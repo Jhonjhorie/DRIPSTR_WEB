@@ -1,4 +1,4 @@
-import ThreeScene from './components/Three';
+import ThreeScene from './shared/Three';
 
 function App() {
   return (
