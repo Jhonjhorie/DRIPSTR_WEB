@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ReactComponent as Logo } from '../assets/LOGO.svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faMessage, faSearch, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
+import ChatMessages from '../modules/Messaging/View/Messaging'; // Update path as necessary
 
 function Navbar() {
+  const [openChat, setOpenChat] = useState(false);
+
+  const toggleChat = () => {
+    setOpenChat(!openChat);
+  };
+
+  const closeChat = () => {
+    setOpenChat(false);
+  };
+
   return (
     <nav className="bg-purple p-4">
       <div className="container mx-auto flex justify-between items-center">
@@ -32,11 +43,15 @@ function Navbar() {
           <Link to="/cart" className="text-white">
             <FontAwesomeIcon icon={faShoppingCart} className="text-white text-2xl cursor-pointer" />
           </Link>
+          <button onClick={toggleChat}>
+            <FontAwesomeIcon icon={faMessage} className="text-white text-2xl cursor-pointer" />
+          </button>
           <Link to="/useraccount" className="text-white">
             <FontAwesomeIcon icon={faUser} className="text-white text-2xl cursor-pointer" />
           </Link>
         </div>
       </div>
+      {openChat && <ChatMessages onClose={closeChat} />}
     </nav>
   );
 }
