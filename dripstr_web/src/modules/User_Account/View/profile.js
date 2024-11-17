@@ -1,8 +1,10 @@
 // src/pages/Customer/CustomerProfile.js
 import React, { useState } from 'react';
-import Avatar from '../../../components/Avatar';
-import Button from '../../../components/Button';
- 
+import Avatar from '../../../shared/Avatar';
+import Button from '../../../shared/Button';
+import ThreeScene from '../components/Three';
+
+
 function CustomerProfile() {
   const [profile, ] = useState({//setProfile
     firstName: 'John',
@@ -28,8 +30,7 @@ function CustomerProfile() {
       <h1 className="text-3xl font-bold mb-8 text-center">Customer Profile</h1>
       <div className="flex flex-col md:flex-row items-center mb-10">
         <div className="md:w-1/3 flex justify-center mb-6 md:mb-0">
-        
-          <Avatar src={profile.avatarUrl} alt="Profile Avatar" className="w-32 h-32 rounded-full" />
+          <ThreeScene />
         </div>
         <div className="md:w-2/3">
           <div className="bg-white p-6 rounded-lg shadow-md">

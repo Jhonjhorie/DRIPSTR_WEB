@@ -9,7 +9,7 @@ const HomeController = () => {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/Cart" element={<Cart />} />
-     </Routes>
+    </Routes>
   );
 };
 
