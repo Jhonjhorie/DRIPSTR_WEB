@@ -17,13 +17,13 @@ import Footer from './shared/Footer';
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
+      <div className="">
         {/* Navbar */}
         <Navbar />
         <SubNavbar />
 
         {/* Main Content */}
-        <main className="flex-grow container mx-auto p-4">
+        <main className="  ">
           <Routes>
             {/* Ito yong mga nilalagay sa URL para mapuntahan yong page ex. localhost:3000/Shop */} 
             <Route path="/" element={<OrderController />} />

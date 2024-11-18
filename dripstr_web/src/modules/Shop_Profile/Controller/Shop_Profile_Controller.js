@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import ShopProfile from '../View/Dashboard';
+import ShopProfile from '../View/Login';
   
 const ShopProfileController = () => {
   return (
