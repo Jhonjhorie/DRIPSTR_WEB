@@ -19,29 +19,30 @@ function App() {
   return (
     <Router>
       <div className="flex flex-col h-screen">
-        {/* Navbar */}
+        {/* Navbar (Header) */}
         <Header />
         {/* SideBar */}
-        <Sidebar />
-
-        {/* Main Content */}
-        <main className="w-auto">
-          <Routes>
-            {/* Ito yong mga nilalagay sa URL para mapuntahan yong page ex. localhost:3000/Shop */}
-            <Route path="/" element={<HomeController />} />
-            <Route path="/mall" element={<ProductsController />} />
-            <Route path="/cart" element={<OrderController />} />
-            <Route path="/login/*" element={<LoginController />} />
-            <Route path="/adminmoderator/*" element={<AdminModeratorController />} />
-            <Route path="/adminsuper/*" element={<AdminSuperController />} />
-            <Route path="/shop/*" element={<ShopController />} />
-            <Route path="/useraccount/*" element={<UserAccountController />} />
-          </Routes>
-         
-        </main>
+        <div className="flex absolute bottom-0 left-0 h-screen w-full overflow-x-hidden">
+          <Sidebar />
+          {/* Main Content */}
+          <div>
+          <main className="flex-1 absolute w-screen top-0 left-0  sm:min-h-[87.6vh] min-h-[40vh] bg-slate-900 mt-16 sm:mt-20 md:mt-24">
+            <Routes>
+              <Route path="/" element={<HomeController />} />
+              <Route path="/mall/*" element={<ProductsController />} />
+              <Route path="/cart/*" element={<OrderController />} />
+              <Route path="/login/*" element={<LoginController />} />
+              <Route path="/adminmoderator/*" element={<AdminModeratorController />} />
+              <Route path="/adminsuper/*" element={<AdminSuperController />} />
+              <Route path="/shop/*" element={<ShopController />} />
+              <Route path="/useraccount/*" element={<UserAccountController />} />
+            </Routes>
+          </main>
+          </div>
+        </div>
       </div>
     </Router>
-  );
+  );  
 }
 
 export default App;
