@@ -6,11 +6,11 @@ import { Link } from 'react-router-dom';
 
 function Navbar() {
   return (
-    <nav className="bg-purple p-4">
+    <nav className="bg-purple-300 p-4">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo and Brand */}
         <Link to="/" className="flex items-center">
-          <span className="text-white font-iceland text-3xl">DRP</span>
+          <span className="text-white font-iceland text-3xl">sadasdasdasdas</span>
           <Logo className="h-20 w-20 mx-2" /> {/* SVG Logo */}
           <span className="text-white font-iceland text-3xl">STR</span>
         </Link>
@@ -28,7 +28,7 @@ function Navbar() {
         </div>
 
         {/* Icons for Cart and User */}
-        <div className="flex items-center space-x-5">
+        <div className=" flex items-center space-x-5">
           <Link to="/cart" className="text-white">
             <FontAwesomeIcon icon={faShoppingCart} className="text-white text-2xl cursor-pointer" />
           </Link>

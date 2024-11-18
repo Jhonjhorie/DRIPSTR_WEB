@@ -1,13 +1,15 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import Cart from '../View/Cart';
- 
+
+import Mall from './Mall';
+
+
 const HomeController = () => {
   return (
     <Routes>
-      <Route path="/" element={<Cart />} />
-    </Routes>
+      <Route path="/" element={<Mall />} />
+     </Routes>
   );
 };
 
