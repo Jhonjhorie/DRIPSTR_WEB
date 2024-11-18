@@ -1,9 +1,9 @@
-// src/components/Navbar.js
+// src/components/SideBar.js
 import React from 'react';
 import { Link } from 'react-router-dom'; 
 
-function Navbar() {
+function SideBar() {
     return 
   }
 
-export default Navbar;
+export default SideBar;

@@ -12,17 +12,17 @@ import UserAccountController from './modules/User_Account/Controller/User_Accoun
 import ProductsController from './modules/Products/Products_Controller'
 
 // Shared Components
-import Navbar from './shared/Navbar';
-import SubNavbar from './shared/SubNavbarShop';
-import Footer from './shared/Footer';
+import Header from './shared/Header';
+import Sidebar from './shared/SideBar';
 
 function App() {
   return (
     <Router>
       <div className="flex flex-col h-screen">
         {/* Navbar */}
-        <Navbar />
-        <SubNavbar />
+        <Header />
+        {/* SideBar */}
+        <Sidebar />
 
         {/* Main Content */}
         <main className="w-auto">
@@ -39,9 +39,6 @@ function App() {
           </Routes>
          
         </main>
-
-        {/* Footer */}
-        <Footer />
       </div>
     </Router>
   );
