@@ -3,7 +3,7 @@ import { ReactComponent as Logo } from '../assets/LOGO.svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMessage, faSearch, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 import { Link } from 'react-router-dom';
-import ChatMessages from '../modules/Messaging/View/Messaging'; // Update path as necessary
+import ChatMessages from '../modules/Messaging/View/Messaging'; 
 
 function Navbar() {
   const [openChat, setOpenChat] = useState(false);

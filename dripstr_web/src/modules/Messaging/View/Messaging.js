@@ -14,16 +14,14 @@ const ChatMessages = ({ onClose }) => {
   };
 
   const closeChat = () => setSelected(null);
-
   const toggleMinimize = () => setMinimized(!isMinimized);
 
   return (
     <div className="relative">
-      {/* Chat Box */}
       <div className="absolute top-0 right-9 bg-white w-80 rounded-lg shadow-md z-50">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-bold text-[#9800ff]">Messages</h2>
-          <button className="btn btn-circle btn-sm " onClick={onClose}>
+          <button className="btn btn-circle btn-sm" onClick={onClose}>
             <FontAwesomeIcon icon={faTimes} size="lg" />
           </button>
         </div>
@@ -40,18 +38,17 @@ const ChatMessages = ({ onClose }) => {
                 alt="Avatar"
                 className="w-10 h-10 rounded-full"
               />
-              <span className="text-sm ">{message}</span>
+              <span className="text-sm">{message}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Selected Chat */}
       {selectedChat && (
         <div
           className={`fixed bottom-4 right-12 w-80 bg-white rounded-lg shadow-md transition-all z-50 ${
             isMinimized ? "h-15" : "h-80"
-          }`}
+          } flex flex-col`}
         >
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-lg font-bold text-[#9800ff]">{selectedChat}</h2>
@@ -70,13 +67,33 @@ const ChatMessages = ({ onClose }) => {
           </div>
 
           {!isMinimized && (
-            <div className="flex justify-between flex-col h-full ">
-              <div className="flex-1 p-4 overflow-y-auto h-70">Chat Messages</div>
-              <div className="flex-1 p-2 border-t content-start">
+            <div className="flex flex-col h-full">
+              <div className="flex-grow overflow-y-auto">
+                {selectedChat === "Message 1" && (
+                  <div className="flex flex-col gap-3">
+                    <div className="chat chat-start">
+                      <div className="chat-bubble">Ganda ng design</div>
+                    </div>
+                    <div className="chat chat-start">
+                      <div className="chat-bubble">
+                        Would buy it again ദ്ദി(˵ •̀ ᴗ - ˵ )
+                      </div>
+                    </div>
+                    <div className="chat chat-end">
+                      <div className="chat-bubble">
+                        Thanks po sa patronage (..◜ᴗ◝..)
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+
+              <div className="flex items-center border-t p-2">
                 <input
                   type="text"
                   placeholder="Type a message..."
-                  className="input w-60 input-bordered flex-row"
+                  className="input input-bordered flex-1"
                 />
                 <button className="btn btn-primary ml-2">
                   <FontAwesomeIcon icon={faPaperPlane} size="lg" />
