@@ -1,6 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import logo from '../../../assets/logoBlack.png';
+import logo from '../../../assets/shop/logoWhite.png';
+import logoName from '../../../assets/logoName.png'
 import sell from '../../../assets/sell.png';
+import '../../../assets/shop/fonts/font.css'
+
 import 'boxicons'
   
 function Login() { 
@@ -15,90 +18,92 @@ function Login() {
 
   return (
 <div className="h-full w-full">
-  <div className="h-auto w-full lg:flex bg-slate-100 ">
+  <div className="h-auto w-full lg:flex bg-slate-100 p-1  ">
     {/* FIRST CONTAINER */}
-    <div className='bg-slate-200 h-auto w-full lg:w-[40%] relative p-2 z-20 md:p-5'>
-        <div className='bg-slate-100 h-auto  w-full rounded-md justify-items-center justify-center p-10'>
-            <div className='align-middle flex justify-center gap-2'>
-                <box-icon  type='solid' color='' size='120%' name='store'></box-icon>
-                <h1 className='text-3xl pt-1 text-violet-950 text-center font-bold'>MERCHANT SIGN-UP</h1>   
-            </div>
-           
-            {/* Shop Name */}
-            <label className="form-control w-full max-w-xs mt-5">
-                <div className="label">
-                    <span className="label-text font-serif font-semibold text-slate-700">What is your SHOP name?</span>
-                </div>
-                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
-            </label>
-            {/* Shop contact info */}
-            <label className="form-control w-full max-w-xs mt-2">
-                <div className="label">
-                    <span className="label-text font-serif font-semibold text-slate-700">What is your SHOP contact number?</span>
-                </div>
-                    <input
-                    value={phoneNumber}
-                    onChange={phonedigit}
-                    onInput={(e) => e.target.value = e.target.value.replace(/[^0-9]/g, '')}
-                    type="number" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
-            </label>
-            {/* Shop address */}
-            <label className="form-control w-full max-w-xs mt-2">
-                <div className="label">
-                    <span className="label-text font-serif font-semibold text-slate-700">SHOP Address?</span>
-                </div>
-                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
-            </label>
-            {/* Type of business */}
-            <label className="form-control w-full max-w-xs mt-2">
-                <div className="label">
-                    <span className="label-text font-serif font-semibold text-slate-700">What is your Type of Business?</span>
-                </div>
-                <select className="select select-bordered w-full max-w-xs">
-                    <option value="">Select an option</option>
-                    <option value="">option 1</option>
-                    <option value="">option 2</option>
-                    <option value="">option 3</option>
-                    <option value="">option 4</option>
-                    <option value="">option 5</option>
-                </select>
-            </label>
-            {/* Image selection */}
-            <div className='flex justify-center align-middle'>
-                <label className="form-control w-full max-w-xs mt-2">
+    <div className=' h-auto w-full lg:w-[55%] md:p-10 overflow-hidden '>
+        <div className='flex md:gap-2 md:justify-start justify-center  '>
+            <box-icon name='store' type='solid' color='#4D077C' size='md'  ></box-icon>
+            <div className='font-bold text-2xl  flex p-2 text-custom-purple iceland-regular '>Create Merchant Account</div>
+        </div>
+        <div className='font-bold text-5xl text-center md:text-left p-2 text-custom-purple iceland-bold'>Get Started</div>
+        <div className='md:flex w-full place-items-center h-[50%] gap-2 lg:gap-8  p-2 '>
+            <div className='w-full md:w-1/2 h-full flex items-center justify-center'>
+                <div className='w-full max-w-xs'>
+                    <label className="form-control w-full">
+                        <div className="label">
+                            <span className="label-text text-slate-800 font-semibold">What is your SHOP name?</span>
+                        </div>
+                        <input type="text" placeholder="Type here" className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full" />
+                    </label>
+                    <label className="form-control w-full max-w-xs mt-2">
+                        <div className="label">
+                            <span className="label-text text-slate-800 font-semibold">What is your SHOP contact number?</span>
+                        </div>
+                        <input 
+                            type="tel"
+                            value={phoneNumber}
+                            placeholder="Type here"
+                            onChange={phonedigit}
+                            className="input input-bordered bg-slate-100 text-black border-violet-950 border-[2px] w-full"
+                        />
+                    </label>
                     <div className="label">
-                        <span className="label-text font-serif font-semibold text-slate-700">Pick an Image for your Shop</span>
+                        <span className="label-text-alt text-slate-700">Phone number should be 11 digits.</span>
                     </div>
-                    <div className='flex gap-2'>
-                        <input type="file" className="file-input file-input-bordered w-full max-w-xs" accept="image/*"/>
-                        <label 
-                        htmlFor='ImageLogo'
-                        className="btn btn-neutral w-[20%]">View</label>
-                    </div>
-                </label>             
+
+                    <label className="form-control w-full max-w-xs ">
+                        <div className="label">
+                            <span className="label-text font-semibold text-slate-800">What is your type of Business?</span>
+                        </div>
+                        <select className="select select-bordered bg-slate-100 text-black border-violet-950 border-[2px] w-full">
+                            <option value="">Select an option</option>
+                            <option value="">Option 1</option>
+                            <option value="">Option 2</option>
+                            <option value="">Option 3</option>
+                            <option value="">Option 4</option>
+                            <option value="">Option 5</option>
+                        </select>
+                    </label>
+                </div>
             </div>
-            {/* Onsubmit*/}
-            <div className=' w-full max-w-xs h-10 mt-5 relative '>
-                <button className="btn glass bg-custom-purple absolute right-0 text-white "> <box-icon color='white' name="rocket"></box-icon>  SUBMIT</button>
+
+            <div className="w-full md:w-1/2 h-full rounded-md  place-items-center justify-center p-2">
+                <div className="bg-slate-100 w-72 h-52 flex items-center justify-center mt-5 border-violet-950 border-2 rounded-md">
+                    {/* SHOP LOGO GOES HERE */}
+                    <box-icon name="image" type="solid" size="100px" color="#6803a0"></box-icon>
+                </div>
+                <div className="h-auto w-full flex mt-6 justify-center ">
+                    <input
+                        type="file"
+                        className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
+                    />
+                </div>
             </div>
 
         </div>
-    </div>
-    {/* SECOND CONTAINER */}
-    <div className='  relative h-auto w-full lg:w-[60%] p-2'>
-        <div className='flex'>
-            <div>
-                <div className='text-black font-serif text-2xl'>" Thinking about seeling? "</div>
-                <div className='text-black font-serif font-bold text-3xl'>JOIN WITH DRIPSTR </div>
+
+            <label class="form-control mx-2 flex justify-center items-center md:items-start ">
+                <div class="label">
+                    <span className="label-text font-semibold text-slate-800">What is your SHOP address?</span>
+                 
+                </div>
+                <textarea class="textarea textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24" placeholder="Type your Shop Address here"></textarea>
+            </label>
+            <div className='w-full h-auto justify-end flex m-2 '>
+                <button class="btn glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>
             </div>
             
-            <div className='bg-slate-50 h-[40%] w-[50%] rounded-md p-2  '>
-                <img src={sell} alt="Logo" className='rounded-md'/>
-            </div>
-           
-        </div>
+    </div>
+
+    {/* SECOND CONTAINER */}
+    <div className=' bg-primary-color glass h-auto lg:h-screen relative w-full  lg:m-2   lg:w-[45%] lg:rounded-[3%] place-content-center place-items-center p-2'>       
+   
+        <div
+        className='text-2xl font-bold iceland-bold text-slate-50  ' >SELL WITH</div>
+        <img src={logo} alt="Dynamic Logo Name" className='drop-shadow-custom '
         
-       
+        />
+
     </div>
 
  
