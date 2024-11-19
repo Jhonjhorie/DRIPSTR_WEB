@@ -1,13 +1,16 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Merchant from '../View/Login';
+import Artist from '../View/ArtistCreate';
 
-import ShopProfile from '../View/Login';
   
 const ShopProfileController = () => {
   return (
     <Routes>
-      <Route path="/" element={<ShopProfile />} />
-      </Routes>
+      <Route path="/MerchantCreate" element={<Merchant />} />
+      <Route path="/ArtistCreate" element={<Artist />} />
+
+    </Routes>
   );
 };
 

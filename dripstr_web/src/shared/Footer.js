@@ -3,7 +3,7 @@ import React from 'react';
 
 function Footer() {
   return (
-    <footer className="bg-gray-800 bottom-0 text-white w-full py-10 mt-10">
+    <footer className="bg-gray-800 bottom-0 text-white w-full py-10 mt-10 p-2">
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* Company Information */}
         <div>
