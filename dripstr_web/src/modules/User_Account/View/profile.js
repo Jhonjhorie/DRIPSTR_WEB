@@ -1,72 +1,85 @@
-// src/pages/Customer/CustomerProfile.js
-import React, { useState } from 'react';
-import Avatar from '../../../shared/Avatar';
-import Button from '../../../shared/Button';
-import ThreeScene from '../components/Three';
+import React from "react";
+import Sidebar from "../components/Sidebar";
 
-
-function CustomerProfile() {
-  const [profile, ] = useState({//setProfile
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+123456789',
-    address: '123 Main St, City, Country',
-    avatarUrl: 'https://via.placeholder.com/150', // Replace with actual avatar URL
-  });
-
-  const handleEditClick = () => {
-    // Logic for editing profile goes here
-    console.log('Edit profile clicked');
-  };
-
-  const handleSaveClick = () => {
-    // Logic for saving updated profile goes here
-    console.log('Save profile clicked');
-  };
-
+const UserProfile = () => {
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Customer Profile</h1>
-      <div className="flex flex-col md:flex-row items-center mb-10">
-        <div className="md:w-1/3 flex justify-center mb-6 md:mb-0">
-          <ThreeScene />
+    <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
+      {/* Profile Header */}
+      <Sidebar />
+
+      <div className="px-5">
+        <div className="flex items-center justify-between mb-6">
+
+          <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
         </div>
-        <div className="md:w-2/3">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">First Name</label>
-              <p className="text-lg">{profile.firstName}</p>
+
+        <div className="p-10 bg-slate-100 rounded-md">
+          <div className="flex flex-wrap justify-between mb-10 gap-6">
+            {/* Full Name Section */}
+            <div className="mb-4 flex-1">
+              <label className="text-gray-600 font-medium block">Full Name</label>
+              <p className="text-lg text-gray-900">Jhonjhorie Quiling</p>
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Last Name</label>
-              <p className="text-lg">{profile.lastName}</p>
+
+            {/* Email Section */}
+            <div className="flex-1">
+              <label className="text-gray-600 font-medium block">Email Address</label>
+              <div className="flex justify-between items-center">
+                <p className="text-lg text-gray-900">jh********@gmail.com</p>
+                <button className="text-indigo-600 font-medium">Change</button>
+              </div>
             </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <p className="text-lg">{profile.email}</p>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Phone</label>
-              <p className="text-lg">{profile.phone}</p>
-            </div>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Address</label>
-              <p className="text-lg">{profile.address}</p>
-            </div>
-            <div className="flex justify-end">
-              <Button onClick={handleEditClick} className="mr-2 bg-blue-500 text-white px-4 py-2 rounded">
-                Edit
-              </Button>
-              <Button onClick={handleSaveClick} className="bg-green-500 text-white px-4 py-2 rounded">
-                Save
-              </Button>
+
+            {/* Mobile Section */}
+            <div className="flex-1">
+              <label className="text-gray-600 font-medium block">Mobile</label>
+              <div className="flex items-center justify-between">
+                <input
+                  type="text"
+                  placeholder="Please enter your mobile"
+                  className="text-lg text-gray-400 border border-gray-300 rounded-md p-2 w-full"
+                />
+                <button className="text-indigo-600 font-medium ml-2">Add</button>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
-export default CustomerProfile;
+          <div className="flex flex-wrap justify-between gap-6">
+            {/* Birthday Section */}
+            <div className="flex-1">
+              <label className="text-gray-600 font-medium block">Birthday</label>
+              <input
+                type="text"
+                placeholder="Please enter your birthday"
+                className="text-lg text-gray-400 border border-gray-300 rounded-md p-2 w-full"
+              />
+            </div>
+
+            {/* Gender Section */}
+            <div className="flex-1">
+              <label className="text-gray-600 font-medium block">Gender</label>
+              <input
+                type="text"
+                placeholder="Please enter your gender"
+                className="text-lg text-gray-400 border border-gray-300 rounded-md p-2 w-full"
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-between mt-10 gap-6">
+            <button className="bg-indigo-600 text-white font-medium py-2 px-4 rounded-md flex-1">
+              Edit
+            </button>
+            <button className="bg-gray-600 text-white font-medium py-2 px-4 rounded-md flex-1">
+              Set Password
+            </button>
+          </div>
+        </div>
+      </div>    
+    </div>
+
+  );
+};
+
+export default UserProfile;
