@@ -91,7 +91,9 @@ function Login() {
                 <textarea className="textarea textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24" placeholder="Type your Shop Address here"></textarea>
             </label>
             <div className='w-full h-auto justify-between flex m-2 '>
-                <button className="btn glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>
+                <button 
+                onClick={() => navigate('/shop/MerchantDashboard')}
+                className="btn glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>
                 <button
                 onClick={() => navigate('/shop/ArtistCreate')}
                 className="  text-slate-600 iceland-bold hover:text-custom-purple hover:duration-300 self-end m-2">
