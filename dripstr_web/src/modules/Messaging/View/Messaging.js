@@ -21,7 +21,7 @@ const ChatMessages = ({ onClose }) => {
       <div className="absolute top-0 right-9 bg-white w-80 rounded-lg shadow-md z-50">
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-lg font-bold text-[#9800ff]">Messages</h2>
-          <button className="btn btn-circle btn-sm" onClick={onClose}>
+          <button className="hover:text-primary-color text-slate-800 btn-sm" onClick={onClose}>
             <FontAwesomeIcon icon={faTimes} size="lg" />
           </button>
         </div>
@@ -53,14 +53,14 @@ const ChatMessages = ({ onClose }) => {
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-lg font-bold text-[#9800ff]">{selectedChat}</h2>
             <div className="flex items-center gap-2">
-              <button className="btn btn-circle btn-sm" onClick={toggleMinimize}>
+              <button className="hover:text-primary-color btn-sm" onClick={toggleMinimize}>
                 {isMinimized ? (
                   <FontAwesomeIcon icon={faCommentAlt} size="lg" />
                 ) : (
                   <FontAwesomeIcon icon={faMinus} size="lg" />
                 )}
               </button>
-              <button className="btn btn-circle btn-sm" onClick={closeChat}>
+              <button className="hover:text-primary-color text-slate-800   btn-sm" onClick={closeChat}>
                 <FontAwesomeIcon icon={faTimes} size="lg" />
               </button>
             </div>
@@ -70,12 +70,12 @@ const ChatMessages = ({ onClose }) => {
             <div className="flex flex-col h-full">
               <div className="flex-grow overflow-y-auto">
                 {selectedChat === "Message 1" && (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
                     <div className="chat chat-start">
-                      <div className="chat-bubble">Ganda ng design</div>
+                      <div className="chat-bubble bg-slate-200 text-black">Ganda ng design</div>
                     </div>
                     <div className="chat chat-start">
-                      <div className="chat-bubble">
+                      <div className="chat-bubble bg-slate-200 text-black">
                         Would buy it again ദ്ദി(˵ •̀ ᴗ - ˵ )
                       </div>
                     </div>
@@ -89,13 +89,13 @@ const ChatMessages = ({ onClose }) => {
               </div>
 
 
-              <div className="flex items-center border-t p-2">
+              <div className="flex items-center bg-slate-100 border-t p-1">
                 <input
                   type="text"
                   placeholder="Type a message..."
                   className="input input-bordered flex-1"
                 />
-                <button className="btn btn-primary ml-2">
+                <button className="btn bg-slate-800 text-white hover:bg-primary-color ml-2">
                   <FontAwesomeIcon icon={faPaperPlane} size="lg" />
                 </button>
               </div>

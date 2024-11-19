@@ -11,9 +11,11 @@ import ShopController from './modules/Shop_Profile/Controller/Shop_Profile_Contr
 import UserAccountController from './modules/User_Account/Controller/User_Account_Controller';
 import ProductsController from './modules/Products/Products_Controller'
 
+
 // Shared Components
 import Header from './shared/Header';
 import Sidebar from './shared/SideBar';
+import Notifications from './modules/Notifications';
 
 function App() {
   return (
@@ -36,6 +38,7 @@ function App() {
               <Route path="/adminsuper/*" element={<AdminSuperController />} />
               <Route path="/shop/*" element={<ShopController />} />
               <Route path="/useraccount/*" element={<UserAccountController />} />
+              <Route path="/notification" element={<Notifications />} />
             </Routes>
           </main>
           </div>

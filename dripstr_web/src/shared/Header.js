@@ -1,10 +1,21 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { ReactComponent as Logo } from '../assets/images/BlackLongLogo.svg'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
-import { faSearch, faShoppingCart, faMessage } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faShoppingCart, faMessage, faUser } from '@fortawesome/free-solid-svg-icons';
+import ChatMessages from '../modules/Messaging/View/Messaging'; 
 
 const Header = () => {
+  const [openChat, setOpenChat] = useState(false);
+
+  const toggleChat = () => {
+    setOpenChat(!openChat);
+  };
+
+  const closeChat = () => {
+    setOpenChat(false);
+  };
+
   return (
     <div className="flex items-center h-16 sm:h-20 px-4 sm:px-8 md:px-16 py-4 sm:py-8 md:py-12 bg-slate-50 sticky top-0 z-30">
       {/* Website Name */}
@@ -36,13 +47,17 @@ const Header = () => {
               <FontAwesomeIcon icon={faShoppingCart} className="text-black hover:text-[--primary-color]" />
             </button>
           </Link>
+          <button onClick={toggleChat}>
+            <FontAwesomeIcon icon={faMessage} className="text-black hover:text-[--primary-color]" />
+          </button>
           <Link to="/account">
             <button>
-              <FontAwesomeIcon icon={faMessage} className="text-black hover:text-[--primary-color]" />
+              <FontAwesomeIcon icon={faUser} className="text-black hover:text-[--primary-color]" />
             </button>
           </Link>
         </div>
       </div>
+      {openChat && <ChatMessages onClose={closeChat} />}
     </div>
   );
 };
