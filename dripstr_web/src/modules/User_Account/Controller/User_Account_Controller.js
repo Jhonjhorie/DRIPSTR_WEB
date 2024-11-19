@@ -2,7 +2,7 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import Dashboard from '../View/Dashboard';  
-import Profile from '../View/Profile';  
+import Profile from '../View/profile';  
 import AddressBook from '../View/Address';  
 import PaymentOptions from '../View/Payment';  
 import Orders from '../View/Orders';  

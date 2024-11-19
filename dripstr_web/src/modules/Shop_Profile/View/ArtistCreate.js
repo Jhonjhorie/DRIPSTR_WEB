@@ -19,7 +19,7 @@ function ArtistCreate() {
   return (
 
 <div className="h-full w-full">
-  <div className="h-auto w-full lg:flex bg-slate-100 p-1  ">
+  <div className="h-auto w-full lg:flex bg-slate-300 p-1  ">
     {/* SECOND CONTAINER */}
     <div className=' bg-custom-purple glass h-auto lg:h-screen relative w-full  lg:m-2   lg:w-[45%] lg:rounded-[3%] place-content-center place-items-center p-2'>       
    

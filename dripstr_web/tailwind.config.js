@@ -19,7 +19,7 @@ module.exports = {
         'text-shadow1': '2px 2px 4px rgba(0, 0, 0, 0.3)', 
       },
       dropShadow: {
-        'custom': '4px 4px 10px rgba(0, 0, 0, 0.5)', // Custom shadow size and color
+        'custom': '4px 4px 10px rgba(0, 0, 0, 0.5)', 
       },
       
       

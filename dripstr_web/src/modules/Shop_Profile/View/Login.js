@@ -19,7 +19,7 @@ function Login() {
 
   return (
 <div className="h-full w-full">
-  <div className="h-auto w-full lg:flex bg-slate-100 p-1  ">
+  <div className="h-auto w-full lg:flex bg-slate-300 p-1  ">
     {/* FIRST CONTAINER */}
     <div className=' h-auto w-full lg:w-[55%] md:p-10 overflow-hidden '>
         <div className='flex md:gap-2 md:justify-start justify-center  '>
