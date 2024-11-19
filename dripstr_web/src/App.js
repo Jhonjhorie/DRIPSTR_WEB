@@ -18,15 +18,23 @@ import Sidebar from './shared/SideBar';
 function App() {
   return (
     <Router>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen w-screen overflow-x-hidden">
         {/* Navbar (Header) */}
         <Header />
-        {/* SideBar */}
-        <div className="flex absolute bottom-0 left-0 h-screen w-full overflow-x-hidden">
-          <Sidebar />
+
+        {/* Main Layout */}
+        <div className="flex flex-1 flex-col sm:flex-row">
+          {/* Sidebar */}
+          <div className="hidden sm:block">
+            <Sidebar />
+          </div>
+          {/* Sidebar for mobile */}
+          <div className="block sm:hidden fixed bottom-0 w-full z-50">
+            <Sidebar />
+          </div>
+
           {/* Main Content */}
-          <div>
-          <main className="flex-1 absolute w-screen top-0 left-0  sm:min-h-[87.6vh] min-h-[40vh] bg-slate-900 mt-16 sm:mt-20 md:mt-24">
+          <main className="flex-1 overflow-y-auto">
             <Routes>
               <Route path="/" element={<HomeController />} />
               <Route path="/mall/*" element={<ProductsController />} />
@@ -38,11 +46,10 @@ function App() {
               <Route path="/useraccount/*" element={<UserAccountController />} />
             </Routes>
           </main>
-          </div>
         </div>
       </div>
     </Router>
-  );  
+  );
 }
 
 export default App;
