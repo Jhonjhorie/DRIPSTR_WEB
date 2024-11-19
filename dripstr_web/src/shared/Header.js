@@ -6,7 +6,7 @@ import { faSearch, faShoppingCart, faMessage } from '@fortawesome/free-solid-svg
 
 const Header = () => {
   return (
-    <div className="flex items-center h-16 sm:h-20 px-4 sm:px-8 md:px-16 py-4 sm:py-8 md:py-12 bg-slate-50 sticky top-0 z-30">
+    <div className="flex items-center h-16 sm:h-20 px-4 sm:px-8 md:px-16 py-4 sm:py-8 md:py-12 bg-slate-50 sticky top-0 z-30 ">
       {/* Website Name */}
       <div className="hidden sm:flex">
         <Link to="/">
