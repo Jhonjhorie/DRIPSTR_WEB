@@ -18,7 +18,7 @@ import Sidebar from './shared/SideBar';
 function App() {
   return (
     <Router>
-      <div className="flex flex-col h-screen w-screen overflow-x-hidden">
+      <div className="flex flex-col h-screen w-screen overflow-x-hidden custom-scrollbar">
         {/* Navbar (Header) */}
         <Header />
 
