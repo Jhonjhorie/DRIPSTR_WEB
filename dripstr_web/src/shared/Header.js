@@ -1,5 +1,5 @@
 import React from 'react';
-import { ReactComponent as Logo } from '../assets/images/BlackLongLogo.svg'; 
+import { ReactComponent as Logo } from '@/assets/images/BlackLongLogo.svg'; 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { faSearch, faShoppingCart, faMessage } from '@fortawesome/free-solid-svg-icons';
