@@ -26,7 +26,7 @@ function App() {
         <main className="flex-grow container mx-auto p-4">
           <Routes>
             {/* Ito yong mga nilalagay sa URL para mapuntahan yong page ex. localhost:3000/Shop */} 
-            <Route path="/" element={<OrderController />} />
+            <Route path="/cart/*" element={<OrderController />} />
             <Route path="/login/*" element={<LoginController />} />
             <Route path="/adminmoderator/*" element={<AdminModeratorController />} />
             <Route path="/adminsuper/*" element={<AdminSuperController />} />

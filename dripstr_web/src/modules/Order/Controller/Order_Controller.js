@@ -7,8 +7,8 @@ import Cart from '../View/Cart';
 const HomeController = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/Cart" element={<Cart />} />
+      <Route path="/" element={<Cart />} />
+      
     </Routes>
   );
 };
