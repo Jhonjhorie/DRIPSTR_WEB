@@ -13,7 +13,7 @@ module.exports = {
         "secondary-color": "var(--secondary-color)"
       },
       backgroundImage: {
-        'gradient-custom': 'linear-gradient(to right, #FFFFFF, #F0B6D0, #4D077C)',
+        'gradient-custom': 'linear-gradient(90deg, #FFFFFF, #FFFFFF, #F0B6D0, #F0B6D0,#4D077C)',
       },
       textShadow: {
         'text-shadow1': '2px 2px 4px rgba(0, 0, 0, 0.3)', 
