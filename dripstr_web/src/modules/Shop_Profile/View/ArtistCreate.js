@@ -30,9 +30,10 @@ function ArtistCreate() {
         />
 
     </div>
+
     {/* FIRST CONTAINER */}
     <div className=' h-auto w-full lg:w-[55%] md:p-10 overflow-hidden '>
-        <div className='flex md:gap-2 md:justify-start justify-center  '>
+        <div className='flex md:gap-2 md:justify-start justify-center mt-5 md:mt-0  '>
             <box-icon name='palette' type='solid' color='#4D077C' size='md'  ></box-icon>
             <div className='font-bold text-2xl  flex p-2 text-custom-purple iceland-regular '>Create Artist Account</div>
         </div>
@@ -100,10 +101,10 @@ function ArtistCreate() {
                 </div>
                 <textarea className="textarea textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24" placeholder="Type your Shop Address here"></textarea>
             </label>
-            <div className='w-full h-auto justify-between flex m-2 '>
+            <div className='w-full h-auto justify-between flex m-2  mb-14 md:mb-0'>
                 <button 
                 onClick={() => navigate('/shop/MerchantCreate')}
-                className="  text-slate-600 iceland-bold hover:text-custom-purple hover:duration-300 self-end m-2">
+                className="  text-slate-600 iceland-bold hover:text-custom-purple hover:duration-300 self-end  m-1">
                     BE A DRIPSTR MERCHANT? </button> 
                 <button className="btn glass bg-custom-purple   mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>      
             </div>

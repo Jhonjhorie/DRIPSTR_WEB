@@ -18,7 +18,7 @@ function Login() {
 
 
   return (
-<div className="h-full w-full">
+<div className="h-full w-full relative">
   <div className="h-auto w-full lg:flex bg-slate-300 p-1  ">
     {/* FIRST CONTAINER */}
     <div className=' h-auto w-full lg:w-[55%] md:p-10 overflow-hidden '>
@@ -27,8 +27,8 @@ function Login() {
             <div className='font-bold text-2xl  flex p-2 text-custom-purple iceland-regular '>Create Merchant Account</div>
         </div>
         <div className='font-bold text-5xl text-center md:text-left p-2 text-custom-purple iceland-bold'>Get Started</div>
-        <div className='md:flex w-full place-items-center h-[50%] gap-2 lg:gap-8  p-2 '>
-            <div className='w-full md:w-1/2 h-full flex items-center justify-center'>
+        <div className='md:flex w-full place-items-center   h-[50%] gap-2 lg:gap-8  p-2 '>
+            <div className='w-full lg:w-1/2 h-full flex  items-center justify-center'>
                 <div className='w-full max-w-xs'>
                     <label className="form-control w-full">
                         <div className="label">
@@ -96,13 +96,13 @@ function Login() {
                 className="btn glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>
                 <button
                 onClick={() => navigate('/shop/ArtistCreate')}
-                className="  text-slate-600 iceland-bold hover:text-custom-purple hover:duration-300 self-end m-2">
+                className="  text-slate-600 iceland-bold hover:text-custom-purple hover:duration-300 self-end mx-5 m-2">
                     BE A DRIPSTR ARTIST? </button> 
             </div>
     </div>
 
     {/* SECOND CONTAINER */}
-    <div className=' bg-primary-color  glass h-auto lg:h-screen relative w-full  lg:m-2   lg:w-[45%] lg:rounded-[3%] place-content-center place-items-center p-2'>       
+    <div className=' bg-primary-color mb-14 md:mb-0 glass h-auto lg:h-screen relative w-full  lg:m-2   lg:w-[45%] lg:rounded-[3%] place-content-center place-items-center p-2'>       
    
         <div 
         className='text-2xl font-bold iceland-bold text-slate-50  ' >SELL WITH</div>
