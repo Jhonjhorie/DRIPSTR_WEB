@@ -1,13 +1,14 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { Link } from 'react-router-dom';
+import OrderCard from "./orderCard";
 import { faChevronRight, faChevronLeft, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { ReactComponent as Logo } from '@/assets/images/LOGO.svg'; 
 
 const AvatarCard = ({ user }) => {
     return (
-        <div className="flex bg-secondary-color rounded-md group drop-shadow-lg w-full md:w-1/2 lg:w-1/3 h-24 md:h-full">
-          <div className="flex flex-row gap-2 p-3 w-full h-full justify-start">
+        <div className="flex bg-secondary-color rounded-md group drop-shadow-lg w-full md:w-1/2 lg:w-1/3 h-24 md:h-72 lg:h-80 ">
+          <div className="flex flex-row gap-1 md:gap-2 p-2 md:p-3 w-full h-full justify-start">
             {/* Avatar Section */}
             <div className="flex flex-col gap-4 w-[20%] md:w-2/5 h-full">
               <Link
@@ -23,11 +24,15 @@ const AvatarCard = ({ user }) => {
             </div>
     
             {/* User Info Section */}
-            <div className="flex flex-col justify-start w-3/5 h-full">
+            <div className="flex flex-row md:flex-col justify-start w-full h-full space-x-4 md:space-x-2">
+            <div className="flex flex-col w-[100%] bg-slate-800">
               <p className="text-slate-50 text-lg font-bold">{user.name}</p>
               <p className="text-slate-50 text-lg font-light">{user.title}</p>
-              <p className="text-slate-50 text-lg font-bold">Orders:</p>
-              {/* <OrderCard orders={user.orders} /> */}
+              </div>
+              <div className="w-[105%] h-full flex md:flex-col flex-row space-x-[-2.5rem] md:space-x-0 ">
+              <p className="text-slate-50 text-lg font-bold rotate-[270deg] md:rotate-0">Orders:</p>
+              <OrderCard orders={user.orders} />
+              </div>
             </div>
           </div>
         </div>
