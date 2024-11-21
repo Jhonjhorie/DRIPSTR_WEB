@@ -68,7 +68,7 @@ const Carousel = ({ images }) => {
             )}
             <Link
             to='/'
-            className='flex flex-row w-fit relative bottom-[9rem] sm:bottom-[9.2rem]  md:bottom-[12rem] lg:bottom-[17.3rem] group-hover:bottom-[11.25rem] sm:group-hover:bottom-[11.5rem] md:group-hover:bottom-[13.5rem] lg:group-hover:bottom-[16.5rem] transition-all duration-300 left-60 sm:left-[50vw] md:left-[27vw]  lg:left-[38vw] bg-secondary-color px-6 lg:px-8  justify-end gap-2 rounded-t-md py-0.5 hover:bg-primary-color items-center'
+            className='flex flex-row w-fit relative bottom-[9rem] sm:bottom-[9.2rem]  md:bottom-[13rem] lg:bottom-[17.3rem] group-hover:bottom-[11.25rem] sm:group-hover:bottom-[11.5rem] md:group-hover:bottom-[14.5rem] lg:group-hover:bottom-[16.5rem] transition-all duration-300 left-60 sm:left-[50vw] md:left-[27vw]  lg:left-[38vw] bg-secondary-color px-6 lg:px-8  justify-end gap-2 rounded-t-md py-0.5 hover:bg-primary-color items-center'
             >
                <p className='text-xl font-bold text-slate-50'>
                 TAP TO DRIP</p>
