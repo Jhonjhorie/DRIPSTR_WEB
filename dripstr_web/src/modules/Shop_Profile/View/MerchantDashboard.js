@@ -8,6 +8,7 @@ import logo2 from '../../../assets/shop/logoWhite.png';
 import '../../../assets/shop/fonts/font.css';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { PieChart } from '@mui/x-charts/PieChart';
+import PrintSales from '../Component/PrintSales';
 
 const data = [
   { label: 'T-Shirt Alucard', value: 400 },
@@ -233,17 +234,16 @@ function MerchantDashboard() {
             <div className='text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs '> 
             Manage product</div>
           </div>
-           <div className='bg-slate-100 h-10 w-48  pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
-           hover:duration-300 glass shadow-md flex place-items-center justify-center  '>
-           <box-icon type='solid' name='printer' color='#563A9C'  ></box-icon>
-            <div className='text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs '> 
-            Print Report  </div>
-          </div>
           <div className='bg-slate-100 h-10 w-48 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  '>
           <box-icon type='solid' name='purchase-tag-alt' color='#563A9C'></box-icon>
             <div className='text-slate-800 font-semibold h-full w-full md:pl-2 py-3 md:py-0 md:text-[15px]  text-[11px] '> 
             Manage Vouchers </div>
+          </div>
+          <div className='bg-slate-100 h-10 w-48  pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
+           hover:duration-300 glass shadow-md flex place-items-center   '>
+           <box-icon type='solid' name='printer' color='#563A9C'  ></box-icon>
+            <div> <PrintSales></PrintSales> </div>
           </div>
         </div>
         <div className='bg-custom-purple rounded-md shadow-md h-full w-full lg:w-[35%] hover:scale-95 hover:duration-300 cursor-pointer p-2 place-items-center flex justify-center '>
@@ -257,7 +257,10 @@ function MerchantDashboard() {
           </div>
         </div>
       </div>
+
+
     </div>
+    
   );
 }
 

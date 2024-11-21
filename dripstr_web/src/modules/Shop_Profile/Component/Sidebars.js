@@ -52,6 +52,13 @@ function SideBar() {
           </li>
           <li>
             <a
+            onClick={() => navigate('/shop/MerchantOrders')}
+            className="block text-base text-gray-800 hover:text-violet-900 cursor-pointer ">
+              Orders
+            </a>
+          </li>
+          <li>
+            <a
             onClick={() => navigate('/shop/MerchantNotifications')}
             className="block text-base text-gray-800 hover:text-violet-900 cursor-pointer ">
               Notifications

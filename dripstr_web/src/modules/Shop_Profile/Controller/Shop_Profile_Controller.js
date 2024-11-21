@@ -6,6 +6,7 @@ import MerchantDashboard from '../View/MerchantDashboard';
 import MerchantFollowers from '../View/Followers';
 import MerchantNotifications from '../View/Notifications';
 import MerchantProducts from '../View/Products';
+import MerchantOrders from '../View/Orders';
 
 const ShopProfileController = () => {
   return (
@@ -16,6 +17,7 @@ const ShopProfileController = () => {
       <Route path="/MerchantNotifications" element={<MerchantNotifications />} />
       <Route path="/MerchantProducts" element={<MerchantProducts />} />
       <Route path="/MerchantFollowers" element={<MerchantFollowers />} />
+      <Route path="/MerchantOrders" element={<MerchantOrders />} />
      
     </Routes>
   );
