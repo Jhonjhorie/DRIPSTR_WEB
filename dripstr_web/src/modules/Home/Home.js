@@ -10,7 +10,7 @@ function Home() {
   return (
     <div className="h-[120vh] w-full relative">
       <div className="absolute inset-0 bg-slate-300 flex flex-col overflow-hidden">
-        <div className="flex flex-col md:flex-row md:space-x-8 items-center p-4">
+        <div className="flex flex-col-reverse gap-4 md:flex-row items-center p-4">
           <Carousel images={Images} />
           <AvatarCard user={currUser} />
         </div>

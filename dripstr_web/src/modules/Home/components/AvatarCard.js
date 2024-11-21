@@ -6,10 +6,10 @@ import { ReactComponent as Logo } from '@/assets/images/LOGO.svg';
 
 const AvatarCard = ({ user }) => {
     return (
-        <div className="flex bg-secondary-color rounded-md group drop-shadow-lg w-full sm:w-1/2 lg:w-1/3 h-full">
-          <div className="flex flex-row gap-2 p-4 w-full h-full justify-start">
+        <div className="flex bg-secondary-color rounded-md group drop-shadow-lg w-full md:w-1/2 lg:w-1/3 h-24 md:h-full">
+          <div className="flex flex-row gap-2 p-3 w-full h-full justify-start">
             {/* Avatar Section */}
-            <div className="flex flex-col gap-4 w-2/5 h-full">
+            <div className="flex flex-col gap-4 w-[20%] md:w-2/5 h-full">
               <Link
                 to="/"
                 className="scale-100 duration-300 transition-all hover:scale-110 w-full h-full"
@@ -26,7 +26,7 @@ const AvatarCard = ({ user }) => {
             <div className="flex flex-col justify-start w-3/5 h-full">
               <p className="text-slate-50 text-lg font-bold">{user.name}</p>
               <p className="text-slate-50 text-lg font-light">{user.title}</p>
-              <p className="text-primary-color text-lg font-bold">Orders:</p>
+              <p className="text-slate-50 text-lg font-bold">Orders:</p>
               {/* <OrderCard orders={user.orders} /> */}
             </div>
           </div>
