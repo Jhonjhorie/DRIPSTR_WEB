@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 import { faChevronRight, faChevronLeft, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-import { ReactComponent as Logo } from '@/assets/images/LOGO.svg'; 
+import { ReactComponent as Logo } from '../../../assets/LOGO.svg'; 
 
 const AvatarCard = ({ user }) => {
     return (

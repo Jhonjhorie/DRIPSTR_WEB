@@ -2,7 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 import { faChevronRight, faChevronLeft, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-import { ReactComponent as Logo } from '@/assets/images/LOGO.svg'; 
+import { ReactComponent as Logo } from '../../../assets/LOGO.svg'; 
 
 const Carousel = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -43,15 +43,15 @@ const Carousel = ({ images }) => {
                 {item.rate.toFixed(1)}  
               </p>
               {item.rate >= 4 && (
-                 <img src={require('@/assets/images/others/fillfull.png')} className='-z-10 relative w-24 md:w-28 lg:w-32 object-contain'
+                 <img src={require('../../../assets/images/others/fillfull.png')} className='-z-10 relative w-24 md:w-28 lg:w-32 object-contain'
                  />
               )}
                 {item.rate < 4 && item.rate > 2 && (
-                 <img src={require('@/assets/images/others/fillhalf.png')} className='-z-10 relative w-24 md:w-32 object-contain'
+                 <img src={require('../../../assets/images/others/fillhalf.png')} className='-z-10 relative w-24 md:w-32 object-contain'
                  />
                 )}
                 {item.rate < 2 && (
-                 <img src={require('@/assets/images/others/fillno.png')} className='-z-10 relative w-24 md:w-32 object-contain'
+                 <img src={require('../../../assets/images/others/fillno.png')} className='-z-10 relative w-24 md:w-32 object-contain'
                  />
                 )} 
               </div>
@@ -111,15 +111,15 @@ const Carousel = ({ images }) => {
       <Logo
             className='-z-10 absolute left-2 top-16 lg:top-10 opacity-100 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all group-hover:scale-110 w-[50%] h-[50%] object-contain'
            />
-        <img src={require('@/assets/images/others/carouselframe.png')} 
+        <img src={require('../../../assets/images/others/carouselframe.png')} 
             className='-z-20 absolute left-[-2rem] bottom-[0rem] w-[100%] h-[100%] opacity-50 object-cover'
             />
-            <img src={require('@/assets/images/others/carouselframe.png')} 
+            <img src={require('../../../assets/images/others/carouselframe.png')} 
             className='-z-20 absolute right-[-2rem] rotate-180 bottom-[0rem] w-[150%] h-[150%] opacity-10 object-cover'
             />
-            <img src={require('@/assets/images/others/name.png')} 
+            <img src={require('../../../assets/images/others/name.png')} 
             className='-z-10 absolute right-2 bottom-[-1rem] lg:bottom-0 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all group-hover:scale-110 w-[15%] h-[50%] object-contain'/>
-            <img src={require('@/assets/images/others/crown.png')}  
+            <img src={require('../../../assets/images/others/crown.png')}  
             className='-z-10 absolute right-24 lg:right-96 top-16 lg:top-10 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all group-hover:scale-110 w-[15%] h-[50%] object-contain'/>
       
     </div>
