@@ -1,9 +1,7 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React from "react";
 import { Link } from 'react-router-dom';
 import OrderCard from "./orderCard";
-import { faChevronRight, faChevronLeft, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-import { ReactComponent as Logo } from '@/assets/images/LOGO.svg'; 
+
 
 const AvatarCard = ({ user }) => {
     return (
@@ -25,7 +23,7 @@ const AvatarCard = ({ user }) => {
     
             {/* User Info Section */}
             <div className="flex flex-row md:flex-col justify-start w-full h-full space-x-4 md:space-x-2">
-            <div className="flex flex-col w-[100%] bg-slate-800">
+            <div className="ml-1 flex flex-col w-[100%] ">
               <p className="text-slate-50 text-lg font-bold">{user.name}</p>
               <p className="text-slate-50 text-lg font-light">{user.title}</p>
               </div>

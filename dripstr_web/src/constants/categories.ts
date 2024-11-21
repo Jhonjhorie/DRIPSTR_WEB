@@ -9,4 +9,6 @@ export const categories = [
     {label:'Sweater', icon: require('@/assets/images/categoriesIcon/sweater.png'), value:'sweater'},
     {label:'Dress', icon: require('@/assets/images/categoriesIcon/dress.png'), value:'dress'},
     {label:'Boxer', icon: require('@/assets/images/categoriesIcon/boxer.png'), value:'boxer'},
+    {label:'Boxer', icon: require('@/assets/images/categoriesIcon/boxer.png'), value:'boxer'},
+    {label:'Boxer', icon: require('@/assets/images/categoriesIcon/boxer.png'), value:'boxer'},
   ]

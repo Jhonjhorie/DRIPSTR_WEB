@@ -2,7 +2,7 @@
 import React from 'react';
 import Carousel from './components/Carousel';
 import AvatarCard from './components/AvatarCard';
-// import CategoriesRibbon from '../components/products/CategoriesRibbon';
+import CategoriesRibbon from '@/shared/products/CategoriesRibbon';
 // import ProductsView from '../components/products/ProductsView';
 import { currUser, Images } from '@/constants/sampleData';
 function Home() { 
@@ -14,13 +14,9 @@ function Home() {
           <Carousel images={Images} />
           <AvatarCard user={currUser} />
         </div>
-        {/* <div className="flex w-full justify-center py-4">
-          {isMobile ? (
-            <CategoriesRibbon active="all" />
-          ) : (
-            <CategoriesRibbon active="all" />
-          )}
-        </div> */}
+        <div className="flex items-center justify-center ">
+            <CategoriesRibbon active="All" />
+        </div> 
         {/* <div className="flex flex-wrap justify-center gap-8">
           {isMobile ? (
             <ProductsView categories="all" />
