@@ -48,7 +48,7 @@ const Header = () => {
             </button>
           </Link>
           <button onClick={toggleChat}>
-            <FontAwesomeIcon icon={faMessage} className="text-black hover:text-[--primary-color]" />
+            <FontAwesomeIcon icon={faMessage} className="indicator text-black hover:text-[--primary-color]" />
           </button>
           <Link to="/account">
             <button>
