@@ -1,36 +1,28 @@
 // src/pages/Mall.js
 
 import React from 'react';
- 
+import CategoriesRibbon from '@/shared/products/CategoriesRibbon';
+import MallRibbon from './components/MallRibbon';
+import ProductsView from '../../shared/products/ProductsView';
+
 function Mall() { 
 
   return (
-    <div className="min-h-screen bg-slate-300 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold mb-4">asdas</h1>
-      {/* DaisyUI Button */}
-      <button className="btn btn-primary mb-8 absolute top-0">Hello DaaiasdsadasasdasdyUI</button>
-      <div className="h-96 bg-slate-800 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold mb-4">asdas</h1>
-      {/* DaisyUI Button */}
-      <button className="btn btn-primary mb-8 absolute top-0">Hello DaaiasdsadasasdasdyUI</button>
-    </div>
-    <div className="h-96 bg-slate-800 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold mb-4">asdas</h1>
-      {/* DaisyUI Button */}
-      <button className="btn btn-primary mb-8 absolute top-0">Hello DaaiasdsadasasdasdyUI</button>
-    </div>  <div className="h-96 bg-slate-800 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold mb-4">asdas</h1>
-      {/* DaisyUI Button */}
-      <button className="btn btn-primary mb-8 absolute top-0">Hello DaaiasdsadasasdasdyUI</button>
-    </div>
-    <div className="h-96 bg-slate-800 flex flex-col items-center justify-center">
-      <h1 className="text-3xl font-bold mb-4">asdas</h1>
-      {/* DaisyUI Button */}
-      <button className="btn btn-primary mb-8 absolute top-0">Hello DaaiasdsadasasdasdyUI</button>
-    </div>
-    </div>
+    <div className=" w-full relative inset-0 bg-slate-300 flex flex-col gap-2 px-2 py-4 ">
+        <div className="flex items-center justify-center">
+          <MallRibbon active="0" />
+          
+        </div>
+        <div className="flex items-center justify-center">
+        <CategoriesRibbon active="All" />
+        </div> 
+        <div className="flex flex-wrap justify-center mb-4 p-4 gap-8">
+            <ProductsView categories="all" />
+        </div> 
     
+    </div>
   );
+    
 }
 
 export default Mall;

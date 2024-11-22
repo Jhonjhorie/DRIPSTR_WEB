@@ -16,11 +16,28 @@ const ProductsView = () => {
 
   return (
     <div className="w-full flex flex-col items-center pb-24">
-      <p className="relative  text-lg text-slate-500 -left-0 z-40 -top-2">
-        DRIP NOW // STAR LATER
-      </p>
+      <div className='relative -top-3 flex flex-row w-full items-center p-4 justify-end'>
+        <p className="absolute left-40 text-lg text-slate-500 ">
+          DRIP NOW // STAR LATER
+        </p>
+        <div class="drawer drawer-end ">
+          <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
+          <div class="drawer-content">
+          {/* //button */} 
+            <label for="my-drawer-4" class="drawer-button text-lg -top-3 absolute right-1">Filter</label>
+          </div>
+          <div class="drawer-side">
+            <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
+            <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
+              {/* //sidebar */}
+              <li><a>Sidebar Item 1</a></li>
+              <li><a>Sidebar Item 2</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
-      <div className="grid gap-2 items-center justify-center" style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}>
+      <div className="grid gap-1 items-center justify-center" style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}>
         {dataWithPlaceholders.map((item, index) =>
           item.empty ? (
             // Placeholder item for alignment
@@ -33,7 +50,7 @@ const ProductsView = () => {
             <Link
               key={item.prodId || `product-${index}`}
               to="/"
-              className="flex flex-col flex-1 max-w-[13.5rem] items-center mx-1 mb-2 p-2 rounded-md bg-slate-50 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
+              className="flex flex-col flex-1 max-w-[13.5rem] items-center mx-1 mb-2 rounded-md bg-slate-100 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
             >
               {item.str && (
                 <Logo
@@ -59,7 +76,7 @@ const ProductsView = () => {
                 className="object-contain mb-2 mt-1 w-[180px] h-[200px]"
                 
               />
-              <div className="w-full flex flex-col">
+              <div className="w-full flex flex-col px-3 py-2 bg-slate-200 rounded-b-md">
                 {item.product && (
                   <p className="text-secondary-color text-md font-medium truncate">
                     {item.product}

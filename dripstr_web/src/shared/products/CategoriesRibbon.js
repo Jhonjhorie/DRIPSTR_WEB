@@ -11,7 +11,7 @@ const CategoriesRibbon = ({ active }) => {
 
   const calculateItemWidth = () => {
     const screenWidth = window.innerWidth;
-    return screenWidth >= 1025 ? 130 : screenWidth >= 768 ? 140 : screenWidth >= 640 ? 80 : 60; 
+    return screenWidth >= 1025 ? 125 : screenWidth >= 768 ? 140 : screenWidth >= 640 ? 80 : 60; 
   };
 
   useEffect(() => {
