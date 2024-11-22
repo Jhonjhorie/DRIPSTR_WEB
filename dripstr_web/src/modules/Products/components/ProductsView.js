@@ -1,8 +1,11 @@
 import React from 'react';
 import { products } from '@/constants/sampleData'; // Ensure you have a products array
 import { Link } from 'react-router-dom';
-import useResponsiveItems from '../hooks/useResponsiveItems';
+import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg'; 
+import FilterProducts from './FilterProducts';
+
+
 
 
 const ProductsView = () => {
@@ -16,25 +19,11 @@ const ProductsView = () => {
 
   return (
     <div className="w-full flex flex-col items-center pb-24">
-      <div className='relative -top-3 flex flex-row w-full items-center p-4 justify-end'>
+      <div className='relative -top-3 flex flex-row w-full items-center p-6 justify-end'>
         <p className="absolute left-40 text-lg text-slate-500 ">
           DRIP NOW // STAR LATER
         </p>
-        <div class="drawer drawer-end ">
-          <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
-          <div class="drawer-content">
-          {/* //button */} 
-            <label for="my-drawer-4" class="drawer-button text-lg -top-3 absolute right-1">Filter</label>
-          </div>
-          <div class="drawer-side">
-            <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
-            <ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-              {/* //sidebar */}
-              <li><a>Sidebar Item 1</a></li>
-              <li><a>Sidebar Item 2</a></li>
-            </ul>
-          </div>
-        </div>
+        <FilterProducts />
       </div>
 
       <div className="grid gap-1 items-center justify-center" style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}>

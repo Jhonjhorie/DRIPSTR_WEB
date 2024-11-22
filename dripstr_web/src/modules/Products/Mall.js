@@ -3,7 +3,7 @@
 import React from 'react';
 import CategoriesRibbon from '@/shared/products/CategoriesRibbon';
 import MallRibbon from './components/MallRibbon';
-import ProductsView from '../../shared/products/ProductsView';
+import ProductsView from './components/ProductsView';
 
 function Mall() { 
 

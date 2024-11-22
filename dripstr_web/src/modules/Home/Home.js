@@ -3,7 +3,7 @@ import React from 'react';
 import Carousel from './components/Carousel';
 import AvatarCard from './components/AvatarCard';
 import CategoriesRibbon from '@/shared/products/CategoriesRibbon';
-import ProductsView from '@/shared/products/ProductsView';
+import ProductsView from '../Products/components/ProductsView';
 import { currUser, Images } from '@/constants/sampleData';
 function Home() { 
 
