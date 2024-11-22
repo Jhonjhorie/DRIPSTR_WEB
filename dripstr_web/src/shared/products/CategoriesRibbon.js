@@ -61,7 +61,7 @@ const CategoriesRibbon = ({ active }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-[95%] md:w-[90%] justify-center items-center bg-slate-50 rounded-full shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex"
+      className="relative w-[95%] md:w-[90%] justify-center items-center bg-slate-50 rounded-full shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex overflow-hidden"
     >
       {/* Title */}
       <div className="flex justify-center gap-2 items-end flex-col">

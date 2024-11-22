@@ -20,7 +20,7 @@ const ProductsView = () => {
   return (
     <div className="w-full flex flex-col items-center pb-24">
       <div className='relative -top-3 flex flex-row w-full items-center p-6 justify-end'>
-        <p className="absolute left-40 text-lg text-slate-500 ">
+        <p className="absolute left-0 md:left-40 text-lg text-slate-500 ">
           DRIP NOW // STAR LATER
         </p>
         <FilterProducts />

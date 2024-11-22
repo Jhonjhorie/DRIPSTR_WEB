@@ -18,7 +18,6 @@ const DoubleRangeSlider = ({ onRangeChange }) => {
     }
   };
 
- 
   useEffect(() => {
     if (onRangeChange) {
       onRangeChange({ min: minValue, max: maxValue });
@@ -26,7 +25,7 @@ const DoubleRangeSlider = ({ onRangeChange }) => {
   }, [minValue, maxValue, onRangeChange]);
 
   return (
-    <div className="w-full flex flex-col items-center space-y-6">
+    <div className="w-full flex flex-col items-center space-y-2">
       {/* Min Slider */}
       <div className="w-full">
         <label className="block text-sm font-medium text-gray-700 mb-2">
