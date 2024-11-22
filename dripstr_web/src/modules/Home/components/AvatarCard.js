@@ -5,7 +5,7 @@ import OrderCard from "./orderCard";
 
 const AvatarCard = ({ user }) => {
     return (
-        <div className="flex bg-secondary-color rounded-md group drop-shadow-lg w-full md:w-1/2 lg:w-1/3 h-24 md:h-72 lg:h-80 ">
+        <div className="flex bg-secondary-color rounded-md group drop-shadow-lg w-full md:w-1/3 lg:w-1/3 h-24 md:h-72 lg:h-80 ">
           <div className="flex flex-row gap-1 md:gap-2 p-2 md:p-3 w-full h-full justify-start">
             {/* Avatar Section */}
             <div className="flex flex-col gap-4 w-[20%] md:w-2/5 h-full">
