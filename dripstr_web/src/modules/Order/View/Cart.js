@@ -938,7 +938,7 @@ function Cart() {
               </div>
             ))}
           </div>
-          <div className="flex justify-between items-center mt-8">
+          <div className="flex justify-between items-center mt-8 sticky z-100 bottom-2 bg-slate-600 p-4 rounded-lg">
             <p className="text-2xl font-bold text-white">
               Total: ${calculateTotal()}
             </p>
