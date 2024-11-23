@@ -34,7 +34,7 @@ function App() {
           </div>
 
           {/* Main Content */}
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 sm:ml-8 sm:pl-2 overflow-y-auto">
             <Routes>
               <Route path="/" element={<HomeController />} />
               <Route path="/mall/*" element={<ProductsController />} />
