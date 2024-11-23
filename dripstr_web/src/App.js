@@ -45,7 +45,7 @@ function App() {
               <Route path="/adminmoderator/*" element={<AdminModeratorController />} />
               <Route path="/adminsuper/*" element={<AdminSuperController />} />
               <Route path="/shop/*" element={<ShopController />} />
-              <Route path="/useraccount/*" element={<UserAccountController />} />
+              <Route path="/account/*" element={<UserAccountController />} />
               <Route path="/notification" element={<Notifications />} />
             </Routes>
           </main>
