@@ -1,16 +1,20 @@
-import React from 'react';
+import React,{useState} from 'react';
 import { products } from '@/constants/sampleData'; // Ensure you have a products array
-import { Link } from 'react-router-dom';
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg'; 
 import FilterProducts from './FilterProducts';
-
-
-
+import ProductModal from './productModal'
 
 const ProductsView = () => {
+  const [selectedItem, setSelectedItem] = useState(null);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 4, lg: 6 }); 
   const numColumns = itemsToShow;
+  
+  const openModal = (item) => {
+    setSelectedItem(item);  
+    document.getElementById('my_modal_4').showModal();
+  };
+
 
   const dataWithPlaceholders = [...products];
   while (dataWithPlaceholders.length % numColumns !== 0) {
@@ -36,9 +40,9 @@ const ProductsView = () => {
               style={{ visibility: 'hidden' }}
             />
           ) : (
-            <Link
+            <div
               key={item.prodId || `product-${index}`}
-              to="/"
+              onClick={() => openModal(item)} 
               className="flex flex-col flex-1 max-w-[13.5rem] items-center mx-1 mb-2 rounded-md bg-slate-100 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
             >
               {item.str && (
@@ -46,6 +50,7 @@ const ProductsView = () => {
                   className="absolute top-2 left-2 group-hover:opacity-100 duration-300 transition-all opacity-50 w-7 h-7"
                 />
               )}
+              
 
               <div className="absolute flex flex-row right-2 top-2 ">
                 {item.voucher && (
@@ -94,13 +99,20 @@ const ProductsView = () => {
                       | {item.sold} sold
                     </span>
                   </div>
+                  
                 </div>
               </div>
-            </Link>
+            </div>
+            
           )
         )}
       </div>
+      {selectedItem && <dialog id="my_modal_4" className=" modal modal-bottom sm:modal-middle">
+                   <ProductModal item={selectedItem} />
+                   </dialog>}
+     
     </div>
+    
   );
 };
 

@@ -10,6 +10,7 @@ import OrderController from './modules/Order/Controller/Order_Controller';
 import ShopController from './modules/Shop_Profile/Controller/Shop_Profile_Controller';
 import UserAccountController from './modules/User_Account/Controller/User_Account_Controller';
 import ProductsController from './modules/Products/Products_Controller'
+import Product from './modules/Products/Product'
 
 // Shared Components
 import Header from './shared/Header';
@@ -38,6 +39,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomeController />} />
               <Route path="/mall/*" element={<ProductsController />} />
+              <Route path="/product/*" element={<Product />} />
               <Route path="/cart/*" element={<OrderController />} />
               <Route path="/login/*" element={<LoginController />} />
               <Route path="/adminmoderator/*" element={<AdminModeratorController />} />
