@@ -1,10 +1,9 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-import Home from '../View/Home';
-import Cart from '../View/Cart';
+ import Cart from '../View/Cart';
  
-const HomeController = () => {
+const CartController = () => {
   return (
     <Routes>
       <Route path="/" element={<Cart />} />
@@ -13,4 +12,4 @@ const HomeController = () => {
   );
 };
 
-export default HomeController;
+export default CartController;
