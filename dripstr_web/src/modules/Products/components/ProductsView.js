@@ -4,6 +4,7 @@ import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg'; 
 import FilterProducts from './FilterProducts';
 import ProductModal from './productModal'
+import RateSymbol from '@/shared/products/rateSymbol';
 
 const ProductsView = () => {
   const [selectedItem, setSelectedItem] = useState(null);
@@ -12,7 +13,9 @@ const ProductsView = () => {
   
   const openModal = (item) => {
     setSelectedItem(item);  
-    document.getElementById('my_modal_4').showModal();
+    setTimeout(() => {
+      document.getElementById('my_modal_4').showModal();
+    }, 50);
   };
 
 
@@ -20,9 +23,14 @@ const ProductsView = () => {
   while (dataWithPlaceholders.length % numColumns !== 0) {
     dataWithPlaceholders.push({ empty: true }); 
   }
+  
 
   return (
+    
     <div className="w-full flex flex-col items-center pb-24">
+       {selectedItem && <dialog id="my_modal_4" className=" modal modal-bottom sm:modal-middle">
+                   <ProductModal item={selectedItem} />
+      </dialog>}
       <div className='relative -top-3 flex flex-row w-full items-center p-6 justify-end'>
         <p className="absolute left-0 md:left-40 text-lg text-slate-500 ">
           DRIP NOW // STAR LATER
@@ -85,16 +93,7 @@ const ProductsView = () => {
                   {/* Ratings and Sales */}
                   <div className="flex flex-row items-center just gap-0.5">
                   <p className="text-primary-color text-md">{item.rate.toFixed(1)}</p>
-                    {item.rate >= 4 && (
-                      <img src={require('@/assets/images/others/fillfull.png')} className='w-4 h-5 object-contain'/>
-                    )}
-                    {item.rate < 4 && item.rate > 2 && (
-                    <img src={require('@/assets/images/others/fillhalf.png')}  className='w-4 h-5 object-contain'/>
-                    )}
-                    {item.rate < 2 && (
-                      <img src={require('@/assets/images/others/fillno.png')} className='w-4 h-5 object-contain'/>
-                  
-                    )}
+                    <RateSymbol item={item.rate} size={'4'} />
                     <span className="text-secondary-color justify-center text-sm ">
                       | {item.sold} sold
                     </span>
@@ -107,9 +106,7 @@ const ProductsView = () => {
           )
         )}
       </div>
-      {selectedItem && <dialog id="my_modal_4" className=" modal modal-bottom sm:modal-middle">
-                   <ProductModal item={selectedItem} />
-                   </dialog>}
+     
      
     </div>
     
