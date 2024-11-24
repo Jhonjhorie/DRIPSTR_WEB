@@ -1,6 +1,7 @@
 import React from "react";
-
-const TopItems = ({ image, price, label, soldCount }) => (
+import image from "../../../../assets/image-removebg-preview.png";
+//Moved image from topitems to import
+const TopItems = ({ price, label, soldCount }) => (
   <div className="bg-slate-600 w-1/6 m-2 h-5/6 flex items-center transition-transform duration-500 hover:scale-125 align-middle justify-center">
     <img
       src={image}

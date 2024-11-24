@@ -44,7 +44,7 @@ function Dashboard() {
                   Sales Statistics
                 </p>
                 <select
-                  className="bg-slate-900 rounded-xl text-violet-400 text-lg font-bold mr-5 cursor-pointer"
+                  className="bg-slate-900 rounded-xl text-violet-600 text-lg font-bold mr-5 cursor-pointer"
                   name="Time Period"
                   id="timePeriod"
                   defaultValue=""

@@ -155,9 +155,9 @@ function Sidebar() {
         </nav>
 
         {/* User info */}
-        <div className="flex flex-col items-center pt-2 pb-4 mt-24">
+        <div className="flex flex-col items-center pt-2 pb-4 mt-64">
           <img
-            className="h-10 w-10 rounded-3xl border-2 border-white"
+            className="h-10 w-10 rounded-full border-2 border-white"
             src={logo}
             alt="Logo"
           />
