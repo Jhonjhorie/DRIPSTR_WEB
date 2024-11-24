@@ -12,9 +12,11 @@ import UserAccountController from './modules/User_Account/Controller/User_Accoun
 import ProductsController from './modules/Products/Products_Controller'
 import Product from './modules/Products/Product'
 
+
 // Shared Components
 import Header from './shared/Header';
 import Sidebar from './shared/SideBar';
+import Notifications from './modules/Notifications';
 
 function App() {
   return (
@@ -45,7 +47,8 @@ function App() {
               <Route path="/adminmoderator/*" element={<AdminModeratorController />} />
               <Route path="/adminsuper/*" element={<AdminSuperController />} />
               <Route path="/shop/*" element={<ShopController />} />
-              <Route path="/useraccount/*" element={<UserAccountController />} />
+              <Route path="/account/*" element={<UserAccountController />} />
+              <Route path="/notification" element={<Notifications />} />
             </Routes>
           </main>
         </div>
