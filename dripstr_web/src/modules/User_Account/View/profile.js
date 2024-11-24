@@ -1,28 +1,28 @@
 // src/pages/Customer/CustomerProfile.js
-import React, { useState } from 'react';
-import Avatar from '../../../shared/Avatar';
-import Button from '../../../shared/Button';
-import ThreeScene from '../components/Three';
-
+import React, { useState } from "react";
+import Avatar from "../../../shared/Avatar";
+import Button from "../../../shared/Button";
+import ThreeScene from "../components/Three";
 
 function CustomerProfile() {
-  const [profile, ] = useState({//setProfile
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+123456789',
-    address: '123 Main St, City, Country',
-    avatarUrl: 'https://via.placeholder.com/150', // Replace with actual avatar URL
+  const [profile] = useState({
+    //setProfile
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    phone: "+123456789",
+    address: "123 Main St, City, Country",
+    avatarUrl: "https://via.placeholder.com/150", // Replace with actual avatar URL
   });
 
   const handleEditClick = () => {
     // Logic for editing profile goes here
-    console.log('Edit profile clicked');
+    console.log("Edit profile clicked");
   };
 
   const handleSaveClick = () => {
     // Logic for saving updated profile goes here
-    console.log('Save profile clicked');
+    console.log("Save profile clicked");
   };
 
   return (
@@ -35,30 +35,46 @@ function CustomerProfile() {
         <div className="md:w-2/3">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">First Name</label>
+              <label className="block text-sm font-medium text-gray-700">
+                First Name
+              </label>
               <p className="text-lg">{profile.firstName}</p>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Last Name</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Last Name
+              </label>
               <p className="text-lg">{profile.lastName}</p>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
               <p className="text-lg">{profile.email}</p>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Phone</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Phone
+              </label>
               <p className="text-lg">{profile.phone}</p>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Address</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Address
+              </label>
               <p className="text-lg">{profile.address}</p>
             </div>
             <div className="flex justify-end">
-              <Button onClick={handleEditClick} className="mr-2 bg-blue-500 text-white px-4 py-2 rounded">
+              <Button
+                onClick={handleEditClick}
+                className="mr-2 bg-blue-500 text-white px-4 py-2 rounded"
+              >
                 Edit
               </Button>
-              <Button onClick={handleSaveClick} className="bg-green-500 text-white px-4 py-2 rounded">
+              <Button
+                onClick={handleSaveClick}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
                 Save
               </Button>
             </div>
