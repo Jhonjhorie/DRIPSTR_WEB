@@ -17,16 +17,16 @@ import {
 
 // Sidebar Navigation Items
 const navItems = [
-  { label: "Manage Account", path: "/useraccount/", icon: faSettings },
-  { label: "My Profile", path: "/useraccount/profile", icon: faPerson },
-  { label: "My Address Book", path: "/useraccount/address", icon: faLocation },
-  { label: "My Payment Options", path: "/useraccount/payment", icon: faCreditCard },
-  { label: "My Order", path: "/useraccount/orders", icon: faReceipt },
-  { label: "My Cancellations", path: "/useraccount/cancellations", icon: faCloseCircle },
-  { label: "My Reviews", path: "/useraccount/reviews", icon: faStar },
-  { label: "My Wishlist and Followed Shop", path: "/useraccount/wishlist", icon: faHeart },
-  { label: "Set up Shop", path: "/useraccount/shop-setup", icon: faStore },
-  { label: "Avatar", path: "/useraccount/avatar", icon: faUserCircle },
+  { label: "Manage Account", path: "/account/", icon: faSettings },
+  { label: "My Profile", path: "/account/profile", icon: faPerson },
+  { label: "My Address Book", path: "/account/address", icon: faLocation },
+  { label: "My Payment Options", path: "/account/payment", icon: faCreditCard },
+  { label: "My Order", path: "/account/orders", icon: faReceipt },
+  { label: "My Cancellations", path: "/account/cancellations", icon: faCloseCircle },
+  { label: "My Reviews", path: "/account/reviews", icon: faStar },
+  { label: "My Wishlist and Followed Shop", path: "/account/wishlist", icon: faHeart },
+  { label: "Set up Shop", path: "/account/shop-setup", icon: faStore },
+  { label: "Avatar", path: "/account/avatar", icon: faUserCircle },
 ];
 
 const AccountLayout = () => {
