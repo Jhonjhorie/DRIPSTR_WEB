@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faTrash, faStore, faTimes } from '@fortawesome/free-solid-svg-icons'; 
 import Button from '../../../shared/Button';
 import cartData from '../Model/CartData';
+import { AlertTitle } from '@mui/material';
 
 function Cart() {
   const [cartItems, setCartItems] = useState(cartData);
@@ -204,7 +205,7 @@ function Cart() {
               className="bg-blue-500 text-white px-4 py-2 rounded"
               onClick={handleProceedToCheckout}
             >
-              Proceed to Checkout
+              Proceed to Checkout ({calculateTotalProducts()})
             </Button>
           </div>
         </div>
