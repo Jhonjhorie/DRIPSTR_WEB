@@ -120,6 +120,8 @@ function SideBar() {
             </a>
             <box-icon type='solid' name='shopping-bags' color='#FFFFFF'></box-icon>
           </li>
+
+          
         </ul>
             <div className='flex gap-2 absolute bottom-14  md:bottom-2  justify-end '>
               <button class="btn px-2 mx-2 ">
