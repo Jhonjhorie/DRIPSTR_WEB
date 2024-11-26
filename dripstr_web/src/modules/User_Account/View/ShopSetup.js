@@ -1,8 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 
+const shop = [
+  { label: 'Shop', path: '/shop/MerchantCreate' },
+
+];
+
+
 const Shop = () => {
+ 
+
   return (
     <div className="p-4 flex min-h-screen bg-slate-200">
       {/* Sidebar */}
@@ -89,11 +97,11 @@ const Shop = () => {
 
         {/* Get Started Button */}
         <div className="text-center">
-          <Link to="/register">
-            <button className="btn btn-primary btn-lg">
-              Get Started
-            </button>
-          </Link>
+        <Link to={shop[0].path}>
+          <button className="btn btn-primary btn-lg">
+            Get Started
+          </button>
+        </Link>
         </div>
       </div>
     </div>

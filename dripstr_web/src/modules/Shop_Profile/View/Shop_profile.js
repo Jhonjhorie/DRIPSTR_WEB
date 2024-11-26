@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import SideBar from '../Component/Sidebars'
 import logo from '../../../assets/shop/shoplogo.jpg';
+import logo1 from '../../../assets/shop/s1.jpg';
+import logo2 from '../../../assets/shop/s2.jpg';
+import logo3 from '../../../assets/shop/s3.jpg';
+import logo4 from '../../../assets/shop/s4.jpg';
 
 function Shop_profile() { 
 
   
   return (
-  <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar px-5 lg:px-20 ">
+  <div className="h-full w-full overflow-y-scroll  bg-slate-300 custom-scrollbar px-2  lg:px-20 md:flex ">
     <div className='absolute mx-3 right-0 z-10'>
       <SideBar/>
     </div>
-    <div className='w-full h-auto bg-gradient-to-r from-violet-500 to-fuchsia-500 shadow-sm gap-2 rounded-sm  md:flex'>
-        <div className='w-auto h-full place-items-center  md:mt-0 mt-2  lg:p-7'>
-          <div className='bg-gradient-to-r from-violet-500 to-fuchsia-500 h-full w-[400px] rounded-sm shadow-md'>
-            <div className='flex w-full h-[70%] '>
-              <div className=' p-2 h-[120px] w-1/3'>
+    <div className='w-[90%] md:w-[35%] lg:overflow-hidden  overflow-y-scroll lg:w-[25%] md:fixed h-full shadow-md bg-slate-100 gap-2 mx-auto '>
+        <div className='w-full h-auto p-2'>
+          <div className='bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1/2 w-full rounded-sm shadow-md mt-2'>
+            <div className='lg:flex w-full h-[70%] place-items-center justify-center  '>
+              <div className=' p-2 h-1/2 lg:h-[120px] w-1/2 lg:w-1/3'>
                 <div className='rounded-md bg-primary-color p-1 h-full w-full'>
                   <img
                     src={logo}
@@ -23,8 +27,8 @@ function Shop_profile() {
                   />
                 </div>
               </div>
-              <div className=' w-2/3 place-content-center'>
-                <div className='text-slate-100 text-lg font-semibold'> Saint Mercy Apparel </div>
+              <div className=' w-2/3 place-content-center place-items-center lg:place-items-start '>
+                <div className='text-slate-100 text-sm lg:text-lg font-semibold'> Saint Mercy Apparel </div>
                 <div className='text-slate-100 text-sm font-semibold flex place-items-center gap-2'> 
                   <div className='bg-green-400 h-2 w-2 rounded-md pl-4' />
                   <div className='text-sm font-normal'> Active </div>  
@@ -55,48 +59,69 @@ function Shop_profile() {
             </div>
           </div>
         </div>
-        <div className=' w-full h-full md:mt-0 mt-2 rounded-md md:pr-5'>
-        <div className="carousel w-full h-48 mt-3 rounded-sm border-custom-purple border-2 ">
-          <div id="slide1" className="carousel-item relative w-full">
+        <div className=' w-full h-[75%] md:mt-0 mt-2 p-2'>
+        <div className="carousel w-full h-[80%] mt-1 rounded-md border-primary-color border-[5px] ">
+          <div id="slide1" className="carousel-item relative w-full ">
             <img
-              src="https://img.daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.webp"
-              className="w-full" />
-            <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-              <a href="#slide4" className="btn btn-circle bg-transparent">❮</a>
-              <a href="#slide2" className="btn btn-circle bg-transparent">❯</a>
+              src={logo1}
+              className="w-full " />
+            <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
+              <a href="#slide4" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg ">❮</a>
+              <a href="#slide2" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg">❯</a>
             </div>
           </div>
           <div id="slide2" className="carousel-item relative w-full">
             <img
-              src="https://img.daisyui.com/images/stock/photo-1609621838510-5ad474b7d25d.webp"
+              src={logo2}
               className="w-full" />
-            <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-              <a href="#slide1" className="btn btn-circle bg-transparent">❮</a>
-              <a href="#slide3" className="btn btn-circle bg-transparent">❯</a>
+            <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
+              <a href="#slide1" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg ">❮</a>
+              <a href="#slide3" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg ">❯</a>
             </div>
           </div>
           <div id="slide3" className="carousel-item relative w-full">
             <img
-              src="https://img.daisyui.com/images/stock/photo-1414694762283-acccc27bca85.webp"
+              src={logo3}
               className="w-full" />
-            <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-              <a href="#slide2" className="btn btn-circle bg-transparent">❮</a>
-              <a href="#slide4" className="btn btn-circle bg-transparent">❯</a>
+            <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
+              <a href="#slide2" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg ">❮</a>
+              <a href="#slide4" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg text-slate-950 text-lg">❯</a>
             </div>
           </div>
           <div id="slide4" className="carousel-item relative w-full">
             <img
-              src="https://img.daisyui.com/images/stock/photo-1665553365602-b2fb8e5d1707.webp"
+              src={logo4}
               className="w-full" />
-            <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-              <a href="#slide3" className="btn btn-circle bg-transparent">❮</a>
-              <a href="#slide1" className="btn btn-circle bg-transparent">❯</a>
+            <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
+              <a href="#slide3" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg ">❮</a>
+              <a href="#slide1" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg ">❯</a>
             </div>
           </div>
         </div>
        </div>
-   
-  </div>
+    </div>
+    <div className='h-full w-full md:flex  '>
+      <div className='md:h-full w-full md:w-[35%] lg:w-[30%] bg-slate-600'></div>
+      <div className='h-[200%] w-full md:w-[65%] lg:w-[75%] md:px-10 px-2 bg-slate-50'>
+        <div className="dropdown dropdown-bottom flex justify-between gap-2 mt-2 place-items-center  ">
+          <p className='font-semibold text-slate-800 flex gap-5 place-items-center iceland-regular text-3xl md:text-4xl  '> Shop products </p> 
+         
+          <div className="flex place-items-center dropdown dropdown-bottom dropdown-end">
+            <div className='text'>filter items</div>
+            <div tabIndex={0} role="button" className="h-8 w-8 jus justify-center place-items-center flex rounded-md
+            hover:bg-slate-900 hover:duration-300 bg-slate-700  m-1"><box-icon color="#FFFFFF" name='filter'></box-icon></div>
+            <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-sm z-[1] w-52 p-2 shadow">
+              <li><a>Shirt</a></li>
+              <li><a>Brief</a></li>
+              <li><a>Boxers</a></li>
+              <li><a>Polo</a></li>
+              <li><a>Formal</a></li>
+            </ul>
+           </div> 
+        </div>
+      </div>
+
+    </div>
   </div>
   );
 }

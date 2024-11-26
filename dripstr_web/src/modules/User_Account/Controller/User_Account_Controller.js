@@ -11,6 +11,7 @@ import Reviews from '../View/Reviews';
 import Wishlist from '../View/Wishlist';  
 import ShopSetup from '../View/ShopSetup';  
 import Avatar from '../View/Avatar';  
+import SetupShop from '../../Shop_Profile/View/Login';
 
 const UserController = () => {
   return (
@@ -25,6 +26,7 @@ const UserController = () => {
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/shop-setup" element={<ShopSetup />} />
       <Route path="/avatar" element={<Avatar />} />
+      <Route path="/ShopSetup" element={<SetupShop />} />
     </Routes>
   );
 };
