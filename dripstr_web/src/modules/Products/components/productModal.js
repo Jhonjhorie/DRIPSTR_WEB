@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import RateSymbol from '@/shared/products/rateSymbol';
 
-const ProductModal = ({ item }) => {
+const ProductModal = ({ item, onClose }) => {
   const navigate = useNavigate();
 
   const handleProductClick = () => {
@@ -70,8 +70,9 @@ const ProductModal = ({ item }) => {
               quasi. In deleniti eaque aut repudiandae et a id nisi.
             </p>
            
-            <form method="dialog  " >
+            <div  >
                 <button
+                  onClick={onClose}
                   className="btn btn-sm btn-circle btn-ghost fixed right-2 top-2"
                 >
                   ✕
@@ -91,7 +92,7 @@ const ProductModal = ({ item }) => {
                   Go to Product Page
                 </button>
                 </div>
-        </form>
+        </div>
           </div>
         </div>
       </div>

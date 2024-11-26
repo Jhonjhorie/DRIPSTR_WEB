@@ -17,7 +17,10 @@ const ProductsView = () => {
       document.getElementById('my_modal_4').showModal();
     }, 50);
   };
-
+  const closeModal = () => {
+    document.getElementById('my_modal_4').close();
+    setSelectedItem(null);
+  };
 
   const dataWithPlaceholders = [...products];
   while (dataWithPlaceholders.length % numColumns !== 0) {
@@ -28,8 +31,8 @@ const ProductsView = () => {
   return (
     
     <div className="w-full flex flex-col items-center pb-24">
-       {selectedItem && <dialog id="my_modal_4" className=" modal modal-bottom sm:modal-middle">
-                   <ProductModal item={selectedItem} />
+       {selectedItem  && <dialog id="my_modal_4" className=" modal modal-bottom sm:modal-middle">
+                   <ProductModal item={selectedItem} onClose={closeModal}/>
       </dialog>}
       <div className='relative -top-3 flex flex-row w-full items-center p-6 justify-end'>
         <p className="absolute left-0 md:left-40 text-lg text-slate-500 ">
