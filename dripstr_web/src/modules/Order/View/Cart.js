@@ -217,21 +217,17 @@ function Cart() {
       )}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center fade-in">
-          <div className="bg-slate-700 text-white p-6 rounded-md w-full max-w-4xl relative">
-            <button className="absolute top-4 right-4 text-white text-lg" onClick={closeModal}>
-              <FontAwesomeIcon icon={faTimes} />
-            </button>
-            {/* Order Preview Header */}
-            <h2 className="text-2xl font-bold mb-4">Order Preview</h2>
+          <div className="absolute flex flex-col bg-slate-700 text-white p-6 rounded-md h-[40rem] w-[45rem] top-[6.5rem] overflow-hidden">
+            <div className='flex flex-row items-center justify-between'>
+              {/* Order Preview Header */}
+              <h2 className="text-2xl font-bold mb-4">Order Preview</h2>
+              <button className="text-white text-lg" onClick={closeModal}>
+                <FontAwesomeIcon icon={faTimes} />
+              </button>
+            </div>
 
             {/* Scrollable Area for the entire order preview if products > 3 */}
-            <div
-              className={`overflow-y-auto max-h-80 ${
-                Object.values(groupedItems).flat().filter(item => item.checked).length > 3
-                  ? "h-80"
-                  : ""
-              }`}
-            >
+            <div className={`overflow-y-auto max-h-[80vh]`}>
               {/* Order Preview: Group Items by Shop */}
               {Object.keys(groupedItems).map(shopName => {
                 const selectedShopItems = groupedItems[shopName].filter(item => item.checked);
@@ -252,10 +248,7 @@ function Cart() {
 
                     {/* Products inside the shop */}
                     {selectedShopItems.map(item => (
-                      <div
-                        key={item.id}
-                        className="flex flex-wrap items-center mb-4 p-4 border-b bg-purple-100 rounded-sm"
-                      >
+                      <div key={item.id} className="flex flex-wrap items-center mb-4 p-4 border-b bg-purple-100 rounded-sm">
                         <img
                           src={item.image}
                           alt={item.title}
@@ -278,39 +271,37 @@ function Cart() {
               })}
             </div>
 
-            {/* Order Summary Section */}
-            <div className="mt-6 bg-slate-800 p-4 rounded-sm">
-              <div className="flex justify-between items-center">
-                <h3 className="text-xl font-bold text-white">Order Summary</h3>
+          {/* Order Summary Section */}
+          <div className="mt-6 bg-slate-800 p-4 rounded-sm">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">Order Summary</h3>
+            </div>
+            <div className="flex justify-between items-center gap-2.5 mt-2.5">
+              <p className="text-md font-bold text-white">Payment Option:</p>
+              <div className="flex gap-4">
+                <label className="flex items-center text-white">
+                  <input
+                    type="radio"
+                    name="paymentOption"
+                    value="cashOnDelivery"
+                    className="mr-2"
+                  />
+                  Cash on Delivery
+                </label>
+                <label className="flex items-center text-white">
+                  <input
+                    type="radio"
+                    name="paymentOption"
+                    value="paypal"
+                    className="mr-2"
+                  />
+                  Paypal
+                </label>
               </div>
-              <div className="flex justify-between items-center gap-2.5 mt-2.5">
-                <p className="text-lg font-bold text-white">Payment Option:</p>
-                <div className="flex gap-4">
-                  <label className="flex items-center text-white">
-                    <input
-                      type="radio"
-                      name="paymentOption"
-                      value="cashOnDelivery"
-                      className="mr-2"
-                      // You can use onChange to handle the selected value
-                    />
-                    Cash on Delivery
-                  </label>
-                  <label className="flex items-center text-white">
-                    <input
-                      type="radio"
-                      name="paymentOption"
-                      value="cashOnDelivery"
-                      className="mr-2"
-                      // You can use onChange to handle the selected value
-                    />
-                    Paypal
-                  </label>
-                </div>
-              </div>
-              <div className="flex justify-between items-center gap-2.5 mt-2.5">
-                <p className="text-lg font-bold text-white">Total Product Price:</p>
-                <p className="text-lg text-white">
+            </div>
+            <div className="flex justify-between items-center gap-2.5 mt-2.5">
+                <p className="text-md font-bold text-white">Total Product Price:</p>
+                <p className="text-md text-white">
                   ${cartItems
                     .filter(item => item.checked)
                     .reduce((total, item) => total + item.price * item.quantity, 0)
@@ -318,8 +309,8 @@ function Cart() {
                 </p>
               </div>
               <div className="flex justify-between items-center gap-2.5 mt-2.5">
-                <p className="text-lg font-bold text-white">Total Shipping Fees:</p>
-                <p className="text-lg text-white">
+                <p className="text-md font-bold text-white">Total Shipping Fees:</p>
+                <p className="text-md text-white">
                   ${Object.keys(groupedItems)
                     .reduce(
                       (total, shopName) =>
@@ -352,19 +343,19 @@ function Cart() {
                     )
                   ).toFixed(2)}
                 </p>
-              </div>
             </div>
-
-            {/* Place Order Button */}
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded mt-6 w-full"
-              onClick={closeModal}
-            >
-              Place Order
-            </button>
           </div>
+
+          {/* Place Order Button */}
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded mt-6 w-full"
+            onClick={closeModal}
+          >
+            Place Order
+          </button>
         </div>
-      )}
+      </div>
+    )}
     </div>
     </>
   );
