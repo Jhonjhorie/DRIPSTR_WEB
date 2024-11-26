@@ -10,12 +10,12 @@ const Notification = () => {
     title: `Notif ${index + 1}`,
     message: 'Limited Time Only!',
     imageUrl: 'https://via.placeholder.com/80',
-    link: `/store/${index + 1}`, 
+    link: `/mall/`, 
   }));
 
   const promos =({
     title: 'promos',
-    link:'/store/',
+    link:'/mall/',
   });
 
   const orders = ({
