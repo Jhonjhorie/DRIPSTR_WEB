@@ -115,7 +115,7 @@ function Cart() {
     <div className="p-3 bg-slate-50">
       <h1 className="text-3xl font-bold mb-8 text-center text-purple-600 ">Shopping Cart</h1>
       <div className="bg-slate-600 flex items-center justify-between p-4 rounded-md mb-4">
-        <p className="text-white text-lg">Total Products: {calculateAllProducts()}</p>
+        <p className="text-white text-lg">Cart Products: {calculateAllProducts()}</p>
         <div className="flex items-center gap-4">
           <button
             onClick={handleCheckAll}
