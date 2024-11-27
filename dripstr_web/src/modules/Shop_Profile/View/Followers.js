@@ -55,8 +55,20 @@ function Followers() {
     <div className='absolute mx-3 right-0 z-10'>
       <SideBar/>
     </div>
-    <div className='w-full h-full bg-slate-300 md:px-10 lg:px-16 py-5'>
-        <a className='rounded-sm px-2 text-custom-purple text-xl md:text-3xl h-full m-5 font-bold'>SHOP FOLLOWERS </a>
+    <div className='w-full h-full bg-slate-300 md:px-10 lg:px-16 py-2'>
+        <div className='rounded-sm px-2  place-items-center  md:px-5 lg:mx-7 mt-2 font-bold md:flex justify-between'>
+          <div className='text-custom-purple place-self-start px-5 md:px-0 text-xl sm:text-2xl md:text-3xl'>
+            SHOP FOLLOWERS
+          </div>
+         
+          <div className='mt-10 md:mt-0 md:mr-14 flex group '>
+            <input type='text' placeholder='Search name...' className='bg-slate-100 text-slate-900 rounded-l-md text-sm font-normal w-72 h-10 p-2'></input>
+            <div className='bg-custom-purple px-2 hover:bg-primary-color duration-300 rounded-r-md cursor-pointer flex place-items-center'>
+              <box-icon name='search-alt' color='#FFF'></box-icon>
+            </div>
+           
+          </div>
+        </div>
         <div className=' w-full  h-auto md:flex md:gap-5 px-5 md:px-10 '>
           <div className='  w-full md:w-1/2 h-full p-1 '>
             <div className='mt-2 w-full bg-slate-300 h-full rounded-md shadow-md p-1'>
@@ -363,7 +375,7 @@ function Followers() {
                 <option value="option5">Others please specify to comments.</option>
               </select>
               <div className='text-slate-800 text-sm font-semibold mt-2'>Add comments</div>
-              <textarea className='custom-scrollbar bg-slate-300 h-20 w-full mt-1 text-slate-900 text-sm p-1'></textarea>
+              <textarea placeholder='Type your comment here...' className='custom-scrollbar bg-slate-300 h-20 w-full mt-1 text-slate-900 text-sm p-1'></textarea>
               
               
               <div className='flex justify-between w-full'>

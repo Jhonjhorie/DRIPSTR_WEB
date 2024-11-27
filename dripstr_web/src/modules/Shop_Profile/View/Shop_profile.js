@@ -21,11 +21,11 @@ function Shop_profile() {
 
   
   return (
-  <div className="h-full w-full overflow-y-scroll  bg-slate-300 custom-scrollbar px-2  lg:px-20 md:flex ">
+  <div className="h-full w-full  bg-slate-300 custom-scrollbar px-2  lg:px-20 md:flex ">
     <div className='absolute mx-3 right-0 z-10'>
       <SideBar/>
     </div>
-    <div className='w-[90%] md:w-[35%] lg:overflow-hidden lg:w-[25%] h-auto md:fixed md:h-auto shadow-2xl bg-slate-100 gap-2 mx-auto '>
+    <div className='w-[90%] md:w-[35%]  lg:w-[25%] h-auto md:fixed md:h-auto shadow-2xl bg-slate-100 gap-2 mx-auto '>
         <div className='w-full h-auto p-2'>
           <div className='bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1/2 w-full rounded-sm shadow-md mt-2'>
             <div className='lg:flex w-full h-[70%] place-items-center justify-center  '>
