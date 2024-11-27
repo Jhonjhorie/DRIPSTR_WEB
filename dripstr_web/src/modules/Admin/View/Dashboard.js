@@ -28,7 +28,7 @@ function Dashboard() {
           {statCards.map((stat, index) => (
             <StatCard
               key={index}
-          
+              icon={stat.icon}
               value={stat.value}
               label={stat.label}
             />
