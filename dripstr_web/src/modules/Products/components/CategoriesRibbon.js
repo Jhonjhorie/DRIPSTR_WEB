@@ -20,34 +20,31 @@ const CategoriesRibbon = ({ active }) => {
         const containerWidth = containerRef.current.offsetWidth;
 
         const itemWidth = calculateItemWidth();
-        const gap = 8;
+        const gap = 48;
         const totalItemWidth = itemWidth + gap;
 
-        // Calculate the number of items that fit into the container width
+       
         const calculatedItemsPerScreen = Math.floor(containerWidth / totalItemWidth);
         setItemsPerScreen(calculatedItemsPerScreen > 0 ? calculatedItemsPerScreen : 1);
       }
     };
 
-    // Initial calculation
     updateDimensions();
 
-    // Recalculate on window resize
     window.addEventListener('resize', updateDimensions);
 
-    // Cleanup event listener
     return () => {
       window.removeEventListener('resize', updateDimensions);
     };
   }, []);
 
-  // Total screens based on `itemsPerScreen`
   const totalScreens = Math.ceil(categories.length / itemsPerScreen);
 
   // Get the items visible on the current screen
   const getVisibleItems = () => {
     const start = currentScreen * itemsPerScreen;
-    return categories.slice(start, start + itemsPerScreen);
+    
+    return categories.slice(1).slice(start, start + itemsPerScreen);
   };
 
   const goToPrevious = () => {
@@ -61,7 +58,7 @@ const CategoriesRibbon = ({ active }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-[95%] md:w-[90%] justify-center items-center bg-slate-50 rounded-full shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex overflow-hidden"
+      className="relative min-w-[96%] md:min-w-[58%] h-20 md:h-28 justify-center items-center bg-slate-50 rounded-full shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex overflow-hidden"
     >
       {/* Title */}
       <div className="flex justify-center gap-2 items-end flex-col">
@@ -71,8 +68,8 @@ const CategoriesRibbon = ({ active }) => {
             <button
               key={index}
               onClick={() => setCurrentScreen(index)}
-              className={`w-2 h-2 rounded-full ${
-                currentScreen === index ? "bg-gray-800" : "bg-gray-300"
+              className={` h-2 rounded-full ${
+                currentScreen === index ? "bg-primary-color w-4" : "bg-secondary-color w-2"
               }`}
             ></button>
           ))}
@@ -81,6 +78,28 @@ const CategoriesRibbon = ({ active }) => {
 
       {/* Categories */}
       <div className="flex items-center w-full">
+      <Link
+              to="/"
+              key={categories[0]}
+              className={`${
+                active === categories[0].label
+                  ? "opacity-100 border-1 border-primary-color hover:border-[1px] rounded-none hover:rounded-lg"
+                  : "opacity-70 border-secondary-color hover:border-[1px] rounded-none hover:rounded-lg"
+              } hover:opacity-100 mr-4 ml-1 px-1 md:px-4 md:w-32 md:h-28 sm:w-16 sm:h-20 w-12 h-16 flex flex-col items-start justify-center bg-slate-50 shadow-sm hover:shadow-lg hover:border-[1px] duration-300 transition-all ease-in-out`}
+            >
+              <img
+                src={categories[0].icon}
+                alt={categories[0].label}
+                className="w-7 h-7 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain mb-2"
+              />
+              <p
+                className={`${
+                  active === categories[0].label ? "text-primary-color" : "text-gray-700"
+                } text-xs md:text-sm font-medium place-content-center justify-center flex items-center`}
+              >
+                {categories[0].label}
+              </p>
+            </Link>
         {/* Left Arrow */}
         {currentScreen > 0 && (
           <button
@@ -92,7 +111,8 @@ const CategoriesRibbon = ({ active }) => {
         )}
 
         {/* Categories List */}
-        <div className="flex flex-wrap justify-start w-full space-x-1 md:space-x-4 overflow-hidden">
+        <div className="flex flex-wrap justify-start w-full space-x-6 md:space-x-4 overflow-hidden">
+        
           {getVisibleItems().map((category, index) => (
             <Link
               to="/"
@@ -111,7 +131,7 @@ const CategoriesRibbon = ({ active }) => {
               <p
                 className={`${
                   active === category.label ? "text-primary-color" : "text-gray-700"
-                } text-sm font-medium`}
+                } text-xs md:text-sm font-medium`}
               >
                 {category.label}
               </p>
@@ -123,6 +143,14 @@ const CategoriesRibbon = ({ active }) => {
         {currentScreen < totalScreens - 1 && (
           <button
             onClick={goToNext}
+            className="p-1 md:p-2 bg-gray-200 hover:bg-gray-300 rounded-full ml-1 lg:mr-4"
+          >
+            <FontAwesomeIcon icon={faChevronRight} className="text-sm md:text-lg" />
+          </button>
+        )}
+        {currentScreen > 0 && !(currentScreen < totalScreens - 1) && (
+          <button
+            onClick={goToPrevious}
             className="p-1 md:p-2 bg-gray-200 hover:bg-gray-300 rounded-full ml-1 lg:mr-4"
           >
             <FontAwesomeIcon icon={faChevronRight} className="text-sm md:text-lg" />
