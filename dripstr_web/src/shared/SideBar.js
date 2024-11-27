@@ -8,14 +8,13 @@ const SideBar = () => {
 
   const mainSideBar = [
     { label: 'Home', path: '/', icon: faHome },
-    { label: 'Mall', path: '/mall', icon: faShop },
     { label: 'Shop', path: '/shop/MerchantCreate', icon: faStore },
     { label: 'Notification', path: '/notification', icon: faBell },
     { label: 'Account', path: '/account', icon: faUser },
   ];
 
   return (
-    <div className="flex sm:flex-col flex-row justify-evenly sm:justify-center sm:top-48 top-auto items-start bg-slate-50 p-1 sm:p-2 rounded-t-lg sm:rounded-none w-full sm:w-10 sticky sm:h-[calc(100vh-20rem)] h-12 left-0 drop-shadow-sm sm:hover:w-48 duration-300 transition-all z-20 overflow-hidden gap-2">
+    <div className="flex sm:flex-col flex-row justify-evenly sm:justify-center sticky sm:fixed items-start bg-slate-50 p-1 sm:p-2 rounded-t-lg sm:rounded-none w-full sm:w-10 sm:h-screen h-12 left-0 top-4 drop-shadow-sm sm:hover:w-48 duration-300 transition-all z-20 overflow-hidden gap-2">
       {mainSideBar.map((item, index) => (
         <Link
           key={index}
