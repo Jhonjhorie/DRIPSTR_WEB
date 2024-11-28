@@ -55,9 +55,7 @@ function SideBar() {
               className="drop-shadow-custom object-cover rounded-full h-full w-full"
             />
           </div>
-          <div className=' items-center justify-center h-10 w-10 absolute mx-2 place-self-end flex right-0'>
-            <box-icon type='solid' name='edit-alt'></box-icon>
-          </div>        
+           
           </div>
 
           <div className='text-white pt-[30%]  text-center'> Saint Mercy Apparel </div>

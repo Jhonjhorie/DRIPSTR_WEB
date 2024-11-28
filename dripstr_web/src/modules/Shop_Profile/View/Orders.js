@@ -54,7 +54,7 @@ function Orders() {
     <div className=' text-2xl md:text-3xl text-custom-purple font-bold md:px-56 p-4'> SHOP ORDERS </div>
     <div className='w-full h-5/6  place-items-center '>
       <div className='w-full md:w-3/4 rounded-md shadow-md mb-20 md:mb-0 lg:w-2/3 h-full bg-slate-100 p-2'>
-      <div className="w-full h-full bg-slate-200 rounded-sm">
+      <div className="w-full h-[470px] bg-slate-200 rounded-sm">
                     <div className="w-full pt-2 glass bg-custom-purple rounded-t-md">
                         <ul className="flex justify-around place-items-center  text-slate-300 cursor-pointer">
                             <li  className={activeTab === 'new-orders' ? 'active-tab' : ''} onClick={() => setActiveTab('new-orders')}><span className='text-sm md:text-lg'>New Orders</span></li>
@@ -64,7 +64,7 @@ function Orders() {
                             <li className={activeTab === 'completed' ? 'active-tab' : ''} onClick={() => setActiveTab('completed')}><span className='text-sm md:text-lg'>Completed</span></li>
                         </ul>
                     </div>
-                    <div className="w-full h-[470px] custom-scrollbar bg-slate-200 p-4 overflow-y-scroll">
+                    <div className="w-full h-full custom-scrollbar bg-slate-200 p-4 overflow-y-scroll">
                         {activeTab === 'new-orders' && (
                             <div>
                                 <h2 className="text-xl text-custom-purple font-bold mb-4">New Orders</h2>
@@ -258,7 +258,7 @@ function Orders() {
                 <div className='text-custom-purple text-sm font-semibold'>Vouchers: <span className='text-sm text-slate-800'> 20% off </span></div>     
                 <div className='text-custom-purple text-sm font-semibold'>Item Price: <span className='text-sm text-slate-800'> ₱140 </span></div>        
                 <div className='text-custom-purple text-sm font-semibold'>Delivery fee: <span className='text-sm text-slate-800'> ₱30 </span></div>
-                
+                <div className='text-custom-purple text-sm font-semibold'>Changed mind Reason: <span className='text-sm text-slate-800'> Mistakenly order </span></div>
                 
                 <div className='text-xl font-semibold right-2  text-slate-900 bottom-0 absolute'>PRICE: <span className='text-yellow-600 text-3xl'> ₱150</span>  </div> 
             </div>    
@@ -270,12 +270,20 @@ function Orders() {
           >
             Close
           </button>
-          <button
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-            onClick={handleCloseModal}
-          >
-            SHIP
-          </button>
+          <div className=' flex gap-2 md:gap-4'>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+              onClick={handleCloseModal}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+              onClick={handleCloseModal}
+            >
+              SHIP
+            </button>
+          </div>  
         </div>
       </div>
     </div>
@@ -318,6 +326,7 @@ function Orders() {
                 <div className='text-custom-purple text-sm font-semibold'>Vouchers: <span className='text-sm text-slate-800'> 20% off </span></div>     
                 <div className='text-custom-purple text-sm font-semibold'>Item Price: <span className='text-sm text-slate-800'> ₱140 </span></div>        
                 <div className='text-custom-purple text-sm font-semibold'>Delivery fee: <span className='text-sm text-slate-800'> ₱30 </span></div>
+                <div className='text-custom-purple text-sm font-semibold'>Status: <span className='text-sm text-slate-800'> In Transit </span></div>
                 
                 
                 <div className='text-xl font-semibold right-2  text-slate-900 bottom-0 absolute'>PRICE: <span className='text-yellow-600 text-3xl'> ₱150</span>  </div> 
@@ -330,9 +339,9 @@ function Orders() {
           >
             Close
           </button>
-          <button
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-            onClick={handleCloseModal}
+          <button 
+            className="bg-green-500 cursor-not-allowed text-white px-4 py-2 rounded hover:bg-green-700"
+            
           >
             Completed
           </button>
