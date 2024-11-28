@@ -8,50 +8,8 @@ import {
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 
-const MallRibbon = ({ active }) => {
-  const items = [
-    {
-      label: "Drip Mall",
-      color: "bg-primary-color",
-      activeColor: "text-secondary-color",
-    },
-    {
-      label: "Just for You",
-      color: "bg-secondary-color",
-      activeColor: "text-secondary-color",
-    },
-    {
-      label: "Followed Store",
-      color: "bg-blue-700",
-      activeColor: "text-secondary-color",
-    },
-    {
-      label: "Popular/ Trend",
-      color: "bg-red-700",
-      activeColor: "text-secondary-color",
-    },
-    {
-      label: "Followed Store",
-      color: "bg-blue-700",
-      activeColor: "text-secondary-color",
-    },
-    {
-      label: "Followed Store",
-      color: "bg-blue-700",
-      activeColor: "text-secondary-color",
-    },
-    {
-      label: "Followed Store",
-      color: "bg-blue-700",
-      activeColor: "text-secondary-color",
-    },
-    {
-      label: "Followed Store",
-      color: "bg-blue-700",
-      activeColor: "text-secondary-color",
-    },
-  ];
-
+const MallRibbon = ({ active, items }) => {
+  
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Show only two items at a time
@@ -108,7 +66,7 @@ const MallRibbon = ({ active }) => {
             <Link
               to={"/"}
               key={currentIndex + index} // Ensure unique keys across transitions
-              className={`h-24 flex-1 ${item.color} group text-slate-50 rounded-lg min-w-[30%] items-center justify-center text-sm md:text-md flex py-4 px-8 md:px-42 font-bold drop-shadow-lg btn glass hover:${item.activeColor} overflow-hidden`}
+              className={`h-24 flex-1 ${item.color} group text-slate-50 rounded-lg w-[25vw]  md:w-[10.5vw]   items-center justify-center text-sm md:text-md flex py-4 px-8 md:px-42 font-bold drop-shadow-lg btn glass hover:${item.activeColor} overflow-hidden`}
             >
               {active == index + currentIndex ? (
                 <Logo className="h-32 w-28 absolute -left-4 top-1 shadow-lg group-hover:scale-150 duration-500 transition-all -z-10" />

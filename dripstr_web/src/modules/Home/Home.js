@@ -6,6 +6,7 @@ import CategoriesRibbon from "../Products/components/CategoriesRibbon";
 import ProductsView from "../Products/components/ProductsView";
 import MallRibbon from "../Products/components/MallRibbon";
 import { currUser, Images } from "@/constants/sampleData";
+import { MallItems } from "@/constants/mallItems.ts";
 function Home() {
   return (
     <div className=" w-full relative inset-0 bg-slate-300 flex flex-col ">
@@ -15,7 +16,7 @@ function Home() {
       </div>
       <div className="flex flex-col md:flex-row items-center justify-between px-1 lg:px-2 mt-1 ">
         <CategoriesRibbon active="All" />
-        <MallRibbon active="0" />
+        <MallRibbon active="1" items={MallItems} />
       </div>
       <div className="flex flex-wrap justify-center mb-4 mt-4 p-4 gap-8">
         <ProductsView categories="all" />
