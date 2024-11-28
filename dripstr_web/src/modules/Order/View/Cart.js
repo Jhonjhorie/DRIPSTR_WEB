@@ -44,7 +44,7 @@ function Cart() {
     localStorage.setItem('orderDetails', JSON.stringify(orderDetails));
     
     // Redirect to Orders page
-    window.location.href = '/User_Account/View/Orders';
+    window.location.href = '/account/orders';
   };
   
   // Pagination state
