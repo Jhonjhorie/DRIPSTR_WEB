@@ -96,7 +96,7 @@ function Shop_profile() {
                 className="w-full" />
               <div className="absolute left-2 right-2 top-1/2 flex -translate-y-1/2 transform justify-between">
                 <a href="#slide2" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg ">❮</a>
-                <a href="#slide4" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg text-slate-950 text-lg">❯</a>
+                <a href="#slide4" className="btn rounded-md bg-transparent hover:bg-primary-color hover:glass hover:opacity-80 text-slate-950 text-lg">❯</a>
               </div>
             </div>
             <div id="slide4" className="carousel-item relative w-full">
@@ -117,7 +117,7 @@ function Shop_profile() {
         <div className="dropdown dropdown-bottom flex  justify-between gap-2 mt-2 place-items-center  ">
           <p className='font-semibold text-slate-800 flex gap-5 place-items-center iceland-regular text-3xl md:text-4xl  '> Shop products </p> 
          
-          <div className="flex place-items-center dropdown dropdown-bottom dropdown-end">
+          <div className="flex place-items-center dropdown dropdown-bottom dropdown-end md:pr-10">
             <div className='text'>filter items</div>
             <div tabIndex={0} role="button" className="h-8 w-8 jus justify-center place-items-center flex rounded-md
             hover:bg-slate-900 hover:duration-300 bg-slate-700  m-1"><box-icon color="#FFFFFF" name='filter'></box-icon></div>

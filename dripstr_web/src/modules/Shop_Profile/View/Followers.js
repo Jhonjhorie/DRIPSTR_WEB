@@ -5,6 +5,7 @@ import shop from '../../../assets/shop/nevercry.jpg';
 import store2 from '../../../assets/shop/store2.jpg'
 import blackLogo from '../../../assets/logoWhite.png'
 const { useState } = React;
+
 function Followers() { 
   const [selectedOption, setSelectedOption] = useState("");
   const [selectedOption2, setSelectedOption2] = useState("");
@@ -142,7 +143,7 @@ function Followers() {
                 <div className="relative bg-slate-300 rounded-md flex place-items-center ">
 
                     <select
-                        id="options"
+                        id="options2"
                         value={selectedOption2}
                         onChange={handleChange2}
                         className="w-full bg-slate-400 text-slate-800  border py-1 px-4 rounded-md text-sm"
