@@ -68,8 +68,10 @@ const CategoriesRibbon = ({ active }) => {
             <button
               key={index}
               onClick={() => setCurrentScreen(index)}
-              className={` h-2 rounded-full ${
-                currentScreen === index ? "bg-primary-color w-4" : "bg-secondary-color w-2"
+              className={`h-2 rounded-full transition-all duration-300 ${
+                currentScreen === index
+                  ? "bg-primary-color w-4" // Bar covering 3 dots
+                  : "bg-secondary-color w-2"
               }`}
             ></button>
           ))}

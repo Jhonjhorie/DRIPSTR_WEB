@@ -100,10 +100,10 @@ const Carousel = ({ images }) => {
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-2 h-2 rounded-full drop-shadow-lg ${
+            className={`h-2 rounded-full drop-shadow-lg transition-all duration-300 ${
               currentIndex === index
-                ? "bg-slate-50"
-                : currentIndex === index-1 || currentIndex === index+1  ? "bg-primary-color":"bg-secondary-color"
+                ? "bg-slate-50 w-4"
+                : currentIndex === index-1 || currentIndex === index+1  ? "bg-primary-color w-3 ":"bg-secondary-color w-2 "
             }`}
           ></button>
         ))}
