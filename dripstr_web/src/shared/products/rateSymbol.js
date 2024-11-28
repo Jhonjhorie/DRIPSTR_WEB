@@ -5,21 +5,21 @@ const RateSymbol = ({ item, size }) => {
     <>
       {item >= 4 && (
         <img
-          src={require('@/assets/images/others/fillfull.png')}
+          src={require("@/assets/images/others/fillfull.png")}
           className={`w-${size} h-${size} object-contain`}
           alt="Full Rating"
         />
       )}
       {item < 4 && item > 2 && (
         <img
-          src={require('@/assets/images/others/fillhalf.png')}
+          src={require("@/assets/images/others/fillhalf.png")}
           className={`w-${size} h-${size} object-contain`}
           alt="Half Rating"
         />
       )}
       {item <= 2 && (
         <img
-          src={require('@/assets/images/others/fillno.png')}
+          src={require("@/assets/images/others/fillno.png")}
           className={`w-${size} h-${size} object-contain`}
           alt="No Rating"
         />
