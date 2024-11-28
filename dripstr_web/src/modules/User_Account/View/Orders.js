@@ -1,5 +1,4 @@
- import React, { useState } from "react";
-
+ import React, { useState, useEffect } from "react";
  import Sidebar from "../components/Sidebar";
 const Orders = () => {
 
@@ -7,7 +6,19 @@ const Orders = () => {
 
   const tabs = ["All", "To Pay", "To Ship", "To Receive", "Received (32)"];
 
+  const [orderDetails, setOrderDetails] = useState(null);
 
+  useEffect(() => {
+    // Fetch data from localStorage
+    const savedOrderDetails = localStorage.getItem("orderDetails");
+    if (savedOrderDetails) {
+      setOrderDetails(JSON.parse(savedOrderDetails));
+    }
+  }, []);
+
+  if (!orderDetails) {
+    return <div>No orders found.</div>;
+  }
 
   return (
     <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
@@ -58,7 +69,8 @@ const Orders = () => {
           </span>
         </div>
       </div>
-
+      <div>
+      </div>
       {/* Order Items */}
       <div className="bg-gray-100 rounded-lg p-4 mb-4">
         <h2 className="text-lg font-bold text-gray-800 mb-2">
@@ -108,6 +120,37 @@ const Orders = () => {
           </div>
         </div>
       </div>
+      <div>
+      <div>
+      <div className="mt-4">
+        {orderDetails.items?.length > 0 ? (
+          orderDetails.items.map((item, index) => (
+            <div key={index} className="mb-2">
+              <div className="bg-gray-100 rounded-lg p-4">
+              <h2 className="text-lg font-bold text-gray-800 mb-2">
+                {item.shopName}
+              </h2>
+              </div>
+              <p><strong>Shop Name:</strong> {item.shopName}</p>
+              <p><strong>Product Name:</strong> {item.productName}</p>
+              <p><strong>Price:</strong> {item.price}</p>
+              <p><strong>Quantity:</strong> {item.quantity}</p>
+            </div>
+          ))
+        ) : (
+          <p>No items in your order.</p>
+        )}
+        <hr className="my-4" />
+        <p><strong>Total Product Price:</strong> {orderDetails.totalProductPrice}</p>
+        <p><strong>Total Shipping Fees:</strong> {orderDetails.totalShippingFees}</p>
+        <p><strong>Grand Total:</strong> {orderDetails.grandTotal}</p>
+      </div>
+      </div>
+      {/*Fetched orders */}
+      
+
+    </div>
+
     </div>
     </div>
     </div>

@@ -9,6 +9,43 @@ function Cart() {
   const [cartItems, setCartItems] = useState(cartData);
   const [showModal, setShowModal] = useState(false);
   const [showCard, setShowCard] = useState(false);
+
+  const handlePlaceOrder = (cartItems, groupedItems) => {
+    const selectedItems = cartItems.filter(item => item.checked);
+  
+    const orderDetails = {
+      items: selectedItems.map(item => ({
+        shopName: item.shopName,
+        productName: item.title,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      totalProductPrice: selectedItems.reduce((total, item) => total + item.price * item.quantity, 0),
+      totalShippingFees: Object.keys(groupedItems).reduce(
+        (total, shopName) =>
+          total +
+          groupedItems[shopName]
+            .filter(item => item.checked)
+            .reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
+        0
+      ),
+      grandTotal: selectedItems.reduce((total, item) => total + item.price * item.quantity, 0) +
+        Object.keys(groupedItems).reduce(
+          (total, shopName) =>
+            total +
+            groupedItems[shopName]
+              .filter(item => item.checked)
+              .reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
+          0
+        ),
+    };
+  
+    // Save to localStorage or send to the server
+    localStorage.setItem('orderDetails', JSON.stringify(orderDetails));
+    
+    // Redirect to Orders page
+    window.location.href = '/User_Account/View/Orders';
+  };
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -112,7 +149,7 @@ function Cart() {
 
   return (
     <>
-    <div className="p-3 bg-slate-50">
+    <div className="p-3 bg-slate-200">
       <h1 className="text-3xl font-bold mb-8 text-center text-purple-600 ">Shopping Cart</h1>
       <div className="bg-slate-600 flex items-center justify-between p-4 rounded-md mb-4">
         <p className="text-white text-lg">Cart Products: {calculateAllProducts()}</p>
@@ -350,7 +387,7 @@ function Cart() {
           {/* Place Order Button */}
           <button
             className="bg-blue-500 text-white px-4 py-2 rounded mt-6 w-full"
-            onClick={closeModal}
+            onClick={() => handlePlaceOrder(cartItems, groupedItems)}
           >
             Place Order
           </button>
