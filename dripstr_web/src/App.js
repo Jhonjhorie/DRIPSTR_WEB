@@ -16,6 +16,7 @@ import ProductsController from './modules/Products/Products_Controller'
 import Header from './shared/Header';
 import Sidebar from './shared/SideBar';
 import Notifications from './modules/Notifications';
+import Reminder from './modules/Messaging/View/Reminder';
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
               <Route path="/shop/*" element={<ShopController />} />
               <Route path="/useraccount/*" element={<UserAccountController />} />
               <Route path="/notification" element={<Notifications />} />
+              <Route path="/reminder" element={<Reminder/>}/>
             </Routes>
           </main>
           </div>

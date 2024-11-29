@@ -1,60 +1,113 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBox, faVolumeHigh } from "@fortawesome/free-solid-svg-icons";
+import { faBell, faBox, faVolumeHigh } from "@fortawesome/free-solid-svg-icons";
 
 const Notification = () => {
+  // Helper functions for randomization
+  const getRandomDate = () => {
+    const today = new Date();
+    const randomDays = Math.floor(Math.random() * 30); // Random date within the past 30 days
+    const randomDate = new Date(today.setDate(today.getDate() - randomDays));
+    return randomDate.toLocaleDateString();
+  };
 
-  const notifications = Array.from({ length: 10 }, (_, index) => ({
-    id: index + 1,
-    title: `Notif ${index + 1}`,
-    message: 'Limited Time Only!',
-    imageUrl: 'https://via.placeholder.com/80',
-    link: `/mall/`, 
-  }));
+  const getRandomShopName = () => {
+    const shops = [
+      "Joli's Shop",
+      "Timmie's Hub",
+      "The Gift Box",
+      "Quilies's Store",
+      "Happy Deals",
+    ];
+    return shops[Math.floor(Math.random() * shops.length)];
+  };
 
-  const promos =({
-    title: 'promos',
-    link:'/mall/',
-  });
+  // Categories of notifications
+  const categories = {
+    promos: Array.from({ length: 3 }, () => ({
+      shopName: getRandomShopName(),
+      date: getRandomDate(),
+      message: "Exclusive Sale: Up to 50% OFF!",
+      imageUrl: "https://via.placeholder.com/80",
+    })),
+    orders: Array.from({ length: 3 }, () => ({
+      shopName: getRandomShopName(),
+      date: getRandomDate(),
+      message: "Your order is out for delivery!",
+      imageUrl: "https://via.placeholder.com/80",
+    })),
+    services: Array.from({ length: 3 }, () => ({
+      shopName: getRandomShopName(),
+      date: getRandomDate(),
+      message: "New partnership opportunity available.",
+      imageUrl: "https://via.placeholder.com/80",
+    })),
+    vouchers: Array.from({ length: 3 }, () => ({
+      shopName: getRandomShopName(),
+      date: getRandomDate(),
+      message: "Your voucher is about to expire. Redeem now!",
+      imageUrl: "https://via.placeholder.com/80",
+    })),
+  };
 
-  const orders = ({
-    title:'orders',
-    link:'/order/',
-  });
+  // Combine all categories into one array for display
+  const notifications = [
+    ...categories.promos,
+    ...categories.orders,
+    ...categories.services,
+    ...categories.vouchers,
+  ];
 
   return (
-    <div className="flex flex-col p-4 bg-slate-200 ml-10">
-      <div className='flex flex-row'>
-        <h2 className="text-2xl font-bold mb-4 text-primary-color self-center">Notifications</h2>
-      <div className='flex flex-row justify-around content-start w-80'>
-      <Link to={promos.link}className='flex items-center bg-white p-3 mb-4 rounded-lg shadow hover:bg-gray-100'>
-      <div className='flex flex-row rounded w-50'>
-          <FontAwesomeIcon icon={faVolumeHigh} size='lg' className='mr-2 self-center text-black'/>  
-          <h2 className="text-1xl font-bold text-primary-color">Promos</h2>
-        </div>
-      </Link>
-      <div className='indicator'>
-      <Link to={orders.link}className='flex items-center bg-white p-3 ml-5 mb-4 rounded-lg shadow hover:bg-gray-100'>
-      <div className='flex flex-row rounded w-50'>
-           <FontAwesomeIcon icon={faBox} size='lg' className='mr-2 self-center text-black'/>  
-          <h2 className="text-1xl font-bold text-primary-color">Orders</h2>
-        </div>
-      </Link>
+    <div className="flex flex-col p-4 bg-slate-200">
+      {/* Header Section */}
+      <div className="flex flex-row items-center border-b pb-4">
+        <h2 className="text-2xl font-bold text-primary-color flex-initial ml-10">
+          Notifications
+        </h2>
+        <div className="flex flex-row justify-start ml-4 space-x-4 flex-grow">
+          <Link
+            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-slate-100">
+            All
+          </Link>
+          <Link
+            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-gray-100">
+            Promos
+          </Link>
+          <Link
+            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-gray-100" >
+            Orders
+          </Link>
+          <Link
+            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-gray-100">
+            Services
+          </Link>
+          <Link
+            to="/vouchers"
+            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-gray-100">
+            Voucher Reminder
+          </Link>
         </div>
       </div>
-      </div>
-      
 
-      {notifications.map((notif) => (
-        <Link to={notif.link} key={notif.id} className="flex items-center bg-white p-4 mb-4 rounded-lg shadow hover:bg-gray-100">
+      {/* Notifications List */}
+      {notifications.map((notif, index) => (
+        <Link
+          to="/details"
+          key={index}
+          className="flex items-center bg-white p-4 mb-4 rounded-lg shadow hover:text-primary-color hover:bg-gray-100 ml-10"
+        >
           <img
             src={notif.imageUrl}
-            alt={`Notification ${notif.id}`}
+            alt={`Notification ${index + 1}`}
             className="w-20 h-20 rounded"
           />
           <div className="flex-1 ml-4">
-            <h3 className="text-lg font-semibold">{notif.title}</h3>
+            <h3 className="text-lg font-semibold flex justify-between">
+              <span>{notif.shopName}</span>
+              <span className="text-sm text-gray-500">{notif.date}</span>
+            </h3>
             <p className="text-gray-600">{notif.message}</p>
           </div>
         </Link>
