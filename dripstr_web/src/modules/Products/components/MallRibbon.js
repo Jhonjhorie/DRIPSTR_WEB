@@ -8,7 +8,7 @@ import {
   faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 
-const MallRibbon = ({ active, items }) => {
+const MallRibbon = ({ active, items, onItemClick }) => {
   
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -63,8 +63,8 @@ const MallRibbon = ({ active, items }) => {
         <div className="justify-evenly items-center  gap-1 lg:gap-3 flex">
           {/* Visible Items */}
           {visibleItems.map((item, index) => (
-            <Link
-              to={"/"}
+            <div
+              onClick={() => onItemClick(currentIndex + index)} 
               key={currentIndex + index} // Ensure unique keys across transitions
               className={`h-24 flex-1 ${item.color} group text-slate-50 rounded-lg w-[25vw]  md:w-[10.5vw]   items-center justify-center text-sm md:text-md flex py-4 px-8 md:px-42 font-bold drop-shadow-lg btn glass hover:${item.activeColor} overflow-hidden`}
             >
@@ -74,7 +74,7 @@ const MallRibbon = ({ active, items }) => {
                 <LogoB className="h-32 w-28 absolute -left-4 group-hover:scale-150 duration-500 transition-all top-1 shadow-lg opacity-50 -z-10" />
               )}
               {item.label}
-            </Link>
+            </div>
           ))}
         </div>
 

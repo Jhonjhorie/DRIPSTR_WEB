@@ -2,7 +2,6 @@ import React,{useState} from 'react';
 import { products } from '@/constants/sampleData'; // Ensure you have a products array
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg'; 
-import FilterProducts from './FilterProducts';
 import ProductModal from './productModal'
 import RateSymbol from '@/shared/products/rateSymbol';
 
@@ -37,13 +36,7 @@ const ProductsView = () => {
                     <button onClick={closeModal}></button>
                   </form>
       </dialog>}
-      <div className='relative -top-3 flex flex-row w-full items-center p-6 justify-end'>
-        <p className="absolute left-0 md:left-40 text-lg text-slate-500 ">
-          DRIP NOW // STAR LATER
-        </p>
-        <FilterProducts />
-      </div>
-
+      
       <div className="grid gap-1 items-center justify-center" style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}>
         {dataWithPlaceholders.map((item, index) =>
           item.empty ? (

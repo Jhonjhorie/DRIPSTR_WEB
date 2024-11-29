@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
-import { categories } from '@/constants/categories.ts';
 
-const CategoriesRibbon = ({ active }) => {
+const CategoriesRibbon = ({ active, categories, onItemClick }) => {
+ 
   const containerRef = useRef(null); // Reference to the container
   const [itemsPerScreen, setItemsPerScreen] = useState(1); // Default to 1 to avoid division by 0
   const [currentScreen, setCurrentScreen] = useState(0);
@@ -80,14 +80,14 @@ const CategoriesRibbon = ({ active }) => {
 
       {/* Categories */}
       <div className="flex items-center w-full">
-      <Link
-              to="/"
+      <div
+              onClick={() => onItemClick(categories[0].label)} 
               key={categories[0]}
               className={`${
                 active === categories[0].label
-                  ? "opacity-100 border-1 border-primary-color hover:border-[1px] rounded-none hover:rounded-lg"
+                  ? "opacity-100 border-2 border-primary-color rounded-lg"
                   : "opacity-70 border-secondary-color hover:border-[1px] rounded-none hover:rounded-lg"
-              } hover:opacity-100 mr-4 ml-1 px-1 md:px-4 md:w-32 md:h-28 sm:w-16 sm:h-20 w-12 h-16 flex flex-col items-start justify-center bg-slate-50 shadow-sm hover:shadow-lg hover:border-[1px] duration-300 transition-all ease-in-out`}
+              } hover:opacity-100 mr-4 ml-1 px-1 md:px-4 md:w-32 md:h-28 sm:w-16 sm:h-20 w-12 h-16 flex flex-col items-start justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
             >
               <img
                 src={categories[0].icon}
@@ -96,12 +96,12 @@ const CategoriesRibbon = ({ active }) => {
               />
               <p
                 className={`${
-                  active === categories[0].label ? "text-primary-color" : "text-gray-700"
-                } text-xs md:text-sm font-medium place-content-center justify-center flex items-center`}
+                  active === categories[0].label ? "text-primary-color text-sm md:text-base" : "text-gray-700 text-xs md:text-sm"
+                }  font-medium place-content-center justify-center flex items-center duration-300 transition-all`}
               >
                 {categories[0].label}
               </p>
-            </Link>
+            </div>
         {/* Left Arrow */}
         {currentScreen > 0 && (
           <button
@@ -116,14 +116,14 @@ const CategoriesRibbon = ({ active }) => {
         <div className="flex flex-wrap justify-start w-full space-x-6 md:space-x-4 overflow-hidden">
         
           {getVisibleItems().map((category, index) => (
-            <Link
-              to="/"
+            <div
+              onClick={() => onItemClick(category.label)} 
               key={index}
               className={`${
                 active === category.label
-                  ? "opacity-100 border-1 border-primary-color hover:border-[1px] rounded-none hover:rounded-lg"
+                  ? "opacity-100 border-2 border-primary-color  rounded-lg"
                   : "opacity-70 border-secondary-color hover:border-[1px] rounded-none hover:rounded-lg"
-              } hover:opacity-100 md:w-24 md:h-28 sm:w-16 sm:h-20 w-12 h-16 flex flex-col items-center justify-center bg-slate-50 shadow-sm hover:shadow-lg hover:border-[1px] duration-300 transition-all ease-in-out`}
+              } hover:opacity-100 md:w-24 md:h-28 sm:w-16 sm:h-20 w-12 h-16 flex flex-col items-center justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
             >
               <img
                 src={category.icon}
@@ -132,12 +132,12 @@ const CategoriesRibbon = ({ active }) => {
               />
               <p
                 className={`${
-                  active === category.label ? "text-primary-color" : "text-gray-700"
-                } text-xs md:text-sm font-medium`}
+                  active === category.label ? "text-primary-color text-sm md:text-base" : "text-gray-700 text-xs md:text-sm"
+                }  font-medium duration-300 transition-all`}
               >
                 {category.label}
               </p>
-            </Link>
+            </div>
           ))}
         </div>
 

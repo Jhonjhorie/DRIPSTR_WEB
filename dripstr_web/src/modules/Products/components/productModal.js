@@ -60,9 +60,10 @@ const ProductModal = ({ item, onClose }) => {
 
           <div className="flex flex-col gap-2 justify-between h-full md:w-full lg:max-w-[45%] pt-6 ">
             <div className="flex flex-col gap-1">
-              <h1 className="text-5xl font-bold text-secondary-color bg-slate-50 p-1 pb-2 rounded-t-md ">
+              <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
                 {item.product}
               </h1>
+              <div className="h-1 mb-2 w-full bg-primary-color"></div>
               <div className="flex flex-row justify-between ">
                 <h2 className="text-2xl font-medium">{item.sold} Sold</h2>
                 <div className="flex gap-1">
@@ -73,24 +74,7 @@ const ProductModal = ({ item, onClose }) => {
                 </div>
               </div>
               <p className="mt-2 rounded-md bg-base-300 p-2 max-h-64 overflow-y-auto custom-scrollbar">
-                Provident cupiditate voluptatem et in. Quaerat fugiat ut
-                assumenda excepturi exercitationem quasi. In deleniti eaque aut
-                repudiandae et a id nisi. Provident cupiditate voluptatem et in.
-                Quaerat fugiat ut assumenda excepturi exercitationem quasi. In
-                deleniti eaque aut repudiandae et a id nisi. Provident
-                cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-                excepturi exercitationem quasi. In deleniti eaque aut
-                repudiandae et a id nisi. Provident cupiditate voluptatem et in.
-                Quaerat fugiat ut assumenda excepturi exercitationem quasi. In
-                deleniti eaque aut repudiandae et a id nisi. Provident
-                cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-                excepturi exercitationem quasi. In deleniti eaque aut
-                repudiandae et a id nisi. Provident cupiditate voluptatem et in.
-                Quaerat fugiat ut assumenda excepturi exercitationem quasi. In
-                deleniti eaque aut repudiandae et a id nisi. Provident
-                cupiditate voluptatem et in. Quaerat fugiat ut assumenda
-                excepturi exercitationem quasi. In deleniti eaque aut
-                repudiandae et a id nisi.
+                {item.description || "No description available."}
               </p>
             </div>
 
