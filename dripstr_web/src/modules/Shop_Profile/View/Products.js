@@ -8,41 +8,34 @@
 
   function Products() { 
     const [activeTabs, setActiveTab] = useState('manage-products');
-    const [isModalOpen1, setIsModalOpen] = useState(false); 
-    const [textInputs, setTextInputs] = useState([]);
+    const [isModalOpenItems, setIsModalOpenItem] = useState(false);  //Modal for Items
+    const [isModalOpenAds, setIsModalOpenAds] = useState(false); //Modal for ads
     const [imageInputs, setImageInputs] = useState([]);
     const [Total, setNumber] = useState('');
     const [category, setCategory] = useState('');
     const [clotheType, setClotheType] = useState('');
     const [customerType, setCustomerType] = useState('');
     
-    const handleAddItem = () => {
-      setIsModalOpen(true);
+    const handleAddItem = () => { //ITEMS
+      setIsModalOpenItem(true);
     };
-
-    const handleCloseModal = () => {
-      setIsModalOpen(false);
+    const handleAddAds = () => { //ADS 
+      setIsModalOpenAds(true);
     };
-
-    const addTextInput = () => {
-      setTextInputs([...textInputs, '']);
+    const handleCloseModal = () => { //Close both
+      setIsModalOpenItem(false);
+      setIsModalOpenAds(false);
     };
 
     const addImageInput = () => {
         setImageInputs([...imageInputs, '']);
     };
 
-    const deleteTextInput = (index) => {
-        const newInputs = textInputs.filter((_, i) => i !== index);
-        setTextInputs(newInputs);
-    };
-
     const deleteImageInput = (index) => {
         const newInputs = imageInputs.filter((_, i) => i !== index);
         setImageInputs(newInputs);
     };
-    
-    
+
     const Totaldigit = (e) => {
       let value = e.target.value;
       value = value.replace(/[^0-9]/g, '').slice(0, 6); 
@@ -67,6 +60,11 @@
         "Tank Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
         "Sweatshirts": ["4-5", "6-7", "8-10", "12-14", "16"],
         "Hoodies": ["4-5", "6-7", "8-10", "12-14", "16"],
+        "Jeans": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
+        "Shorts": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
+        "Skirts": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
+        "Trousers": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
+        "Leggings": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
         "Underwear": ["2T-3T", "4-5", "6-7", "8-10", "12-14"],
         "Socks": ["XS", "S", "M", "L", "XL"], // Based on shoe size ranges
         "Hats": ["XS", "S", "M", "L"], // Adjustable based on head circumference
@@ -89,7 +87,12 @@
         "Polo Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
         "Tank Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
         "Sweatshirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Hoodies / Jackets": ["4-5", "6-7", "8-10", "12-14", "16"],
+        "Hoodies": ["4-5", "6-7", "8-10", "12-14", "16"],
+        "Jeans Sizes": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
+        "Shorts Sizes": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
+        "Skirts Sizes": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
+        "Trousers Sizes": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
+        "Leggings Sizes": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
         "Blouses": ["4-5", "6-7", "8-10", "12-14", "16"],
         "Crop Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
         "Underwear": ["2T-3T", "4-5", "6-7", "8-10", "12-14"],
@@ -185,6 +188,14 @@
       setCategory(e.target.value);
       setClotheType('');
     };
+    //Pwede pala gantong comment hehe colors
+    const colors = [
+      "Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Pink", 
+      "Brown", "Gray", "Black", "White", "Cyan", "Magenta", "Teal", 
+      "Lime", "Indigo", "Violet", "Maroon", "Beige", "Turquoise", 
+      "Gold", "Silver", "Bronze", "Lavender", "Peach", "Coral", 
+      "Aqua", "Olive", "Emerald", "Ivory", "Chartreuse"
+    ];
     
     return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
@@ -266,7 +277,9 @@
                         </div>
                       </h2>
                       <div className='flex gap-2 justify-center  place-items-center'>
-                          <div className='bg-custom-purple text-sm p-1 md:px-2 text-slate-50 cursor-pointer duration-200 hover:scale-95 rounded-sm '>Add photo Ads</div>
+                          <div
+                           onClick={handleAddAds}
+                           className='bg-custom-purple text-sm p-1 md:px-2 text-slate-50 cursor-pointer duration-200 hover:scale-95 rounded-sm '>Add photo Ads</div>
                       </div>
                     </div>
 
@@ -299,7 +312,7 @@
         </div>
       </div>
       {/* Add Item Modal */} 
-      {isModalOpen1 && (
+      {isModalOpenItems && (
     <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
       <div className="bg-white pt-2 rounded-lg p-5 w-full md:w-1/2 lg:w-3/4 m-2 md:m-0">
         <h2 className=" flex justify-between w-full place-items-center   "><span className='font-bold text-[20px] text-slate-800 py-2 md:text-2xl '>ADD ITEM</span> <box-icon type='solid' color='#4D077C' name='customize'></box-icon></h2>
@@ -373,7 +386,7 @@
           <div className=' w-1/4 h-full py-1'>
           <div className=' flex gap-2 place-items-center justify-between '>
             <label className='text-slate-950 font-semibold text-sm '>Add Sizes?</label> 
-            <div className="tooltip tooltip-bottom " data-tip=" The sizes that we use is US based, for better sizing instruction our team recommend to upload an image sizing for better understanding.">
+            <div className="tooltip tooltip-bottom " data-tip=" The sizes that we use is US based, for better sizing instruction our team highly recommend to upload an image sizing for better customers understanding.">
                 <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
                   <box-icon color='#FFFFFF' name='info-circle'></box-icon>
                 </button>
@@ -398,35 +411,21 @@
           <div className='w-1/2 h-full '>
 
           <div className='flex justify-between place-items-center w-full '>
-            <label className='text-slate-950 font-semibold mr-2 text-sm'>Add Variant? </label>
-            
-              <button 
-                  className="bg-custom-purple justify-center hover:bg-slate-600 duration-300 rounded-md  flex text-white p-1 "
-                  onClick={addTextInput}
-              >
-                  <box-icon type='solid' color='#FFFFFF' name='message-square-add'></box-icon>
-              </button>
-         
+            <label className='text-slate-950 font-semibold mr-2 mt-1.5 text-sm'>Add Variant? </label>
+          
           </div>
           
-            <div className='bg-slate-100 h-[150px] w-full mt-1 p-1 overflow-hidden overflow-y-scroll shadow-inner shadow-slate-500 rounded-sm  custom-scrollbar '>
+            <div className='bg-slate-100 h-[150px] w-full mt-2.5 p-1 overflow-hidden overflow-y-scroll shadow-inner shadow-slate-500 rounded-sm  custom-scrollbar '>
              
                 <div>
-                  {textInputs.map((input, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                        <input 
-                            type="text" 
-                            className="border p-2 w-full bg-slate-200 h-9 text-slate-800 text-sm"
-                            placeholder={`Text Input ${index + 1}`}
-                        />
-                        <button 
-                            className="ml-2 bg-red-500 text-white h-9 px-2 py-1 rounded"
-                            onClick={() => deleteTextInput(index)}
-                        >
-                            Clear
-                        </button>
+                <div className="grid grid-cols-2 gap-4">
+                        {colors.map((color, index) => (
+                            <div key={index} className="flex items-center">
+                                <input type="checkbox" id={color} name={color} className="mr-2"/>
+                                <label htmlFor={color} className="text-gray-700">{color}</label>
+                            </div>
+                        ))}
                     </div>
-                  ))}
                 </div>
             </div>
             <div className='flex justify-between place-items-center w-full  mt-1 '>
@@ -481,7 +480,39 @@
         </div>
       </div>
     </div>
-    )}
+      )}
+      {/* Add Advertisement Modal */} 
+      {isModalOpenAds && (
+      <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+        <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
+          <div className="font-medium text-slate-800 py-2 w-full flex justify-between place-items-center  ">
+            <span className='font-bold text-[20px] md:text-2xl'>Add Shop Advertisement Photo</span>
+            <box-icon name='images' color='#4D077C'></box-icon>
+          </div>
+          <div className='h-auto w-full bg-slate-200  rounded-md shadow-sm mb-2 p-2 md:flex gap-2'>
+            <div>
+              <label className=' text-slate-800  text-sm font-semibold' >Name:</label> <br/>
+              <input type='text' className='bg-slate-50 p-1 rounded-sm  mt-1 text-slate-800 w-full' placeholder='Type Ads Name' ></input>
+            </div>
+          </div>
+          <div className='flex justify-between w-full'>
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+              onClick={handleCloseModal}
+            >
+              Close
+            </button>
+            <button 
+              className="bg-green-500  text-white px-4 py-2 rounded hover:bg-green-700"
+              onClick={handleCloseModal}
+            >
+              Completed
+            </button>
+          </div>
+        </div>
+      </div>
+      )}
+
     </div>
     );
   }
