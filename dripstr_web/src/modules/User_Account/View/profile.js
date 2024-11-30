@@ -13,7 +13,8 @@ const UserProfile = () => {
           <div className="bg-gray-100 p-4 rounded-lg shadow">
 
           {/* Profile Picture Section */}
-          <div className="flex items-center mb-6 ">
+          <div className="flex items-center mb-6  ">
+ 
             <img
               src="path_to_profile_picture" // Placeholder for profile picture
               alt=""
@@ -22,8 +23,8 @@ const UserProfile = () => {
             <div>
               <h2 className="text-lg font-semibold">Jhonjhorie Quiling</h2>
               <button className="text-blue-600 font-medium">Change Picture</button>
-            </div>
-          </div>
+            </div>            </div>
+         
 
           {/* Contact Information Section */}
           <div className="mb-6 ">
@@ -32,7 +33,7 @@ const UserProfile = () => {
               {/* Email Section */}
               <div>
                 <label className="text-gray-600 font-medium block">Email Address</label>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between bg-slate-200 items-center p-2 border border-gray-300 rounded-md w-full">
                   <p className="text-lg text-gray-900">jh********@gmail.com</p>
                   <button className="text-blue-600 font-medium">Change</button>
                 </div>
@@ -45,7 +46,7 @@ const UserProfile = () => {
                   <input
                     type="text"
                     placeholder="Enter your mobile number"
-                    className="text-lg text-gray-700 border border-gray-300 rounded-md p-2 w-full"
+                    className="text-lg bg-slate-200 text-gray-700 border border-gray-300 rounded-md p-2 w-full"
                   />
                   <button className="bg-blue-600 text-white font-medium py-1 px-3 rounded-md ml-2">Add</button>
                 </div>
@@ -62,14 +63,14 @@ const UserProfile = () => {
                 <label className="text-gray-600 font-medium block">Birthday</label>
                 <input
                   type="date"
-                  className="text-lg text-gray-700 border border-gray-300 rounded-md p-2 w-full"
+                  className="text-lg bg-slate-200 text-gray-700 border border-gray-300 rounded-md p-2 w-full"
                 />
               </div>
 
               {/* Gender Section */}
               <div>
                 <label className="text-gray-600 font-medium block">Gender</label>
-                <select className="text-lg text-gray-700 border border-gray-300 rounded-md p-2 w-full">
+                <select className="text-lg text-gray-700 border bg-slate-200 border-gray-300 rounded-md p-2 w-full">
                   <option value="">Select Gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>

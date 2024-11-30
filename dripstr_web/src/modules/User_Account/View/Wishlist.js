@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 const    Wishlist = () => {
+  const [selectedTab, setSelectedTab] = useState("My Wishlists");
+
+  const tabs = [ "My Wishlists", "Past Purchases", "Followed Stores"];
+
+
   return (
     <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
 
@@ -12,18 +17,27 @@ const    Wishlist = () => {
     <div className="bg-slate-200 min-h-screen p-4">
       {/* Header */}
       <h1 className="text-xl font-bold text-gray-800 mb-6">
-        My Wishlist & Followed Stores (1)
+        My Wishlist & Followed Stores
       </h1>
 
-      {/* Navigation */}
-      <div className="flex justify-around bg-white p-3 rounded-md shadow mb-4">
-        <span className="text-gray-800 font-semibold cursor-pointer">My Wishlists</span>
-        <span className="text-gray-600 cursor-pointer">Past Purchases</span>
-        <span className="text-gray-600 cursor-pointer">Followed Stores</span>
-      </div>
 
-      {/* Add All to Cart Button */}
-      <button className="btn btn-primary w-full mb-4">ADD ALL TO CART</button>
+          {/* Navigation Tabs */}
+          <div className="tabs border-b bg-white rounded-md mb-4 shadow border-gray-300 flex flex-row justify-around">
+            {tabs.map((tab, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedTab(tab)}
+                className={`px-4 py-2 text-gray-700 font-medium  relative ${
+                  selectedTab === tab
+                    ? "text-purple-600  "
+                    : "hover:text-black"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div> 
+
 
       {/* Wishlist Item */}
       <div className="bg-white p-4 rounded-md shadow mb-4">
