@@ -11,6 +11,11 @@
     const [isModalOpen1, setIsModalOpen] = useState(false); 
     const [textInputs, setTextInputs] = useState([]);
     const [imageInputs, setImageInputs] = useState([]);
+    const [Total, setNumber] = useState('');
+    const [category, setCategory] = useState('');
+    const [clotheType, setClotheType] = useState('');
+    const [customerType, setCustomerType] = useState('');
+    
     const handleAddItem = () => {
       setIsModalOpen(true);
     };
@@ -37,15 +42,104 @@
         setImageInputs(newInputs);
     };
     
-    const [Total, setNumber] = useState('');
+    
     const Totaldigit = (e) => {
       let value = e.target.value;
       value = value.replace(/[^0-9]/g, '').slice(0, 6); 
       setNumber(value);
     };
-
-
-
+    {/* Array for categories */}
+    const categories = {
+      "Complete set": [],
+      "Top wear": ["T-Shirts", "Polo Shirts", "Tank Tops", "Sweatshirts", "Hoodies / Jacket", "Blouses", "Crop Tops", "Tunics"],
+      "Bottom wear": ["Jeans", "Shorts", "Skirts", "Trousers", "Leggings"],
+      "Undergarment": ["Underwear", "Bras", "Socks"],
+      "Accessory": ["Hats", "Belts", "Scarves", "Gloves"],
+      "Gadgets": ["Watches", "Fitness Trackers", "Smart Glasses"],
+      "Footwear": ["Sneakers", "Boots", "Sandals", "Formal Shoes"],
+      "Others": ["Costumes", "Uniforms", "Swimwear"]
+    };
+    {/* Function to show the next dropdown hehe */}
+    const handleCategoryChange = (e) => {
+      setCategory(e.target.value);
+      setClotheType('');
+    };
+    {/* List of Items sizes ADD MORE SIZES*/}
+    const sizes = {
+      "Kids-Boy": {
+        "T-Shirts": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Polo Shirts": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Tank Tops": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Sweatshirts": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Hoodies / Jacket": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Blouses": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Crop Tops": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Tunics": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Sneakers": ["10", "11", "12", "13", "1", "2", "3", "4", "5"],
+        "Boots": ["10", "11", "12", "13", "1", "2", "3", "4", "5"],
+        "Sandals": ["10", "11", "12", "13", "1", "2", "3", "4", "5"],
+        "Formal Shoes": ["10", "11", "12", "13", "1", "2", "3", "4", "5"],
+        "Costumes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Uniforms": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Swimwear": ["XS", "S", "M", "L", "XL", "XXL"]
+      },
+      "Kids-Girl": {
+        "T-Shirts": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Polo Shirts": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Tank Tops": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Sweatshirts": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Hoodies / Jacket": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Blouses": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Crop Tops": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Tunics": ["2T", "3T", "4T", "5T", "6", "7", "8", "10", "12", "14", "16"],
+        "Sneakers": ["10", "11", "12", "13", "1", "2", "3", "4", "5"],
+        "Boots": ["10", "11", "12", "13", "1", "2", "3", "4", "5"],
+        "Sandals": ["10", "11", "12", "13", "1", "2", "3", "4", "5"],
+        "Formal Shoes": ["10", "11", "12", "13", "1", "2", "3", "4", "5"],
+        "Costumes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Uniforms": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Swimwear": ["XS", "S", "M", "L", "XL", "XXL"]
+      },
+      "Adults-Man": {
+        "T-Shirts": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Polo Shirts": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Tank Tops": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Sweatshirts": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Hoodies / Jacket": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Blouses": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Crop Tops": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Tunics": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Sneakers": ["6", "7", "8", "9", "10", "11"],
+        "Boots": ["6", "7", "8", "9", "10", "11"],
+        "Sandals": ["6", "7", "8", "9", "10", "11"],
+        "Formal Shoes": ["6", "7", "8", "9", "10", "11"],
+        "Costumes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Uniforms": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Swimwear": ["XS", "S", "M", "L", "XL", "XXL"]
+      },
+      "Adults-Woman": {
+        "T-Shirts": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Polo Shirts": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Tank Tops": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Sweatshirts": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Hoodies / Jacket": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Blouses": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Crop Tops": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Tunics": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Sneakers": ["6", "7", "8", "9", "10", "11"],
+        "Boots": ["6", "7", "8", "9", "10", "11"],
+        "Sandals": ["6", "7", "8", "9", "10", "11"],
+        "Formal Shoes": ["6", "7", "8", "9", "10", "11"],
+        "Costumes": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Uniforms": ["XS", "S", "M", "L", "XL", "XXL"],
+        "Swimwear": ["XS", "S", "M", "L", "XL", "XXL"]
+      }
+    };
+    {/* Will show a sizes choices */}
+    const handleCustomerTypeChange = (e) => {
+      setCustomerType(e.target.value);
+    };
+    
     return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
       <div className='absolute mx-3 right-0 z-10'>
@@ -161,9 +255,9 @@
       {/* Add Item Modal */} 
       {isModalOpen1 && (
     <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-      <div className="bg-white pt-2 rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
+      <div className="bg-white pt-2 rounded-lg p-5 w-full md:w-1/2 lg:w-3/4 m-2 md:m-0">
         <h2 className=" flex justify-between w-full place-items-center   "><span className='font-bold text-[20px] text-slate-800 py-2 md:text-2xl '>ADD ITEM</span> <box-icon type='solid' color='#4D077C' name='customize'></box-icon></h2>
-        <div className='bg-slate-200 h-full rounded-md flex gap-1 w-full p-2 md:p-5 mb-2'>
+        <div className='bg-slate-200 h-full rounded-md flex gap-1 w-full p-2 md:px-5 mb-2'>
           <div className='w-1/2 h-auto p-1 pr-5 '> 
             <label className='text-slate-950  font-semibold mr-2 text-sm'>Item Name:</label><br/>
             <input type='text' className=' bg-slate-50 p-1 rounded-sm  mt-2 text-slate-800 w-full' placeholder='Item Name '></input> <br/>
@@ -176,30 +270,70 @@
               className=' bg-slate-50 p-1 rounded-sm text-slate-800 mt-1 w-full' 
               placeholder='Item Name '>
             </input> <br/>
+            {/* Category of clothes */}
             <label className='text-slate-950 font-semibold text-sm mr-2'>Category:</label><br/>
-            <select
-              id="options"
-              className=" bg-slate-100 w-full text-slate-800  border py-1 px-2 rounded-md text-sm"
-            >
-              <option value="option1" >Complete set</option>
-              <option value="option1" >Top wear</option>
-              <option value="option2">Bottom wear</option>
-              <option value="option3">Undergarment </option>
-              <option value="option4">Accessory</option>
-              <option value="option5">Gadgets</option>
-              <option value="option5">Footwear</option>
-              <option value="option5">Others</option>
-            </select><br/>
-            <label className='text-slate-950 font-semibold text-sm  mt-2'>Add Sizes</label>
-            <div className='flex'>
-              <div className=' h-40  w-1/2 bg-slate-500'>
+              <select
+                  id="category"
+                  className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm"
+                  value={category}
+                  onChange={handleCategoryChange}
+              >
+                  <option value="">Select Category</option>
+                  {Object.keys(categories).map((cat, index) => (
+                      <option key={index} value={cat}>{cat}</option>
+                  ))}
+              </select><br/>
 
-              </div>
-              <div className=' h-40 w-1/2 bg-slate-900'>
-                
-              </div>
-            </div>
+              {category && categories[category].length > 0 && (
+                  <>
+                      <label className='text-slate-950 font-semibold text-sm mr-2'>Clothe Type:</label><br/>
+                      <select
+                          id="clotheType"
+                          className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm"
+                          value={clotheType}
+                          onChange={(e) => setClotheType(e.target.value)}
+                      >
+                          <option value="">Select Clothe Type</option>
+                          {categories[category].map((type, index) => (
+                              <option key={index} value={type}>{type}</option>
+                          ))}
+                      </select><br/>
+                  </>
+              )}
+
+              <label className='text-slate-950 font-semibold text-sm mr-2'>Customer Type:</label><br/>
+              <select
+                  id="customerType"
+                  value={customerType}
+                  onChange={handleCustomerTypeChange}
+                  className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm"
+              >
+                  <option value="">Select Customer Type</option>
+                  <option value="Kids-Boy">Kids Boy</option>
+                  <option value="Kids-Girl">Kids Girl</option>
+                  <option value="Adults-Man">Adult Man</option>
+                  <option value="Adultsz-Woman">Adult Woman</option>
+              </select><br/>
         
+          </div>
+
+          {/* Select sizes */}
+          <div className=' w-1/4 h-full py-1'>
+          <label className='text-slate-950 font-semibold text-sm pt-3'>Add Sizes?</label> 
+          <div className='h-[340px] mt-2 w-full bg-slate-100 overflow-hidden overflow-y-scroll shadow-sm shadow-slate-500 rounded-sm custom-scrollbar'>
+            {clotheType && sizes[customerType] && sizes[customerType][clotheType] ? (
+              sizes[customerType][clotheType].map((size, index) => (
+                <div key={index} className="p-2">
+                  <input type="checkbox" id={`size-${size}`} name="sizes" value={size} className="mr-2" />
+                  <label htmlFor={`size-${size}`} className="text-slate-800 text-sm">{size}</label>
+                </div>
+              ))
+            ) : (
+              <p className="text-slate-800 text-c text-sm p-2">No sizes available for the selected options.</p>
+            )}
+          </div>
+          
+            
           </div>
           <div className='w-1/2 h-full '>
 
@@ -269,7 +403,7 @@
             </div>
 
           </div>
-          
+        
         </div>
         <div className='flex justify-between w-full'>
           <button
