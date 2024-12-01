@@ -113,8 +113,42 @@ export const products = [
 
     product: "Retro Vans", 
     rate: 4.4, 
-    reviews: [], 
-    description: "Classic retro design with a modern twist.", 
+    reviews: [
+      {
+        id: 1, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 5.0, 
+        likes: 20,
+        images: [],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      },
+      {
+        id: 2, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 4.8, 
+        likes: 20,
+        images: [],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      },
+      {
+        id: 3, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 3, 
+        likes: 20,
+        images: [],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      }
+    ], 
+    description: "Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist. Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.", 
     category: "shoes", 
     colorVariant: ['Grey', 'Black'], 
     sizeVariant: ['6', '7', '8', '9', '10'], 

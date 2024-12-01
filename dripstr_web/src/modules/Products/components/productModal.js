@@ -13,17 +13,17 @@ const ProductModal = ({ item, onClose }) => {
   return (
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 max-h-[40rem] overflow-y-auto custom-scrollbar  modal-box">
       <div className="hero bg-slate-300 ">
-        <div className="hero-content flex-col h-full lg:flex-row">
-        {item.str && (
-                  <div className="bg-primary-color rounded-md absolute bottom-6  pl-1 z-50 left-[45%]">
-                    <button
-                      onClick={() => handleProductClick()}
-                      className="btn rounded-md btn-sm glass   "
-                    >
-                      Wear Avatar
-                    </button>
-                  </div>
-                )}
+        <div className="hero-content flex-col h-full lg:flex-row ">
+          {item.str && (
+            <div className="bg-primary-color rounded-md absolute bottom-6  pl-1 z-50 left-[45%]">
+              <button
+                onClick={() => handleProductClick()}
+                className="btn rounded-md btn-sm glass   "
+              >
+                Avatar Wear
+              </button>
+            </div>
+          )}
           <div className="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
             {allImages.map((image, imageIndex) => {
               const slideId = `slide${imageIndex}`;
@@ -64,16 +64,61 @@ const ProductModal = ({ item, onClose }) => {
                 {item.product}
               </h1>
               <div className="h-1 mb-2 w-full bg-primary-color"></div>
-              <div className="flex flex-row justify-between ">
-                <h2 className="text-2xl font-medium">{item.sold} Sold</h2>
-                <div className="flex gap-1">
-                  <h2 className="text-2xl font-medium text-primary-color">
-                    {item.rate.toFixed(1)}
-                  </h2>
-                  <RateSymbol item={item.rate} size={"8"} />
+              <div className="flex flex-col justify-between gap-4 mb-2">
+                <div className="flex justify-between gap-2 items-center">
+                  <div className="flex items-center gap-2 ">
+                    <p className="text-sm font-medium">Shop:</p>
+                    <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
+                      {item.shop}
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <h2 className="text-base font-medium">
+                      {item.sold} Sold /{" "}
+                    </h2>
+                    <div className="flex gap-1 items-center">
+                      <h2 className="text-base font-medium text-primary-color">
+                        {item.rate?.toFixed(1) || "N/A"}
+                      </h2>
+                      <RateSymbol item={item.rate} size={"4"} />
+                    </div>
+                  </div>
                 </div>
               </div>
-              <p className="mt-2 rounded-md bg-base-300 p-2 max-h-64 overflow-y-auto custom-scrollbar">
+              <div className="flex flex-row justify-between">
+                <div className="flex flex-col gap-2">
+                  {[
+                    { label: "Variant", items: item.colorVariant },
+                    {
+                      label: "Sizes",
+                      items: item.sizeVariant ? item.sizeVariant : [],
+                    }, // Ensure size is handled as an array
+                  ].map((choice, choiceIndex) => (
+                    <div key={choiceIndex} className="flex items-center gap-2">
+                      <p className="text-lg font-medium">{choice.label}:</p>
+                      <div className="flex gap-1">
+                        {choice.items.map((choiceItem, index) => (
+                          <label
+                            key={index}
+                            className="p-0 form-control btn  text-xs cursor-pointer flex items-center justify-center duration-300 transition-all min-w-10 h-8 bg-slate-50"
+                          >
+                            <input
+                              type="radio"
+                              name={`radio-${choice.label.toLowerCase()}`}
+                              value={choiceItem}
+                              className="hidden peer"
+                            />
+                            <span className="peer-checked:bg-primary-color peer-checked:opacity-100 opacity-50 peer-checked:text-white w-full h-full flex items-center justify-center p-2 rounded-md duration-300 transition-all glass btn">
+                              {choiceItem}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <p className="mt-2 rounded-md bg-base-300 p-2 max-h-60 overflow-y-auto custom-scrollbar">
                 {item.description || "No description available."}
               </p>
             </div>
@@ -85,19 +130,17 @@ const ProductModal = ({ item, onClose }) => {
               >
                 ✕
               </button>
-              <div className="justify-end flex my-2">
+              <div className="justify-end flex my-1 mb-3">
                 <div className="flex justify-end items-center gap-0 flex-row">
                   {item.voucher && (
-            
-                      <span className="text-lg border border-primary-color px-2 ">
-                        SHOP VOUCHER
-                      </span>
+                    <span className="text-lg border border-primary-color px-2 ">
+                      SHOP VOUCHER
+                    </span>
                   )}
                   {item.discount > 0 && (
-                  <span className="text-lg text-white bg-primary-color border border-primary-color px-0.5 font-bold">
-                    {item.discount}%
-                  </span>
-                 
+                    <span className="text-lg text-white bg-primary-color border border-primary-color px-0.5 font-bold">
+                      {item.discount}%
+                    </span>
                   )}
                   <div className="flex pl-2">
                     <p className="text-2xl  text-primary-color">₱</p>
@@ -108,7 +151,6 @@ const ProductModal = ({ item, onClose }) => {
                 </div>
               </div>
               <div className=" justify-end gap-2 items-center flex">
-
                 <button
                   onClick={() => handleProductClick()}
                   className="btn btn-sm btn-outline btn-secondary  "
