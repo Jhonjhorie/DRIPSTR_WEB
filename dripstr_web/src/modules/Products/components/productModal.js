@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
+import { averageRate } from "../hooks/useRate.ts";
 
 const ProductModal = ({ item, onClose }) => {
   const navigate = useNavigate();
@@ -14,16 +15,7 @@ const ProductModal = ({ item, onClose }) => {
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 max-h-[40rem] overflow-y-auto custom-scrollbar  modal-box">
       <div className="hero bg-slate-300 ">
         <div className="hero-content flex-col h-full lg:flex-row ">
-          {item.str && (
-            <div className="bg-primary-color rounded-md absolute bottom-6  pl-1 z-50 left-[45%]">
-              <button
-                onClick={() => handleProductClick()}
-                className="btn rounded-md btn-sm glass   "
-              >
-                Avatar Wear
-              </button>
-            </div>
-          )}
+      <div className="flex flex-col">
           <div className="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
             {allImages.map((image, imageIndex) => {
               const slideId = `slide${imageIndex}`;
@@ -56,8 +48,19 @@ const ProductModal = ({ item, onClose }) => {
                 </div>
               );
             })}
+             
           </div>
-
+          {item.str && (
+            <div className="bg-primary-color  w-full rounded-md pl-1 z-50">
+              <button
+                onClick={() => handleProductClick()}
+                className="btn rounded-md  w-full btn-sm glass   "
+              >
+                See in Avatar
+              </button>
+            </div>
+          )}
+          </div>
           <div className="flex flex-col gap-2 justify-between h-full md:w-full lg:max-w-[45%] pt-6 ">
             <div className="flex flex-col gap-1">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
@@ -78,9 +81,9 @@ const ProductModal = ({ item, onClose }) => {
                     </h2>
                     <div className="flex gap-1 items-center">
                       <h2 className="text-base font-medium text-primary-color">
-                        {item.rate?.toFixed(1) || "N/A"}
+                      {averageRate(item.reviews) || "N/A"}
                       </h2>
-                      <RateSymbol item={item.rate} size={"4"} />
+                      <RateSymbol item={averageRate(item.reviews)} size={"4"} />
                     </div>
                   </div>
                 </div>
@@ -133,7 +136,7 @@ const ProductModal = ({ item, onClose }) => {
               <div className="justify-end flex my-1 mb-3">
                 <div className="flex justify-end items-center gap-0 flex-row">
                   {item.voucher && (
-                    <span className="text-lg border border-primary-color px-2 ">
+                    <span className="text-lg bg-slate-50 border border-primary-color px-2 ">
                       SHOP VOUCHER
                     </span>
                   )}

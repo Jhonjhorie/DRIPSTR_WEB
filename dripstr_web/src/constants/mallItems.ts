@@ -24,14 +24,5 @@ export const MallItems = [
       color: "bg-red-700",
       activeColor: "text-secondary-color",
     },
-    {
-      label: "Followed Store",
-      color: "bg-blue-700",
-      activeColor: "text-secondary-color",
-    },
-    {
-      label: "Followed Store",
-      color: "bg-blue-700",
-      activeColor: "text-secondary-color",
-    },
+
   ];

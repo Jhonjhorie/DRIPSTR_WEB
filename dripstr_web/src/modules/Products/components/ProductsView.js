@@ -4,8 +4,9 @@ import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg'; 
 import ProductModal from './productModal'
 import RateSymbol from '@/shared/products/rateSymbol';
+import { averageRate } from '../hooks/useRate.ts';
 
-const ProductsView = () => {
+const ProductsView = ({categories, filter}) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 4, lg: 6 }); 
   const numColumns = itemsToShow;
@@ -21,11 +22,32 @@ const ProductsView = () => {
     setSelectedItem(null);
   };
 
-  const dataWithPlaceholders = [...products];
-  while (dataWithPlaceholders.length % numColumns !== 0) {
-    dataWithPlaceholders.push({ empty: true }); 
+ 
+const filteredProducts = products.filter(item => {
+  switch (filter) {
+    case 0:
+      return true;
+    case 1:
+      return item.str === true;
+    default:
+      return true;
   }
-  
+});
+
+const filteredProductsC = filteredProducts.filter(item => {
+  return categories === "All" || item.category === categories;
+});
+
+
+const totalItems = filteredProductsC.length;
+const remainder = totalItems % numColumns;
+const placeholdersNeeded = remainder === 0 ? 0 : numColumns - remainder;
+
+const dataWithPlaceholders = [
+  ...filteredProductsC,
+  ...Array(placeholdersNeeded).fill({ empty: true }),
+];
+
 
   return (
     
@@ -91,7 +113,7 @@ const ProductsView = () => {
 
                   {/* Ratings and Sales */}
                   <div className="flex flex-row items-center just gap-0.5">
-                  <p className="text-primary-color text-md">{item.rate.toFixed(1)}</p>
+                  <p className="text-primary-color text-md">{averageRate(item.reviews)}</p>
                     <RateSymbol item={item.rate} size={'4'} />
                     <span className="text-secondary-color justify-center text-sm ">
                       | {item.sold} sold

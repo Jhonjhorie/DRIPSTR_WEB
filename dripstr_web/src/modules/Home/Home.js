@@ -7,6 +7,7 @@ import ProductsView from "../Products/components/ProductsView";
 import MallRibbon from "../Products/components/MallRibbon";
 import FilterProducts from '../Products/components/FilterProducts';
 
+
 //Data
 import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from '@/constants/categories.ts';
@@ -38,7 +39,7 @@ function Home() {
      
         <FilterProducts />
       </div>
-        <ProductsView categories="all" />
+        <ProductsView categories={filCat} filter={filMall} />
       </div>
     </div>
   );

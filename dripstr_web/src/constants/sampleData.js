@@ -1,24 +1,5 @@
 export const Images = [
-  { product: "Viscount Blank", rate: 4.1, shop: "Viscount", url: require('@/assets/images/home/blackTshirt.png') },
-  { product: "Leather Mercedez", rate: 4.8, shop: "Aest", url: require('@/assets/images/home/brownShoes.png') },
-  { product: "Runner Jump", rate: 3.0, shop: "Nike", url: require('@/assets/images/home/orangeShoes.png') },
-  { product: "Retro Vans", rate: 1.4, shop: "Vans", url: require('@/assets/images/home/greyShoe.png') },
-];
-
-
-export const orderSample = Images;
-
-export const currUser = {
-  userId: "143143143",
-  name: "Jolena Magdangal",
-  avatarIcon: require('@/assets/images/samples/jolinapic.png'),
-  title: "New Star",
-  orders: orderSample,
-};
-
-export const products = [
-  { 
-    product: "Viscount Blank", 
+  {  product: "Viscount Blank", 
     rate: 4.1, 
     reviews: [
       {
@@ -37,7 +18,7 @@ export const products = [
       }
     ], 
     description: "Very Good black tshirt", 
-    category: "t-shirt", 
+    category: "top", 
     colorVariant: ['Black', 'Blue', 'Dark Black'], 
     sizeVariant: ['S', 'M', 'L', 'XL', '2XL'], 
     shop: "Viscount", 
@@ -57,8 +38,8 @@ export const products = [
     product: "Leather Mercedez", 
     rate: 0, 
     reviews: [], 
-    description: "Elegant and stylish leather shoes for formal occasions.", 
-    category: "shoes", 
+    description: "Elegant and stylish leather Shoes for formal occasions.", 
+    category: "Shoes", 
     colorVariant: ['Brown'], 
     sizeVariant: ['7', '8', '9', '10'], 
     shop: "Aest", 
@@ -92,8 +73,8 @@ export const products = [
         sizeOrder: '9'
       }
     ], 
-    description: "High-performance running shoes.", 
-    category: "shoes", 
+    description: "High-performance running Shoes.", 
+    category: "Shoes", 
     colorVariant: ['Orange', 'White'], 
     sizeVariant: ['7', '8', '9', '10', '11'], 
     shop: "Nike", 
@@ -149,7 +130,7 @@ export const products = [
       }
     ], 
     description: "Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist. Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.", 
-    category: "shoes", 
+    category: "Shoes", 
     colorVariant: ['Grey', 'Black'], 
     sizeVariant: ['6', '7', '8', '9', '10'], 
     shop: "Vans", 
@@ -171,14 +152,36 @@ export const products = [
         date: '11/25/2024', 
         note: 'Perfect size and design. Highly recommend.', 
         rate: 5.0, 
+        likes: 5,
+        images: [require('@/assets/images/samples/2.png'), require('@/assets/images/samples/3.png'), require('@/assets/images/samples/4.png'), require('@/assets/images/samples/4.png')],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      },
+      {
+        id: 3, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 5.0, 
+        likes: 10,
+        images: [require('@/assets/images/samples/5.png'), require('@/assets/images/samples/3.png'), require('@/assets/images/samples/4.png'), require('@/assets/images/samples/4.png')],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      },
+      {
+        id: 4, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 4.0, 
         likes: 20,
-        images: [],
+        images: [require('@/assets/images/samples/1.png'), require('@/assets/images/samples/3.png'), require('@/assets/images/samples/4.png'), require('@/assets/images/samples/4.png')],
         colorOrder: 'Black', 
         sizeOrder: 'One Size'
       }
     ], 
     description: "Stylish and durable tote bag for everyday use.", 
-    category: "bags", 
+    category: "Bag", 
     colorVariant: ['Black', 'Beige'], 
     sizeVariant: ['One Size'], 
     shop: "The Classics", 
@@ -208,7 +211,246 @@ export const products = [
       }
     ], 
     description: "Lightweight white shirt inspired by American culture.", 
-    category: "t-shirt", 
+    category: "Top", 
+    colorVariant: ['White', 'Navy Blue'], 
+    sizeVariant: ['M', 'L', 'XL'], 
+    shop: "America", 
+    url: require('@/assets/images/samples/2.png'), 
+    str: false, 
+    discount: 0, 
+    sold: 50, 
+    voucher: false, 
+    price: 180, 
+    prodId: 1299 
+  },
+];
+
+
+export const orderSample = Images;
+
+export const currUser = {
+  userId: "143143143",
+  name: "Jolena Magdangal",
+  avatarIcon: require('@/assets/images/samples/jolinapic.png'),
+  title: "New Star",
+  orders: orderSample,
+};
+
+export const products = [
+  { 
+    product: "Viscount Blank", 
+    rate: 4.1, 
+    reviews: [
+      {
+        id: 0, 
+        userName: 'Anna', 
+        date: '11/30/2024', 
+        note: 'This is a good product thank you', 
+        rate: 3.5, 
+        likes: 15,
+        images: [
+          require('@/assets/images/home/blackTshirt.png'), 
+          require('@/assets/images/home/blackTshirt.png')
+        ], 
+        colorOrder: 'Black', 
+        sizeOrder: 'M'
+      }
+    ], 
+    description: "Very Good black tshirt", 
+    category: "Top", 
+    colorVariant: ['Black', 'Blue', 'Dark Black'], 
+    sizeVariant: ['S', 'M', 'L', 'XL', '2XL'], 
+    shop: "Viscount", 
+    url: require('@/assets/images/home/blackTshirt.png'), 
+    str: true, 
+    discount: 50, 
+    sold: 0, 
+    voucher: false, 
+    price: 100, 
+    prodId: 1245, 
+    images: [
+      require('@/assets/images/home/orangeShoes.png'), 
+      require('@/assets/images/home/greyShoe.png')
+    ]
+  },
+  { 
+    product: "Leather Mercedez", 
+    rate: 0, 
+    reviews: [], 
+    description: "Elegant and stylish leather Shoes for formal occasions.", 
+    category: "Shoes", 
+    colorVariant: ['Brown'], 
+    sizeVariant: ['7', '8', '9', '10'], 
+    shop: "Aest", 
+    url: require('@/assets/images/home/brownShoes.png'), 
+    str: false, 
+    discount: 0, 
+    sold: 100, 
+    voucher: false, 
+    price: 400, 
+    prodId: 2734, 
+    images: [
+      require('@/assets/images/home/orangeShoes.png'), 
+      require('@/assets/images/home/greyShoe.png')
+    ]
+  },
+  { 
+    product: "Runner Jump", 
+    rate: 3.0, 
+    reviews: [
+      {
+        id: 1, 
+        userName: 'Mike', 
+        date: '11/28/2024', 
+        note: 'Good for running, but lacks comfort for long durations.', 
+        rate: 3.0, 
+        likes: 8,
+        images: [
+          require('@/assets/images/home/orangeShoes.png')
+        ], 
+        colorOrder: 'Orange', 
+        sizeOrder: '9'
+      }
+    ], 
+    description: "High-performance running Shoes.", 
+    category: "Shoes", 
+    colorVariant: ['Orange', 'White'], 
+    sizeVariant: ['7', '8', '9', '10', '11'], 
+    shop: "Nike", 
+    url: require('@/assets/images/home/orangeShoes.png'), 
+    str: false, 
+    discount: 0, 
+    sold: 100, 
+    voucher: false, 
+    price: 100, 
+    prodId: 1246, 
+    images: [
+      require('@/assets/images/home/orangeShoes.png'), 
+      require('@/assets/images/home/greyShoe.png')
+    ]
+  },
+  { 
+
+    product: "Retro Vans", 
+    rate: 4.4, 
+    reviews: [
+      {
+        id: 1, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 5.0, 
+        likes: 20,
+        images: [],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      },
+      {
+        id: 2, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 4.8, 
+        likes: 20,
+        images: [],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      },
+      {
+        id: 3, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 3, 
+        likes: 20,
+        images: [],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      }
+    ], 
+    description: "Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist. Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.Classic retro design with a modern twist.", 
+    category: "Shoes", 
+    colorVariant: ['Grey', 'Black'], 
+    sizeVariant: ['6', '7', '8', '9', '10'], 
+    shop: "Vans", 
+    url: require('@/assets/images/home/greyShoe.png'), 
+    str: true, 
+    discount: 0, 
+    sold: 100, 
+    voucher: false, 
+    price: 300, 
+    prodId: 1247 
+  },
+  {  
+    product: "Classic Tote Bag", 
+    rate: 4.9, 
+    reviews: [
+      {
+        id: 2, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 5.0, 
+        likes: 5,
+        images: [require('@/assets/images/samples/2.png'), require('@/assets/images/samples/3.png'), require('@/assets/images/samples/4.png'), require('@/assets/images/samples/4.png')],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      },
+      {
+        id: 3, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 5.0, 
+        likes: 10,
+        images: [require('@/assets/images/samples/5.png'), require('@/assets/images/samples/3.png'), require('@/assets/images/samples/4.png'), require('@/assets/images/samples/9.png')],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      },
+      {
+        id: 4, 
+        userName: 'Lisa', 
+        date: '11/25/2024', 
+        note: 'Perfect size and design. Highly recommend.', 
+        rate: 4.0, 
+        likes: 20,
+        images: [require('@/assets/images/samples/1.png'), require('@/assets/images/samples/3.png'), require('@/assets/images/samples/4.png'), require('@/assets/images/samples/8.png')],
+        colorOrder: 'Black', 
+        sizeOrder: 'One Size'
+      }
+    ], 
+    description: "Stylish and durable tote bag for everyday use.", 
+    category: "Bag", 
+    colorVariant: ['Black', 'Beige'], 
+    sizeVariant: ['One Size'], 
+    shop: "The Classics", 
+    url: require('@/assets/images/samples/1.png'), 
+    str: false, 
+    discount: 20, 
+    sold: 100, 
+    voucher: true, 
+    price: 200, 
+    prodId: 1248
+  },
+  { 
+ 
+    product: "Air White America", 
+    rate: 3.8, 
+    reviews: [
+      {
+        id: 3, 
+        userName: 'John', 
+        date: '11/29/2024', 
+        note: 'Looks good, but not very comfortable for long wear.', 
+        rate: 3.5, 
+        likes: 10,
+        images: [require('@/assets/images/samples/2.png')], 
+        colorOrder: 'White', 
+        sizeOrder: 'XL'
+      }
+    ], 
+    description: "Lightweight white shirt inspired by American culture.", 
+    category: "Top", 
     colorVariant: ['White', 'Navy Blue'], 
     sizeVariant: ['M', 'L', 'XL'], 
     shop: "America", 
@@ -237,8 +479,8 @@ export const products = [
         sizeOrder: 'L'
       }
     ], 
-    description: "Premium white t-shirt with a minimalist design.", 
-    category: "t-shirt", 
+    description: "Premium white Top with a minimalist design.", 
+    category: "Top", 
     colorVariant: ['White', 'Red'], 
     sizeVariant: ['S', 'M', 'L', 'XL'], 
     shop: "RedCorner", 
@@ -297,8 +539,8 @@ export const products = [
         sizeOrder: 'M'
       }
     ], 
-    description: "Stylish black t-shirt with Japanese-inspired design.", 
-    category: "t-shirt", 
+    description: "Stylish black Top with Japanese-inspired design.", 
+    category: "Top", 
     colorVariant: ['Black', 'White'], 
     sizeVariant: ['S', 'M', 'L'], 
     shop: "Japanese Aesthetic", 
@@ -327,8 +569,8 @@ export const products = [
         sizeOrder: 'L'
       }
     ], 
-    description: "Premium white t-shirt with Japanese aesthetic.", 
-    category: "t-shirt", 
+    description: "Premium white Top with Japanese aesthetic.", 
+    category: "Top", 
     colorVariant: ['White', 'Black'], 
     sizeVariant: ['M', 'L', 'XL'], 
     shop: "Japanese Aesthetic", 
@@ -387,8 +629,8 @@ export const products = [
         sizeOrder: 'M'
       }
     ], 
-    description: "Simple, plain shorts for everyday wear.", 
-    category: "shorts", 
+    description: "Simple, plain Bottom for everyday wear.", 
+    category: "Bottom", 
     colorVariant: ['Gray', 'Blue'], 
     sizeVariant: ['S', 'M', 'L'], 
     shop: "Litex Bazaar", 
@@ -409,7 +651,7 @@ export const products = [
         id: 10, 
         userName: 'James', 
         date: '11/21/2024', 
-        note: 'These pants are very trendy and comfortable.', 
+        note: 'These Bottom are very trendy and comfortable.', 
         rate: 4.7, 
         likes: 14, 
         images: [], 
@@ -417,8 +659,8 @@ export const products = [
         sizeOrder: 'L'
       }
     ], 
-    description: "Trendy pants for a hypebeast look.", 
-    category: "pants", 
+    description: "Trendy Bottom for a hypebeast look.", 
+    category: "Bottom", 
     colorVariant: ['Black', 'Navy Blue'], 
     sizeVariant: ['M', 'L', 'XL'], 
     shop: "Hypebeast", 
@@ -447,8 +689,8 @@ export const products = [
         sizeOrder: 'S'
       }
     ], 
-    description: "Stylish shorts with vibrant colors.", 
-    category: "shorts", 
+    description: "Stylish Bottom with vibrant colors.", 
+    category: "Bottom", 
     colorVariant: ['Red', 'Black'], 
     sizeVariant: ['S', 'M', 'L'], 
     shop: "GenggengDrip", 
@@ -477,8 +719,8 @@ export const products = [
         sizeOrder: 'M'
       }
     ], 
-    description: "Simple shorts available in various colors.", 
-    category: "shorts", 
+    description: "Simple Bottom available in various colors.", 
+    category: "Bottom", 
     colorVariant: ['Green', 'Blue', 'Gray'], 
     sizeVariant: ['S', 'M', 'L', 'XL'], 
     shop: "Litex Bazaar", 
@@ -508,7 +750,7 @@ export const products = [
       }
     ], 
     description: "Tote bag featuring anime-themed prints.", 
-    category: "bags", 
+    category: "Bag", 
     colorVariant: ['White', 'Black'], 
     sizeVariant: ['One Size'], 
     shop: "WeabooDrip", 
@@ -529,7 +771,7 @@ export const products = [
         id: 14, 
         userName: 'Kenji', 
         date: '11/17/2024', 
-        note: 'These shoes are amazing and unique!', 
+        note: 'These Shoes are amazing and unique!', 
         rate: 5, 
         likes: 30, 
         images: [], 
@@ -537,8 +779,8 @@ export const products = [
         sizeOrder: '42'
       }
     ], 
-    description: "Trendy anime-inspired shoes.", 
-    category: "shoes", 
+    description: "Trendy anime-inspired Shoes.", 
+    category: "Shoes", 
     colorVariant: ['White', 'Red'], 
     sizeVariant: ['40', '41', '42', '43'], 
     shop: "WeabooDrip", 
@@ -597,8 +839,8 @@ export const products = [
         sizeOrder: 'M'
       }
     ], 
-    description: "Classic black plain t-shirt.", 
-    category: "t-shirt", 
+    description: "Classic black plain Top.", 
+    category: "Top", 
     colorVariant: ['Black', 'Gray'], 
     sizeVariant: ['S', 'M', 'L', 'XL'], 
     shop: "Litex Bazaar", 
