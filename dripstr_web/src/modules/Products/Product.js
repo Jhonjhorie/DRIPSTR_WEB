@@ -1,132 +1,195 @@
-import React from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
+import {averageRate} from "./hooks/useRate.ts";
+import RatingSection from "./components/RatingSection.js";
+
 
 function Product() {
   const location = useLocation();
-  const item = location.state?.item; // Safely access item from state
+  const item = location.state?.item;
+ 
+  // Move the hook outside any conditionals
+  const allImages = item?.url ? [item.url, ...(item.images || [])] : [];
+  const [currentSlide, setCurrentSlide] = useState(0);
+
 
   if (!item) {
-    return <p>No product data found. Please return to the products page.</p>;
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <p className="text-lg font-semibold">
+          No product data found. Please return to the products page.
+        </p>
+      </div>
+    );
   }
 
+  const handlePrevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + allImages.length) % allImages.length);
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % allImages.length);
+  };
+
   return (
-    <div className="w-full relative inset-0 bg-slate-300 flex flex-col gap-2 px-2 py-4">
-      <div className="">
-        <div className="hero bg-slate-300 ">
-          <div className="hero-content flex-col h-full lg:flex-row">
-            <div class="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
-              <div
-                id="slide1"
-                class="carousel-item relative w-full justify-center items-center "
-              >
-                <img
-                  src={item.url}
-                  class="w-[40rem] h-[50vh]  object-contain"
-                />
-                <div class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                  <a href="#slide4" class="btn btn-circle">
-                    ❮
-                  </a>
-                  <a href="#slide2" class="btn btn-circle">
-                    ❯
-                  </a>
+    <div className="w-full relative pb-16 items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 py-4">
+      <div className=" justify-start  w-full">
+        <div className="max-w-[120rem] flex items-start justify-center gap-8 p-4  hero-content flex-col h-full  w-full lg:flex-row">
+          <div className="flex flex-col w-full">
+            <div className="carousel w-full h-[70vh] bg-slate-50 rounded-md overflow-y-hidden">
+              {allImages.length > 0 ? (
+                <div className="carousel-item relative w-full  justify-center items-center">
+                  <img
+                    src={allImages[currentSlide]}
+                    alt={`${item.product}-${currentSlide}`}
+                    className="w-[40rem] h-[90%] object-contain"
+                  />
+                  {allImages.length > 1 && (
+                    <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
+                      <button
+                        onClick={handlePrevSlide}
+                        className="btn btn-circle"
+                      >
+                        ❮
+                      </button>
+                      <button
+                        onClick={handleNextSlide}
+                        className="btn btn-circle"
+                      >
+                        ❯
+                      </button>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                <p className="text-center w-full py-4">No images available.</p>
+              )}
+            </div>
+            {item.str && (
+              <div className="bg-primary-color w-full rounded-md pl-1">
+                <button className="btn rounded-md w-full hover:text-primary-color  btn-sm glass">
+                  See in Avatar
+                </button>
               </div>
-              <div
-                id="slide2"
-                class="carousel-item relative w-full  justify-center items-center "
-              >
-                <img
-                  src={require("@/assets/images/home/blackTshirt.png")}
-                  class="w-[40rem] h-[65vh]  object-contain"
-                />
-                <div class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                  <a href="#slide1" class="btn btn-circle">
-                    ❮
-                  </a>
-                  <a href="#slide3" class="btn btn-circle">
-                    ❯
-                  </a>
+            )}
+          </div>
+
+          {/* Product Details */}
+          <div className="flex flex-col  justify-between lg:items-end min-h-[74vh]  h-full w-full  pt-6">
+            <div className="flex flex-col w-full gap-1">
+              <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md">
+                {item.product}
+              </h1>
+              <div className="h-1 mb-2 w-full bg-primary-color"></div>
+              <div className="flex flex-col justify-between gap-4">
+                <div className="flex justify-between gap-2 items-center">
+                  <div className="flex items-center gap-2 ">
+                    <p className="text-sm font-medium">Shop:</p>
+                    <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
+                      {item.shop}
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <h2 className="text-base font-medium">
+                      {item.sold} Sold /{" "}
+                    </h2>
+                    <div className="flex gap-1 items-center">
+                      <h2 className="text-base font-medium text-primary-color">
+                        {averageRate(item.reviews) || "N/A"}
+                      </h2>
+                      <RateSymbol item={item.rate} size={"4"} />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div
-                id="slide3"
-                class="carousel-item relative w-full justify-center items-center "
-              >
-                <img
-                  src={require("@/assets/images/home/brownShoes.png")}
-                  class="w-[40rem] h-[65vh]  object-contain"
-                />
-                <div class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                  <a href="#slide2" class="btn btn-circle">
-                    ❮
-                  </a>
-                  <a href="#slide4" class="btn btn-circle">
-                    ❯
-                  </a>
+                <div className="flex flex-row justify-between">
+                  <div className="flex flex-col gap-2">
+                    {[
+                      { label: "Variant", items: item.colorVariant },
+                      {
+                        label: "Sizes",
+                        items: item.sizeVariant ? item.sizeVariant : [],
+                      }, // Ensure size is handled as an array
+                    ].map((choice, choiceIndex) => (
+                      <div
+                        key={choiceIndex}
+                        className="flex items-center gap-2"
+                      >
+                        <p className="text-lg font-medium">{choice.label}:</p>
+                        <div className="flex gap-1">
+                          {choice.items.map((choiceItem, index) => (
+                            <label
+                              key={index}
+                              className="p-0 form-control btn  text-xs cursor-pointer flex items-center justify-center duration-300 transition-all min-w-10 h-8 bg-slate-50"
+                            >
+                              <input
+                                type="radio"
+                                name={`radio-${choice.label.toLowerCase()}`}
+                                value={choiceItem}
+                                className="hidden peer"
+                              />
+                              <span className="peer-checked:bg-primary-color peer-checked:opacity-100 opacity-50 peer-checked:text-white w-full h-full flex items-center justify-center p-2 rounded-md duration-300 transition-all glass btn">
+                                {choiceItem}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div
-                id="slide4"
-                class="carousel-item relative w-full justify-center items-center "
-              >
-                <img
-                  src={require("@/assets/images/home/greyShoe.png")}
-                  class="w-[40rem] h-[65vh]  object-contain"
-                />
-                <div class="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                  <a href="#slide3" class="btn btn-circle">
-                    ❮
-                  </a>
-                  <a href="#slide1" class="btn btn-circle">
-                    ❯
-                  </a>
+                <div className="flex justify-end pl-2 mt-2 md:mt-8">
+                  <p className="text-2xl text-primary-color">₱</p>
+                  <h2 className="text-6xl font-bold text-primary-color">
+                    {item.discount > 0
+                      ? (item.price * (1 - item.discount / 100)).toFixed(2)
+                      : item.price.toFixed(2)}
+                  </h2>
+                </div>
+                <div className="justify-end flex flex-col items-end gap-2 ">
+                  <div className="flex justify-end items-center gap-2 flex-col">
+                    {item.discount > 0 && (
+                      <div className="flex items-center">
+                        <span className="text-lg text-white bg-primary-color border border-primary-color px-0.5 font-bold">
+                          {item.discount}%
+                        </span>
+                        <span className="text-3xl text-secondary-color px-1 font-bold opacity-50 line-through ">
+                          ₱{item.price.toFixed(2) || "N/A"}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {item.voucher && (
+                    <span className="text-lg font-bold border border-primary-color px-2 ">
+                      SHOP VOUCHER
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-1 justify-between h-full ">
-              <div className="flex flex-col gap-1">
-                <h1 className="text-6xl font-bold text-secondary-color ">
-                  {item.product}
-                </h1>
-                <div className="flex flex-row justify-between ">
-                  <h2 className="text-5xl font-bold">{item.sold} Sold</h2>
-                  <div className="flex gap-1">
-                    <h2 className="text-5xl font-bold text-primary-color">
-                      {item.rate.toFixed(1)}
-                    </h2>
-                    <RateSymbol item={item.rate} size={"12"} />
-                  </div>
-                </div>
-              </div>
 
-              <p className="py-6">
-                Provident cupiditate voluptatem et in. Quaerat fugiat ut
-                assumenda excepturi exercitationem quasi. In deleniti eaque aut
-                repudiandae et a id nisi.
-              </p>
-
-              <form method="dialog  ">
-                <button className="btn btn-sm btn-circle btn-ghost fixed right-2 top-2">
-                  ✕
+            <div>
+              <div className="justify-end gap-2 mt-4 items-center flex">
+                <button className="btn p-4 btn-md btn-secondary">
+                  Add to Cart
                 </button>
-                <div className=" justify-end gap-4 items-center flex">
-                  <h2 className="text-4xl font-bold text-primary-color">
-                    ₱{item.price}
-                  </h2>
-                  <button className="btn btn-sm btn-outline btn-secondary  ">
-                    Add to Cart
-                  </button>
-                  <button className="btn btn-sm  btn-outline ">
-                    Place Order
-                  </button>
-                </div>
-              </form>
+                <button className="btn p-4 btn-md btn-primary">
+                  Place Order
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <div className="flex flex-col w-full px-4">
+      <div class="my-0 divider"></div>
+        <p className="text-2xl font-bold">Product Description</p>
+    
+        <p className="mt-2 rounded-md bg-slate-100 p-2 max-h-60 overflow-y-auto custom-scrollbar">
+          {item.description || "No description available."}
+        </p>
+      </div>
+      <RatingSection item={item} />
     </div>
   );
 }
