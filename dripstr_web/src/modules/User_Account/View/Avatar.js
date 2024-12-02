@@ -100,7 +100,7 @@ const Avatar = () => {
               <hemisphereLight intensity={0.5} skyColor={0xffffff} groundColor={0x444444} />
               <directionalLight intensity={2} position={[2, 2, 2]} />
               {/* Add a platform */}
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={null}>
                 <Plane args={[5, 5]} position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
                   <meshStandardMaterial color="lightgray" />
                 </Plane>
