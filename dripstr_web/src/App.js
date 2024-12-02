@@ -1,9 +1,8 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Controllers
-import AdminModeratorController from './modules/AdminModerator/Controller/Admin_Controller';
-import AdminSuperController from './modules/AdminSuper/Controller/AdminSuper_Contoller';
+import AdminController from './modules/Admin/Controller/Admin_Controller'
 import LoginController from './modules/Login/Controller/Login_Controller';
 import HomeController from './modules/Home/Home_Controller';
 import OrderController from './modules/Order/Controller/Order_Controller';
@@ -17,6 +16,9 @@ import Product from './modules/Products/Product'
 import Header from './shared/Header';
 import Sidebar from './shared/SideBar';
 import Notifications from './modules/Notifications';
+
+
+// Shared Component
 
 function App() {
   return (
@@ -44,8 +46,7 @@ function App() {
               <Route path="/product/*" element={<Product />} />
               <Route path="/cart/*" element={<OrderController />} />
               <Route path="/login/*" element={<LoginController />} />
-              <Route path="/adminmoderator/*" element={<AdminModeratorController />} />
-              <Route path="/adminsuper/*" element={<AdminSuperController />} />
+              <Route path="/admin/*" element={<AdminController />} />
               <Route path="/shop/*" element={<ShopController />} />
               <Route path="/account/*" element={<UserAccountController />} />
               <Route path="/notification" element={<Notifications />} />
