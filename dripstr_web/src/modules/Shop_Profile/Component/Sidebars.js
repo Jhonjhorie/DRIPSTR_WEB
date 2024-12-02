@@ -1,79 +1,138 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../../../assets/shop/shoplogo.jpg';
 
 function SideBar() { 
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
   const navbarRef = useRef(null);
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const toggleNavbar = () => {
-    setIsNavbarVisible(!isNavbarVisible);
-  };
-  
-    useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (navbarRef.current && !navbarRef.current.contains(event.target)) {
-        setIsNavbarVisible(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-    }, []);
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+};
+
+ 
 
   return (
-    <div className="relative" ref={navbarRef}>
-    {/* Icon button */}
-    <button
-      className="w-10 h-10 flex items-center m-3 shadow-md justify-center hover:bg-primary-color glass hover:duration-300 bg-slate-100 rounded-md"
-      onClick={toggleNavbar}
-    >
-     <box-icon  size='35px' name='menu-alt-right' ></box-icon>
-    </button>
+    <div className="relative flex  md:mr-0" ref={navbarRef}>
+    
+    <div className="dropdown dropdown-bottom dropdown-end bg-slate-100 shadow-md border-2 border-primary-color 
+    shadow-primary-color h-12 w-20 mt-2 rounded-md mr-16 ">
+      <div>
+          <img
+            src={logo}
+            alt="Shop Logo"
+            className="drop-shadow-custom object-cover rounded-md h-11 w-full"
+          />
+      </div>
+    </div>
 
+
+   
     {/* Navbar */}
-    {isNavbarVisible && (
-      <div className="absolute top-12 right-0 w-48 mx-3 bg-slate-50 shadow-lg rounded-md p-4">
-        <ul className="space-y-2">
-          <li>
+    <button 
+      className="fixed w-12 h-12 right-3 z-10 bg-custom-purple  glass text-white rounded-md m-2 shadow-lg"
+      onClick={toggleSidebar}
+    >
+      <box-icon name='menu' color="#ffffff" ></box-icon>
+                    </button>
+                    {isSidebarOpen && (
+                        <div 
+                            className="fixed inset-0 bg-black opacity-50 z-40"
+                            onClick={toggleSidebar}
+                        ></div>
+                    )}
+      <div
+       className={`fixed top-0 right-0 w-72 h-full bg-base-100 shadow-lg transform transition-transform duration-300 z-50 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+
+        <ul className=" mt-16  md:mt-24 p-2">
+          <div className='h-24 w-full rounded-md bg-primary-color'>
+          <div className='bg-slate-100 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-full border-[3px]  border-custom-purple ' >
+            <img
+              src={logo}
+              alt="Shop Logo"
+              className="drop-shadow-custom object-cover rounded-full h-full w-full"
+            />
+          </div>
+          <div className=' items-center justify-center h-10 w-10 absolute mx-2 place-self-end flex right-0'>
+            <box-icon type='solid' name='edit-alt'></box-icon>
+          </div>        
+          </div>
+
+          <div className='text-white pt-[30%]  text-center'> Saint Mercy Apparel </div>
+          <li
+          onClick={() => navigate('/shop/MerchantDashboard')}
+          className='flex justify-between p-1 hover:bg-base-200 rounded-md mt-5 hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a
-            onClick={() => navigate('/shop/MerchantDashboard')}
-            className="block text-base text-gray-800 hover:text-violet-900 cursor-pointer ">
+            className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
               Dashboard
             </a>
+            <box-icon type='solid' name='dashboard' color="#FFFFFF"></box-icon>
           </li>
-          <li>
+
+          <li 
+          onClick={() => navigate('/shop/MerchantProducts')}
+          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a
-            onClick={() => navigate('/shop/MerchantProducts')}
-            className="block text-base text-gray-800 hover:text-violet-900 cursor-pointer ">
+            className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
               Products
             </a>
+            <box-icon type='solid' name='component' color="#FFFFFF"></box-icon>
           </li>
-          <li>
+
+          <li 
+          onClick={() => navigate('/shop/MerchantOrders')}
+          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a
-            onClick={() => navigate('/shop/MerchantOrders')}
-            className="block text-base text-gray-800 hover:text-violet-900 cursor-pointer ">
+             className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
               Orders
             </a>
+            <box-icon name='basket' type='solid' color="#FFFFFF"></box-icon>
           </li>
-          <li>
+
+          <li
+          onClick={() => navigate('/shop/MerchantNotifications')}
+          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a
-            onClick={() => navigate('/shop/MerchantNotifications')}
-            className="block text-base text-gray-800 hover:text-violet-900 cursor-pointer ">
+            className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
               Notifications
             </a>
+            <box-icon type='solid' name='bell' color="#FFFFFF"></box-icon>
           </li>
-          <li>
-            <a
-            onClick={() => navigate('/shop/MerchantFollowers')}
-            className="block text-base text-gray-800 hover:text-violet-900 cursor-pointer ">
+          
+          <li
+          onClick={() => navigate('/shop/MerchantFollowers')}
+          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
+            <a   
+             className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
               Followers
             </a>
+            <box-icon type='solid' name='group' color="#FFFFFF"></box-icon>
+          </li>
+
+          <li
+          onClick={() => navigate('/shop/Shop_profile')}
+          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
+            <a   
+             className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
+              Shop Preview
+            </a>
+            <box-icon type='solid' name='shopping-bags' color='#FFFFFF'></box-icon>
           </li>
         </ul>
+            <div className='flex gap-2 absolute bottom-14  md:bottom-2  justify-end '>
+              <button class="btn px-2 mx-2 ">
+                Messages
+                <div class="badge">+99</div>
+              </button>
+              <button class="btn">
+                Inbox
+                <div class="badge badge-secondary">+99</div>
+              </button>
+            </div>
       </div>
-    )}
+    
   </div>
   );
 }

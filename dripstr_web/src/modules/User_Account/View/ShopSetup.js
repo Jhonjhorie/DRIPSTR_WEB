@@ -88,13 +88,23 @@ const Shop = () => {
         </section>
 
         {/* Get Started Button */}
+        <div className=" flex flex-row items-center justify-center gap-10">
         <div className="text-center">
-          <Link to="/register">
+          <Link to="/shop/MerchantCreate">
             <button className="btn btn-primary btn-lg">
-              Get Started
+              Be a Merchant
             </button>
           </Link>
         </div>
+        <div className="text-center">
+          <Link to="/shop/ArtistCreate">
+            <button className="btn btn-primary btn-lg">
+              Be a Artist
+            </button>
+          </Link>
+        </div>
+        </div>
+
       </div>
     </div>
   );
