@@ -198,7 +198,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 7.1,
+        id: 7.2,
         shopName: 'Hype Beast',
         title: 'XXXTENTACION Hoodie',
         description: 'Look at me!',
@@ -209,7 +209,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 7.1,
+        id: 7.3,
         shopName: 'Hype Beast',
         title: 'Central Cee Pro Club Shirt',
         description: 'How can I be homophobic?',
@@ -858,7 +858,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.,
+        id: 52,
         shopName: 'HypeVest',
         title: 'Drip Vest Bag',
         description: 'Bag for your drip.',
@@ -880,7 +880,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 51.2,
+        id: 52.2,
         shopName: 'HypeVest',
         title: 'Fanny Pack',
         description: 'Small Belongings.',
@@ -891,7 +891,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 51.2,
+        id: 52.3,
         shopName: 'HypeVest',
         title: 'Fanny Pack',
         description: 'Small Belongings.',
@@ -902,7 +902,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52,
+        id: 53,
         shopName: 'Bandripton',
         title: 'Metallica Hoodie',
         description: 'Enter the sandman.',
@@ -913,7 +913,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.1,
+        id: 53.1,
         shopName: 'Bandripton',
         title: 'Metallica Shirt',
         description: 'Enter the sandman.',
@@ -924,7 +924,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.2,
+        id: 53.2,
         shopName: 'Bandripton',
         title: 'Metallica Short',
         description: 'Enter the sandman.',
@@ -935,7 +935,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.3,
+        id: 53.3,
         shopName: 'Bandripton',
         title: 'AC DC Hoodie',
         description: 'Highway To Hell.',
@@ -946,7 +946,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.3,
+        id: 53.4,
         shopName: 'Bandripton',
         title: 'AC DC Short',
         description: 'Highway To Hell.',
@@ -957,7 +957,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.3,
+        id: 53.5,
         shopName: 'Bandripton',
         title: 'AC DC Shirt',
         description: 'Highway To Hell.',
@@ -968,7 +968,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.4,
+        id: 53.6,
         shopName: 'Bandripton',
         title: 'AC DC Cap',
         description: 'Highway To Hell.',
@@ -979,7 +979,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.5,
+        id: 53.7,
         shopName: 'Bandripton',
         title: 'The Smiths Shirt',
         description: 'The Queen is Dead.',
@@ -990,7 +990,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.6,
+        id: 53.8,
         shopName: 'Bandripton',
         title: 'The Smiths Long Sleeves',
         description: 'The Queen is Dead.',
@@ -1001,7 +1001,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.7,
+        id: 53.9,
         shopName: 'Bandripton',
         title: 'The Smiths Short',
         description: 'The Queen is Dead.',
@@ -1012,7 +1012,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.8,
+        id: 53.01,
         shopName: 'Bandripton',
         title: 'The Smiths Shirt',
         description: 'How Soon is Now.',
@@ -1023,7 +1023,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 52.9,
+        id: 53.011,
         shopName: 'Bandripton',
         title: 'The Smiths Shirt',
         description: 'How Soon is Now.',
@@ -1034,7 +1034,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 53,
+        id: 54,
         shopName: 'Hustler',
         title: 'Pablo Escobar Shirt',
         description: 'KingPin.',
@@ -1045,7 +1045,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 53.1,
+        id: 54.1,
         shopName: 'Hustler',
         title: 'Pablo Escobar Hoodie',
         description: 'KingPin.',
@@ -1056,7 +1056,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 53.2,
+        id: 54.2,
         shopName: 'Hustler',
         title: 'Pablo Escobar White Shirt',
         description: 'KingPin.',
@@ -1067,7 +1067,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 53.3,
+        id: 54.3,
         shopName: 'Hustler',
         title: 'ScarFace Shirt',
         description: 'KingPin.',
@@ -1078,7 +1078,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 53.3,
+        id: 54.4,
         shopName: 'Hustler',
         title: 'Andrew Tate Shirt',
         description: 'TOP G!!!',
@@ -1089,7 +1089,7 @@ const cartItems = [
         checked: false,
       },
       {
-        id: 54,
+        id: 55,
         shopName: 'League of Legends',
         title: 'Arcane Powder Shirt',
         description: 'Oh the misery.',

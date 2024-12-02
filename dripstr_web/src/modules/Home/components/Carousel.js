@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 import { faChevronRight, faChevronLeft, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { ReactComponent as Logo } from '@/assets/images/LOGO.svg'; 
+import { averageRate } from "@/modules/Products/hooks/useRate.ts";
 
 const Carousel = ({ images }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -37,20 +38,20 @@ const Carousel = ({ images }) => {
                 {item.product}
               </p>
             )}
-            {item.rate && (
+            {item.reviews  && (
               <div className='bottom-72 md:bottom-[21rem] lg:bottom-96 right-0 lg:right-4 flex flex-row relative justify-end space-x-0 md:space-x-[-1rem] group-hover:bottom-[18.65rem] md:group-hover:bottom-[21rem] group-hover:right-0 duration-300 transition-all items-start'>
               <p className='text-6xl lg:text-8xl text-primary-color drop-shadow-2xl  font-bold'>
-                {item.rate.toFixed(1)}  
+                {averageRate(item.reviews)}  
               </p>
-              {item.rate >= 4 && (
+              {averageRate(item.reviews) >= 4 && (
                  <img src={require('@/assets/images/others/fillfull.png')} className='-z-10 relative w-24 md:w-28 lg:w-32 object-contain'
                  />
               )}
-                {item.rate < 4 && item.rate > 2 && (
+                {averageRate(item.reviews) < 4 && averageRate(item.reviews) > 2 && (
                  <img src={require('@/assets/images/others/fillhalf.png')} className='-z-10 relative w-24 md:w-32 object-contain'
                  />
                 )}
-                {item.rate < 2 && (
+                {averageRate(item.reviews) < 2 && (
                  <img src={require('@/assets/images/others/fillno.png')} className='-z-10 relative w-24 md:w-32 object-contain'
                  />
                 )} 
@@ -100,10 +101,10 @@ const Carousel = ({ images }) => {
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-2 h-2 rounded-full drop-shadow-lg ${
+            className={`h-2 rounded-full drop-shadow-lg transition-all duration-300 ${
               currentIndex === index
-                ? "bg-slate-50"
-                : currentIndex === index-1 || currentIndex === index+1  ? "bg-primary-color":"bg-secondary-color"
+                ? "bg-slate-50 w-4"
+                : currentIndex === index-1 || currentIndex === index+1  ? "bg-primary-color w-3 ":"bg-secondary-color w-2 "
             }`}
           ></button>
         ))}

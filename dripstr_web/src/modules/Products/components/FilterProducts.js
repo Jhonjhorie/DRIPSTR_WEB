@@ -22,8 +22,8 @@ const FilterProducts = ({ }) => {
           <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
           <div class="drawer-content">
           {/* //button */} 
-            <label for="my-drawer-4" class="btn drawer-button text-lg glass -top-6 gap-2 p-2 absolute flex flex-row right-1">
-              <FontAwesomeIcon icon={faFilter} size={24}  />
+            <label for="my-drawer-4" class="py-2  btn drawer-button text-lg glass -top-6 gap-2 absolute flex flex-row right-1">
+              <FontAwesomeIcon icon={faFilter} size={20}  />
                Filter</label>
           </div>
           <div class="drawer-side z-50">
