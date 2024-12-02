@@ -2,39 +2,59 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Controllers
-import AdminController from "./modules/Admin/Controller/Admin_Controller";
-import LoginController from "./modules/Login/Controller/Login_Controller";
-import OrderController from "./modules/Order/Controller/Order_Controller";
-import ShopController from "./modules/Shop_Profile/Controller/Shop_Profile_Controller";
-import UserAccountController from "./modules/User_Account/Controller/User_Account_Controller";
+import AdminController from './modules/Admin/Controller/Admin_Controller'
+import LoginController from './modules/Login/Controller/Login_Controller';
+import HomeController from './modules/Home/Home_Controller';
+import OrderController from './modules/Order/Controller/Order_Controller';
+import ShopController from './modules/Shop_Profile/Controller/Shop_Profile_Controller';
+import UserAccountController from './modules/User_Account/Controller/User_Account_Controller';
+import ProductsController from './modules/Products/Products_Controller'
+import Product from './modules/Products/Product'
+
 
 // Shared Components
-import Navbar from "./shared/Navbar";
-import SubNavbar from "./shared/SubNavbarShop";
-import Footer from "./shared/Footer";
+import Header from './shared/Header';
+import Sidebar from './shared/SideBar';
+import Notifications from './modules/Notifications';
+import Reminder from './modules/Messaging/View/Reminder';
+
+
+// Shared Component
 
 function App() {
   return (
     <Router>
-      <div className="flex flex-col min-h-screen">
-        {/* Navbar */}
-        <Navbar />
-        <SubNavbar />
+      <div className="flex flex-col h-screen w-screen overflow-x-hidden custom-scrollbar">
+        {/* Navbar (Header) */}
+        <Header />
 
-        {/* Main Content */}
-        <main className="flex-grow container mx-auto p-4">
-          <Routes>
-            {/* Ito yong mga nilalagay sa URL para mapuntahan yong page ex. localhost:3000/Shop */}
-            <Route path="/" element={<OrderController />} />
-            <Route path="/login/*" element={<LoginController />} />
-            <Route path="/admin/*" element={<AdminController />} />
-            <Route path="/shop/*" element={<ShopController />} />
-            <Route path="/useraccount/*" element={<UserAccountController />} />
-          </Routes>
-        </main>
+        {/* Main Layout */}
+        <div className="flex flex-1 flex-col sm:flex-row">
+          {/* Sidebar */}
+          <div className="hidden sm:block">
+            <Sidebar />
+          </div>
+          {/* Sidebar for mobile */}
+          <div className="block sm:hidden fixed bottom-0 w-full z-50">
+            <Sidebar />
+          </div>
 
-        {/* Footer */}
-        <Footer />
+          {/* Main Content */}
+          <main className="flex-1 sm:ml-8 sm:pl-2 overflow-y-auto">
+            <Routes>
+              <Route path="/" element={<HomeController />} />
+              <Route path="/mall/*" element={<ProductsController />} />
+              <Route path="/product/*" element={<Product />} />
+              <Route path="/cart/*" element={<OrderController />} />
+              <Route path="/login/*" element={<LoginController />} />
+              <Route path="/admin/*" element={<AdminController />} />
+              <Route path="/shop/*" element={<ShopController />} />
+              <Route path="/account/*" element={<UserAccountController />} />
+              <Route path="/notification" element={<Notifications />} />
+              <Route path="/reminder" element={<Reminder/>}/>
+            </Routes>
+          </main>
+        </div>
       </div>
     </Router>
   );

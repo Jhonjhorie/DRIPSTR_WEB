@@ -1,19 +1,19 @@
 import React from "react";
-import {
-  UserGroupIcon,
-  BuildingStorefrontIcon,
-  PencilIcon,
-  UsersIcon,
-} from "@heroicons/react/24/solid";
+// import {
+//   UserGroupIcon,
+//   BuildingStorefrontIcon,
+//   PencilIcon,
+//   UsersIcon,
+// } from "@heroicons/react/24/solid";
 import StatCard from "./Components/StatCard";
 import TopItems from "./Components/TopItems";
 import Sidebar from "./Shared/Sidebar";
 
 const statCards = [
-  { icon: UsersIcon, value: "63459", label: "Customer" },
-  { icon: BuildingStorefrontIcon, value: "69", label: "Merchant" },
-  { icon: PencilIcon, value: "69", label: "Designer" },
-  { icon: UserGroupIcon, value: "69", label: "Overall Users" },
+  { icon: '', value: "63459", label: "Customer" },
+  { icon: '', value: "69", label: "Merchant" },
+  { icon: '', value: "69", label: "Designer" },
+  { icon: '', value: "69", label: "Overall Users" },
 ];
 
 const topItems = Array(6).fill({ label: "Item", soldCount: "6" });

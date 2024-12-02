@@ -1,5 +1,5 @@
 import React from "react";
-import image from "../../../../assets/image-removebg-preview.png";
+import image from "../../../../assets/logoBlack.png";
 
 const ReviewTable = () => {
   return (
