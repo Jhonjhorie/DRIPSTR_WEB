@@ -6,10 +6,10 @@ const Account = () => {
     <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
 
     <Sidebar />
-    <div className="px-5">
+    <div className="p-4 px-9">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Manage My Account</h1>
+        <h1 className="text-xl font-bold text-gray-800">Manage My Account</h1>
       </div>
 
       {/* Profile Section */}

@@ -1,21 +1,26 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faUser, faShop, faStore, faBell } from '@fortawesome/free-solid-svg-icons';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faHome,
+  faUser,
+  faShop,
+  faStore,
+  faBell,
+} from "@fortawesome/free-solid-svg-icons";
 
 const SideBar = () => {
-  const [activeName, setActiveName] = useState('Home');
-  
+  const [activeName, setActiveName] = useState("Home");
+
   const mainSideBar = [
     { label: 'Home', path: '/', icon: faHome },
-    { label: 'Mall', path: '/mall', icon: faShop },
-    { label: 'Shop', path: '/shop', icon: faStore },
+    { label: 'Shop', path: '/shop/MerchantDashboard', icon: faStore },
     { label: 'Notification', path: '/notification', icon: faBell },
     { label: 'Account', path: '/account', icon: faUser },
   ];
 
   return (
-    <div className="flex sm:flex-col flex-row justify-evenly sm:justify-center top-[100vh] sm:top-0 items-start bg-slate-50 p-1 sm:p-2 rounded-t-lg w-full sm:w-10 sticky h-10 sm:min-h-screen left-0 drop-shadow-sm sm:hover:w-48 duration-300 transition-all z-20 overflow-hidden gap-2">
+    <div className="flex sm:flex-col flex-row justify-evenly sm:justify-center sticky sm:fixed items-start bg-slate-50 p-1 sm:p-2 rounded-t-lg sm:rounded-none w-full sm:w-10 sm:h-screen h-12 left-0 top-4 drop-shadow-sm sm:hover:w-48 duration-300 transition-all z-20 overflow-hidden gap-2">
       {mainSideBar.map((item, index) => (
         <Link
           key={index}
@@ -25,7 +30,7 @@ const SideBar = () => {
         >
           <div
             className={`${
-              activeName === item.label ? 'bg-primary-color' : 'hidden'
+              activeName === item.label ? "bg-primary-color" : "hidden"
             } absolute bottom-0 sm:bottom-auto sm:left-0 w-10 h-1 sm:w-1 sm:h-10 z-40 rounded-t-lg sm:rounded-r-lg`}
           />
           <div className="flex justify-center items-center w-6">
@@ -33,8 +38,8 @@ const SideBar = () => {
               icon={item.icon}
               className={`${
                 activeName === item.label
-                  ? 'text-primary-color'
-                  : 'text-slate-500'
+                  ? "text-primary-color"
+                  : "text-slate-500"
               } group-hover:text-primary-color`}
               size="lg"
             />
@@ -42,8 +47,8 @@ const SideBar = () => {
           <span
             className={`${
               activeName === item.label
-                ? 'text-primary-color font-bold'
-                : 'text-slate-500'
+                ? "text-primary-color font-bold"
+                : "text-slate-500"
             } sm:flex hidden text-sm font-semibold group-hover:text-primary-color group-hover:font-bold`}
           >
             {item.label}
