@@ -44,11 +44,11 @@ function SideBar() {
                         ></div>
                     )}
       <div
-       className={`fixed top-0 right-0 w-72 h-full bg-base-100 shadow-lg transform transition-transform duration-300 z-50 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+       className={`fixed top-0 right-0 w-72 h-full bg-slate-200 shadow-lg transform transition-transform duration-300 z-50 ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
         <ul className=" mt-16  md:mt-24 p-2">
-          <div className='h-24 w-full rounded-md bg-primary-color'>
-          <div className='bg-slate-100 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-full border-[3px]  border-custom-purple ' >
+          <div className='h-24 w-full rounded-md bg-slate-900'>
+          <div className='bg-slate-100 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-full border-[3px]  border-slate-800 ' >
             <img
               src={logo}
               alt="Shop Logo"
@@ -58,65 +58,76 @@ function SideBar() {
            
           </div>
 
-          <div className='text-white pt-[30%]  text-center'> Saint Mercy Apparel </div>
+          <div className='text-slate-900 font-semibold pt-[30%]  text-center'> Saint Mercy Apparel </div>
           <li
           onClick={() => navigate('/shop/MerchantDashboard')}
-          className='flex justify-between p-1 hover:bg-base-200 rounded-md mt-5 hover:duration-200 hover:text-violet-900 cursor-pointer '>
+          className='flex justify-between p-1 hover:bg-slate-300 mt-4 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a
-            className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
+            className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Dashboard
             </a>
-            <box-icon type='solid' name='dashboard' color="#FFFFFF"></box-icon>
+            <box-icon type='solid' name='dashboard' color="#4D077C"></box-icon>
           </li>
 
           <li 
           onClick={() => navigate('/shop/MerchantProducts')}
-          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
+          className='flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a
-            className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
+            className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Products
             </a>
-            <box-icon type='solid' name='component' color="#FFFFFF"></box-icon>
+            <box-icon type='solid' name='component' color="#4D077C"></box-icon>
           </li>
 
           <li 
           onClick={() => navigate('/shop/MerchantOrders')}
-          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
+          className='flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a
-             className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
+             className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Orders
             </a>
-            <box-icon name='basket' type='solid' color="#FFFFFF"></box-icon>
+            <box-icon name='basket' type='solid' color="#4D077C"></box-icon>
+          </li>
+
+          <li
+          onClick={() => navigate('/shop/MerchantMessages')}
+          className='flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
+            <a
+            className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
+              Messages
+            </a>
+            <box-icon type='solid' name='message-dots' color="#4D077C"></box-icon>
+
           </li>
 
           <li
           onClick={() => navigate('/shop/MerchantNotifications')}
-          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
+            className='flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a
-            className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
+            className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Notifications
             </a>
-            <box-icon type='solid' name='bell' color="#FFFFFF"></box-icon>
+            <box-icon type='solid' name='bell' color="#4D077C"></box-icon>
           </li>
           
           <li
           onClick={() => navigate('/shop/MerchantFollowers')}
-          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
+          className='flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a   
-             className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
+             className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Followers
             </a>
-            <box-icon type='solid' name='group' color="#FFFFFF"></box-icon>
+            <box-icon type='solid' name='group' color="#4D077C"></box-icon>
           </li>
 
           <li
           onClick={() => navigate('/shop/Shop_profile')}
-          className='flex justify-between p-1 hover:bg-base-200 rounded-md hover:duration-200 hover:text-violet-900 cursor-pointer '>
+          className='flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
             <a   
-             className="block  text-base text-gray-100 w-full hover:text-primary-color cursor-pointer ">
+             className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Shop Preview
             </a>
-            <box-icon type='solid' name='shopping-bags' color='#FFFFFF'></box-icon>
+            <box-icon type='solid' name='shopping-bags' color="#4D077C"></box-icon>
           </li>
 
           
