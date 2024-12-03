@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faTrash, faStore, faTimes } from '@fortawesome/free-solid-svg-icons'; 
 import Button from '../../../shared/Button';
 import cartData from '../Model/CartData';
-import { AlertTitle } from '@mui/material';
+import Pagination from '../Controller/Pagination';
 
 function Cart() {
   const [cartItems, setCartItems] = useState(cartData);
@@ -88,7 +88,7 @@ function Cart() {
   };
 
   const handleDeleteAll = () => {
-    setCartItems(cartItems.filter((item) => !item.checked));
+    setCartItems(cartItems.filter((item) => !item));
   };
 
   const calculateTotalProducts = () => {
@@ -147,9 +147,11 @@ function Cart() {
     setCurrentPage(pageNumber);
   };
 
+  
+  
   return (
     <>
-    <div className="p-3 bg-slate-200">
+    <div className="p-3 bg-slate-200 max-h-full">
       <h1 className="text-3xl font-bold mb-8 text-center text-purple-600 ">Shopping Cart</h1>
       <div className="bg-slate-600 flex items-center justify-between p-4 rounded-md mb-4">
         <p className="text-white text-lg">Cart Products: {calculateAllProducts()}</p>
@@ -222,17 +224,8 @@ function Cart() {
             ))}
           </div>
           {/* Pagination Controls */}
-          <div className="flex justify-center mb-4">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-purple-500 text-white font-bold' : 'bg-slate-500 text-white font-bold'}`}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
+          <Pagination totalPages={totalPages} handlePageChange={handlePageChange} />
+
           {/* Sticky Total and Proceed Section */}
           <div className="flex justify-between items-center mt-8 sticky z-100 bottom-2 bg-slate-600 p-4 rounded-lg">
             <p className="text-2xl font-bold text-white">
