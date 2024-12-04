@@ -109,7 +109,7 @@ const Shop = () => {
           </div>
           <div className="text-center">
             <Link to="/shop/ArtistCreate">
-              <button className="btn btn-primary btn-lg">Be a Artist</button>
+              <button className="btn btn-primary btn-lg">Be an Artist</button>
             </Link>
           </div>
         </div>
