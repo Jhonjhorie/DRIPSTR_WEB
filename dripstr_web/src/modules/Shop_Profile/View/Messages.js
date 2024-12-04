@@ -93,7 +93,7 @@ function Messages() {
                             <div className={`text-sm ${user.status === 'sent' ? 'text-white' : 'text-slate-700 '}`}> {user.message} </div>
                         </div>
                         <div className='absolute top-1 text-sm  right-2'> {user.timeSent} </div>
-                    </div>
+                    </div>  
                  ))}
                 </div>
             </div>
@@ -263,7 +263,7 @@ function Messages() {
                                     <span
                                     className={`${
                                         selectedUser.orderRating === 'to rate' 
-                                        ? 'text-white' 
+                                        ? 'text-slate-800' 
                                         : 'text-yellow-500'
                                     } text-sm`}
                                     >

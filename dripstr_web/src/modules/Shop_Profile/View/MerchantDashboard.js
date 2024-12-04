@@ -9,7 +9,7 @@ import '../../../assets/shop/fonts/font.css';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { PieChart } from '@mui/x-charts/PieChart';
 import PrintSales from '../Component/PrintSales';
-
+import { useNavigate } from 'react-router-dom';
 const data = [
   { label: 'T-Shirt Alucard', value: 400 },
   { label: 'Ben Brief', value: 300 },
@@ -38,7 +38,7 @@ const uData = [4000, 3000, 2000, 2780, 1890, 2390, 3490, 5000, 2000, 278, 1890, 
   ];
 
 function MerchantDashboard() {
-
+  const navigate = useNavigate();
   return (
     <div className="h-full w-full bg-slate-300 overflow-y-scroll custom-scrollbar  ">
       <div className="absolute mx-3 right-0 z-10">
@@ -228,16 +228,22 @@ function MerchantDashboard() {
       {/* 3rd Container */}
       <div className='  gap-2 h-24 -mt-20 sm:-mt-0 w-full mb-32 md:mb-0 px-3 lg:px-14 lg:flex'>
         <div className=' h-auto lg:w-[65%] w-full py-2 md:px-5 rounded-md flex gap-1 lg:gap-5 justify-center lg:justify-start'>
-          <div className='bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
+          <div
+            onClick={() => navigate('/shop/MerchantProducts')}
+          className='bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  '>
           <box-icon name='add-to-queue' type='solid' color='#563A9C' ></box-icon>
-            <div className='text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs '> 
+            <div
+            className='text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs '> 
             Manage product</div>
           </div>
-          <div className='bg-slate-100 h-10 w-48 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
+          <div
+            onClick={() => navigate('/shop/MerchantVouchers')}
+          className='bg-slate-100 h-10 w-48 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  '>
           <box-icon type='solid' name='purchase-tag-alt' color='#563A9C'></box-icon>
-            <div className='text-slate-800 font-semibold h-full w-full md:pl-2 py-3 md:py-0 md:text-[15px]  text-[11px] '> 
+            <div
+            className='text-slate-800 font-semibold h-full w-full md:pl-2 py-3 md:py-0 md:text-[15px]  text-[11px] '> 
             Manage Vouchers </div>
           </div>
           <div className='bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer

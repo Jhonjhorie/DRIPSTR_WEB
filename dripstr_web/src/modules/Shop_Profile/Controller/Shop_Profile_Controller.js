@@ -9,6 +9,7 @@ import MerchantProducts from '../View/Products';
 import MerchantOrders from '../View/Orders';
 import Shop_profile from '../View/Shop_profile';
 import MerchantMessages from '../View/Messages';
+import MerchantVouchers from '../View/Vouchers';
 
 const ShopProfileController = () => {
   return (
@@ -22,6 +23,7 @@ const ShopProfileController = () => {
       <Route path="/MerchantFollowers" element={<MerchantFollowers />} />
       <Route path="/MerchantOrders" element={<MerchantOrders />} />
       <Route path="/Shop_profile" element={<Shop_profile />} />
+      <Route path="/MerchantVouchers" element={<MerchantVouchers />} />
     </Routes>
   );
 };
