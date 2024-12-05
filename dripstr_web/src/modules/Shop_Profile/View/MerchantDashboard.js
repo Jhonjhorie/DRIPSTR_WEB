@@ -47,7 +47,7 @@ function MerchantDashboard() {
       {/* 1st Container -- Logo Shop -- Notification */}
       <div className="h-auto w-full md:flex gap-2  place-items-center p-2 align-middle ">
         <div className=' h-full w-full p-2  md:pl-10'>
-          <div className=' text-3xl md:text-5xl font-bold text-custom-purple mb-5 flex justify-center md:justify-start' >Dashboard </div>
+          <div className=' text-3xl md:text-5xl font-bold text-custom-purple md:pl-5 mb-5 flex justify-start' >Dashboard </div>
             <div className='flex flex-wrap w-full justify-center  h-auto gap-2 md:gap-5 '>
 
             {/* BOXES STATS */}

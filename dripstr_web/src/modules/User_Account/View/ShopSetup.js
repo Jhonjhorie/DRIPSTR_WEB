@@ -1,6 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+
+const shop = [{ label: "Shop", path: "/shop/MerchantCreate" }];
 
 const Shop = () => {
   return (
@@ -40,7 +42,9 @@ const Shop = () => {
               </p>
             </div>
             <div className="card bg-white shadow-md p-4">
-              <h3 className="font-semibold text-gray-800">Support & Training</h3>
+              <h3 className="font-semibold text-gray-800">
+                Support & Training
+              </h3>
               <p className="text-gray-600">
                 Access direct support and training to succeed as a seller.
               </p>
@@ -61,13 +65,18 @@ const Shop = () => {
           </h2>
           <ol className="steps steps-vertical lg:steps-horizontal">
             <li className="step step-primary">
-              <h3 className="font-medium text-gray-800">1. Register Your Account</h3>
+              <h3 className="font-medium text-gray-800">
+                1. Register Your Account
+              </h3>
               <p className="text-gray-600">
-                Sign up as a seller and provide your business details to get started.
+                Sign up as a seller and provide your business details to get
+                started.
               </p>
             </li>
             <li className="step">
-              <h3 className="font-medium text-gray-800">2. Set Up Your Store</h3>
+              <h3 className="font-medium text-gray-800">
+                2. Set Up Your Store
+              </h3>
               <p className="text-gray-600">
                 Upload product details, add descriptions, and set your prices.
               </p>
@@ -75,13 +84,17 @@ const Shop = () => {
             <li className="step">
               <h3 className="font-medium text-gray-800">3. Start Selling</h3>
               <p className="text-gray-600">
-                Once approved, your products go live on DRPSTR, and you can start selling.
+                Once approved, your products go live on DRPSTR, and you can
+                start selling.
               </p>
             </li>
             <li className="step">
-              <h3 className="font-medium text-gray-800">4. Manage Orders and Payments</h3>
+              <h3 className="font-medium text-gray-800">
+                4. Manage Orders and Payments
+              </h3>
               <p className="text-gray-600">
-                Track orders and payments in your seller dashboard and grow your business.
+                Track orders and payments in your seller dashboard and grow your
+                business.
               </p>
             </li>
           </ol>
@@ -89,22 +102,17 @@ const Shop = () => {
 
         {/* Get Started Button */}
         <div className=" flex flex-row items-center justify-center gap-10">
-        <div className="text-center">
-          <Link to="/shop/MerchantCreate">
-            <button className="btn btn-primary btn-lg">
-              Be a Merchant
-            </button>
-          </Link>
+          <div className="text-center">
+            <Link to={shop[0].path}>
+              <button className="btn btn-primary btn-lg">Be a Merchant </button>
+            </Link>
+          </div>
+          <div className="text-center">
+            <Link to="/shop/ArtistCreate">
+              <button className="btn btn-primary btn-lg">Be a Artist</button>
+            </Link>
+          </div>
         </div>
-        <div className="text-center">
-          <Link to="/shop/ArtistCreate">
-            <button className="btn btn-primary btn-lg">
-              Be a Artist
-            </button>
-          </Link>
-        </div>
-        </div>
-
       </div>
     </div>
   );

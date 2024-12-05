@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import logo from "../../../../assets/image-removebg-preview.png";
-
+import logo from "../../../../assets/logoName.png";
+ 
 function Sidebar() {
   // State to control sidebar visibility on small screens
   const [isSidebarOpen, setSidebarOpen] = useState(false);

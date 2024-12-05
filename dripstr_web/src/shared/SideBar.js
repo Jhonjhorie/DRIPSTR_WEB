@@ -13,10 +13,10 @@ const SideBar = () => {
   const [activeName, setActiveName] = useState("Home");
 
   const mainSideBar = [
-    { label: "Home", path: "/", icon: faHome },
-    { label: "Shop", path: "/shop/MerchantCreate", icon: faStore },
-    { label: "Notification", path: "/notification", icon: faBell },
-    { label: "Account", path: "/account", icon: faUser },
+    { label: 'Home', path: '/', icon: faHome },
+    { label: 'Shop', path: '/shop/MerchantDashboard', icon: faStore },
+    { label: 'Notification', path: '/notification', icon: faBell },
+    { label: 'Account', path: '/account', icon: faUser },
   ];
 
   return (

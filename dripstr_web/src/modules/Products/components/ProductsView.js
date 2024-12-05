@@ -1,12 +1,11 @@
 import React,{useState} from 'react';
-import { products } from '@/constants/sampleData'; // Ensure you have a products array
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg'; 
-import FilterProducts from './FilterProducts';
 import ProductModal from './productModal'
 import RateSymbol from '@/shared/products/rateSymbol';
+import { averageRate } from '../hooks/useRate.ts';
 
-const ProductsView = () => {
+const ProductsView = ({products, categories, filter}) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 4, lg: 6 }); 
   const numColumns = itemsToShow;
@@ -17,27 +16,48 @@ const ProductsView = () => {
       document.getElementById('my_modal_4').showModal();
     }, 50);
   };
+  const closeModal = () => {
+    document.getElementById('my_modal_4').close();
+    setSelectedItem(null);
+  };
 
-
-  const dataWithPlaceholders = [...products];
-  while (dataWithPlaceholders.length % numColumns !== 0) {
-    dataWithPlaceholders.push({ empty: true }); 
+ 
+const filteredProducts = products.filter(item => {
+  switch (filter) {
+    case 0:
+      return true;
+    case 1:
+      return item.str === true;
+    default:
+      return true;
   }
-  
+});
+
+const filteredProductsC = filteredProducts.filter(item => {
+  return categories === "All" || item.category === categories;
+});
+
+
+const totalItems = filteredProductsC.length;
+const remainder = totalItems % numColumns;
+const placeholdersNeeded = remainder === 0 ? 0 : numColumns - remainder;
+
+const dataWithPlaceholders = [
+  ...filteredProductsC,
+  ...Array(placeholdersNeeded).fill({ empty: true }),
+];
+
 
   return (
     
     <div className="w-full flex flex-col items-center pb-24">
-       {selectedItem && <dialog id="my_modal_4" className=" modal modal-bottom sm:modal-middle">
-                   <ProductModal item={selectedItem} />
+       {selectedItem  && <dialog id="my_modal_4" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
+                   <ProductModal item={selectedItem} onClose={closeModal}/>
+                   <form method="dialog" class="modal-backdrop">
+                    <button onClick={closeModal}></button>
+                  </form>
       </dialog>}
-      <div className='relative -top-3 flex flex-row w-full items-center p-6 justify-end'>
-        <p className="absolute left-0 md:left-40 text-lg text-slate-500 ">
-          DRIP NOW // STAR LATER
-        </p>
-        <FilterProducts />
-      </div>
-
+      
       <div className="grid gap-1 items-center justify-center" style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}>
         {dataWithPlaceholders.map((item, index) =>
           item.empty ? (
@@ -51,7 +71,7 @@ const ProductsView = () => {
             <div
               key={item.prodId || `product-${index}`}
               onClick={() => openModal(item)} 
-              className="flex flex-col flex-1 max-w-[13.5rem] items-center mx-1 mb-2 rounded-md bg-slate-100 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
+              className="flex flex-col flex-1 max-w-[13.5rem] w-[13.5rem] items-center mx-1 mb-2 rounded-md bg-slate-100 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
             >
               {item.str && (
                 <Logo
@@ -92,7 +112,7 @@ const ProductsView = () => {
 
                   {/* Ratings and Sales */}
                   <div className="flex flex-row items-center just gap-0.5">
-                  <p className="text-primary-color text-md">{item.rate.toFixed(1)}</p>
+                  <p className="text-primary-color text-md">{averageRate(item.reviews)}</p>
                     <RateSymbol item={item.rate} size={'4'} />
                     <span className="text-secondary-color justify-center text-sm ">
                       | {item.sold} sold
