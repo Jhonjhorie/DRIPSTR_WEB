@@ -11,7 +11,17 @@ const ProductModal = ({ item, onClose }) => {
   };
 
   const handleCartClick = () => {
-    localStorage.setItem('cartItem', JSON.stringify(item));
+    // Get the current cart items from localStorage (if any)
+    const storedItems = localStorage.getItem('cartItems');
+    const cartItems = storedItems ? JSON.parse(storedItems) : []; // Initialize as empty array if no cart items exist
+  
+    // Add the new item to the cart
+    const updatedCartItems = [...cartItems, item]; // Append the new item
+  
+    // Save the updated cart items back to localStorage
+    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+  
+    // Navigate to the cart page
     navigate(`/cart`);
   };
 

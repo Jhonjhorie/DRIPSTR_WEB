@@ -4,7 +4,7 @@ import { faPlus, faMinus, faTrash, faStore, faTimes } from '@fortawesome/free-so
 import Button from '../../../shared/Button';
 import cartData from '../Model/CartData';
 import Pagination from '../Controller/Pagination';
-import productModal from '../../Products/components/productModal';
+
 
 function Cart() {
   const [cartItems, setCartItems] = useState(cartData);
@@ -12,14 +12,13 @@ function Cart() {
   const [showCard, setShowCard] = useState(false);
 
   useEffect(() => {
-    // Get the cart data from localStorage when the page loads
-    const storedItem = localStorage.getItem('cartItem');
-    if (storedItem) {
-      const item = JSON.parse(storedItem);
-      setCartItems([item]); // Add the item to the cart array
+    // Get the cart data
+    const storedItems = localStorage.getItem('cartItems');
+    if (storedItems) {
+      const items = JSON.parse(storedItems);
+      setCartItems(items); // Set the items to the cart state
     }
   }, []);
-
 
   const handlePlaceOrder = (cartItems, groupedItems) => {
     // Filter the cartItems to get only those that are checked
