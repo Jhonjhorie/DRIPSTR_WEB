@@ -4,15 +4,35 @@ import { faPlus, faMinus, faTrash, faStore, faTimes } from '@fortawesome/free-so
 import Button from '../../../shared/Button';
 import cartData from '../Model/CartData';
 import Pagination from '../Controller/Pagination';
+import productModal from '../../Products/components/productModal';
 
 function Cart() {
   const [cartItems, setCartItems] = useState(cartData);
   const [showModal, setShowModal] = useState(false);
   const [showCard, setShowCard] = useState(false);
 
+  useEffect(() => {
+    // Get the cart data from localStorage when the page loads
+    const storedItem = localStorage.getItem('cartItem');
+    if (storedItem) {
+      const item = JSON.parse(storedItem);
+      setCartItems([item]); // Add the item to the cart array
+    }
+  }, []);
+
+
   const handlePlaceOrder = (cartItems, groupedItems) => {
+    // Filter the cartItems to get only those that are checked
     const selectedItems = cartItems.filter(item => item.checked);
   
+    // Create a new groupedItems object that groups selected items by shopName
+    const groupedSelectedItems = selectedItems.reduce((acc, item) => {
+      if (!acc[item.shopName]) acc[item.shopName] = [];
+      acc[item.shopName].push(item);
+      return acc;
+    }, {});
+  
+    // Prepare order details
     const orderDetails = {
       items: selectedItems.map(item => ({
         shopName: item.shopName,
@@ -21,31 +41,26 @@ function Cart() {
         quantity: item.quantity,
       })),
       totalProductPrice: selectedItems.reduce((total, item) => total + item.price * item.quantity, 0),
-      totalShippingFees: Object.keys(groupedItems).reduce(
+      totalShippingFees: Object.keys(groupedSelectedItems).reduce(
         (total, shopName) =>
-          total +
-          groupedItems[shopName]
-            .filter(item => item.checked)
-            .reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
+          total + groupedSelectedItems[shopName].reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
         0
       ),
       grandTotal: selectedItems.reduce((total, item) => total + item.price * item.quantity, 0) +
-        Object.keys(groupedItems).reduce(
+        Object.keys(groupedSelectedItems).reduce(
           (total, shopName) =>
-            total +
-            groupedItems[shopName]
-              .filter(item => item.checked)
-              .reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
+            total + groupedSelectedItems[shopName].reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
           0
         ),
     };
   
-    // Save to localStorage or send to the server
+    // Save order details to localStorage or send them to the server
     localStorage.setItem('orderDetails', JSON.stringify(orderDetails));
-    
+  
     // Redirect to Orders page
     window.location.href = '/account/orders';
   };
+  
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -151,7 +166,7 @@ function Cart() {
   
   return (
     <>
-    <div className="p-3 bg-slate-200 max-h-full">
+    <div className="p-3 bg-slate-200 h-full">
       <h1 className="text-3xl font-bold mb-8 text-center text-purple-600 ">Shopping Cart</h1>
       <div className="bg-slate-600 flex items-center justify-between p-4 rounded-md mb-4">
         <p className="text-white text-lg">Cart Products: {calculateAllProducts()}</p>
@@ -171,7 +186,7 @@ function Cart() {
         </div>
       </div>
       {cartItems.length === 0 ? (
-        <p className="text-center">Your cart is empty.</p>
+        <p className="flex items-center justify-center text-2xl font-bold text-purple-600 mt-[13rem]">Your cart is empty.</p>
       ) : (
         <div className="flex flex-col">
           <div className="mb-4">

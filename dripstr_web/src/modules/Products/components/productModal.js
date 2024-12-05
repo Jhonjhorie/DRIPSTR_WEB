@@ -10,6 +10,11 @@ const ProductModal = ({ item, onClose }) => {
     navigate(`/product/${item.product}`, { state: { item } });
   };
 
+  const handleCartClick = () => {
+    localStorage.setItem('cartItem', JSON.stringify(item));
+    navigate(`/cart`);
+  };
+
   const allImages = [item.url, ...(item.images || [])];
   return (
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 h-[40rem] overflow-y-auto overflow-x-hidden lg:overflow-hidden custom-scrollbar  modal-box">
@@ -160,7 +165,7 @@ const ProductModal = ({ item, onClose }) => {
               </div>
               <div className=" justify-end gap-2 items-center flex">
                 <button
-                  onClick={() => handleProductClick()}
+                  onClick={() => handleCartClick()}
                   className="btn btn-sm btn-outline btn-secondary  "
                 >
                   Add to Cart
