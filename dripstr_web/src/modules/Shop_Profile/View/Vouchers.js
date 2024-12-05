@@ -2,6 +2,9 @@ import React from 'react';
 import SideBar from '../Component/Sidebars'
 import { useNavigate } from 'react-router-dom';
 import blackLogo from '../../../assets/logoWhite.png'
+import { blockInvalidChar } from "../Hooks/ValidNumberInput";
+
+
 const { useState } = React;
 
 function Vouchers() { 
@@ -54,11 +57,17 @@ function Vouchers() {
                     <div className='text-2xl text-center font-semibold text-slate-900 iceland-regular '>Create Vouchers</div>
                     <div className='mb-2 gap-3 flex place-items-center mt-2'>
                         <label className='text-slate-800 font-semibold text-sm '>Items OFF:</label>
-                        <input type='number' className='bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-48   border-[1px] border-custom-purple'></input>
+                        <input 
+                        onKeyDown={blockInvalidChar}
+
+                        type='number' className='bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-48   border-[1px] border-custom-purple'></input>
                     </div>
                     <div className='mb-2 gap-2 flex place-items-center'>
                         <label className='text-slate-800 font-semibold text-sm'>Min Spend:</label>
-                        <input type='number' className='bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-48 border-[1px] border-custom-purple'></input>
+                        <input 
+                        onKeyDown={blockInvalidChar}
+
+                        type='number' className='bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-48 border-[1px] border-custom-purple'></input>
                     </div>
                     <div className='justify-end relative w-full flex  '>
                         <button className='p-2 bg-custom-purple shadow-md  mr-2 text-white text-sm glass rounded-md hover:bg-primary-color hover:scale-95 duration-300'> CREATE </button>

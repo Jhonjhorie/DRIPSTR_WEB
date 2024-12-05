@@ -103,7 +103,7 @@ const Shop = () => {
         {/* Get Started Button */}
         <div className=" flex flex-row items-center justify-center gap-10">
           <div className="text-center">
-            <Link to={shop[0].path}>
+            <Link to="/shop/MerchantCreate">
               <button className="btn btn-primary btn-lg">Be a Merchant </button>
             </Link>
           </div>

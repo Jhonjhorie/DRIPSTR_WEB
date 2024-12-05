@@ -106,7 +106,9 @@ function ArtistCreate() {
                 onClick={() => navigate('/shop/MerchantCreate')}
                 className="  text-slate-600 iceland-bold hover:text-custom-purple hover:duration-300 self-end  m-1">
                     BE A DRIPSTR MERCHANT? </button> 
-                <button className="btn glass bg-custom-purple   mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>      
+                <button
+                  onClick={() => navigate('/shop/Artist/ArtistDashboard')}
+                className="btn glass bg-custom-purple   mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>      
             </div>
             
     </div>

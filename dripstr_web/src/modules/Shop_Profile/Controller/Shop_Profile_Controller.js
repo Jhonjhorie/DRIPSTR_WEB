@@ -10,6 +10,11 @@ import MerchantOrders from '../View/Orders';
 import Shop_profile from '../View/Shop_profile';
 import MerchantMessages from '../View/Messages';
 import MerchantVouchers from '../View/Vouchers';
+import ArtistDashboard from '../View/Artist/ArtistDashboard';
+import ArtistMessage from '../View/Artist/ArtistMessages';
+import ArtistOrders from '../View/Artist/ArtistOrders';
+import ArtistAddArts from '../View/Artist/AddArt';
+
 
 const ShopProfileController = () => {
   return (
@@ -24,6 +29,10 @@ const ShopProfileController = () => {
       <Route path="/MerchantOrders" element={<MerchantOrders />} />
       <Route path="/Shop_profile" element={<Shop_profile />} />
       <Route path="/MerchantVouchers" element={<MerchantVouchers />} />
+      <Route path="/Artist/ArtistDashboard" element={<ArtistDashboard />} />
+      <Route path="/Artist/ArtistAddArts" element={<ArtistAddArts />} />
+      <Route path="/Artist/ArtistMessage" element={<ArtistMessage />} />
+      <Route path="/Artist/ArtistOrders" element={<ArtistOrders />} />
     </Routes>
   );
 };
