@@ -99,7 +99,7 @@ function ArtistCreate() {
                     <span className="label-text font-semibold text-slate-800">What is your address?</span>
                  
                 </div>
-                <textarea className="textarea textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24" placeholder="Type your Shop Address here"></textarea>
+                <textarea className="textarea resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24" placeholder="Type your Shop Address here"></textarea>
             </label>
             <div className='w-full h-auto justify-between flex m-2  mb-14 md:mb-0'>
                 <button 

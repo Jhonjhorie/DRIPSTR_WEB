@@ -133,13 +133,13 @@ function SideBar() {
           
         </ul>
             <div className='flex gap-2 absolute bottom-14  md:bottom-2  justify-end '>
-              <button class="btn px-2 mx-2 ">
+              <button className="btn px-2 mx-2 ">
                 Messages
-                <div class="badge">+99</div>
+                <div className="badge">+99</div>
               </button>
-              <button class="btn">
+              <button className="btn">
                 Inbox
-                <div class="badge badge-secondary">+99</div>
+                <div className="badge badge-secondary">+99</div>
               </button>
             </div>
       </div>
