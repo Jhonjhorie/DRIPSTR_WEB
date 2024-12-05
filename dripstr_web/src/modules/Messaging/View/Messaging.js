@@ -138,7 +138,7 @@ const ChatMessages = ({ onClose }) => {
           ref={chatRef}
           className={`fixed ${
             isMobile ? "top-0 left-0 w-full" : "bottom-4 right-12 w-80"
-          } bg-white rounded-lg shadow-md transition-all z-50 flex flex-col`}
+          } bg-slate-100 rounded-lg shadow-lg shadow-slate-300 transition-all z-50 flex flex-col`}
           style={{
             height: isMobile ? "100vh" : "50vh", // Full-screen height on mobile
           }}
