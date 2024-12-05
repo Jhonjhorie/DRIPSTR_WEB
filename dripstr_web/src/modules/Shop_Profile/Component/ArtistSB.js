@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../../../assets/shop/shoplogo.jpg';
-
+import avatar from '../../../assets/car.jpg'
 function ArtistSB() { 
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
   const navbarRef = useRef(null);
@@ -21,7 +20,7 @@ function ArtistSB() {
     shadow-primary-color h-12 w-20 mt-2 rounded-md mr-16 ">
       <div>
           <img
-            src={logo}
+            src={avatar}
             alt="Shop Logo"
             className="drop-shadow-custom object-cover rounded-md h-11 w-full"
           />
@@ -50,7 +49,7 @@ function ArtistSB() {
           <div className='h-24 w-full rounded-md bg-slate-900'>
           <div className='bg-slate-100 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-full border-[3px]  border-slate-800 ' >
             <img
-              src={logo}
+              src={avatar}
               alt="Shop Logo"
               className="drop-shadow-custom object-cover rounded-full h-full w-full"
             />
@@ -58,7 +57,7 @@ function ArtistSB() {
            
           </div>
 
-          <div className='text-slate-900 font-semibold pt-[30%]  text-center'> Saint Mercy Apparel </div>
+          <div className='text-slate-900 font-semibold pt-[30%]  text-center'> Lazy cat at work </div>
           <li
           onClick={() => navigate('/shop/Artist/ArtistDashboard')}
           className='flex justify-between p-1 hover:bg-slate-300 mt-4 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
