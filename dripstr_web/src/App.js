@@ -20,7 +20,6 @@ import Reminder from './modules/Messaging/View/Reminder';
 
 
 // Shared Component
-
 function App() {
   return (
     <Router>

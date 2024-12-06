@@ -14,6 +14,7 @@ import Avatar from '../View/Avatar';
 import SetupShop from '../../Shop_Profile/View/Login';
 import RPMCreateAvatar from '../View/RPMCreateAvatar';  
 import XPAvatar from '../View/ExperimentAvatar';  
+import CharacterCreation from '../View/CharacterCreation';  
 
 const UserController = () => {
   return (
@@ -31,6 +32,8 @@ const UserController = () => {
       <Route path="/ShopSetup" element={<SetupShop />} />
       <Route path="/RPMAvatar" element={<RPMCreateAvatar />} />
       <Route path="/XPAvatar" element={<XPAvatar />} />
+      <Route path="/CC" element={<CharacterCreation />} />
+
     </Routes>
   );
 };
