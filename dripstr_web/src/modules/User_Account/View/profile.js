@@ -34,7 +34,7 @@ const UserProfile = () => {
                 </div>
               </div>
               <div className="align-middle justify-center">
-                <Link to="../RPMAvatar">
+                <Link to="../Cc">
                   <button className="text-blue-600 font-medium">
                     Create Avatar
                   </button>
