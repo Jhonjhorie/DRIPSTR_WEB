@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell, faBox, faVolumeHigh } from "@fortawesome/free-solid-svg-icons";
@@ -25,25 +25,25 @@ const Notification = () => {
 
   // Categories of notifications
   const categories = {
-    promos: Array.from({ length: 3 }, () => ({
+    promos: Array.from({ length: 15 }, () => ({
       shopName: getRandomShopName(),
       date: getRandomDate(),
       message: "Exclusive Sale: Up to 50% OFF!",
       imageUrl: "https://via.placeholder.com/80",
     })),
-    orders: Array.from({ length: 3 }, () => ({
+    orders: Array.from({ length: 5 }, () => ({
       shopName: getRandomShopName(),
       date: getRandomDate(),
       message: "Your order is out for delivery!",
       imageUrl: "https://via.placeholder.com/80",
     })),
-    services: Array.from({ length: 3 }, () => ({
+    services: Array.from({ length: 7 }, () => ({
       shopName: getRandomShopName(),
       date: getRandomDate(),
       message: "New partnership opportunity available.",
       imageUrl: "https://via.placeholder.com/80",
     })),
-    vouchers: Array.from({ length: 3 }, () => ({
+    vouchers: Array.from({ length: 8 }, () => ({
       shopName: getRandomShopName(),
       date: getRandomDate(),
       message: "Your voucher is about to expire. Redeem now!",
@@ -51,13 +51,28 @@ const Notification = () => {
     })),
   };
 
-  // Combine all categories into one array for display
-  const notifications = [
-    ...categories.promos,
-    ...categories.orders,
-    ...categories.services,
-    ...categories.vouchers,
-  ];
+  // State to handle category selection
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [visibleCount, setVisibleCount] = useState(10); // Initially show 10 notifications
+
+  // Handle category click
+  const categorySort = (category) => {
+    setSelectedCategory(category);
+    setVisibleCount(10); // Reset the visible count when category changes
+  };
+
+  const filteredNotifications = selectedCategory === "all"
+    ? [
+        ...categories.promos,
+        ...categories.orders,
+        ...categories.services,
+        ...categories.vouchers,
+      ]
+    : categories[selectedCategory];
+
+  const handleSeeMore = () => {
+    setVisibleCount(visibleCount + 10); // Show 10 more notifications on click
+  };
 
   return (
     <div className="flex flex-col p-4 bg-slate-200">
@@ -67,32 +82,50 @@ const Notification = () => {
           Notifications
         </h2>
         <div className="flex flex-row justify-start ml-4 space-x-4 flex-grow">
-          <Link
-            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-slate-100">
-            All
-          </Link>
-          <Link
-            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-gray-100">
-            Promos
-          </Link>
-          <Link
-            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-gray-100" >
-            Orders
-          </Link>
-          <Link
-            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-gray-100">
-            Services
-          </Link>
-          <Link
-            to="/vouchers"
-            className="flex items-center bg-white px-4 py-2 text-sm font-bold text-slate-600 hover:text-primary-color rounded-lg shadow hover:bg-gray-100">
-            Voucher Reminder
-          </Link>
+          {/* All Category Button */}
+          <button
+            onClick={() => categorySort("all")}
+            className={`flex items-center px-4 py-2 text-sm font-bold ${selectedCategory === "all" ? "text-primary-color bg-gray-100" : "text-slate-600"} hover:text-primary-color rounded-lg shadow hover:bg-gray-100 bg-white`}
+          >
+            <span>All</span>
+          </button>
+
+          {/* Promos Category Button */}
+          <button
+            onClick={() => categorySort("promos")}
+            className={`flex items-center px-4 py-2 text-sm font-bold ${selectedCategory === "promos" ? "text-primary-color bg-gray-100" : "text-slate-600"} hover:text-primary-color rounded-lg shadow hover:bg-gray-100 bg-white`}
+          >
+            <span>Promos</span>
+          </button>
+
+          {/* Orders Category Button */}
+          <button
+            onClick={() => categorySort("orders")}
+            className={`flex items-center px-4 py-2 text-sm font-bold ${selectedCategory === "orders" ? "text-primary-color bg-gray-100" : "text-slate-600"} hover:text-primary-color rounded-lg shadow hover:bg-gray-100 bg-white`}
+          >
+            <span>Orders</span>
+          </button>
+
+          {/* Services Category Button */}
+          <button
+            onClick={() => categorySort("services")}
+            className={`flex items-center px-4 py-2 text-sm font-bold ${selectedCategory === "services" ? "text-primary-color bg-gray-100" : "text-slate-600"} hover:text-primary-color rounded-lg shadow hover:bg-gray-100 bg-white`}
+          >
+            <span>Services</span>
+          </button>
+
+          {/* Vouchers Category Button */}
+          <button
+            onClick={() => categorySort("vouchers")}
+            className={`flex items-center px-4 py-2 text-sm font-bold ${selectedCategory === "vouchers" ? "text-primary-color bg-slate-100" : "text-slate-600"} hover:text-primary-color rounded-lg shadow hover:bg-gray-100 bg-white`}
+          >
+            <span>Voucher Reminder</span>
+          </button>
         </div>
       </div>
 
       {/* Notifications List */}
-      {notifications.map((notif, index) => (
+      {filteredNotifications.slice(0, visibleCount).map((notif, index) => (
         <Link
           to="/details"
           key={index}
@@ -112,6 +145,18 @@ const Notification = () => {
           </div>
         </Link>
       ))}
+
+      {/* Show More Button */}
+      {visibleCount < filteredNotifications.length && (
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={handleSeeMore}
+            className="text-primary-color font-semibold hover:underline"
+          >
+            See More
+          </button>
+        </div>
+      )}
     </div>
   );
 };
