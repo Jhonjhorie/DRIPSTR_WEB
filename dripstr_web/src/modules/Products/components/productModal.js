@@ -1,87 +1,95 @@
-import React from "react";
+import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
+import BuyConfirm from "./buyConfirm.js";
 
 const ProductModal = ({ item, onClose }) => {
+  const [selectedAction, setSelectedAction] = useState(null);
   const navigate = useNavigate();
 
   const handleProductClick = () => {
     navigate(`/product/${item.product}`, { state: { item } });
   };
 
-  const handleCartClick = () => {
-    // Get the current cart items from localStorage (if any)
-    const storedItems = localStorage.getItem('cartItems');
-    const cartItems = storedItems ? JSON.parse(storedItems) : []; // Initialize as empty array if no cart items exist
-  
-    // Add the new item to the cart
-    const updatedCartItems = [...cartItems, item]; // Append the new item
-  
-    // Save the updated cart items back to localStorage
-    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-  
-    // Navigate to the cart page
-    navigate(`/cart`);
+  const openModal = (action) => {
+    setSelectedAction(action);  
+    setTimeout(() => {
+      document.getElementById('buyConfirm_Modal').showModal();
+    }, 50);
+  };
+  const closeModal = () => {
+    document.getElementById('buyConfirm_Modal').close();
   };
 
   const allImages = [item.url, ...(item.images || [])];
   return (
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 h-[40rem] overflow-y-auto overflow-x-hidden lg:overflow-hidden custom-scrollbar  modal-box">
+      {item  && <dialog id="buyConfirm_Modal" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
+                   <BuyConfirm action={selectedAction} item={item} onClose={closeModal}/>
+                   <form method="dialog" class="modal-backdrop">
+                    <button onClick={closeModal}></button>
+                  </form>
+      </dialog>}
+
       <div className=" place-items-stretch hero bg-slate-300 h-full ">
         <div className="hero-content flex-col h-full lg:flex-row ">
-      <div className="flex flex-col">
-      <img src={require('@/assets/images/starDrp.png')}  
-            className=' absolute -top-24 -right-16 lg:right-[30%] -z-10 opacity-30  w-[35%] h-[50%] object-contain'/>
-      <img src={require('@/assets/images/streetbg.png')}  
-            className=' absolute top-[55%] lg:top-[60%] -left-[10%] -z-10 opacity-30  w-[35%] h-[40%] object-contain '/>
-          <div className="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
-          
-            {allImages.map((image, imageIndex) => {
-              const slideId = `slide${imageIndex}`;
-              const prevSlideId = `slide${
-                (imageIndex - 1 + allImages.length) % allImages.length
-              }`;
-              const nextSlideId = `slide${(imageIndex + 1) % allImages.length}`;
+          <div className="flex flex-col">
+            <img
+              src={require("@/assets/images/starDrp.png")}
+              className=" absolute -top-24 -right-16 lg:right-[30%] -z-10 opacity-30  w-[35%] h-[50%] object-contain"
+            />
+            <img
+              src={require("@/assets/images/streetbg.png")}
+              className=" absolute top-[55%] lg:top-[60%] -left-[10%] -z-10 opacity-30  w-[35%] h-[40%] object-contain "
+            />
+            <div className="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
+              {allImages.map((image, imageIndex) => {
+                const slideId = `slide${imageIndex}`;
+                const prevSlideId = `slide${
+                  (imageIndex - 1 + allImages.length) % allImages.length
+                }`;
+                const nextSlideId = `slide${
+                  (imageIndex + 1) % allImages.length
+                }`;
 
-              return (
-                <div
-                  id={slideId}
-                  key={slideId}
-                  className="carousel-item relative w-full  max-w-[40rem]  justify-center items-center"
-                >
-                  <img
-                    src={image}
-                    alt={`${item.product}-${imageIndex}`}
-                    className="w-[32rem]  h-[65vh] object-contain"
-                  />
-                  {allImages.length > 1 && (
-                    <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                      <a href={`#${prevSlideId}`} className="btn btn-circle">
-                        ❮
-                      </a>
-                      <a href={`#${nextSlideId}`} className="btn btn-circle">
-                        ❯
-                      </a>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-             
-          </div>
-          {item.str && (
-            <div className="bg-primary-color  w-full rounded-md pl-1 z-50">
-              <button
-                onClick={() => handleProductClick()}
-                className="btn rounded-md  w-full btn-sm glass   "
-              >
-                See in Avatar
-              </button>
+                return (
+                  <div
+                    id={slideId}
+                    key={slideId}
+                    className="carousel-item relative w-full  justify-center items-center"
+                  >
+                    <img
+                      src={image}
+                      alt={`${item.product}-${imageIndex}`}
+                      className="w-[32rem]  h-[65vh] object-contain"
+                    />
+                    {allImages.length > 1 && (
+                      <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
+                        <a href={`#${prevSlideId}`} className="btn btn-circle">
+                          ❮
+                        </a>
+                        <a href={`#${nextSlideId}`} className="btn btn-circle">
+                          ❯
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          )}
+            {item.str && (
+              <div className="bg-primary-color  w-full rounded-md pl-1 z-50">
+                <button
+                  onClick={() => handleProductClick()}
+                  className="btn rounded-md  w-full btn-sm glass   "
+                >
+                  See in Avatar
+                </button>
+              </div>
+            )}
           </div>
-          <div className="flex flex-col gap-2 justify-between  h-full md:w-full lg:max-w-[45%] pt-6 ">
+          <div className="flex flex-col gap-2 justify-between  h-full w-full lg:max-w-[50%] lg:min-w-[50%] pt-6 ">
             <div className="flex flex-col gap-1 ">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
                 {item.product}
@@ -101,7 +109,7 @@ const ProductModal = ({ item, onClose }) => {
                     </h2>
                     <div className="flex gap-1 items-center">
                       <h2 className="text-base font-medium text-primary-color">
-                      {averageRate(item.reviews) || "N/A"}
+                        {averageRate(item.reviews) || "N/A"}
                       </h2>
                       <RateSymbol item={averageRate(item.reviews)} size={"4"} />
                     </div>
@@ -175,13 +183,13 @@ const ProductModal = ({ item, onClose }) => {
               </div>
               <div className=" justify-end gap-2 items-center flex">
                 <button
-                  onClick={() => handleCartClick()}
+                  onClick={() => openModal('cart')}
                   className="btn btn-sm btn-outline btn-secondary  "
                 >
                   Add to Cart
                 </button>
                 <button
-                  onClick={() => handleProductClick()}
+                  onClick={() => openModal('order')}
                   className="btn btn-sm btn-outline btn-primary  "
                 >
                   Place Order
@@ -197,7 +205,6 @@ const ProductModal = ({ item, onClose }) => {
           </div>
         </div>
       </div>
-    
     </div>
   );
 };

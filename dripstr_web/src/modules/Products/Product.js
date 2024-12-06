@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import {averageRate} from "./hooks/useRate.ts";
 import RatingSection from "./components/RatingSection.js";
+import BuyConfirm from "./components/buyConfirm.js";
 
 
 function Product() {
@@ -12,6 +13,7 @@ function Product() {
   // Move the hook outside any conditionals
   const allImages = item?.url ? [item.url, ...(item.images || [])] : [];
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [selectedAction, setSelectedAction] = useState(null);
 
 
   if (!item) {
@@ -32,8 +34,24 @@ function Product() {
     setCurrentSlide((prev) => (prev + 1) % allImages.length);
   };
 
+  const openModal = (action) => {
+    setSelectedAction(action);  
+    setTimeout(() => {
+      document.getElementById('buyConfirm_Modal').showModal();
+    }, 50);
+  };
+  const closeModal = () => {
+    document.getElementById('buyConfirm_Modal').close();
+  };
+
   return (
     <div className="w-full relative pb-16 items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 py-4">
+       {item  && <dialog id="buyConfirm_Modal" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
+                   <BuyConfirm action={selectedAction} item={item} onClose={closeModal}/>
+                   <form method="dialog" class="modal-backdrop">
+                    <button onClick={closeModal}></button>
+                  </form>
+      </dialog>}
         <img src={require('@/assets/images/starDrp.png')}  
             className=' absolute top-[-320px] -right-16 lg:right-[30%] z-0 opacity-30  w-[35%] h-[50%] object-contain'/>
       <img src={require('@/assets/images/streetbg.png')}  
@@ -176,10 +194,16 @@ function Product() {
 
             <div>
               <div className="justify-end gap-2 mt-4 items-center flex">
-                <button className="btn p-4 btn-md btn-secondary">
+              <button
+                  onClick={() => openModal('cart')}
+                  className="btn btn-sm btn-outline btn-secondary  "
+                >
                   Add to Cart
                 </button>
-                <button className="btn p-4 btn-md btn-primary">
+                <button
+                  onClick={() => openModal('order')}
+                  className="btn btn-sm btn-outline btn-primary  "
+                >
                   Place Order
                 </button>
               </div>
