@@ -3,16 +3,35 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faTrash, faStore, faTimes } from '@fortawesome/free-solid-svg-icons'; 
 import Button from '../../../shared/Button';
 import cartData from '../Model/CartData';
-import { AlertTitle } from '@mui/material';
+import Pagination from '../Controller/Pagination';
+
 
 function Cart() {
   const [cartItems, setCartItems] = useState(cartData);
   const [showModal, setShowModal] = useState(false);
   const [showCard, setShowCard] = useState(false);
 
+  useEffect(() => {
+    // Get the cart data
+    const storedItems = localStorage.getItem('cartItems');
+    if (storedItems) {
+      const items = JSON.parse(storedItems);
+      setCartItems(items); // Set the items to the cart state
+    }
+  }, []);
+
   const handlePlaceOrder = (cartItems, groupedItems) => {
+    // Filter the cartItems to get only those that are checked
     const selectedItems = cartItems.filter(item => item.checked);
   
+    // Create a new groupedItems object that groups selected items by shopName
+    const groupedSelectedItems = selectedItems.reduce((acc, item) => {
+      if (!acc[item.shopName]) acc[item.shopName] = [];
+      acc[item.shopName].push(item);
+      return acc;
+    }, {});
+  
+    // Prepare order details
     const orderDetails = {
       items: selectedItems.map(item => ({
         shopName: item.shopName,
@@ -21,31 +40,26 @@ function Cart() {
         quantity: item.quantity,
       })),
       totalProductPrice: selectedItems.reduce((total, item) => total + item.price * item.quantity, 0),
-      totalShippingFees: Object.keys(groupedItems).reduce(
+      totalShippingFees: Object.keys(groupedSelectedItems).reduce(
         (total, shopName) =>
-          total +
-          groupedItems[shopName]
-            .filter(item => item.checked)
-            .reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
+          total + groupedSelectedItems[shopName].reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
         0
       ),
       grandTotal: selectedItems.reduce((total, item) => total + item.price * item.quantity, 0) +
-        Object.keys(groupedItems).reduce(
+        Object.keys(groupedSelectedItems).reduce(
           (total, shopName) =>
-            total +
-            groupedItems[shopName]
-              .filter(item => item.checked)
-              .reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
+            total + groupedSelectedItems[shopName].reduce((shopTotal, item) => shopTotal + item.shippingFee, 0),
           0
         ),
     };
   
-    // Save to localStorage or send to the server
+    // Save order details to localStorage or send them to the server
     localStorage.setItem('orderDetails', JSON.stringify(orderDetails));
-    
+  
     // Redirect to Orders page
     window.location.href = '/account/orders';
   };
+  
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,7 +102,7 @@ function Cart() {
   };
 
   const handleDeleteAll = () => {
-    setCartItems(cartItems.filter((item) => !item.checked));
+    setCartItems(cartItems.filter((item) => !item));
   };
 
   const calculateTotalProducts = () => {
@@ -147,9 +161,11 @@ function Cart() {
     setCurrentPage(pageNumber);
   };
 
+  
+  
   return (
     <>
-    <div className="p-3 bg-slate-200">
+    <div className="p-3 bg-slate-200 h-full">
       <h1 className="text-3xl font-bold mb-8 text-center text-purple-600 ">Shopping Cart</h1>
       <div className="bg-slate-600 flex items-center justify-between p-4 rounded-md mb-4">
         <p className="text-white text-lg">Cart Products: {calculateAllProducts()}</p>
@@ -169,7 +185,7 @@ function Cart() {
         </div>
       </div>
       {cartItems.length === 0 ? (
-        <p className="text-center">Your cart is empty.</p>
+        <p className="flex items-center justify-center text-2xl font-bold text-purple-600 mt-[13rem]">Your cart is empty.</p>
       ) : (
         <div className="flex flex-col">
           <div className="mb-4">
@@ -222,17 +238,8 @@ function Cart() {
             ))}
           </div>
           {/* Pagination Controls */}
-          <div className="flex justify-center mb-4">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index + 1}
-                onClick={() => handlePageChange(index + 1)}
-                className={`mx-1 px-3 py-1 rounded ${currentPage === index + 1 ? 'bg-purple-500 text-white font-bold' : 'bg-slate-500 text-white font-bold'}`}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
+          <Pagination totalPages={totalPages} handlePageChange={handlePageChange} />
+
           {/* Sticky Total and Proceed Section */}
           <div className="flex justify-between items-center mt-8 sticky z-100 bottom-2 bg-slate-600 p-4 rounded-lg">
             <p className="text-2xl font-bold text-white">

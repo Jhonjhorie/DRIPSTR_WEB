@@ -12,10 +12,11 @@ const ChatMessages = ({ onClose }) => {
   const chatRef = useRef(null);
 
   // Sample messages with chat history
-  const messages = [
+  const [messages, setMessages] = useState([
     {
       id: 1,
       name: "Message 1",
+      status: "unread", // New status field to track message read status
       chatHistory: [
         { from: "user", text: "Ganda ng design" },
         { from: "user", text: "Would buy it again (˵ •̀ ᴗ - ˵ )" },
@@ -25,6 +26,7 @@ const ChatMessages = ({ onClose }) => {
     {
       id: 2,
       name: "Message 2",
+      status: "unread",
       chatHistory: [
         { from: "user", text: "How much is this?" },
         { from: "admin", text: "It costs 500 pesos" }
@@ -33,9 +35,10 @@ const ChatMessages = ({ onClose }) => {
     {
       id: 3,
       name: "Message 3",
-      chatHistory: []
+      status: "unread",
+      chatHistory: [] // No chat history here
     }
-  ];
+  ]);
 
   // Detect if the screen size is mobile
   useEffect(() => {
@@ -47,13 +50,19 @@ const ChatMessages = ({ onClose }) => {
     return () => window.removeEventListener("resize", updateView);
   }, []);
 
-  // Handle opening the selected chat
+  // Handle opening the selected chat and marking as read
   const openChat = (message) => {
     if (selectedChat && selectedChat.id !== message.id) {
       // Only add to minimized chats if it's a different chat
       setMinimizedChats((prev) => [...prev, selectedChat]);
     }
     setSelected(message);
+    // Mark the message as read
+    setMessages((prevMessages) =>
+      prevMessages.map((msg) =>
+        msg.id === message.id ? { ...msg, status: "read" } : msg
+      )
+    );
     // Remove the chat from minimized state if it's already minimized
     setMinimizedChats((prev) => prev.filter((chat) => chat.id !== message.id));
   };
@@ -109,7 +118,7 @@ const ChatMessages = ({ onClose }) => {
             {messages.map((message) => (
               <div
                 key={message.id}
-                className="flex items-center gap-4 p-3 hover:text-primary-color hover:bg-gray-100 cursor-pointer"
+                className={`flex items-center gap-4 p-3 hover:text-primary-color cursor-pointer ${message.status === "unread" ? "bg-violet-100" : ""}`}
                 onClick={() => openChat(message)}
               >
                 <img
@@ -126,6 +135,10 @@ const ChatMessages = ({ onClose }) => {
                       : "No messages"}
                   </div>
                 </div>
+                {/* Display unread indicator only for chats with messages */}
+                {message.chatHistory.length > 0 && message.status === "unread" && (
+                  <div className="w-2.5 h-2.5 rounded-full bg-primary-color ml-auto self-center"></div>
+                )}
               </div>
             ))}
           </div>
@@ -138,7 +151,7 @@ const ChatMessages = ({ onClose }) => {
           ref={chatRef}
           className={`fixed ${
             isMobile ? "top-0 left-0 w-full" : "bottom-4 right-12 w-80"
-          } bg-white rounded-lg shadow-md transition-all z-50 flex flex-col`}
+          } bg-slate-100 rounded-lg shadow-lg shadow-slate-300 transition-all z-50 flex flex-col`}
           style={{
             height: isMobile ? "100vh" : "50vh", // Full-screen height on mobile
           }}
@@ -196,10 +209,10 @@ const ChatMessages = ({ onClose }) => {
         {minimizedChats.map((chat, index) => (
           <div
             key={index}
-            className="bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg cursor-pointer"
+            className="bg-blue-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-md shadow-slate-100 cursor-pointer"
             onClick={() => openChat(chat)}
           >
-            {chat.name[0]} {/* Display the first letter of the chat */}
+            {chat.name[0]} {/* Display the first letter of the chat name */}
           </div>
         ))}
       </div>

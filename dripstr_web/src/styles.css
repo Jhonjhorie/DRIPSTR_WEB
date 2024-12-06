@@ -27,6 +27,7 @@ input[type="number"] {
   
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px; 
+      
     }
   
     .custom-scrollbar::-webkit-scrollbar-thumb {

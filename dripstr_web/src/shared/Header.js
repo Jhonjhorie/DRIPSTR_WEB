@@ -15,10 +15,6 @@ const Header = () => {
     setOpenChat(!openChat);
   };
 
-  const closeChat = () => {
-    setOpenChat(false);
-  };
-
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -95,7 +91,7 @@ const Header = () => {
           </button>
         </Link>
       </div>
-      {openChat && <ChatMessages onClose={closeChat} />}
+      {openChat && <ChatMessages/>}
     </div>
   );
 };

@@ -1,20 +1,16 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-
-import Login from '../View/login';
-import SignUp from '../View/signup';
-import ForgotPassword from '../View/forgotpassword';
- 
+import Account from "../../User_Account/View/CharacterCreation";
+import Auth from '../View/Auth.js';
+  
  
 const HomeController = () => {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/SignUp" element={<SignUp />} />
-      <Route path="/ForgotPassword" element={<ForgotPassword />} />
-      
-     </Routes>
+      <Route path="/" element={<Auth />} />
+      <Route path="/account" element={<Account />} />
+    </Routes>
   );
 };
 
