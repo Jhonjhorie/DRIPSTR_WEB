@@ -123,6 +123,12 @@ const CharacterCustomization = () => {
     navigate("/Account/Avatar");
   };
 
+  const handleSkip = () => {
+ 
+     alert("Character customization Skiped!");
+    navigate("/");
+  };
+
   return (
     <div className="p-4 flex flex-row min-h-screen bg-slate-200">
       <div className="flex-1 h-[500px] rounded-lg shadow-lg bg-gray-100">
@@ -215,7 +221,7 @@ const CharacterCustomization = () => {
 <div className="p-2 w-full flex flex-row justify-end">
         <button
           className="p-2 w-40  mr-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          onClick={handleSave}
+          onClick={handleSkip}
         >
           Skip
         </button>
