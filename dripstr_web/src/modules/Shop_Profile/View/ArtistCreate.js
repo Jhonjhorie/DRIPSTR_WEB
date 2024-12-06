@@ -99,14 +99,16 @@ function ArtistCreate() {
                     <span className="label-text font-semibold text-slate-800">What is your address?</span>
                  
                 </div>
-                <textarea className="textarea textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24" placeholder="Type your Shop Address here"></textarea>
+                <textarea className="textarea resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24" placeholder="Type your Shop Address here"></textarea>
             </label>
             <div className='w-full h-auto justify-between flex m-2  mb-14 md:mb-0'>
                 <button 
                 onClick={() => navigate('/shop/MerchantCreate')}
                 className="  text-slate-600 iceland-bold hover:text-custom-purple hover:duration-300 self-end  m-1">
                     BE A DRIPSTR MERCHANT? </button> 
-                <button className="btn glass bg-custom-purple   mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>      
+                <button
+                  onClick={() => navigate('/shop/Artist/ArtistDashboard')}
+                className="btn glass bg-custom-purple   mr-5 iceland-regular tracking-wide text-lg text-white ">SUBMIT</button>      
             </div>
             
     </div>

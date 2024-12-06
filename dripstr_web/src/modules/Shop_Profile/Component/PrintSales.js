@@ -52,16 +52,16 @@ function PrintSales() {
                     <div className='w-full h-0.5 rounded-full bg-custom-purple'></div>
                     <div className='w-full h-72 p-5 mb-5'>
                         <div className='text-black text-sm'>
-                            <p className='p-1 text-slate-950 text-sm font-semibold'>Shop name : <span className='font-normal text-sm'>{ShopName}</span></p>    
-                            <p className='p-1 text-slate-950 text-sm font-semibold'>Ratings : <span className='font-normal text-sm'>{ShopRating}</span></p>    
-                            <p className='p-1 text-slate-950 text-sm font-semibold'>Total Income : <span className='font-normal text-sm'>{TotalIncome}</span></p>    
-                            <p className='p-1 text-slate-950 text-sm font-semibold'>Total Orders : <span className='font-normal text-sm'>{TotalOrders}</span></p>    
-                            <p className='p-1 text-slate-950 text-sm font-semibold mb-3'>No. of Return Item : <span className='font-normal text-sm'>{TotalReturnItems}</span></p>                 
-                            <p className='p-1 text-slate-950 text-sm font-semibold'>Most Possitive Feedback : <br/> <span className='font-normal text-sm'>{PossitiveFB}</span></p>    
-                            <p className='p-1 text-slate-950 text-sm font-semibold mb-10'>Least Likely Feedback : <br/><span className='font-normal text-sm'>{NegativeFB}</span></p>    
-                            <p className='p-1 text-slate-950 text-sm font-semibold  '>
+                            <div className='p-1 text-slate-950 text-sm font-semibold'>Shop name : <span className='font-normal text-sm'>{ShopName}</span></div>    
+                            <div className='p-1 text-slate-950 text-sm font-semibold'>Ratings : <span className='font-normal text-sm'>{ShopRating}</span></div>    
+                            <div className='p-1 text-slate-950 text-sm font-semibold'>Total Income : <span className='font-normal text-sm'>{TotalIncome}</span></div>    
+                            <div className='p-1 text-slate-950 text-sm font-semibold'>Total Orders : <span className='font-normal text-sm'>{TotalOrders}</span></div>    
+                            <div className='p-1 text-slate-950 text-sm font-semibold mb-3'>No. of Return Item : <span className='font-normal text-sm'>{TotalReturnItems}</span></div>                 
+                            <div className='p-1 text-slate-950 text-sm font-semibold'>Most Possitive Feedback : <br/> <span className='font-normal text-sm'>{PossitiveFB}</span></div>    
+                            <div className='p-1 text-slate-950 text-sm font-semibold mb-10'>Least Likely Feedback : <br/><span className='font-normal text-sm'>{NegativeFB}</span></div>    
+                            <div className='p-1 text-slate-950 text-sm font-semibold  '>
                                 <span className=''><DateTime/></span> 
-                            </p>
+                            </div>
                         </div>
                     </div>
                     <div className='w-full h-0.5 rounded-full bg-custom-purple'></div>
