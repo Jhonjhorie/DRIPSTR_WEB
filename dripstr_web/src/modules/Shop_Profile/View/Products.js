@@ -29,7 +29,9 @@
     const [viewItem, setViewPost] = React.useState(false); // Confirmation for posting item
     const [selectedItem, setSelectedItem] = React.useState(null);
     const [selectedColors, setSelectedColors] = useState([]);
+    const [otherColor, setOtherColor] = useState(""); 
 
+    
     const handleAddItem = () => { //ITEMS
       setIsModalOpenItem(true);
     };
@@ -200,6 +202,7 @@
       setCustomerType(e.target.value);
       setCategory(''); // When click remove the content
       setClotheType(''); //''
+    
     };
     {/* Function to show the next dropdown hehe */}
     const handleCategoryChange = (e) => {
@@ -212,7 +215,7 @@
       "Brown", "Gray", "Black", "White", "Cyan", "Magenta", "Teal", 
       "Lime", "Indigo", "Violet", "Maroon", "Beige", "Turquoise", 
       "Gold", "Silver", "Bronze", "Lavender", "Peach", "Coral", 
-      "Aqua", "Olive", "Emerald", "Ivory", "Chartreuse"
+      "Aqua", "Olive", "Emerald", "Ivory", "Chartreuse", "Others"
     ];
     const handleCheckboxChange = (color) => {
       setSelectedColors(prevState => 
@@ -395,11 +398,11 @@
       </div>
       {/* Add Item Modal */} 
       {isModalOpenItems && (
-    <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+    <div className="fixed inset-0 pt-16 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
       <div className="bg-white pt-2 rounded-lg p-5 w-full md:w-1/2 lg:w-3/4 m-2 md:m-0">
         <h2 className=" flex justify-between w-full place-items-center   "><span className='font-bold text-[20px] text-slate-800 py-2 md:text-2xl '>ADD ITEM</span> <box-icon type='solid' color='#4D077C' name='customize'></box-icon></h2>
         <div className='bg-slate-200 h-[400px] md:h-full rounded-md overflow-hidden custom-scrollbar overflow-y-scroll md:flex gap-1 w-full p-2 md:px-5 mb-2'>
-          <div className='w-full md:w-1/2 h-auto p-1 pr-5 '> 
+          <div className='w-full md:w-1/4 h-auto p-1 pr-5 '> 
             <label className='text-slate-950  font-semibold mr-2 text-sm'>Item Name:</label><br/>
             <input type='text' className=' bg-slate-50 p-1 rounded-sm  mt-2 text-slate-800 w-full shadow-md' placeholder='Item Name '></input> <br/>
             <label className='text-slate-950 font-semibold text-sm mr-2 '>Total:</label><br/>
@@ -409,7 +412,7 @@
               onChange={Totaldigit}
               onKeyDown={blockInvalidChar}
               className=' bg-slate-50 p-1 rounded-sm text-slate-800 mt-1 w-full shadow-md' 
-              placeholder='Item Name '>
+              placeholder='Quantity '>
             </input> <br/>
             {/* customer type */}
             <label className='text-slate-950 font-semibold text-sm mr-2'>Customer Type:</label><br/>
@@ -467,7 +470,7 @@
           {/* Select sizes */}
           <div className=' w-full md:w-1/4 h-full py-1'>
           <div className=' flex gap-2 place-items-center justify-between '>
-            <label className='text-slate-950 font-semibold text-sm '>Add Sizes?</label> 
+            <label className='text-slate-950 font-semibold text-sm '>Color Variant</label> 
             <div className="tooltip tooltip-bottom " data-tip="Our sizes are based on US standards. To provide better sizing guidance, we highly recommend uploading an image with detailed size instructions to help customers understand.">
                 <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
                   <box-icon color='#FFFFFF' name='info-circle'></box-icon>
@@ -475,17 +478,46 @@
             </div>
           </div>
           
-          <div className='h-[340px] mt-2 w-full bg-slate-100 overflow-hidden overflow-y-scroll shadow-sm shadow-slate-500 rounded-sm custom-scrollbar'>
-            {clotheType && sizes[customerType] && sizes[customerType][clotheType] ? (
-              sizes[customerType][clotheType].map((size, index) => (
-                <div key={index} className="p-2">
-                  <input type="checkbox" id={`size-${size}`} name="sizes" value={size} className="mr-2" />
-                  <label htmlFor={`size-${size}`} className="text-slate-800 text-sm">{size}</label>
-                </div>
-              ))
-            ) : (
-              <p className="text-slate-800 text-c text-sm p-2">No sizes available for the selected options.</p>
-            )}
+          <div className='h-[400px] mt-2 w-full relative bg-slate-100 overflow-hidden overflow-y-scroll shadow-sm shadow-slate-500 rounded-sm custom-scrollbar'>
+          {clotheType.length === 0 && (
+              <div className="text-red-500 text-sm mt-2 text-center">
+                  Please Complete the Selection
+              </div>
+          )}
+            {clotheType && colors.length > 0 && (
+            <div className="grid grid-cols-2 pb-10 gap-1 p-2">
+              
+                {colors.map((color, index) => (
+                  <div className=' w-full  h-full'>
+                        <div key={index} className="flex items-center mb-2">
+                          <input
+                              type="checkbox"
+                              id={color}
+                              name={color}
+                              className="mr-2"
+                              onChange={() => handleCheckboxChange(color)}
+                          />
+                          <label htmlFor={color} className="text-sm text-gray-700">{color}</label>
+                        
+                        </div>
+                        
+                          {color === "Others" && selectedColors.includes("Others") && (
+                              <input
+                                  type="text"
+                                  placeholder="Specify color"
+                                  className="absolute p-1 border left-5 w-48 rounded text-sm bg-slate-200"
+                                  onChange={(e) => setOtherColor(e.target.value)}
+                              />
+                          )}
+                        
+                      
+                  </div>
+                
+                    
+                ))}
+               
+            </div>
+             )}
           </div>
           
             
@@ -494,72 +526,97 @@
           <div className='w-full md:w-1/2 h-full '>
 
           <div className='flex justify-between place-items-center w-full '>
-            <label className='text-slate-950 font-semibold mr-2 mt-1.5 text-sm'>Add Variant? </label>
-          
-          </div>
-          
-            <div className='bg-slate-100 h-[150px] w-full mt-2.5 p-1 overflow-hidden overflow-y-scroll shadow-inner shadow-slate-500 rounded-sm  custom-scrollbar '>
-             
-                <div>
-                <div className="grid grid-cols-2 gap-4">
-                {colors.map((color, index) => (
-                        <div key={index} className="flex items-center mb-2">
-                            <input 
-                                type="checkbox" 
-                                id={color} 
-                                name={color} 
-                                className="mr-2" 
-                                onChange={() => handleCheckboxChange(color)}
-                            />
-                            <label htmlFor={color} className="text-gray-700">{color}</label>
-                            
-                        </div>
-                        
-                    ))} 
-                       
-                    </div>
-                </div>
-            </div>
-            <div className='flex justify-between place-items-center w-full  mt-1 '>
-            <label className='text-slate-950 font-semibold mr-2 text-sm'>Add Image? </label>
+            <label className='text-slate-950 font-semibold mr-2  text-sm'> Put Image, Size, Quantity, Price </label>  
             
-              <button 
+            <button 
                   className="bg-custom-purple justify-center flex text-white p-1 hover:bg-slate-600 duration-300 rounded-md "
                   onClick={addImageInput}
               >
                  <box-icon type='solid' color='#FFFFFF' name='folder-plus'></box-icon>
               </button>
+          </div>
+            <div className='flex justify-between place-items-center w-full  mt-1 '>
+
          
             </div>
-            <div className='bg-slate-100 h-[150px] w-full mt-1 p-1 overflow-hidden overflow-y-scroll shadow-inner shadow-slate-500 rounded-sm  custom-scrollbar '>
+            <div className='bg-gradient-to-br from-violet-500 to-fuchsia-500 h-[400px] w-full p-2 overflow-hidden overflow-y-scroll shadow-inner shadow-slate-500 rounded-sm  custom-scrollbar '>
              
                 <div>
+                {selectedColors.length === 0 && (
+                    <div className="text-slate-100 text-sm mt-2 text-center">
+                        Please Select a Variant
+                    </div>
+                )}
                 {selectedColors.map((color, index) => (
-                      <div key={index} className="mt-1 rounded-md p-1 bg-slate-400 shadow-md">
-                          <label className="block text-gray-800 text-sm mb-2 ">Upload an image for {color}</label>
-                          <input 
-                              type="file"
-                              accept="image/*" 
-                              className={`block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-${color.toLowerCase()}-50 focus:outline-none`}
-                          />
-                      </div>
-                  ))}
-                {imageInputs.map((input, index) => (
-                  <div key={index} className="flex items-center mb-2">
-                      <input 
-                          type="file" 
-                          accept="image/*"
-                          className="border p-2 w-full bg-slate-200 h-auto text-slate-800 text-sm"
-                          
-                      />
-                      <button 
-                          className="ml-2 bg-red-500 text-white h-9 px-2 py-1 rounded"
-                          onClick={() => deleteImageInput(index)}
-                      >
-                          Clear
-                      </button>
-                  </div>
+                    <div key={index} className=" rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md">
+                        <label className="block text-gray-800 text-sm text-center w-full bg-slate-100 mb-2 rounded-t-md py-2 ">Upload an image for variant <span className='font-bold uppercase '> {color}</span></label>
+                        <input 
+                            type="file"
+                            accept="image/*" 
+                            className={`block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-${color.toLowerCase()}-50 focus:outline-none`}
+                        />
+                        
+                        {/* Render size selection and price input here */}
+                        {clotheType && sizes[customerType] && sizes[customerType][clotheType] ? (
+                            sizes[customerType][clotheType].map((size, sizeIndex) => (
+                                <div key={sizeIndex} className="p-2 flex gap-2 place-items-center">
+                                    <div className='w-1/3'>
+                                        <input 
+                                            type="checkbox" 
+                                            id={`size-${size}-${color}`} 
+                                            name="sizes" 
+                                            value={size} 
+                                            className="mr-2"
+                                        />
+                                        <label htmlFor={`size-${size}-${color}`} className="text-slate-800 text-sm">
+                                            {size}
+                                        </label>
+                                    </div>
+                             
+                                    <div className='gap-2 flex p-2 justify-end w-1/3'>
+                                        <label className='text-sm text-slate-800'>Quantity:</label>
+                                        <input 
+                                            onKeyDown={blockInvalidChar} 
+                                            type='number' 
+                                            placeholder="Quantity"
+                                            className='bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700'
+                                        />
+                                    </div>
+                                    <div className='gap-2 p-2 flex w-1/3'>
+                                        <label className='text-sm text-slate-800'> Price:</label>
+                                        <input 
+                                            className='bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700' 
+                                            onKeyDown={blockInvalidChar} 
+                                            type='number'
+                                            placeholder="Price"
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-slate-800 text-c text-sm p-2">No sizes available for the selected options.</p>
+                        )}
+                        
+                        
+                    </div>
                 ))}
+
+                {imageInputs.map((input, index) => (
+                    <div key={index} className="flex items-center mb-2">
+                        <input 
+                            type="file" 
+                            accept="image/*"
+                            className="border p-2 w-full bg-slate-200 h-auto text-slate-800 text-sm"
+                        />
+                        <button 
+                            className="ml-2 bg-red-500 text-white h-9 px-2 py-1 rounded"
+                            onClick={() => deleteImageInput(index)}
+                        >
+                            Clear
+                        </button>
+                    </div>
+                ))}
+
                 </div>
             </div>
 
