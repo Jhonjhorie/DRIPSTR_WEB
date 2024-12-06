@@ -12,6 +12,7 @@ import FilterProducts from '../Products/components/FilterProducts';
 import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from '@/constants/categories.ts';
 import { currUser, Images } from "@/constants/sampleData";
+import { products } from '@/constants/sampleData'; // Ensure you have a products array
 
 function Home() {
   const [filMall, setFilMall] = useState(0);
@@ -39,7 +40,7 @@ function Home() {
      
         <FilterProducts />
       </div>
-        <ProductsView categories={filCat} filter={filMall} />
+        <ProductsView products={products} categories={filCat} filter={filMall} />
       </div>
     </div>
   );

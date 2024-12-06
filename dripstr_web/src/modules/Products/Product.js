@@ -34,10 +34,16 @@ function Product() {
 
   return (
     <div className="w-full relative pb-16 items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 py-4">
+        <img src={require('@/assets/images/starDrp.png')}  
+            className=' absolute top-[-320px] -right-16 lg:right-[30%] z-0 opacity-30  w-[35%] h-[50%] object-contain'/>
+      <img src={require('@/assets/images/streetbg.png')}  
+            className=' absolute top-[60rem] lg:top-[40rem] -left-[10%] z-0 opacity-30  w-[35%] h-[40%] object-contain '/>
       <div className=" justify-start  w-full">
+        
         <div className="max-w-[120rem] flex items-start justify-center gap-8 p-4  hero-content flex-col h-full  w-full lg:flex-row">
           <div className="flex flex-col w-full">
-            <div className="carousel w-full h-[70vh] bg-slate-50 rounded-md overflow-y-hidden">
+        
+            <div className="carousel w-full h-[70vh] bg-slate-50 z-10 rounded-md overflow-y-hidden">
               {allImages.length > 0 ? (
                 <div className="carousel-item relative w-full  justify-center items-center">
                   <img
@@ -76,7 +82,7 @@ function Product() {
           </div>
 
           {/* Product Details */}
-          <div className="flex flex-col  justify-between lg:items-end min-h-[74vh]  h-full w-full  pt-6">
+          <div className="flex flex-col  justify-between z-10 lg:items-end min-h-[74vh]  h-full w-full  pt-6">
             <div className="flex flex-col w-full gap-1">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md">
                 {item.product}
@@ -181,7 +187,7 @@ function Product() {
           </div>
         </div>
       </div>
-      <div className="flex flex-col w-full px-4">
+      <div className="flex flex-col z-10 w-full px-4">
       <div class="my-0 divider"></div>
         <p className="text-2xl font-bold">Product Description</p>
     

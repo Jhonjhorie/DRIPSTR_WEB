@@ -1,12 +1,11 @@
 import React,{useState} from 'react';
-import { products } from '@/constants/sampleData'; // Ensure you have a products array
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg'; 
 import ProductModal from './productModal'
 import RateSymbol from '@/shared/products/rateSymbol';
 import { averageRate } from '../hooks/useRate.ts';
 
-const ProductsView = ({categories, filter}) => {
+const ProductsView = ({products, categories, filter}) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 4, lg: 6 }); 
   const numColumns = itemsToShow;
@@ -72,7 +71,7 @@ const dataWithPlaceholders = [
             <div
               key={item.prodId || `product-${index}`}
               onClick={() => openModal(item)} 
-              className="flex flex-col flex-1 max-w-[13.5rem] items-center mx-1 mb-2 rounded-md bg-slate-100 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
+              className="flex flex-col flex-1 max-w-[13.5rem] w-[13.5rem] items-center mx-1 mb-2 rounded-md bg-slate-100 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
             >
               {item.str && (
                 <Logo

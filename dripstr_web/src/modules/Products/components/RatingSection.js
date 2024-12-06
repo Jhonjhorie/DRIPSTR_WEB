@@ -55,7 +55,7 @@ export default function RatingSection ({item}) {
   };
       
     return (
-      <div className="flex flex-col mt-4 w-full px-4">
+      <div className="flex flex-col mt-4 w-full z-10 px-4">
         <div class="my-0 divider"></div>
         <p className="text-2xl font-bold">Rating & Reviews</p>
 

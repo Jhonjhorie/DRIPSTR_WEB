@@ -10,13 +10,33 @@ const ProductModal = ({ item, onClose }) => {
     navigate(`/product/${item.product}`, { state: { item } });
   };
 
+  const handleCartClick = () => {
+    // Get the current cart items from localStorage (if any)
+    const storedItems = localStorage.getItem('cartItems');
+    const cartItems = storedItems ? JSON.parse(storedItems) : []; // Initialize as empty array if no cart items exist
+  
+    // Add the new item to the cart
+    const updatedCartItems = [...cartItems, item]; // Append the new item
+  
+    // Save the updated cart items back to localStorage
+    localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+  
+    // Navigate to the cart page
+    navigate(`/cart`);
+  };
+
   const allImages = [item.url, ...(item.images || [])];
   return (
-    <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 max-h-[40rem] overflow-y-auto custom-scrollbar  modal-box">
-      <div className="hero bg-slate-300 ">
+    <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 h-[40rem] overflow-y-auto overflow-x-hidden lg:overflow-hidden custom-scrollbar  modal-box">
+      <div className=" place-items-stretch hero bg-slate-300 h-full ">
         <div className="hero-content flex-col h-full lg:flex-row ">
       <div className="flex flex-col">
+      <img src={require('@/assets/images/starDrp.png')}  
+            className=' absolute -top-24 -right-16 lg:right-[30%] -z-10 opacity-30  w-[35%] h-[50%] object-contain'/>
+      <img src={require('@/assets/images/streetbg.png')}  
+            className=' absolute top-[55%] lg:top-[60%] -left-[10%] -z-10 opacity-30  w-[35%] h-[40%] object-contain '/>
           <div className="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
+          
             {allImages.map((image, imageIndex) => {
               const slideId = `slide${imageIndex}`;
               const prevSlideId = `slide${
@@ -28,12 +48,12 @@ const ProductModal = ({ item, onClose }) => {
                 <div
                   id={slideId}
                   key={slideId}
-                  className="carousel-item relative w-full justify-center items-center"
+                  className="carousel-item relative w-full  max-w-[40rem]  justify-center items-center"
                 >
                   <img
                     src={image}
                     alt={`${item.product}-${imageIndex}`}
-                    className="w-[40rem] h-[65vh] object-contain"
+                    className="w-[32rem]  h-[65vh] object-contain"
                   />
                   {allImages.length > 1 && (
                     <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
@@ -61,13 +81,13 @@ const ProductModal = ({ item, onClose }) => {
             </div>
           )}
           </div>
-          <div className="flex flex-col gap-2 justify-between h-full md:w-full lg:max-w-[45%] pt-6 ">
-            <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-2 justify-between  h-full md:w-full lg:max-w-[45%] pt-6 ">
+            <div className="flex flex-col gap-1 ">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
                 {item.product}
               </h1>
               <div className="h-1 mb-2 w-full bg-primary-color"></div>
-              <div className="flex flex-col justify-between gap-4 mb-2">
+              <div className="flex flex-col justify-between  gap-4 mb-2">
                 <div className="flex justify-between gap-2 items-center">
                   <div className="flex items-center gap-2 ">
                     <p className="text-sm font-medium">Shop:</p>
@@ -155,7 +175,7 @@ const ProductModal = ({ item, onClose }) => {
               </div>
               <div className=" justify-end gap-2 items-center flex">
                 <button
-                  onClick={() => handleProductClick()}
+                  onClick={() => handleCartClick()}
                   className="btn btn-sm btn-outline btn-secondary  "
                 >
                   Add to Cart
@@ -177,6 +197,7 @@ const ProductModal = ({ item, onClose }) => {
           </div>
         </div>
       </div>
+    
     </div>
   );
 };

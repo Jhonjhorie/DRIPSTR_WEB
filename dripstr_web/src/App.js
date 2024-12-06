@@ -8,8 +8,9 @@ import HomeController from './modules/Home/Home_Controller';
 import OrderController from './modules/Order/Controller/Order_Controller';
 import ShopController from './modules/Shop_Profile/Controller/Shop_Profile_Controller';
 import UserAccountController from './modules/User_Account/Controller/User_Account_Controller';
-import ProductsController from './modules/Products/Products_Controller'
-import Product from './modules/Products/Product'
+import ProductsController from './modules/Products/Products_Controller';
+import Product from './modules/Products/Product';
+import Search from './modules/Products/Search';
 
 
 // Shared Components
@@ -44,6 +45,7 @@ function App() {
               <Route path="/" element={<HomeController />} />
               <Route path="/mall/*" element={<ProductsController />} />
               <Route path="/product/*" element={<Product />} />
+              <Route path="/search" element={<Search />} />
               <Route path="/cart/*" element={<OrderController />} />
               <Route path="/login/*" element={<LoginController />} />
               <Route path="/admin/*" element={<AdminController />} />
