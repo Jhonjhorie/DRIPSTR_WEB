@@ -28,6 +28,7 @@
     const [showAlert, setShowAlert] = React.useState(false); // Alert
     const [viewItem, setViewPost] = React.useState(false); // Confirmation for posting item
     const [selectedItem, setSelectedItem] = React.useState(null);
+    const [selectedColors, setSelectedColors] = useState([]);
 
     const handleAddItem = () => { //ITEMS
       setIsModalOpenItem(true);
@@ -213,7 +214,13 @@
       "Gold", "Silver", "Bronze", "Lavender", "Peach", "Coral", 
       "Aqua", "Olive", "Emerald", "Ivory", "Chartreuse"
     ];
-
+    const handleCheckboxChange = (color) => {
+      setSelectedColors(prevState => 
+          prevState.includes(color) 
+          ? prevState.filter(c => c !== color) 
+          : [...prevState, color]
+      );
+  };
     //Ads image appear in the div
     const handleImagePick = (event) => {
       const file = event.target.files[0];
@@ -495,12 +502,21 @@
              
                 <div>
                 <div className="grid grid-cols-2 gap-4">
-                        {colors.map((color, index) => (
-                            <div key={index} className="flex items-center">
-                                <input type="checkbox" id={color} name={color} className="mr-2"/>
-                                <label htmlFor={color} className="text-gray-700">{color}</label>
-                            </div>
-                        ))}
+                {colors.map((color, index) => (
+                        <div key={index} className="flex items-center mb-2">
+                            <input 
+                                type="checkbox" 
+                                id={color} 
+                                name={color} 
+                                className="mr-2" 
+                                onChange={() => handleCheckboxChange(color)}
+                            />
+                            <label htmlFor={color} className="text-gray-700">{color}</label>
+                            
+                        </div>
+                        
+                    ))} 
+                       
                     </div>
                 </div>
             </div>
@@ -518,6 +534,16 @@
             <div className='bg-slate-100 h-[150px] w-full mt-1 p-1 overflow-hidden overflow-y-scroll shadow-inner shadow-slate-500 rounded-sm  custom-scrollbar '>
              
                 <div>
+                {selectedColors.map((color, index) => (
+                      <div key={index} className="mt-1 rounded-md p-1 bg-slate-400 shadow-md">
+                          <label className="block text-gray-800 text-sm mb-2 ">Upload an image for {color}</label>
+                          <input 
+                              type="file"
+                              accept="image/*" 
+                              className={`block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-${color.toLowerCase()}-50 focus:outline-none`}
+                          />
+                      </div>
+                  ))}
                 {imageInputs.map((input, index) => (
                   <div key={index} className="flex items-center mb-2">
                       <input 

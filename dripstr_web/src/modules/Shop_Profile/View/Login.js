@@ -3,7 +3,7 @@ import logo from '../../../assets/shop/logoWhite.png';
 import '../../../assets/shop/fonts/font.css'
 import { useNavigate } from 'react-router-dom';
 import 'boxicons'
-import { supabase } from '../../../database/supabase'
+import { supabase } from "../../../constants/supabase";  
 function Login() { 
     const navigate = useNavigate();
     const [shopName, setShopName] = useState(""); 
@@ -296,7 +296,7 @@ function Login() {
                     strokeWidth="2"
                     d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-              <span>Shop address is Required!</span>
+              <span>Shop Description is Required!</span>
             </div>
           </div>
       )}
