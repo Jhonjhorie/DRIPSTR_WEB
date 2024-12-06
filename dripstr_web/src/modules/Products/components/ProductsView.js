@@ -1,11 +1,36 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect} from 'react';
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg'; 
 import ProductModal from './productModal'
 import RateSymbol from '@/shared/products/rateSymbol';
 import { averageRate } from '../hooks/useRate.ts';
+import { supabase } from '@/constants/supabase';
 
-const ProductsView = ({products, categories, filter}) => {
+const ProductsView = ({ categories, filter}) => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+
+      try {
+        const { data, error } = await supabase
+          .from('products') 
+          .select('*'); 
+        if (error) throw error;
+        setProducts(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
   const [selectedItem, setSelectedItem] = useState(null);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 4, lg: 6 }); 
   const numColumns = itemsToShow;
@@ -47,6 +72,8 @@ const dataWithPlaceholders = [
   ...Array(placeholdersNeeded).fill({ empty: true }),
 ];
 
+if (loading) return <p>Loading...</p>;
+if (error) return <p>Error: {error}</p>;
 
   return (
     
