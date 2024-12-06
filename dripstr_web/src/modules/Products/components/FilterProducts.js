@@ -10,12 +10,12 @@ const FilterProducts = ({ }) => {
 
     const handleRangeChange = (newRange) => {
     setRange(newRange);
-    console.log("Selected Range:", newRange); 
+ 
     };
     
     const handleRateChange = (newRateRange) => {
         setRateRange(newRateRange);
-        console.log("Selected Rate Range:", newRateRange); 
+       
       };
 
     return (<div class="drawer drawer-end ">
