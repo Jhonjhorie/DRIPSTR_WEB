@@ -1,4 +1,4 @@
-import React from 'react';
+
 import SideBar from '../Component/Sidebars';
 import logo from '../../../assets/shop/shoplogo.jpg';
 import boy from '../../../assets/shop/sample2.jpg';
@@ -10,6 +10,8 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import { PieChart } from '@mui/x-charts/PieChart';
 import PrintSales from '../Component/PrintSales';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from "../../../constants/supabase"; 
+import React, {useState, useEffect} from 'react';
 const data = [
   { label: 'T-Shirt Alucard', value: 400 },
   { label: 'Ben Brief', value: 300 },
@@ -37,8 +39,56 @@ const uData = [4000, 3000, 2000, 2780, 1890, 2390, 3490, 5000, 2000, 278, 1890, 
     'Dec',
   ];
 
+
 function MerchantDashboard() {
   const navigate = useNavigate();
+  const [shopData, setShopData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Fetch the current user profile and shop data
+    const fetchUserProfileAndShop = async () => {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError) {
+        setError(authError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (user) {
+        console.log("Current user:", user);
+        
+        // Fetch shop data for the current user
+        const { data: shops, error: shopError } = await supabase
+          .from("shop")
+          .select("shop_name") // You can specify fields if needed, e.g., .select("id, name")
+          .eq("owner_Id", user.id); // Assuming the shop table has 'user_id' to link it to the user
+
+        if (shopError) {
+          setError(shopError.message);
+        } else {
+          setShopData(shops); // Store the fetched shops data
+          console.log("this is a shopname:",  shops )
+          shops.forEach(shop => {
+            console.log("Shop Name:", shop.shop_name); // Log each shop name
+          });
+        }
+      } else {
+        console.log("No user is signed in");
+        setError('No user is signed in');
+        setLoading(false);
+      }
+      setLoading(false); // Stop the loading state once fetching is done
+    };
+
+    fetchUserProfileAndShop();
+  }, []); 
+
+
+
+
   return (
     <div className="h-full w-full bg-slate-300 overflow-y-scroll custom-scrollbar  ">
       <div className="absolute mx-3 right-0 z-10">
@@ -47,7 +97,9 @@ function MerchantDashboard() {
       {/* 1st Container -- Logo Shop -- Notification */}
       <div className="h-auto w-full md:flex gap-2  place-items-center p-2 align-middle ">
         <div className=' h-full w-full p-2  md:pl-10'>
-          <div className=' text-3xl md:text-5xl font-bold text-custom-purple md:pl-5 mb-5 flex justify-start' >Dashboard </div>
+          <div className=' text-3xl md:text-5xl font-bold text-custom-purple md:pl-5 mb-5 flex justify-start' >Dashboard  
+          
+           </div>
             <div className='flex flex-wrap w-full justify-center  h-auto gap-2 md:gap-5 '>
 
             {/* BOXES STATS */}

@@ -72,6 +72,7 @@ const AuthScreen = () => {
       options: {
         data: {
           fullName, // Custom field to store additional user info
+          
         },
       },
     });

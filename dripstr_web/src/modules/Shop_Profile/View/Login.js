@@ -15,7 +15,29 @@ function Login() {
     const [showAlert3, setShowAlert3] = React.useState(false); // AlertDescription
     const [showAlert4, setShowAlert4] = React.useState(false); // Alert11digits
     const [showAlert5, setShowAlert5] = React.useState(false); // AlertAddress
-   
+    const [user, setUser] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [imageUrl, setImageUrl] = useState(null);
+    const [imageFile, setImageFile] = useState(null);  // State to hold the image file
+
+    const handleFileChange = (e) => {
+      const file = e.target.files[0]; // Get the selected file
+      if (file) {
+        setImageFile(file); // Store the file in state
+        console.log("Selected file:", file);
+      }
+    };
+    
+    useEffect(() => {
+      const getUser = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+        console.log("Current user:", user);
+      };
+  
+      getUser();
+    }, []);
     const phonedigit = (e) => {
         let value = e.target.value;
         value = value.replace(/[^0-9]/g, '').slice(0, 11); 
@@ -71,35 +93,98 @@ function Login() {
       }, 3000);
         return; // Do not proceed if the field is empty
       }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error("No user found");
+        return;
+      }
+
+      let uploadedImageUrl = null;
+      if (imageFile) {
+        try {
+          // Upload the image to Supabase storage
+          const { data, error: uploadError } = await supabase.storage
+            .from('shop_profile')  // Replace with your storage bucket name
+            .upload(`shop_profile/${imageFile.name}`, imageFile);
+    
+          if (uploadError) {
+            console.error("Error uploading image:", uploadError.message);
+            return; // Exit if there's an error uploading the image
+          }
+ if (data?.path) {
+      const { publicURL, error: urlError } = supabase.storage
+        .from('shop_profile')
+        .getPublicUrl(data.path);
+
+      if (urlError) {
+        console.error("Error fetching image URL:", urlError.message);
+        return; // Exit if there's an error fetching the image URL
+      }
+
+      uploadedImageUrl = publicURL; // Correctly assign the public URL
+      console.log("Image uploaded successfully:", uploadedImageUrl);
+    }
+  } catch (err) {
+    console.error("Unexpected error while uploading image:", err);
+    return; // Exit if there's an unexpected error during image upload
+  }
+      }
+  
+      const userId = user.id;  // Get the current user's ID
 
       try {
-        const { data, error } = await supabase
-          .from("shops")
+        // Fetch current user ID
+      
+    
+        // Insert the shop with the user ID as the owner ID
+        const { data: shopData, error: shopError } = await supabase
+          .from("shop")
           .insert([
             {
               shop_name: shopName,
               contact_number: phoneNumber,
               description: shopDescription,
               address: shopAddress,
+              owner_Id: userId,  // Set the owner_id to the current user's ID
+              shop_image: uploadedImageUrl, 
             },
-          ]);
+          ])
+          .single();  // Insert a single shop and get the inserted row
     
-        if (error) {
-          console.error("Error inserting data:", error.message);
-          return; // Exit early if there's an error
+        if (shopError) {
+          console.error("Error inserting shop data:", shopError.message);
+          return; // Exit early if there's an error inserting the shop data
         }
     
-        if (data && data.length > 0) {
-          console.log("Data inserted successfully:", data);
-          console.log("Inserted row ID:", data[0].id); // Access row ID safely
+        console.log("Shop created successfully:", shopData);
+    
+        // Now, update the user's profile to set merchant_id to the new shop's shop_id
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ isMerchant: true })
+          .eq("id", userId);  // Update the user's profile with ismerchant = true
+    
+        if (updateError) {
+          console.error("Error updating user profile:", updateError.message);
+          return; // Exit if there's an error updating the user profile
         }
     
+        console.log("User profile updated with merchant_id and ismerchant = true");
+        console.log("Inserting shop with data:", {
+          shop_name: shopName,
+          contact_number: phoneNumber,
+          description: shopDescription,
+          address: shopAddress,
+          owner_Id: userId,
+      });
         // Reset form fields after successful insertion
-        console.log("Data inserted successfully:");
-        navigate('/shop/MerchantDashboard')
         setShopName("");
         setPhoneNumber("");
         setShopDescription("");
+        
+    
+        // Navigate to the Merchant Dashboard
+        navigate('/shop/MerchantDashboard');
       } catch (err) {
         console.error("Unexpected error:", err);
       }
@@ -169,6 +254,8 @@ function Login() {
                 <div className="h-auto w-full flex mt-6 justify-center ">
                     <input
                         type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
                         className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
                     />
                 </div>
