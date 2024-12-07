@@ -3,13 +3,17 @@ import { useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
 import BuyConfirm from "./buyConfirm.js";
+import ItemOptions from "./itemOptions.js";
+import useGetImage from "../hooks/useGetImageUrl.js";
+
 
 const ProductModal = ({ item, onClose }) => {
   const [selectedAction, setSelectedAction] = useState(null);
   const navigate = useNavigate();
+  const imageUrls = useGetImage(item); 
 
   const handleProductClick = () => {
-    navigate(`/product/${item.product}`, { state: { item } });
+    navigate(`/product/${item.product_name}`, { state: { item } });
   };
 
   const openModal = (action) => {
@@ -22,7 +26,13 @@ const ProductModal = ({ item, onClose }) => {
     document.getElementById('buyConfirm_Modal').close();
   };
 
-  const allImages = [item.url, ...(item.images || [])];
+  const allImages = [
+    ...imageUrls,  
+    ...(item.variant && item.variant.length > 0 
+      ? item.variant.map(variant => variant.image)  // Add variant images
+      : [])
+  ];
+
   return (
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 h-[40rem] overflow-y-auto overflow-x-hidden lg:overflow-hidden custom-scrollbar  modal-box">
       {item  && <dialog id="buyConfirm_Modal" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
@@ -61,7 +71,7 @@ const ProductModal = ({ item, onClose }) => {
                   >
                     <img
                       src={image}
-                      alt={`${item.product}-${imageIndex}`}
+                      alt={`${item.product_name}-${imageIndex}`}
                       className="w-[32rem]  h-[65vh] object-contain"
                     />
                     {allImages.length > 1 && (
@@ -92,7 +102,7 @@ const ProductModal = ({ item, onClose }) => {
           <div className="flex flex-col gap-2 justify-between  h-full w-full lg:max-w-[50%] lg:min-w-[50%] pt-6 ">
             <div className="flex flex-col gap-1 ">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
-                {item.product}
+                {item.product_name}
               </h1>
               <div className="h-1 mb-2 w-full bg-primary-color"></div>
               <div className="flex flex-col justify-between  gap-4 mb-2">
@@ -100,7 +110,7 @@ const ProductModal = ({ item, onClose }) => {
                   <div className="flex items-center gap-2 ">
                     <p className="text-sm font-medium">Shop:</p>
                     <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                      {item.shop}
+                      {item.shop_id.shop_name}
                     </div>
                   </div>
                   <div className="flex gap-1">
@@ -118,35 +128,7 @@ const ProductModal = ({ item, onClose }) => {
               </div>
               <div className="flex flex-row justify-between">
                 <div className="flex flex-col gap-2">
-                  {[
-                    { label: "Variant", items: item.colorVariant },
-                    {
-                      label: "Sizes",
-                      items: item.sizeVariant ? item.sizeVariant : [],
-                    }, // Ensure size is handled as an array
-                  ].map((choice, choiceIndex) => (
-                    <div key={choiceIndex} className="flex items-center gap-2">
-                      <p className="text-lg font-medium">{choice.label}:</p>
-                      <div className="flex gap-1">
-                        {choice.items.map((choiceItem, index) => (
-                          <label
-                            key={index}
-                            className="p-0 form-control btn  text-xs cursor-pointer flex items-center justify-center duration-300 transition-all min-w-10 h-8 bg-slate-50"
-                          >
-                            <input
-                              type="radio"
-                              name={`radio-${choice.label.toLowerCase()}`}
-                              value={choiceItem}
-                              className="hidden peer"
-                            />
-                            <span className="peer-checked:bg-primary-color peer-checked:opacity-100 opacity-50 peer-checked:text-white w-full h-full flex items-center justify-center p-2 rounded-md duration-300 transition-all glass btn">
-                              {choiceItem}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+              <ItemOptions item={item} />
                 </div>
               </div>
               <p className="mt-2 rounded-md bg-base-300 p-2 max-h-60 overflow-y-auto custom-scrollbar">
@@ -163,7 +145,7 @@ const ProductModal = ({ item, onClose }) => {
               </button>
               <div className="justify-end flex my-1 mb-3">
                 <div className="flex justify-end items-center gap-0 flex-row">
-                  {item.voucher && (
+                  {item.vouchers && (
                     <span className="text-lg bg-slate-50 border border-primary-color px-2 ">
                       SHOP VOUCHER
                     </span>

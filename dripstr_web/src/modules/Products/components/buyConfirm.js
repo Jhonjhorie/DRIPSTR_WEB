@@ -2,12 +2,14 @@ import React, { useState, useEffect, act } from "react";
 import { useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
+import ItemOptions from "./itemOptions.js";
 
 const BuyConfirm = ({ action, item, onClose }) => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(item.colorVariant[0] || ""); 
-  const [selectedSize, setSelectedSize] = useState(item.sizeVariant?.[0] || "");
+  const [selectedColor, setSelectedColor] = useState(""); 
+  const [selectedSize, setSelectedSize] = useState("");
+  
   const [isCart, setIsCart] = useState(action === 'cart');
 
   useEffect(() => {
@@ -82,43 +84,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
           </div>
           <div className="flex flex-row justify-between">
             <div className="flex flex-col gap-2">
-              {[
-                { label: "Variant", items: item.colorVariant },
-                {
-                  label: "Sizes",
-                  items: item.sizeVariant ? item.sizeVariant : [],
-                }, // Ensure size is handled as an array
-              ].map((choice, choiceIndex) => (
-                <div key={choiceIndex} className="flex items-center gap-2">
-                  <p className="text-lg font-medium">{choice.label}:</p>
-                  <div className="flex gap-1">
-                    {choice.items.map((choiceItem, index) => (
-                      <label
-                        key={index}
-                        className="p-0 form-control btn  text-xs cursor-pointer flex items-center justify-center duration-300 transition-all min-w-10 h-8 bg-slate-50"
-                      >
-                        <input
-                          type="radio"
-                          name={`radio-${choice.label.toLowerCase()}`}
-                          value={choiceItem}
-                          className="hidden peer"
-                          checked={
-                            choice.label.toLowerCase() === "variant"
-                              ? choiceItem === selectedColor
-                              : choiceItem === selectedSize
-                          }
-                          onChange={(e) =>
-                            handleRadioChange(e, choice.label.toLowerCase())
-                          }
-                        />
-                        <span className="peer-checked:bg-primary-color peer-checked:opacity-100 opacity-50 peer-checked:text-white w-full h-full flex items-center justify-center p-2 rounded-md duration-300 transition-all glass btn">
-                          {choiceItem}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            
             </div>
           </div>
         </div>

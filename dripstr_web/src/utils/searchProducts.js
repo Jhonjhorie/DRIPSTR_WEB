@@ -4,6 +4,6 @@ export const searchProducts = (query, products) => {
   const regex = new RegExp(query, 'i'); 
   
   return products.filter((product) =>
-    product.product && regex.test(product.product) 
+    product.product_name && regex.test(product.product_name) 
   );
 };
