@@ -119,7 +119,7 @@ function Product() {
                   <div className="flex items-center gap-2 ">
                     <p className="text-sm font-medium">Shop:</p>
                     <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                      {item.shop}
+                      {item.shops.shop_name }
                     </div>
                   </div>
                   <div className="flex gap-1">

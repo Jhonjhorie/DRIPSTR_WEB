@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter, faSort } from '@fortawesome/free-solid-svg-icons';
 import PriceRangeSlider from './priceRangeSlider';
@@ -8,15 +8,13 @@ const FilterProducts = ({ }) => {
     const [range, setRange] = useState({ min: 100, max: 1000 });
     const [rateRange, setRateRange] = useState({ min: 0, max: 5 });
 
-    const handleRangeChange = (newRange) => {
-    setRange(newRange);
- 
-    };
+    const handleRangeChange = useCallback((newRange) => {
+      setRange(newRange);
+    }, []);
     
-    const handleRateChange = (newRateRange) => {
-        setRateRange(newRateRange);
-       
-      };
+    const handleRateChange = useCallback((newRate) => {
+      setRateRange(newRate);
+    }, []);
 
     return (<div class="drawer drawer-end ">
           <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />

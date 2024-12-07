@@ -1,4 +1,4 @@
-import React, { useState, useEffect, act } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
@@ -7,8 +7,8 @@ import ItemOptions from "./itemOptions.js";
 const BuyConfirm = ({ action, item, onClose }) => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(""); 
-  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState(item?.color_variant[0]?.name || ""); 
+  const [selectedSize, setSelectedSize] = useState(item?.size_variant[0] || "");
   
   const [isCart, setIsCart] = useState(action === 'cart');
 
@@ -33,14 +33,11 @@ const BuyConfirm = ({ action, item, onClose }) => {
     }
   };
 
-  const handleRadioChange = (event, type) => {
-    const value = event.target.value;
-    if (type === "variant") {
-      setSelectedColor(value);
-    } else if (type === "sizes") {
-      setSelectedSize(value);
-    }
+  const handleSelectedValues = (color, size) => {
+    setSelectedColor(color);
+    setSelectedSize(size);
   };
+
 
   const handleProductClick = () => {
     navigate(`/product/${item.product}`, { state: { item } });
@@ -55,12 +52,12 @@ const BuyConfirm = ({ action, item, onClose }) => {
       />
       <div className="flex flex-col gap-2 justify-between  bg-slate-300 h-full w-full p-4 ">
         <div className="flex flex-col gap-1 z-10 ">
-          <h1 className="text-lg font-bold text-secondary-color  p-1 rounded-t-md ">        
-            {isCart ? 'Add to Cart': 'Buy Now'} 
+          <h1 className="text-lg font-bold text-secondary-color  p-1 rounded-t-md ">
+            {isCart ? "Add to Cart" : "Buy Now"}
           </h1>
           <div className="items-center justify-center bg-slate-50 rounded-md flex">
             <h1 className="text-2xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
-              {item.product}
+              {item.product_name}
             </h1>
           </div>
           <div className="flex flex-col justify-between p-1  gap-4 mb-2">
@@ -68,7 +65,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
               <div className="flex items-center gap-2 ">
                 <p className="text-sm font-medium">Shop:</p>
                 <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                  {item.shop}
+                  {item.shops.name}
                 </div>
               </div>
               <div className="flex gap-1">
@@ -84,7 +81,12 @@ const BuyConfirm = ({ action, item, onClose }) => {
           </div>
           <div className="flex flex-row justify-between">
             <div className="flex flex-col gap-2">
-            
+              <ItemOptions
+                item={item}
+                selectedColor={selectedColor}
+                selectedSize={selectedSize}
+                onSelectedValuesChange={handleSelectedValues}
+              />
             </div>
           </div>
         </div>
@@ -121,19 +123,23 @@ const BuyConfirm = ({ action, item, onClose }) => {
           </button>
           <div className="justify-end flex flex-col mt-2  mb-3">
             <div className="flex justify-end">
-          <p className="text-lg text-secondary-color">Variant: {selectedColor} - Size: {selectedSize} - Quantity: {quantity}</p>
-          </div>
+              <p className="text-lg text-secondary-color">
+                Variant: {selectedColor} - Size: {selectedSize} - Quantity:{" "}
+                {quantity}
+              </p>
+            </div>
             <div className="flex justify-end pl-2 ">
-          
               <p className="text-2xl text-primary-color">₱</p>
               <h2 className="text-6xl font-bold text-primary-color">
                 {item.discount > 0
-                  ? (item.price * (1 - item.discount / 100) * quantity).toFixed(2)
+                  ? (item.price * (1 - item.discount / 100) * quantity).toFixed(
+                      2
+                    )
                   : item.price.toFixed(2) * quantity}
               </h2>
             </div>
             <div className="justify-end flex items-end gap-2 ">
-              {item.voucher && (
+              {item.vouchers && (
                 <span className="text-lg font-bold border border-primary-color px-2 ">
                   SHOP VOUCHER
                 </span>

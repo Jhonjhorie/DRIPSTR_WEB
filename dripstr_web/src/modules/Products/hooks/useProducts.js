@@ -12,7 +12,7 @@ const useProducts = () => {
       try {
         const { data, error } = await supabase
           .from('products') 
-          .select('*, shop:shops(shop_name)'); 
+           .select('*, shops(shop_name)');
 
         if (error) throw error;
         setProducts(data); 

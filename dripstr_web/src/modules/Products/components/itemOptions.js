@@ -1,6 +1,21 @@
+import React, {useState} from "react";
+
 const SUPABASE_STORAGE_URL = 'https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public';
 
-const ItemOptions = ({ item }) => {
+const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange }) => {
+  const [color, setColor] = useState(selectedColor);
+  const [size, setSize] = useState(selectedSize);
+
+  const handleRadioChange = (event, type) => {
+    const value = event.target.value;
+    if (type === "variant") {
+      setColor(value);
+      onSelectedValuesChange(value, size); 
+    } else if (type === "sizes") {
+      setSize(value);
+      onSelectedValuesChange(color, value); 
+    }
+  };
 
   const choices = [
     {
@@ -34,8 +49,15 @@ const ItemOptions = ({ item }) => {
                   <input
                     type="radio"
                     name={`radio-${choice.label.toLowerCase()}`}
-                    value={choiceItem.name} // Use the 'name' property here
+                    value={choice.label === "Variant" ? choiceItem.name : choiceItem} // Use the 'name' property here
                     className="hidden peer"
+                    checked={
+                      choice.label.toLowerCase() === "variant"
+                        ? choiceItem.name === selectedColor
+                        : choiceItem === selectedSize
+                    }
+                    onChange={(e) =>
+                      handleRadioChange(e, choice.label.toLowerCase())}
                   />
                   {choice.label === "Variant" ?  <span className="peer-checked:bg-primary-color peer-checked:opacity-100 opacity-50 peer-checked:text-white w-full h-full flex items-center justify-start pl-0 rounded-md duration-300 transition-all glass btn">
                   {choiceItem.image && (

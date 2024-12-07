@@ -58,7 +58,6 @@ const DoubleRangeSlider = ({ onRangeChange }) => {
         />
       </div>
 
-
       <div className="flex w-full justify-between px-2 text-xs">
         <span className={minValue === 0 || maxValue === 0 ? "text-primary font-bold" : ""}>₱0</span>
         <span

@@ -110,7 +110,7 @@ const ProductModal = ({ item, onClose }) => {
                   <div className="flex items-center gap-2 ">
                     <p className="text-sm font-medium">Shop:</p>
                     <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                      {item.shop_id.shop_name}
+                        {item.shops?.shop_name || 'No shop available'}
                     </div>
                   </div>
                   <div className="flex gap-1">
