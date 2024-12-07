@@ -29,9 +29,39 @@
     const [viewItem, setViewPost] = React.useState(false); // Confirmation for posting item
     const [selectedItem, setSelectedItem] = React.useState(null);
     const [selectedColors, setSelectedColors] = useState([]);
-    const [otherColor, setOtherColor] = useState(""); 
-
+    const [inputs, setInputs] = useState([]);//add variants inputs
+    const [submittedVariants, setSubmittedVariants] = useState([]);
     
+
+
+    const handleAddInput = () => { // Add a new input field to the list
+      setInputs((prevInputs) => [...prevInputs, '']);
+    };
+    const handleDeleteInput = (indexToDelete) => {// Remove the input field at the specified index
+      setInputs((prevInputs) => prevInputs.filter((_, index) => index !== indexToDelete));
+      setSubmittedVariants((prevVariants) =>
+      prevVariants.filter((_, index) => index !== indexToDelete)
+    );
+    };
+    const handleSubmit = (index) => {
+      const variantText = inputs[index];
+      if (variantText == 0) {
+        alert(`No entered variant`);
+      }
+      if (variantText) {
+        setSubmittedVariants((prevVariants) => [
+          ...prevVariants,
+          { text: variantText, sizes: sizes[customerType]?.[clotheType] || [] },
+        ]);
+        
+      }
+    };
+    const handleInputChange = (value, index) => {
+      const updatedInputs = [...inputs];
+      updatedInputs[index] = value;
+      setInputs(updatedInputs);
+    };
+
     const handleAddItem = () => { //ITEMS
       setIsModalOpenItem(true);
     };
@@ -217,6 +247,8 @@
       "Gold", "Silver", "Bronze", "Lavender", "Peach", "Coral", 
       "Aqua", "Olive", "Emerald", "Ivory", "Chartreuse", "Others"
     ];
+
+    
     const handleCheckboxChange = (color) => {
       setSelectedColors(prevState => 
           prevState.includes(color) 
@@ -478,52 +510,62 @@
             </div>
           </div>
           
-          <div className='h-[400px] mt-2 w-full relative bg-slate-100 overflow-hidden overflow-y-scroll shadow-sm shadow-slate-500 rounded-sm custom-scrollbar'>
-          {clotheType.length === 0 && (
-              <div className="text-red-500 text-sm mt-2 text-center">
-                  Please Complete the Selection
-              </div>
-          )}
-            {clotheType && colors.length > 0 && (
-            <div className="grid grid-cols-2 pb-10 gap-1 p-2">
+          <div className='h-[400px] mt-2 w-full px-2  bg-slate-100 overflow-hidden overflow-y-scroll shadow-sm shadow-slate-500 rounded-sm custom-scrollbar'>
+            {clotheType.length === 0 && (
+                <div className="text-red-500 text-sm mt-4 text-center">
+                    Please Complete the Selection
+                </div>
+            ) }
+            
+            {clotheType && (
+              <button
+                  className="mt-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 w-full hover:bg-blue-600 text-white py-1 px-4 rounded-md shadow-md text-sm"
+                  onClick={handleAddInput}
+              >
+                  Add Variant for {clotheType}
+              </button>
+            )}
+            {clotheType && (
+                <div className='text-sm mt-2 font-semibold text-slate-800 '> Type a Variant </div>
+            )}
+          
+            {inputs.map((value, index) => (
+              <div key={index} className="items-center mb-2">
               
-                {colors.map((color, index) => (
-                  <div className=' w-full  h-full'>
-                        <div key={index} className="flex items-center mb-2">
-                          <input
-                              type="checkbox"
-                              id={color}
-                              name={color}
-                              className="mr-2"
-                              onChange={() => handleCheckboxChange(color)}
-                          />
-                          <label htmlFor={color} className="text-sm text-gray-700">{color}</label>
-                        
-                        </div>
-                        
-                          {color === "Others" && selectedColors.includes("Others") && (
-                              <input
-                                  type="text"
-                                  placeholder="Specify color"
-                                  className="absolute p-1 border left-5 w-48 rounded text-sm bg-slate-200"
-                                  onChange={(e) => setOtherColor(e.target.value)}
-                              />
-                          )}
-                        
-                      
-                  </div>
+                <input
+                    type="text"
+                    className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
+                    value={value}
+                    onChange={(e) => handleInputChange(e.target.value, index)}
+                    placeholder="Enter Variant"
+                    disabled={submittedVariants.some((variant) => variant.text === value)}
+                />
+                  <div className='flex g mt-1 justify-end'>
+                    <button
+                        className="ml-2 bg-red-500 hover:bg-red-600 hover:scale-95 duration-300 text-white py-1 px-2 rounded-sm text-sm shadow-md"
+                        onClick={() => handleDeleteInput(index)}
+                    >
+                        Delete
+                    </button>
+                    <button
+                        className={`ml-2 bg-green-500 hover:bg-green-600 hover:scale-95 duration-300 text-white py-1 px-2 rounded-sm text-sm shadow-md ${
+                          submittedVariants.some((variant) => variant.text === value) ? "cursor-not-allowed bg-slate-500" : ""
+                        }`}
+                        onClick={() => handleSubmit(index)}
+                        disabled={submittedVariants.some((variant) => variant.text === value)}
+                    >
+                        Submit
+                    </button>  
+                </div>
                 
-                    
-                ))}
-               
             </div>
-             )}
+          ))}
           </div>
           
             
           </div>
            {/* Select variant and photo */}
-          <div className='w-full md:w-1/2 h-full '>
+          <div className='w-1/2 h-full '>
 
           <div className='flex justify-between place-items-center w-full '>
             <label className='text-slate-950 font-semibold mr-2  text-sm'> Put Image, Size, Quantity, Price </label>  
@@ -542,64 +584,64 @@
             <div className='bg-gradient-to-br from-violet-500 to-fuchsia-500 h-[400px] w-full p-2 overflow-hidden overflow-y-scroll shadow-inner shadow-slate-500 rounded-sm  custom-scrollbar '>
              
                 <div>
-                {selectedColors.length === 0 && (
+                {submittedVariants.length === 0 && (
                     <div className="text-slate-100 text-sm mt-2 text-center">
-                        Please Select a Variant
+                        Please Input a Variant
                     </div>
                 )}
-                {selectedColors.map((color, index) => (
-                    <div key={index} className=" rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md">
-                        <label className="block text-gray-800 text-sm text-center w-full bg-slate-100 mb-2 rounded-t-md py-2 ">Upload an image for variant <span className='font-bold uppercase '> {color}</span></label>
-                        <input 
-                            type="file"
-                            accept="image/*" 
-                            className={`block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-${color.toLowerCase()}-50 focus:outline-none`}
-                        />
-                        
-                        {/* Render size selection and price input here */}
-                        {clotheType && sizes[customerType] && sizes[customerType][clotheType] ? (
-                            sizes[customerType][clotheType].map((size, sizeIndex) => (
-                                <div key={sizeIndex} className="p-2 flex gap-2 place-items-center">
-                                    <div className='w-1/3'>
-                                        <input 
-                                            type="checkbox" 
-                                            id={`size-${size}-${color}`} 
-                                            name="sizes" 
-                                            value={size} 
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor={`size-${size}-${color}`} className="text-slate-800 text-sm">
-                                            {size}
-                                        </label>
-                                    </div>
-                             
-                                    <div className='gap-2 flex p-2 justify-end w-1/3'>
-                                        <label className='text-sm text-slate-800'>Quantity:</label>
-                                        <input 
-                                            onKeyDown={blockInvalidChar} 
-                                            type='number' 
-                                            placeholder="Quantity"
-                                            className='bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700'
-                                        />
-                                    </div>
-                                    <div className='gap-2 p-2 flex w-1/3'>
-                                        <label className='text-sm text-slate-800'> Price:</label>
-                                        <input 
-                                            className='bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700' 
-                                            onKeyDown={blockInvalidChar} 
-                                            type='number'
-                                            placeholder="Price"
-                                        />
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-slate-800 text-c text-sm p-2">No sizes available for the selected options.</p>
-                        )}
-                        
-                        
-                    </div>
-                ))}
+               {submittedVariants.map((variant, index) => (
+                <div key={index} className="rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md">
+                  {/* Variant Title */}
+                  <label className="block text-gray-800 text-sm text-center w-full bg-slate-100 mb-2 rounded-t-md py-2">
+                    Upload an image for variant <span className="font-bold uppercase">{variant.text}</span>
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-slate-100 focus:outline-none"
+                  />
+
+                  {/* Sizing Options */}
+                  {variant.sizes.length > 0 ? (
+                    variant.sizes.map((size, sizeIndex) => (
+                      <div key={sizeIndex} className="p-2 flex gap-2 place-items-center">
+                        <div className="w-1/3">
+                          <input
+                            type="checkbox"
+                            id={`size-${size}-${variant.text}`}
+                            name="sizes"
+                            value={size}
+                            className="mr-2"
+                          />
+                          <label htmlFor={`size-${size}-${variant.text}`} className="text-slate-800 text-sm">
+                            {size}
+                          </label>
+                        </div>
+
+                        <div className="gap-2 flex p-2 justify-end w-1/3">
+                        <label className="text-sm text-slate-800">Quantity:</label>
+                          <input
+                            type="number"
+                            placeholder="Quantity"
+                            className="bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700"
+                          />
+                        </div>
+                        <div className="gap-2 p-2 flex w-1/3">
+                          <label className="text-sm text-slate-800">Price:</label>
+                          <input
+                            className="bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700"
+                            type="number"
+                            placeholder="Price"
+                          />
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-800 text-center text-sm p-2">No sizes available for the selected options.</p>
+                  )}
+                </div>
+              ))}
+
 
                 {imageInputs.map((input, index) => (
                     <div key={index} className="flex items-center mb-2">
