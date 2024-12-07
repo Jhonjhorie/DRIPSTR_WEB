@@ -1,15 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import { Link } from "react-router-dom";
-
-const UserProfile = () => {
+import { createClient } from '@supabase/supabase-js';
+import { supabase } from "../../../constants/supabase";  
+ const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState(null);
+
+  const saveProfileChanges = async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .update(profile) // Update the profile state
+      .eq('user_id', profile.user_id); // Use the user's ID
+  
+    if (error) {
+      console.error('Error updating profile:', error.message);
+    } else {
+      console.log('Profile updated successfully:', data);
+      setIsEditing(false);
+    }
+  };
+  const [isLoading, setIsLoading] = useState(true);
+
+  
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfile((prev) => ({ ...prev, [name]: value }));
+  };
+  
+  const fetchUserProfile = async () => {  setIsLoading(true);
+
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+    if (userError) {
+      console.error('Error fetching user:', userError.message);
+      return;
+    }
+  
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id);
+  
+    if (error) {
+      console.error('Error fetching profile:', error.message);
+      return null;
+    }
+    setIsLoading(false);
+
+    setProfile(data[0]); // Assuming only one profile exists for the user
+
+  };
+  
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+  
+
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
   };
 
   return (
+    
     <div className="p-4 flex min-h-screen bg-slate-200">
       <Sidebar />
 
@@ -56,14 +110,17 @@ const UserProfile = () => {
                   <div className="flex justify-between  rounded-md w-full">
                     {isEditing ? (
                       <input
-                        type="email"
-                        defaultValue="jh********@gmail.com"
-                        className="text-lg text-gray-900 border   items-center p-2   border-gray-300 bg-slate-200   rounded-md   w-full"
-                      />
+  type="email"
+  name="email"
+  value={profile?.email || ''}
+  onChange={handleInputChange}
+  className="text-lg text-gray-900 border items-center p-2 border-gray-300 bg-slate-200 rounded-md w-full"
+/>
+
                     ) : (
                       <p className="text-lg  text-gray-900">
-                        jh********@gmail.com
-                      </p>
+                        {profile?.email || 'Loading...'}                      
+                        </p>
                     )} 
                   </div>
                 </div>
@@ -130,12 +187,13 @@ const UserProfile = () => {
 
             {/* Action Buttons */}
             <div className="flex justify-between mt-10 w-48 float-end">
-              <button
-                className="bg-blue-600 text-white  font-medium py-2 px-4 rounded-md flex-1"
-                onClick={handleEditToggle}
-              >
-                {isEditing ? "Save Changes" : "Edit"}
-              </button>
+            <button
+  className="bg-blue-600 text-white font-medium py-2 px-4 rounded-md flex-1"
+  onClick={isEditing ? saveProfileChanges : handleEditToggle}
+>
+  {isEditing ? "Save Changes" : "Edit"}
+</button>
+
  
             </div>
           </div>
