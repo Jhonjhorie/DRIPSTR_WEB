@@ -64,7 +64,7 @@ const UserProfile = () => {
                       <p className="text-lg  text-gray-900">
                         jh********@gmail.com
                       </p>
-                    )} 
+                    )}
                   </div>
                 </div>
 
@@ -82,7 +82,7 @@ const UserProfile = () => {
                       />
                     ) : (
                       <p className="text-lg text-gray-900">0956*****07</p>
-                    )} 
+                    )}
                   </div>
                 </div>
               </div>
@@ -136,7 +136,6 @@ const UserProfile = () => {
               >
                 {isEditing ? "Save Changes" : "Edit"}
               </button>
- 
             </div>
           </div>
         </div>
@@ -145,4 +144,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile; 
+export default UserProfile;
