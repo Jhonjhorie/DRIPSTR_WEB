@@ -6,7 +6,7 @@ const ProductModal = ({ item }) => {
   const navigate = useNavigate();
 
   const handleProductClick = () => {
-    navigate(`/product/${item.product}`, { state: { item } });
+    navigate(`/cart/order`, { state: { item } });
    
   };
 
