@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import RateSymbol from "@/shared/products/rateSymbol";
 import {averageRate} from "../hooks/useRate.ts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 
 export default function RatingSection ({item}) {
+const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public/";
+
   const [likesData, setLikesData] = useState(
     item.reviews.reduce((acc, review) => {
       acc[review.id] = { likes: review.likes, isLiked: false };
@@ -201,9 +203,10 @@ export default function RatingSection ({item}) {
                             key={index}
                             className="border-base-content card bg-base-100 w-36 border text-center"
                           >
+                       
                             <div className="card-body">
                               <img
-                                src={image}
+                                src={`${supabaseBaseUrl}${image}`}
                                 alt={`Review image ${index + 1}`}
                                 onClick={() => openModal(review)}
                                 className="w-full h-24 object-fill rounded-md cursor-pointer"
@@ -238,7 +241,7 @@ export default function RatingSection ({item}) {
             </div>
           </div>
         </div>
-         {/* Modal for Image Carousel */}
+   
       {selectedItem && (
         <dialog id="my_modal_R" className="modal">
           <div className="modal-box">
@@ -246,7 +249,7 @@ export default function RatingSection ({item}) {
               {selectedItem.images.length > 0 ? (
                 <div className="carousel-item relative w-full justify-center items-center">
                   <img
-                    src={selectedItem.images[currentSlide]}
+                    src={`${supabaseBaseUrl}${selectedItem.images[currentSlide]}`}
                     alt={`Review Image ${currentSlide}`}
                     className="w-[40rem] h-[90%] object-contain"
                   />

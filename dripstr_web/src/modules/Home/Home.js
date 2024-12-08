@@ -12,11 +12,14 @@ import FilterProducts from '../Products/components/FilterProducts';
 import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from '@/constants/categories.ts';
 import { currUser, Images } from "@/constants/sampleData";
-import { products } from '@/constants/sampleData'; // Ensure you have a products array
+import useProducts from "../Products/hooks/useProducts";
+
+
 
 function Home() {
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState(categories[0].label);
+  const { products, loading, error } = useProducts();
 
   return (
     <div className=" w-full relative inset-0 bg-slate-300 flex flex-col ">
@@ -40,7 +43,7 @@ function Home() {
      
         <FilterProducts />
       </div>
-        <ProductsView products={products} categories={filCat} filter={filMall} />
+        <ProductsView products={products}  categories={filCat} filter={filMall} loading={loading} error={error} />
       </div>
     </div>
   );

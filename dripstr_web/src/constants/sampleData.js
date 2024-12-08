@@ -10,8 +10,8 @@ export const Images = [
         rate: 3.5, 
         likes: 15,
         images: [
-          require('@/assets/images/home/blackTshirt.png'), 
-          require('@/assets/images/home/blackTshirt.png')
+          require('@/assets/images/home/a.png'), 
+          require('@/assets/images/home/a.png')
         ], 
         colorOrder: 'Black', 
         sizeOrder: 'M'
@@ -22,7 +22,7 @@ export const Images = [
     colorVariant: ['Black', 'Blue', 'Dark Black'], 
     sizeVariant: ['S', 'M', 'L', 'XL', '2XL'], 
     shop: "Viscount", 
-    url: require('@/assets/images/home/blackTshirt.png'), 
+    url: require('@/assets/images/home/a.png'), 
     str: true, 
     discount: 50, 
     sold: 0, 
@@ -30,8 +30,8 @@ export const Images = [
     price: 100, 
     prodId: 1245, 
     images: [
-      require('@/assets/images/home/orangeShoes.png'), 
-      require('@/assets/images/home/greyShoe.png')
+      require('@/assets/images/home/b.png'), 
+      require('@/assets/images/home/c.png')
     ]
   },
   { 
@@ -43,7 +43,7 @@ export const Images = [
     colorVariant: ['Brown'], 
     sizeVariant: ['7', '8', '9', '10'], 
     shop: "Aest", 
-    url: require('@/assets/images/home/brownShoes.png'), 
+    url: require('@/assets/images/home/b.png'), 
     str: false, 
     discount: 0, 
     sold: 100, 
@@ -51,8 +51,8 @@ export const Images = [
     price: 400, 
     prodId: 2734, 
     images: [
-      require('@/assets/images/home/orangeShoes.png'), 
-      require('@/assets/images/home/greyShoe.png')
+      require('@/assets/images/home/c.png'), 
+      require('@/assets/images/home/b.png')
     ]
   },
   { 
@@ -67,7 +67,7 @@ export const Images = [
         rate: 3.0, 
         likes: 8,
         images: [
-          require('@/assets/images/home/orangeShoes.png')
+          require('@/assets/images/home/b.png')
         ], 
         colorOrder: 'Orange', 
         sizeOrder: '9'
@@ -78,7 +78,7 @@ export const Images = [
     colorVariant: ['Orange', 'White'], 
     sizeVariant: ['7', '8', '9', '10', '11'], 
     shop: "Nike", 
-    url: require('@/assets/images/home/orangeShoes.png'), 
+    url: require('@/assets/images/home/d.png'), 
     str: false, 
     discount: 0, 
     sold: 100, 
@@ -86,8 +86,8 @@ export const Images = [
     price: 100, 
     prodId: 1246, 
     images: [
-      require('@/assets/images/home/orangeShoes.png'), 
-      require('@/assets/images/home/greyShoe.png')
+      require('@/assets/images/home/a.png'), 
+      require('@/assets/images/home/b.png')
     ]
   },
   { 
@@ -134,7 +134,7 @@ export const Images = [
     colorVariant: ['Grey', 'Black'], 
     sizeVariant: ['6', '7', '8', '9', '10'], 
     shop: "Vans", 
-    url: require('@/assets/images/home/greyShoe.png'), 
+    url: require('@/assets/images/home/a.png'), 
     str: true, 
     discount: 0, 
     sold: 100, 
@@ -249,8 +249,8 @@ export const products = [
         rate: 3.5, 
         likes: 15,
         images: [
-          require('@/assets/images/home/blackTshirt.png'), 
-          require('@/assets/images/home/blackTshirt.png')
+          require('@/assets/images/home/a.png'), 
+          require('@/assets/images/home/a.png')
         ], 
         colorOrder: 'Black', 
         sizeOrder: 'M'
@@ -261,7 +261,7 @@ export const products = [
     colorVariant: ['Black', 'Blue', 'Dark Black'], 
     sizeVariant: ['S', 'M', 'L', 'XL', '2XL'], 
     shop: "Viscount", 
-    url: require('@/assets/images/home/blackTshirt.png'), 
+    url: require('@/assets/images/home/b.png'), 
     str: true, 
     discount: 50, 
     sold: 0, 
@@ -269,8 +269,8 @@ export const products = [
     price: 100, 
     prodId: 1245, 
     images: [
-      require('@/assets/images/home/orangeShoes.png'), 
-      require('@/assets/images/home/greyShoe.png')
+      require('@/assets/images/home/a.png'), 
+      require('@/assets/images/home/c.png')
     ]
   },
   { 
@@ -282,7 +282,7 @@ export const products = [
     colorVariant: ['Brown'], 
     sizeVariant: ['7', '8', '9', '10'], 
     shop: "Aest", 
-    url: require('@/assets/images/home/brownShoes.png'), 
+    url: require('@/assets/images/home/b.png'), 
     str: false, 
     discount: 0, 
     sold: 100, 
@@ -290,8 +290,8 @@ export const products = [
     price: 400, 
     prodId: 2734, 
     images: [
-      require('@/assets/images/home/orangeShoes.png'), 
-      require('@/assets/images/home/greyShoe.png')
+      require('@/assets/images/home/c.png'), 
+      require('@/assets/images/home/b.png')
     ]
   },
   { 
@@ -306,7 +306,7 @@ export const products = [
         rate: 3.0, 
         likes: 8,
         images: [
-          require('@/assets/images/home/orangeShoes.png')
+          require('@/assets/images/home/c.png')
         ], 
         colorOrder: 'Orange', 
         sizeOrder: '9'
@@ -317,7 +317,7 @@ export const products = [
     colorVariant: ['Orange', 'White'], 
     sizeVariant: ['7', '8', '9', '10', '11'], 
     shop: "Nike", 
-    url: require('@/assets/images/home/orangeShoes.png'), 
+    url: require('@/assets/images/home/c.png'), 
     str: false, 
     discount: 0, 
     sold: 100, 
@@ -325,8 +325,8 @@ export const products = [
     price: 100, 
     prodId: 1246, 
     images: [
-      require('@/assets/images/home/orangeShoes.png'), 
-      require('@/assets/images/home/greyShoe.png')
+      require('@/assets/images/home/c.png'), 
+      require('@/assets/images/home/d.png')
     ]
   },
   { 
@@ -373,7 +373,7 @@ export const products = [
     colorVariant: ['Grey', 'Black'], 
     sizeVariant: ['6', '7', '8', '9', '10'], 
     shop: "Vans", 
-    url: require('@/assets/images/home/greyShoe.png'), 
+    url: require('@/assets/images/home/d.png'), 
     str: true, 
     discount: 0, 
     sold: 100, 
