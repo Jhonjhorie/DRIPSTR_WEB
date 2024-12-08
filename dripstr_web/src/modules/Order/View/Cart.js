@@ -151,7 +151,7 @@ function Cart() {
   
   return (
     <>
-    <div className="p-3 bg-slate-200 max-h-full">
+    <div className="p-3 bg-slate-200 h-full">
       <h1 className="text-3xl font-bold mb-8 text-center text-purple-600 ">Shopping Cart</h1>
       <div className="bg-slate-600 flex items-center justify-between p-4 rounded-md mb-4">
         <p className="text-white text-lg">Cart Products: {calculateAllProducts()}</p>
@@ -171,7 +171,7 @@ function Cart() {
         </div>
       </div>
       {cartItems.length === 0 ? (
-        <p className="text-center">Your cart is empty.</p>
+        <p className="text-center flex items-start justify-center mt-[18rem] font-extrabold text-purple-600 text-2xl">Your cart is empty.</p>
       ) : (
         <div className="flex flex-col">
           <div className="mb-4">

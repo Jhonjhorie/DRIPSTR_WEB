@@ -1,14 +1,19 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 
 function Product() {
   const location = useLocation();
   const item = location.state?.item; // Safely access item from state
+  const navigate = useNavigate();
 
   if (!item) {
     return <p>No product data found. Please return to the products page.</p>;
   }
+
+  const handlePlaceOrder = () => {
+    navigate('/order', { state: { item } }); // Pass the product data to the Order page
+  };
 
   return (
     <div className="w-full relative inset-0 bg-slate-300 flex flex-col gap-2 px-2 py-4">
@@ -118,7 +123,7 @@ function Product() {
                   <button className="btn btn-sm btn-outline btn-secondary  ">
                     Add to Cart
                   </button>
-                  <button className="btn btn-sm  btn-outline ">
+                  <button className="btn btn-sm  btn-outline "  onClick={handlePlaceOrder}>
                     Place Order
                   </button>
                 </div>
