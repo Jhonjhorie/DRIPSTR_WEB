@@ -23,7 +23,7 @@ const navItems = [
   { label: "My Order", path: "/account/orders", icon: faReceipt },
   { label: "My Wishlist", path: "/account/wishlist", icon: faHeart },
   { label: "Set up Shop", path: "/account/shop-setup", icon: faStore },
-  { label: "Avatar", path: "/account/avatar", icon: faUserCircle },
+  { label: "Avatar", path: "/account/Cc", icon: faUserCircle },
 ];
 
  /*{ label: "My Cancellations", path: "/account/cancellations", icon: faCloseCircle },
