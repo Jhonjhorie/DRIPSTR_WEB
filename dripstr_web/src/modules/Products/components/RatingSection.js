@@ -203,7 +203,7 @@ const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/obj
                             key={index}
                             className="border-base-content card bg-base-100 w-36 border text-center"
                           >
-                            <p>{supabaseBaseUrl}{image}</p>
+                       
                             <div className="card-body">
                               <img
                                 src={`${supabaseBaseUrl}${image}`}

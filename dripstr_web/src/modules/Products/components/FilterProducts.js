@@ -35,15 +35,7 @@ const FilterProducts = ({ }) => {
                 Star Rating
                 <StarRangeSlider onRateChange={handleRateChange} />
                 </div>
-                <div className='flex flex-row text-lg items-center mt-2 gap-2 font-bold w-full justify-evenly'>
-                    STR ITEMS? <input type="checkbox" className="toggle toggle-lg toggle-primary"  />
-                </div>
-                <div className='flex flex-row text-lg items-center mt-2 gap-2 font-bold w-full justify-evenly'>
-                    VOUCHER? <input type="checkbox" className="toggle toggle-lg toggle-primary"  />
-                </div>
-                <div className='flex flex-row text-lg items-center mt-2 gap-2 font-bold w-full justify-evenly'>
-                    DISCOUNT? <input type="checkbox" className="toggle toggle-lg toggle-primary"  />
-                </div>
+
             </div>
           </div>
         </div>

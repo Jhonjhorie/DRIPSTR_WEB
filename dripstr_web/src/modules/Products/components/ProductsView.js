@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import ProductModal from './productModal';
 import ProductCard from './productCard';
-import useGetImage from '../hooks/useGetImageUrl';
+
 
 
 const ProductsView = ({ products, categories, filter, loading, error }) => {
@@ -28,6 +28,16 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
         return true;
       case 1:
         return item.str === true;
+      case 2:
+        return;
+      case 3:
+        return item.discount != 0 || item.vouchers != null;
+      case 4:
+        return;
+      case 5:
+        return item.sold > 99;
+      case 6:
+        return item.reviews.length > 2;
       default:
         return true;
     }
