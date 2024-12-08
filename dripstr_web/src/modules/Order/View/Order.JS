@@ -1,10 +1,15 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function Order() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { item } = location.state || {}; // Retrieve the passed product details
   const shipping = 120.00;
+
+  const handleToCart = () => {
+    navigate('/account/orders', { state: { item } }); // Pass the product data to the Order page
+  };
 
   if (!item) {
     return <div>No order details found.</div>;
@@ -35,31 +40,55 @@ function Order() {
             <h2 className="text-2xl font-bold text-gray-800">{item.product}</h2>
             <p className="text-lg text-gray-500">Price: ₱{item.price}</p>
 
-            <p className="text-md font-bold text-black">Payment Option:</p>
-            <div className="flex gap-4">
-              <div className="">
-                <label className="flex items-center text-black">
-                  <input type="radio" name="paymentOption" value="cashOnDelivery" />
-                  Cash on Delivery
-                </label>
-                <label className="flex items-center text-black">
-                  <input type="radio" name="paymentOption" value="paypal" />
-                  Paypal
-                </label>
-              </div>
-            </div>
+            
+            
           </div>
         </div>
       </div>
 
-      {/* Footer Section */}
       <div className="mt-auto sticky bottom-0 w-full bg-white p-6 shadow-xl flex justify-between items-center">
-        <div className="text-xl">
-          <p className="text-gray-500">Shipping: ₱{shipping}</p>
+        {/* Left Side (Shipping and Total Price) */}
+        <div className="text-xl flex flex-col gap-4">
+          <p className="text-md font-bold text-black">Shipping: ₱{shipping}</p>
           <p className="text-2xl font-bold text-black">Total Price: ₱{shipping + item.price}</p>
         </div>
-        <button className="btn btn-lg btn-primary py-2 px-6">Checkout</button>
+
+        {/* Right Side (Voucher and Payment Options) */}
+        <div className="flex flex-col gap-4 items-end">
+          {/* Apply Voucher */}
+          <div className="flex items-center gap-4">
+            <h1 className="text-md font-bold text-black">Apply Voucher:</h1>
+            <input
+              type="text"
+              placeholder="Enter Voucher"
+              className="p-2 border border-gray-300 bg-gray-300 rounded-md w-40 text-black h-8"
+            />
+          </div>
+
+          {/* Payment Option */}
+          <div className="flex items-center gap-4">
+            <p className="text-md font-bold text-black">Payment Option:</p>
+            <div>
+              <label className="flex items-center text-black">
+                <input type="radio" name="paymentOption" value="cashOnDelivery" />
+                Cash on Delivery
+              </label>
+              <label className="flex items-center text-black">
+                <input type="radio" name="paymentOption" value="paypal" />
+                Paypal
+              </label>
+            </div>
+          </div>
+        </div>
+
+        {/* Checkout Button */}
+        <div className="flex gap-4 items-center">
+          <button className="btn btn-lg btn-primary py-2 px-6" onClick={handleToCart}>
+            Checkout
+          </button>
+        </div>
       </div>
+
     </div>
   );
 }

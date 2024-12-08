@@ -6,7 +6,12 @@ const ProductModal = ({ item }) => {
   const navigate = useNavigate();
 
   const handleProductClick = () => {
-    navigate(`/cart/order`, { state: { item } });
+    navigate(`/product/${item.product}`, { state: { item } });
+   
+  };
+
+  const handleToCart = () => {
+    navigate(`/cart`, { state: { item } });
    
   };
 
@@ -79,7 +84,7 @@ const ProductModal = ({ item }) => {
               <div className=' justify-end gap-4 items-center flex'>
               <h2 className="text-4xl font-bold text-primary-color">₱{item.price}</h2>
               <button
-                  onClick={() => handleProductClick()}
+                  onClick={() => handleToCart()}
                   className="btn btn-sm btn-outline btn-secondary  "
                 >
                   Add to Cart

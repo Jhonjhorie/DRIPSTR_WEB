@@ -1,14 +1,18 @@
- import React, { useState, useEffect } from "react";
- import Sidebar from "../components/Sidebar";  
+import React, { useState, useEffect } from "react";
+import Sidebar from "../components/Sidebar";  
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
-
+import { useLocation, useNavigate } from "react-router-dom";
 const Orders = () => {
   const [selectedTab, setSelectedTab] = useState("All");
 
   const tabs = ["All", "To Pay", "To Ship", "To Receive", "Received (32)"];
 
   const [orderDetails, setOrderDetails] = useState(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { item } = location.state || {}; // Retrieve the passed product details
 
   useEffect(() => {
     // Fetch data from localStorage
@@ -135,6 +139,28 @@ const Orders = () => {
             ) : (
               <p>No items in your order.</p>
             )}
+          </div>
+          <div className="bg-gray-100 rounded-lg p-4">
+            <h2 className="text-lg font-bold text-gray-800 mb-2">
+              {item.shop}
+            </h2>
+            <span className="text-green-500 font-medium mb-4 block">Received</span>
+            <div className="flex gap-4">
+              <img
+                src="https://via.placeholder.com/80"
+                alt="Order Item"
+                className="w-20 h-20 rounded-lg"
+              />
+              <div className="flex-1">
+                <p className="text-gray-800 font-medium">
+                  {item.product}
+                </p>
+                <p className="text-gray-500">Black</p>
+                <p className="text-green-500">30 Days Free Returns</p>
+                <p className="text-gray-800 font-bold">₱{item.price}</p>
+                <p className="text-gray-500">Qty: 1</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
