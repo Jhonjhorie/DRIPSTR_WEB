@@ -117,9 +117,7 @@ const CharacterCustomization = () => {
         <Canvas
           camera={{ position: [0, 3, 3] }}
           style={{ background: "linear-gradient(to top, #1e3a8a, #3b82f6)" }}
-        >          <Plane args={[5, 5]} position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <meshStandardMaterial color="lightgray" />
-      </Plane>
+        >    
           <ambientLight intensity={0.8} />
           <hemisphereLight
             intensity={0.6}
