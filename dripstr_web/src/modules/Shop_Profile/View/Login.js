@@ -16,9 +16,7 @@ function Login() {
     const [showAlert4, setShowAlert4] = React.useState(false); // Alert11digits
     const [showAlert5, setShowAlert5] = React.useState(false); // AlertAddress
     const [user, setUser] = useState(null);
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [uploading, setUploading] = useState(false);
-    const [imageUrl, setImageUrl] = useState(null);
+
     const [imageFile, setImageFile] = useState(null);  // State to hold the image file
 
     const handleFileChange = (e) => {
@@ -29,15 +27,7 @@ function Login() {
       }
     };
     
-    useEffect(() => {
-      const getUser = async () => {
-        const { data: { user } } = await supabase.auth.getUser();
-        setUser(user);
-        console.log("Current user:", user);
-      };
-  
-      getUser();
-    }, []);
+
     const phonedigit = (e) => {
         let value = e.target.value;
         value = value.replace(/[^0-9]/g, '').slice(0, 11); 
@@ -93,12 +83,11 @@ function Login() {
       }, 3000);
         return; // Do not proceed if the field is empty
       }
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error("No user found");
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (!user || userError) {
+        console.error('No user found');
         return;
       }
-
       let uploadedImageUrl = null;
       if (imageFile) {
         try {
@@ -111,23 +100,23 @@ function Login() {
             console.error("Error uploading image:", uploadError.message);
             return; // Exit if there's an error uploading the image
           }
- if (data?.path) {
-      const { publicURL, error: urlError } = supabase.storage
+      if (data?.path) {
+        const { data: publicUrlData, error: urlError } = supabase.storage
         .from('shop_profile')
         .getPublicUrl(data.path);
 
-      if (urlError) {
-        console.error("Error fetching image URL:", urlError.message);
-        return; // Exit if there's an error fetching the image URL
-      }
+            if (urlError) {
+              console.error("Error fetching image URL:", urlError.message);
+              return; // Exit if there's an error fetching the image URL
+            }
 
-      uploadedImageUrl = publicURL; // Correctly assign the public URL
-      console.log("Image uploaded successfully:", uploadedImageUrl);
-    }
-  } catch (err) {
-    console.error("Unexpected error while uploading image:", err);
-    return; // Exit if there's an unexpected error during image upload
-  }
+            uploadedImageUrl = publicUrlData.publicUrl; // Correctly assign the public URL
+            console.log("Image uploaded successfully:", uploadedImageUrl);
+          }
+        } catch (err) {
+          console.error("Unexpected error while uploading image:", err);
+          return; // Exit if there's an unexpected error during image upload
+        }
       }
   
       const userId = user.id;  // Get the current user's ID
@@ -146,7 +135,7 @@ function Login() {
               description: shopDescription,
               address: shopAddress,
               owner_Id: userId,  // Set the owner_id to the current user's ID
-              shop_image: uploadedImageUrl, 
+              shop_image: uploadedImageUrl || null, 
             },
           ])
           .single();  // Insert a single shop and get the inserted row
@@ -170,18 +159,13 @@ function Login() {
         }
     
         console.log("User profile updated with merchant_id and ismerchant = true");
-        console.log("Inserting shop with data:", {
-          shop_name: shopName,
-          contact_number: phoneNumber,
-          description: shopDescription,
-          address: shopAddress,
-          owner_Id: userId,
-      });
+
         // Reset form fields after successful insertion
-        setShopName("");
-        setPhoneNumber("");
-        setShopDescription("");
-        
+        setShopName('');
+        setPhoneNumber('');
+        setShopDescription('');
+        setShopAddress('');
+        setImageFile(null);
     
         // Navigate to the Merchant Dashboard
         navigate('/shop/MerchantDashboard');
@@ -214,6 +198,7 @@ function Login() {
                         id="shopName"
                         value={shopName}
                         onChange={handleShopNameChange}
+
                         type="text" placeholder="Type here" className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full" />
                     </label>
                     <label className="form-control w-full max-w-xs mt-2">
@@ -270,7 +255,7 @@ function Login() {
                 </div>
                 <textarea
                 value={shopAddress}
-                 onChange={handleShopAddressChange}
+                onChange={handleShopAddressChange}
                 className="textarea resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24" placeholder="Type your Shop Address here"></textarea>
             </label>
             <button 

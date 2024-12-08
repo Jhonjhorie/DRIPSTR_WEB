@@ -16,57 +16,15 @@ function SideBar() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  useEffect(() => {
-    const fetchImage = async () => {
-      const { data: user, error } = await supabase.auth.getUser(); // Use getUser() to fetch the current user
-
-      if (error) {
-        console.error('Error fetching user:', error);
-        setLoading(false);
-        return;
-      }
-
-      if (user) {
-        const userId = user.id; // Get user ID
-        
-        // Construct the image path (assuming the image is stored by user ID)
-        const imagePath = `shop_image/${userId}/`; // Adjust the path as needed
-        
-        // Fetch the image public URL from the Supabase bucket
-        const { data, error } = await supabase.storage
-          .from('shop_profile') // Replace with your bucket name
-          .getPublicUrl(imagePath); // Image path based on user ID
-
-        if (error) {
-          console.error('Error fetching image:', error);
-        } else {
-          setImageUrl(data.publicUrl); // Set the image 
-          console.log('Image Path:', imagePath);
-
-        }
-      } else {
-        console.log('No user logged in');
-      }
-      setLoading(false);
-    };
-
-    fetchImage();
-  }, []); 
-
+  
   return (
     <div className="relative flex  md:mr-0" ref={navbarRef}>
     
     <div className="dropdown dropdown-bottom dropdown-end bg-slate-100 shadow-md border-2 border-primary-color 
     shadow-primary-color h-12 w-20 mt-2 rounded-md mr-16 ">
-      <div>
-      {loading ? (
-        <p>Loading image...</p> // Display loading message
-      ) : imageUrl ? (
-        <img src={imageUrl} alt="User Profile" /> // Display the fetched image
-      ) : (
-        <p>No image found.</p> // Display if no image is found
-      )}
-      </div>
+          
+        <img src={logo} alt="User Profile" className='object-cover h-full w-full rounded-md '/>
+      
     </div>
 
 
