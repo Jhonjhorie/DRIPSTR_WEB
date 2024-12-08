@@ -6,7 +6,7 @@ import { supabase } from "../../../constants/supabase";
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState({
-    fullName: "",
+    full_name: "",
     email: "",
     mobile: "",
     birthday: "",
@@ -55,6 +55,7 @@ const UserProfile = () => {
       const { error } = await supabase
         .from("profiles")
         .update({
+          full_name: profile.full_name,
           email: profile.email,
           mobile: profile.mobile,
           birthday: profile.birthday,
@@ -108,7 +109,19 @@ const UserProfile = () => {
                   className="w-24 h-24 rounded-full border-2 border-gray-300 mr-4"
                 />
                 <div>
-                  <h2 className="text-lg font-semibold">{profile.fullName}</h2>
+                {isEditing ? (
+                      <input
+                        type="text"
+                        name="full_name"
+                        value={profile.full_name}
+                        onChange={handleInputChange}
+                        placeholder="Enter your Full Namer"
+                        className="text-lg bg-slate-200 text-gray-700 border border-gray-300 rounded-md p-2 w-full"
+                      />
+                    ) : (
+                       <h2 className="text-lg text-gray-900 font-semibold">{profile.full_name}</h2>
+
+                    )}
                   <button className="text-blue-600 font-medium">
                     Change Picture
                   </button>
