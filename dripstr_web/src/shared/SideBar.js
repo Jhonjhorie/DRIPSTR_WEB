@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { supabase } from "../constants/supabase";  
 import {
   faHome,
   faUser,
@@ -9,12 +10,40 @@ import {
   faBell,
 } from "@fortawesome/free-solid-svg-icons";
 
+
 const SideBar = () => {
   const [activeName, setActiveName] = useState("Home");
+  const [isMerchant, setIsMerchant] = useState(false); 
+
+  useEffect(() => {
+    // Fetch the current user profile and yung IsMerchant == false ELSE == True
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        console.log("Current user:", user);
+        const { data: profiles, error } = await supabase
+          .from("profiles")
+          .select("isMerchant")
+          .eq("id", user.id)
+          .single();
+
+        if (error) {
+          console.error("Error fetching profile data:", error);
+        } else {
+          console.log("Profile data:", profiles);
+          setIsMerchant(profiles?.isMerchant || false); // Set the isMerchant state
+        }
+      } else {
+        console.log("No user is signed in");
+      }
+    };
+    fetchUserProfile();
+  }, []); 
+
 
   const mainSideBar = [
     { label: 'Home', path: '/', icon: faHome },
-    { label: 'Shop', path: '/shop/MerchantDashboard', icon: faStore },
+    ...(isMerchant ? [{ label: 'Shop', path: '/shop/MerchantDashboard', icon: faStore }] : []),
     { label: 'Notification', path: '/notification', icon: faBell },
     { label: 'Account', path: '/account', icon: faUser },
   ];

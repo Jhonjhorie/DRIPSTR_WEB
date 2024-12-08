@@ -1,10 +1,52 @@
-import React from "react";
+import React,  { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { supabase } from "../../../constants/supabase";
+
+
 
 const shop = [{ label: "Shop", path: "/shop/MerchantCreate" }];
 
 const Shop = () => {
+
+  const [isMerchant, setIsMerchant] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserStatus = async () => {
+      setLoading(true);
+      try {
+        // Get the current user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.error("Error fetching user:", userError?.message || "No user found");
+          return;
+        }
+
+        // Fetch the user's profile from the 'profiles' table
+        const { data: profiles, error: profileError } = await supabase
+          .from("profiles")
+          .select("isMerchant")
+          .eq("id", user.id)
+          .single();
+
+        if (profileError) {
+          console.error("Error fetching profile:", profileError.message);
+          return;
+        }
+
+        // Set the isMerchant status
+        setIsMerchant(profiles.isMerchant === true);
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserStatus();
+  }, []);
+  
   return (
     <div className="p-4 flex min-h-screen bg-slate-200">
       {/* Sidebar */}
@@ -103,9 +145,26 @@ const Shop = () => {
         {/* Get Started Button */}
         <div className=" flex flex-row items-center justify-center gap-10">
           <div className="text-center">
-            <Link to="/shop/MerchantCreate">
-              <button className="btn btn-primary btn-lg">Be a Merchant </button>
-            </Link>
+            <button
+              className={` ${
+                isMerchant || loading
+                  ? "btn-lg rounded-md hover:bg-slate-800 cursor-not-allowed bg-slate-900 text-gray-100 "
+                  : "btn-lg bg-primary rounded-md font-semibold hover:bg-opacity-80 text-slate-900"
+              }`}
+              disabled={isMerchant || loading}
+            >
+              {loading || isMerchant ? (
+                loading ? (
+                  "Loading..."
+                ) : (
+                 "You Are Already a Merchant"
+                )
+              ) : (
+                <Link to="/shop/MerchantCreate" className="text-white text-inherit no-underline">
+                  Be a Merchant
+                </Link>
+              )}
+            </button>
           </div>
           <div className="text-center">
             <Link to="/shop/ArtistCreate">

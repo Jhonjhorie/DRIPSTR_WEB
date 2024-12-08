@@ -1,31 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../../assets/shop/shoplogo.jpg';
+import { supabase } from "../../../constants/supabase";  
+
 
 function SideBar() { 
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
   const navbarRef = useRef(null);
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
-};
+  };
 
- 
-
+  
   return (
     <div className="relative flex  md:mr-0" ref={navbarRef}>
     
     <div className="dropdown dropdown-bottom dropdown-end bg-slate-100 shadow-md border-2 border-primary-color 
     shadow-primary-color h-12 w-20 mt-2 rounded-md mr-16 ">
-      <div>
-          <img
-            src={logo}
-            alt="Shop Logo"
-            className="drop-shadow-custom object-cover rounded-md h-11 w-full"
-          />
-      </div>
+          
+        <img src={logo} alt="User Profile" className='object-cover h-full w-full rounded-md '/>
+      
     </div>
 
 
