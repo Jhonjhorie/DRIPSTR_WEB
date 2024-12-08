@@ -7,16 +7,17 @@ function Product() {
   const item = location.state?.item; // Safely access item from state
   const navigate = useNavigate();
 
+
   if (!item) {
     return <p>No product data found. Please return to the products page.</p>;
   }
 
   const handlePlaceOrder = () => {
-    navigate('/order', { state: { item } }); // Pass the product data to the Order page
+    navigate('/cart/order', { state: { item } }); // Pass the product data to the Order page
   };
 
   return (
-    <div className="w-full relative inset-0 bg-slate-300 flex flex-col gap-2 px-2 py-4">
+    <div className="w-full relative inset-0 bg-slate-300 flex flex-col gap-2 px-2 py-4 h-100">
       <div className="">
         <div className="hero bg-slate-300 ">
           <div className="hero-content flex-col h-full lg:flex-row">
