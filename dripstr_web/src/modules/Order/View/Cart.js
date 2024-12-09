@@ -185,7 +185,7 @@ function Cart() {
         </div>
       </div>
       {cartItems.length === 0 ? (
-        <p className="flex items-center justify-center text-2xl font-bold text-purple-600 mt-[13rem]">Your cart is empty.</p>
+        <p className="text-center flex items-start justify-center mt-[18rem] font-extrabold text-purple-600 text-2xl">Your cart is empty.</p>
       ) : (
         <div className="flex flex-col">
           <div className="mb-4">

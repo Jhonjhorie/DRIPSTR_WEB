@@ -33,6 +33,8 @@ const ProductModal = ({ item, onClose }) => {
       : [])
   ];
 
+
+
   return (
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 h-[40rem] overflow-y-auto overflow-x-hidden lg:overflow-hidden custom-scrollbar  modal-box">
       {item  && <dialog id="buyConfirm_Modal" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
@@ -166,6 +168,7 @@ const ProductModal = ({ item, onClose }) => {
               <div className=" justify-end gap-2 items-center flex">
                 <button
                   onClick={() => openModal('cart')}
+              
                   className="btn btn-sm btn-outline btn-secondary  "
                 >
                   Add to Cart
