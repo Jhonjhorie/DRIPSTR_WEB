@@ -44,6 +44,10 @@ const BuyConfirm = ({ action, item, onClose }) => {
   const handleProductClick = () => {
     navigate(`/product/${item.product}`, { state: { item } });
   };
+  const handleToCart = () => {
+    navigate(`/cart`, { state: { item } });
+   
+  };
 
   return (
     <div className="relative right-16 sm:-right-40 ">
@@ -179,7 +183,8 @@ const BuyConfirm = ({ action, item, onClose }) => {
                 Go to Product Page
               </button>
               <button
-                onClick={onClose}
+              
+                onClick={isCart ? () => handleToCart() : onClose}
                 className="btn btn-sm btn-outline btn-primary  "
               >
                 Confirm
