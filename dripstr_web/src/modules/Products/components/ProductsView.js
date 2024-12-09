@@ -56,11 +56,18 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
     ...Array(placeholdersNeeded).fill({ empty: true }),
   ];
   
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return (<div className='min-h-24'>
+  <p>Loading...</p>
+  </div>
+  )
+  ;
+  if (error) return (<div className='min-h-24'> 
+  <p>Error: {error}</p>
+  </div>
+);
 
   return (
-    <div className="w-full flex flex-col items-center pb-24">
+    <div className="w-full flex flex-col items-center pb-24 min-h-20">
       {selectedItem && (
         <dialog
           id="my_modal_4"

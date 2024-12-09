@@ -7,7 +7,7 @@ const topItems = Array(6).fill({ label: "Item", soldCount: "6" });
 
 function Dashboard() {
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row  ">
       <Sidebar />
       <div className="w-full h-screen flex-col">
         {/* Users Statistics */}

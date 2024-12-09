@@ -11,7 +11,9 @@ import ReportDetail from "../View/Components/ReportDetail";
 
 const AdminController = () => {
   return (
+    <main className="bg-slate-800 p-4">
     <Routes>
+   
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/reviews" element={<Reviews />} />
       <Route path="/reports" element={<Reports />} />
@@ -20,7 +22,9 @@ const AdminController = () => {
 
       <Route path="/settings" element={<Settings />} />
       <Route path="/reports/:reportNo" element={<ReportDetail />} />
+     
     </Routes>
+    </main>
   );
 };
 

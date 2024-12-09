@@ -275,7 +275,7 @@ function Orders() {
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
               onClick={handleCloseModal}
             >
-              Cancel
+              Cancel Order
             </button>
             <button
               className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
