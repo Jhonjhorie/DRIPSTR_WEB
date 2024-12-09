@@ -2,13 +2,20 @@ import React from "react";
 import Sidebar from "./Shared/Sidebar";
 import ReportTable from "./Components/ReportTable";
 import FromToCalendar from "./Components/FromToCalendar";
+import { useNavigate } from "react-router-dom";
 
 function Reports() {
+  const navigate = useNavigate();
+
+  const handleRowClick = (reportNo) => {
+    navigate(`/admin/reports/${reportNo}`);
+  };
+
   return (
     <div className="flex flex-row">
       <Sidebar />
       <div className="w-full h-screen flex-col">
-        <div className="bg-gray-700 justify-end flex">
+        <div className="justify-end flex h-16">
           <FromToCalendar />
         </div>
 
@@ -16,7 +23,8 @@ function Reports() {
           <div className="h-full p-6">
             <h1 className="text-white text-2xl font-bold mb-4">Reports</h1>
             <div className="h-full">
-              <ReportTable />
+              {/* Pass the row click handler to ReportTable */}
+              <ReportTable onRowClick={handleRowClick} />
             </div>
           </div>
         </div>
@@ -24,4 +32,5 @@ function Reports() {
     </div>
   );
 }
+
 export default Reports;
