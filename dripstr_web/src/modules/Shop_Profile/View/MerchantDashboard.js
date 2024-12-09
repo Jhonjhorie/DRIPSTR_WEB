@@ -14,7 +14,7 @@ import { supabase } from "../../../constants/supabase";
 import React, {useState, useEffect} from 'react';
 const data = [
   { label: 'T-Shirt Alucard', value: 400 },
-  { label: 'Ben Brief', value: 300 },
+  { label: 'Ben SHIRT', value: 300 },
   { label: 'Bini Shirt', value: 300 },
   { label: 'Bini Maloi', value: 20 },
   { label: 'Xdinary Heroes', value: 278 },
