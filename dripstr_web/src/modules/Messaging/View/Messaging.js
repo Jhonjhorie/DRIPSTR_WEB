@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCommentAlt, faTimes, faPaperPlane, faMinus } from "@fortawesome/free-solid-svg-icons";
+import { faMessage, faTimes, faPaperPlane, faMinus } from "@fortawesome/free-solid-svg-icons";
+import { Link} from "react-router-dom";
 
 const ChatMessages = ({ onClose }) => {
   const [selectedChat, setSelected] = useState(null);
@@ -107,12 +108,23 @@ const ChatMessages = ({ onClose }) => {
         <div ref={chatListRef} className="absolute top-0 right-9 bg-white w-80 rounded-lg shadow-md z-50">
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-lg font-bold text-[#9800ff]">Messages</h2>
+            <div>
+
+            
+              <Link to="/shop/MerchantMessages">
+              <button className="p-2 text-slate-800">
+                <FontAwesomeIcon icon={faMessage} size="lg" />
+                </button> 
+              </Link>
+              
             <button
               className="hover:text-primary-color text-slate-800 btn-sm"
               onClick={() => setChatListVisible(false)} // Hides the Chat List
             >
               <FontAwesomeIcon icon={faTimes} size="lg" />
             </button>
+            </div>
+           
           </div>
           <div className="max-h-60 overflow-y-auto">
             {messages.map((message) => (
