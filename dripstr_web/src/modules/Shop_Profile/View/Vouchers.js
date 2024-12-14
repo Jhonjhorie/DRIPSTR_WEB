@@ -1,49 +1,212 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import SideBar from '../Component/Sidebars'
 import { useNavigate } from 'react-router-dom';
 import blackLogo from '../../../assets/logoWhite.png'
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
-
-
-const { useState } = React;
+import { supabase } from "../../../constants/supabase"; 
 
 function Vouchers() { 
     const navigate = useNavigate();
     const [selectedVouchers, setSelectedVouchers] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [deleteVoucher, setDelVoucher] = useState(false);
+    const [shopData, setShopData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [vouchers, setVouchers] = useState([]);
+    const [selectedShopId, setSelectedShopId] = useState(null);
+    const [vouchLimit, setVouchLimit] = useState('');
+    const [vouchLimit2, setVouchLimit2] = useState('');
+    const [showAlert, setShowAlert] = React.useState(false); // Alert
+    const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete
+    const [showNoSelectedVoucher, setShowNoSelDelVocuher] = React.useState(false); // Alert Delete
 
 
-    const VouchersData = [
-        { id: 1, off: 10, minSpend: 500 },
-        { id: 2, off: 15, minSpend: 1000 },
-        { id: 3, off: 20, minSpend: 1500 },
-        { id: 4, off: 25, minSpend: 2000 },
-        { id: 5, off: 30, minSpend: 2500 },
-        { id: 6, off: 35, minSpend: 3000 },
-        { id: 7, off: 40, minSpend: 3500 },
-        { id: 8, off: 45, minSpend: 4000 },
-        { id: 9, off: 50, minSpend: 4500 },
-        { id: 10, off: 55, minSpend: 5000 },
-        { id: 11, off: 60, minSpend: 5500 },
-        { id: 12, off: 65, minSpend: 6000 },
-    ];
+    //Get the user Shop Data
+    useEffect(() => {
+        // Fetch the current user profile and shop data
+        const fetchUserProfileAndShop = async () => {
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
+          if (authError) {
+            setError(authError.message);
+            setLoading(false);
+            return;
+          }
+      
+          if (user) {
+            console.log("Current user:", user);
+      
+            // Fetch shop data for the current user
+            const { data: shops, error: shopError } = await supabase
+              .from("shop")
+              .select("shop_name, id") // Specify fields if needed
+              .eq("owner_Id", user.id); // Assuming the 'shop' table has 'owner_Id' to link it to the user
+      
+            if (shopError) {
+              setError(shopError.message);
+            } else if (shops && shops.length > 0) {
+              const shop = shops[0]; // Since there's only one shop, select the first one
+              setShopData(shop); // Store the single shop data
+              setSelectedShopId(shop.id); // Automatically set the selected shop ID
+              console.log("Shop Name:", shop.shop_name);
+              console.log("Shop ID:", shop.id);
+            } else {
+              console.log("No shop found for the current user.");
+              setError('No shop found for the current user.');
+            }
+          } else {
+            console.log("No user is signed in");
+            setError('No user is signed in');
+          }
+          setLoading(false); // Stop the loading state once fetching is done
+        };
+      
+        fetchUserProfileAndShop();
+    }, []);
+      
+    //Onsubmit new shop Vouchers
+    const handleCreateVoucher = async () => {
+    if (!selectedShopId) {
+        console.error("No shop selected");
+        setError('Please select a shop to create a voucher for.');
+        return;
+    }
+    
+    console.log("Creating voucher for Shop ID:", selectedShopId);
+    setLoading(true);
+    
+    try {
+        const { data, error: insertError } = await supabase
+        .from("shop_Vouchers")
+        .insert([
+            {
+            shop_id: selectedShopId,
+            items_off: vouchLimit,
+            min_spend: vouchLimit2,
+            },
+        ]);
+    
+        if (insertError) {
+        console.error("Insert Error:", insertError);
+        setError(insertError.message);
+        } else {
+        console.log('Voucher created successfully:', data);
+        setVouchLimit('');
+        setVouchLimit2('');
+        fetchVouchers(); 
+        setShowAlert(true);
+        setTimeout(() => {
+          setShowAlert(false);
+         }, 3000);
+        }
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        setError('An unexpected error occurred.');
+    } finally {
+        setLoading(false);
+    }
+    };
+    
+    //Fetch the current shop Vouchers
+    const fetchVouchers = async () => {
+        if (!selectedShopId) return;
+      
+        try {
+          const { data, error } = await supabase
+            .from("shop_Vouchers")
+            .select("id, items_off, min_spend")
+            .eq("shop_id", selectedShopId);
+      
+          if (error) {
+            console.error("Error fetching vouchers:", error);
+            setError(error.message);
+          } else {
+            setVouchers(data);
+            console.log("Fetched vouchers:", data);
+          }
+        } catch (error) {
+          console.error("Unexpected error fetching vouchers:", error);
+        }
+    };
+    useEffect(() => {
+    fetchVouchers();
+    }, [selectedShopId]);
+            
+
+
 
     const handleCheckboxChange = (voucher) => {
-        setSelectedVouchers((prevSelected) =>
-            prevSelected.includes(voucher)
-                ? prevSelected.filter((v) => v !== voucher)
-                : [...prevSelected, voucher]
-        );
-    };
+        if (selectedVouchers.includes(voucher)) {
+          setSelectedVouchers(selectedVouchers.filter(v => v.id !== voucher.id));
+        } else {
+          setSelectedVouchers([...selectedVouchers, voucher]);
+        }
+        console.log('Selected Vouchers:', selectedVouchers); // Log the selected vouchers
+      };
+      
+
+      const handleDeleteVouchers = async () => {
+        try {
+          // Loop through selectedVouchers and delete each voucher
+          const deletePromises = selectedVouchers.map((voucher) => 
+            supabase
+              .from("shop_Vouchers")
+              .delete()
+              .eq("id", voucher.id)
+          );
+      
+          // Wait for all deletions to finish
+          const results = await Promise.all(deletePromises);
+      
+          // Optionally refresh the list of vouchers
+          console.log("Vouchers deleted:", results);
+          setDelVoucher(false); // Close modal
+          // Optionally, update the list of selected vouchers by resetting the state
+          setSelectedVouchers([]);
+          fetchVouchers(); 
+          setShowAlertDel(true);
+          setTimeout(() => {
+            setShowAlertDel(false);
+           }, 3000);
+     
+        } catch (error) {
+          console.error("Error deleting vouchers:", error);
+        }
+      };
+      
+            
 
     const handleSendToFollowers = () => {
         setShowModal(true);
     };
+    const handleDelVoucherConfirmations = () => {
+        if (selectedVouchers.length > 0) {
+            setDelVoucher(true); // Show the modal when there are selected vouchers
+          } else {
+            console.log("No vouchers selected for deletion.");
+            setShowNoSelDelVocuher(true);
+            setTimeout(() => {
+                setShowNoSelDelVocuher(false);
+            }, 3000);
+          }
+        
+    };
     const closeModal = () => {
         setSelectedVouchers([]);
         setShowModal(false)
+        setDelVoucher(false)
     }
-    
+    const limit = (e) => {
+        let value = e.target.value;
+        value = value.replace(/[^0-9]/g, '').slice(0, 9); 
+        setVouchLimit(value);
+    };
+    const limit2 = (e) => {
+        let value = e.target.value;
+        value = value.replace(/[^0-9]/g, '').slice(0, 9); 
+        setVouchLimit2(value);
+    };
   return (
   <div className="h-full w-full overflow-y-scroll px-16 bg-slate-300 custom-scrollbar ">
       <div className="absolute mx-3 right-0 z-10">
@@ -59,18 +222,27 @@ function Vouchers() {
                         <label className='text-slate-800 font-semibold text-sm '>Items OFF:</label>
                         <input 
                         onKeyDown={blockInvalidChar}
-
+                        onChange={(e) => setVouchLimit(e.target.value)}
+                        value={vouchLimit}
+                        
                         type='number' className='bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-48   border-[1px] border-custom-purple'></input>
                     </div>
                     <div className='mb-2 gap-2 flex place-items-center'>
                         <label className='text-slate-800 font-semibold text-sm'>Min Spend:</label>
                         <input 
                         onKeyDown={blockInvalidChar}
-
+                        onChange={(e) => setVouchLimit2(e.target.value)}
+                        value={vouchLimit2}
                         type='number' className='bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-48 border-[1px] border-custom-purple'></input>
                     </div>
                     <div className='justify-end relative w-full flex  '>
-                        <button className='p-2 bg-custom-purple shadow-md  mr-2 text-white text-sm glass rounded-md hover:bg-primary-color hover:scale-95 duration-300'> CREATE </button>
+                        <button
+                            onClick={handleCreateVoucher}
+                            className='p-2 bg-custom-purple shadow-md mr-2 text-white text-sm glass rounded-md hover:bg-primary-color hover:scale-95 duration-300'
+                            disabled={loading}
+                            >
+                            {loading ? 'Creating...' : 'CREATE'}
+                        </button>
                     </div>
                     
                 </div>
@@ -81,7 +253,9 @@ function Vouchers() {
                         className='font-semibold text-slate-800 flex justify-between w-full hover:bg-slate-300 duration-200 rounded-md p-1'>Gift to Followers <box-icon color='#FAB12F' name='gift'></box-icon> </button>
                     </div>
                     <div>
-                        <button className='font-semibold text-slate-800 flex justify-between w-full hover:bg-slate-300 duration-200 rounded-md p-1'>Delete Voucher  <box-icon type='solid' name='coupon' color='#FAB12F'></box-icon> </button>
+                        <button 
+                        onClick={handleDelVoucherConfirmations}
+                        className='font-semibold text-slate-800 flex justify-between w-full hover:bg-slate-300 duration-200 rounded-md p-1'>Delete Voucher  <box-icon type='solid' name='coupon' color='#FAB12F'></box-icon> </button>
                     </div>
                     <div className='absolute w-full bottom-0 '>
                         <div className='w-full flex justify-between' >
@@ -93,46 +267,64 @@ function Vouchers() {
                 </div>
             </div>
             <div className='w-3/4 h-[550px] rounded-md bg-slate-200  shadow-inner shadow-slate-500 overflow-hidden overflow-y-scroll'>
-            <div className='w-auto grid grid-cols-2  gap-3 p-3'>
-
-                    {VouchersData.map((voucher) => (
-                       <div key={voucher.id} className='h-14 w-full shadow-md shadow-primary-color relative bg-slate-800 hover:scale-95 duration-300 mt-1 flex place-items-center rounded-sm'>
-                            <div className=' absolute -ml-2'>
-                            <div className='bg-slate-200 h-3 w-3 mb-1 rounded-full'></div>
-                            <div className='bg-slate-200 h-3 w-3 rounded-full'></div>  
-                            </div>
-                            <div className='bg-slate-400 md:h-5 md:w-5 h-3 w-3 rounded-full absolute right-3 place-content-center flex place-items-center'>
-                            <input type="checkbox" default className="checkbox rounded-full " onChange={() => handleCheckboxChange(voucher)} />
-                            </div>
-                            <div>
-                            <div className='h-10 w-10 rounded-full mx-5'>
-                                <img
-                                src={blackLogo}
-                                alt="Shop Logo"
-                                className="drop-shadow-custom object-cover l"
-                                />
-                            </div>
-                            </div>
-                            
-                            <div className='h-full w-full bg-slate-100 p-1 px-2'>
-                            <div>
-                                <p className=' text-slate-800 font-medium text-sm md:text-lg '>Shop Voucher
-                                <span className='text-custom-purple font-semibold'> {voucher.off}% OFF</span>
-                                </p>
-                                <p className=' text-slate-800 font-normal text-sm'>Minimun spend of 
-                                <span className='text-custom-purple font-semibold'> ₱{voucher.minSpend}</span>
-                                </p>
-                            </div>
-                            
-                            </div>
+            <div className='w-auto grid grid-cols-2 relative place-items-center gap-3 p-3'>
+                {vouchers.length > 0 ? (
+                    vouchers.map((voucher) => (
+                    <div
+                        key={voucher.id}
+                        className="h-14 w-full shadow-md shadow-primary-color relative bg-slate-800 hover:scale-95 duration-300 mt-1 flex place-items-center rounded-sm"
+                    >
+                        <div className="absolute -ml-2">
+                        <div className="bg-slate-200 h-3 w-3 mb-1 rounded-full"></div>
+                        <div className="bg-slate-200 h-3 w-3 rounded-full"></div>
                         </div>
-                    ))}
-                </div>
-
+                        <div className="bg-slate-400 md:h-5 md:w-5 h-3 w-3 rounded-full absolute right-3 place-content-center flex place-items-center">
+                        <input
+                            type="checkbox"
+                            checked={selectedVouchers.some(v => v.id === voucher.id)}
+                            className="checkbox rounded-full"
+                            onChange={() => handleCheckboxChange(voucher)}
+                        />
+                        </div>
+                        <div>
+                        <div className="h-10 w-10 rounded-full mx-5">
+                            <img
+                            src={blackLogo}
+                            alt="Shop Logo"
+                            className="drop-shadow-custom object-cover"
+                            />
+                        </div>
+                        </div>
+                        <div className="h-full w-full bg-slate-100 p-1 px-2">
+                        <div>
+                            <p className="text-slate-800 font-medium text-sm md:text-lg">
+                            Shop Voucher
+                            <span className="text-custom-purple font-semibold">
+                                {" "}
+                                {voucher.items_off}% OFF
+                            </span>
+                            </p>
+                            <p className="text-slate-800 font-normal text-sm">
+                            Minimum spend of
+                            <span className="text-custom-purple font-semibold">
+                                {" "}
+                                ₱{voucher.min_spend}
+                            </span>
+                            </p>
+                        </div>
+                        </div>
+                    </div>
+                    ))
+                ) : (
+                    <p className="text-slate-800  h-auto font-medium text-center place-items-center justify-center absolute ">
+                        <span className='text-center'>Loading Shop Vouchers</span>
+                    </p>
+                )}
+            </div>
             </div>
         </div>
       </div>
-
+        {/* MODALS CONFIRMATIONS */}
         {showModal && (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
                 <div className="bg-white p-5 rounded-md shadow-md">
@@ -149,6 +341,87 @@ function Vouchers() {
                         <button onClick={() => setShowModal(false) && {}}  className="mt-4 p-2 bg-green-500 text-white rounded-md">Send</button>
                     </div>
                   
+                </div>
+            </div>
+        )}
+        {/* DELETE VOUCHER CONFIRMATIONS */}
+        {deleteVoucher && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+                <div className="bg-white p-5 rounded-md shadow-md">
+                    <h2 className="text-xl font-bold mb-4 text-center text-slate-800">Delete Vouchers?</h2>
+                    <ul>
+                        {selectedVouchers.length > 0 ? (
+                            selectedVouchers.map((voucher, index) => (
+                            <li key={voucher.id || index} className="mb-2 text-custom-purple">
+                                {voucher.items_off}% OFF - Minimum Spend: ₱{voucher.min_spend}
+                            </li>
+                            ))
+                        ) : (
+                            <li>No vouchers selected.</li>
+                        )}
+                    </ul>
+                    <div className='flex w-full gap-2 justify-between'>
+                        <button onClick={closeModal} className="mt-4 p-2 bg-red-500 text-white rounded-md">Cancel</button>
+                        <button onClick={handleDeleteVouchers}   className="mt-4 p-2 bg-green-500 text-white rounded-md">Delete anyway</button>
+                    </div>
+                  
+                </div>
+            </div>
+        )}
+        {/* ALLERTS ADD VOUCHERS */} 
+        {showAlert && (
+            <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+                <div role="alert" className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 shrink-0 stroke-current mr-2"
+                    fill="none"
+                    viewBox="0 0 24 24">
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Voucher Added</span>
+                </div>
+            </div>
+        )}
+         {/* ALLERTS DELETE VOUCHERS */} 
+         {showAlertDel && (
+            <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+                <div role="alert" className="alert alert-success shadow-md flex items-center p-4 bg-red-600 text-slate-50 font-semibold rounded-md">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6 shrink-0 stroke-current"
+                    fill="none"
+                    viewBox="0 0 24 24">
+                    <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Voucher Deleted</span>
+                </div>
+            </div>
+        )}
+         {/* ALLERTS DELETE VOUCHERS */} 
+         {showNoSelectedVoucher && (
+            <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+                <div role="alert" className="alert alert-info shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    className="h-6 w-6 shrink-0 stroke-current">
+                    <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Select a Voucher to be Deleted</span>
                 </div>
             </div>
         )}
