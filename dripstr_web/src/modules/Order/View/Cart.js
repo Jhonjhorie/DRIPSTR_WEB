@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faMinus, faStore } from '@fortawesome/free-solid-svg-icons'; 
+import { faPlus, faMinus, faStore, faTrash } from '@fortawesome/free-solid-svg-icons'; 
 
 function Cart() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -20,9 +20,11 @@ function Cart() {
 
   if (cartItems.length === 0) {
     return (
-      <div>
-        <h1>Shopping Cart</h1>
-        <p>Your cart is empty.</p>
+      <div className='flex flex-col bg-slate-200 p-6 h-full'>
+        <h1 className='text-4xl font-bold text-primary-color mb-6'>
+          Shopping Cart
+        </h1>
+        <h1 className='text-2xl font-bold text-primary-color mb-6 flex justify-center items-center mt-[17rem]'>Your cart is empty</h1>
       </div>
     );
   }
@@ -43,15 +45,16 @@ function Cart() {
     );
   };
 
+
   return (
     <div className="flex flex-col bg-slate-200 p-6 h-full">
       <h1 className="text-4xl font-bold text-primary-color mb-6">Shopping Cart</h1>
       <div>
         {cartItems.map((item) => (
-          <div key={item.id} className='flex bg-slate-400 p-4 gap-2 mb-4'>
+          <div key={item.id} className="flex bg-slate-400 p-4 gap-2 mb-4">
             <div>
               <h1 className="text-xl font-bold text-black mb-2 ml-3">
-                <FontAwesomeIcon icon={faStore}/> {item.shop?.shop_name}
+                <FontAwesomeIcon icon={faStore} /> {item.shop?.shop_name}
               </h1>
               <img
                 src={item.url}
@@ -59,17 +62,29 @@ function Cart() {
                 className="w-20 h-20 object-cover ml-3"
               />
             </div>
-            <div className='text-black font-bold mt-8'>
+            <div className="text-black font-bold mt-8">
               <h2>{item.product_name}</h2>
-              <div className='flex flex-row'>
+              <div className="flex flex-row">
                 <h2>Quantity:</h2>
-                <div className='ml-2'>
-                  <FontAwesomeIcon icon={faMinus} onClick={() => minusCount(item.id)} />
+                <div className="ml-2">
+                  <FontAwesomeIcon icon={faMinus} className='cursor-pointer' onClick={() => minusCount(item.id)} />
                   <span> {item.count} </span>
-                  <FontAwesomeIcon icon={faPlus} onClick={() => plusCount(item.id)} />
+                  <FontAwesomeIcon icon={faPlus} className='cursor-pointer' onClick={() => plusCount(item.id)} />
                 </div>
               </div>
               <p>Price: ₱{item.price * item.count}</p>
+            </div>
+            {/* Trash Icon Container */}
+            <div className=" ml-auto flex items-center">
+              <FontAwesomeIcon
+                icon={faTrash}
+                className="text-red-500 cursor-pointer text-[2rem] mr-4"
+                onClick={() =>
+                  setCartItems((prevItems) =>
+                    prevItems.filter((cartItem) => cartItem.id !== item.id)
+                  )
+                }
+              />
             </div>
           </div>
         ))}
@@ -78,7 +93,7 @@ function Cart() {
         {/* Left Side (Shipping and Total Price) */}
         <div className="text-xl flex flex-col gap-4">
           <p className="text-md font-bold text-black">Shipping: ₱</p>
-          <p className="text-2xl font-bold text-black">Total Price: ₱</p>
+          <p className="text-2xl font-bold text-black">Total Price: ₱{cartItems.reduce((total, item) => total + item.price * item.count, 0)}</p>
         </div>
 
         {/* Right Side (Voucher and Payment Options) */}
