@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus, faStore, faTrash } from '@fortawesome/free-solid-svg-icons'; 
+import Pagination from '../Controller/Pagination.js';
 
 function Cart() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;  // Set to 5 for pagination of 5 items per page
 
   // Ensure each item has a 'count' property, defaulting to 1 if not present
   const [cartItems, setCartItems] = useState(
@@ -45,12 +48,29 @@ function Cart() {
     );
   };
 
+  // Determine pagination for cart items
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = cartItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(cartItems.length / itemsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const totalProducts = cartItems.length;
 
   return (
     <div className="flex flex-col bg-slate-200 p-6 h-full">
       <h1 className="text-4xl font-bold text-primary-color mb-6">Shopping Cart</h1>
       <div>
-        {cartItems.map((item) => (
+        <h1 className="text-md font-bold text-primary-color mb-6 flex justify-start">
+          Total Products: {totalProducts}
+        </h1>
+      </div>
+      <div>
+        {currentItems.map((item) => (
           <div key={item.id} className="flex bg-slate-400 p-4 gap-2 mb-4">
             <div>
               <h1 className="text-xl font-bold text-black mb-2 ml-3">
@@ -89,7 +109,12 @@ function Cart() {
           </div>
         ))}
       </div>
+      <div className='flex justify-center'>
+        <Pagination totalPages={totalPages} handlePageChange={handlePageChange} />
+      </div>
+      
       <div className="mt-auto sticky bottom-0 w-full bg-slate-400 p-6 shadow-xl flex justify-between items-center">
+        
         {/* Left Side (Shipping and Total Price) */}
         <div className="text-xl flex flex-col gap-4">
           <p className="text-md font-bold text-black">Shipping: ₱</p>
