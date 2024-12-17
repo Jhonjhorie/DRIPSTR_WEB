@@ -22,6 +22,7 @@ function Vouchers() {
   const [showAlertNull, setShowAlertNull] = React.useState(false); // Alert
   const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete
   const [showNoSelectedVoucher, setShowNoSelDelVocuher] = React.useState(false); // Alert Delete
+  const [editVoucher, setEditVoucher] = useState(false);
 
   //Get the user Shop Data
   useEffect(() => {
@@ -228,6 +229,9 @@ function Vouchers() {
   const handleSendToFollowers = () => {
     setShowModal(true);
   };
+  const handleEditVoucherConfirmations = () => {
+    setEditVoucher(true);
+  };
   const handleDelVoucherConfirmations = () => {
     if (selectedVouchers.length > 0) {
       setDelVoucher(true); // Show the modal when there are selected vouchers
@@ -239,10 +243,19 @@ function Vouchers() {
       }, 3000);
     }
   };
+  
+  
+  const handleLabelChange = (index, newValue) => {
+    const updatedVouchers = [...selectedVouchers];
+    updatedVouchers[index] = { ...updatedVouchers[index], label: newValue };
+    setSelectedVouchers(updatedVouchers);
+  };
+  
   const closeModal = () => {
     setSelectedVouchers([]);
     setShowModal(false);
     setDelVoucher(false);
+    setEditVoucher(false);
   };
   const limit = (e) => {
     let value = e.target.value;
@@ -337,6 +350,19 @@ function Vouchers() {
                   ></box-icon>{" "}
                 </button>
               </div>
+              <div>
+                <button
+                  onClick={handleEditVoucherConfirmations}
+                  className="font-semibold text-slate-800 flex justify-between w-full hover:bg-slate-300 duration-200 rounded-md p-1"
+                >
+                  Edit Vouchers{" "}
+                  <box-icon
+                    type="solid"
+                    name="coupon"
+                    color="#FAB12F"
+                  ></box-icon>{" "}
+                </button>
+              </div>
               <div className="absolute w-full bottom-10 ">
                 <div className="w-full flex justify-between">
                   <button
@@ -391,7 +417,7 @@ function Vouchers() {
                           Shop Voucher
                           <span className="text-custom-purple font-semibold">
                             {" "}
-                            {voucher.items_off}₱ OFF
+                            ₱{voucher.items_off} OFF
                           </span>
                         </p>
                         <p className="text-slate-800 font-normal text-sm">
@@ -423,14 +449,25 @@ function Vouchers() {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-5 rounded-md shadow-md">
             <h2 className="text-xl font-bold mb-4 text-slate-800">
-              Selected Vouchers
+              Gift to Followers
             </h2>
             <ul>
-              {selectedVouchers.map((voucher) => (
-                <li key={voucher.id} className="mb-2 text-custom-purple">
-                  {voucher.off}% OFF - Minimum Spend: ₱{voucher.minSpend}
-                </li>
-              ))}
+              {selectedVouchers.length > 0 ? (
+                selectedVouchers.map((voucher, index) => (
+                  <li
+                    key={voucher.id || index}
+                    className="mb-2 text-custom-purple"
+                  >
+                    <span className="text-violet-600 font-semibold ">
+                      "{voucher.label}"
+                    </span>{" "}
+                    {voucher.items_off}% OFF - Minimum Spend: ₱
+                    {voucher.min_spend}
+                  </li>
+                ))
+              ) : (
+                <li>No vouchers selected.</li>
+              )}
             </ul>
             <div className="flex w-full justify-between">
               <button
@@ -449,6 +486,54 @@ function Vouchers() {
           </div>
         </div>
       )}
+      {/* MODALS EDIT */}
+      {editVoucher && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-md shadow-md w-[400px]">
+            <h2 className="text-xl font-bold mb-4 text-slate-800">
+              Edit Vouchers
+            </h2>
+            <ul>
+              {selectedVouchers.length > 0 ? (
+                selectedVouchers.map((voucher, index) => (
+                  <li key={voucher.id || index} className="mb-4">
+                    <label className="block text-sm font-semibold text-slate-800 mb-1">
+                      Voucher Label
+                    </label>
+                    <input
+                      type="text"
+                      value={voucher.label}
+                      onChange={(e) => handleLabelChange(index, e.target.value)}
+                      className="w-full p-2 border rounded-md text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-600"
+                    />
+                    <p className="text-custom-purple mt-1">
+                      {voucher.items_off}% OFF - Minimum Spend: ₱
+                      {voucher.min_spend}
+                    </p>
+                  </li>
+                ))
+              ) : (
+                <li className="text-center">No vouchers selected.</li>
+              )}
+            </ul>
+            <div className="flex w-full justify-between">
+              <button
+                onClick={closeModal}
+                className="mt-4 p-2 bg-red-500 text-white rounded-md"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setShowModal(false) && {}}
+                className="mt-4 p-2 bg-green-500 text-white rounded-md"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* DELETE VOUCHER CONFIRMATIONS */}
       {deleteVoucher && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
