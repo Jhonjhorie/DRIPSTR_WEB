@@ -20,9 +20,11 @@ function Vouchers() {
   const [vouchLimit2, setVouchLimit2] = useState("");
   const [showAlert, setShowAlert] = React.useState(false); // Alert
   const [showAlertNull, setShowAlertNull] = React.useState(false); // Alert
+  const [showAlertUpdated, setShowAlertUpdated] = React.useState(false); // Alert Update
   const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete
   const [showNoSelectedVoucher, setShowNoSelDelVocuher] = React.useState(false); // Alert Delete
   const [editVoucher, setEditVoucher] = useState(false);
+  const [showNoSelectedeEditVoucher, setShopEdit] = useState(false);
 
   //Get the user Shop Data
   useEffect(() => {
@@ -230,8 +232,69 @@ function Vouchers() {
     setShowModal(true);
   };
   const handleEditVoucherConfirmations = () => {
-    setEditVoucher(true);
+    if (selectedVouchers.length > 0) {
+      setEditVoucher(true); // Show the modal when there are selected vouchers
+    } else {
+      console.log("No vouchers selected for update.");
+      setShopEdit(true);
+      setTimeout(() => {
+        setShopEdit(false);
+      }, 3000);
+    }
   };
+
+  const handleSave = async () => {
+    if (!selectedShopId || selectedVouchers.length === 0) {
+      console.error("No shop selected or no vouchers selected for update.");
+      return;
+    }
+
+    try {
+      // Fetch the existing vouchers
+      const { data: shopData, error: fetchError } = await supabase
+        .from("shop")
+        .select("shop_Vouchers")
+        .eq("id", selectedShopId)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching existing vouchers:", fetchError);
+        return;
+      }
+
+      const existingVouchers = shopData?.shop_Vouchers || [];
+
+      // Update only the selected vouchers
+      const updatedVouchers = existingVouchers.map((voucher) => {
+        const selectedVoucher = selectedVouchers.find(
+          (v) => v.id === voucher.id
+        );
+        return selectedVoucher ? { ...voucher, ...selectedVoucher } : voucher;
+      });
+
+      // Push the updated list back to the database
+      const { error: updateError } = await supabase
+        .from("shop")
+        .update({ shop_Vouchers: updatedVouchers })
+        .eq("id", selectedShopId);
+
+      if (updateError) {
+        console.error("Error updating vouchers:", updateError);
+      } else {
+        console.log("Selected vouchers updated successfully!");
+        fetchVouchers(); // Refresh the voucher list
+        setEditVoucher(false); // Close the modal
+        setShowAlertUpdated(true);
+        setTimeout(() => {
+          setShowAlertUpdated(false);
+        }, 3000);
+        setSelectedVouchers([]);
+      }
+    } catch (error) {
+      console.error("Unexpected error during voucher update:", error);
+    }
+  };
+
   const handleDelVoucherConfirmations = () => {
     if (selectedVouchers.length > 0) {
       setDelVoucher(true); // Show the modal when there are selected vouchers
@@ -243,14 +306,13 @@ function Vouchers() {
       }, 3000);
     }
   };
-  
-  
-  const handleLabelChange = (index, newValue) => {
+
+  const handleLabelChange = (index, field, newValue) => {
     const updatedVouchers = [...selectedVouchers];
-    updatedVouchers[index] = { ...updatedVouchers[index], label: newValue };
+    updatedVouchers[index] = { ...updatedVouchers[index], [field]: newValue };
     setSelectedVouchers(updatedVouchers);
   };
-  
+
   const closeModal = () => {
     setSelectedVouchers([]);
     setShowModal(false);
@@ -444,6 +506,7 @@ function Vouchers() {
           </div>
         </div>
       </div>
+
       {/* MODALS CONFIRMATIONS */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -489,26 +552,49 @@ function Vouchers() {
       {/* MODALS EDIT */}
       {editVoucher && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-5 rounded-md shadow-md w-[400px]">
+          <div className="bg-white overflow-hidden h-80 overflow-y-scroll relative custom-scrollbar p-5 rounded-md shadow-md w-[400px]">
             <h2 className="text-xl font-bold mb-4 text-slate-800">
               Edit Vouchers
             </h2>
             <ul>
               {selectedVouchers.length > 0 ? (
                 selectedVouchers.map((voucher, index) => (
-                  <li key={voucher.id || index} className="mb-4">
+                  <li
+                    key={voucher.id || index}
+                    className="mb-4 bg-violet-500 p-2 rounded-md shadow-md"
+                  >
                     <label className="block text-sm font-semibold text-slate-800 mb-1">
                       Voucher Label
                     </label>
                     <input
                       type="text"
                       value={voucher.label}
-                      onChange={(e) => handleLabelChange(index, e.target.value)}
-                      className="w-full p-2 border rounded-md text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-600"
+                      onChange={(e) =>
+                        handleLabelChange(index, "label", e.target.value)
+                      }
+                      className="w-full p-2 border bg-slate-100 rounded-md text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-600"
                     />
                     <p className="text-custom-purple mt-1">
-                      {voucher.items_off}% OFF - Minimum Spend: ₱
-                      {voucher.min_spend}
+                      Total Off:
+                      <input
+                        onKeyDown={blockInvalidChar}
+                        type="number"
+                        value={voucher.items_off}
+                        onChange={(e) =>
+                          handleLabelChange(index, "items_off", e.target.value)
+                        }
+                        className="w-full p-2 border bg-slate-100 rounded-md text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-600"
+                      />
+                      Minimum Spend:
+                      <input
+                        onKeyDown={blockInvalidChar}
+                        type="number"
+                        value={voucher.min_spend}
+                        onChange={(e) =>
+                          handleLabelChange(index, "min_spend", e.target.value)
+                        }
+                        className="w-full p-2 border bg-slate-100 rounded-md text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-600"
+                      />
                     </p>
                   </li>
                 ))
@@ -516,16 +602,16 @@ function Vouchers() {
                 <li className="text-center">No vouchers selected.</li>
               )}
             </ul>
-            <div className="flex w-full justify-between">
+            <div className="flex w-full  bg-white -bottom-5 sticky justify-between">
               <button
                 onClick={closeModal}
-                className="mt-4 p-2 bg-red-500 text-white rounded-md"
+                className="m-2 p-2 bg-red-500 text-white rounded-md"
               >
                 Cancel
               </button>
               <button
-                onClick={() => setShowModal(false) && {}}
-                className="mt-4 p-2 bg-green-500 text-white rounded-md"
+                onClick={handleSave}
+                className="m-2 p-2 bg-green-500 text-white rounded-md"
               >
                 Save
               </button>
@@ -533,7 +619,6 @@ function Vouchers() {
           </div>
         </div>
       )}
-
       {/* DELETE VOUCHER CONFIRMATIONS */}
       {deleteVoucher && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -624,6 +709,30 @@ function Vouchers() {
           </div>
         </div>
       )}
+      {/* ALLERTS EMPTY FIELDS */}
+      {showAlertUpdated && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span>Selected Voucher Updated!</span>
+          </div>
+        </div>
+      )}
       {/* ALLERTS DELETE VOUCHERS */}
       {showAlertDel && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
@@ -653,7 +762,7 @@ function Vouchers() {
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div
             role="alert"
-            className="alert alert-info shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -669,6 +778,30 @@ function Vouchers() {
               ></path>
             </svg>
             <span>Select a Voucher to be Deleted</span>
+          </div>
+        </div>
+      )}
+      {/* ALLERTS DELETE VOUCHERS */}
+      {showNoSelectedeEditVoucher && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="bg-custom-purple alert shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span> Select a Voucher to be Edited</span>
           </div>
         </div>
       )}
