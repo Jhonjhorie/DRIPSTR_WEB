@@ -21,6 +21,7 @@ function Vouchers() {
   const [showAlert, setShowAlert] = React.useState(false); // Alert
   const [showAlertNull, setShowAlertNull] = React.useState(false); // Alert
   const [showAlertUpdated, setShowAlertUpdated] = React.useState(false); // Alert Update
+  const [showAlertSent, setShowAlertSent] = React.useState(false); // Alert Sent
   const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete
   const [showNoSelectedVoucher, setShowNoSelDelVocuher] = React.useState(false); // Alert Delete
   const [editVoucher, setEditVoucher] = useState(false);
@@ -231,6 +232,77 @@ function Vouchers() {
   const handleSendToFollowers = () => {
     setShowModal(true);
   };
+  const handleSendToFollowersGift = async () => {
+    try {
+      // Check if there are selected vouchers
+      if (selectedVouchers.length === 0) {
+        console.log("No vouchers selected.");
+        return;
+      }
+
+      // Fetch the followers for the selected shop
+      const { data: shopData, error: fetchError } = await supabase
+        .from("shop")
+        .select("shop_Followers")
+        .eq("id", selectedShopId)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching shop followers:", fetchError);
+        return;
+      }
+
+      const followers = shopData?.shop_Followers || [];
+      if (followers.length === 0) {
+        console.log("No followers found for this shop.");
+        return;
+      }
+
+      // Prepare the voucher data to be added
+      const voucherData = selectedVouchers.map((voucher) => ({
+        vouch_id: voucher.id,
+        label: voucher.label,
+        off: voucher.items_off,
+        min_spend: voucher.min_spend,
+      }));
+
+      // Iterate over each follower and add the selected vouchers to their shop_GiftedVoucher
+      const updatedFollowers = followers.map((follower) => {
+        // Assuming `shop_GiftedVoucher` exists for each follower, and it is an array
+        const currentGiftedVouchers = follower.shop_GiftedVoucher || [];
+
+        // Combine the current vouchers with the new selected vouchers
+        const updatedVouchers = [...currentGiftedVouchers, ...voucherData];
+
+        // Return the updated follower object
+        return {
+          ...follower,
+          shop_GiftedVoucher: updatedVouchers,
+        };
+      });
+
+      // Update the shop table with the modified followers
+      const { error: updateError } = await supabase
+        .from("shop")
+        .update({ shop_Followers: updatedFollowers })
+        .eq("id", selectedShopId);
+
+      if (updateError) {
+        console.error("Error updating shop followers:", updateError);
+      } else {
+        console.log("Vouchers sent to followers successfully");
+        setShowModal(false); // Close the modal after sending
+        setSelectedVouchers([]);
+        setShowAlertSent(true);
+        setTimeout(() => {
+          setShowAlertSent(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+    }
+  };
+
   const handleEditVoucherConfirmations = () => {
     if (selectedVouchers.length > 0) {
       setEditVoucher(true); // Show the modal when there are selected vouchers
@@ -448,13 +520,17 @@ function Vouchers() {
                 vouchers.map((voucher) => (
                   <div
                     key={voucher.id}
-                    className="h-14 w-full shadow-md shadow-primary-color relative bg-slate-800 hover:scale-95 duration-300 mt-1 flex place-items-center rounded-sm"
+                    className="h-14 w-full cursor-pointer shadow-md shadow-primary-color relative bg-slate-800 hover:scale-95 duration-300 mt-1 flex place-items-center rounded-sm"
+                    onClick={() => handleCheckboxChange(voucher)}
                   >
                     <div className="absolute -ml-2">
                       <div className="bg-slate-200 h-3 w-3 mb-1 rounded-full"></div>
                       <div className="bg-slate-200 h-3 w-3 rounded-full"></div>
                     </div>
-                    <div className="bg-slate-400 md:h-5 md:w-5 h-3 w-3 rounded-full absolute right-3 place-content-center flex place-items-center">
+                    <div
+                      className="bg-slate-400 md:h-5 md:w-5 h-3 w-3 rounded-full absolute right-3 place-content-center flex place-items-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <input
                         type="checkbox"
                         checked={selectedVouchers.some(
@@ -498,7 +574,7 @@ function Vouchers() {
                   </div>
                 ))
               ) : (
-                <p className="text-slate-800  h-auto font-medium text-center place-items-center justify-center absolute ">
+                <p className="text-slate-800 h-auto font-medium text-center place-items-center justify-center absolute">
                   <span className="text-center">Loading Shop Vouchers</span>
                 </p>
               )}
@@ -540,7 +616,7 @@ function Vouchers() {
                 Cancel
               </button>
               <button
-                onClick={() => setShowModal(false) && {}}
+                onClick={handleSendToFollowersGift}
                 className="mt-4 p-2 bg-green-500 text-white rounded-md"
               >
                 Send
@@ -561,7 +637,7 @@ function Vouchers() {
                 selectedVouchers.map((voucher, index) => (
                   <li
                     key={voucher.id || index}
-                    className="mb-4 bg-violet-500 p-2 rounded-md shadow-md"
+                    className="mb-4 bg-violet-500 glass p-2 rounded-md shadow-md"
                   >
                     <label className="block text-sm font-semibold text-slate-800 mb-1">
                       Voucher Label
@@ -709,7 +785,32 @@ function Vouchers() {
           </div>
         </div>
       )}
-      {/* ALLERTS EMPTY FIELDS */}
+      {/* ALLERTS SENT VOUCHERS */}
+      
+      {showAlertSent && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Voucher Sent to Followers.</span>
+          </div>
+        </div>
+      )}
+      {/* ALLERTS UPDATED FIELDS */}
       {showAlertUpdated && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div
@@ -781,7 +882,7 @@ function Vouchers() {
           </div>
         </div>
       )}
-      {/* ALLERTS DELETE VOUCHERS */}
+      {/* ALLERTS UPDATE VOUCHERS */}
       {showNoSelectedeEditVoucher && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div
