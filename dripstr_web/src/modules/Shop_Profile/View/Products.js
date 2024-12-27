@@ -30,6 +30,62 @@ function Products() {
   const [selectedColors, setSelectedColors] = useState([]);
   const [inputs, setInputs] = useState([]); //add variants inputs
   const [submittedVariants, setSubmittedVariants] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [isOpen2, setIsOpen2] = useState(false);
+  const [selectedItems2, setSelectedItems2] = useState([]);
+
+  const toggleDropdown2 = () => {
+    setIsOpen2(!isOpen2);
+    if (isOpen) setIsOpen(false);
+  };
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+    if (isOpen2) setIsOpen2(false);
+  };
+
+  const items = [
+    "T-shirt",
+    "Shorts",
+    "Jeans",
+    "Jacket",
+    "Sweater",
+    "Hat",
+    "Scarf",
+    "Gloves",
+    "Socks",
+    "Shoes",
+    "Belt",
+    "Sunglasses",
+    "Watch",
+    "Bracelet",
+    "Necklace",
+  ];
+  const customerTypes = [
+    "Kid",
+    "Teen",
+    "Adult",
+    "Senior",
+    "Male",
+    "Female",
+    "Parent",
+    "Student",
+    "Professional",
+    "Athlete",
+    "Traveler",
+    "Shopper",
+    "Collector",
+    "Fashion Enthusiast",
+    "Casual Buyer",
+  ];
+  const handleCheckboxChange = (item) => {
+    setSelectedItems((prevSelectedItems) =>
+      prevSelectedItems.includes(item)
+        ? prevSelectedItems.filter((i) => i !== item)
+        : [...prevSelectedItems, item]
+    );
+  };
 
   const handleAddInput = () => {
     // Add a new input field to the list
@@ -50,10 +106,7 @@ function Products() {
       alert(`No entered variant`);
     }
     if (variantText) {
-      setSubmittedVariants((prevVariants) => [
-        ...prevVariants,
-        { text: variantText, sizes: sizes[customerType]?.[clotheType] || [] },
-      ]);
+      setSubmittedVariants((prevVariants) => [...prevVariants]);
     }
   };
   const handleInputChange = (value, index) => {
@@ -94,358 +147,7 @@ function Products() {
     value = value.replace(/[^0-9]/g, "").slice(0, 6);
     setNumber(value);
   };
-  {
-    /* Array for categories */
-  }
-  const categories = {
-    "Complete set": [],
-    "Top wear": [
-      "T-Shirts",
-      "Polo Shirts",
-      "Tank Tops",
-      "Sweatshirts",
-      "Hoodies",
-      "Blouses",
-      "Crop Tops",
-      "Tunics",
-    ],
-    "Bottom wear": ["Jeans", "Shorts", "Skirts", "Trousers", "Leggings"],
-    Undergarment: ["Underwear", "Bras", "Socks"],
-    Accessory: ["Hats", "Belts", "Scarves", "Gloves"],
-    Gadgets: ["Watches", "Fitness Trackers", "Smart Glasses"],
-    Footwear: ["Sneakers", "Boots", "Sandals", "Formal Shoes"],
-    Others: ["Costumes", "Uniforms", "Swimwear"],
-  };
-  {
-    /* List of Items sizes ADD MORE SIZES*/
-  }
-  const sizes = {
-    "Kids-Boy": {
-      "T-Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-      "Polo Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-      "Tank Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
-      Sweatshirts: ["4-5", "6-7", "8-10", "12-14", "16"],
-      Hoodies: ["4-5", "6-7", "8-10", "12-14", "16"],
-      Jeans: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Shorts: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Skirts: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Trousers: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Leggings: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Underwear: ["2T-3T", "4-5", "6-7", "8-10", "12-14"],
-      Socks: ["XS", "S", "M", "L", "XL"], // Based on shoe size ranges
-      Hats: ["XS", "S", "M", "L"], // Adjustable based on head circumference
-      Belts: ["20 in", "22 in", "24 in", "26 in", "28 in"], // Length in inches
-      Scarves: ["XS", "S", "M", "L"], // General sizes based on age
-      Gloves: ["XS", "S", "M", "L"], // Based on hand length
-      Watches: ["Small", "Medium", "Large"], // Band sizes
-      "Fitness Trackers": ["Small", "Medium", "Large"],
-      "Smart Glasses": ["Small", "Medium", "Large"],
-      Sneakers: ["4", "5", "6", "7", "8"], // US kids shoe sizes
-      Boots: ["4", "5", "6", "7", "8"],
-      Sandals: ["4", "5", "6", "7", "8"],
-      "Formal Shoes": ["4", "5", "6", "7", "8"],
-      Costumes: ["4-5", "6-7", "8-10", "12-14", "16"],
-      Uniforms: ["4-5", "6-7", "8-10", "12-14", "16"],
-      Swimwear: ["4-5", "6-7", "8-10", "12-14", "16"],
-    },
-    "Kids-Girl": {
-      "T-Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-      "Polo Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-      "Tank Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
-      Sweatshirts: ["4-5", "6-7", "8-10", "12-14", "16"],
-      Hoodies: ["4-5", "6-7", "8-10", "12-14", "16"],
-      Jeans: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Shorts: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Skirts: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Trousers: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Leggings: [
-        "2T",
-        "3T",
-        "4T",
-        "5T",
-        "6T",
-        "7T",
-        "8",
-        "10",
-        "12",
-        "14",
-        "16",
-        "18",
-      ],
-      Blouses: ["4-5", "6-7", "8-10", "12-14", "16"],
-      "Crop Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
-      Underwear: ["2T-3T", "4-5", "6-7", "8-10", "12-14"],
-      Bras: ["30AA", "32AA", "34AA", "36AA"], // For older kids
-      Socks: ["XS", "S", "M", "L", "XL"], // Based on shoe size ranges
-      Hats: ["XS", "S", "M", "L"], // Adjustable based on head circumference
-      Belts: ["20 in", "22 in", "24 in", "26 in", "28 in"], // Length in inches
-      Scarves: ["XS", "S", "M", "L"], // General sizes based on age
-      Gloves: ["XS", "S", "M", "L"], // Based on hand length
-      Watches: ["Small", "Medium", "Large"], // Band sizes
-      "Fitness Trackers": ["Small", "Medium", "Large"],
-      "Smart Glasses": ["Small", "Medium", "Large"],
-      Sneakers: ["4", "5", "6", "7", "8"], // US kids shoe sizes
-      Boots: ["4", "5", "6", "7", "8"],
-      Sandals: ["4", "5", "6", "7", "8"],
-      "Formal Shoes": ["4", "5", "6", "7", "8"],
-      Costumes: ["4-5", "6-7", "8-10", "12-14", "16"],
-      Uniforms: ["4-5", "6-7", "8-10", "12-14", "16"],
-      Swimwear: ["4-5", "6-7", "8-10", "12-14", "16"],
-    },
-    "Adults-Man": {
-      "T-Shirts": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-      "Polo Shirts": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-      "Tank Tops": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-      Sweatshirts: ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-      Hoodies: ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-      Blouses: ["S", "M", "L", "XL", "XXL"], // For gender-neutral styles, sizes for men are typically S, M, L
-      "Crop Tops": ["S", "M", "L", "XL"], // Unisex sizing, can be styled for men
-      Tunics: ["S", "M", "L", "XL", "XXL"],
-      Jeans: ["28", "29", "30", "31", "32", "33", "34", "35", "36", "38", "40"],
-      Shorts: ["S", "M", "L", "XL", "XXL"],
-      Skirts: ["S", "M", "L", "XL", "XXL"], // Not common for men, but unisex sizes apply
-      Trousers: ["28", "29", "30", "31", "32", "33", "34", "36", "38", "40"],
-      Leggings: ["S", "M", "L", "XL"], // For unisex athletic wear
-      Underwear: ["S", "M", "L", "XL", "XXL"],
-      Socks: ["S", "M", "L", "XL"], // Based on shoe size (typically for men: M - 6-9, L - 9-12, XL - 12+)
-      Hats: ["S", "M", "L"], // Based on head circumference
-      Belts: ["28", "30", "32", "34", "36", "38", "40"], // Waist sizes
-      Scarves: ["One Size"], // Usually one size fits most
-      Gloves: ["S", "M", "L", "XL"], // Based on hand measurement
-      Watches: ["Small", "Medium", "Large"], // Based on wrist size
-      "Fitness Trackers": ["Small", "Medium", "Large"],
-      "Smart Glasses": ["Small", "Medium", "Large"], // Frame size
-      Sneakers: ["6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
-      Boots: ["6", "7", "8", "9", "10", "11", "12", "13", "14"],
-      Sandals: ["6", "7", "8", "9", "10", "11", "12", "13"],
-      "Formal Shoes": ["6", "7", "8", "9", "10", "11", "12", "13"],
-      Costumes: ["S", "M", "L", "XL", "XXL"],
-      Uniforms: ["S", "M", "L", "XL", "XXL"],
-      Swimwear: ["S", "M", "L", "XL", "XXL"],
-    },
-    "Adults-Woman": {
-      "T-Shirts": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-      "Polo Shirts": ["XS", "S", "M", "L", "XL", "XXL"],
-      "Tank Tops": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-      Sweatshirts: ["XS", "S", "M", "L", "XL", "XXL"],
-      Hoodies: ["XS", "S", "M", "L", "XL", "XXL"],
-      Blouses: ["XS", "S", "M", "L", "XL", "XXL"],
-      "Crop Tops": ["XS", "S", "M", "L", "XL"],
-      Tunics: ["XS", "S", "M", "L", "XL", "XXL"],
-      Jeans: ["24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34"],
-      Shorts: ["XS", "S", "M", "L", "XL", "XXL"],
-      Skirts: ["XS", "S", "M", "L", "XL", "XXL"],
-      Trousers: ["XS", "S", "M", "L", "XL", "XXL"],
-      Leggings: ["XS", "S", "M", "L", "XL", "XXL"],
-      Underwear: ["XS", "S", "M", "L", "XL", "XXL"],
-      Bras: [
-        "30A",
-        "32A",
-        "34A",
-        "36A",
-        "32B",
-        "34B",
-        "36B",
-        "38B",
-        "34C",
-        "36C",
-        "38C",
-        "32D",
-        "34D",
-        "36D",
-      ],
-      Socks: ["S", "M", "L", "XL"], // Based on shoe size equivalency
-      Hats: ["S", "M", "L"], // Based on head circumference
-      Belts: ["26", "28", "30", "32", "34", "36", "38"], // Waist size
-      Scarves: ["One Size"], // Usually adjustable
-      Gloves: ["S", "M", "L", "XL"], // Based on hand size
-      Watches: ["Small", "Medium", "Large"], // Based on wrist size
-      "Fitness Trackers": ["Small", "Medium", "Large"],
-      "Smart Glasses": ["Small", "Medium", "Large"],
-      Sneakers: ["5", "6", "7", "8", "9", "10", "11", "12"],
-      Boots: ["5", "6", "7", "8", "9", "10", "11", "12"],
-      Sandals: ["5", "6", "7", "8", "9", "10", "11", "12"],
-      "Formal Shoes": ["5", "6", "7", "8", "9", "10", "11", "12"],
-      Costumes: ["XS", "S", "M", "L", "XL", "XXL"],
-      Uniforms: ["XS", "S", "M", "L", "XL", "XXL"],
-      Swimwear: ["XS", "S", "M", "L", "XL", "XXL"],
-    },
-  };
-  {
-    /* Will show a sizes choices */
-  }
-  const handleCustomerTypeChange = (e) => {
-    setCustomerType(e.target.value);
-    setCategory(""); // When click remove the content
-    setClotheType(""); //''
-  };
-  {
-    /* Function to show the next dropdown hehe */
-  }
-  const handleCategoryChange = (e) => {
-    setCategory(e.target.value);
-    setClotheType("");
-  };
-  //Pwede pala gantong comment hehe colors
-  const colors = [
-    "Red",
-    "Green",
-    "Blue",
-    "Yellow",
-    "Purple",
-    "Orange",
-    "Pink",
-    "Brown",
-    "Gray",
-    "Black",
-    "White",
-    "Cyan",
-    "Magenta",
-    "Teal",
-    "Lime",
-    "Indigo",
-    "Violet",
-    "Maroon",
-    "Beige",
-    "Turquoise",
-    "Gold",
-    "Silver",
-    "Bronze",
-    "Lavender",
-    "Peach",
-    "Coral",
-    "Aqua",
-    "Olive",
-    "Emerald",
-    "Ivory",
-    "Chartreuse",
-    "Others",
-  ];
 
-  const handleCheckboxChange = (color) => {
-    setSelectedColors((prevState) =>
-      prevState.includes(color)
-        ? prevState.filter((c) => c !== color)
-        : [...prevState, color]
-    );
-  };
   //Ads image appear in the div
   const handleImagePick = (event) => {
     const file = event.target.files[0];
@@ -782,7 +484,7 @@ function Products() {
             <div className="bg-slate-200 h-[400px] md:h-full rounded-md overflow-hidden custom-scrollbar overflow-y-scroll md:flex gap-1 w-full p-2 md:px-5 mb-2">
               <div className="w-full md:w-1/4 h-auto p-1 pr-5 ">
                 <label className="text-slate-950  font-semibold mr-2 text-sm">
-                  Item Name:
+                  Item Title:
                 </label>
                 <br />
                 <input
@@ -791,82 +493,83 @@ function Products() {
                   placeholder="Item Name "
                 ></input>{" "}
                 <br />
+                <br />
                 <label className="text-slate-950 font-semibold text-sm mr-2 ">
-                  Total:
+                  Tags:
                 </label>
                 <br />
-                <input
-                  type="number"
-                  value={Total}
-                  onChange={Totaldigit}
-                  onKeyDown={blockInvalidChar}
-                  className=" bg-slate-50 p-1 rounded-sm text-slate-800 mt-1 w-full shadow-md"
-                  placeholder="Quantity "
-                ></input>{" "}
-                <br />
-                {/* customer type */}
-                <label className="text-slate-950 font-semibold text-sm mr-2">
-                  Customer Type:
-                </label>
-                <br />
-                <select
-                  id="customerType"
-                  value={customerType}
-                  onChange={handleCustomerTypeChange}
-                  className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
-                >
-                  <option value="">Select Customer Type</option>
-                  <option value="Kids-Boy">Kids Boy</option>
-                  <option value="Kids-Girl">Kids Girl</option>
-                  <option value="Adults-Man">Teen & Adult Man</option>
-                  <option value="Adults-Woman">Teen & Adult Woman</option>
-                </select>
-                <br />
-                {customerType && (
-                  <div className="mb-4">
-                    <label className="text-slate-950 font-semibold text-sm mr-2">
-                      Category:
-                    </label>
-                    <br />
-                    <select
-                      id="category"
-                      className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
-                      value={category}
-                      onChange={handleCategoryChange}
-                    >
-                      <option value="">Select Category</option>
-                      {Object.keys(categories).map((cat, index) => (
-                        <option key={index} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                    <br />
-
-                    {category && categories[category].length > 0 && (
-                      <>
-                        <label className="text-slate-950 font-semibold text-sm mr-2">
-                          Clothe Type:
-                        </label>
-                        <br />
-                        <select
-                          id="clotheType"
-                          className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
-                          value={clotheType}
-                          onChange={(e) => setClotheType(e.target.value)}
+                {/* type of clothe */}
+                <div>
+                  <button
+                    type="button"
+                    className="inline-flex  justify-between w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-slate-300 duration-200 "
+                    onClick={toggleDropdown}
+                  >
+                    Clothe Type
+                    <i
+                      className={`ml-2 fas mt-1 fa-chevron-${
+                        isOpen ? "up" : "down"
+                      }`}
+                    ></i>
+                  </button>
+                </div>
+                {isOpen && (
+                  <div className="origin-top-right mt-2 h-40 overflow-hidden overflow-y-scroll w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      {items.map((item) => (
+                        <label
+                          key={item}
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                         >
-                          <option value="">Select Clothe Type</option>
-                          {categories[category].map((type, index) => (
-                            <option key={index} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                        <br />
-                      </>
-                    )}
+                          <input
+                            type="checkbox"
+                            className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+                            checked={selectedItems.includes(item)}
+                            onChange={() => handleCheckboxChange(item)}
+                          />
+                          <span className="ml-2">{item}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 )}
+                {/* Customer type */}
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    className="inline-flex  justify-between w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-slate-300 duration-200 "
+                    onClick={toggleDropdown2}
+                  >
+                    Customer Type
+                    <i
+                      className={`ml-2 fas mt-1 fa-chevron-${
+                        isOpen ? "up" : "down"
+                      }`}
+                    ></i>
+                  </button>
+                </div>
+                {isOpen2 && (
+                  <div className="origin-top-right mt-2 h-40 overflow-hidden overflow-y-scroll w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      {customerTypes.map((item2) => (
+                        <label
+                          key={item2}
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+                            checked={selectedItems2.includes(item2)}
+                            onChange={() => handleCheckboxChange(item2)}
+                          />
+                          <span className="ml-2">{item2}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+          
+
               </div>
 
               {/* Select sizes */}
