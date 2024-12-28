@@ -34,6 +34,7 @@ function Products() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [isOpen2, setIsOpen2] = useState(false);
   const [selectedItems2, setSelectedItems2] = useState([]);
+  const [additionalInfo, setAdditionalInfo] = useState({});
 
   const toggleDropdown2 = () => {
     setIsOpen2(!isOpen2);
@@ -86,10 +87,12 @@ function Products() {
         : [...prevSelectedItems, item]
     );
   };
-
-  const handleAddInput = () => {
-    // Add a new input field to the list
-    setInputs((prevInputs) => [...prevInputs, ""]);
+  const handleCheckboxChange2 = (item) => {
+    setSelectedItems2((prevSelectedItems) =>
+      prevSelectedItems.includes(item)
+        ? prevSelectedItems.filter((i) => i !== item)
+        : [...prevSelectedItems, item]
+    );
   };
   const handleDeleteInput = (indexToDelete) => {
     // Remove the input field at the specified index
@@ -101,18 +104,20 @@ function Products() {
     );
   };
   const handleSubmit = (index) => {
-    const variantText = inputs[index];
-    if (variantText == 0) {
-      alert(`No entered variant`);
+    if (inputs[index].trim() === "") {
+      alert("Please input something");
+      return;
     }
-    if (variantText) {
-      setSubmittedVariants((prevVariants) => [...prevVariants]);
-    }
+    const newSubmittedVariants = [
+      ...submittedVariants,
+      { text: inputs[index], sizes: [] },
+    ];
+    setSubmittedVariants(newSubmittedVariants);
   };
   const handleInputChange = (value, index) => {
-    const updatedInputs = [...inputs];
-    updatedInputs[index] = value;
-    setInputs(updatedInputs);
+    const newInputs = [...inputs];
+    newInputs[index] = value;
+    setInputs(newInputs);
   };
 
   const handleAddItem = () => {
@@ -146,6 +151,21 @@ function Products() {
     let value = e.target.value;
     value = value.replace(/[^0-9]/g, "").slice(0, 6);
     setNumber(value);
+  };
+  const handleAddInfo = (variantIndex) => {
+    const newInfo = { ...additionalInfo };
+    if (!newInfo[variantIndex]) {
+      newInfo[variantIndex] = [];
+    }
+    newInfo[variantIndex].push({});
+    setAdditionalInfo(newInfo);
+  };
+  const handleDeleteInfo = (variantIndex, infoIndex) => {
+    const newInfo = { ...additionalInfo };
+    newInfo[variantIndex] = newInfo[variantIndex].filter(
+      (_, i) => i !== infoIndex
+    );
+    setAdditionalInfo(newInfo);
   };
 
   //Ads image appear in the div
@@ -514,7 +534,7 @@ function Products() {
                   </button>
                 </div>
                 {isOpen && (
-                  <div className="origin-top-right mt-2 h-40 overflow-hidden overflow-y-scroll w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <div className="origin-top-right mt-2 h-40 overflow-hidden overflow-y-scroll w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                     <div className="py-1">
                       {items.map((item) => (
                         <label
@@ -549,7 +569,7 @@ function Products() {
                   </button>
                 </div>
                 {isOpen2 && (
-                  <div className="origin-top-right mt-2 h-40 overflow-hidden overflow-y-scroll w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <div className="origin-top-right mt-2 h-40 overflow-hidden overflow-y-scroll w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                     <div className="py-1">
                       {customerTypes.map((item2) => (
                         <label
@@ -560,7 +580,7 @@ function Products() {
                             type="checkbox"
                             className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
                             checked={selectedItems2.includes(item2)}
-                            onChange={() => handleCheckboxChange(item2)}
+                            onChange={() => handleCheckboxChange2(item2)}
                           />
                           <span className="ml-2">{item2}</span>
                         </label>
@@ -568,61 +588,47 @@ function Products() {
                     </div>
                   </div>
                 )}
-          
-
               </div>
 
               {/* Select sizes */}
               <div className=" w-full md:w-1/4 h-full py-1">
                 <div className=" flex gap-2 place-items-center justify-between ">
                   <label className="text-slate-950 font-semibold text-sm ">
-                    Color Variant
+                    Add Item Variant
                   </label>
                   <div
                     className="tooltip tooltip-bottom "
-                    data-tip="Our sizes are based on US standards. To provide better sizing guidance, we highly recommend uploading an image with detailed size instructions to help customers understand."
+                    data-tip="Add an Item."
                   >
-                    <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
-                      <box-icon color="#FFFFFF" name="info-circle"></box-icon>
+                    <button
+                      onClick={() => setInputs([...inputs, ""])}
+                      className="hover:bg-slate-600 glass bg-custom-purple duration-300 p-0.5 shadow-md place-items-center flex rounded-sm"
+                    >
+                      <box-icon
+                        name="message-square-add"
+                        type="solid"
+                        color="#FFFFFF"
+                      ></box-icon>
                     </button>
                   </div>
                 </div>
 
-                <div className="h-[400px] mt-2 w-full px-2  bg-slate-100 overflow-hidden overflow-y-scroll shadow-sm shadow-slate-500 rounded-sm custom-scrollbar">
-                  {clotheType.length === 0 && (
+                <div className="h-[400px] mt-1 w-full px-2  bg-slate-100 overflow-hidden overflow-y-scroll shadow-sm shadow-slate-500 rounded-sm custom-scrollbar">
+                  {inputs.length === 0 && (
                     <div className="text-red-500 text-sm mt-4 text-center">
-                      Please Complete the Selection
+                      Click the Add Button.
                     </div>
                   )}
-
-                  {clotheType && (
-                    <button
-                      className="mt-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 w-full hover:bg-blue-600 text-white py-1 px-4 rounded-md shadow-md text-sm"
-                      onClick={handleAddInput}
-                    >
-                      Add Variant for {clotheType}
-                    </button>
-                  )}
-                  {clotheType && (
-                    <div className="text-sm mt-2 font-semibold text-slate-800 ">
-                      {" "}
-                      Type a Variant{" "}
-                    </div>
-                  )}
-
                   {inputs.map((value, index) => (
-                    <div key={index} className="items-center mb-2">
+                    <div key={index} className="items-center mt-2">
                       <input
                         type="text"
-                        className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
+                        className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-sm text-sm shadow-md"
                         value={value}
                         onChange={(e) =>
                           handleInputChange(e.target.value, index)
                         }
                         placeholder="Enter Variant"
-                        disabled={submittedVariants.some(
-                          (variant) => variant.text === value
-                        )}
                       />
                       <div className="flex g mt-1 justify-end">
                         <button
@@ -678,86 +684,137 @@ function Products() {
                         Please Input a Variant
                       </div>
                     )}
-                    {submittedVariants.map((variant, index) => (
+                    {submittedVariants.map((variant, variantIndex) => (
                       <div
-                        key={index}
+                        key={variantIndex}
                         className="rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md"
                       >
-                        {/* Variant Title */}
-                        <label className="block text-gray-800 text-sm text-center w-full bg-slate-100 mb-2 rounded-t-md py-2">
-                          Upload an image for variant{" "}
-                          <span className="font-bold uppercase">
-                            {variant.text}
-                          </span>
-                        </label>
+                        <div className="flex gap-1 justify-between">
+                          <label className="block text-gray-800 text-sm text-center w-full bg-slate-100 mb-2 rounded-t-md py-2">
+                            Upload an image for variant{" "}
+                            <span className="font-bold uppercase">
+                              {variant.text}
+                            </span>
+                          </label>
+                          <button
+                            className=" bg-red-500 hover:bg-red-600 hover:scale-95 mb-2 p-1 duration-300 text-white  rounded-sm text-sm shadow-md"
+                            onClick={() => handleDeleteInput(variantIndex)}
+                          >
+                            <box-icon
+                              type="solid"
+                              name="trash"
+                              size="20px"
+                            ></box-icon>
+                          </button>
+                        </div>
+
                         <input
                           type="file"
                           accept="image/*"
                           className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-slate-100 focus:outline-none"
                         />
 
-                        {/* Sizing Options */}
-                        {variant.sizes.length > 0 ? (
-                          variant.sizes.map((size, sizeIndex) => (
-                            <div
-                              key={sizeIndex}
-                              className="p-2 flex gap-2 place-items-center"
-                            >
-                              <div className="w-1/3">
-                                <input
-                                  type="checkbox"
-                                  id={`size-${size}-${variant.text}`}
-                                  name="sizes"
-                                  value={size}
-                                  className="mr-2"
-                                />
-                                <label
-                                  htmlFor={`size-${size}-${variant.text}`}
-                                  className="text-slate-800 text-sm"
-                                >
-                                  {size}
-                                </label>
-                              </div>
+                        <button
+                          onClick={() => handleAddInfo(variantIndex)}
+                          className="bg-green-600 glass hover:bg-violet-500 duration-200 px-2 py-1 rounded-sm mt-2 text-black text-sm"
+                        >
+                          Add new information
+                        </button>
+                        <br />
 
-                              <div className="gap-2 flex p-2 justify-end w-1/3">
-                                <label className="text-sm text-slate-800">
-                                  Quantity:
+                        <div className="w-full justify-between flex">
+                          <div>
+                            <label className="text-slate-800 text-sm ">
+                              Size:{" "}
+                            </label>
+                            <input
+                              type="text"
+                              className="p-1 bg-slate-100 w-20 rounded-sm text-black text-sm mt-1"
+                            ></input>
+                          </div>
+                          <div>
+                            <label className="text-slate-800 text-sm ">
+                              Quantity:{" "}
+                            </label>
+                            <input
+                             type="number"
+                             onKeyDown={blockInvalidChar}
+                              className="p-1 bg-slate-100 w-20 rounded-sm text-black text-sm mt-1"
+                            ></input>
+                          </div>
+                          <div>
+                            <label className="text-slate-800 text-sm ">
+                              Price:{" "}
+                            </label>
+                            <input
+                             type="number"
+                             onKeyDown={blockInvalidChar}
+                              className="p-1 bg-slate-100 w-20 rounded-sm text-black text-sm mt-1"
+                            ></input>
+                          </div>
+                        </div>
+
+                        {additionalInfo[variantIndex] &&
+                          additionalInfo[variantIndex].map((_, infoIndex) => (
+                            <div
+                              key={infoIndex}
+                              className="w-full justify-between flex mt-2"
+                            >
+                              <div>
+                                <label className="text-slate-800 text-sm">
+                                  Size:{" "}
+                                </label>
+                                <input
+                                  type="text"
+                                  className="p-1 bg-slate-100 w-20 rounded-sm text-black text-sm mt-1"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-slate-800 text-sm">
+                                  Quantity:{" "}
                                 </label>
                                 <input
                                   type="number"
-                                  placeholder="Quantity"
-                                  className="bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700"
+                                  onKeyDown={blockInvalidChar}
+                                  className="p-1 bg-slate-100 w-20 rounded-sm text-black text-sm mt-1"
                                 />
                               </div>
-                              <div className="gap-2 p-2 flex w-1/3">
-                                <label className="text-sm text-slate-800">
-                                  Price:
+                              <div>
+                                <label className="text-slate-800 text-sm">
+                                  Price:{" "}
                                 </label>
                                 <input
-                                  className="bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700"
                                   type="number"
-                                  placeholder="Price"
+                                  onKeyDown={blockInvalidChar}
+                                  className="p-1 bg-slate-100 w-20 rounded-sm text-black text-sm mt-1"
                                 />
                               </div>
+                              <button
+                                onClick={() =>
+                                  handleDeleteInfo(variantIndex, infoIndex)
+                                }
+                                className="bg-red-600 px-1 rounded-sm text-white hover:bg-red-400 duration-200 glass text-sm"
+                              >
+                                Delete
+                              </button>
                             </div>
-                          ))
-                        ) : (
-                          <p className="text-slate-800 text-center text-sm p-2">
-                            No sizes available for the selected options.
-                          </p>
-                        )}
+                          ))}
                       </div>
                     ))}
 
                     {imageInputs.map((input, index) => (
-                      <div key={index} className="flex items-center mb-2">
-                        <input
+                      <div key={index} className="flex items-center mb-2 gap-2">
+                      <input 
+                      type="text" 
+                      placeholder="Label"
+                      className="bg-slate-50 p-1.5 text-slate-700 text-sm rounded-sm"></input>
+                      <input
                           type="file"
                           accept="image/*"
-                          className="border p-2 w-full bg-slate-200 h-auto text-slate-800 text-sm"
+                          className="border p-0.5 rounded-sm w-full bg-slate-200 h-auto text-slate-800 text-sm"
                         />
                         <button
-                          className="ml-2 bg-red-500 text-white h-9 px-2 py-1 rounded"
+                          className=" bg-red-500 text-white h-9 px-2 py-1 rounded"
                           onClick={() => deleteImageInput(index)}
                         >
                           Clear
