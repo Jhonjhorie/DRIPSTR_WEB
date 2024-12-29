@@ -18,6 +18,7 @@ function Products() {
   const [activeTabs, setActiveTab] = useState("manage-products");
   const [isModalOpenItems, setIsModalOpenItem] = useState(false); //Modal for Items
   const [isModalOpenAds, setIsModalOpenAds] = useState(false); //Modal for ads
+  const [isModalImage, setIsModalOpenImage] = useState(false); //View Image
   const [imageInputs, setImageInputs] = useState([]);
   const [Total, setNumber] = useState("");
   const [category, setCategory] = useState("");
@@ -33,17 +34,27 @@ function Products() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isOpen2, setIsOpen2] = useState(false);
+  const [selectedItems3, setSelectedItems3] = useState([]);
+  const [isOpen3, setIsOpen3] = useState(false);
   const [selectedItems2, setSelectedItems2] = useState([]);
   const [additionalInfo, setAdditionalInfo] = useState({});
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(null);
+  const [uploadedImages, setUploadedImages] = useState({});
 
   const toggleDropdown2 = () => {
     setIsOpen2(!isOpen2);
     if (isOpen) setIsOpen(false);
+    if (isOpen3) setIsOpen3(false);
   };
-
+  const toggleDropdown3 = () => {
+    setIsOpen3(!isOpen3);
+    if (isOpen2) setIsOpen2(false);
+    if (isOpen) setIsOpen(false);
+  };
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
     if (isOpen2) setIsOpen2(false);
+    if (isOpen3) setIsOpen3(false);
   };
 
   const items = [
@@ -62,6 +73,21 @@ function Products() {
     "Watch",
     "Bracelet",
     "Necklace",
+  ];
+  const others = [
+    "Gaming",
+    "Electronics",
+    "Fashion",
+    "Home Appliances",
+    "Toys",
+    "Books",
+    "Health & Beauty",
+    "Sports",
+    "Groceries",
+    "Automotive",
+    "Furniture",
+    "Accessories",
+    "Stationery",
   ];
   const customerTypes = [
     "Kid",
@@ -94,15 +120,14 @@ function Products() {
         : [...prevSelectedItems, item]
     );
   };
-  const handleDeleteInput = (indexToDelete) => {
-    // Remove the input field at the specified index
-    setInputs((prevInputs) =>
-      prevInputs.filter((_, index) => index !== indexToDelete)
-    );
-    setSubmittedVariants((prevVariants) =>
-      prevVariants.filter((_, index) => index !== indexToDelete)
+  const handleCheckboxChange3 = (item) => {
+    setSelectedItems3((prevSelectedItems) =>
+      prevSelectedItems.includes(item)
+        ? prevSelectedItems.filter((i) => i !== item)
+        : [...prevSelectedItems, item]
     );
   };
+  
   const handleSubmit = (index) => {
     if (inputs[index].trim() === "") {
       alert("Please input something");
@@ -119,10 +144,39 @@ function Products() {
     newInputs[index] = value;
     setInputs(newInputs);
   };
-
+  const handleDeleteInput = (indexToDelete) => {
+    // Remove the input field at the specified index
+    setInputs((prevInputs) =>
+      prevInputs.filter((_, index) => index !== indexToDelete)
+    );
+    setSubmittedVariants((prevVariants) =>
+      prevVariants.filter((_, index) => index !== indexToDelete)
+    );
+  };
   const handleAddItem = () => {
     //ITEMS
     setIsModalOpenItem(true);
+  };
+  const handleViewImage = (variantIndex) => {
+    setIsModalOpenImage(true);
+    setSelectedVariantIndex(variantIndex);
+  };
+  const handleImageUpload = (event, variantIndex) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImages((prevImages) => ({
+          ...prevImages,
+          [variantIndex]: reader.result,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  const handleViewImageClose = () => {
+    setIsModalOpenImage(false);
+    setSelectedVariantIndex(null);
   };
   const handleAddAds = () => {
     //ADS
@@ -135,23 +189,19 @@ function Products() {
     setViewPost(false);
     setSelectedItem(null);
   };
+
   const handleViewClick = (item) => {
     setSelectedItem(item);
   };
   const addImageInput = () => {
     setImageInputs([...imageInputs, ""]);
-  };
+  };  
 
   const deleteImageInput = (index) => {
     const newInputs = imageInputs.filter((_, i) => i !== index);
     setImageInputs(newInputs);
   };
 
-  const Totaldigit = (e) => {
-    let value = e.target.value;
-    value = value.replace(/[^0-9]/g, "").slice(0, 6);
-    setNumber(value);
-  };
   const handleAddInfo = (variantIndex) => {
     const newInfo = { ...additionalInfo };
     if (!newInfo[variantIndex]) {
@@ -588,6 +638,41 @@ function Products() {
                     </div>
                   </div>
                 )}
+                {/* Other tags */}
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    className="inline-flex  justify-between w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-slate-300 duration-200 "
+                    onClick={toggleDropdown3}
+                  >
+                    Others
+                    <i
+                      className={`ml-2 fas mt-1 fa-chevron-${
+                        isOpen3 ? "up" : "down"
+                      }`}
+                    ></i>
+                  </button>
+                </div>
+                {isOpen3 && (
+                  <div className="origin-top-right mt-2 h-40 overflow-hidden overflow-y-scroll w-full rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      {others.map((item3) => (
+                        <label
+                          key={item3}
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            className="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out"
+                            checked={selectedItems3.includes(item3)}
+                            onChange={() => handleCheckboxChange3(item3)}
+                          />
+                          <span className="ml-2">{item3}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Select sizes */}
@@ -697,6 +782,13 @@ function Products() {
                             </span>
                           </label>
                           <button
+                            className=" bg-blue-500 tooltip tooltip-bottom hover:bg-blue-600 hover:scale-95 mb-2 p-1 duration-300 text-white  rounded-sm text-sm shadow-md"
+                            data-tip="View Image"
+                            onClick={() => handleViewImage(variantIndex)}
+                          >
+                            <box-icon name="image" size="20px"></box-icon>
+                          </button>
+                          <button
                             className=" bg-red-500 hover:bg-red-600 hover:scale-95 mb-2 p-1 duration-300 text-white  rounded-sm text-sm shadow-md"
                             onClick={() => handleDeleteInput(variantIndex)}
                           >
@@ -711,6 +803,7 @@ function Products() {
                         <input
                           type="file"
                           accept="image/*"
+                          onChange={(event) => handleImageUpload(event, variantIndex)}
                           className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-slate-100 focus:outline-none"
                         />
 
@@ -737,8 +830,8 @@ function Products() {
                               Quantity:{" "}
                             </label>
                             <input
-                             type="number"
-                             onKeyDown={blockInvalidChar}
+                              type="number"
+                              onKeyDown={blockInvalidChar}
                               className="p-1 bg-slate-100 w-20 rounded-sm text-black text-sm mt-1"
                             ></input>
                           </div>
@@ -747,8 +840,8 @@ function Products() {
                               Price:{" "}
                             </label>
                             <input
-                             type="number"
-                             onKeyDown={blockInvalidChar}
+                              type="number"
+                              onKeyDown={blockInvalidChar}
                               className="p-1 bg-slate-100 w-20 rounded-sm text-black text-sm mt-1"
                             ></input>
                           </div>
@@ -804,11 +897,12 @@ function Products() {
 
                     {imageInputs.map((input, index) => (
                       <div key={index} className="flex items-center mb-2 gap-2">
-                      <input 
-                      type="text" 
-                      placeholder="Label"
-                      className="bg-slate-50 p-1.5 text-slate-700 text-sm rounded-sm"></input>
-                      <input
+                        <input
+                          type="text"
+                          placeholder="Label"
+                          className="bg-slate-50 p-1.5 text-slate-700 text-sm rounded-sm"
+                        ></input>
+                        <input
                           type="file"
                           accept="image/*"
                           className="border p-0.5 rounded-sm w-full bg-slate-200 h-auto text-slate-800 text-sm"
@@ -1063,6 +1157,47 @@ function Products() {
                 </div>
                 <div className="h-52 w-full bg-slate-200"> </div>
                 <div className="h-52 w-full bg-slate-500"> </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isModalImage && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+          <div className="bg-white relative rounded-lg p-5 h-auto w-full md:w-3/12  m-2 md:m-0 auto">
+            <div className="min-h-80 bg-violet-300 w-full">
+             {selectedVariantIndex !== null ? (
+              uploadedImages[selectedVariantIndex] ? (
+                <div className="h-80 bg-violet-300 w-full">
+                <img
+                  src={uploadedImages[selectedVariantIndex]}
+                  alt={`Variant ${selectedVariantIndex}`}
+                  className=" mb-4 object-fill h-full w-auto place-self-center"
+                />
+              </div>
+              ) : (
+                <p className="text-center text-gray-500 mb-4">
+                  No image uploaded for this item.
+                </p>
+              )
+            ) : null}
+            </div>
+            <div className="flex gap-2">
+              <button
+                className="bg-white absolute top-0 right-2 text-red-600 font-bold px-3 py-1 mt-2 rounded-lg hover:text-red-300 duration-200"
+                onClick={handleViewImageClose}
+              >
+                X
+              </button>
+              <div className="w-full">
+                {selectedVariantIndex !== null && (
+                  <div className="mt-3">
+                    <p className="font-bold uppercase text-center text-slate-700">
+                      {submittedVariants[selectedVariantIndex].text}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
