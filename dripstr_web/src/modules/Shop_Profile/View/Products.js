@@ -150,8 +150,14 @@ function Products() {
       prevInputs.filter((_, index) => index !== indexToDelete)
     );
     setSubmittedVariants((prevVariants) =>
-      prevVariants.filter((_, index) => index !== indexToDelete)
+      prevVariants.filter((_, index) => index !== indexToDelete),
+      
     );
+    setUploadedImages((prevImages) =>
+    prevImages.filter((_, index) => index !== indexToDelete),
+    
+);
+    
   };
   const handleAddItem = () => {
     //ITEMS
@@ -164,16 +170,17 @@ function Products() {
   const handleImageUpload = (event, variantIndex) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUploadedImages((prevImages) => ({
-          ...prevImages,
-          [variantIndex]: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setUploadedImages((prevImages) => {
+                const newUploadedImages = Array.isArray(prevImages) ? [...prevImages] : [];
+                newUploadedImages[variantIndex] = reader.result;
+                return newUploadedImages;
+            });
+        };
+        reader.readAsDataURL(file);
     }
-  };
+};
   const handleViewImageClose = () => {
     setIsModalOpenImage(false);
     setSelectedVariantIndex(null);
@@ -770,9 +777,9 @@ function Products() {
                       </div>
                     )}
                     {submittedVariants.map((variant, variantIndex) => (
-                      <div
-                        key={variantIndex}
-                        className="rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md"
+                        <div
+                          key={variantIndex}
+                          className="rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md"
                       >
                         <div className="flex gap-1 justify-between">
                           <label className="block text-gray-800 text-sm text-center w-full bg-slate-100 mb-2 rounded-t-md py-2">
