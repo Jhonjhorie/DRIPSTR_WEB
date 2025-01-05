@@ -45,6 +45,7 @@ function MerchantDashboard() {
   const [shopData, setShopData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [shopRating, setShopRating] = useState('');
 
   useEffect(() => {
     // Fetch the current user profile and shop data
@@ -63,7 +64,7 @@ function MerchantDashboard() {
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
           .from("shop")
-          .select("shop_name") // You can specify fields if needed, e.g., .select("id, name")
+          .select("shop_name, shop_Rating") // You can specify fields if needed, e.g., .select("id, name")
           .eq("owner_Id", user.id); // Assuming the shop table has 'user_id' to link it to the user
 
         if (shopError) {
@@ -71,8 +72,10 @@ function MerchantDashboard() {
         } else {
           setShopData(shops); // Store the fetched shops data
           console.log("this is a shopname:",  shops )
+         
           shops.forEach(shop => {
             console.log("Shop Name:", shop.shop_name); // Log each shop name
+             setShopRating(shop.shop_Rating);
           });
         }
       } else {
@@ -143,13 +146,16 @@ function MerchantDashboard() {
             </div>
         </div>
         <div className='bg-custom-purple glass rounded-md md:h-[200px] h-[170px] w-[70%] sm:w-[50%] md:w-[35%] lg:w-[25%] md:mr-12 lg:mr-16  p-2 mb-2 md:mb-0 '>
-          <div className="bg-slate-400 h-full w-auto rounded-md">
-            <img
-              src={logo}
-              alt="Shop Logo"
-              className="drop-shadow-custom h-full w-full object-cover rounded-md"
-              sizes="100%"
-            />
+          <div className="bg-slate-100 h-full w-auto rounded-md">
+          {shopRating ? (
+        <div className='text-slate-900 font-semibold text-2xl md:text-5xl pt-[25%]  text-center'> {shopRating} <box-icon type='solid' size='30px' color='#F09319' name='star'></box-icon> <br/>
+         <div className='text-slate-800 text-xl'> SHOP RATING </div> 
+        </div>
+        ) : (
+          <div className="h-full w-full flex items-center justify-center">
+            <span>SHOP RATING LOADING...</span>
+          </div>
+        )}
           </div>
         </div>
       </div>

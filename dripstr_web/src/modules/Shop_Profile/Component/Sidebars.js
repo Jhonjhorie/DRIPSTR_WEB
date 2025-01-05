@@ -12,6 +12,7 @@ function SideBar() {
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(true);
   const [shopImageUrl, setShopImageUrl] = useState('');
+  const [shopName, setShopName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   const toggleSidebar = () => {
@@ -40,7 +41,7 @@ function SideBar() {
         // Fetch shop image URL where user is the shop owner
         const { data, error } = await supabase
           .from('shop') // Replace 'shop' with your table name
-          .select('shop_image') // Replace 'shop_image' with your column name
+          .select('shop_image, shop_name') // Replace 'shop_image' with your column name
           .eq('owner_Id', user.id) // Assuming 'user_id' links shop to user
           .single();
 
@@ -53,6 +54,7 @@ function SideBar() {
         if (data) {
           console.log('Shop data:', data);
           setShopImageUrl(data.shop_image);
+          setShopName(data.shop_name);
         } else {
           console.warn('No shop data found for this user.');
           setErrorMessage('No shop image found.');
@@ -114,7 +116,15 @@ function SideBar() {
            
           </div>
 
-          <div className='text-slate-900 font-semibold pt-[30%]  text-center'> Saint Mercy Apparel </div>
+         
+          {shopName ? (
+        <div className='text-slate-900 font-semibold pt-[30%]  text-center'> {shopName} </div>
+        ) : (
+          <div className="h-full w-full flex items-center justify-center">
+            <span>Loading...</span>
+          </div>
+        )}
+         
           <li
           onClick={() => navigate('/shop/MerchantDashboard')}
           className='flex justify-between p-1 hover:bg-slate-300 mt-4 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>

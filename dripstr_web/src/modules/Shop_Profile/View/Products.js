@@ -56,7 +56,14 @@ function Products() {
     if (isOpen2) setIsOpen2(false);
     if (isOpen3) setIsOpen3(false);
   };
-
+const handleNameChange = (event, index) => {
+  const name = event.target.value;
+  selectedVariantIndex((prevVariants) =>
+    prevVariants.map((variant, i) =>
+      i === index ? { ...variant, name } : variant
+    )
+  );
+};
   const items = [
     "T-shirt",
     "Shorts",
@@ -127,7 +134,7 @@ function Products() {
         : [...prevSelectedItems, item]
     );
   };
-  
+
   const handleSubmit = (index) => {
     if (inputs[index].trim() === "") {
       alert("Please input something");
@@ -150,14 +157,11 @@ function Products() {
       prevInputs.filter((_, index) => index !== indexToDelete)
     );
     setSubmittedVariants((prevVariants) =>
-      prevVariants.filter((_, index) => index !== indexToDelete),
-      
+      prevVariants.filter((_, index) => index !== indexToDelete)
     );
     setUploadedImages((prevImages) =>
-    prevImages.filter((_, index) => index !== indexToDelete),
-    
-);
-    
+      prevImages.filter((_, index) => index !== indexToDelete)
+    );
   };
   const handleAddItem = () => {
     //ITEMS
@@ -170,17 +174,20 @@ function Products() {
   const handleImageUpload = (event, variantIndex) => {
     const file = event.target.files[0];
     if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setUploadedImages((prevImages) => {
-                const newUploadedImages = Array.isArray(prevImages) ? [...prevImages] : [];
-                newUploadedImages[variantIndex] = reader.result;
-                return newUploadedImages;
-            });
-        };
-        reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUploadedImages((prevImages) => {
+          const newUploadedImages = Array.isArray(prevImages)
+            ? [...prevImages]
+            : [];
+          newUploadedImages[variantIndex] = reader.result;
+          return newUploadedImages;
+        });
+    
+      };
+      reader.readAsDataURL(file);
     }
-};
+  };
   const handleViewImageClose = () => {
     setIsModalOpenImage(false);
     setSelectedVariantIndex(null);
@@ -202,7 +209,7 @@ function Products() {
   };
   const addImageInput = () => {
     setImageInputs([...imageInputs, ""]);
-  };  
+  };
 
   const deleteImageInput = (index) => {
     const newInputs = imageInputs.filter((_, i) => i !== index);
@@ -764,7 +771,7 @@ function Products() {
                     <box-icon
                       type="solid"
                       color="#FFFFFF"
-                      name="folder-plus"
+                      name="image-add"
                     ></box-icon>
                   </button>
                 </div>
@@ -777,9 +784,9 @@ function Products() {
                       </div>
                     )}
                     {submittedVariants.map((variant, variantIndex) => (
-                        <div
-                          key={variantIndex}
-                          className="rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md"
+                      <div
+                        key={variantIndex}
+                        className="rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md"
                       >
                         <div className="flex gap-1 justify-between">
                           <label className="block text-gray-800 text-sm text-center w-full bg-slate-100 mb-2 rounded-t-md py-2">
@@ -809,8 +816,11 @@ function Products() {
 
                         <input
                           type="file"
+                          
                           accept="image/*"
-                          onChange={(event) => handleImageUpload(event, variantIndex)}
+                          onChange={(event) =>
+                            handleImageUpload(event, variantIndex)
+                          }
                           className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-slate-100 focus:outline-none"
                         />
 
@@ -1174,21 +1184,21 @@ function Products() {
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
           <div className="bg-white relative rounded-lg p-5 h-auto w-full md:w-3/12  m-2 md:m-0 auto">
             <div className="min-h-80 bg-violet-300 w-full">
-             {selectedVariantIndex !== null ? (
-              uploadedImages[selectedVariantIndex] ? (
-                <div className="h-80 bg-violet-300 w-full">
-                <img
-                  src={uploadedImages[selectedVariantIndex]}
-                  alt={`Variant ${selectedVariantIndex}`}
-                  className=" mb-4 object-fill h-full w-auto place-self-center"
-                />
-              </div>
-              ) : (
-                <p className="text-center text-gray-500 mb-4">
-                  No image uploaded for this item.
-                </p>
-              )
-            ) : null}
+              {selectedVariantIndex !== null ? (
+                uploadedImages[selectedVariantIndex] ? (
+                  <div className="h-80 bg-violet-300 w-full">
+                    <img
+                      src={uploadedImages[selectedVariantIndex]}
+                      alt={`Variant ${selectedVariantIndex}`}
+                      className=" mb-4 object-fill h-full w-auto place-self-center"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500 mb-4">
+                    No image uploaded for this item.
+                  </p>
+                )
+              ) : null}
             </div>
             <div className="flex gap-2">
               <button
