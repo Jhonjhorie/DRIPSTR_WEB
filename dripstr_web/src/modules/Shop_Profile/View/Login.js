@@ -15,18 +15,15 @@ function Login() {
   const [showAlert3, setShowAlert3] = React.useState(false); // AlertDescription
   const [showAlert4, setShowAlert4] = React.useState(false); // Alert11digits
   const [showAlert5, setShowAlert5] = React.useState(false); // AlertAddress
+  const [showImage, setshowImage] = React.useState(false); //Show image modal
+  const [showFile, setshowFile] = React.useState(false); //Show File modal
+  const [selectedImage, setSelectedImage] = useState(null); // show to the modal div
+  const [fileName, setFileName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const [user, setUser] = useState(null);
 
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0]; // Get the selected file
-    if (file) {
-      setImageFile(file); // Store the file in state
-      console.log("Selected file:", file);
-    }
-  };
-
+  const [pdfFile, setpdfFile] = useState(null);
   const phonedigit = (e) => {
     let value = e.target.value;
     value = value.replace(/[^0-9]/g, "").slice(0, 11);
@@ -90,6 +87,7 @@ function Login() {
       return;
     }
     let uploadedImageUrl = null;
+    let uploadedPdfUrl = null;
     if (imageFile) {
       try {
         // Upload the image to Supabase storage
@@ -119,7 +117,35 @@ function Login() {
         return; // Exit if there's an unexpected error during image upload
       }
     }
+    if (pdfFile) {
+      try {
+        // Upload the image to Supabase storage
+        const { data, error: uploadError } = await supabase.storage
+          .from("shop_profile") // Replace with your storage bucket name
+          .upload(`pdfs/${pdfFile.name}`, pdfFile);
 
+        if (uploadError) {
+          console.error("Error uploading image:", uploadError.message);
+          return; // Exit if there's an error uploading the image
+        }
+        if (data?.path) {
+          const { data: publicUrlData, error: urlError } = supabase.storage
+            .from("shop_profile")
+            .getPublicUrl(data.path);
+
+          if (urlError) {
+            console.error("Error fetching image URL:", urlError.message);
+            return; // Exit if there's an error fetching the image URL
+          }
+
+          uploadedPdfUrl = publicUrlData.publicUrl; // Correctly assign the public URL
+          console.log("Image uploaded successfully:", uploadedPdfUrl);
+        }
+      } catch (err) {
+        console.error("Unexpected error while uploading image:", err);
+        return; // Exit if there's an unexpected error during image upload
+      }
+    }
     const userId = user.id; // Get the current user's ID
 
     try {
@@ -136,6 +162,7 @@ function Login() {
             address: shopAddress,
             owner_Id: userId, // Set the owner_id to the current user's ID
             shop_image: uploadedImageUrl || null,
+            shop_BusinessPermit: uploadedPdfUrl || null,
           },
         ])
         .single(); // Insert a single shop and get the inserted row
@@ -168,7 +195,7 @@ function Login() {
       setShopDescription("");
       setShopAddress("");
       setImageFile(null);
-
+      setpdfFile(null);
       // Navigate to the Merchant Dashboard
       navigate("/shop/MerchantDashboard");
     } catch (err) {
@@ -176,12 +203,51 @@ function Login() {
     }
   };
 
+  const handleOpenImage = () => {
+    if (selectedImage) {
+      setshowImage(true);
+    } else {
+      alert("Please select an image");
+    }
+  };
+  const handleOpenFile = () => {
+    if (selectedFile) {
+      setshowFile(true);
+    } else {
+      alert("Please select a file");
+    }
+  };
+  //MODAL FOR IMAGES
+  const handleCloseModal = () => {
+    setshowImage(false);
+    setshowFile(false);
+    
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0]; // Get the selected file
+    if (file) {
+      setImageFile(file); // Store the file in state
+      setSelectedImage(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChange2 = (event) => {
+    const file = event.target.files[0];
+    if (file && (file.type === "application/pdf" )) {
+        setpdfFile(file);
+        setFileName(file.name);
+        setSelectedFile(file);
+    } else {
+        alert("Please select a valid file (PDF or Word document)");
+    }
+};
   return (
     <div className="h-full w-full relative">
-      <div className="h-auto w-full lg:flex bg-slate-300 p-1  ">
+      <div className="h-full w-full lg:flex bg-slate-300 p-1 justify-center  ">
         {/* FIRST CONTAINER */}
 
-        <div className=" h-auto w-full lg:w-[55%] md:p-10 overflow-hidden ">
+        <div className=" h-auto w-full lg:w-[55%]  overflow-hidden ">
           <div className="flex md:gap-2 md:justify-start justify-center  ">
             <box-icon
               name="store"
@@ -193,11 +259,11 @@ function Login() {
               Create Merchant Account
             </div>
           </div>
-          <div className="font-bold text-5xl text-center md:text-left p-2 text-custom-purple iceland-bold">
+          <div className="font-bold text-5xl text-center md:text-left p-1 text-custom-purple iceland-bold">
             Get Started
           </div>
           <form onSubmit={handleSubmit}>
-            <div className="md:flex w-full place-items-center h-[50%] gap-2 lg:gap-8  p-2 ">
+            <div className="md:flex w-full place-items-center h-[50%] gap-2 lg:gap-5  p-2 ">
               <div className="w-full lg:w-1/2 h-full flex  items-center justify-center">
                 <div className="w-full max-w-xs">
                   <label className="form-control w-full">
@@ -235,45 +301,77 @@ function Login() {
                       Phone number should be 11 digits.
                     </span>
                   </div>
-
-                  <label className="form-control w-full max-w-xs ">
-                    <div className="label">
-                      <span className="label-text font-semibold text-slate-800 ">
-                        Shop description?
-                      </span>
-                    </div>
-                    <textarea
-                      id="shopDescription"
-                      value={shopDescription}
-                      onChange={handleShopDescriptionChange}
-                      className="w-full textarea h-14 textarea-bordered bg-slate-100 text-black border-violet-950 rounded-md border-[2px] p-1 resize-none"
-                    ></textarea>
-                  </label>
                 </div>
               </div>
 
-              <div className="w-full md:w-1/2 h-full rounded-md  place-items-center justify-center p-2">
-                <div className="bg-slate-100 w-72 h-52 flex items-center justify-center mt-5 border-violet-950 border-2 rounded-md">
-                  {/* SHOP LOGO GOES HERE */}
-                  <box-icon
-                    name="image"
-                    type="solid"
-                    size="100px"
-                    color="#6803a0"
-                  ></box-icon>
-                </div>
-                <div className="h-auto w-full flex mt-6 justify-center ">
+              <div className="w-full md:w-1/2 h-full rounded-md   justify-center mt-1 p-2">
+                
+                <label className="label-text font-semibold ml-2 text-slate-800">
+                    Upload shop photo
+                  </label>
+                  <div className="h-auto w-full flex mt-2 justify-center gap-2 ">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      placeholder={fileName || "Choose a file..."}
+                      className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
+                    />
+                    <div
+                      onClick={handleOpenImage}
+                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                    >
+                      <box-icon
+                        type="solid"
+                        name="image-alt"
+                        color="#FFFFFF"
+                      ></box-icon>
+                    </div>
+                  </div>
+                <div className="mt-4">
+                <label className="label-text font-semibold ml-2 text-slate-800">
+                  Upload business permit
+                </label>
+                <div className="h-auto w-full flex mt-1 justify-center gap-2 ">
                   <input
                     type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleFileChange2}
                     className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
                   />
+                  <div 
+                    onClick={handleOpenFile}
+                  className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md">
+                    <box-icon
+                      type="solid"
+                      name="file"
+                      color="#FFFFFF"
+                    ></box-icon>
+                  </div>
+                </div>
+                <div className="label">
+                    <span className="label-text-alt text-slate-700">
+                      PDF file format is only accepted.
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <label className="form-control mx-2 flex justify-center items-center md:items-start ">
+            <label className="form-control mx-5 -mt-3 flex justify-center items-center md:items-start ">
+              <label className="form-control w-full  ">
+                <div className="label">
+                  <span className="label-text font-semibold text-slate-800 ">
+                    Shop description?
+                  </span>
+                </div>
+                <textarea
+                  id="shopDescription"
+                  value={shopDescription}
+                  onChange={handleShopDescriptionChange}
+                  className="w-full textarea h-16 textarea-bordered bg-slate-100 text-black border-violet-950 rounded-md border-[2px] p-1 resize-none"
+                ></textarea>
+              </label>
               <div className="label">
                 <span className="label-text font-semibold text-slate-800">
                   What is your SHOP address?
@@ -282,15 +380,15 @@ function Login() {
               <textarea
                 value={shopAddress}
                 onChange={handleShopAddressChange}
-                className="textarea resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24"
+                className="textarea resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-16"
                 placeholder="Type your Shop Address here"
               ></textarea>
             </label>
-            <button className="btn mt-2 ml-2 glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white ">
+            <button className="btn mt-4 ml-2 glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white ">
               SUBMIT
             </button>
           </form>
-          <div className="w-full bg-slate-400 h-auto relative justify-between flex m-2 ">
+          <div className="w-full md:mb-0 mb-16 bg-slate-400 h-auto relative justify-between flex m-2 ">
             <button
               onClick={() => navigate("/shop/ArtistCreate")}
               className="  text-slate-600 iceland-bold absolute right-0 bottom-1 hover:text-custom-purple hover:duration-300 self-end mx-5 m-2"
@@ -298,18 +396,6 @@ function Login() {
               BE A DRIPSTR ARTIST?{" "}
             </button>
           </div>
-        </div>
-
-        {/* SECOND CONTAINER */}
-        <div className=" bg-primary-color mb-14 md:mb-0 glass h-auto lg:h-screen relative w-full  lg:m-2   lg:w-[45%] lg:rounded-[3%] place-content-center place-items-center p-2">
-          <div className="text-2xl font-bold iceland-bold text-slate-50  ">
-            SELL WITH
-          </div>
-          <img
-            src={logo}
-            alt="Dynamic Logo Name"
-            className="drop-shadow-custom "
-          />
         </div>
       </div>
 
@@ -425,6 +511,56 @@ function Login() {
               />
             </svg>
             <span>Shop Description is Required!</span>
+          </div>
+        </div>
+      )}
+      {showImage && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
+          <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
+            {/*Image goes here*/}
+            <div className=" h-[250px] w-[250px] border-custom-purple border-2 bg-slate-600 rounded-md  place-items-center   ">
+              {selectedImage ? (
+                <img
+                  src={selectedImage}
+                  alt="Uploaded shop photo"
+                  className="w-full h-full object-cover rounded-sm"
+                />
+              ) : (
+                <p className="text-white">Please select an image</p>
+              )}{" "}
+            </div>
+            <div className="flex justify-between  w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded  hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+             
+            </div>
+          </div>
+        </div>
+      )}
+      {showFile && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
+          <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
+            {/*Image goes here*/}
+            <div className=" h-[450px] w-[400px]  bg-slate-600 rounded-md  place-items-center   ">
+            {selectedFile ? (
+                                        <iframe src={URL.createObjectURL(selectedFile)} title="Uploaded file" className="w-full h-full"></iframe>
+                                    ) : (
+                                        <p className="text-white">Please select a file</p>
+                                    )}
+            </div>
+            <div className="flex justify-between  w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded  hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+             
+            </div>
           </div>
         </div>
       )}
