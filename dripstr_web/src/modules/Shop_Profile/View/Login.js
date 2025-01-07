@@ -15,6 +15,8 @@ function Login() {
   const [showAlert3, setShowAlert3] = React.useState(false); // AlertDescription
   const [showAlert4, setShowAlert4] = React.useState(false); // Alert11digits
   const [showAlert5, setShowAlert5] = React.useState(false); // AlertAddress
+  const [showAlert6, setShowAlert6] = React.useState(false); // AlertImageMissing
+  const [showAlert7, setShowAlert7] = React.useState(false); // AlertFileMissing
   const [showImage, setshowImage] = React.useState(false); //Show image modal
   const [showFile, setshowFile] = React.useState(false); //Show File modal
   const [selectedImage, setSelectedImage] = useState(null); // show to the modal div
@@ -38,6 +40,8 @@ function Login() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload on form submit
+
+    //handles alerts on missing inputs
     if (!shopName.trim()) {
       console.error("Shop name is required");
       setShowAlert(true);
@@ -78,6 +82,24 @@ function Login() {
       }, 3000);
       return; // Do not proceed if the field is empty
     }
+    if (!selectedImage) {
+      console.error("Shop Image is required");
+      setShowAlert6(true);
+      setTimeout(() => {
+        setShowAlert6(false);
+      }, 3000);
+      return; // Do not proceed if the field is empty
+    }
+    if (!selectedFile) {
+      console.error("Shop File is required");
+      setShowAlert7(true);
+      setTimeout(() => {
+        setShowAlert7(false);
+      }, 3000);
+      return; // Do not proceed if the field is empty
+    }
+
+    //define current user credit
     const {
       data: { user },
       error: userError,
@@ -86,8 +108,12 @@ function Login() {
       console.error("No user found");
       return;
     }
+
+    //set null if there's no Image & File Inputted
     let uploadedImageUrl = null;
     let uploadedPdfUrl = null;
+
+    //Set Image from shop to DB
     if (imageFile) {
       try {
         // Upload the image to Supabase storage
@@ -117,6 +143,8 @@ function Login() {
         return; // Exit if there's an unexpected error during image upload
       }
     }
+
+    //Set Business Permit from shop to DB
     if (pdfFile) {
       try {
         // Upload the image to Supabase storage
@@ -125,7 +153,7 @@ function Login() {
           .upload(`pdfs/${pdfFile.name}`, pdfFile);
 
         if (uploadError) {
-          console.error("Error uploading image:", uploadError.message);
+          console.error("Error uploading pdffile:", uploadError.message);
           return; // Exit if there's an error uploading the image
         }
         if (data?.path) {
@@ -134,7 +162,7 @@ function Login() {
             .getPublicUrl(data.path);
 
           if (urlError) {
-            console.error("Error fetching image URL:", urlError.message);
+            console.error("Error fetching pdf URL:", urlError.message);
             return; // Exit if there's an error fetching the image URL
           }
 
@@ -148,6 +176,7 @@ function Login() {
     }
     const userId = user.id; // Get the current user's ID
 
+  // Insert the shop with the user ID as the owner ID
     try {
       // Fetch current user ID
 
@@ -201,8 +230,9 @@ function Login() {
     } catch (err) {
       console.error("Unexpected error:", err);
     }
-  };
+    };
 
+  //Open Modal for Viewing Image
   const handleOpenImage = () => {
     if (selectedImage) {
       setshowImage(true);
@@ -210,6 +240,8 @@ function Login() {
       alert("Please select an image");
     }
   };
+
+  //Open Modal for Viewing Pdf File
   const handleOpenFile = () => {
     if (selectedFile) {
       setshowFile(true);
@@ -217,13 +249,14 @@ function Login() {
       alert("Please select a file");
     }
   };
+
   //MODAL FOR IMAGES
   const handleCloseModal = () => {
     setshowImage(false);
     setshowFile(false);
-    
   };
 
+  //define image input
   const handleFileChange = (event) => {
     const file = event.target.files[0]; // Get the selected file
     if (file) {
@@ -232,16 +265,18 @@ function Login() {
       console.log("Selected file:", file);
     }
   };
+
+  //define file input
   const handleFileChange2 = (event) => {
     const file = event.target.files[0];
-    if (file && (file.type === "application/pdf" )) {
-        setpdfFile(file);
-        setFileName(file.name);
-        setSelectedFile(file);
+    if (file && file.type === "application/pdf") {
+      setpdfFile(file);
+      setFileName(file.name);
+      setSelectedFile(file);
     } else {
-        alert("Please select a valid file (PDF or Word document)");
+      alert("Please select a valid file (PDF document)");
     }
-};
+  };
   return (
     <div className="h-full w-full relative">
       <div className="h-full w-full lg:flex bg-slate-300 p-1 justify-center  ">
@@ -305,51 +340,51 @@ function Login() {
               </div>
 
               <div className="w-full md:w-1/2 h-full rounded-md   justify-center mt-1 p-2">
-                
                 <label className="label-text font-semibold ml-2 text-slate-800">
-                    Upload shop photo
-                  </label>
-                  <div className="h-auto w-full flex mt-2 justify-center gap-2 ">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      placeholder={fileName || "Choose a file..."}
-                      className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
-                    />
-                    <div
-                      onClick={handleOpenImage}
-                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
-                    >
-                      <box-icon
-                        type="solid"
-                        name="image-alt"
-                        color="#FFFFFF"
-                      ></box-icon>
-                    </div>
-                  </div>
-                <div className="mt-4">
-                <label className="label-text font-semibold ml-2 text-slate-800">
-                  Upload business permit
+                  Upload shop photo
                 </label>
-                <div className="h-auto w-full flex mt-1 justify-center gap-2 ">
+                <div className="h-auto w-full flex mt-2 justify-center gap-2 ">
                   <input
                     type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileChange2}
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    placeholder={fileName || "Choose a file..."}
                     className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
                   />
-                  <div 
-                    onClick={handleOpenFile}
-                  className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md">
+                  <div
+                    onClick={handleOpenImage}
+                    className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                  >
                     <box-icon
                       type="solid"
-                      name="file"
+                      name="image-alt"
                       color="#FFFFFF"
                     ></box-icon>
                   </div>
                 </div>
-                <div className="label">
+                <div className="mt-4">
+                  <label className="label-text font-semibold ml-2 text-slate-800">
+                    Upload business permit
+                  </label>
+                  <div className="h-auto w-full flex mt-1 justify-center gap-2 ">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileChange2}
+                      className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
+                    />
+                    <div
+                      onClick={handleOpenFile}
+                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                    >
+                      <box-icon
+                        type="solid"
+                        name="file"
+                        color="#FFFFFF"
+                      ></box-icon>
+                    </div>
+                  </div>
+                  <div className="label">
                     <span className="label-text-alt text-slate-700">
                       PDF file format is only accepted.
                     </span>
@@ -400,7 +435,7 @@ function Login() {
       </div>
 
       {showAlert && (
-        <div className="md:bottom-5  w-full px-10 bottom-10 z-10  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div
             role="alert"
             className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
@@ -423,7 +458,7 @@ function Login() {
         </div>
       )}
       {showAlert2 && (
-        <div className="md:bottom-5  w-full px-10 bottom-10 z-10  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div
             role="alert"
             className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
@@ -446,7 +481,7 @@ function Login() {
         </div>
       )}
       {showAlert3 && (
-        <div className="md:bottom-5  w-full px-10 bottom-10 z-10  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div
             role="alert"
             className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
@@ -469,7 +504,7 @@ function Login() {
         </div>
       )}
       {showAlert4 && (
-        <div className="md:bottom-5  w-full px-10 bottom-10 z-10  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div
             role="alert"
             className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
@@ -492,7 +527,7 @@ function Login() {
         </div>
       )}
       {showAlert5 && (
-        <div className="md:bottom-5  w-full px-10 bottom-10 z-10  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div
             role="alert"
             className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
@@ -514,11 +549,57 @@ function Login() {
           </div>
         </div>
       )}
+      {showAlert6 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Shop Image is Required!</span>
+          </div>
+        </div>
+      )}
+      {showAlert7 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Shop Business Permit is Required!</span>
+          </div>
+        </div>
+      )}
       {showImage && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
           <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
             {/*Image goes here*/}
-            <div className=" h-[250px] w-[250px] border-custom-purple border-2 bg-slate-600 rounded-md  place-items-center   ">
+            <div className=" h-[350px] w-[350px] border-custom-purple border-2 bg-slate-600 rounded-md  place-items-center   ">
               {selectedImage ? (
                 <img
                   src={selectedImage}
@@ -536,7 +617,6 @@ function Login() {
               >
                 Close
               </button>
-             
             </div>
           </div>
         </div>
@@ -546,11 +626,15 @@ function Login() {
           <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
             {/*Image goes here*/}
             <div className=" h-[450px] w-[400px]  bg-slate-600 rounded-md  place-items-center   ">
-            {selectedFile ? (
-                                        <iframe src={URL.createObjectURL(selectedFile)} title="Uploaded file" className="w-full h-full"></iframe>
-                                    ) : (
-                                        <p className="text-white">Please select a file</p>
-                                    )}
+              {selectedFile ? (
+                <iframe
+                  src={URL.createObjectURL(selectedFile)}
+                  title="Uploaded file"
+                  className="w-full h-full"
+                ></iframe>
+              ) : (
+                <p className="text-white">Please select a file</p>
+              )}
             </div>
             <div className="flex justify-between  w-full mt-2">
               <button
@@ -559,7 +643,6 @@ function Login() {
               >
                 Close
               </button>
-             
             </div>
           </div>
         </div>
