@@ -10,11 +10,13 @@ import sample7 from "../../../assets/images/samples/9.png";
 import sample8 from "../../../assets/images/samples/11.png";
 import sample9 from "../../../assets/images/samples/12.png";
 import sampleads from "../../../assets/shop/s2.jpg";
-
+import { useNavigate } from 'react-router-dom';
+import { supabase } from "../../../constants/supabase"; 
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 const { useState } = React;
 
 function Products() {
+  const navigate = useNavigate();
   const [activeTabs, setActiveTab] = useState("manage-products");
   const [isModalOpenItems, setIsModalOpenItem] = useState(false); //Modal for Items
   const [isModalOpenAds, setIsModalOpenAds] = useState(false); //Modal for ads
@@ -432,7 +434,7 @@ const handleNameChange = (event, index) => {
                   </h2>
                   <div className="flex gap-2 justify-center  place-items-center">
                     <div
-                      onClick={handleAddItem}
+                      onClick={() => navigate('/shop/AddItem')}
                       className="bg-custom-purple p-1 md:px-2 text-slate-50 cursor-pointer text-sm  duration-200 hover:scale-95 rounded-sm "
                     >
                       Add Items
