@@ -27,6 +27,13 @@ const AddItem = () => {
     tag3: "",
   });
   const addVariant = () => {
+    if (variants.length >= 10) {
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+      }, 3000);
+      return; // Do not add more variants if the limit is reached
+    }
     setVariants([
       ...variants,
       {
@@ -35,18 +42,10 @@ const AddItem = () => {
         image: "", // Initial empty value for image
       },
     ]);
-    if (variants.length >= 10) {
-      setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 3000);
-      return; // Do not add more variants if the limit is reached
-    }
+   
     
   };
- 
 
-  
   // Fetch the current user and shop data
   useEffect(() => {
     const fetchUserProfileAndShop = async () => {
@@ -121,51 +120,66 @@ const AddItem = () => {
     setVariants(updatedVariants);
   };
 
-
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { itemTitle, itemDescription, tag1, tag2, tag3 } = formData;
-    // Combine the tags into an array for storing as JSONB
     const tags = [tag1, tag2, tag3].filter(Boolean); // Remove empty values
-
-
-    
-
-    const formattedVariants = variants.map((variant) => ({
-      img: variant.image || "", // Include the image if it exists
-      variant_Name: variant.name,
-      sizes: variant.info.map((info) => ({
-        qty: info.quantity,
-        size: info.size,
-        price: info.price,
-      })),
-     
-    }));
   
     try {
-      // Ensure shop ID is selected
-      if (!selectedShopId) {
-        throw new Error("Shop ID is not selected.");
+      // Validate required fields
+      if (!itemTitle || !itemDescription || !selectedShopId) {
+        alert("Please fill in all required fields.");
+        return;
       }
-
+  
+      // Upload images for all variants
+      const updatedVariants = await Promise.all(
+        variants.map(async (variant) => {
+          if (variant.file) {
+            const filePath = `product/${Date.now()}_${variant.file.name}`;
+            const { data, error } = await supabase.storage
+              .from("product") // Use the correct bucket name
+              .upload(filePath, variant.file);
+  
+            if (error) throw error;
+  
+            return {
+              ...variant,
+              image: data.path, // Replace the preview URL with the uploaded image path
+            };
+          }
+          return variant; // If no file, return the variant as is
+        })
+      );
+  
+      // Prepare the formatted variants
+      const formattedVariants = updatedVariants.map((variant) => ({
+        img: variant.image || "", // Use the uploaded image path
+        variant_Name: variant.name,
+        sizes: variant.info.map((info) => ({
+          qty: info.quantity,
+          size: info.size,
+          price: info.price,
+        })),
+      }));
+  
       // Insert the product data
       const { data, error } = await supabase.from("shop_Product").insert([
         {
           item_Name: itemTitle,
           item_Description: itemDescription,
-          item_Tags: tags, // Store tags as a single string
+          item_Tags: tags,
           item_Rating: 0,
           item_Orders: 0,
           is_Post: false,
           shop_Id: selectedShopId,
           shop_Name: shopData?.shop_name || "Unknown Shop",
-          item_Variant: formattedVariants, 
+          item_Variant: formattedVariants,
         },
       ]);
-
+  
       if (error) throw error;
-
+  
       alert("Product added successfully!");
       setFormData({
         itemTitle: "",
@@ -175,19 +189,13 @@ const AddItem = () => {
         tag3: "",
       });
       setVariants([]);
-
+  
     } catch (error) {
       console.error("Error adding product:", error.message);
       alert("Failed to add product.");
     }
   };
-  const handleAddVariant = () => {
-    setVariants((prevVariants) => [
-      ...prevVariants,
-      { variant_Name: '', sizes: [], image: '' }, // Add a new variant with empty data
-    ]);
-  };
- 
+
   const removeVariant = () => {
     if (variantToDelete !== null) {
       const newVariants = variants.filter((_, i) => i !== variantToDelete);
@@ -215,7 +223,7 @@ const AddItem = () => {
     setVariants(updatedVariants);
   };
   
-  const handleImageChange = async (index, event) => {
+  const handleImageChange = (index, event) => {
     const file = event.target.files[0]; // Get the selected file
   
     if (!file) {
@@ -223,48 +231,19 @@ const AddItem = () => {
       return; // Exit if no file is selected
     }
   
-    try {
-      const newVariants = [...variants];
-      const imageUrl = URL.createObjectURL(file); // Generate a preview URL
+    // Store the image preview URL temporarily
+    const previewUrl = URL.createObjectURL(file);
   
-      // Update the preview image in the variants array
-      newVariants[index].image = imageUrl;
-      setVariants(newVariants); // Update state to display the preview image
+    setVariants((prevVariants) =>
+      prevVariants.map((variant, i) =>
+        i === index
+          ? { ...variant, image: previewUrl, file } // Add the file object to the variant for later upload
+          : variant
+      )
+    );
   
-      console.log(`Preview image for variant ${index} updated:`, imageUrl);
-  
-      // Now, upload the image to Supabase Storage
-      const filePath = `product/${Date.now()}_${file.name}`; // Ensure you're using the correct bucket name (e.g., 'product')
-  
-      // Upload the image to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('product') // Use the correct bucket name
-        .upload(filePath, file);
-  
-      if (error) {
-        console.error("Error uploading image:", error.message); 
-        throw new Error(error.message);
-      }
-  
-      // Log the data object returned from the upload function
-      console.log("Data returned from upload:", data);
-  
-      // Store only the path from the upload result in the variant
-      newVariants[index].image = data.path; // Store only the path
-      setVariants(newVariants); // Update state with the path from Supabase
-  
-      console.log(`Image path for variant ${index} uploaded and URL updated:`, data.path);
-  
-    } catch (err) {
-      console.error("Failed to handle image change:", err);
-    }
+    console.log(`Preview for variant ${index} updated.`);
   };
-  
-
-  
-  
-
-
 
   const removeInfo = (variantIndex, infoIndex) => {
     const newVariants = [...variants];
