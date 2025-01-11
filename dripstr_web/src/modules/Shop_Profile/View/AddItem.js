@@ -10,6 +10,10 @@ const AddItem = () => {
   const [imageSrc, setImageSrc] = useState("");
   const [showAlert, setShowAlert] = React.useState(false); // Alert Max Variant
   const [showAlert2, setShowAlert2] = React.useState(false); // Alert Max Variant Information
+  const [showAlert3, setShowAlert3] = React.useState(false); // Alert Required fields
+  const [showAlert4, setShowAlert4] = React.useState(false); // Alert Image per Variant
+  const [showAlert5, setShowAlert5] = React.useState(false); // Alert Name per Variant
+  const [showAlert6, setShowAlert6] = React.useState(false); // Alert When no variant is added
   const [showModalDelete, setShowModalDelete] = React.useState(false); // Modal for Delete Variant Information
   const [variantToDelete, setVariantToDelete] = useState(null);
   const [variantToDeleteName, setVariantToDeleteName] = useState("");
@@ -34,16 +38,15 @@ const AddItem = () => {
       }, 3000);
       return; // Do not add more variants if the limit is reached
     }
+
     setVariants([
       ...variants,
       {
         name: "", // Initial value for variant name
-        info: [],  // Initial empty array for variant info
+        info: [], // Initial empty array for variant info
         image: "", // Initial empty value for image
       },
     ]);
-   
-    
   };
 
   // Fetch the current user and shop data
@@ -124,14 +127,46 @@ const AddItem = () => {
     e.preventDefault();
     const { itemTitle, itemDescription, tag1, tag2, tag3 } = formData;
     const tags = [tag1, tag2, tag3].filter(Boolean); // Remove empty values
-  
+
     try {
       // Validate required fields
       if (!itemTitle || !itemDescription || !selectedShopId) {
-        alert("Please fill in all required fields.");
+        console.log("Please fill in all required fields.");
+        setShowAlert3(true);
+        setTimeout(() => {
+          setShowAlert3(false);
+        }, 3000);
         return;
       }
-  
+      //if no varainst is added
+      if (variants.length === 0) {
+        console.log("Please add at least one variant before submitting.");
+        setShowAlert6(true);
+        setTimeout(() => {
+          setShowAlert6(false);
+        }, 3000);
+        return;
+      }
+      // Validate that all variants have a selected image
+      const hasMissingImages = variants.some((variant) => !variant.image);
+      const hasMissingName = variants.some((variant) => !variant.name);
+      if (hasMissingName) {
+        console.log("Please ensure that each variant has a Name.");
+        setShowAlert5(true);
+        setTimeout(() => {
+          setShowAlert5(false);
+        }, 3000);
+        return;
+      }
+      if (hasMissingImages) {
+        console.log("Please ensure that each variant has a selected image.");
+        setShowAlert4(true);
+        setTimeout(() => {
+          setShowAlert4(false);
+        }, 3000);
+        return;
+      }
+
       // Upload images for all variants
       const updatedVariants = await Promise.all(
         variants.map(async (variant) => {
@@ -140,9 +175,9 @@ const AddItem = () => {
             const { data, error } = await supabase.storage
               .from("product") // Use the correct bucket name
               .upload(filePath, variant.file);
-  
+
             if (error) throw error;
-  
+
             return {
               ...variant,
               image: data.path, // Replace the preview URL with the uploaded image path
@@ -151,7 +186,7 @@ const AddItem = () => {
           return variant; // If no file, return the variant as is
         })
       );
-  
+
       // Prepare the formatted variants
       const formattedVariants = updatedVariants.map((variant) => ({
         img: variant.image || "", // Use the uploaded image path
@@ -162,7 +197,7 @@ const AddItem = () => {
           price: info.price,
         })),
       }));
-  
+
       // Insert the product data
       const { data, error } = await supabase.from("shop_Product").insert([
         {
@@ -177,9 +212,9 @@ const AddItem = () => {
           item_Variant: formattedVariants,
         },
       ]);
-  
+
       if (error) throw error;
-  
+
       alert("Product added successfully!");
       setFormData({
         itemTitle: "",
@@ -189,7 +224,6 @@ const AddItem = () => {
         tag3: "",
       });
       setVariants([]);
-  
     } catch (error) {
       console.error("Error adding product:", error.message);
       alert("Failed to add product.");
@@ -216,24 +250,24 @@ const AddItem = () => {
     updatedVariants[index].name = e.target.value;
     setVariants(updatedVariants);
   };
-  
+
   const handleInfoChange = (variantIndex, infoIndex, field, e) => {
     const updatedVariants = [...variants];
     updatedVariants[variantIndex].info[infoIndex][field] = e.target.value;
     setVariants(updatedVariants);
   };
-  
+
   const handleImageChange = (index, event) => {
     const file = event.target.files[0]; // Get the selected file
-  
+
     if (!file) {
       console.error("No file selected or input cleared.");
       return; // Exit if no file is selected
     }
-  
+
     // Store the image preview URL temporarily
     const previewUrl = URL.createObjectURL(file);
-  
+
     setVariants((prevVariants) =>
       prevVariants.map((variant, i) =>
         i === index
@@ -241,7 +275,7 @@ const AddItem = () => {
           : variant
       )
     );
-  
+
     console.log(`Preview for variant ${index} updated.`);
   };
 
@@ -563,6 +597,110 @@ const AddItem = () => {
               </div>
             </div>
           )}
+          {/* Fill the required fields */}
+          {showAlert3 && (
+            <div className="md:bottom-5  w-auto px-10 bottom-16 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+              <div
+                role="alert"
+                className="alert  bg-custom-purple shadow-md flex items-center p-4  font-semibold rounded-md"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span className="text-sm md:text-[15px]">
+                  Required field is empty!
+                </span>
+              </div>
+            </div>
+          )}
+          {/* Image each variant */}
+          {showAlert4 && (
+            <div className="md:bottom-5  w-auto px-10 bottom-16 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+              <div
+                role="alert"
+                className="alert  bg-custom-purple shadow-md flex items-center p-4  font-semibold rounded-md"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span className="text-sm md:text-[15px]">
+                  Variants Image are Missing!
+                </span>
+              </div>
+            </div>
+          )}
+          {/* Image each variant */}
+          {showAlert5 && (
+            <div className="md:bottom-5  w-auto px-10 bottom-16 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+              <div
+                role="alert"
+                className="alert  bg-custom-purple shadow-md flex items-center p-4  font-semibold rounded-md"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span className="text-sm md:text-[15px]">
+                  Variants Name are Missing!
+                </span>
+              </div>
+            </div>
+          )}
+          {/* Image each variant */}
+          {showAlert6 && (
+            <div className="md:bottom-5  w-auto px-10 bottom-16 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+              <div
+                role="alert"
+                className="alert  bg-custom-purple shadow-md flex items-center p-4  font-semibold rounded-md"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span className="text-sm md:text-[15px]">
+                  Please Input Atleast 1 Variant.
+                </span>
+              </div>
+            </div>
+          )}
           {/* Delete Variant Confirmation */}
           {showModalDelete && (
             <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -577,13 +715,13 @@ const AddItem = () => {
                 <div className="flex w-full justify-between">
                   <button
                     onClick={closeModal}
-                    className="mt-4 p-2 bg-red-500 text-white rounded-md"
+                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
                   >
                     No! go back.
                   </button>
                   <button
                     onClick={removeVariant}
-                    className="mt-4 p-2 bg-green-500 text-white rounded-md"
+                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
                   >
                     I'm sure!
                   </button>
