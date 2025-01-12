@@ -23,7 +23,11 @@ function Products() {
   const [isModalImage, setIsModalOpenImage] = useState(false); //View Image
   const [imageSrc, setImageSrc] = React.useState("");
   const [showAlert, setShowAlert] = React.useState(false); // Alert
+  const [showAlertUnpost, setShowAlertUnpost] = React.useState(false); // Alert Unpost
+  const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete Item
   const [showAlert2, setShowAlert2] = React.useState(false); // Alert Confirm Post
+  const [showAlertDelCon, setShowAlertDelCon] = React.useState(false); // Alert Confirmation to Delete the selected Item
+  const [showAlertUnP, setShowAlertUnP] = React.useState(false); // Alert Confirmation to Unpost the selected Item
   const [viewItem, setViewPost] = React.useState(false); // Confirmation for posting item
   const [selectedItem, setSelectedItem] = React.useState(null);
   const [submittedVariants, setSubmittedVariants] = useState([]);
@@ -32,9 +36,32 @@ function Products() {
   const [shopData, setShopData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [shopItem, setShopProducts] = useState("");
-  useEffect(() => { // call the shop product details
+  const [editableVariants, setEditableVariants] = useState({}); // Track editable states for each variant
+
+  const toggleEdit = (variantIndex) => {
+    setEditableVariants((prev) => ({
+      ...prev,
+      [variantIndex]: !prev[variantIndex],
+    }));
+  };
+
+  const handleSizeChange = (variantIndex, sizeIndex, field, value) => {
+    setSelectedItem((prevItem) => {
+      const updatedVariants = [...prevItem.item_Variant];
+      updatedVariants[variantIndex].sizes[sizeIndex][field] = value;
+  
+      return {
+        ...prevItem,
+        item_Variant: updatedVariants,
+      };
+    });
+  };
+  
+
+  useEffect(() => {
+    // call the shop product details
     const fetchUserProfileAndShop = async () => {
       setLoading(true); // Start loading state
 
@@ -84,11 +111,13 @@ function Products() {
 
             // Process each product and add the image path of the first variant
             const updatedProducts = products.map((product) => {
-
               const totalQuantity = product.item_Variant?.reduce(
-                (total, variant) => total + variant.sizes?.reduce(
-                  (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0), 0
-                ),
+                (total, variant) =>
+                  total +
+                  variant.sizes?.reduce(
+                    (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0),
+                    0
+                  ),
                 0
               );
 
@@ -103,9 +132,7 @@ function Products() {
               console.log("First Variant:", firstVariant);
               console.log("Image Path:", firstVariant?.img);
 
-              return { ...product, imagePath,  totalQuantity };
-
-              
+              return { ...product, imagePath, totalQuantity };
             });
 
             setShopProducts(updatedProducts); // Store the products with imagePath in state
@@ -148,17 +175,24 @@ function Products() {
       const { data: publicUrlData } = supabase.storage
         .from("product")
         .getPublicUrl(updatedItem.item_Variant?.[0]?.img || "");
-        const totalQuantity = updatedItem.item_Variant?.reduce(
-          (total, variant) => total + variant.sizes?.reduce(
-            (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0), 0
+      const totalQuantity = updatedItem.item_Variant?.reduce(
+        (total, variant) =>
+          total +
+          variant.sizes?.reduce(
+            (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0),
+            0
           ),
-          0
-        );
+        0
+      );
       // Update state with the new product details
       setShopProducts((prevItems) =>
         prevItems.map((item) =>
           item.id === updatedItem.id
-            ? { ...updatedItem, imagePath: publicUrlData?.publicUrl, totalQuantity }
+            ? {
+                ...updatedItem,
+                imagePath: publicUrlData?.publicUrl,
+                totalQuantity,
+              }
             : item
         )
       );
@@ -195,30 +229,59 @@ function Products() {
       const { data: publicUrlData } = supabase.storage
         .from("product")
         .getPublicUrl(updatedItem.item_Variant?.[0]?.img || "");
-        const totalQuantity = updatedItem.item_Variant?.reduce(
-          (total, variant) => total + variant.sizes?.reduce(
-            (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0), 0
+      const totalQuantity = updatedItem.item_Variant?.reduce(
+        (total, variant) =>
+          total +
+          variant.sizes?.reduce(
+            (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0),
+            0
           ),
-          0
-        );
+        0
+      );
       // Update state with the new product details
       setShopProducts((prevItems) =>
         prevItems.map((item) =>
           item.id === updatedItem.id
-            ? { ...updatedItem, imagePath: publicUrlData?.publicUrl, totalQuantity }
+            ? {
+                ...updatedItem,
+                imagePath: publicUrlData?.publicUrl,
+                totalQuantity,
+              }
             : item
         )
       );
 
       // Notify user and reset states
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
+      setShowAlertUnpost(true);
+      setTimeout(() => setShowAlertUnpost(false), 3000);
       setSelectedItem(null);
+      setShowAlertUnP(false);
       setShowAlert2(false);
     } catch (error) {
       console.error("Error updating the post status:", error);
     }
   };
+  const DeleteItem = async () => {
+    try {
+      const { error } = await supabase
+        .from("shop_Product")
+        .delete()
+        .eq("id", selectedItem.id);
+
+      setShopProducts((prevItems) =>
+        prevItems.filter((item) => item.id !== selectedItem.id)
+      );
+      setSelectedItem(null);
+      setShowAlertDel(true);
+      setTimeout(() => setShowAlertDel(false), 3000);
+      setShowAlertDelCon(false);
+      if (error) throw error;
+      console.log("Item deleted:", selectedItem);
+    } catch (error) {
+      console.error("Error updating the post status:", error);
+    }
+  };
+
   const handleViewImageClose = () => {
     setIsModalOpenImage(false);
     setSelectedVariantIndex(null);
@@ -237,8 +300,18 @@ function Products() {
   const handlePostItem = () => {
     setShowAlert2(true);
   };
+  const handleUnPostItem = () => {
+    setShowAlertUnP(true);
+  };
+  const handleDelItem = () => {
+    setShowAlertDelCon(true);
+  };
+
   const handleClosePostItem = () => {
     setShowAlert2(false);
+    setShowAlertDelCon(false);
+    setShowAlertUnpost(false);
+    setShowAlertUnP(false);
   };
   const handleViewClick = (item) => {
     setSelectedItem(item);
@@ -694,6 +767,52 @@ function Products() {
           </div>
         </div>
       )}
+      {showAlertDel && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Item is Successfully Deleted.</span>
+          </div>
+        </div>
+      )}
+      {showAlertUnpost && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Item is Unposted.</span>
+          </div>
+        </div>
+      )}
 
       {/* EDIT, VIEW, POST, REMOVE ITEM */}
       {selectedItem && (
@@ -737,32 +856,26 @@ function Products() {
                   />
                 </div>
                 <div className=" w-auto h-auto p-2 rounded-sm ">
-                {selectedItem.is_Post === false ? (
-                   <div
-                   onClick={handlePostItem}
-                   className="bg-blue-700 p-1 justify-center flex iceland-regular rounded-sm glass 
-                    hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-blue-500"
+                  {selectedItem.is_Post === false ? (
+                    <div
+                      onClick={handlePostItem}
+                      className="bg-green-700 p-1 justify-center flex iceland-regular rounded-sm glass 
+                    hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-green-500"
                     >
                       POST
-                 </div>
-                ) : (
-                  // Green dot and "Posted" text
-                  <div
-                  onClick={unPostNotify}
-                  className="bg-gray-700 p-1 justify-center flex iceland-regular rounded-sm glass 
+                    </div>
+                  ) : (
+                    // Green dot and "Posted" text
+                    <div
+                      onClick={handleUnPostItem}
+                      className="bg-gray-700 p-1 justify-center flex iceland-regular rounded-sm glass 
                    hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-gray-500"
-                   >
-                     UNPOST
-                </div>
-                )}
-                
+                    >
+                      UNPOST
+                    </div>
+                  )}
                   <div
-                    className="bg-green-700 p-1 justify-center flex iceland-regular rounded-sm glass 
-                  hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-green-500"
-                  >
-                    EDIT
-                  </div>
-                  <div
+                    onClick={handleDelItem}
                     className="bg-red-700 p-1 justify-center flex iceland-regular rounded-sm glass 
                   hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-red-500"
                   >
@@ -771,7 +884,7 @@ function Products() {
                   <div
                     onClick={handleCloseModal}
                     className="bg-custom-purple p-1 justify-center flex iceland-regular rounded-sm glass 
-                  hover:scale-95 duration-300 cursor-pointer mt-10 md:mt-24 text-black font-semibold hover:bg-primary-color"
+                  hover:scale-95 duration-300 cursor-pointer mt-10 md:mt-32 text-black font-semibold hover:bg-primary-color"
                   >
                     CLOSE
                   </div>
@@ -853,12 +966,117 @@ function Products() {
                     </div>
                   </div>
                 </div>
-                <div className="h-52 w-full bg-slate-200"> </div>
+                <div className="h-auto w-full bg-slate-200 p-4 flex flex-col gap-4">
+                  {selectedItem.item_Variant?.map((variant, variantIndex) => (
+                    <div
+                      key={variantIndex}
+                      className="p-4 bg-white shadow-md rounded-lg"
+                    >
+                      {/* Variant Name */}
+                      <div className="flex justify-between items-center mb-4">
+                        <div className="text-lg font-bold text-slate-800">
+                          {variant.variant_Name}
+                        </div>
+                        <button
+                          onClick={() => toggleEdit(variantIndex)}
+                          className={`${
+                            editableVariants[variantIndex]
+                              ? "bg-green-500"
+                              : "bg-blue-500"
+                          } text-white text-sm px-3 py-1 rounded-md`}
+                        >
+                          {editableVariants[variantIndex] ? "Save" : "Edit"}
+                        </button>
+                      </div>
+
+                      {/* Sizes, Quantities, and Prices */}
+                      {variant.sizes?.map((size, sizeIndex) => (
+                        <div
+                          key={sizeIndex}
+                          className="flex justify-between items-center mb-2 border-b pb-2"
+                        >
+                          <div>
+                            <label className="text-slate-900 text-sm font-medium">
+                              Size:
+                            </label>
+                            <input
+                              className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                editableVariants[variantIndex]
+                                  ? "bg-slate-300"
+                                  : "bg-slate-100"
+                              }`}
+                              type="text"
+                              value={size.size}
+                              onChange={(e) =>
+                                handleSizeChange(
+                                  variantIndex,
+                                  sizeIndex,
+                                  "size",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={!editableVariants[variantIndex]}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-slate-900 text-sm font-medium">
+                              Quantity:
+                            </label>
+                            <input
+                              onKeyDown={blockInvalidChar}
+                              className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                editableVariants[variantIndex]
+                                  ? "bg-slate-300"
+                                  : "bg-slate-100"
+                              }`}
+                              type="number"
+                              value={size.qty}
+                              onChange={(e) =>
+                                handleSizeChange(
+                                  variantIndex,
+                                  sizeIndex,
+                                  "qty",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={!editableVariants[variantIndex]}
+                            />
+                          </div>
+                          <div>
+                            <label className="text-slate-900 text-sm font-medium">
+                              Price:
+                            </label>
+                            <input
+                              onKeyDown={blockInvalidChar}
+                              className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                editableVariants[variantIndex]
+                                  ? "bg-slate-300"
+                                  : "bg-slate-100"
+                              }`}
+                              type="number"
+                              value={size.price}
+                              onChange={(e) =>
+                                handleSizeChange(
+                                  variantIndex,
+                                  sizeIndex,
+                                  "price",
+                                  e.target.value
+                                )
+                              }
+                              readOnly={!editableVariants[variantIndex]}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+
                 <div className="h-52 w-full bg-slate-500"> </div>
               </div>
             </div>
           </div>
-          {/* Delete Variant Confirmation */}
+          {/* Post Variant Confirmation */}
           {showAlert2 && (
             <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white p-5 rounded-md shadow-md">
@@ -878,6 +1096,62 @@ function Products() {
                   </button>
                   <button
                     onClick={PostNotify}
+                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                  >
+                    Yeah sure!
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Unpost Variant Confirmation */}
+          {showAlertUnP && (
+            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-5 rounded-md shadow-md">
+                <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
+                  Are you sure you want to Unpost this <br />
+                  <span className="font-bold text-primary-color">
+                    {selectedItem.item_Name}
+                  </span>
+                  ?
+                </h2>
+                <div className="flex w-full gap-2 justify-between">
+                  <button
+                    onClick={handleClosePostItem}
+                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                  >
+                    No! go back.
+                  </button>
+                  <button
+                    onClick={unPostNotify}
+                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                  >
+                    Yeah sure!
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Delete Variant Confirmation */}
+          {showAlertDelCon && (
+            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-5 rounded-md shadow-md">
+                <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
+                  Are you sure you want to Delete this <br />
+                  <span className="font-bold text-primary-color">
+                    {selectedItem.item_Name}
+                  </span>
+                  ?
+                </h2>
+                <div className="flex w-full gap-2 justify-between">
+                  <button
+                    onClick={handleClosePostItem}
+                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                  >
+                    No! go back.
+                  </button>
+                  <button
+                    onClick={DeleteItem}
                     className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
                   >
                     Yeah sure!
