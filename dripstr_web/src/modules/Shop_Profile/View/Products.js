@@ -51,15 +51,43 @@ function Products() {
     setSelectedItem((prevItem) => {
       const updatedVariants = [...prevItem.item_Variant];
       updatedVariants[variantIndex].sizes[sizeIndex][field] = value;
-  
+
       return {
         ...prevItem,
         item_Variant: updatedVariants,
       };
     });
   };
+
+  const handleUpdate = async (variantIndex) => {
+    try {
+      const updatedVariant = selectedItem.item_Variant[variantIndex];
+  
+      const { error } = await supabase
+        .from("shop_Product")
+        .update({ item_Variant: selectedItem.item_Variant })
+        .eq("id", selectedItem.id);
+  
+      
+      if (error) {
+        console.error("Error updating the variant:", error);
+        alert("Failed to update the variant.");
+      } else {
+        alert("Variant updated successfully!");
+        toggleEdit(variantIndex); // Exit edit mode after successful update
+      }
+    } catch (error) {
+      console.error("Error updating the variant:", error);
+    }
+  };
   
 
+  const [originalSelectedItem, setOriginalSelectedItem] = useState(null);
+
+  useEffect(() => {
+    // Deep copy the selected item to track changes
+    setOriginalSelectedItem(JSON.parse(JSON.stringify(selectedItem)));
+  }, [selectedItem]);
   useEffect(() => {
     // call the shop product details
     const fetchUserProfileAndShop = async () => {
@@ -978,7 +1006,18 @@ function Products() {
                           {variant.variant_Name}
                         </div>
                         <button
-                          onClick={() => toggleEdit(variantIndex)}
+                         onClick={async () => {
+                          if (editableVariants[variantIndex]) {
+                            // Save changes
+                            const success = await handleUpdate(variantIndex); // Wait for update completion
+                            if (success) {
+                              toggleEdit(variantIndex); // Exit edit mode only if update is successful
+                            }
+                          } else {
+                            // Enter edit mode
+                            toggleEdit(variantIndex);
+                          }
+                        }}
                           className={`${
                             editableVariants[variantIndex]
                               ? "bg-green-500"
@@ -1065,6 +1104,7 @@ function Products() {
                               }
                               readOnly={!editableVariants[variantIndex]}
                             />
+                            
                           </div>
                         </div>
                       ))}
