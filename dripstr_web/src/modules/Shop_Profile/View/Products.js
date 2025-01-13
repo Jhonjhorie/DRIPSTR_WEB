@@ -28,6 +28,7 @@ function Products() {
   const [showAlert2, setShowAlert2] = React.useState(false); // Alert Confirm Post
   const [showAlertDelCon, setShowAlertDelCon] = React.useState(false); // Alert Confirmation to Delete the selected Item
   const [showAlertUnP, setShowAlertUnP] = React.useState(false); // Alert Confirmation to Unpost the selected Item
+  const [ConfirmUpdate, setShowAlertCOnfirmUpdate] = React.useState(false); // Alert Confirmation to Update the selected Item
   const [viewItem, setViewPost] = React.useState(false); // Confirmation for posting item
   const [selectedItem, setSelectedItem] = React.useState(null);
   const [submittedVariants, setSubmittedVariants] = useState([]);
@@ -36,9 +37,9 @@ function Products() {
   const [shopData, setShopData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedVariant, setSelectedVariant] = useState(null);
   const [shopItem, setShopProducts] = useState("");
   const [editableVariants, setEditableVariants] = useState({}); // Track editable states for each variant
+  const [currentVariantIndex, setCurrentVariantIndex] = useState(null);
 
   const toggleEdit = (variantIndex) => {
     setEditableVariants((prev) => ({
@@ -62,13 +63,12 @@ function Products() {
   const handleUpdate = async (variantIndex) => {
     try {
       const updatedVariant = selectedItem.item_Variant[variantIndex];
-  
+
       const { error } = await supabase
         .from("shop_Product")
         .update({ item_Variant: selectedItem.item_Variant })
         .eq("id", selectedItem.id);
-  
-      
+
       if (error) {
         console.error("Error updating the variant:", error);
         alert("Failed to update the variant.");
@@ -80,64 +80,53 @@ function Products() {
       console.error("Error updating the variant:", error);
     }
   };
+
+  const fetchUserProfileAndShop = async () => {
+    setLoading(true); 
   
-
-  const [originalSelectedItem, setOriginalSelectedItem] = useState(null);
-
-  useEffect(() => {
-    // Deep copy the selected item to track changes
-    setOriginalSelectedItem(JSON.parse(JSON.stringify(selectedItem)));
-  }, [selectedItem]);
-  useEffect(() => {
-    // call the shop product details
-    const fetchUserProfileAndShop = async () => {
-      setLoading(true); // Start loading state
-
+    try {
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-
+  
       if (authError) {
         setError(authError.message);
-        setLoading(false);
         return;
       }
-
+  
       if (user) {
         console.log("Current user:", user);
-
-        // Fetch shop data for the current user
+  
         const { data: shops, error: shopError } = await supabase
           .from("shop")
           .select("id, shop_name, shop_Rating")
           .eq("owner_Id", user.id);
-
+  
         if (shopError) {
           setError(shopError.message);
-          setLoading(false);
           return;
         }
-
+  
         if (shops && shops.length > 0) {
-          setShopData(shops); // Store the fetched shop data
+          setShopData(shops);
+  
           console.log("Fetched shops:", shops);
-
+  
           const selectedShopId = shops[0].id; // Assuming the first shop is selected
-
+  
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
             .select(
               "id, item_Name, item_Description, item_Tags, item_Rating, item_Orders, item_Variant, is_Post"
             )
             .eq("shop_Id", selectedShopId);
-
+  
           if (productError) {
             setError(productError.message);
           } else {
             console.log("Fetched products for the shop:", products);
-
-            // Process each product and add the image path of the first variant
+  
             const updatedProducts = products.map((product) => {
               const totalQuantity = product.item_Variant?.reduce(
                 (total, variant) =>
@@ -148,22 +137,18 @@ function Products() {
                   ),
                 0
               );
-
-              const firstVariant =
-                product.item_Variant && product.item_Variant[0];
+  
+              const firstVariant = product.item_Variant && product.item_Variant[0];
               const { data: publicUrlData } = supabase.storage
                 .from("product")
                 .getPublicUrl(firstVariant?.img || "");
-
+  
               const imagePath = publicUrlData?.publicUrl || null;
-
-              console.log("First Variant:", firstVariant);
-              console.log("Image Path:", firstVariant?.img);
-
+  
               return { ...product, imagePath, totalQuantity };
             });
-
-            setShopProducts(updatedProducts); // Store the products with imagePath in state
+  
+            setShopProducts(updatedProducts);
           }
         } else {
           console.log("No shops found for the user.");
@@ -173,12 +158,18 @@ function Products() {
         console.log("No user is signed in");
         setError("No user is signed in");
       }
-
+    } catch (error) {
+      console.error("Error fetching shop and product data:", error);
+      setError("An error occurred while fetching shop data.");
+    } finally {
       setLoading(false); // Stop loading state
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchUserProfileAndShop();
-  }, []);
+  }, []); // Empty dependency array ensures it runs only once on mount
+  
 
   const PostNotify = async () => {
     try {
@@ -213,17 +204,7 @@ function Products() {
         0
       );
       // Update state with the new product details
-      setShopProducts((prevItems) =>
-        prevItems.map((item) =>
-          item.id === updatedItem.id
-            ? {
-                ...updatedItem,
-                imagePath: publicUrlData?.publicUrl,
-                totalQuantity,
-              }
-            : item
-        )
-      );
+      fetchUserProfileAndShop();
 
       // Notify user and reset states
       setShowAlert(true);
@@ -267,17 +248,7 @@ function Products() {
         0
       );
       // Update state with the new product details
-      setShopProducts((prevItems) =>
-        prevItems.map((item) =>
-          item.id === updatedItem.id
-            ? {
-                ...updatedItem,
-                imagePath: publicUrlData?.publicUrl,
-                totalQuantity,
-              }
-            : item
-        )
-      );
+      fetchUserProfileAndShop();
 
       // Notify user and reset states
       setShowAlertUnpost(true);
@@ -318,15 +289,33 @@ function Products() {
     //ADS
     setIsModalOpenAds(true);
   };
-  const handleCloseModal = () => {
-    //Close all modals even the datas
+  const handleCloseModal = async () => {
+    // Close all modals and reset data
     setIsModalOpenItem(false);
     setIsModalOpenAds(false);
     setViewPost(false);
     setSelectedItem(null);
+  
+    // Fetch updated shop and product details
+    await fetchUserProfileAndShop();
   };
+  
   const handlePostItem = () => {
     setShowAlert2(true);
+  };
+  const handleUpdateItem = (variantIndex) => {
+    setCurrentVariantIndex(variantIndex);
+    setShowAlertCOnfirmUpdate(true);
+  };
+  const handleConfirmedUpdate = async () => {
+    if (currentVariantIndex !== null) {
+      const success = await handleUpdate(currentVariantIndex);
+      if (success) {
+        toggleEdit(currentVariantIndex);
+      }
+      handleUpdateItem();
+      setShowAlertCOnfirmUpdate(false);
+    }
   };
   const handleUnPostItem = () => {
     setShowAlertUnP(true);
@@ -341,6 +330,7 @@ function Products() {
     setShowAlertUnpost(false);
     setShowAlertUnP(false);
   };
+
   const handleViewClick = (item) => {
     setSelectedItem(item);
     console.log("Viewing item:", item);
@@ -368,116 +358,6 @@ function Products() {
     setViewPost(true);
   };
   //Items sample datas
-  const sampleData = [
-    {
-      id: 1,
-      photo: sample1,
-      name: "Viscount Black",
-      qty: 10,
-      category: "Top wear",
-      type: "T-Shirts",
-      customerType: "Adults-Man",
-      availableSizes: ["S", "M", "L", "XL", "XXL"],
-      colors: ["Black", "Gray", "White", "Blue", "Red"],
-      rating: 4,
-    },
-    {
-      id: 2,
-      photo: sample2,
-      name: "Duke Blue",
-      qty: 5,
-      category: "Top wear",
-      type: "Polo Shirts",
-      customerType: "Adults-Woman",
-      availableSizes: ["XS", "S", "M", "L", "XL"],
-      colors: ["Blue", "Cyan", "Teal", "White", "Pink"],
-      rating: 5,
-    },
-    {
-      id: 3,
-      photo: sample3,
-      name: "Earl Grey",
-      qty: 8,
-      category: "Top wear",
-      type: "Sweatshirts",
-      customerType: "Kids-Boy",
-      availableSizes: ["4-5", "6-7", "8-10", "12-14", "16"],
-      colors: ["Gray", "Black", "Red", "Green", "Yellow"],
-      rating: 3,
-    },
-    {
-      id: 4,
-      photo: sample4,
-      name: "Count Crimson",
-      qty: 12,
-      category: "Top wear",
-      type: "Hoodies",
-      customerType: "Kids-Girl",
-      availableSizes: ["4-5", "6-7", "8-10", "12-14", "16"],
-      colors: ["Red", "Pink", "Purple", "White", "Lavender"],
-      rating: 4,
-    },
-    {
-      id: 5,
-      photo: sample5,
-      name: "Baron Green",
-      qty: 7,
-      category: "Top wear",
-      type: "Tank Tops",
-      customerType: "Adults-Woman",
-      availableSizes: ["XS", "S", "M", "L", "XL"],
-      colors: ["Green", "Lime", "Olive", "Yellow", "Beige"],
-      rating: 5,
-    },
-    {
-      id: 6,
-      photo: sample6,
-      name: "Marquis Magenta",
-      qty: 9,
-      category: "Top wear",
-      type: "Crop Tops",
-      customerType: "Kids-Girl",
-      availableSizes: ["4-5", "6-7", "8-10", "12-14", "16"],
-      colors: ["Magenta", "Pink", "Purple", "White", "Peach"],
-      rating: 3,
-    },
-    {
-      id: 7,
-      photo: sample7,
-      name: "Lord Lavender",
-      qty: 6,
-      category: "Top wear",
-      type: "Blouses",
-      customerType: "Adults-Woman",
-      availableSizes: ["S", "M", "L", "XL", "XXL"],
-      colors: ["Lavender", "Violet", "Silver", "Indigo", "Turquoise"],
-      rating: 5,
-    },
-    {
-      id: 8,
-      photo: sample8,
-      name: "Sir Silver",
-      qty: 11,
-      category: "Top wear",
-      type: "Tunics",
-      customerType: "Adults-Man",
-      availableSizes: ["S", "M", "L", "XL", "XXL"],
-      colors: ["Silver", "Gray", "White", "Black", "Teal"],
-      rating: 4,
-    },
-    {
-      id: 9,
-      photo: sample9,
-      name: "Lady Lilac",
-      qty: 4,
-      category: "Top wear",
-      type: "Sweatshirts",
-      customerType: "Kids-Boy",
-      availableSizes: ["4-5", "6-7", "8-10", "12-14", "16"],
-      colors: ["Lilac", "Purple", "Blue", "Pink", "Cyan"],
-      rating: 2,
-    },
-  ];
 
   return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
@@ -1006,18 +886,15 @@ function Products() {
                           {variant.variant_Name}
                         </div>
                         <button
-                         onClick={async () => {
-                          if (editableVariants[variantIndex]) {
-                            // Save changes
-                            const success = await handleUpdate(variantIndex); // Wait for update completion
-                            if (success) {
-                              toggleEdit(variantIndex); // Exit edit mode only if update is successful
+                          onClick={async () => {
+                            if (editableVariants[variantIndex]) {
+                              // Open confirmation modal for saving changes
+                              handleUpdateItem(variantIndex);
+                            } else {
+                              // Enter edit mode
+                              toggleEdit(variantIndex);
                             }
-                          } else {
-                            // Enter edit mode
-                            toggleEdit(variantIndex);
-                          }
-                        }}
+                          }}
                           className={`${
                             editableVariants[variantIndex]
                               ? "bg-green-500"
@@ -1104,7 +981,6 @@ function Products() {
                               }
                               readOnly={!editableVariants[variantIndex]}
                             />
-                            
                           </div>
                         </div>
                       ))}
@@ -1192,6 +1068,38 @@ function Products() {
                   </button>
                   <button
                     onClick={DeleteItem}
+                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                  >
+                    Yeah sure!
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Delete Variant Confirmation */}
+          {ConfirmUpdate && (
+            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-5 rounded-md shadow-md">
+                <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
+                  Are you sure you want to Update this <br />
+                  <span className="font-bold text-primary-color">
+                    {selectedItem.item_Name}
+                  </span>
+                  ?
+                </h2>
+                <div className="flex w-full gap-2 justify-between">
+                <button
+          onClick={() => {
+            setShowAlertCOnfirmUpdate(false); // Close the confirmation modal
+            setCurrentVariantIndex(null); // Reset the variant index
+            toggleEdit(currentVariantIndex); // Ensure edit mode is toggled off
+          }}
+          className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+        >
+          No! go back.
+        </button>
+                  <button
+                    onClick={handleConfirmedUpdate}
                     className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
                   >
                     Yeah sure!
