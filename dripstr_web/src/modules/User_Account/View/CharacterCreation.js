@@ -3,10 +3,15 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Plane } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { useNavigate } from "react-router-dom";
- 
+import Sidebar from "../components/Sidebar";
+
+
 function Part({ url, position, color }) {
   const gltf = useGLTF(url);
-  const clonedScene = useMemo(() => SkeletonUtils.clone(gltf.scene), [gltf.scene]);
+  const clonedScene = useMemo(
+    () => SkeletonUtils.clone(gltf.scene),
+    [gltf.scene]
+  );
 
   useMemo(() => {
     clonedScene.traverse((node) => {
@@ -25,8 +30,8 @@ const CharacterCustomization = () => {
   const [selectedBodyType, setSelectedBodyType] = useState("Heavy");
   const [selectedHair, setSelectedHair] = useState("");
 
-  const [skinColor, setSkinColor] = useState("#f5c9a6"); 
-  const [hairColor, setHairColor] = useState("#000000");  
+  const [skinColor, setSkinColor] = useState("#f5c9a6");
+  const [hairColor, setHairColor] = useState("#000000");
 
   const navigate = useNavigate();
 
@@ -112,12 +117,16 @@ const CharacterCustomization = () => {
     : {};
 
   return (
-    <div className="p-4 flex flex-row min-h-screen bg-slate-200">
+    <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
+
+    <Sidebar />
+    <div className="p-4 flex flex-1 flex-row min-h-screen bg-slate-200">
+      
       <div className="flex-1 h-[500px] rounded-lg shadow-lg bg-gray-100">
         <Canvas
           camera={{ position: [0, 3, 3] }}
           style={{ background: "linear-gradient(to top, #1e3a8a, #3b82f6)" }}
-        >    
+        >
           <ambientLight intensity={0.8} />
           <hemisphereLight
             intensity={0.6}
@@ -128,29 +137,54 @@ const CharacterCustomization = () => {
           <directionalLight intensity={1.2} position={[-5, 5, 5]} />
           <group>
             {selectedHair && (
-              <Part url={selectedHair} position={[0, 0.85, 0]} color={hairColor} />
+              <Part
+                url={selectedHair}
+                position={[0, 0.85, 0]}
+                color={hairColor}
+              />
             )}
             {currentParts.Head && (
-              <Part url={currentParts.Head} position={[0, 0, 0]} color={skinColor} />
+              <Part
+                url={currentParts.Head}
+                position={[0, 0, 0]}
+                color={skinColor}
+              />
             )}
             {currentParts.Torso && (
-              <Part url={currentParts.Torso} position={[0, 0, 0]} color={skinColor} />
+              <Part
+                url={currentParts.Torso}
+                position={[0, 0, 0]}
+                color={skinColor}
+              />
             )}
             {currentParts.Arms && (
-              <Part url={currentParts.Arms} position={[0, 0, 0]} color={skinColor} />
+              <Part
+                url={currentParts.Arms}
+                position={[0, 0, 0]}
+                color={skinColor}
+              />
             )}
             {currentParts.Legs && (
-              <Part url={currentParts.Legs} position={[0, 0, 0]} color={skinColor} />
+              <Part
+                url={currentParts.Legs}
+                position={[0, 0, 0]}
+                color={skinColor}
+              />
             )}
           </group>
 
-          <OrbitControls minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
+          <OrbitControls
+            minPolarAngle={Math.PI / 2}
+            maxPolarAngle={Math.PI / 2}
+          />
         </Canvas>
       </div>
       <div className="flex flex-col flex-1 ml-2 ">
-      <h1 className="text-xl font-bold text-gray-800 mb-4">Create Character</h1>
+        <h1 className="text-xl font-bold text-gray-800 mb-4">
+          Create Character
+        </h1>
 
-      <label className="block text-gray-700 font-semibold mb-2">Gender</label>
+        <label className="block text-gray-700 font-semibold mb-2">Gender</label>
         <select
           className="w-full p-2 border rounded bg-white"
           value={gender}
@@ -160,7 +194,9 @@ const CharacterCustomization = () => {
           <option value="Girl">Girl</option>
         </select>
 
-        <label className="block text-gray-700 font-semibold mb-2 mt-2">Body Type</label>
+        <label className="block text-gray-700 font-semibold mb-2 mt-2">
+          Body Type
+        </label>
         <select
           className="w-full p-2 border rounded bg-white"
           value={selectedBodyType}
@@ -174,7 +210,9 @@ const CharacterCustomization = () => {
           ))}
         </select>
 
-        <label className="block text-gray-700 font-semibold mb-2 mt-2">Hair</label>
+        <label className="block text-gray-700 font-semibold mb-2 mt-2">
+          Hair
+        </label>
         <select
           className="w-full p-2 border rounded bg-white"
           value={selectedHair}
@@ -189,30 +227,35 @@ const CharacterCustomization = () => {
         </select>
 
         <div className="flex flex-col mt-4">
-        <div className="flex flex-col mt-4">
-  <label className="block text-gray-700 font-semibold mb-2">Skin Color</label>
-  <div className="flex space-x-2">
-    {[
-      { label: "White", color: "#fff" },
-      { label: "Light", color: "#f5c9a6" },
-      { label: "Medium", color: "#d2a77d" },
-      { label: "Tan", color: "#a67c5b" },
-      { label: "Dark", color: "#67442e" },
-    ].map((option) => (
-      <button
-        key={option.color}
-        className={`w-10 h-10 rounded-full border-2 ${
-          skinColor === option.color ? "border-blue-500" : "border-gray-300"
-        }`}
-        style={{ backgroundColor: option.color }}
-        onClick={() => setSkinColor(option.color)}
-      />
-    ))}
-  </div>
-</div>
+          <div className="flex flex-col mt-4">
+            <label className="block text-gray-700 font-semibold mb-2">
+              Skin Color
+            </label>
+            <div className="flex space-x-2">
+              {[
+                { label: "White", color: "#fff" },
+                { label: "Light", color: "#f5c9a6" },
+                { label: "Medium", color: "#d2a77d" },
+                { label: "Tan", color: "#a67c5b" },
+                { label: "Dark", color: "#67442e" },
+              ].map((option) => (
+                <button
+                  key={option.color}
+                  className={`w-10 h-10 rounded-full border-2 ${
+                    skinColor === option.color
+                      ? "border-blue-500"
+                      : "border-gray-300"
+                  }`}
+                  style={{ backgroundColor: option.color }}
+                  onClick={() => setSkinColor(option.color)}
+                />
+              ))}
+            </div>
+          </div>
 
-
-          <label className="block text-gray-700 font-semibold mb-2 mt-4">Hair Color</label>
+          <label className="block text-gray-700 font-semibold mb-2 mt-4">
+            Hair Color
+          </label>
           <input
             type="color"
             className="w-20 h-10 p-1 border rounded"
@@ -236,8 +279,9 @@ const CharacterCustomization = () => {
           </button>
         </div>
       </div>
-    </div>
-  );
+      </div>
+      </div>
+    );
 };
 
 export default CharacterCustomization;
