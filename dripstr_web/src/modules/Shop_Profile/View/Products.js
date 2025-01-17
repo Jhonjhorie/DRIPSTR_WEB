@@ -1,854 +1,1258 @@
-  import React from 'react';
-  import SideBar from '../Component/Sidebars'
-  import sample1 from '../../../assets/images/samples/5.png'
-  import sample2 from '../../../assets/images/samples/10.png'
-  import sample3 from '../../../assets/images/samples/3.png'
-  import sample4 from '../../../assets/images/samples/4.png'
-  import sample5 from '../../../assets/images/samples/6.png'
-  import sample6 from '../../../assets/images/samples/7.png'
-  import sample7 from '../../../assets/images/samples/9.png'
-  import sample8 from '../../../assets/images/samples/11.png'
-  import sample9 from '../../../assets/images/samples/12.png'
-  import sampleads from '../../../assets/shop/s2.jpg'
+import React from "react";
+import SideBar from "../Component/Sidebars";
+import sampleads from "../../../assets/shop/s2.jpg";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../../../constants/supabase";
+import { blockInvalidChar } from "../Hooks/ValidNumberInput";
+const { useState, useEffect } = React;
 
-  import { blockInvalidChar } from "../Hooks/ValidNumberInput";
-  const { useState } = React;
- 
+function Products() {
+  const navigate = useNavigate();
+  const [activeTabs, setActiveTab] = useState("manage-products");
+  const [isModalOpenItems, setIsModalOpenItem] = useState(false); //Modal for Items
+  const [isModalOpenAds, setIsModalOpenAds] = useState(false); //Modal for ads
+  const [isModalImage, setIsModalOpenImage] = useState(false); //View Image
+  const [imageSrc, setImageSrc] = React.useState("");
+  const [showAlert, setShowAlert] = React.useState(false); // Alert
+  const [showAlertUnpost, setShowAlertUnpost] = React.useState(false); // Alert Unpost
+  const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete Item
+  const [showAlert2, setShowAlert2] = React.useState(false); // Alert Confirm Post
+  const [showAlertEditDone, setShowAlertEditDone] = React.useState(false); // Alert
+  const [showAlertDelCon, setShowAlertDelCon] = React.useState(false); // Alert Confirmation to Delete the selected Item
+  const [showAlertUnP, setShowAlertUnP] = React.useState(false); // Alert Confirmation to Unpost the selected Item
+  const [ConfirmUpdate, setShowAlertCOnfirmUpdate] = React.useState(false); // Alert Confirmation to Update the selected Item
+  const [viewItem, setViewPost] = React.useState(false); // Confirmation for posting item
+  const [selectedItem, setSelectedItem] = React.useState(null);
+  const [submittedVariants, setSubmittedVariants] = useState([]);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(null);
+  const [uploadedImages, setUploadedImages] = useState({});
+  const [shopData, setShopData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [shopItem, setShopProducts] = useState("");
+  const [editableVariants, setEditableVariants] = useState({}); // Track editable states for each variant
+  const [currentVariantIndex, setCurrentVariantIndex] = useState(null);
 
-  function Products() { 
-    const [activeTabs, setActiveTab] = useState('manage-products');
-    const [isModalOpenItems, setIsModalOpenItem] = useState(false);  //Modal for Items
-    const [isModalOpenAds, setIsModalOpenAds] = useState(false); //Modal for ads
-    const [imageInputs, setImageInputs] = useState([]);
-    const [Total, setNumber] = useState('');
-    const [category, setCategory] = useState('');
-    const [clotheType, setClotheType] = useState('');
-    const [customerType, setCustomerType] = useState('');
-    const [imageSrc, setImageSrc] = React.useState('');
-    const [showAlert, setShowAlert] = React.useState(false); // Alert
-    const [viewItem, setViewPost] = React.useState(false); // Confirmation for posting item
-    const [selectedItem, setSelectedItem] = React.useState(null);
-    const [selectedColors, setSelectedColors] = useState([]);
-    const [inputs, setInputs] = useState([]);//add variants inputs
-    const [submittedVariants, setSubmittedVariants] = useState([]);
-    
-
-
-    const handleAddInput = () => { // Add a new input field to the list
-      setInputs((prevInputs) => [...prevInputs, '']);
-    };
-    const handleDeleteInput = (indexToDelete) => {// Remove the input field at the specified index
-      setInputs((prevInputs) => prevInputs.filter((_, index) => index !== indexToDelete));
-      setSubmittedVariants((prevVariants) =>
-      prevVariants.filter((_, index) => index !== indexToDelete)
-    );
-    };
-    const handleSubmit = (index) => {
-      const variantText = inputs[index];
-      if (variantText == 0) {
-        alert(`No entered variant`);
-      }
-      if (variantText) {
-        setSubmittedVariants((prevVariants) => [
-          ...prevVariants,
-          { text: variantText, sizes: sizes[customerType]?.[clotheType] || [] },
-        ]);
-        
-      }
-    };
-    const handleInputChange = (value, index) => {
-      const updatedInputs = [...inputs];
-      updatedInputs[index] = value;
-      setInputs(updatedInputs);
-    };
-
-    const handleAddItem = () => { //ITEMS
-      setIsModalOpenItem(true);
-    };
-    const handleAddAds = () => { //ADS 
-      setIsModalOpenAds(true);
-    };
-    const handleCloseModal = () => { //Close all modals even the datas
-      setIsModalOpenItem(false);
-      setIsModalOpenAds(false);
-      setViewPost(false);
-      setSelectedItem(null);
-    };
-    const handleViewClick = (item) => {
-      setSelectedItem(item);
-    };
-    const addImageInput = () => {
-        setImageInputs([...imageInputs, '']);
-    };
-
-    const deleteImageInput = (index) => {
-        const newInputs = imageInputs.filter((_, i) => i !== index);
-        setImageInputs(newInputs);
-    };
-
-    const Totaldigit = (e) => {
-      let value = e.target.value;
-      value = value.replace(/[^0-9]/g, '').slice(0, 6); 
-      setNumber(value);
-    };
-    {/* Array for categories */}
-    const categories = {
-      "Complete set": [],
-      "Top wear": ["T-Shirts", "Polo Shirts", "Tank Tops", "Sweatshirts", "Hoodies", "Blouses", "Crop Tops", "Tunics"],
-      "Bottom wear": ["Jeans", "Shorts", "Skirts", "Trousers", "Leggings"],
-      "Undergarment": ["Underwear", "Bras", "Socks"],
-      "Accessory": ["Hats", "Belts", "Scarves", "Gloves"],
-      "Gadgets": ["Watches", "Fitness Trackers", "Smart Glasses"],
-      "Footwear": ["Sneakers", "Boots", "Sandals", "Formal Shoes"],
-      "Others": ["Costumes", "Uniforms", "Swimwear"]
-    };
-    {/* List of Items sizes ADD MORE SIZES*/}
-    const sizes = {
-      "Kids-Boy": {
-        "T-Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Polo Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Tank Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Sweatshirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Hoodies": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Jeans": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Shorts": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Skirts": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Trousers": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Leggings": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Underwear": ["2T-3T", "4-5", "6-7", "8-10", "12-14"],
-        "Socks": ["XS", "S", "M", "L", "XL"], // Based on shoe size ranges
-        "Hats": ["XS", "S", "M", "L"], // Adjustable based on head circumference
-        "Belts": ["20 in", "22 in", "24 in", "26 in", "28 in"], // Length in inches
-        "Scarves": ["XS", "S", "M", "L"], // General sizes based on age
-        "Gloves": ["XS", "S", "M", "L"], // Based on hand length
-        "Watches": ["Small", "Medium", "Large"], // Band sizes
-        "Fitness Trackers": ["Small", "Medium", "Large"],
-        "Smart Glasses": ["Small", "Medium", "Large"],
-        "Sneakers": ["4", "5", "6", "7", "8"], // US kids shoe sizes
-        "Boots": ["4", "5", "6", "7", "8"],
-        "Sandals": ["4", "5", "6", "7", "8"],
-        "Formal Shoes": ["4", "5", "6", "7", "8"],    
-        "Costumes": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Uniforms": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Swimwear": ["4-5", "6-7", "8-10", "12-14", "16"]
-      },
-      "Kids-Girl": {
-        "T-Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Polo Shirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Tank Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Sweatshirts": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Hoodies": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Jeans": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Shorts": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Skirts": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Trousers": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Leggings": [ "2T", "3T", "4T", "5T", "6T", "7T", "8", "10", "12", "14", "16", "18"],
-        "Blouses": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Crop Tops": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Underwear": ["2T-3T", "4-5", "6-7", "8-10", "12-14"],
-        "Bras": ["30AA", "32AA", "34AA", "36AA"], // For older kids
-        "Socks": ["XS", "S", "M", "L", "XL"], // Based on shoe size ranges
-        "Hats": ["XS", "S", "M", "L"], // Adjustable based on head circumference
-        "Belts": ["20 in", "22 in", "24 in", "26 in", "28 in"], // Length in inches
-        "Scarves": ["XS", "S", "M", "L"], // General sizes based on age
-        "Gloves": ["XS", "S", "M", "L"], // Based on hand length
-        "Watches": ["Small", "Medium", "Large"], // Band sizes
-        "Fitness Trackers": ["Small", "Medium", "Large"],
-        "Smart Glasses": ["Small", "Medium", "Large"],
-        "Sneakers": ["4", "5", "6", "7", "8"], // US kids shoe sizes
-        "Boots": ["4", "5", "6", "7", "8"],
-        "Sandals": ["4", "5", "6", "7", "8"],
-        "Formal Shoes": ["4", "5", "6", "7", "8"],    
-        "Costumes": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Uniforms": ["4-5", "6-7", "8-10", "12-14", "16"],
-        "Swimwear": ["4-5", "6-7", "8-10", "12-14", "16"]
-      },
-      "Adults-Man": {
-        "T-Shirts": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-        "Polo Shirts": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-        "Tank Tops": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-        "Sweatshirts": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-        "Hoodies": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-        "Blouses": ["S", "M", "L", "XL", "XXL"], // For gender-neutral styles, sizes for men are typically S, M, L
-        "Crop Tops": ["S", "M", "L", "XL"], // Unisex sizing, can be styled for men
-        "Tunics": ["S", "M", "L", "XL", "XXL"],
-        "Jeans": ["28", "29", "30", "31", "32", "33", "34", "35", "36", "38", "40"],
-        "Shorts": ["S", "M", "L", "XL", "XXL"],
-        "Skirts": ["S", "M", "L", "XL", "XXL"], // Not common for men, but unisex sizes apply
-        "Trousers": ["28", "29", "30", "31", "32", "33", "34", "36", "38", "40"],
-        "Leggings": ["S", "M", "L", "XL"], // For unisex athletic wear
-        "Underwear": ["S", "M", "L", "XL", "XXL"],
-        "Socks": ["S", "M", "L", "XL"], // Based on shoe size (typically for men: M - 6-9, L - 9-12, XL - 12+)
-        "Hats": ["S", "M", "L"], // Based on head circumference
-        "Belts": ["28", "30", "32", "34", "36", "38", "40"], // Waist sizes
-        "Scarves": ["One Size"], // Usually one size fits most
-        "Gloves": ["S", "M", "L", "XL"], // Based on hand measurement
-        "Watches": ["Small", "Medium", "Large"], // Based on wrist size
-        "Fitness Trackers": ["Small", "Medium", "Large"],
-        "Smart Glasses": ["Small", "Medium", "Large"], // Frame size
-        "Sneakers": ["6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
-        "Boots": ["6", "7", "8", "9", "10", "11", "12", "13", "14"],
-        "Sandals": ["6", "7", "8", "9", "10", "11", "12", "13"],
-        "Formal Shoes": ["6", "7", "8", "9", "10", "11", "12", "13"],
-        "Costumes": ["S", "M", "L", "XL", "XXL"],
-        "Uniforms": ["S", "M", "L", "XL", "XXL"],
-        "Swimwear": ["S", "M", "L", "XL", "XXL"]  
-      },
-      "Adults-Woman": {
-        "T-Shirts": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-        "Polo Shirts": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Tank Tops": ["XS", "S", "M", "L", "XL", "XXL", "XXXL"],
-        "Sweatshirts": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Hoodies": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Blouses": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Crop Tops": ["XS", "S", "M", "L", "XL"],
-        "Tunics": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Jeans": ["24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34"],
-        "Shorts": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Skirts": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Trousers": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Leggings": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Underwear": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Bras": ["30A", "32A", "34A", "36A", "32B", "34B", "36B", "38B", "34C", "36C", "38C", "32D", "34D", "36D"],
-        "Socks": ["S", "M", "L", "XL"], // Based on shoe size equivalency  
-        "Hats": ["S", "M", "L"], // Based on head circumference
-        "Belts": ["26", "28", "30", "32", "34", "36", "38"], // Waist size
-        "Scarves": ["One Size"], // Usually adjustable
-        "Gloves": ["S", "M", "L", "XL"], // Based on hand size
-        "Watches": ["Small", "Medium", "Large"], // Based on wrist size
-        "Fitness Trackers": ["Small", "Medium", "Large"],
-        "Smart Glasses": ["Small", "Medium", "Large"],
-        "Sneakers": ["5", "6", "7", "8", "9", "10", "11", "12"],
-        "Boots": ["5", "6", "7", "8", "9", "10", "11", "12"],
-        "Sandals": ["5", "6", "7", "8", "9", "10", "11", "12"],
-        "Formal Shoes": ["5", "6", "7", "8", "9", "10", "11", "12"],
-        "Costumes": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Uniforms": ["XS", "S", "M", "L", "XL", "XXL"],
-        "Swimwear": ["XS", "S", "M", "L", "XL", "XXL"]
-      }
-    };
-    {/* Will show a sizes choices */}
-    const handleCustomerTypeChange = (e) => {
-      setCustomerType(e.target.value);
-      setCategory(''); // When click remove the content
-      setClotheType(''); //''
-    
-    };
-    {/* Function to show the next dropdown hehe */}
-    const handleCategoryChange = (e) => {
-      setCategory(e.target.value);
-      setClotheType('');
-    };
-    //Pwede pala gantong comment hehe colors
-    const colors = [
-      "Red", "Green", "Blue", "Yellow", "Purple", "Orange", "Pink", 
-      "Brown", "Gray", "Black", "White", "Cyan", "Magenta", "Teal", 
-      "Lime", "Indigo", "Violet", "Maroon", "Beige", "Turquoise", 
-      "Gold", "Silver", "Bronze", "Lavender", "Peach", "Coral", 
-      "Aqua", "Olive", "Emerald", "Ivory", "Chartreuse", "Others"
-    ];
-
-    
-    const handleCheckboxChange = (color) => {
-      setSelectedColors(prevState => 
-          prevState.includes(color) 
-          ? prevState.filter(c => c !== color) 
-          : [...prevState, color]
-      );
+  const toggleEdit = (variantIndex) => {
+    setEditableVariants((prev) => ({
+      ...prev,
+      [variantIndex]: !prev[variantIndex],
+    }));
   };
-    //Ads image appear in the div
-    const handleImagePick = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-              setImageSrc(e.target.result);
-          };
-          reader.readAsDataURL(file);
-      } else {
-          setImageSrc('');
-      }
-    };
-    const cancelImage = () => {
-      setImageSrc('');
-      document.getElementById('imageInput').value = '';
-    }
-    const PostNotify = () => { //Notify when post
-      setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false);
-      }, 3000);
-      setSelectedItem(false);
-    }
-    const ViewPostEDIT = () => {
-      setViewPost(true);
-    }
-    //Items sample datas
-    const sampleData = [
-      { id: 1, photo: sample1, name: 'Viscount Black', qty: 10, category: 'Top wear', type: 'T-Shirts', customerType: 'Adults-Man', availableSizes: ["S", "M", "L", "XL", "XXL"], colors: ["Black", "Gray", "White", "Blue", "Red"], rating: 4 },
-      { id: 2, photo: sample2, name: 'Duke Blue', qty: 5, category: 'Top wear', type: 'Polo Shirts', customerType: 'Adults-Woman', availableSizes: ["XS", "S", "M", "L", "XL"], colors: ["Blue", "Cyan", "Teal", "White", "Pink"], rating: 5 },
-      { id: 3, photo: sample3, name: 'Earl Grey', qty: 8, category: 'Top wear', type: 'Sweatshirts', customerType: 'Kids-Boy', availableSizes: ["4-5", "6-7", "8-10", "12-14", "16"], colors: ["Gray", "Black", "Red", "Green", "Yellow"], rating: 3 },
-      { id: 4, photo: sample4, name: 'Count Crimson', qty: 12, category: 'Top wear', type: 'Hoodies', customerType: 'Kids-Girl', availableSizes: ["4-5", "6-7", "8-10", "12-14", "16"], colors: ["Red", "Pink", "Purple", "White", "Lavender"], rating: 4 },
-      { id: 5, photo: sample5, name: 'Baron Green', qty: 7, category: 'Top wear', type: 'Tank Tops', customerType: 'Adults-Woman', availableSizes: ["XS", "S", "M", "L", "XL"], colors: ["Green", "Lime", "Olive", "Yellow", "Beige"], rating: 5 },
-      { id: 6, photo: sample6, name: 'Marquis Magenta', qty: 9, category: 'Top wear', type: 'Crop Tops', customerType: 'Kids-Girl', availableSizes: ["4-5", "6-7", "8-10", "12-14", "16"], colors: ["Magenta", "Pink", "Purple", "White", "Peach"], rating: 3 },
-      { id: 7, photo: sample7, name: 'Lord Lavender', qty: 6, category: 'Top wear', type: 'Blouses', customerType: 'Adults-Woman', availableSizes: ["S", "M", "L", "XL", "XXL"], colors: ["Lavender", "Violet", "Silver", "Indigo", "Turquoise"], rating: 5 },
-      { id: 8, photo: sample8, name: 'Sir Silver', qty: 11, category: 'Top wear', type: 'Tunics', customerType: 'Adults-Man', availableSizes: ["S", "M", "L", "XL", "XXL"], colors: ["Silver", "Gray", "White", "Black", "Teal"], rating: 4 },
-      { id: 9, photo: sample9, name: 'Lady Lilac', qty: 4, category: 'Top wear', type: 'Sweatshirts', customerType: 'Kids-Boy', availableSizes: ["4-5", "6-7", "8-10", "12-14", "16"], colors: ["Lilac", "Purple", "Blue", "Pink", "Cyan"], rating: 2 }
-    ];
-    
-    
-  
-    return (
-    <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
-      <div className='absolute mx-3 right-0 z-10'>
-        <SideBar/>
-      </div>
-    
 
-      <div className='w-full h-full bg-slate-300 '>
-        <div className=' text-4xl text-custom-purple font-bold p-2 py-3'>Manage Products</div>
-        <div className='h-[550px] p-5 w-full overflow-hidden rounded-md shadow-md bg-slate-100'>
-          <div className=' w-full flex gap-5 place-items-center justify-between mb-2'>
-            <div className='md:flex md:gap-2 font-semibold text-slate-400'>
-              <div  className={activeTabs === 'manage-products' ? 'active-tabs' : 'mb-2 md:mb-0'} onClick={() => setActiveTab('manage-products')}>
-                <span className=' rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-custom-purple glass p-1  md:p-3'>Manage Products</span>
-              </div> 
-              <div className={activeTabs === 'manage-adds' ? 'active-tabs' : 'mt-2 md:mt-0'} onClick={() => setActiveTab('manage-adds')}>
-                <span className=' rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-custom-purple glass p-1 md:p-3'>Manage Ads</span>
+  const handleSizeChange = (variantIndex, sizeIndex, field, value) => {
+    setSelectedItem((prevItem) => {
+      const updatedVariants = [...prevItem.item_Variant];
+      updatedVariants[variantIndex].sizes[sizeIndex][field] = value;
+
+      return {
+        ...prevItem,
+        item_Variant: updatedVariants,
+      };
+    });
+  };
+
+  const handleUpdate = async (variantIndex) => {
+    try {
+      const updatedVariant = selectedItem.item_Variant[variantIndex];
+
+      const { error } = await supabase
+        .from("shop_Product")
+        .update({ item_Variant: selectedItem.item_Variant })
+        .eq("id", selectedItem.id);
+
+      if (error) {
+        console.error("Error updating the variant:", error);
+        alert("Failed to update the variant.");
+      } else {
+        setShowAlertEditDone(true);
+        setTimeout(() => setShowAlertEditDone(false), 3000);
+        toggleEdit(variantIndex); // Exit edit mode after successful update
+      }
+    } catch (error) {
+      console.error("Error updating the variant:", error);
+    }
+  };
+
+  const fetchUserProfileAndShop = async () => {
+    setLoading(true);
+
+    try {
+      // Get the current authenticated user
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError) {
+        console.error("Authentication error:", authError.message);
+        setError(authError.message);
+        return;
+      }
+
+      if (user) {
+        console.log("Current user:", user);
+
+        // Fetch shop data for the current user
+        const { data: shops, error: shopError } = await supabase
+          .from("shop")
+          .select("id, shop_name, shop_Rating")
+          .eq("owner_Id", user.id);
+
+        if (shopError) {
+          console.error("Shop fetch error:", shopError.message);
+          setError(shopError.message);
+          return;
+        }
+
+        if (shops && shops.length > 0) {
+          setShopData(shops);
+          console.log("Fetched shops:", shops);
+
+          const selectedShopId = shops[0].id; // Assuming the first shop is selected
+
+          // Fetch products for the selected shop
+          const { data: products, error: productError } = await supabase
+            .from("shop_Product")
+            .select(
+              "id, item_Name, item_Description, item_Tags, item_Rating, item_Orders, item_Variant, is_Post"
+            )
+            .eq("shop_Id", selectedShopId);
+
+          if (productError) {
+            console.error("Product fetch error:", productError.message);
+            setError(productError.message);
+          } else {
+            console.log("Fetched products for the shop:", products);
+
+            // Process products to calculate total quantity and fetch image paths for each variant
+            const updatedProducts = await Promise.all(
+              products.map(async (product) => {
+                const totalQuantity = product.item_Variant?.reduce(
+                  (total, variant) =>
+                    total +
+                    variant.sizes?.reduce(
+                      (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0),
+                      0
+                    ),
+                  0
+                );
+
+                // Extract the first variant for external use
+                const firstVariant = product.item_Variant?.[0] || null;
+
+                // Fetch the public URL for the first variant's image
+                const { data: firstVariantUrlData } = supabase.storage
+                  .from("product")
+                  .getPublicUrl(firstVariant?.img || "");
+
+                const updatedFirstVariant = firstVariant
+                  ? {
+                      ...firstVariant,
+                      imagePath: firstVariantUrlData?.publicUrl || null,
+                    }
+                  : null;
+
+                // Fetch image paths for all variants
+                const updatedVariants = await Promise.all(
+                  product.item_Variant?.map(async (variant) => {
+                    const { data: publicUrlData } = supabase.storage
+                      .from("product")
+                      .getPublicUrl(variant.img || "");
+                    return {
+                      ...variant,
+                      imagePath: publicUrlData?.publicUrl || null,
+                    };
+                  }) || []
+                );
+
+                // Return the updated product with the first variant accessible separately
+                return {
+                  ...product,
+                  firstVariant: updatedFirstVariant,
+                  item_Variant: updatedVariants,
+                  totalQuantity,
+                };
+              })
+            );
+
+            setShopProducts(updatedProducts);
+          }
+        } else {
+          console.warn("No shops found for the user.");
+          setError("No shops found for the current user.");
+        }
+      } else {
+        console.warn("No user is signed in");
+        setError("No user is signed in");
+      }
+    } catch (error) {
+      console.error("Error fetching shop and product data:", error);
+      setError("An error occurred while fetching shop data.");
+    } finally {
+      setLoading(false); // Stop loading state
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfileAndShop();
+  }, []);
+
+  const PostNotify = async () => {
+    try {
+      // Update the `is_Post` status
+      const { error } = await supabase
+        .from("shop_Product")
+        .update({ is_Post: true })
+        .eq("id", selectedItem.id);
+
+      if (error) throw error;
+
+      // Re-fetch the updated product and image URL
+      const { data: updatedItem, error: fetchError } = await supabase
+        .from("shop_Product")
+        .select("*")
+        .eq("id", selectedItem.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Fetch the image path for the first variant
+      const { data: publicUrlData } = supabase.storage
+        .from("product")
+        .getPublicUrl(updatedItem.item_Variant?.[0]?.img || "");
+      const totalQuantity = updatedItem.item_Variant?.reduce(
+        (total, variant) =>
+          total +
+          variant.sizes?.reduce(
+            (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0),
+            0
+          ),
+        0
+      );
+      // Update state with the new product details
+      fetchUserProfileAndShop();
+
+      // Notify user and reset states
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+      setSelectedItem(null);
+      setShowAlert2(false);
+    } catch (error) {
+      console.error("Error updating the post status:", error);
+    }
+  };
+  const unPostNotify = async () => {
+    try {
+      // Update the `is_Post` status
+      const { error } = await supabase
+        .from("shop_Product")
+        .update({ is_Post: false })
+        .eq("id", selectedItem.id);
+
+      if (error) throw error;
+
+      // Re-fetch the updated product and image URL
+      const { data: updatedItem, error: fetchError } = await supabase
+        .from("shop_Product")
+        .select("*")
+        .eq("id", selectedItem.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Fetch the image path for the first variant
+      const { data: publicUrlData } = supabase.storage
+        .from("product")
+        .getPublicUrl(updatedItem.item_Variant?.[0]?.img || "");
+      const totalQuantity = updatedItem.item_Variant?.reduce(
+        (total, variant) =>
+          total +
+          variant.sizes?.reduce(
+            (sizeTotal, size) => sizeTotal + parseInt(size.qty || 0),
+            0
+          ),
+        0
+      );
+      // Update state with the new product details
+      fetchUserProfileAndShop();
+
+      // Notify user and reset states
+      setShowAlertUnpost(true);
+      setTimeout(() => setShowAlertUnpost(false), 3000);
+      setSelectedItem(null);
+      setShowAlertUnP(false);
+      setShowAlert2(false);
+    } catch (error) {
+      console.error("Error updating the post status:", error);
+    }
+  };
+  const DeleteItem = async () => {
+    try {
+      const { error } = await supabase
+        .from("shop_Product")
+        .delete()
+        .eq("id", selectedItem.id);
+
+      setShopProducts((prevItems) =>
+        prevItems.filter((item) => item.id !== selectedItem.id)
+      );
+      setSelectedItem(null);
+      setShowAlertDel(true);
+      setTimeout(() => setShowAlertDel(false), 3000);
+      setShowAlertDelCon(false);
+      if (error) throw error;
+      console.log("Item deleted:", selectedItem);
+    } catch (error) {
+      console.error("Error updating the post status:", error);
+    }
+  };
+
+  const handleViewImageClose = () => {
+    setIsModalOpenImage(false);
+    setSelectedVariantIndex(null);
+  };
+  const handleAddAds = () => {
+    //ADS
+    setIsModalOpenAds(true);
+  };
+  const handleCloseModal = async () => {
+    // Close all modals and reset data
+    setIsModalOpenItem(false);
+    setIsModalOpenAds(false);
+    setViewPost(false);
+    setSelectedItem(null);
+
+    // Fetch updated shop and product details
+    await fetchUserProfileAndShop();
+  };
+
+  const handlePostItem = () => {
+    setShowAlert2(true);
+  };
+  const handleUpdateItem = (variantIndex) => {
+    setCurrentVariantIndex(variantIndex);
+    setShowAlertCOnfirmUpdate(true);
+  };
+  const handleConfirmedUpdate = async () => {
+    if (currentVariantIndex !== null) {
+      const success = await handleUpdate(currentVariantIndex);
+      if (success) {
+        toggleEdit(currentVariantIndex);
+      }
+      handleUpdateItem();
+      setShowAlertCOnfirmUpdate(false);
+    }
+  };
+  const handleUnPostItem = () => {
+    setShowAlertUnP(true);
+  };
+  const handleDelItem = () => {
+    setShowAlertDelCon(true);
+  };
+
+  const handleClosePostItem = () => {
+    setShowAlert2(false);
+    setShowAlertDelCon(false);
+    setShowAlertUnpost(false);
+    setShowAlertUnP(false);
+  };
+
+  const handleViewClick = (item) => {
+    setSelectedItem(item);
+    console.log("Viewing item:", item);
+  };
+
+  //Ads image appear in the div
+  const handleImagePick = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImageSrc(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImageSrc("");
+    }
+  };
+  const cancelImage = () => {
+    setImageSrc("");
+    document.getElementById("imageInput").value = "";
+  };
+
+  const handleAddSize = (variantIndex) => {
+    const updatedVariants = [...selectedItem.item_Variant];
+    updatedVariants[variantIndex].sizes = [
+      ...(updatedVariants[variantIndex].sizes || []),
+      { size: "", qty: 0, price: 0 },
+    ];
+    setSelectedItem({
+      ...selectedItem,
+      item_Variant: updatedVariants,
+    });
+  };
+
+  //Items sample datas
+
+  return (
+    <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
+      <div className="absolute mx-3 right-0 z-10">
+        <SideBar />
+      </div>
+
+      <div className="w-full h-full bg-slate-300 ">
+        <div className=" text-4xl text-custom-purple font-bold p-2 py-3">
+          Manage Products
+        </div>
+        <div className="h-[550px] p-5 w-full overflow-hidden rounded-md shadow-md bg-slate-100">
+          <div className=" w-full flex gap-5 place-items-center justify-between mb-2">
+            <div className="md:flex md:gap-2 font-semibold text-slate-400">
+              <div
+                className={
+                  activeTabs === "manage-products"
+                    ? "active-tabs"
+                    : "mb-2 md:mb-0"
+                }
+                onClick={() => setActiveTab("manage-products")}
+              >
+                <span className=" rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-custom-purple glass p-1  md:p-3">
+                  Manage Products
+                </span>
+              </div>
+              <div
+                className={
+                  activeTabs === "manage-adds" ? "active-tabs" : "mt-2 md:mt-0"
+                }
+                onClick={() => setActiveTab("manage-adds")}
+              >
+                <span className=" rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-custom-purple glass p-1 md:p-3">
+                  Manage Ads
+                </span>
               </div>
             </div>
-            
-            <div className='flex  md:gap-2 text-slate-50 rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-gradient-to-r from-violet-500 to-fuchsia-500 glass p-1 md:p-2'>
+
+            <div className="flex  md:gap-2 text-slate-50 rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-gradient-to-r from-violet-500 to-fuchsia-500 glass p-1 md:p-2">
               Create New Design
-              <box-icon type='solid' color='#e2e8f0' name='palette'></box-icon>  
+              <box-icon type="solid" color="#e2e8f0" name="palette"></box-icon>
             </div>
-            
           </div>
-            <div className="w-full h-full custom-scrollbar bg-slate-200 shadow-inner rounded-md p-4 overflow-y-scroll">
-              {activeTabs === 'manage-products' && (
-                  <div className='mb-8'>
-                    <div className='flex justify-between'>
-                    <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">Manage Product 
-                        <div className="tooltip tooltip-bottom " data-tip=" Once the Item is added, it doesn't mean it automatically added to the shop preview, but it will
-                        only store to this page, you can still have the decision to post it. ">
-                            <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
-                              <box-icon color='#FFFFFF' name='info-circle'></box-icon>
-                            </button>
-                        </div>
-                      </h2>
-                      <div className='flex gap-2 justify-center  place-items-center'>
-                          <div
-                           onClick={handleAddItem}
-                           className='bg-custom-purple p-1 md:px-2 text-slate-50 cursor-pointer text-sm  duration-200 hover:scale-95 rounded-sm '>Add Items</div>
-                      </div>
+          <div className="w-full h-full custom-scrollbar bg-slate-200 shadow-inner rounded-md p-4 overflow-y-scroll">
+            {activeTabs === "manage-products" && (
+              <div className="mb-8">
+                <div className="flex justify-between">
+                  <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">
+                    Manage Product
+                    <div
+                      className="tooltip tooltip-bottom "
+                      data-tip=" Once the Item is added, it doesn't mean it automatically added to the shop preview, but it will
+                        only store to this page, you can still have the decision to post it. "
+                    >
+                      <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
+                        <box-icon color="#FFFFFF" name="info-circle"></box-icon>
+                      </button>
                     </div>
-                      
-                      <div className=' flex gap-2 font-semibold justify-around md:justify-between px-2 text-slate-800'>
-                          <li className='list-none md:pl-5'>Item ID</li> 
-                          <li className='list-none lg:-ml-48'>Photo</li> 
-                          <li className='list-none lg:-ml-14'>Name</li> 
-                          <li className='list-none lg:-ml-10'>QTY</li> 
-                          <li className='list-none md:pr-6'>Action</li>
-                      </div>
-                      
-
-                      {sampleData.map(item => (
-                        <div key={item.id} className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2 mb-2">
-                            <div className="h-full w-1/12 flex items-center justify-center">{item.id}</div>
-                            <div className="h-full w-2/12 flex items-center justify-center">
-                                <div className="h-14 w-14 rounded-sm bg-slate-200">
-                                    <img
-                                        src={item.photo}
-                                        alt={`Image of ${item.name}`}
-                                        className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                                        sizes="100%"
-                                    />
-                                </div>
-                            </div>
-                            <div className="h-full w-4/12 flex items-center justify-center">{item.name}</div>
-                            <div className="h-full w-1/12 flex md:pl-5 lg:pl-24 items-center justify-center">
-                              <span className={item.qty < 11 ? "text-red-500 font-semibold" : "text-primary-color font-bold"}>{item.qty}</span>
-                            </div>
-                            <div className="h-full w-4/12 flex items-center justify-end gap-2">
-                        
-                                <div
-                                 onClick={() => handleViewClick(item)} 
-                                 className="h-full px-2 md:w-24 bg-slate-500 flex items-center justify-center rounded-md font-semibold hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95">View</div>
-                            </div>
-                        </div>
-                      ))}
-
-
-                      
-                      
+                  </h2>
+                  <div className="flex gap-2 justify-center  place-items-center">
+                    <div
+                      onClick={() => navigate("/shop/AddItem")}
+                      className="bg-custom-purple p-1 md:px-2 text-slate-50 cursor-pointer text-sm  duration-200 hover:scale-95 rounded-sm "
+                    >
+                      Add Items
+                    </div>
                   </div>
-              )}
-              {activeTabs === 'manage-adds' && (
-                  <div>
-                      <div className='flex justify-between'>
-                      <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">Manage Shop Advertisement 
-                        <div className="tooltip tooltip-bottom " data-tip=" Maximum advertisement photos to be posted is 3 to 5 Images only.  ">
-                            <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
-                              <box-icon color='#FFFFFF' name='info-circle'></box-icon>
-                            </button>
-                        </div>
-                      </h2>
-                      <div className='flex gap-2 justify-center  place-items-center'>
-                          <div
-                           onClick={handleAddAds}
-                           className='bg-custom-purple text-sm p-1 md:px-2 text-slate-50 cursor-pointer duration-200 hover:scale-95 rounded-sm '>Add photo Ads</div>
-                      </div>
-                    </div>
+                </div>
 
-                      <div className=' flex font-semibold justify-between px-2 text-slate-800'>
-                          <li className='list-none'>Ads ID / Photo</li> 
-                          <li className='list-none'>Name</li> 
-                          <li className='list-none pr-4'>Action</li> 
-                      </div>
-                      <div className='p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2'>
-                          <div className='h-full w-20 place-items-center justify-center flex'> 10 </div>
-                          <div className='h-full w-14 rounded-sm bg-slate-200'>
-                          <img
-                            src={sampleads}
-                            alt="Shop Logo"
-                            className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                            sizes="100%"
-                          />
+                <div className="flex gap-2 font-semibold justify-around md:justify-between px-2 text-slate-800">
+                  <li className="list-none w-1/12 text-center">Item ID</li>
+                  <li className="list-none w-2/12 text-center">Photo</li>
+                  <li className="list-none w-4/12 text-center">Name</li>
+                  <li className="list-none w-1/12 text-center">Quantity</li>
+                  <li className="list-none w-2/12 text-center">Status</li>
+                  <li className="list-none w-2/12 text-center">Action</li>
+                </div>
+
+                {shopItem.length > 0 ? (
+                  shopItem.map((item) => {
+                    return (
+                      <div
+                        key={item.id}
+                        className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2 mb-2"
+                      >
+                        <div className="h-full w-1/12 flex items-center justify-center">
+                          {item.id}
+                        </div>
+                        <div className="h-full w-2/12 flex items-center justify-center">
+                          <div className="h-14 w-14 rounded-sm bg-slate-200">
+                            {item.firstVariant.imagePath ? (
+                              <img
+                                src={item.firstVariant.imagePath}
+                                alt={`Image of ${item.item_Name}`}
+                                className="shadow-lg shadow-slate-400 bg-slate-100 h-full w-full object-cover rounded-md"
+                                sizes="100%"
+                              />
+                            ) : (
+                              <div className="h-full w-full flex items-center justify-center text-xs text-gray-500">
+                                No Image
+                              </div>
+                            )}
                           </div>
-                          <div className='h-full w-full place-items-center flex justify-center '> Latest Drip Design </div>
+                        </div>
+                        <div className="h-full w-4/12 flex items-center justify-center">
+                          {item.item_Name}
+                        </div>
+                        <div className="h-full w-1/12 flex items-center justify-center">
+                          <span
+                            className={
+                              item.totalQuantity <= 10
+                                ? "text-red-500 font-semibold"
+                                : "text-slate-700 font-bold"
+                            }
+                          >
+                            {item.totalQuantity || "0"}
+                          </span>
+                        </div>
+                        <div className="h-full w-2/12 flex items-center justify-center">
+                          {item.is_Post === false ? (
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="h-3 w-3 rounded-full bg-red-500"
+                                title="Not Posted"
+                              ></div>
+                              <span className="text-sm">Not Posted</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <div
+                                className="h-3 w-3 rounded-full bg-green-500"
+                                title="Posted"
+                              ></div>
+                              <span className="text-sm">Posted</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="h-full w-2/12 flex items-center justify-end gap-2">
                           <div
-                      
-                          className=' h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
-                          hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex '>View</div>
+                            onClick={() => handleViewClick(item)}
+                            className="h-full px-2 md:w-24 bg-slate-500 flex items-center justify-center rounded-md font-semibold hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95"
+                          >
+                            View
+                          </div>
+                        </div>
                       </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center text-slate-500">
+                    No products found.
                   </div>
-              )}
+                )}
+              </div>
+            )}
+            {activeTabs === "manage-adds" && (
+              <div>
+                <div className="flex justify-between">
+                  <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">
+                    Manage Shop Advertisement
+                    <div
+                      className="tooltip tooltip-bottom "
+                      data-tip=" Maximum advertisement photos to be posted is 3 to 5 Images only.  "
+                    >
+                      <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
+                        <box-icon color="#FFFFFF" name="info-circle"></box-icon>
+                      </button>
+                    </div>
+                  </h2>
+                  <div className="flex gap-2 justify-center  place-items-center">
+                    <div
+                      onClick={handleAddAds}
+                      className="bg-custom-purple text-sm p-1 md:px-2 text-slate-50 cursor-pointer duration-200 hover:scale-95 rounded-sm "
+                    >
+                      Add photo Ads
+                    </div>
+                  </div>
+                </div>
 
-            </div>
-          <div className='bg-slate-600 w-full h-9'></div>
+                <div className=" flex font-semibold justify-between px-2 text-slate-800">
+                  <li className="list-none">Ads ID / Photo</li>
+                  <li className="list-none">Name</li>
+                  <li className="list-none pr-4">Action</li>
+                </div>
+                <div className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2">
+                  <div className="h-full w-20 place-items-center justify-center flex">
+                    {" "}
+                    10{" "}
+                  </div>
+                  <div className="h-full w-14 rounded-sm bg-slate-200">
+                    <img
+                      src={sampleads}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="h-full w-full place-items-center flex justify-center ">
+                    {" "}
+                    Latest Drip Design{" "}
+                  </div>
+                  <div
+                    className=" h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
+                          hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex "
+                  >
+                    View
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="bg-slate-600 w-full h-9"></div>
         </div>
       </div>
-      {/* Add Item Modal */} 
-      {isModalOpenItems && (
-    <div className="fixed inset-0 pt-16 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-      <div className="bg-white pt-2 rounded-lg p-5 w-full md:w-1/2 lg:w-3/4 m-2 md:m-0">
-        <h2 className=" flex justify-between w-full place-items-center   "><span className='font-bold text-[20px] text-slate-800 py-2 md:text-2xl '>ADD ITEM</span> <box-icon type='solid' color='#4D077C' name='customize'></box-icon></h2>
-        <div className='bg-slate-200 h-[400px] md:h-full rounded-md overflow-hidden custom-scrollbar overflow-y-scroll md:flex gap-1 w-full p-2 md:px-5 mb-2'>
-          <div className='w-full md:w-1/4 h-auto p-1 pr-5 '> 
-            <label className='text-slate-950  font-semibold mr-2 text-sm'>Item Name:</label><br/>
-            <input type='text' className=' bg-slate-50 p-1 rounded-sm  mt-2 text-slate-800 w-full shadow-md' placeholder='Item Name '></input> <br/>
-            <label className='text-slate-950 font-semibold text-sm mr-2 '>Total:</label><br/>
-            <input
-              type="number"
-              value={Total}
-              onChange={Totaldigit}
-              onKeyDown={blockInvalidChar}
-              className=' bg-slate-50 p-1 rounded-sm text-slate-800 mt-1 w-full shadow-md' 
-              placeholder='Quantity '>
-            </input> <br/>
-            {/* customer type */}
-            <label className='text-slate-950 font-semibold text-sm mr-2'>Customer Type:</label><br/>
-              <select
-                  id="customerType"
-                  value={customerType}
-                  onChange={handleCustomerTypeChange}
-                  className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
-              >
-                  <option value="">Select Customer Type</option>
-                  <option value="Kids-Boy">Kids Boy</option>
-                  <option value="Kids-Girl">Kids Girl</option>
-                  <option value="Adults-Man">Teen & Adult Man</option>
-                  <option value="Adults-Woman">Teen & Adult Woman</option>
-              </select><br/>
-        
-
-              {customerType && (
-                <div className="mb-4">
-                    <label className='text-slate-950 font-semibold text-sm mr-2'>Category:</label><br/>
-                    <select
-                        id="category"
-                        className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
-                        value={category}
-                        onChange={handleCategoryChange}
-                    >
-                        <option value="">Select Category</option>
-                        {Object.keys(categories).map((cat, index) => (
-                            <option key={index} value={cat}>{cat}</option>
-                        ))}
-                    </select><br/>
-
-                    {category && categories[category].length > 0 && (
-                        <>
-                            <label className='text-slate-950 font-semibold text-sm mr-2'>Clothe Type:</label><br/>
-                            <select
-                                id="clotheType"
-                                className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
-                                value={clotheType}
-                                onChange={(e) => setClotheType(e.target.value)}
-                            >
-                                <option value="">Select Clothe Type</option>
-                                {categories[category].map((type, index) => (
-                                    <option key={index} value={type}>{type}</option>
-                                ))}
-                            </select><br/>
-                        </>
-                    )}
-                </div>
-              )}
-
-             
-          </div>
-
-          {/* Select sizes */}
-          <div className=' w-full md:w-1/4 h-full py-1'>
-          <div className=' flex gap-2 place-items-center justify-between '>
-            <label className='text-slate-950 font-semibold text-sm '>Color Variant</label> 
-            <div className="tooltip tooltip-bottom " data-tip="Our sizes are based on US standards. To provide better sizing guidance, we highly recommend uploading an image with detailed size instructions to help customers understand.">
-                <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
-                  <box-icon color='#FFFFFF' name='info-circle'></box-icon>
-                </button>
+      {/* Add Advertisement Modal */}
+      {isModalOpenAds && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+          <div className="bg-white rounded-lg p-5 h-auto w-full md:w-3/4 pt-2 lg:w-1/2 m-2 md:m-0 auto">
+            <div className="font-medium text-slate-800 py-2 w-full flex justify-between place-items-center  ">
+              <span className="font-bold text-[20px] md:text-2xl">
+                Add Shop Advertisement Photo
+              </span>
+              <box-icon name="images" color="#4D077C"></box-icon>
             </div>
-          </div>
-          
-          <div className='h-[400px] mt-2 w-full px-2  bg-slate-100 overflow-hidden overflow-y-scroll shadow-sm shadow-slate-500 rounded-sm custom-scrollbar'>
-            {clotheType.length === 0 && (
-                <div className="text-red-500 text-sm mt-4 text-center">
-                    Please Complete the Selection
-                </div>
-            ) }
-            
-            {clotheType && (
-              <button
-                  className="mt-3 bg-gradient-to-r from-violet-500 to-fuchsia-500 w-full hover:bg-blue-600 text-white py-1 px-4 rounded-md shadow-md text-sm"
-                  onClick={handleAddInput}
-              >
-                  Add Variant for {clotheType}
-              </button>
-            )}
-            {clotheType && (
-                <div className='text-sm mt-2 font-semibold text-slate-800 '> Type a Variant </div>
-            )}
-          
-            {inputs.map((value, index) => (
-              <div key={index} className="items-center mb-2">
-              
-                <input
-                    type="text"
-                    className="bg-slate-100 w-full text-slate-800 border py-1 px-2 rounded-md text-sm shadow-md"
-                    value={value}
-                    onChange={(e) => handleInputChange(e.target.value, index)}
-                    placeholder="Enter Variant"
-                    disabled={submittedVariants.some((variant) => variant.text === value)}
-                />
-                  <div className='flex g mt-1 justify-end'>
-                    <button
-                        className="ml-2 bg-red-500 hover:bg-red-600 hover:scale-95 duration-300 text-white py-1 px-2 rounded-sm text-sm shadow-md"
-                        onClick={() => handleDeleteInput(index)}
-                    >
-                        Delete
-                    </button>
-                    <button
-                        className={`ml-2 bg-green-500 hover:bg-green-600 hover:scale-95 duration-300 text-white py-1 px-2 rounded-sm text-sm shadow-md ${
-                          submittedVariants.some((variant) => variant.text === value) ? "cursor-not-allowed bg-slate-500" : ""
-                        }`}
-                        onClick={() => handleSubmit(index)}
-                        disabled={submittedVariants.some((variant) => variant.text === value)}
-                    >
-                        Submit
-                    </button>  
-                </div>
-                
-            </div>
-          ))}
-          </div>
-          
-            
-          </div>
-           {/* Select variant and photo */}
-          <div className='w-1/2 h-full '>
-
-          <div className='flex justify-between place-items-center w-full '>
-            <label className='text-slate-950 font-semibold mr-2  text-sm'> Put Image, Size, Quantity, Price </label>  
-            
-            <button 
-                  className="bg-custom-purple justify-center flex text-white p-1 hover:bg-slate-600 duration-300 rounded-md "
-                  onClick={addImageInput}
-              >
-                 <box-icon type='solid' color='#FFFFFF' name='folder-plus'></box-icon>
-              </button>
-          </div>
-            <div className='flex justify-between place-items-center w-full  mt-1 '>
-
-         
-            </div>
-            <div className='bg-gradient-to-br from-violet-500 to-fuchsia-500 h-[400px] w-full p-2 overflow-hidden overflow-y-scroll shadow-inner shadow-slate-500 rounded-sm  custom-scrollbar '>
-             
-                <div>
-                {submittedVariants.length === 0 && (
-                    <div className="text-slate-100 text-sm mt-2 text-center">
-                        Please Input a Variant
-                    </div>
-                )}
-               {submittedVariants.map((variant, index) => (
-                <div key={index} className="rounded-md p-1 mb-2 bg-slate-400 bg-opacity-60 glass shadow-md">
-                  {/* Variant Title */}
-                  <label className="block text-gray-800 text-sm text-center w-full bg-slate-100 mb-2 rounded-t-md py-2">
-                    Upload an image for variant <span className="font-bold uppercase">{variant.text}</span>
-                  </label>
+            <div className="h-auto w-full bg-slate-200 place-items-center md:place-items-start  rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
+              <div className="md:w-1/2 h-auto p-2">
+                <div className="mt-2">
+                  <label className=" text-slate-800  text-sm font-semibold">
+                    Name:
+                  </label>{" "}
+                  <br />
                   <input
-                    type="file"
+                    type="text"
+                    className="bg-slate-100 p-1 rounded-sm shadow-md mt-1 text-slate-800 w-full"
+                    placeholder="Type Ad Name"
+                  ></input>{" "}
+                  <br />
+                </div>
+                <div className="mt-2 ">
+                  <label className=" text-slate-800  text-sm font-semibold mt-2">
+                    Choose a marketing visual
+                  </label>{" "}
+                  <br />
+                  <input
+                    onChange={handleImagePick}
                     accept="image/*"
-                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-slate-100 focus:outline-none"
-                  />
+                    id="imageInput"
+                    type="file"
+                    className="bg-slate-100 text-slate-700 w-full shadow-md mt-1"
+                  ></input>
+                  <div className=" place-items-end py-2">
+                    <div
+                      onClick={cancelImage}
+                      className="bg-custom-purple p-1 glass rounded-md hover:scale-95 duration-300 cursor-pointer text-white"
+                    >
+                      Cancel{" "}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="w-[180px] h-2/3 md:w-1/2 md:h-full bg-custom-purple shadow-md glass rounded-sm p-2">
+                <div className="bg-slate-100 h-[200px] md:h-[350px] rounded-sm shadow-md place-items-center flex place-content-center">
+                  {imageSrc ? (
+                    <img
+                      src={imageSrc}
+                      className="h-full w-full object-contain"
+                      alt="Preview of the selected marketing visual"
+                    />
+                  ) : (
+                    <span>Ads will appear here</span>
+                  )}
+                </div>
+              </div>
+            </div>
 
-                  {/* Sizing Options */}
-                  {variant.sizes.length > 0 ? (
-                    variant.sizes.map((size, sizeIndex) => (
-                      <div key={sizeIndex} className="p-2 flex gap-2 place-items-center">
-                        <div className="w-1/3">
-                          <input
-                            type="checkbox"
-                            id={`size-${size}-${variant.text}`}
-                            name="sizes"
-                            value={size}
-                            className="mr-2"
-                          />
-                          <label htmlFor={`size-${size}-${variant.text}`} className="text-slate-800 text-sm">
-                            {size}
+            <div className="flex justify-between w-full">
+              <button
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+              <button
+                className="bg-green-500  text-white px-4 py-2 rounded hover:bg-green-700"
+                onClick={handleCloseModal}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ALLERTS */}
+      {showAlert && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Item Posted in the Shop</span>
+          </div>
+        </div>
+      )}
+      {showAlertDel && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Item is Successfully Deleted.</span>
+          </div>
+        </div>
+      )}
+      {showAlertUnpost && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Item is Unposted.</span>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT, VIEW, POST, REMOVE ITEM */}
+      {selectedItem && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
+          <div className="bg-white rounded-lg  md:w-1/2 h-2/3 w-full ">
+            <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 w-full rounded-t-md  " />
+            <div className=" flex justify-between items-center ">
+              <div className="text-custom-purple font-semibold iceland-regular text-2xl p-2">
+                ITEM INFORMATION
+              </div>
+              <div className="h-full w-2/12 flex items-center justify-center">
+                {selectedItem.is_Post === false ? (
+                  // Red dot and "Not Posted" text
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full bg-red-500"
+                      title="Not Posted"
+                    ></div>
+                    <span className="text-sm text-red-500">Not Posted</span>
+                  </div>
+                ) : (
+                  // Green dot and "Posted" text
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-3 w-3 rounded-full bg-green-500"
+                      title="Posted"
+                    ></div>
+                    <span className="text-sm text-green-500">Posted</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="h-full bg-white w-full p-2 flex gap-2">
+              <div className=" w-4/12 h-auto">
+                <div className="w-full h-[200px] rounded-sm bg-slate-100 p-2 shadow-inner shadow-custom-purple mb-2">
+                  <img
+                    src={selectedItem.firstVariant.imagePath}
+                    alt={`Image of ${selectedItem.item_Name}`}
+                    className="h-full w-full object-cover rounded-md"
+                  />
+                </div>
+                <div className=" w-auto h-auto p-2 rounded-sm ">
+                  {selectedItem.is_Post === false ? (
+                    <div
+                      onClick={handlePostItem}
+                      className="bg-green-700 p-1 justify-center flex iceland-regular rounded-sm glass 
+                    hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-green-500"
+                    >
+                      POST
+                    </div>
+                  ) : (
+                    // Green dot and "Posted" text
+                    <div
+                      onClick={handleUnPostItem}
+                      className="bg-gray-700 p-1 justify-center flex iceland-regular rounded-sm glass 
+                   hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-gray-500"
+                    >
+                      UNPOST
+                    </div>
+                  )}
+                  <div
+                    onClick={handleDelItem}
+                    className="bg-red-700 p-1 justify-center flex iceland-regular rounded-sm glass 
+                  hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-red-500"
+                  >
+                    REMOVE
+                  </div>
+                  <div
+                    onClick={handleCloseModal}
+                    className="bg-custom-purple p-1 justify-center flex iceland-regular rounded-sm glass 
+                  hover:scale-95 duration-300 cursor-pointer mt-10 md:mt-32 text-black font-semibold hover:bg-primary-color"
+                  >
+                    CLOSE
+                  </div>
+                </div>
+              </div>
+              <div className="bg-slate-900 w-full h-full overflow-hidden relative overflow-y-scroll custom-scrollbar">
+                <div className=" w-full bg-white h-auto px-2 ">
+                  <div className="sticky bg-white h-auto z-10 top-0 flex justify-between place-items-center ">
+                    <div className="text-2xl text-primary-color  font-bold">
+                      {selectedItem.item_Name}
+                    </div>
+                  </div>
+                  <div className="flex">
+                    <div className="w-1/2 h-auto">
+                      <div className="mt-2">
+                        <label className="text-sm text-slate-800 font-semibold">
+                          Description:
+                        </label>
+                        <div className="text-sm text-primary-color font-semibold">
+                          {selectedItem.item_Description}
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <label className="text-sm text-slate-800 font-semibold">
+                          Category:
+                        </label>
+                        <div className="text-sm text-primary-color font-semibold">
+                          {selectedItem.category}
+                        </div>
+                      </div>
+                      <div className="mt-2 mb-2">
+                        <label className="text-sm text-slate-800 font-semibold">
+                          Item Tags:
+                        </label>
+                        <div className="text-sm text-white font-normal  flex flex-wrap gap-2">
+                          {selectedItem.item_Tags?.map((tag, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-primary-color glass  rounded-md"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="w-1/2 h-auto relative ">
+                      <div className=" mr-2 justify-center right-5 place-items-end">
+                        <div className="place-items-center mr-2">
+                          <div className="text-yellow-500 text-5xl flex place-items-center font-bold text-center">
+                            {selectedItem.item_Rating}
+                            <box-icon
+                              type="solid"
+                              color="#FFB200"
+                              size="40px"
+                              name="star"
+                            ></box-icon>
+                          </div>
+                          <label className="text-sm text-slate-800 font-semibold">
+                            Customers rating
                           </label>
                         </div>
-
-                        <div className="gap-2 flex p-2 justify-end w-1/3">
-                        <label className="text-sm text-slate-800">Quantity:</label>
-                          <input
-                            type="number"
-                            placeholder="Quantity"
-                            className="bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700"
-                          />
-                        </div>
-                        <div className="gap-2 p-2 flex w-1/3">
-                          <label className="text-sm text-slate-800">Price:</label>
-                          <input
-                            className="bg-slate-200 px-1 shadow-sm rounded-sm w-24 text-slate-700"
-                            type="number"
-                            placeholder="Price"
-                          />
-                        </div>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-slate-800 text-center text-sm p-2">No sizes available for the selected options.</p>
-                  )}
-                </div>
-              ))}
-
-
-                {imageInputs.map((input, index) => (
-                    <div key={index} className="flex items-center mb-2">
-                        <input 
-                            type="file" 
-                            accept="image/*"
-                            className="border p-2 w-full bg-slate-200 h-auto text-slate-800 text-sm"
-                        />
-                        <button 
-                            className="ml-2 bg-red-500 text-white h-9 px-2 py-1 rounded"
-                            onClick={() => deleteImageInput(index)}
+                      <div className="justify-center  right-5 place-items-center gap-2 top-20 absolute">
+                        <div
+                          className={
+                            selectedItem.qty < 11
+                              ? "text-red-500 text-2xl font-bold text-center"
+                              : "text-primary-color text-2xl font-bold text-center"
+                          }
                         >
-                            Clear
-                        </button>
+                          {selectedItem.item_Orders}
+                        </div>
+                        <label className="text-sm text-slate-800 font-semibold">
+                          Sold
+                        </label>
+                      </div>
                     </div>
-                ))}
-
-                </div>
-            </div>
-
-          </div>
-        
-        </div>
-        <div className='flex justify-between w-full'>
-          <button
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-            onClick={handleCloseModal}
-          >
-            Close
-          </button>
-          <button 
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-            onClick={handleCloseModal}
-          >
-           Add Item
-          </button>
-        </div>
-      </div>
-    </div>
-      )}
-      {/* Add Advertisement Modal */} 
-      {isModalOpenAds && (
-      <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-        <div className="bg-white rounded-lg p-5 h-auto w-full md:w-3/4 pt-2 lg:w-1/2 m-2 md:m-0 auto">
-          <div className="font-medium text-slate-800 py-2 w-full flex justify-between place-items-center  ">
-            <span className='font-bold text-[20px] md:text-2xl'>Add Shop Advertisement Photo</span>
-            <box-icon name='images' color='#4D077C'></box-icon>
-          </div>
-          <div className='h-auto w-full bg-slate-200 place-items-center md:place-items-start  rounded-md shadow-sm mb-2 p-2 md:flex gap-2'>
-            
-              <div className='md:w-1/2 h-auto p-2'>
-                <div className='mt-2'>
-                  <label className=' text-slate-800  text-sm font-semibold' >Name:</label> <br/>
-                  <input type='text' className='bg-slate-100 p-1 rounded-sm shadow-md mt-1 text-slate-800 w-full' placeholder='Type Ad Name' ></input> <br/>  
-                </div>
-                <div className='mt-2 '>
-                  <label className=' text-slate-800  text-sm font-semibold mt-2' >Choose a marketing visual</label> <br/>
-                  <input 
-                  onChange={handleImagePick}
-                  accept="image/*"
-                  id="imageInput"
-                  type='file' className='bg-slate-100 text-slate-700 w-full shadow-md mt-1'></input>
-                  <div className=' place-items-end py-2'>
-                    <div
-                    onClick={cancelImage}
-                    className='bg-custom-purple p-1 glass rounded-md hover:scale-95 duration-300 cursor-pointer text-white'>Cancel </div>
                   </div>
                 </div>
-              
-              </div>
-              <div className='w-[180px] h-2/3 md:w-1/2 md:h-full bg-custom-purple shadow-md glass rounded-sm p-2'>
-               <div className='bg-slate-100 h-[200px] md:h-[350px] rounded-sm shadow-md place-items-center flex place-content-center'>
-                  {imageSrc ? (
-                      <img src={imageSrc} className="h-full w-full object-contain" alt="Preview of the selected marketing visual" />
-                  ) : (
-                      <span>Ads will appear here</span>
-                  )}
-               </div>
-              </div>
-            
-          </div>
-             
-          <div className='flex justify-between w-full'>
-            <button
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-              onClick={handleCloseModal}
-            >
-              Close
-            </button>
-            <button 
-              className="bg-green-500  text-white px-4 py-2 rounded hover:bg-green-700"
-              onClick={handleCloseModal}
-            >
-              Add
-            </button>
-          </div>
-        </div>
-      </div>
-      )}
- 
+                <div className="h-auto w-full bg-slate-200 p-4 flex flex-col gap-4">
+                  {selectedItem.item_Variant?.map((variant, variantIndex) => (
+                    <div
+                      key={variantIndex}
+                      className="p-4 bg-white shadow-md rounded-lg"
+                    >
+                      {/* Variant Name */}
+                      <div className="flex justify-between items-center mb-4">
+                        {variant.imagePath ? (
+                          <img
+                            src={variant.imagePath}
+                            alt={`Image of ${variant.variant_Name}`}
+                            className="h-16 w-16 shadow-md object-cover rounded-md"
+                          />
+                        ) : (
+                          <div className="h-20 w-20 bg-gray-200 flex items-center justify-center rounded-md">
+                            <span className="text-gray-500 text-sm">
+                              No Image
+                            </span>
+                          </div>
+                        )}
+                        <div className="text-lg font-bold text-slate-800">
+                          {variant.variant_Name}
+                        </div>
+                        <div className="flex gap-2">
+                          {editableVariants[variantIndex] && (
+                            <button
+                              onClick={() => handleAddSize(variantIndex)}
+                              className="bg-primary-color hover:bg-primary-dark text-white text-sm px-3 py-1 rounded-md"
+                            >
+                              Add Size
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              if (editableVariants[variantIndex]) {
+                                // Save changes
+                                handleUpdateItem(variantIndex);
+                              } else {
+                                // Enter edit mode
+                                toggleEdit(variantIndex);
+                              }
+                            }}
+                            className={`${
+                              editableVariants[variantIndex]
+                                ? "bg-green-500"
+                                : "bg-blue-500"
+                            } text-white text-sm px-3 py-1 rounded-md`}
+                          >
+                            {editableVariants[variantIndex] ? "Save" : "Edit"}
+                          </button>
+                        </div>
+                      </div>
 
-    {/* ALLERTS */} 
-      {showAlert && (
-          <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-            <div role="alert" className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md">
-              <svg
+                      {/* Sizes, Quantities, and Prices */}
+                      {variant.sizes?.map((size, sizeIndex) => (
+                        <div>
+                          <div
+                            key={sizeIndex}
+                            className="flex justify-between items-center mb-2 border-b pb-2"
+                          >
+                            <div>
+                              <label className="text-slate-900 text-sm font-medium">
+                                Size:
+                              </label>
+                              <input
+                                className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                  editableVariants[variantIndex]
+                                    ? "bg-slate-300"
+                                    : "bg-slate-100"
+                                }`}
+                                type="text"
+                                value={size.size}
+                                onChange={(e) =>
+                                  handleSizeChange(
+                                    variantIndex,
+                                    sizeIndex,
+                                    "size",
+                                    e.target.value
+                                  )
+                                }
+                                readOnly={!editableVariants[variantIndex]}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-slate-900 text-sm font-medium">
+                                Quantity:
+                              </label>
+                              <input
+                                onKeyDown={blockInvalidChar}
+                                className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                  editableVariants[variantIndex]
+                                    ? "bg-slate-300"
+                                    : "bg-slate-100"
+                                }`}
+                                type="number"
+                                value={size.qty}
+                                onChange={(e) =>
+                                  handleSizeChange(
+                                    variantIndex,
+                                    sizeIndex,
+                                    "qty",
+                                    e.target.value
+                                  )
+                                }
+                                readOnly={!editableVariants[variantIndex]}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-slate-900 text-sm font-medium">
+                                Price:
+                              </label>
+                              <input
+                                onKeyDown={blockInvalidChar}
+                                className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                  editableVariants[variantIndex]
+                                    ? "bg-slate-300"
+                                    : "bg-slate-100"
+                                }`}
+                                type="number"
+                                value={size.price}
+                                onChange={(e) =>
+                                  handleSizeChange(
+                                    variantIndex,
+                                    sizeIndex,
+                                    "price",
+                                    e.target.value
+                                  )
+                                }
+                                readOnly={!editableVariants[variantIndex]}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="h-52 w-full bg-slate-500"> </div>
+              </div>
+            </div>
+          </div>
+          {/* Post Variant Confirmation */}
+          {showAlert2 && (
+            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-5 rounded-md shadow-md">
+                <h2 className="text-xl font-semibold mb-4 text-slate-800">
+                  Post this Item{" "}
+                  <span className="font-bold text-primary-color">
+                    {selectedItem.item_Name}
+                  </span>
+                  ?
+                </h2>
+                <div className="flex w-full gap-2 justify-between">
+                  <button
+                    onClick={handleClosePostItem}
+                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                  >
+                    No! go back.
+                  </button>
+                  <button
+                    onClick={PostNotify}
+                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                  >
+                    Yeah sure!
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Unpost Variant Confirmation */}
+          {showAlertUnP && (
+            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-5 rounded-md shadow-md">
+                <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
+                  Are you sure you want to Unpost this <br />
+                  <span className="font-bold text-primary-color">
+                    {selectedItem.item_Name}
+                  </span>
+                  ?
+                </h2>
+                <div className="flex w-full gap-2 justify-between">
+                  <button
+                    onClick={handleClosePostItem}
+                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                  >
+                    No! go back.
+                  </button>
+                  <button
+                    onClick={unPostNotify}
+                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                  >
+                    Yeah sure!
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Delete Variant Confirmation */}
+          {showAlertDelCon && (
+            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-5 rounded-md shadow-md">
+                <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
+                  Are you sure you want to Delete this <br />
+                  <span className="font-bold text-primary-color">
+                    {selectedItem.item_Name}
+                  </span>
+                  ?
+                </h2>
+                <div className="flex w-full gap-2 justify-between">
+                  <button
+                    onClick={handleClosePostItem}
+                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                  >
+                    No! go back.
+                  </button>
+                  <button
+                    onClick={DeleteItem}
+                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                  >
+                    Yeah sure!
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Delete Variant Confirmation */}
+          {ConfirmUpdate && (
+            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white p-5 rounded-md shadow-md">
+                <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
+                  Are you sure you want to Update this <br />
+                  <span className="font-bold text-primary-color">
+                    {selectedItem.item_Name}
+                  </span>
+                  ?
+                </h2>
+                <div className="flex w-full gap-2 justify-between">
+                  <button
+                    onClick={() => {
+                      const updatedVariants = [...selectedItem.item_Variant];
+                      if (currentVariantIndex !== null) {
+                        updatedVariants[currentVariantIndex].sizes =
+                          updatedVariants[currentVariantIndex].sizes.filter(
+                            (size) =>
+                              size.size.trim() !== "" ||
+                              size.qty > 0 ||
+                              size.price > 0
+                          );
+                      }
+                      setSelectedItem({
+                        ...selectedItem,
+                        item_Variant: updatedVariants,
+                      });
+
+                      setShowAlertCOnfirmUpdate(false);
+                      setCurrentVariantIndex(null);
+                      toggleEdit(currentVariantIndex);
+                    }}
+                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                  >
+                    No! go back.
+                  </button>
+                  <button
+                    onClick={handleConfirmedUpdate}
+                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                  >
+                    Yeah sure!
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Alert Update Variant Confirmation */}
+          {showAlertEditDone && (
+            <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+              <div
+                role="alert"
+                className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+              >
+                <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 shrink-0 stroke-current mr-2"
                   fill="none"
-                  viewBox="0 0 24 24">
+                  viewBox="0 0 24 24"
+                >
                   <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Item Posted in the Shop</span>
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>Item {selectedItem.item_Name} Updated in the Shop</span>
+              </div>
             </div>
-          </div>
+          )}
+        </div>
       )}
 
-    {/* EDIT, VIEW, POST, REMOVE ITEM */} 
-      {selectedItem && (
-      <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
-        <div className="bg-white rounded-lg  md:w-1/2 h-2/3 w-full ">
-          <div className=' bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 w-full rounded-t-md  '/>
-          <div className='text-custom-purple font-semibold iceland-regular text-2xl p-2'>ITEM INFORMATION</div>
-          <div className='h-full bg-white w-full p-2 flex gap-2'>
-            <div className=' w-4/12 h-auto'>
-              <div className='w-full h-[200px] rounded-sm bg-slate-100 shadow-inner shadow-custom-purple mb-2'>
-                <img
-                    src={selectedItem.photo}
-                    alt={`Image of ${selectedItem.name}`}
-                    className="h-full w-full object-cover rounded-md"
-                />
-              </div>
-              <div className=' w-auto h-auto p-2 rounded-sm '>
-                <div
-                  onClick={PostNotify}
-                  className='bg-blue-700 p-1 justify-center flex iceland-regular rounded-sm glass 
-                  hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-blue-500'>POST</div>
-                <div className='bg-green-700 p-1 justify-center flex iceland-regular rounded-sm glass 
-                  hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-green-500'>EDIT</div>
-                <div className='bg-red-700 p-1 justify-center flex iceland-regular rounded-sm glass 
-                  hover:scale-95 duration-300 cursor-pointer mt-2 text-black font-semibold hover:bg-red-500'>REMOVE</div>
-                <div
-                  onClick={handleCloseModal}
-                  className='bg-custom-purple p-1 justify-center flex iceland-regular rounded-sm glass 
-                  hover:scale-95 duration-300 cursor-pointer mt-10 md:mt-24 text-black font-semibold hover:bg-primary-color'>CLOSE</div>
-              </div>
+      {isModalImage && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+          <div className="bg-white relative rounded-lg p-5 h-auto w-full md:w-3/12  m-2 md:m-0 auto">
+            <div className="min-h-80 bg-violet-300 w-full">
+              {selectedVariantIndex !== null ? (
+                uploadedImages[selectedVariantIndex] ? (
+                  <div className="h-80 bg-violet-300 w-full">
+                    <img
+                      src={uploadedImages[selectedVariantIndex]}
+                      alt={`Variant ${selectedVariantIndex}`}
+                      className=" mb-4 object-fill h-full w-auto place-self-center"
+                    />
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500 mb-4">
+                    No image uploaded for this item.
+                  </p>
+                )
+              ) : null}
             </div>
-            <div className='bg-slate-900 w-full h-full overflow-hidden relative overflow-y-scroll custom-scrollbar'>
-              <div className='h-52 w-full bg-white px-2'>
-               
-                  <div className='sticky bg-white h-auto z-10 top-0 flex justify-between place-items-center '>
-                    <div className='text-2xl text-primary-color  font-bold'>{selectedItem.name}</div>
-                  
+            <div className="flex gap-2">
+              <button
+                className="bg-white absolute top-0 right-2 text-red-600 font-bold px-3 py-1 mt-2 rounded-lg hover:text-red-300 duration-200"
+                onClick={handleViewImageClose}
+              >
+                X
+              </button>
+              <div className="w-full">
+                {selectedVariantIndex !== null && (
+                  <div className="mt-3">
+                    <p className="font-bold uppercase text-center text-slate-700">
+                      {submittedVariants[selectedVariantIndex].text}
+                    </p>
                   </div>
-                  <div className='flex'>
-                    <div className='w-1/2'>
-                      <div className='mt-2'>
-                        <label className='text-sm text-slate-800 font-semibold'>For:</label>
-                        <div className='text-sm text-primary-color font-semibold'>{selectedItem.customerType}</div>
-                      </div>
-                      <div className='mt-2'>
-                        <label className='text-sm text-slate-800 font-semibold'>Category:</label>
-                        <div className='text-sm text-primary-color font-semibold'>{selectedItem.category}</div>
-                      </div>
-                      <div className='mt-2'>
-                        <label className='text-sm text-slate-800 font-semibold'>Clothing Type:</label>
-                        <div className='text-sm text-primary-color font-semibold'>{selectedItem.type}</div>
-                      </div>
-                    </div>
-
-                    <div className='w-1/2 h-auto relative '>
-                      <div className=' mr-2 justify-center right-5 place-items-end'>
-                        <div className='place-items-center mr-2'>
-                          <div className='text-yellow-500 text-5xl flex place-items-center font-bold text-center'>{selectedItem.rating}
-                           <box-icon type='solid' color='#FFB200' size='40px' name='star'></box-icon>
-                          </div>
-                          <label className='text-sm text-slate-800 font-semibold'>Customers rating</label>
-                        </div>
-
-                      </div>
-                      <div className='justify-center right-5 place-items-center bottom-0 absolute'>
-                        <div className={selectedItem.qty < 11 ? "text-red-500 text-2xl font-bold text-center" : "text-primary-color text-2xl font-bold text-center"}>{selectedItem.qty}</div>
-                        <label className='text-sm text-slate-800 font-semibold'>Quantity</label>  
-                      </div>
-                    </div>
-                  </div>
-                 
-                
-                
+                )}
               </div>
-              <div className='h-52 w-full bg-slate-200'> </div>
-              <div className='h-52 w-full bg-slate-500'> </div>
             </div>
           </div>
         </div>
-      </div>
       )}
+    </div>
+  );
+}
 
-
-      </div>
-      );
-    }
-
-
-
-  export default Products;
+export default Products;
