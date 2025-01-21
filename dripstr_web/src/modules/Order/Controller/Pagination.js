@@ -52,7 +52,7 @@ const Pagination = ({ totalPages, handlePageChange }) => {
       {/* First Button */}
         <button
             onClick={handleFirst}
-            className={`px-3 py-1 rounded bg-purple-500 text-white font-bold
+            className={`px-3 py-1 rounded bg-purple-800 text-white font-bold
                 ${currentPage === 1 ? 'cursor-not-allowed opacity-75' : ''}`}
             disabled={currentPage === 1}
             >
@@ -62,7 +62,7 @@ const Pagination = ({ totalPages, handlePageChange }) => {
       {/* Previous Button */}
       <button
             onClick={handlePrevious}
-            className={`px-3 py-1 rounded bg-purple-500 text-white font-bold
+            className={`px-3 py-1 rounded bg-purple-800 text-white font-bold
                 ${currentPage === 1 ? 'cursor-not-allowed opacity-75' : ''}`}
             disabled={currentPage === 1}
             >
@@ -87,7 +87,7 @@ const Pagination = ({ totalPages, handlePageChange }) => {
       {/* Next Button */}
       <button
         onClick={handleNext}
-        className={`px-3 py-1 rounded bg-purple-500 text-white font-bold
+        className={`px-3 py-1 rounded bg-purple-800 text-white font-bold
             ${currentPage === totalPages ? 'cursor-not-allowed opacity-75' : ''}`}
         disabled={currentPage === totalPages}
       >
@@ -97,7 +97,7 @@ const Pagination = ({ totalPages, handlePageChange }) => {
       {/* Last Button */}
       <button
         onClick={handleLast}
-        className={`px-3 py-1 rounded bg-purple-500 text-white font-bold
+        className={`px-3 py-1 rounded bg-purple-800 text-white font-bold
             ${currentPage === totalPages ? 'cursor-not-allowed opacity-75' : ''}`}
         disabled={currentPage === totalPages}
       >

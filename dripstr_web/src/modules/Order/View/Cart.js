@@ -7,6 +7,7 @@ function Cart() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;  // Set to 5 for pagination of 5 items per page
+  const [selectedProducts, setSelectedProducts] = useState([]); //Handles checkbox change
 
   // Ensure each item has a 'count' property, defaulting to 1 if not present
   const [cartItems, setCartItems] = useState(
@@ -59,14 +60,20 @@ function Cart() {
     setCurrentPage(pageNumber);
   };
 
-  const totalProducts = cartItems.length;
+    const handleCheckboxChange = (productId) => {
+    setSelectedProducts((prevSelected) =>
+      prevSelected.includes(productId)
+        ? prevSelected.filter((id) => id !== productId) // Deselect
+        : [...prevSelected, productId] // Select
+    );
+    };
 
   return (
     <div className="flex flex-col bg-slate-200 p-6 h-full">
       <h1 className="text-4xl font-bold text-primary-color mb-6">Shopping Cart</h1>
       <div>
         <h1 className="text-md font-bold text-primary-color mb-6 flex justify-start">
-          Total Products: {totalProducts}
+          Total Products: {cartItems.length}
         </h1>
       </div>
       <div>
@@ -74,7 +81,12 @@ function Cart() {
           <div key={item.id} className="flex bg-slate-400 p-4 gap-2 mb-4">
             <div>
               <h1 className="text-xl font-bold text-black mb-2 ml-3">
-                <FontAwesomeIcon icon={faStore} /> {item.shop?.shop_name}
+              <input type='checkbox'
+              className='mr-2 w-4 h-4'
+              checked={selectedProducts.includes(item.id)}
+              onChange={() => handleCheckboxChange(item.id)}
+              />
+              <FontAwesomeIcon icon={faStore} /> {item.shop?.shop_name}
               </h1>
               <img
                 src={item.url}
@@ -136,7 +148,7 @@ function Cart() {
           {/* Payment Option */}
           <div className="flex items-center gap-4">
             <p className="text-md font-bold text-black">Payment Option:</p>
-            <div>
+            <div className='flex flex-row gap-4'>
               <label className="flex items-center text-black">
                 <input type="radio" name="paymentOption" value="cashOnDelivery" />
                 Cash on Delivery
@@ -152,7 +164,7 @@ function Cart() {
         {/* Checkout Button */}
         <div className="flex gap-4 items-center">
           <button className="btn btn-lg btn-primary py-2 px-6">
-            Checkout
+            Checkout ({selectedProducts.length})
           </button>
         </div>
       </div>
