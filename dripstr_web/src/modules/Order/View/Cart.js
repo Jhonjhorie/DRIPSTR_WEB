@@ -196,7 +196,7 @@ function Cart() {
       </div>
       {showAlert && (
         <div className="absolute bg-purple-900 text-white text-center top-0 left-0 w-full py-3 z-50 px-4">
-          <h1 className="text-lg justify-center">Please select a product first</h1>
+          <h1 className="text-lg justify-center">Please select a product first.</h1>
           <div className='absolute right-9 top-4'>
             <FontAwesomeIcon icon={faX} className="cursor-pointer" onClick={() => setShowAlert(false)} />
           </div>
