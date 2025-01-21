@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faMinus, faStore, faTrash } from '@fortawesome/free-solid-svg-icons'; 
+import { faPlus, faMinus, faStore, faTrash, faX } from '@fortawesome/free-solid-svg-icons';
 import Pagination from '../Controller/Pagination.js';
+import { set } from 'date-fns';
 
 function Cart() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 3;  // Set to 5 for pagination of 5 items per page
+  const itemsPerPage = 5;  // Set to 5 for pagination of 5 items per page
   const [selectedProducts, setSelectedProducts] = useState([]); //Handles checkbox change
+  const [showAlert, setShowAlert] = useState(false);
 
   // Ensure each item has a 'count' property, defaulting to 1 if not present
   const [cartItems, setCartItems] = useState(
@@ -34,16 +36,16 @@ function Cart() {
   }
 
   const minusCount = (itemId) => {
-    setCartItems(prevItems => 
-      prevItems.map(item => 
+    setCartItems(prevItems =>
+      prevItems.map(item =>
         item.id === itemId ? { ...item, count: Math.max(1, item.count - 1) } : item
       )
     );
   };
 
   const plusCount = (itemId) => {
-    setCartItems(prevItems => 
-      prevItems.map(item => 
+    setCartItems(prevItems =>
+      prevItems.map(item =>
         item.id === itemId ? { ...item, count: item.count + 1 } : item
       )
     );
@@ -60,13 +62,24 @@ function Cart() {
     setCurrentPage(pageNumber);
   };
 
-    const handleCheckboxChange = (productId) => {
+  const handleCheckboxChange = (productId) => {
     setSelectedProducts((prevSelected) =>
       prevSelected.includes(productId)
         ? prevSelected.filter((id) => id !== productId) // Deselect
         : [...prevSelected, productId] // Select
     );
-    };
+    setShowAlert(false);
+  };
+
+  const handleCheckout = () => {
+    if (selectedProducts.length === 0) {
+      setShowAlert(true); // Show the alert card if no products are selected
+    } else {
+      setShowAlert(false);
+      // Proceed with checkout logic (e.g., navigate to another page or process checkout)
+      console.log('Proceeding to checkout with:', selectedProducts);
+    }
+  };
 
   return (
     <div className="flex flex-col bg-slate-200 p-6 h-full">
@@ -79,20 +92,27 @@ function Cart() {
       <div>
         {currentItems.map((item) => (
           <div key={item.id} className="flex bg-slate-400 p-4 gap-2 mb-4">
-            <div>
+            <div className='flex mr-4 flex-col'>
               <h1 className="text-xl font-bold text-black mb-2 ml-3">
-              <input type='checkbox'
-              className='mr-2 w-4 h-4'
-              checked={selectedProducts.includes(item.id)}
-              onChange={() => handleCheckboxChange(item.id)}
-              />
-              <FontAwesomeIcon icon={faStore} /> {item.shop?.shop_name}
+                <input type='checkbox'
+                  className='mr-2 w-4 h-4'
+                  checked={selectedProducts.includes(item.id)}
+                  onChange={() => handleCheckboxChange(item.id)}
+                />
+                <FontAwesomeIcon icon={faStore} /> {item.shop?.shop_name}
               </h1>
-              <img
-                src={item.url}
-                alt={item.product_name}
-                className="w-20 h-20 object-cover ml-3"
-              />
+              <div className='flex flex-row ml-3'>
+                <input type='checkbox'
+                  className='w-4 h-4'
+                  checked={selectedProducts.includes(item.id)}
+                  onChange={() => handleCheckboxChange(item.id)}
+                />
+                <img
+                  src={item.url}
+                  alt={item.product_name}
+                  className="w-20 h-20 object-cover ml-3"
+                />
+              </div>
             </div>
             <div className="text-black font-bold mt-8">
               <h2>{item.product_name}</h2>
@@ -121,16 +141,20 @@ function Cart() {
           </div>
         ))}
       </div>
+
       <div className='flex justify-center'>
         <Pagination totalPages={totalPages} handlePageChange={handlePageChange} />
       </div>
-      
       <div className="mt-auto sticky bottom-0 w-full bg-slate-400 p-6 shadow-xl flex justify-between items-center">
-        
+
         {/* Left Side (Shipping and Total Price) */}
         <div className="text-xl flex flex-col gap-4">
           <p className="text-md font-bold text-black">Shipping: ₱</p>
-          <p className="text-2xl font-bold text-black">Total Price: ₱{cartItems.reduce((total, item) => total + item.price * item.count, 0)}</p>
+          <p className="text-2xl font-bold text-black">
+            Total Price: ₱{currentItems
+              .filter((item) => selectedProducts.includes(item.id)) // Only include selected products
+              .reduce((total, item) => total + item.price * item.count, 0)}
+          </p>
         </div>
 
         {/* Right Side (Voucher and Payment Options) */}
@@ -163,11 +187,21 @@ function Cart() {
 
         {/* Checkout Button */}
         <div className="flex gap-4 items-center">
-          <button className="btn btn-lg btn-primary py-2 px-6">
+          <button
+            className="btn btn-lg btn-primary py-2 px-6"
+            onClick={handleCheckout}>
             Checkout ({selectedProducts.length})
           </button>
         </div>
       </div>
+      {showAlert && (
+        <div className="absolute bg-purple-900 text-white text-center top-0 left-0 w-full py-3 z-50 px-4">
+          <h1 className="text-lg justify-center">Please select a product first</h1>
+          <div className='absolute right-9 top-4'>
+            <FontAwesomeIcon icon={faX} className="cursor-pointer" onClick={() => setShowAlert(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
