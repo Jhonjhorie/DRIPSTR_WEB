@@ -19,16 +19,6 @@ function ArtistCreate() {
     <div className="h-full w-full">
       <div className="h-auto w-full lg:flex bg-slate-300 p-1  ">
         {/* SECOND CONTAINER */}
-        <div className=" bg-custom-purple glass h-auto lg:h-screen relative w-full  lg:m-2   lg:w-[45%] lg:rounded-[3%] place-content-center place-items-center p-2">
-          <div className="text-2xl font-bold iceland-bold text-slate-50  ">
-            DESIGN WITH
-          </div>
-          <img
-            src={logo}
-            alt="Dynamic Logo Name"
-            className="drop-shadow-custom "
-          />
-        </div>
 
         {/* FIRST CONTAINER */}
         <div className=" h-auto w-full lg:w-[55%] md:p-10 overflow-hidden ">
@@ -52,7 +42,7 @@ function ArtistCreate() {
                 <label className="form-control w-full">
                   <div className="label">
                     <span className="label-text text-slate-800 font-semibold">
-                      What is your Username?
+                      What is your Artist Name?
                     </span>
                   </div>
                   <input
@@ -84,16 +74,20 @@ function ArtistCreate() {
                 <label className="form-control w-full max-w-xs ">
                   <div className="label">
                     <span className="label-text font-semibold text-slate-800">
-                      What is your type of Business?
+                      What is your Art Style?
                     </span>
                   </div>
                   <select className="select select-bordered bg-slate-100 text-black border-violet-950 border-[2px] w-full">
                     <option value="">Select an option</option>
-                    <option value="">Option 1</option>
-                    <option value="">Option 2</option>
-                    <option value="">Option 3</option>
-                    <option value="">Option 4</option>
-                    <option value="">Option 5</option>
+                    <option value="">Street Art/Graffiti</option>
+                    <option value="">Digital Art</option>
+                    <option value="">Comic/Cartoon Art</option>
+                    <option value="">Anime/Manga</option>
+                    <option value="">Chibi Style</option>
+                    <option value="">Pixel Art</option>
+                    <option value="">Cubism</option>
+                    <option value="">Realism</option>
+                    <option value="">etc</option>
                   </select>
                 </label>
               </div>
@@ -121,7 +115,7 @@ function ArtistCreate() {
           <label className="form-control mx-2 flex justify-center items-center md:items-start ">
             <div className="label">
               <span className="label-text font-semibold text-slate-800">
-                What is your address?
+                Introduce yourself
               </span>
             </div>
             <textarea
@@ -129,13 +123,8 @@ function ArtistCreate() {
               placeholder="Type your Shop Address here"
             ></textarea>
           </label>
-          <div className="w-full h-auto justify-between flex m-2  mb-14 md:mb-0">
-            <button
-              onClick={() => navigate("/shop/MerchantCreate")}
-              className="  text-slate-600 iceland-bold hover:text-custom-purple hover:duration-300 self-end  m-1"
-            >
-              BE A DRIPSTR MERCHANT?{" "}
-            </button>
+          <div className="w-full h-auto justify-end flex m-2  mb-14 md:mb-0">
+           
             <button
               onClick={() => navigate("/shop/Artist/ArtistDashboard")}
               className="btn glass bg-custom-purple   mr-5 iceland-regular tracking-wide text-lg text-white "
