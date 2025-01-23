@@ -21,7 +21,10 @@ const AddItem = () => {
   const [shopData, setShopData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+  };
   //Get the user Shop Data
   const [formData, setFormData] = useState({
     itemTitle: "",
@@ -125,17 +128,24 @@ const AddItem = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const { itemTitle, itemDescription, tag1, tag2, tag3 } = formData;
     const tags = [tag1, tag2, tag3].filter(Boolean); // Remove empty values
 
     try {
       // Validate required fields
-      if (!itemTitle || !itemDescription || !selectedShopId) {
+      if (
+        !itemTitle ||
+        !itemDescription ||
+        !selectedShopId ||
+        !selectedCategory
+      ) {
         console.log("Please fill in all required fields.");
         setShowAlert3(true);
         setTimeout(() => {
           setShowAlert3(false);
         }, 3000);
+        setLoading(false);
         return;
       }
       //if no varainst is added
@@ -145,6 +155,7 @@ const AddItem = () => {
         setTimeout(() => {
           setShowAlert6(false);
         }, 3000);
+        setLoading(false);
         return;
       }
       // Validate that all variants have a selected image
@@ -156,6 +167,7 @@ const AddItem = () => {
         setTimeout(() => {
           setShowAlert5(false);
         }, 3000);
+        setLoading(false);
         return;
       }
       if (hasMissingImages) {
@@ -164,6 +176,7 @@ const AddItem = () => {
         setTimeout(() => {
           setShowAlert4(false);
         }, 3000);
+        setLoading(false);
         return;
       }
 
@@ -204,6 +217,7 @@ const AddItem = () => {
           item_Name: itemTitle,
           item_Description: itemDescription,
           item_Tags: tags,
+          item_Category: selectedCategory,
           item_Rating: 0,
           item_Orders: 0,
           is_Post: false,
@@ -223,10 +237,13 @@ const AddItem = () => {
         tag2: "",
         tag3: "",
       });
+      setSelectedCategory("");
       setVariants([]);
     } catch (error) {
       console.error("Error adding product:", error.message);
       alert("Failed to add product.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -316,7 +333,7 @@ const AddItem = () => {
                 </div>
                 <span className="ml-3 ">Add Item</span>
               </div>
-              <div className=" w-full mt-5 md:mt-10">
+              <div className=" w-full mt-2 md:mt-5">
                 <label className="text-slate-950  font-semibold mr-2 text-[15px]">
                   Item Title:
                 </label>
@@ -342,6 +359,36 @@ const AddItem = () => {
                   onChange={handleChange}
                   name="itemDescription"
                 ></textarea>
+              </div>
+              <div className="">
+                <div className="dropdown w-full">
+                  <div
+                    tabIndex={0}
+                    role="button"
+                    className="bg-custom-purple glass hover:scale-95 duration-300 rounded-md text-center text-slate-100 p-2 mt-2 w-full"
+                  >
+                    {selectedCategory || "Choose a Category"}
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu bg-slate-100 text-slate-900 font-semibold rounded-sm w-full z-[1] p-2 shadow"
+                  >
+                    {[
+                      "Top",
+                      "Bottom",
+                      "Tumbler",
+                      "Mug",
+                      "Shoes",
+                      "Totebag",
+                    ].map((category) => (
+                      <li key={category}>
+                        <a onClick={() => handleCategorySelect(category)}>
+                          {category}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
               <div className="w-full h-56">
                 <div className="w-full flex justify-between align">
@@ -536,13 +583,22 @@ const AddItem = () => {
               </div>
             </div>
             <div className=" absolute bottom-16 md:bottom-10 right-10 p-2 bg-violet-700 bg-opacity-40 rounded-md">
-              <button
-                type="submit"
-                className="text-slate-100 font-semibold px-5 shadow-md shadow-primary-color
-             p-2 hover:scale-105 hover:bg-primary-color duration-300 rounded-md bg-custom-purple glass "
-              >
-                Submit
-              </button>
+              {loading ? (
+                <div className="text-center">
+                  <span className="loading loading-infinity text-slate-50 w-16"></span>
+                  <h1 className="text-slate-50 font-semibold iceland-regular text-xl">
+                    Submitting
+                  </h1>
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  className="text-slate-100 font-semibold px-5 shadow-md shadow-primary-color
+                 p-2 hover:scale-105 hover:bg-primary-color duration-300 rounded-md bg-custom-purple glass "
+                >
+                  Submit
+                </button>
+              )}
             </div>
           </div>
           {/* Reach Max Variant */}

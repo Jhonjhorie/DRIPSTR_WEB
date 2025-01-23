@@ -97,7 +97,7 @@ function MerchantDashboard() {
           </div>
         </div>
         <div className="w-full h-full gap-1  bg-slate-100 shadow-md justify-between flex">
-          <div className="w-80  h-full bg-gradient-to-br from-violet-500 to-fuchsia-500 bg-opacity-10 p-2 overflow-hidden overflow-y-scroll custom-scrollbar">
+          <div className="w-80  h-full text-transparent bg-clip-text bg-gradient-to-br from-violet-500 to-fuchsia-500 bg-opacity-10 p-2 overflow-hidden overflow-y-scroll custom-scrollbar">
             <div className="w-full h-16 bg-slate-50"></div>
           </div>
           <div className="w-full h-full bg-slate-900"></div>

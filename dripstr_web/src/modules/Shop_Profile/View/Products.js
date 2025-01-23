@@ -35,7 +35,7 @@ function Products() {
   const [adName, setAdName] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imageSrcAd, setImageSrcAd] = useState("");
-  const [imageSrcAds, setImageSrcAds] = useState("");
+  const [imageSrcAds, setImageSrcAds] = useState(null);
   const [selectedShopId, setSelectedShopId] = useState(null);
 
   const fetchUserProfileAndShop = async () => {
@@ -79,7 +79,7 @@ function Products() {
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
             .select(
-              "id, item_Name, item_Description, item_Tags, item_Rating, item_Orders, item_Variant, is_Post"
+              "id, item_Name, item_Description, item_Tags, item_Rating, item_Orders, item_Variant, is_Post, item_Category"
             )
             .eq("shop_Id", selectedShopId);
 
@@ -438,7 +438,7 @@ function Products() {
     }
   };
   const cancelImage = () => {
-    setImageSrc("");
+    setImageSrcAds(null);
     document.getElementById("imageInput").value = "";
   };
 
@@ -494,13 +494,13 @@ function Products() {
         alert("Failed to add ad.");
       } else {
         alert("Ad successfully added!");
+        
         handleCloseModal(); // Close the modal after success
       }
     } catch (error) {
       console.error("Unexpected error:", error);
       alert("An unexpected error occurred.");
     } finally {
-      // Hide loading indicator
       setLoading(false);
     }
   };
@@ -766,8 +766,8 @@ function Products() {
                   </div>
                 </div>
               </div>
-              <div className="w-[180px] h-2/3 md:w-1/2 md:h-full bg-custom-purple shadow-md glass rounded-sm p-2">
-                <div className="bg-slate-100 h-[200px] md:h-[350px] rounded-sm shadow-md place-items-center flex place-content-center">
+              <div className="w-[180px] h-2/3 md:w-full md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
+                <div className="bg-slate-100 h-[200px] md:h-full rounded-sm shadow-md place-items-center flex place-content-center">
                   {imageSrcAds ? (
                     <img
                       src={imageSrcAds}
@@ -963,12 +963,12 @@ function Products() {
                           {selectedItem.item_Description}
                         </div>
                       </div>
-                      <div className="mt-2">
+                      <div className="mt-2 flex gap-1">
                         <label className="text-sm text-slate-800 font-semibold">
-                          Category:
+                          Category: 
                         </label>
                         <div className="text-sm text-primary-color font-semibold">
-                          {selectedItem.category}
+                          {selectedItem.item_Category}
                         </div>
                       </div>
                       <div className="mt-2 mb-2">
