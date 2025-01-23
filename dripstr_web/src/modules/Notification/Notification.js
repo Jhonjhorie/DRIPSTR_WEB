@@ -1,7 +1,5 @@
 // src/pages/Home.js
 import React,{useState} from "react";
-import Carousel from "./components/Carousel";
-import AvatarCard from "./components/AvatarCard";
 import CategoriesRibbon from "../Products/components/CategoriesRibbon";
 import ProductsView from "../Products/components/ProductsView";
 import MallRibbon from "../Products/components/MallRibbon";

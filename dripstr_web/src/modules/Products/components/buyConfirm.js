@@ -3,9 +3,17 @@ import { useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
 import ItemOptions from "./itemOptions.js";
+import useUserProfile from "@/shared/mulletCheck.js";
+import LoginFirst from "@/shared/mulletFirst";
+
+
+
 const SUPABASE_STORAGE_URL = 'https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public';
 
+ 
+
 const BuyConfirm = ({ action, item, onClose }) => {
+  const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(item?.color_variant[0] || ""); 
@@ -45,6 +53,8 @@ const BuyConfirm = ({ action, item, onClose }) => {
     navigate(`/product/${item.product}`, { state: { item } });
   };
 
+
+  if(isLoggedIn){
   return (
     <div className="relative right-16 sm:-right-40 ">
       <div className="absolute right-[75%] top-[55%] sm:right-[100%] sm:-top-4 w-[30vw] h-[30vw] z-50 bg-slate-50 rounded-l-lg">
@@ -190,6 +200,9 @@ const BuyConfirm = ({ action, item, onClose }) => {
       </div>
     </div>
   );
+}else{
+  return <LoginFirst />
+}
 };
 
 export default BuyConfirm;

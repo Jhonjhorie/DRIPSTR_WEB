@@ -3,10 +3,12 @@ import RateSymbol from "@/shared/products/rateSymbol";
 import {averageRate} from "../hooks/useRate.ts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
+import useUserProfile from "@/shared/mulletCheck.js";
+import LoginFirst from "@/shared/mulletFirst";
 
 export default function RatingSection ({item}) {
 const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public/";
-
+ const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [likesData, setLikesData] = useState(
     item.reviews.reduce((acc, review) => {
       acc[review.id] = { likes: review.likes, isLiked: false };
@@ -19,15 +21,26 @@ const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/obj
   };
   const [selectedItem, setSelectedItem] = useState(null);
   const toggleLike = (reviewId) => {
-    setLikesData((prev) => {
-      const updatedData = { ...prev };
-      const isLiked = updatedData[reviewId].isLiked;
-      updatedData[reviewId] = {
-        isLiked: !isLiked,
-        likes: isLiked ? updatedData[reviewId].likes - 1 : updatedData[reviewId].likes + 1,
-      };
-      return updatedData;
-    });
+    if(isLoggedIn){
+      setLikesData((prev) => {
+        const updatedData = { ...prev };
+        const isLiked = updatedData[reviewId].isLiked;
+        updatedData[reviewId] = {
+          isLiked: !isLiked,
+          likes: isLiked ? updatedData[reviewId].likes - 1 : updatedData[reviewId].likes + 1,
+        };
+        return updatedData;
+      });
+    }else{
+      setTimeout(() => {
+        document.getElementById('login_Modal').showModal();
+      }, 50);
+    }
+   
+  };
+  
+  const closeModalL = () => {
+    document.getElementById('login_Modal').close();
   };
   const [currentSlide, setCurrentSlide] = useState(0);
   const [reviewImages, setReviewImages] = useState([]);
@@ -57,7 +70,14 @@ const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/obj
   };
       
     return (
+       
       <div className="flex flex-col mt-4 w-full z-10 px-4">
+  {!isLoggedIn && <dialog id="login_Modal" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
+                   <LoginFirst />
+                   <form method="dialog" class="modal-backdrop">
+                    <button onClick={closeModalL}></button>
+                  </form>
+      </dialog>}
         <div class="my-0 divider"></div>
         <p className="text-2xl font-bold">Rating & Reviews</p>
 
@@ -222,6 +242,7 @@ const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/obj
                         <button
                           onClick={() => toggleLike(review.id)}
                           className="text-blue-500"
+                         
                         >
                           <FontAwesomeIcon
                             icon={faThumbsUp}
