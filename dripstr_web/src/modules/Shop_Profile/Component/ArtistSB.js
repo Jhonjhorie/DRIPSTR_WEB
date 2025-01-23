@@ -34,7 +34,7 @@ function ArtistSB() {
       className="fixed w-12 h-12 right-3 z-10 bg-custom-purple  glass text-white rounded-md m-2 shadow-lg"
       onClick={toggleSidebar}
     >
-      <box-icon name='menu' color="#ffffff" ></box-icon>
+     <i class="fa-solid fa-bars"></i>
                     </button>
                     {isSidebarOpen && (
                         <div 

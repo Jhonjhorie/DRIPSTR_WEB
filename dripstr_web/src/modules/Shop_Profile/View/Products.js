@@ -32,47 +32,11 @@ function Products() {
   const [shopItem, setShopProducts] = useState("");
   const [editableVariants, setEditableVariants] = useState({}); // Track editable states for each variant
   const [currentVariantIndex, setCurrentVariantIndex] = useState(null);
-
-  const toggleEdit = (variantIndex) => {
-    setEditableVariants((prev) => ({
-      ...prev,
-      [variantIndex]: !prev[variantIndex],
-    }));
-  };
-
-  const handleSizeChange = (variantIndex, sizeIndex, field, value) => {
-    setSelectedItem((prevItem) => {
-      const updatedVariants = [...prevItem.item_Variant];
-      updatedVariants[variantIndex].sizes[sizeIndex][field] = value;
-
-      return {
-        ...prevItem,
-        item_Variant: updatedVariants,
-      };
-    });
-  };
-
-  const handleUpdate = async (variantIndex) => {
-    try {
-      const updatedVariant = selectedItem.item_Variant[variantIndex];
-
-      const { error } = await supabase
-        .from("shop_Product")
-        .update({ item_Variant: selectedItem.item_Variant })
-        .eq("id", selectedItem.id);
-
-      if (error) {
-        console.error("Error updating the variant:", error);
-        alert("Failed to update the variant.");
-      } else {
-        setShowAlertEditDone(true);
-        setTimeout(() => setShowAlertEditDone(false), 3000);
-        toggleEdit(variantIndex); // Exit edit mode after successful update
-      }
-    } catch (error) {
-      console.error("Error updating the variant:", error);
-    }
-  };
+  const [adName, setAdName] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imageSrcAd, setImageSrcAd] = useState("");
+  const [imageSrcAds, setImageSrcAds] = useState("");
+  const [selectedShopId, setSelectedShopId] = useState(null);
 
   const fetchUserProfileAndShop = async () => {
     setLoading(true);
@@ -110,7 +74,7 @@ function Products() {
           console.log("Fetched shops:", shops);
 
           const selectedShopId = shops[0].id; // Assuming the first shop is selected
-
+          setSelectedShopId(selectedShopId);
           // Fetch products for the selected shop
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
@@ -197,6 +161,91 @@ function Products() {
   useEffect(() => {
     fetchUserProfileAndShop();
   }, []);
+
+  const toggleEdit = (variantIndex) => {
+    setEditableVariants((prev) => ({
+      ...prev,
+      [variantIndex]: !prev[variantIndex],
+    }));
+  };
+
+  const handleSizeChange = (variantIndex, sizeIndex, field, value) => {
+    setSelectedItem((prevItem) => {
+      const updatedVariants = [...prevItem.item_Variant];
+      updatedVariants[variantIndex].sizes[sizeIndex][field] = value;
+
+      return {
+        ...prevItem,
+        item_Variant: updatedVariants,
+      };
+    });
+  };
+
+  const handleUpdate = async (variantIndex) => {
+    try {
+      const updatedVariant = selectedItem.item_Variant[variantIndex];
+
+      const { error } = await supabase
+        .from("shop_Product")
+        .update({ item_Variant: selectedItem.item_Variant })
+        .eq("id", selectedItem.id);
+
+      if (error) {
+        console.error("Error updating the variant:", error);
+        alert("Failed to update the variant.");
+      } else {
+        setShowAlertEditDone(true);
+        setTimeout(() => setShowAlertEditDone(false), 3000);
+        toggleEdit(variantIndex); // Exit edit mode after successful update
+      }
+    } catch (error) {
+      console.error("Error updating the variant:", error);
+    }
+  };
+
+  const handleDeleteVarInfo = async (variantIndex, sizeIndex) => {
+    try {
+      // Ensure `selectedItem` and `item_Variant` exist
+      if (!selectedItem || !selectedItem.item_Variant) {
+        console.error("Selected item or item_Variant is undefined.");
+        alert("No item selected.");
+        return;
+      }
+
+      // Copy the `item_Variant` array
+      const updatedVariants = [...selectedItem.item_Variant];
+
+      // Get the specific variant
+      const targetVariant = updatedVariants[variantIndex];
+
+      if (!targetVariant || !targetVariant.sizes) {
+        console.error("Target variant or sizes is undefined.");
+        alert("Invalid variant or size.");
+        return;
+      }
+
+      // Remove the specific size
+      targetVariant.sizes = targetVariant.sizes.filter(
+        (_, idx) => idx !== sizeIndex
+      );
+
+      // Update the database
+      const { error } = await supabase
+        .from("shop_Product")
+        .update({ item_Variant: updatedVariants })
+        .eq("id", selectedItem.id);
+
+      if (error) {
+        console.error("Error deleting the variant:", error);
+        alert("Failed to delete the size.");
+      } else {
+        setShowAlertEditDone(true);
+        setTimeout(() => setShowAlertEditDone(false), 3000);
+      }
+    } catch (error) {
+      console.error("Error deleting the size:", error);
+    }
+  };
 
   const PostNotify = async () => {
     try {
@@ -343,6 +392,18 @@ function Products() {
       handleUpdateItem();
       setShowAlertCOnfirmUpdate(false);
     }
+    const updatedVariants = [...selectedItem.item_Variant];
+    if (currentVariantIndex !== null) {
+      updatedVariants[currentVariantIndex].sizes = updatedVariants[
+        currentVariantIndex
+      ].sizes.filter(
+        (size) => size.size.trim() !== "" || size.qty > 0 || size.price > 0
+      );
+    }
+    setSelectedItem({
+      ...selectedItem,
+      item_Variant: updatedVariants,
+    });
   };
   const handleUnPostItem = () => {
     setShowAlertUnP(true);
@@ -367,13 +428,13 @@ function Products() {
   const handleImagePick = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImageSrc(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      setImageFile(file);
+      const previewUrl = URL.createObjectURL(file);
+      console.log("Preview URL:", previewUrl);
+      setImageSrcAd(previewUrl); // Show preview
+      setImageSrcAds(URL.createObjectURL(file)); // Show preview
     } else {
-      setImageSrc("");
+      setImageSrcAd("");
     }
   };
   const cancelImage = () => {
@@ -394,6 +455,55 @@ function Products() {
   };
 
   //Items sample datas
+  const handleAddAd = async () => {
+    if (!imageSrcAd || !adName) {
+      alert("Please provide both the ad name and marketing visual.");
+      return;
+    }
+
+    try {
+      // Show loading indicator
+      setLoading(true);
+
+      // Upload the selected image to Supabase storage
+      const fileName = `${Date.now()}-${imageFile.name}`; // Unique file name
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("shop_Ads")
+        .upload(fileName, imageFile);
+
+      if (uploadError) {
+        console.error("Image upload error:", uploadError.message);
+        alert("Failed to upload image.");
+        return;
+      }
+
+      // Get the public URL for the uploaded image
+      const { data: publicUrlData } = supabase.storage
+        .from("ads")
+        .getPublicUrl(fileName);
+
+      // Insert ad details into the shop_Ads table
+      const { error: insertError } = await supabase.from("shop_Ads").insert({
+        shop_Id: selectedShopId, // Use the shop ID from state
+        ad_Name: adName,
+        ad_Image: publicUrlData.publicUrl,
+      });
+
+      if (insertError) {
+        console.error("Error adding ad:", insertError.message);
+        alert("Failed to add ad.");
+      } else {
+        alert("Ad successfully added!");
+        handleCloseModal(); // Close the modal after success
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred.");
+    } finally {
+      // Hide loading indicator
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
@@ -629,6 +739,8 @@ function Products() {
                     type="text"
                     className="bg-slate-100 p-1 rounded-sm shadow-md mt-1 text-slate-800 w-full"
                     placeholder="Type Ad Name"
+                    value={adName}
+                    onChange={(e) => setAdName(e.target.value)}
                   ></input>{" "}
                   <br />
                 </div>
@@ -656,9 +768,9 @@ function Products() {
               </div>
               <div className="w-[180px] h-2/3 md:w-1/2 md:h-full bg-custom-purple shadow-md glass rounded-sm p-2">
                 <div className="bg-slate-100 h-[200px] md:h-[350px] rounded-sm shadow-md place-items-center flex place-content-center">
-                  {imageSrc ? (
+                  {imageSrcAds ? (
                     <img
-                      src={imageSrc}
+                      src={imageSrcAds}
                       className="h-full w-full object-contain"
                       alt="Preview of the selected marketing visual"
                     />
@@ -678,7 +790,7 @@ function Products() {
               </button>
               <button
                 className="bg-green-500  text-white px-4 py-2 rounded hover:bg-green-700"
-                onClick={handleCloseModal}
+                onClick={handleAddAd}
               >
                 Add
               </button>
@@ -864,9 +976,9 @@ function Products() {
                           Item Tags:
                         </label>
                         <div className="text-sm text-white font-normal  flex flex-wrap gap-2">
-                          {selectedItem.item_Tags?.map((tag, index) => (
+                          {selectedItem.item_Tags?.map((tag) => (
                             <span
-                              key={index}
+                              key={tag}
                               className="px-2 py-1 bg-primary-color glass  rounded-md"
                             >
                               {tag}
@@ -965,86 +1077,99 @@ function Products() {
                       </div>
 
                       {/* Sizes, Quantities, and Prices */}
-                      {variant.sizes?.map((size, sizeIndex) => (
-                        <div>
-                          <div
-                            key={sizeIndex}
-                            className="flex justify-between items-center mb-2 border-b pb-2"
-                          >
-                            <div>
-                              <label className="text-slate-900 text-sm font-medium">
-                                Size:
-                              </label>
-                              <input
-                                className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                  editableVariants[variantIndex]
-                                    ? "bg-slate-300"
-                                    : "bg-slate-100"
-                                }`}
-                                type="text"
-                                value={size.size}
-                                onChange={(e) =>
-                                  handleSizeChange(
-                                    variantIndex,
-                                    sizeIndex,
-                                    "size",
-                                    e.target.value
-                                  )
-                                }
-                                readOnly={!editableVariants[variantIndex]}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-slate-900 text-sm font-medium">
-                                Quantity:
-                              </label>
-                              <input
-                                onKeyDown={blockInvalidChar}
-                                className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                  editableVariants[variantIndex]
-                                    ? "bg-slate-300"
-                                    : "bg-slate-100"
-                                }`}
-                                type="number"
-                                value={size.qty}
-                                onChange={(e) =>
-                                  handleSizeChange(
-                                    variantIndex,
-                                    sizeIndex,
-                                    "qty",
-                                    e.target.value
-                                  )
-                                }
-                                readOnly={!editableVariants[variantIndex]}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-slate-900 text-sm font-medium">
-                                Price:
-                              </label>
-                              <input
-                                onKeyDown={blockInvalidChar}
-                                className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                  editableVariants[variantIndex]
-                                    ? "bg-slate-300"
-                                    : "bg-slate-100"
-                                }`}
-                                type="number"
-                                value={size.price}
-                                onChange={(e) =>
-                                  handleSizeChange(
-                                    variantIndex,
-                                    sizeIndex,
-                                    "price",
-                                    e.target.value
-                                  )
-                                }
-                                readOnly={!editableVariants[variantIndex]}
-                              />
+                      {variant.sizes?.length > 0 ? (
+                        variant.sizes?.map((size, sizeIndex) => (
+                          <div key={`${variantIndex}-${sizeIndex}`}>
+                            <div className="flex justify-between items-center mb-2 border-b pb-2">
+                              <div>
+                                <label className="text-slate-900 text-sm font-medium">
+                                  Size:
+                                </label>
+                                <input
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                    editableVariants[variantIndex]
+                                      ? "bg-slate-300"
+                                      : "bg-slate-100"
+                                  }`}
+                                  type="text"
+                                  value={size.size}
+                                  onChange={(e) =>
+                                    handleSizeChange(
+                                      variantIndex,
+                                      sizeIndex,
+                                      "size",
+                                      e.target.value
+                                    )
+                                  }
+                                  readOnly={!editableVariants[variantIndex]}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-slate-900 text-sm font-medium">
+                                  Quantity:
+                                </label>
+                                <input
+                                  onKeyDown={blockInvalidChar}
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                    editableVariants[variantIndex]
+                                      ? "bg-slate-300"
+                                      : "bg-slate-100"
+                                  }`}
+                                  type="number"
+                                  value={size.qty}
+                                  onChange={(e) =>
+                                    handleSizeChange(
+                                      variantIndex,
+                                      sizeIndex,
+                                      "qty",
+                                      e.target.value
+                                    )
+                                  }
+                                  readOnly={!editableVariants[variantIndex]}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-slate-900 text-sm font-medium">
+                                  Price:
+                                </label>
+                                <input
+                                  onKeyDown={blockInvalidChar}
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
+                                    editableVariants[variantIndex]
+                                      ? "bg-slate-300"
+                                      : "bg-slate-100"
+                                  }`}
+                                  type="number"
+                                  value={size.price}
+                                  onChange={(e) =>
+                                    handleSizeChange(
+                                      variantIndex,
+                                      sizeIndex,
+                                      "price",
+                                      e.target.value
+                                    )
+                                  }
+                                  readOnly={!editableVariants[variantIndex]}
+                                />
+                              </div>
+                              <div>
+                                {editableVariants[variantIndex] && (
+                                  <button
+                                    onClick={handleDeleteVarInfo}
+                                    className="text-red-600"
+                                  >
+                                    <i className="fa-solid fa-trash-can"></i>
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           </div>
+                        ))
+                      ) : (
+                        <div className="text-gray-500">
+                          No sizes available for this variant
                         </div>
-                      ))}
+                      )}
                     </div>
                   ))}
                 </div>

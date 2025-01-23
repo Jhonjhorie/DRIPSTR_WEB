@@ -45,62 +45,101 @@ const xLabels = [
 function MerchantDashboard() {
   const navigate = useNavigate();
   const [shopData, setShopData] = useState(null);
+  const [productCounts, setProductCounts] = useState([]); // Initialize with an empty array
+  const [totalProductCount, setTotalProductCount] = useState(0); // Initialize with 0
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [shopRating, setShopRating] = useState("");
-
+  const [shopRating, setShopRating] = useState(0);
+ 
   useEffect(() => {
-    // Fetch the current user profile and shop data
-    const fetchUserProfileAndShop = async () => {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-
-      if (authError) {
-        setError(authError.message);
-        setLoading(false);
-        return;
-      }
-
-      if (user) {
+    const fetchData = async () => {
+      setLoading(true);
+  
+      try {
+        // Fetch the current user
+        const { data: userData, error: authError } = await supabase.auth.getUser ();
+  
+        if (authError) {
+          console.error("Authentication error:", authError.message);
+          setError(authError.message);
+          setLoading(false);
+          return;
+        }
+  
+        const user = userData.user;
+        if (!user) {
+          console.log("No user is signed in");
+          setError("No user is signed in");
+          setLoading(false);
+          return;
+        }
+  
         console.log("Current user:", user);
-
+  
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
           .from("shop")
-          .select("shop_name, shop_Rating") // You can specify fields if needed, e.g., .select("id, name")
-          .eq("owner_Id", user.id); // Assuming the shop table has 'user_id' to link it to the user
-
+          .select("id, shop_name, shop_Rating")
+          .eq("owner_Id", user.id);
+  
         if (shopError) {
+          console.error("Error fetching shops:", shopError.message);
           setError(shopError.message);
+        } else if (shops && shops.length > 0) {
+          setShopData(shops);
+          console.log("Fetched shops:", shops);
+  
+          // Calculate and set the average shop rating
+          const averageRating =
+            shops.reduce((acc, shop) => acc + (shop.shop_Rating || 0), 0) /
+            shops.length;
+          setShopRating(averageRating || 0);
+  
+          // Fetch all products for the shops
+          const { data: products, error: productError } = await supabase
+            .from("shop_Product")
+            .select("shop_Id");
+  
+          if (productError) {
+            console.error("Error fetching products:", productError.message);
+            setError(productError.message);
+          } else {
+            // Count products by shop
+            const productCountByShop = shops.map((shop) => ({
+              shopId: shop.id,
+              productCount: products.filter(product => product.shop_Id === shop.id).length,
+            }));
+  
+            console.log("Product counts by shop:", productCountByShop);
+            setProductCounts(productCountByShop);
+  
+        
+            const totalProductCount = productCountByShop.reduce((acc, shop) => acc + shop.productCount, 0);
+            console.log("Total product count:", totalProductCount);
+            setTotalProductCount(totalProductCount); 
+          }
         } else {
-          setShopData(shops); // Store the fetched shops data
-          console.log("this is a shopname:", shops);
-
-          shops.forEach((shop) => {
-            console.log("Shop Name:", shop.shop_name); // Log each shop name
-            setShopRating(shop.shop_Rating);
-          });
+          console.log("No shops found for the user");
+          setError("No shops found for the user");
         }
-      } else {
-        console.log("No user is signed in");
-        setError("No user is signed in");
+      } catch (err) {
+        console.error("Unexpected error:", err.message);
+        setError("An unexpected error occurred. Please try again.");
+      } finally {
         setLoading(false);
       }
-      setLoading(false); // Stop the loading state once fetching is done
     };
-
-    fetchUserProfileAndShop();
-  }, []);
-
+  
+    fetchData();
+  }, []); // Run once on mount
+  
   return (
     <div className="h-full w-full bg-slate-300 overflow-y-scroll custom-scrollbar  ">
       <div className="absolute mx-3 right-0 z-10">
         <SideBar />
       </div>
       {/* 1st Container -- Logo Shop -- Notification */}
-      <div className="h-auto w-full md:flex gap-2  place-items-center p-2 align-middle ">
+      <div  className="h-auto w-full md:flex gap-2  place-items-center p-2 align-middle ">
         <div className=" h-full w-full p-2  md:pl-10">
           <div className=" text-3xl md:text-5xl font-bold text-custom-purple md:pl-5 mb-5 flex justify-start">
             Dashboard
@@ -139,7 +178,7 @@ function MerchantDashboard() {
                 style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}
               >
                 {" "}
-                22{" "}
+                {totalProductCount}{" "}
               </div>
               <div className="absolute bottom-0 right-0 blur-[2px] -z-10 ">
                 <box-icon
@@ -198,7 +237,7 @@ function MerchantDashboard() {
         </div>
         <div className="bg-custom-purple glass rounded-md md:h-[200px] h-[170px] w-[70%] sm:w-[50%] md:w-[35%] lg:w-[25%] md:mr-12 lg:mr-16  p-2 mb-2 md:mb-0 ">
           <div className="bg-slate-100 h-full w-auto rounded-md">
-            {shopRating ? (
+          
               <div className="text-slate-900 font-semibold text-2xl md:text-5xl pt-[25%]  text-center">
                 {" "}
                 {shopRating}{" "}
@@ -211,20 +250,8 @@ function MerchantDashboard() {
                 <br />
                 <div className="text-slate-800 text-xl"> SHOP RATING </div>
               </div>
-            ) : (
-              <div className="text-slate-900 font-semibold text-2xl md:text-5xl pt-[25%]  text-center">
-                 {" "}
-                <span>0</span>
-                <box-icon
-                  type="solid"
-                  size="30px"
-                  color="#F09319"
-                  name="star"
-                ></box-icon>{" "}
-                 <br />
-                <div className="text-slate-800 text-xl"> SHOP RATING </div>
-              </div>
-            )}
+        
+           
           </div>
         </div>
       </div>
