@@ -16,7 +16,7 @@ import Search from './modules/Products/Search';
 // Shared Components
 import Header from './shared/Header';
 import Sidebar from './shared/SideBar';
-import Notifications from './modules/Notifications';
+import Notifications from './modules/Notification/Notification_Controller';
 import Reminder from './modules/Messaging/View/Reminder';
 
 
