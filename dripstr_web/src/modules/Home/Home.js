@@ -27,7 +27,7 @@ function Home() {
    
       <div className="flex flex-col-reverse gap-4 md:flex-row items-center p-4 h-[39%] lg:h-[38%]">
         <Carousel images={Images} />
-        <AvatarCard user={currUser} />
+        {/* <AvatarCard user={currUser} /> */}
       </div>
       <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-between px-1 lg:px-2 mt-1 ">
       <CategoriesRibbon active={filCat} categories={categories} onItemClick={(label) => setFilCat(label)} />
@@ -37,7 +37,7 @@ function Home() {
       <div className="flex flex-wrap justify-center mb-4 mt-0 md:mt-5  p-4 gap-2">
       <div className='relative flex flex-row w-full items-center p-6 justify-end'>
      
-        <div class="breadcrumbs text-lg text-slate-500 font-serif  absolute left-0 md:left-40">
+        <div className="breadcrumbs text-lg text-slate-500 font-serif  absolute left-0 md:left-40">
           <ul>
             <li className=" text-bold text-primary-color">{filMall === 0 ? 'Drip Now' :MallItems[filMall].label}</li>
             <li className=" text-bold  text-secondary-color">{filCat === categories[0].label ? 'Star Later' : filCat}</li>

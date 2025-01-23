@@ -10,10 +10,10 @@ import useGetImage from "../hooks/useGetImageUrl.js";
 const ProductModal = ({ item, onClose }) => {
   const [selectedAction, setSelectedAction] = useState(null);
   const navigate = useNavigate();
-  const imageUrls = useGetImage(item); 
+  const allImages = useGetImage(item); 
 
   const handleProductClick = () => {
-    navigate(`/product/${item.product_name}`, { state: { item } });
+    navigate(`/product/${item.item_Name}`, { state: { item } });
   };
 
   const openModal = (action) => {
@@ -25,13 +25,6 @@ const ProductModal = ({ item, onClose }) => {
   const closeModal = () => {
     document.getElementById('buyConfirm_Modal').close();
   };
-
-  const allImages = [
-    ...imageUrls,  
-    ...(item.variant && item.variant.length > 0 
-      ? item.variant.map(variant => variant.image)  // Add variant images
-      : [])
-  ];
 
   return (
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 h-[40rem] overflow-y-auto overflow-x-hidden lg:overflow-hidden custom-scrollbar  modal-box">
@@ -71,7 +64,7 @@ const ProductModal = ({ item, onClose }) => {
                   >
                     <img
                       src={image}
-                      alt={`${item.product_name}-${imageIndex}`}
+                      alt={`${item.item_Name}-${imageIndex}`}
                       className="w-[32rem]  h-[65vh] object-contain"
                     />
                     {allImages.length > 1 && (
@@ -102,7 +95,7 @@ const ProductModal = ({ item, onClose }) => {
           <div className="flex flex-col gap-2 justify-between  h-full w-full lg:max-w-[50%] lg:min-w-[50%] pt-6 ">
             <div className="flex flex-col gap-1 ">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
-                {item.product_name}
+                {item.item_Name}
               </h1>
               <div className="h-1 mb-2 w-full bg-primary-color"></div>
               <div className="flex flex-col justify-between  gap-4 mb-2">
@@ -110,12 +103,12 @@ const ProductModal = ({ item, onClose }) => {
                   <div className="flex items-center gap-2 ">
                     <p className="text-sm font-medium">Shop:</p>
                     <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                        {item.shop?.shop_name || 'No shop available'}
+                        {item.shop_Name || 'No shop available'}
                     </div>
                   </div>
                   <div className="flex gap-1">
                     <h2 className="text-base font-medium">
-                      {item.sold} Sold /{" "}
+                      {item.item_Orders} Sold /{" "}
                     </h2>
                     <div className="flex gap-1 items-center">
                       <h2 className="text-base font-medium text-primary-color">
@@ -132,7 +125,7 @@ const ProductModal = ({ item, onClose }) => {
                 </div>
               </div>
               <p className="mt-2 rounded-md bg-base-300 p-2 max-h-60 overflow-y-auto custom-scrollbar">
-                {item.description || "No description available."}
+                {item.item_Description || "No description available."}
               </p>
             </div>
 
@@ -158,7 +151,7 @@ const ProductModal = ({ item, onClose }) => {
                   <div className="flex pl-2">
                     <p className="text-2xl  text-primary-color">₱</p>
                     <h2 className="text-5xl font-bold text-primary-color">
-                      {item.price}
+                      {item.item_Variant[0].sizes[0].price}
                     </h2>
                   </div>
                 </div>

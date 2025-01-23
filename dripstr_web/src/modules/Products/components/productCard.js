@@ -61,7 +61,7 @@ const ProductCard = ({ item, onClick }) => {
       {currentImage ? (
         <img
           src={currentImage}
-          alt={item.product_name}
+          alt={item.item_Name}
           className="object-contain mb-2 mt-1 w-[180px] h-[200px]"
         />
       ) : (
@@ -73,24 +73,24 @@ const ProductCard = ({ item, onClick }) => {
       )}
 
       <div className="w-full flex flex-col px-3 py-2 bg-slate-200 rounded-b-md">
-        {item.product_name && (
+        {item.item_Name && (
           <p className="text-secondary-color text-md font-medium truncate">
-            {item.product_name}
+            {item.item_Name}
           </p>
         )}
         <div className="flex flex-row justify-between items-center">
-          {item.price && (
+          {/* {item?.item_Variant[0]?.sizes[0]?.price && (
             <p className="text-primary-color text-md font-medium">
-              ₱{item.price}
+              ₱{item.item_Variant[0].sizes[0].price}
             </p>
-          )}
+          )} */}
           <div className="flex flex-row items-center gap-0.5">
             <p className="text-primary-color text-md">
               {averageRate(item.reviews)}
             </p>
             <RateSymbol item={averageRate(item.reviews)} size="4" />
             <span className="text-secondary-color justify-center text-sm">
-              | {item.sold} sold
+              | {item.item_Orders} sold
             </span>
           </div>
         

@@ -30,7 +30,7 @@ function Search() {
     let result = searchProducts(query, products);
     result = result.filter((item) =>
       (filMall === 0 || item.mallId === MallItems[filMall]?.id) &&
-      (filCat === categories[0].label || item.category === filCat)
+      (filCat === categories[0].label || item.item_Category === filCat)
     );
 
     setFilteredProducts(result);
