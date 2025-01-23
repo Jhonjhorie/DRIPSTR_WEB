@@ -27,6 +27,7 @@ function Products() {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(null);
   const [uploadedImages, setUploadedImages] = useState({});
   const [shopData, setShopData] = useState(null);
+  const [shopAds, setShopAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [shopItem, setShopProducts] = useState("");
@@ -60,7 +61,7 @@ function Products() {
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
           .from("shop")
-          .select("id, shop_name, shop_Rating")
+          .select("id, shop_name, shop_Rating, shop_Ads")
           .eq("owner_Id", user.id);
 
         if (shopError) {
@@ -71,11 +72,28 @@ function Products() {
 
         if (shops && shops.length > 0) {
           setShopData(shops);
-          console.log("Fetched shops:", shops);
+        console.log("Fetched shops:", shops);
 
-          const selectedShopId = shops[0].id; // Assuming the first shop is selected
-          setSelectedShopId(selectedShopId);
-          // Fetch products for the selected shop
+        const selectedShopId = shops[0].id; // Assuming the first shop is selected
+        setSelectedShopId(selectedShopId);
+
+        // Fetch ads for the selected shop and process them
+        const ads = shops[0].shop_Ads || []; // Assuming shop_Ads is an array of image paths
+        const updatedAds = await Promise.all(
+          ads.map(async (adPath) => {
+            const { data: publicUrlData, error: publicUrlError } = supabase.storage
+              .from("shop_Ads") // Assuming 'product' is your bucket
+              .getPublicUrl(ads.ad_Image);
+
+
+            return {
+              imageUrl: publicUrlData?.publicUrl || null, // Attach the public URL
+            };
+          })
+        );
+        setShopAds(updatedAds); // Save the updated ads with public URLs
+
+          
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
             .select(
@@ -157,7 +175,6 @@ function Products() {
       setLoading(false); // Stop loading state
     }
   };
-
   useEffect(() => {
     fetchUserProfileAndShop();
   }, []);
@@ -168,7 +185,6 @@ function Products() {
       [variantIndex]: !prev[variantIndex],
     }));
   };
-
   const handleSizeChange = (variantIndex, sizeIndex, field, value) => {
     setSelectedItem((prevItem) => {
       const updatedVariants = [...prevItem.item_Variant];
@@ -180,7 +196,6 @@ function Products() {
       };
     });
   };
-
   const handleUpdate = async (variantIndex) => {
     try {
       const updatedVariant = selectedItem.item_Variant[variantIndex];
@@ -202,7 +217,6 @@ function Products() {
       console.error("Error updating the variant:", error);
     }
   };
-
   const handleDeleteVarInfo = async (variantIndex, sizeIndex) => {
     try {
       // Ensure `selectedItem` and `item_Variant` exist
@@ -246,7 +260,6 @@ function Products() {
       console.error("Error deleting the size:", error);
     }
   };
-
   const PostNotify = async () => {
     try {
       // Update the `is_Post` status
@@ -356,14 +369,9 @@ function Products() {
       console.error("Error updating the post status:", error);
     }
   };
-
   const handleViewImageClose = () => {
     setIsModalOpenImage(false);
     setSelectedVariantIndex(null);
-  };
-  const handleAddAds = () => {
-    //ADS
-    setIsModalOpenAds(true);
   };
   const handleCloseModal = async () => {
     // Close all modals and reset data
@@ -375,7 +383,6 @@ function Products() {
     // Fetch updated shop and product details
     await fetchUserProfileAndShop();
   };
-
   const handlePostItem = () => {
     setShowAlert2(true);
   };
@@ -411,19 +418,99 @@ function Products() {
   const handleDelItem = () => {
     setShowAlertDelCon(true);
   };
-
   const handleClosePostItem = () => {
     setShowAlert2(false);
     setShowAlertDelCon(false);
     setShowAlertUnpost(false);
     setShowAlertUnP(false);
   };
-
   const handleViewClick = (item) => {
     setSelectedItem(item);
     console.log("Viewing item:", item);
   };
+  const handleAddSize = (variantIndex) => {
+    const updatedVariants = [...selectedItem.item_Variant];
+    updatedVariants[variantIndex].sizes = [
+      ...(updatedVariants[variantIndex].sizes || []),
+      { size: "", qty: 0, price: 0 },
+    ];
+    setSelectedItem({
+      ...selectedItem,
+      item_Variant: updatedVariants,
+    });
+  };
 
+
+  //Shops ads images
+  const handleAddAd = async () => {
+    if (!imageSrcAd || !adName) {
+      alert("Please provide both the ad name and marketing visual.");
+      return;
+    }
+  
+    setLoading(true); 
+  
+    try {
+      // Fetch existing ads
+      const { data: shopData, error: fetchError } = await supabase
+        .from("shop")
+        .select("shop_Ads") 
+        .eq("id", selectedShopId)
+        .single();
+  
+      if (fetchError) {
+        console.error("Error fetching shop ads:", fetchError);
+        setError(fetchError.message);
+        return;
+      }
+  
+      // Upload the selected image to Supabase storage
+      const fileName = `${Date.now()}-${imageFile.name}`; // Unique file name
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("shop_Ads") 
+        .upload(fileName, imageFile);
+  
+      if (uploadError) {
+        console.error("Image upload error:", uploadError.message);
+        alert("Failed to upload image.");
+        return;
+      }
+
+      const imagePath = `shop_Ads/${fileName}`; 
+  
+      const existingAds = shopData?.shop_Ads || []; 
+
+      const newAd = {
+        id: Date.now(), 
+        ad_Name: adName,
+        ad_Image: imagePath,
+      };
+      const updatedAds = [...existingAds, newAd];
+  
+      // Update the shop_Ads column
+      const { error: updateError } = await supabase
+        .from("shop")
+        .update({ shop_Ads: updatedAds })
+        .eq("id", selectedShopId);
+  
+      if (updateError) {
+        console.error("Error adding ad:", updateError.message);
+        alert("Failed to add ad.");
+      } else {
+        alert("Ad successfully added!");
+        handleCloseModal(); // Close the modal after success
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred.");
+    } finally {
+      setLoading(false); // Hide loading indicator
+    }
+  };
+  const handleAddAds = () => {
+    //ADS
+    setIsModalOpenAds(true);
+  };
   //Ads image appear in the div
   const handleImagePick = (event) => {
     const file = event.target.files[0];
@@ -442,68 +529,6 @@ function Products() {
     document.getElementById("imageInput").value = "";
   };
 
-  const handleAddSize = (variantIndex) => {
-    const updatedVariants = [...selectedItem.item_Variant];
-    updatedVariants[variantIndex].sizes = [
-      ...(updatedVariants[variantIndex].sizes || []),
-      { size: "", qty: 0, price: 0 },
-    ];
-    setSelectedItem({
-      ...selectedItem,
-      item_Variant: updatedVariants,
-    });
-  };
-
-  //Items sample datas
-  const handleAddAd = async () => {
-    if (!imageSrcAd || !adName) {
-      alert("Please provide both the ad name and marketing visual.");
-      return;
-    }
-
-    try {
-      // Show loading indicator
-      setLoading(true);
-
-      // Upload the selected image to Supabase storage
-      const fileName = `${Date.now()}-${imageFile.name}`; // Unique file name
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("shop_Ads")
-        .upload(fileName, imageFile);
-
-      if (uploadError) {
-        console.error("Image upload error:", uploadError.message);
-        alert("Failed to upload image.");
-        return;
-      }
-
-      // Get the public URL for the uploaded image
-      const { data: publicUrlData } = supabase.storage
-        .from("ads")
-        .getPublicUrl(fileName);
-
-      // Insert ad details into the shop_Ads table
-      const { error: insertError } = await supabase.from("shop_Ads").insert({
-        shop_Id: selectedShopId, // Use the shop ID from state
-        ad_Name: adName,
-        ad_Image: publicUrlData.publicUrl,
-      });
-
-      if (insertError) {
-        console.error("Error adding ad:", insertError.message);
-        alert("Failed to add ad.");
-      } else {
-        alert("Ad successfully added!");
-        
-        handleCloseModal(); // Close the modal after success
-      }
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      alert("An unexpected error occurred.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
@@ -660,58 +685,63 @@ function Products() {
               </div>
             )}
             {activeTabs === "manage-adds" && (
-              <div>
+                <div>
                 <div className="flex justify-between">
                   <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">
                     Manage Shop Advertisement
                     <div
-                      className="tooltip tooltip-bottom "
-                      data-tip=" Maximum advertisement photos to be posted is 3 to 5 Images only.  "
+                      className="tooltip tooltip-bottom"
+                      data-tip=" Maximum advertisement photos to be posted is 3 to 5 Images only."
                     >
                       <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
                         <box-icon color="#FFFFFF" name="info-circle"></box-icon>
                       </button>
                     </div>
                   </h2>
-                  <div className="flex gap-2 justify-center  place-items-center">
+                  <div className="flex gap-2 justify-center place-items-center">
                     <div
                       onClick={handleAddAds}
-                      className="bg-custom-purple text-sm p-1 md:px-2 text-slate-50 cursor-pointer duration-200 hover:scale-95 rounded-sm "
+                      className="bg-custom-purple text-sm p-1 md:px-2 text-slate-50 cursor-pointer duration-200 hover:scale-95 rounded-sm"
                     >
                       Add photo Ads
                     </div>
                   </div>
                 </div>
-
-                <div className=" flex font-semibold justify-between px-2 text-slate-800">
+          
+                <div className="flex font-semibold justify-between px-2 text-slate-800">
                   <li className="list-none">Ads ID / Photo</li>
                   <li className="list-none">Name</li>
                   <li className="list-none pr-4">Action</li>
                 </div>
-                <div className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2">
-                  <div className="h-full w-20 place-items-center justify-center flex">
-                    {" "}
-                    10{" "}
-                  </div>
-                  <div className="h-full w-14 rounded-sm bg-slate-200">
-                    <img
-                      src={sampleads}
-                      alt="Shop Logo"
-                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                      sizes="100%"
-                    />
-                  </div>
-                  <div className="h-full w-full place-items-center flex justify-center ">
-                    {" "}
-                    Latest Drip Design{" "}
-                  </div>
-                  <div
-                    className=" h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
-                          hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex "
-                  >
-                    View
-                  </div>
-                </div>
+          
+                {shopData.length > 0 && shopData[0].shop_Ads && shopData[0].shop_Ads.length > 0 ? (
+                  shopData[0].shop_Ads.map((ad, index) => (
+                    <div key={index} className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2">
+                      <div className="h-full w-20 place-items-center justify-center flex">
+                        {ad.id} {/* Assuming ad has an id property */}
+                      </div>
+                      <div className="h-full w-14 rounded-sm bg-slate-200">
+                        <img
+                          src={ad.imageUrl} // Assuming ad has an imageUrl property
+                          alt="Advertisement"
+                          className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                          sizes="100%"
+                        />
+                      </div>
+                      <div className="h-full w-full place-items-center flex justify-center">
+                        {ad.ad_Name} {/* Assuming ad has a name property */}
+                      </div>
+                      <div
+                        className="h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
+                          hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex"
+                      >
+                        View
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-2 text-slate-900">No advertisements available.</div>
+                )}
               </div>
             )}
           </div>
@@ -965,7 +995,7 @@ function Products() {
                       </div>
                       <div className="mt-2 flex gap-1">
                         <label className="text-sm text-slate-800 font-semibold">
-                          Category: 
+                          Category:
                         </label>
                         <div className="text-sm text-primary-color font-semibold">
                           {selectedItem.item_Category}

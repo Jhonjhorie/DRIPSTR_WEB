@@ -116,7 +116,7 @@ const AddItem = () => {
       setTimeout(() => {
         setShowAlert2(false);
       }, 3000);
-      return; // Do not add more items if the limit is reached
+      return;
     }
     updatedVariants[index].info.push({
       size: "",
@@ -333,7 +333,7 @@ const AddItem = () => {
                 </div>
                 <span className="ml-3 ">Add Item</span>
               </div>
-              <div className=" w-full mt-2 md:mt-5">
+              <div className=" w-full mt-2 ">
                 <label className="text-slate-950  font-semibold mr-2 text-[15px]">
                   Item Title:
                 </label>
@@ -360,8 +360,11 @@ const AddItem = () => {
                   name="itemDescription"
                 ></textarea>
               </div>
+              <label className="text-slate-950  font-semibold mr-2 text-[15px]">
+                  Item Category:
+                </label>
               <div className="">
-                <div className="dropdown w-full">
+                <div className="dropdown dropdown-top w-full">
                   <div
                     tabIndex={0}
                     role="button"
@@ -371,7 +374,7 @@ const AddItem = () => {
                   </div>
                   <ul
                     tabIndex={0}
-                    className="dropdown-content menu bg-slate-100 text-slate-900 font-semibold rounded-sm w-full z-[1] p-2 shadow"
+                    className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
                   >
                     {[
                       "Top",
@@ -380,6 +383,7 @@ const AddItem = () => {
                       "Mug",
                       "Shoes",
                       "Totebag",
+                      "Others",
                     ].map((category) => (
                       <li key={category}>
                         <a onClick={() => handleCategorySelect(category)}>
