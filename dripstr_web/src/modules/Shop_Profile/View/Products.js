@@ -495,7 +495,7 @@ function Products() {
       // Upload the selected image to Supabase storage
       const fileName = `${Date.now()}-${imageFile.name}`; // Unique file name
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("shop_profile/shop_Ads") // Ensure folder path is correct
+        .from("shop_profile/shop_Ads") 
         .upload(fileName, imageFile);
 
       if (uploadError) {
@@ -506,7 +506,7 @@ function Products() {
 
       // Get the public URL for the uploaded image
       const { data: publicUrlData, error: urlError } = supabase.storage
-        .from("shop_profile/shop_Ads") // Use the same folder as upload
+        .from("shop_profile/shop_Ads") 
         .getPublicUrl(fileName);
 
       if (urlError) {
@@ -517,7 +517,6 @@ function Products() {
 
       const imageUrl = publicUrlData?.publicUrl; // Get the public URL
 
-      // Check if the image URL was retrieved
       if (!imageUrl) {
         alert("Failed to get image URL.");
         return;
@@ -528,12 +527,12 @@ function Products() {
       const newAd = {
         id: Date.now(),
         ad_Name: adName,
-        ad_Image: imageUrl, // Store the public URL of the image
+        ad_Image: imageUrl, 
       };
 
       const updatedAds = [...existingAds, newAd];
 
-      // Update the shop_Ads column with the new ad
+
       const { error: updateError } = await supabase
         .from("shop")
         .update({ shop_Ads: updatedAds })
@@ -544,13 +543,13 @@ function Products() {
         alert("Failed to add ad.");
       } else {
         alert("Ad successfully added!");
-        handleCloseModal(); // Close the modal after success
+        handleCloseModal(); 
       }
     } catch (error) {
       console.error("Unexpected error:", error);
       alert("An unexpected error occurred.");
     } finally {
-      setLoading(false); // Hide loading indicator
+      setLoading(false);
     }
   };
 
@@ -766,7 +765,7 @@ function Products() {
                     return (
                       <div
                         key={index}
-                        className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2"
+                        className="p-2 mt-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2"
                       >
                         <div className="h-full w-20 place-items-center justify-center flex">
                         {`${index + 1}`}
