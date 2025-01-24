@@ -72,28 +72,57 @@ function Products() {
 
         if (shops && shops.length > 0) {
           setShopData(shops);
-        console.log("Fetched shops:", shops);
+          console.log("Fetched shops:", shops);
 
-        const selectedShopId = shops[0].id; // Assuming the first shop is selected
-        setSelectedShopId(selectedShopId);
+          const selectedShopId = shops[0].id; // Assuming the first shop is selected
+          setSelectedShopId(selectedShopId);
 
-        // Fetch ads for the selected shop and process them
-        const ads = shops[0].shop_Ads || []; // Assuming shop_Ads is an array of image paths
-        const updatedAds = await Promise.all(
-          ads.map(async (adPath) => {
-            const { data: publicUrlData, error: publicUrlError } = supabase.storage
-              .from("shop_Ads") // Assuming 'product' is your bucket
-              .getPublicUrl(ads.ad_Image);
+          // Fetch ads for the selected shop
+          const ads = shops[0].shop_Ads || []; // Correctly initialize `ads`
 
+          const updatedAds = await Promise.all(
+            ads.map(async (ad) => {
+              console.log("Ad ID:", ad.id); // Log Ad ID
+              console.log("Ad Image Path:", ad.ad_Image); // Log the path
 
-            return {
-              imageUrl: publicUrlData?.publicUrl || null, // Attach the public URL
-            };
-          })
-        );
-        setShopAds(updatedAds); // Save the updated ads with public URLs
+              let imageUrl = null;
 
-          
+              if (ad.ad_Image) {
+                // Ensure the path starts with shop_profile/shop_Ads/ and fetch the public URL
+                const fullImagePath = ad.ad_Image.startsWith(
+                  "shop_profile/shop_Ads/"
+                )
+                  ? ad.ad_Image
+                  : `shop_profile/shop_Ads/${ad.ad_Image}`; // Prepend the path if needed
+
+                const { data: publicUrlData, error: publicUrlError } =
+                  supabase.storage
+                    .from("shop_profile") // Make sure this is the correct bucket name
+                    .getPublicUrl(fullImagePath); // Fetch public URL using the full path
+
+                if (publicUrlError) {
+                  console.error(
+                    "Error fetching ad URL:",
+                    publicUrlError.message
+                  );
+                }
+
+                console.log("Generated image URL:", publicUrlData?.publicUrl);
+
+                imageUrl = publicUrlData?.publicUrl || null;
+              }
+
+              return {
+                id: ad.id,
+                ad_Name: ad.ad_Name,
+                imageUrl, // Use the fetched or existing image URL
+              };
+            })
+          );
+
+          console.log("Updated Ads with URLs:", updatedAds); // Log the updated ads
+          setShopAds(updatedAds); // Set the updated ads
+
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
             .select(
@@ -440,59 +469,76 @@ function Products() {
     });
   };
 
-
   //Shops ads images
   const handleAddAd = async () => {
     if (!imageSrcAd || !adName) {
       alert("Please provide both the ad name and marketing visual.");
       return;
     }
-  
-    setLoading(true); 
-  
+
+    setLoading(true);
+
     try {
       // Fetch existing ads
       const { data: shopData, error: fetchError } = await supabase
         .from("shop")
-        .select("shop_Ads") 
+        .select("shop_Ads")
         .eq("id", selectedShopId)
         .single();
-  
+
       if (fetchError) {
         console.error("Error fetching shop ads:", fetchError);
         setError(fetchError.message);
         return;
       }
-  
+
       // Upload the selected image to Supabase storage
       const fileName = `${Date.now()}-${imageFile.name}`; // Unique file name
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("shop_Ads") 
+        .from("shop_profile/shop_Ads") // Ensure folder path is correct
         .upload(fileName, imageFile);
-  
+
       if (uploadError) {
         console.error("Image upload error:", uploadError.message);
         alert("Failed to upload image.");
         return;
       }
 
-      const imagePath = `shop_Ads/${fileName}`; 
-  
-      const existingAds = shopData?.shop_Ads || []; 
+      // Get the public URL for the uploaded image
+      const { data: publicUrlData, error: urlError } = supabase.storage
+        .from("shop_profile/shop_Ads") // Use the same folder as upload
+        .getPublicUrl(fileName);
+
+      if (urlError) {
+        console.error("Error fetching public URL:", urlError.message);
+        alert("Failed to fetch image URL.");
+        return;
+      }
+
+      const imageUrl = publicUrlData?.publicUrl; // Get the public URL
+
+      // Check if the image URL was retrieved
+      if (!imageUrl) {
+        alert("Failed to get image URL.");
+        return;
+      }
+
+      const existingAds = shopData?.shop_Ads || [];
 
       const newAd = {
-        id: Date.now(), 
+        id: Date.now(),
         ad_Name: adName,
-        ad_Image: imagePath,
+        ad_Image: imageUrl, // Store the public URL of the image
       };
+
       const updatedAds = [...existingAds, newAd];
-  
-      // Update the shop_Ads column
+
+      // Update the shop_Ads column with the new ad
       const { error: updateError } = await supabase
         .from("shop")
         .update({ shop_Ads: updatedAds })
         .eq("id", selectedShopId);
-  
+
       if (updateError) {
         console.error("Error adding ad:", updateError.message);
         alert("Failed to add ad.");
@@ -507,6 +553,7 @@ function Products() {
       setLoading(false); // Hide loading indicator
     }
   };
+
   const handleAddAds = () => {
     //ADS
     setIsModalOpenAds(true);
@@ -528,7 +575,6 @@ function Products() {
     setImageSrcAds(null);
     document.getElementById("imageInput").value = "";
   };
-
 
   return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
@@ -685,7 +731,7 @@ function Products() {
               </div>
             )}
             {activeTabs === "manage-adds" && (
-                <div>
+              <div>
                 <div className="flex justify-between">
                   <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">
                     Manage Shop Advertisement
@@ -707,40 +753,52 @@ function Products() {
                     </div>
                   </div>
                 </div>
-          
+
                 <div className="flex font-semibold justify-between px-2 text-slate-800">
-                  <li className="list-none">Ads ID / Photo</li>
+                  <li className="list-none">Ads Photo</li>
                   <li className="list-none">Name</li>
                   <li className="list-none pr-4">Action</li>
                 </div>
-          
-                {shopData.length > 0 && shopData[0].shop_Ads && shopData[0].shop_Ads.length > 0 ? (
-                  shopData[0].shop_Ads.map((ad, index) => (
-                    <div key={index} className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2">
-                      <div className="h-full w-20 place-items-center justify-center flex">
-                        {ad.id} {/* Assuming ad has an id property */}
-                      </div>
-                      <div className="h-full w-14 rounded-sm bg-slate-200">
-                        <img
-                          src={ad.imageUrl} // Assuming ad has an imageUrl property
-                          alt="Advertisement"
-                          className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                          sizes="100%"
-                        />
-                      </div>
-                      <div className="h-full w-full place-items-center flex justify-center">
-                        {ad.ad_Name} {/* Assuming ad has a name property */}
-                      </div>
+                {shopData.length > 0 &&
+                shopData[0].shop_Ads &&
+                shopData[0].shop_Ads.length > 0 ? (
+                  shopData[0].shop_Ads.map((ad, index) => {
+                    return (
                       <div
-                        className="h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
-                          hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex"
+                        key={index}
+                        className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2"
                       >
-                        View
+                        <div className="h-full w-20 place-items-center justify-center flex">
+                        {`${index + 1}`}
+                        </div>
+                        <div className="h-full w-24 flex justify-center items-center bg-slate-200 rounded-md">
+                          {ad.ad_Image ? (
+                            <img
+                              src={ad.ad_Image} 
+                              alt={ad.ad_Name || "Advertisement"}
+                              className="h-full w-full object-cover rounded-md shadow-lg"
+                              sizes="100%"
+                            />
+                          ) : (
+                            <p>No image available</p>
+                          )}
+                        </div>
+                        <div className="h-full w-full place-items-center flex justify-center">
+                          {ad.ad_Name || "No Name"}
+                        </div>
+                        <div
+                          className="h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
+            hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex"
+                        >
+                          View
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
-                  <div className="p-2 text-slate-900">No advertisements available.</div>
+                  <div className="p-2 text-slate-900">
+                    No advertisements available.
+                  </div>
                 )}
               </div>
             )}
