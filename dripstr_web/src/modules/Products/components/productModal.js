@@ -11,6 +11,12 @@ const ProductModal = ({ item, onClose }) => {
   const [selectedAction, setSelectedAction] = useState(null);
   const navigate = useNavigate();
   const allImages = useGetImage(item); 
+  const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
+    const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0].sizes[0].size || "");
+    const handleSelectedValues = (color, size) => {
+      setSelectedColor(color);
+      setSelectedSize(size);
+    };
 
   const handleProductClick = () => {
     navigate(`/product/${item.item_Name}`, { state: { item } });
@@ -28,7 +34,7 @@ const ProductModal = ({ item, onClose }) => {
 
   return (
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 h-[40rem] overflow-y-auto overflow-x-hidden lg:overflow-hidden custom-scrollbar  modal-box">
-      {item  && <dialog id="buyConfirm_Modal" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
+      {item  && <dialog id="buyConfirm_Modal" className="  max-w-full modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
                    <BuyConfirm action={selectedAction} item={item} onClose={closeModal}/>
                    <form method="dialog" class="modal-backdrop">
                     <button onClick={closeModal}></button>
@@ -121,7 +127,12 @@ const ProductModal = ({ item, onClose }) => {
               </div>
               <div className="flex flex-row justify-between">
                 <div className="flex flex-col gap-2">
-              <ItemOptions item={item} />
+              <ItemOptions
+               item={item}
+               selectedColor={selectedColor}
+               selectedSize={selectedSize}
+               onSelectedValuesChange={handleSelectedValues}
+              />
                 </div>
               </div>
               <p className="mt-2 rounded-md bg-base-300 p-2 max-h-60 overflow-y-auto custom-scrollbar">

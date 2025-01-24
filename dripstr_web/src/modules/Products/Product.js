@@ -15,10 +15,7 @@ function Product() {
   const imageUrls = useGetImage(item); 
 
   const allImages = [
-    ...imageUrls,  
-    ...(item.variant && item.variant.length > 0 
-      ? item.variant.map(variant => variant.image)  // Add variant images
-      : [])
+    ...imageUrls
   ];
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedAction, setSelectedAction] = useState(null);
@@ -111,7 +108,7 @@ function Product() {
           <div className="flex flex-col  justify-between z-10 lg:items-end min-h-[74vh]  h-full w-full  pt-6">
             <div className="flex flex-col w-full gap-1">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md">
-                {item.product_name}
+                {item.item_Name}
               </h1>
               <div className="h-1 mb-2 w-full bg-primary-color"></div>
               <div className="flex flex-col justify-between gap-4">
@@ -119,12 +116,12 @@ function Product() {
                   <div className="flex items-center gap-2 ">
                     <p className="text-sm font-medium">Shop:</p>
                     <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                    {item.shop?.shop_name || 'No shop available'}
+                    {item.shop_Name || 'No shop available'}
                     </div>
                   </div>
                   <div className="flex gap-1">
                     <h2 className="text-base font-medium">
-                      {item.sold} Sold /{" "}
+                      {item.item_Orders} Sold /{" "}
                     </h2>
                     <div className="flex gap-1 items-center">
                       <h2 className="text-base font-medium text-primary-color">
@@ -143,8 +140,8 @@ function Product() {
                   <p className="text-2xl text-primary-color">₱</p>
                   <h2 className="text-6xl font-bold text-primary-color">
                     {item.discount > 0
-                      ? (item.price * (1 - item.discount / 100)).toFixed(2)
-                      : item.price.toFixed(2)}
+                      ? (item.item_Variant[0].sizes[0].price * (1 - item.discount / 100)).toFixed(2)
+                      : item.item_Variant[0].sizes[0].price.toFixed(2)}
                   </h2>
                 </div>
                 <div className="justify-end flex flex-col items-end gap-2 ">
@@ -155,7 +152,7 @@ function Product() {
                           {item.discount}%
                         </span>
                         <span className="text-3xl text-secondary-color px-1 font-bold opacity-50 line-through ">
-                          ₱{item.price.toFixed(2) || "N/A"}
+                          ₱{(Number(item.item_Variant[0].sizes[0].price) || 0).toFixed(2) || "N/A"}
                         </span>
                       </div>
                     )}
@@ -196,7 +193,7 @@ function Product() {
           {item.description || "No description available."}
         </p>
       </div>
-      <RatingSection item={item} />
+      {/* <RatingSection item={item} /> */}
     </div>
   );
 }

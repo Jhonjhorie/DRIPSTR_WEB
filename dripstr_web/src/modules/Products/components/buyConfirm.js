@@ -16,8 +16,8 @@ const BuyConfirm = ({ action, item, onClose }) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(item?.color_variant[0] || ""); 
-  const [selectedSize, setSelectedSize] = useState(item?.size_variant[0] || "");
+  const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
+  const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0].sizes[0].size || "");
   
   const [isCart, setIsCart] = useState(action === 'cart');
 
@@ -47,7 +47,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
     setSelectedSize(size);
   };
 
-  const imagePreview =`${SUPABASE_STORAGE_URL}/${selectedColor.image}`
+  const imagePreview =`${selectedColor.imagePath}`
 
   const handleProductClick = () => {
     navigate(`/product/${item.product}`, { state: { item } });
@@ -56,7 +56,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
 
   if(isLoggedIn){
   return (
-    <div className="relative right-16 sm:-right-40 ">
+    <div className="w-[40rem] relative right-16 sm:-right-40 ">
       <div className="absolute right-[75%] top-[55%] sm:right-[100%] sm:-top-4 w-[30vw] h-[30vw] z-50 bg-slate-50 rounded-l-lg">
         <img
           src={imagePreview}
@@ -65,7 +65,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
         />
         
       </div>
-      <div className="lg:w-[80rem] rounded-md w-full justify-center -top-20 relative items-center p-0  overflow-y-auto custom-scrollbar  modal-box  bg-slate-300 gap-2 z-40">
+      <div className="lg:w-[200rem] max-w-[200rem] rounded-md w-[100rem]  justify-center -top-20 relative items-center p-0  custom-scrollbar  modal-box  bg-slate-300 gap-2 z-40">
         <img
           src={require("@/assets/images/starDrp.png")}
           className=" absolute bottom-0 lg:-bottom-0 -left-12 z-0 opacity-50 
@@ -78,7 +78,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
             </h1>
             <div className="items-center justify-center bg-slate-50 rounded-md flex">
               <h1 className="text-2xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
-                {item.product_name}
+                {item.item_Name}
               </h1>
             </div>
             <div className="flex flex-col justify-between p-1  gap-4 mb-2">
@@ -86,7 +86,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
                 <div className="flex items-center gap-2 ">
                   <p className="text-sm font-medium">Shop:</p>
                   <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                    {item.shop?.shop_name || "No shop available"}
+                    {item.shop_Name || "No shop available"}
                   </div>
                 </div>
                 <div className="flex gap-1">
@@ -101,14 +101,14 @@ const BuyConfirm = ({ action, item, onClose }) => {
               </div>
             </div>
             <div className="flex flex-row justify-between">
-              <div className="flex flex-col gap-2">
+               <div className="flex flex-col gap-2">
                 <ItemOptions
                   item={item}
                   selectedColor={selectedColor}
                   selectedSize={selectedSize}
                   onSelectedValuesChange={handleSelectedValues}
                 />
-              </div>
+              </div> 
             </div>
           </div>
           <div className="flex items-center justify-center gap-2">
@@ -152,13 +152,9 @@ const BuyConfirm = ({ action, item, onClose }) => {
               <div className="flex justify-end pl-2 ">
                 <p className="text-2xl text-primary-color">₱</p>
                 <h2 className="text-6xl font-bold text-primary-color">
-                  {item.discount > 0
-                    ? (
-                        item.price *
-                        (1 - item.discount / 100) *
-                        quantity
-                      ).toFixed(2)
-                    : item.price.toFixed(2) * quantity}
+                {item.discount > 0
+                      ? (item.item_Variant[0].sizes[0].price * (1 - item.discount / 100)).toFixed(2)
+                      : item.item_Variant[0].sizes[0].price.toFixed(2)}
                 </h2>
               </div>
               <div className="justify-end flex items-end gap-2 ">
@@ -174,7 +170,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
                         {item.discount}%
                       </span>
                       <span className="text-3xl text-secondary-color px-1 font-bold opacity-50 line-through ">
-                        ₱{item.price.toFixed(2) || "N/A"}
+                      ₱{(Number(item.item_Variant[0].sizes[0].price) || 0).toFixed(2) || "N/A"}
                       </span>
                     </div>
                   )}

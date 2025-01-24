@@ -36,8 +36,8 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
         return;
       case 5:
         return item.item_Orders > 99;
-      case 6:
-        return item.reviews.length > 2;
+      // case 6:
+      //   return item?.reviews?.length > 2;
       default:
         return true;
     }

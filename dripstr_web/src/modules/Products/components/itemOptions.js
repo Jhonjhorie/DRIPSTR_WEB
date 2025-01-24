@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const SUPABASE_STORAGE_URL = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public";
 
@@ -10,13 +10,20 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
   // Extracting variants from item
   const variants = item?.item_Variant || [];
 
-  // Extract sizes from the selected variant
-  const sizes = color ? color.sizes || [] : [];
+  // Use useEffect to update sizes when color changes
+  const [sizes, setSizes] = useState(color?.sizes || []);
+
+  useEffect(() => {
+    if (color) {
+      setSizes(color.sizes || []);
+      setSize(null); // Reset size when color changes
+    }
+  }, [color]); // Dependency on color change
 
   const handleRadioChange = (event, type, choiceItem) => {
     if (type === "variant" && !disab) {
       setColor(choiceItem);
-      setSize(null); // Reset size when variant changes
+      setSize(null); // Reset size when color changes
       onSelectedValuesChange(choiceItem, null);
     } else if (type === "size" && !disab) {
       setSize(choiceItem);
@@ -29,7 +36,7 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
       {/* Variant Selection */}
       <div className="flex items-center gap-2">
         <p className="text-lg font-medium">Variant:</p>
-        <div className="flex gap-1">
+        <div className="flex gap-1 w-full overflow-x-auto custom-scrollbar pb-1">
           {variants.length > 0 ? (
             variants.map((variant, index) => (
               <label
@@ -67,7 +74,7 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
       {/* Size Selection */}
       <div className="flex items-center gap-2">
         <p className="text-lg font-medium">Size:</p>
-        <div className="flex gap-1">
+        <div className="flex gap-1 w-full overflow-x-auto custom-scrollbar pb-1">
           {sizes.length > 0 ? (
             sizes.map((sizeOption, index) => (
               <label
@@ -85,10 +92,12 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
                 <span
                   className={`peer-checked:bg-primary-color peer-checked:opacity-100 ${
                     disab ? "opacity-100" : "opacity-50"
-                  } peer-checked:text-white w-full h-full flex items-center justify-center rounded-md duration-300 transition-all glass btn`}
+                  } peer-checked:text-white w-full h-full items-center  form-control justify-center rounded-md duration-300 transition-all glass btn`}
                 >
-                  {sizeOption.size} - ₱{sizeOption.price}
+                  {sizeOption.size}
+            
                 </span>
+             
               </label>
             ))
           ) : (
