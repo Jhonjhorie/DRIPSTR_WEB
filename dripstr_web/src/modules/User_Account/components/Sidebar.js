@@ -23,7 +23,7 @@ const navItems = [
   { label: "My Order", path: "/account/orders", icon: faReceipt },
   { label: "My Wishlist", path: "/account/wishlist", icon: faHeart },
   { label: "Set up Shop", path: "/account/shop-setup", icon: faStore },
-  { label: "Avatar", path: "/account/Cc", icon: faUserCircle },
+  { label: "Avatar", path: "/account/avatar", icon: faUserCircle },
 ];
 
  /*{ label: "My Cancellations", path: "/account/cancellations", icon: faCloseCircle },
@@ -46,59 +46,56 @@ const AccountLayout = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <nav
-        className={`bg-white shadow-md h-screen flex flex-col transition-all duration-300 ease-in-out ${
-          isMinimized ? "w-16" : "w-64"
-        }`}
-        onMouseEnter={() => setIsMinimized(false)} // Expand on hover
-        onMouseLeave={() => setIsMinimized(window.innerWidth < 768)} // Minimize on hover out
-      >
-        {/* Sidebar Header */}
-        <div
-          className={`flex p-4 text-purple-700 font-bold text-xl transition-all   ${
-            isMinimized ? "opacity-0 invisible " : "opacity-100 visible"
-          }`}
-        >
-          User Account
-        </div>
-
-        {/* Navigation Items */}
-        <ul className="flex-grow space-y-2 px-2">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <Link
-                to={item.path}
-                className={`flex items-center p-2 rounded-lg transition-all duration-300 ${
-                  location.pathname === item.path
-                    ? "bg-purple-100 text-purple-700"
-                    : "text-gray-700 hover:bg-gray-200 hover:text-purple-500"
-                }`}
-              >
-                <FontAwesomeIcon
-                  icon={item.icon}
-                  className={`text-xl transition-transform duration-300 ${
-                    isMinimized ? "mx-auto" : "mr-3"
-                  }`}
-                />
-                <span
-                  className={`whitespace-nowrap transition-all duration-300 ${
-                    isMinimized ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                  }`}
-                >
-                  {item.label}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-
- 
-      </nav>
-
- 
+<div className="flex min-h-full bg-gray-100">
+  {/* Sidebar */}
+  <nav
+    className={`bg-white shadow-md h-full flex flex-col transition-all duration-300 ease-in-out ${
+      isMinimized ? "w-16" : "w-64"
+    }`}
+    onMouseEnter={() => setIsMinimized(false)} // Expand on hover
+    onMouseLeave={() => setIsMinimized(window.innerWidth < 768)} // Minimize on hover out
+  >
+    {/* Sidebar Header */}
+    <div
+      className={`flex p-4 text-purple-700 font-bold text-xl transition-all ${
+        isMinimized ? "opacity-0 invisible" : "opacity-100 visible"
+      }`}
+    >
+      User Account
     </div>
+
+    {/* Navigation Items */}
+    <ul className="flex-grow space-y-2 px-2">
+      {navItems.map((item) => (
+        <li key={item.path}>
+          <Link
+            to={item.path}
+            className={`flex items-center p-2 rounded-lg transition-all duration-300 ${
+              location.pathname === item.path
+                ? "bg-purple-100 text-purple-700"
+                : "text-gray-700 hover:bg-gray-200 hover:text-purple-500"
+            }`}
+          >
+            <FontAwesomeIcon
+              icon={item.icon}
+              className={`text-xl transition-transform duration-300 ${
+                isMinimized ? "mx-auto" : "mr-3"
+              }`}
+            />
+            <span
+              className={`whitespace-nowrap transition-all duration-300 ${
+                isMinimized ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+              }`}
+            >
+              {item.label}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</div>
+
   );
 };
 
