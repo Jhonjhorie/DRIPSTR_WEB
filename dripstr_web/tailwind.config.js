@@ -21,6 +21,7 @@ module.exports = {
       dropShadow: {
         'custom': '4px 4px 10px rgba(0, 0, 0, 0.5)', 
         'customWhite': '4px 4px 10px rgba(255, 255, 255, 0.5)', 
+        'customViolet': '4px 4px 15px rgba(138, 43, 226, 1)',
       },
       
       

@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
+import successEmote from "../../../../src/assets/emote/success.png";
+import questionEmote from "../../../../src/assets/emote/hmmm.png";
 
 const AddItem = () => {
   const navigate = useNavigate();
@@ -22,6 +24,8 @@ const AddItem = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
+
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
   };
@@ -130,7 +134,7 @@ const AddItem = () => {
     e.preventDefault();
     setLoading(true);
     const { itemTitle, itemDescription, tag1, tag2, tag3 } = formData;
-    const tags = [tag1, tag2, tag3].filter(Boolean); // Remove empty values
+    const tags = [tag1, tag2, tag3].filter(Boolean);
 
     try {
       // Validate required fields
@@ -186,17 +190,17 @@ const AddItem = () => {
           if (variant.file) {
             const filePath = `product/${Date.now()}_${variant.file.name}`;
             const { data, error } = await supabase.storage
-              .from("product") // Use the correct bucket name
+              .from("product")
               .upload(filePath, variant.file);
 
             if (error) throw error;
 
             return {
               ...variant,
-              image: data.path, // Replace the preview URL with the uploaded image path
+              image: data.path,
             };
           }
-          return variant; // If no file, return the variant as is
+          return variant; //
         })
       );
 
@@ -229,7 +233,10 @@ const AddItem = () => {
 
       if (error) throw error;
 
-      alert("Product added successfully!");
+      setShowAlertSuccess(true);
+      setTimeout(() => {
+        setShowAlertSuccess(false);
+      }, 5000);
       setFormData({
         itemTitle: "",
         itemDescription: "",
@@ -361,8 +368,8 @@ const AddItem = () => {
                 ></textarea>
               </div>
               <label className="text-slate-950  font-semibold mr-2 text-[15px]">
-                  Item Category:
-                </label>
+                Item Category:
+              </label>
               <div className="">
                 <div className="dropdown dropdown-top w-full">
                   <div
@@ -443,8 +450,16 @@ const AddItem = () => {
               </div>
               <div className="w-full h-[70vh]   overflow-y-scroll mt-2 p-3">
                 {variants.length === 0 && (
-                  <div className="text-slate-800 text-sm mt-2 text-center">
-                    Please Add a Variant
+                  <div className="w-fill h-full justify-items-center content-center">
+                    <div className="-mt-10">
+                      <img
+                        src={questionEmote}
+                        alt="Success Emote"
+                        className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                      />
+                    </div>
+                    <div className="-ml-7    ">  <h1 className="text-2xl text-custom-purple font-bold">Add Variants</h1></div>
+                  
                   </div>
                 )}
                 {variants.map((variant, index) => (
@@ -786,6 +801,27 @@ const AddItem = () => {
                     I'm sure!
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+          {/* ALLERTS ADD Item SUCCESS */}
+          {showAlertSuccess && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white w-80  justify-items-center rounded-md shadow-md relative">
+                <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+                <div className="p-5">
+                  <img
+                    src={successEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
+                  Item Successfully Added
+                </h2>
               </div>
             </div>
           )}
