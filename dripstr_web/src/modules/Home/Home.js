@@ -1,7 +1,7 @@
 // src/pages/Home.js
 import React,{useState} from "react";
 import Carousel from "./components/Carousel";
-import AvatarCard from "./components/AvatarCard";
+import NameCard from "./components/nameCard";
 import CategoriesRibbon from "../Products/components/CategoriesRibbon";
 import ProductsView from "../Products/components/ProductsView";
 import MallRibbon from "../Products/components/MallRibbon";
@@ -10,9 +10,10 @@ import FilterProducts from '../Products/components/FilterProducts';
 //Data
 import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from '@/constants/categories.ts';
-import { currUser, Images } from "@/constants/sampleData";
+import { Images } from "@/constants/sampleData";
 import useProducts from "../Products/hooks/useProducts";
 import useUserProfile from "@/shared/mulletCheck";
+import InvitationCard from "./components/invitationCard";
 
 
 
@@ -27,7 +28,11 @@ function Home() {
    
       <div className="flex flex-col-reverse gap-4 md:flex-row items-center p-4 h-[39%] lg:h-[38%]">
         <Carousel images={Images} />
-        {/* <AvatarCard user={currUser} /> */}
+        <div className="flex flex-col w-full md:w-1/3 lg:w-1/3 h-24 md:h-42 lg:h-80 justify-between">
+          <NameCard /> 
+          <InvitationCard />
+        </div>
+        
       </div>
       <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-between px-1 lg:px-2 mt-1 ">
       <CategoriesRibbon active={filCat} categories={categories} onItemClick={(label) => setFilCat(label)} />
