@@ -65,11 +65,14 @@ const ProductCard = ({ item, onClick }) => {
           className="object-contain mb-2 mt-1 w-[180px] h-[200px]"
         />
       ) : (
+        <div>
         <img
-          src={require('@/assets/images/blackLogo.png')}
+        src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
-          className="object-contain mb-2 mt-1 w-[180px] h-[200px]"
+          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
         />
+                        <p className="font-semibold text-sm absolute bottom-20 left-6">No image provided.</p>
+        </div>
       )}
 
       <div className="w-full flex flex-col px-3 py-2 bg-slate-200 rounded-b-md">

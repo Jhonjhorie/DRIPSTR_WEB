@@ -7,9 +7,6 @@ import useUserProfile from "@/shared/mulletCheck.js";
 import LoginFirst from "@/shared/mulletFirst";
 
 
-
-const SUPABASE_STORAGE_URL = 'https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public';
-
  
 
 const BuyConfirm = ({ action, item, onClose }) => {
@@ -17,7 +14,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
-  const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0].sizes[0].size || "");
+  const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
   
   const [isCart, setIsCart] = useState(action === 'cart');
 
@@ -47,7 +44,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
     setSelectedSize(size);
   };
 
-  const imagePreview =`${selectedColor.imagePath}`
+  const imagePreview = `${selectedColor.imagePath}`
 
   const handleProductClick = () => {
     navigate(`/product/${item.product}`, { state: { item } });
@@ -59,9 +56,9 @@ const BuyConfirm = ({ action, item, onClose }) => {
     <div className="w-[40rem] relative right-16 sm:-right-40 ">
       <div className="absolute right-[75%] top-[55%] sm:right-[100%] sm:-top-4 w-[30vw] h-[30vw] z-50 bg-slate-50 rounded-l-lg">
         <img
-          src={imagePreview}
-          alt={selectedColor.name}
-          className="h-full w-full object-contain"
+          src={selectedColor.imagePath != null || "" ? imagePreview : require("@/assets/emote/success.png")}
+          alt={selectedColor.variant_Name}
+          className={`h-full w-full ${selectedColor.imagePath != null || "" ? 'object-contain' : 'object-none'}`}
         />
         
       </div>
@@ -145,32 +142,32 @@ const BuyConfirm = ({ action, item, onClose }) => {
             <div className="justify-end flex flex-col mt-2  mb-3">
               <div className="flex justify-end">
                 <p className=" text-sm font-semibold lg:text-lg text-secondary-color">
-                  Variant: {selectedColor.name} - Size: {selectedSize} -
+                  Variant: {selectedColor?.variant_Name} - Size: {selectedSize?.size} -
                   Quantity: {quantity}
                 </p>
               </div>
               <div className="flex justify-end pl-2 ">
                 <p className="text-2xl text-primary-color">₱</p>
                 <h2 className="text-6xl font-bold text-primary-color">
-                {item.discount > 0
-                      ? (item.item_Variant[0].sizes[0].price * (1 - item.discount / 100)).toFixed(2)
-                      : item.item_Variant[0].sizes[0].price.toFixed(2)}
+                {selectedSize != null ? item.discount > 0
+                      ? ((Number(selectedSize?.price) || 0).toFixed(2) * (1 - item.discount / 100) * quantity).toFixed(2)
+                      : (Number(selectedSize?.price) || 0).toFixed(2) : 'N/A'}
                 </h2>
               </div>
               <div className="justify-end flex items-end gap-2 ">
-                {item.vouchers && (
+                {item?.vouchers && (
                   <span className="text-lg font-bold border border-primary-color px-2 ">
                     SHOP VOUCHER
                   </span>
                 )}
                 <div className="flex justify-end items-center gap-2 flex-col">
-                  {item.discount > 0 && (
+                  {item?.discount > 0 && (
                     <div className="flex items-center">
                       <span className="text-lg text-white bg-primary-color border border-primary-color px-0.5 font-bold">
-                        {item.discount}%
+                        {item?.discount}%
                       </span>
                       <span className="text-3xl text-secondary-color px-1 font-bold opacity-50 line-through ">
-                      ₱{(Number(item.item_Variant[0].sizes[0].price) || 0).toFixed(2) || "N/A"}
+                      ₱{(Number(selectedSize?.price) || 0).toFixed(2) || "N/A"}
                       </span>
                     </div>
                   )}

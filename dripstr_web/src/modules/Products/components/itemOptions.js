@@ -7,24 +7,23 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
   const [size, setSize] = useState(selectedSize || null);
   const disab = onSelectedValuesChange == null;
 
-  // Extracting variants from item
+
   const variants = item?.item_Variant || [];
 
-  // Use useEffect to update sizes when color changes
   const [sizes, setSizes] = useState(color?.sizes || []);
 
   useEffect(() => {
     if (color) {
       setSizes(color.sizes || []);
-      setSize(null); // Reset size when color changes
+      setSize(sizes[0]); 
     }
-  }, [color]); // Dependency on color change
+  }, [color]); 
 
   const handleRadioChange = (event, type, choiceItem) => {
     if (type === "variant" && !disab) {
       setColor(choiceItem);
-      setSize(null); // Reset size when color changes
-      onSelectedValuesChange(choiceItem, null);
+      setSize(sizes[0]);
+      onSelectedValuesChange(choiceItem, sizes[0]);
     } else if (type === "size" && !disab) {
       setSize(choiceItem);
       onSelectedValuesChange(color, choiceItem);
@@ -33,7 +32,7 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
 
   return (
     <div className="flex flex-col gap-2">
-      {/* Variant Selection */}
+
       <div className="flex items-center gap-2">
         <p className="text-lg font-medium">Variant:</p>
         <div className="flex gap-1 w-full overflow-x-auto custom-scrollbar pb-1">
@@ -54,13 +53,14 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
                 <span
                   className={`peer-checked:bg-primary-color peer-checked:opacity-100 ${
                     disab ? "opacity-100" : "opacity-50"
-                  } peer-checked:text-white w-full h-full flex items-center hover:bg-primary-color justify-start pl-0 rounded-md duration-300 transition-all glass btn`}
+                  } peer-checked:text-white w-full h-full flex items-center hover:bg-primary-color justify-start pl-1 rounded-md duration-300 transition-all glass btn`}
                 >
-                  <img
+                  {variant.imagePath && <img
                     src={variant.imagePath}
                     alt={variant.variant_Name}
                     className="rounded-l-md w-8 h-full object-contain bg-slate-50"
-                  />
+                  />}
+                  
                   {variant.variant_Name}
                 </span>
               </label>
@@ -71,7 +71,6 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
         </div>
       </div>
 
-      {/* Size Selection */}
       <div className="flex items-center gap-2">
         <p className="text-lg font-medium">Size:</p>
         <div className="flex gap-1 w-full overflow-x-auto custom-scrollbar pb-1">
@@ -84,7 +83,7 @@ const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange
                 <input
                   type="radio"
                   name="radio-size"
-                  value={sizeOption.size}
+                  value={sizeOption}
                   className="hidden peer"
                   checked={sizeOption === size}
                   onChange={(e) => handleRadioChange(e, "size", sizeOption)}

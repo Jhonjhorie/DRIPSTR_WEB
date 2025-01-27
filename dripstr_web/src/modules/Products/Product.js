@@ -13,6 +13,12 @@ function Product() {
   const location = useLocation();
   const item = location.state?.item;
   const imageUrls = useGetImage(item); 
+  const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
+      const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
+      const handleSelectedValues = (color, size) => {
+        setSelectedColor(color);
+        setSelectedSize(size);
+      };
 
   const allImages = [
     ...imageUrls
@@ -92,7 +98,16 @@ function Product() {
                   )}
                 </div>
               ) : (
-                <p className="text-center w-full py-4">No images available.</p>
+                <div className="flex flex-col items-center justify-center">
+                 
+                    
+       
+                <img
+                    src={require("@/assets/emote/hmmm.png")}
+                    alt="No Images Available"
+                    className="w-[40rem] h-[35%] object-none"
+                  />                <p className="text-center font-bold pr-8">No images available.</p>
+                </div>
               )}
             </div>
             {item.str && (
@@ -133,15 +148,20 @@ function Product() {
                 </div>
                 <div className="flex flex-row justify-between">
                   <div className="flex flex-col gap-2">
-                   <ItemOptions item={item} />
+                  <ItemOptions
+                  item={item}
+                  selectedColor={selectedColor}
+                  selectedSize={selectedSize}
+                  onSelectedValuesChange={handleSelectedValues}
+                />
                   </div>
                 </div>
                 <div className="flex justify-end pl-2 mt-2 md:mt-8">
                   <p className="text-2xl text-primary-color">₱</p>
                   <h2 className="text-6xl font-bold text-primary-color">
-                    {item.discount > 0
-                      ? (item.item_Variant[0].sizes[0].price * (1 - item.discount / 100)).toFixed(2)
-                      : item.item_Variant[0].sizes[0].price.toFixed(2)}
+                  {selectedSize != null ? item.discount > 0
+                      ? ((Number(selectedSize?.price) || 0).toFixed(2) * (1 - item.discount / 100)).toFixed(2)
+                      : (Number(selectedSize?.price) || 0).toFixed(2) : 'N/A'}
                   </h2>
                 </div>
                 <div className="justify-end flex flex-col items-end gap-2 ">
@@ -152,7 +172,7 @@ function Product() {
                           {item.discount}%
                         </span>
                         <span className="text-3xl text-secondary-color px-1 font-bold opacity-50 line-through ">
-                          ₱{(Number(item.item_Variant[0].sizes[0].price) || 0).toFixed(2) || "N/A"}
+                          ₱{(Number(selectedSize?.price) || 0).toFixed(2) || "N/A"}
                         </span>
                       </div>
                     )}

@@ -12,7 +12,7 @@ const ProductModal = ({ item, onClose }) => {
   const navigate = useNavigate();
   const allImages = useGetImage(item); 
   const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
-    const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0].sizes[0].size || "");
+    const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
     const handleSelectedValues = (color, size) => {
       setSelectedColor(color);
       setSelectedSize(size);
@@ -53,39 +53,53 @@ const ProductModal = ({ item, onClose }) => {
               className=" absolute top-[55%] lg:top-[60%] -left-[10%] -z-10 opacity-30  w-[35%] h-[40%] object-contain "
             />
             <div className="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
-              {allImages.map((image, imageIndex) => {
-                const slideId = `slide${imageIndex}`;
-                const prevSlideId = `slide${
-                  (imageIndex - 1 + allImages.length) % allImages.length
-                }`;
-                const nextSlideId = `slide${
-                  (imageIndex + 1) % allImages.length
-                }`;
-
-                return (
-                  <div
-                    id={slideId}
-                    key={slideId}
-                    className="carousel-item relative w-full  justify-center items-center"
-                  >
-                    <img
-                      src={image}
-                      alt={`${item.item_Name}-${imageIndex}`}
-                      className="w-[32rem]  h-[65vh] object-contain"
-                    />
-                    {allImages.length > 1 && (
-                      <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                        <a href={`#${prevSlideId}`} className="btn btn-circle">
-                          ❮
-                        </a>
-                        <a href={`#${nextSlideId}`} className="btn btn-circle">
-                          ❯
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {allImages.length > 0 ?
+                (allImages.map((image, imageIndex) => {
+                  const slideId = `slide${imageIndex}`;
+                  const prevSlideId = `slide${
+                    (imageIndex - 1 + allImages.length) % allImages.length
+                  }`;
+                  const nextSlideId = `slide${
+                    (imageIndex + 1) % allImages.length
+                  }`;
+  
+                  return (
+                    <div
+                      id={slideId}
+                      key={slideId}
+                      className="carousel-item relative w-full  justify-center items-center"
+                    >
+                      <img
+                        src={image}
+                        alt={`${item.item_Name}-${imageIndex}`}
+                        className="w-[32rem]  h-[65vh] object-contain"
+                      />
+                      {allImages.length > 1 && (
+                        <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
+                          <a href={`#${prevSlideId}`} className="btn btn-circle">
+                            ❮
+                          </a>
+                          <a href={`#${nextSlideId}`} className="btn btn-circle">
+                            ❯
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  );
+              }))
+              :
+                <div
+                className="carousel-item relative w-full  justify-center items-center flex flex-col"
+              >
+                <img
+                src={require("@/assets/emote/hmmm.png")}
+                  alt={`${item.item_Name}`}
+                  className="w-[32rem]  h-[65vh] object-none "
+                />
+                <p className="font-bold absolute bottom-32 left-36">No image provided.</p>
+              </div>
+              }
+              
             </div>
             {item.str && (
               <div className="bg-primary-color  w-full rounded-md pl-1 z-50">
@@ -162,7 +176,9 @@ const ProductModal = ({ item, onClose }) => {
                   <div className="flex pl-2">
                     <p className="text-2xl  text-primary-color">₱</p>
                     <h2 className="text-5xl font-bold text-primary-color">
-                      {item.item_Variant[0].sizes[0].price}
+                    {selectedSize != null ? item.discount > 0
+                      ? ((Number(selectedSize?.price) || 0).toFixed(2) * (1 - item.discount / 100)).toFixed(2)
+                      : (Number(selectedSize?.price) || 0).toFixed(2) : 'N/A'}
                     </h2>
                   </div>
                 </div>
