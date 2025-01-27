@@ -4,6 +4,10 @@ import sampleads from "../../../assets/shop/s2.jpg";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
+import sadEmote from "../../../../src/assets/emote/sad.png";
+import successEmote from "../../../../src/assets/emote/success.png";
+import questionEmote from "../../../../src/assets/emote/hmmm.png";
+
 const { useState, useEffect } = React;
 
 function Products() {
@@ -495,7 +499,7 @@ function Products() {
       // Upload the selected image to Supabase storage
       const fileName = `${Date.now()}-${imageFile.name}`; // Unique file name
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("shop_profile/shop_Ads") 
+        .from("shop_profile/shop_Ads")
         .upload(fileName, imageFile);
 
       if (uploadError) {
@@ -506,7 +510,7 @@ function Products() {
 
       // Get the public URL for the uploaded image
       const { data: publicUrlData, error: urlError } = supabase.storage
-        .from("shop_profile/shop_Ads") 
+        .from("shop_profile/shop_Ads")
         .getPublicUrl(fileName);
 
       if (urlError) {
@@ -527,11 +531,10 @@ function Products() {
       const newAd = {
         id: Date.now(),
         ad_Name: adName,
-        ad_Image: imageUrl, 
+        ad_Image: imageUrl,
       };
 
       const updatedAds = [...existingAds, newAd];
-
 
       const { error: updateError } = await supabase
         .from("shop")
@@ -543,7 +546,7 @@ function Products() {
         alert("Failed to add ad.");
       } else {
         alert("Ad successfully added!");
-        handleCloseModal(); 
+        handleCloseModal();
       }
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -723,8 +726,22 @@ function Products() {
                     );
                   })
                 ) : (
-                  <div className="text-center text-slate-500">
-                    No products found.
+                  <div className="">
+                    <div className="w-fill h-full justify-items-center content-center">
+                      <div className="mt-10">
+                        <img
+                          src={sadEmote}
+                          alt="Success Emote"
+                          className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                        />
+                      </div>
+                      <div className="">
+                        {" "}
+                        <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">
+                          No Products
+                        </h1>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -768,12 +785,12 @@ function Products() {
                         className="p-2 mt-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2"
                       >
                         <div className="h-full w-20 place-items-center justify-center flex">
-                        {`${index + 1}`}
+                          {`${index + 1}`}
                         </div>
                         <div className="h-full w-24 flex justify-center items-center bg-slate-200 rounded-md">
                           {ad.ad_Image ? (
                             <img
-                              src={ad.ad_Image} 
+                              src={ad.ad_Image}
                               alt={ad.ad_Name || "Advertisement"}
                               className="h-full w-full object-cover rounded-md shadow-lg"
                               sizes="100%"
@@ -795,8 +812,22 @@ function Products() {
                     );
                   })
                 ) : (
-                  <div className="p-2 text-slate-900">
-                    No advertisements available.
+                  <div className="">
+                    <div className="w-fill h-full justify-items-center content-center">
+                      <div className="mt-10">
+                        <img
+                          src={sadEmote}
+                          alt="Success Emote"
+                          className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                        />
+                      </div>
+                      <div className="">
+                        {" "}
+                        <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">
+                          No Advertisement yet.
+                        </h1>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -889,6 +920,15 @@ function Products() {
       {/* ALLERTS */}
       {showAlert && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
             className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
@@ -912,9 +952,18 @@ function Products() {
       )}
       {showAlertDel && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+           <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain h-40 w-40 rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+            className="alert alert-success shadow-md flex items-center p-4 bg-red-600 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -935,6 +984,15 @@ function Products() {
       )}
       {showAlertUnpost && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain h-40 w-40 rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
             className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
@@ -952,7 +1010,7 @@ function Products() {
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span>Item is Unposted.</span>
+            <span>Item is Unposted in Dripstr.</span>
           </div>
         </div>
       )}

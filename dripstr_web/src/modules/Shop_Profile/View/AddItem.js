@@ -234,9 +234,6 @@ const AddItem = () => {
       if (error) throw error;
 
       setShowAlertSuccess(true);
-      setTimeout(() => {
-        setShowAlertSuccess(false);
-      }, 5000);
       setFormData({
         itemTitle: "",
         itemDescription: "",
@@ -253,7 +250,11 @@ const AddItem = () => {
       setLoading(false);
     }
   };
-
+  const closeConfirmAdd = () => {
+    setTimeout(() => {
+      setShowAlertSuccess(false);
+    }, 1000);
+  }
   const removeVariant = () => {
     if (variantToDelete !== null) {
       const newVariants = variants.filter((_, i) => i !== variantToDelete);
@@ -458,7 +459,7 @@ const AddItem = () => {
                         className="object-contain rounded-lg p-1 drop-shadow-customViolet"
                       />
                     </div>
-                    <div className="-ml-7    ">  <h1 className="text-2xl text-custom-purple font-bold">Add Variants</h1></div>
+                    <div className="-ml-7    ">  <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">Add Variants</h1></div>
                   
                   </div>
                 )}
@@ -822,6 +823,11 @@ const AddItem = () => {
                 <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
                   Item Successfully Added
                 </h2>
+                <div 
+                onClick={closeConfirmAdd}
+                className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer">
+                  Okay!
+                </div>
               </div>
             </div>
           )}

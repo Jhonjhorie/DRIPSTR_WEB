@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import blackLogo from "../../../assets/logoWhite.png";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 import { supabase } from "../../../constants/supabase";
+import questionEmote from "../../../../src/assets/emote/question.png";
+import hmmmEmote from "../../../../src/assets/emote/hmmm.png";
+import successEmote from "../../../../src/assets/emote/success.png";
 
 function Vouchers() {
   const navigate = useNavigate();
@@ -574,9 +577,23 @@ function Vouchers() {
                   </div>
                 ))
               ) : (
-                <p className="text-slate-800 h-auto font-medium text-center place-items-center justify-center absolute">
-                  <span className="text-center">Loading Shop Vouchers</span>
-                </p>
+                <div className=" top-28 justify-center absolute">
+                  <div className="w-fill h-full justify-items-center content-center">
+                    <div className="mt-10">
+                      <img
+                        src={hmmmEmote}
+                        alt="Success Emote"
+                        className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                      />
+                    </div>
+                    <div className="-ml-7 ">
+                      {" "}
+                      <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">
+                        No Vouchers Yet.
+                      </h1>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -629,7 +646,7 @@ function Vouchers() {
       {editVoucher && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white overflow-hidden h-80 overflow-y-scroll relative custom-scrollbar p-5 rounded-md shadow-md w-[400px]">
-            <h2 className="text-xl font-bold mb-4 text-slate-800">
+            <h2 className="text-xl text-center font-bold mb-4 text-slate-800">
               Edit Vouchers
             </h2>
             <ul>
@@ -699,8 +716,8 @@ function Vouchers() {
       {deleteVoucher && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-5 rounded-md shadow-md">
-            <h2 className="text-xl font-bold mb-4 text-center text-slate-800">
-              Delete Vouchers?
+            <h2 className="text-xl text-center font-bold mb-4 text-slate-800">
+              Delete this Vouchers
             </h2>
             <ul>
               {selectedVouchers.length > 0 ? (
@@ -764,9 +781,18 @@ function Vouchers() {
       {/* ALLERTS EMPTY FIELDS */}
       {showAlertNull && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-52 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+            className="alert z-20 alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -786,9 +812,18 @@ function Vouchers() {
         </div>
       )}
       {/* ALLERTS SENT VOUCHERS */}
-      
+
       {showAlertSent && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-52 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
             className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
@@ -813,6 +848,15 @@ function Vouchers() {
       {/* ALLERTS UPDATED FIELDS */}
       {showAlertUpdated && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
             className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
@@ -837,9 +881,18 @@ function Vouchers() {
       {/* ALLERTS DELETE VOUCHERS */}
       {showAlertDel && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-28 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-success shadow-md flex items-center p-4 bg-red-600 text-slate-50 font-semibold rounded-md"
+            className="alert z-20 alert-success shadow-md flex items-center p-4  bg-red-600 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -861,6 +914,15 @@ function Vouchers() {
       {/* ALLERTS DELETE VOUCHERS */}
       {showNoSelectedVoucher && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-52 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
             className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
@@ -885,6 +947,15 @@ function Vouchers() {
       {/* ALLERTS UPDATE VOUCHERS */}
       {showNoSelectedeEditVoucher && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-52 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
             className="bg-custom-purple alert shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"

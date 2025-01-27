@@ -14,7 +14,6 @@ function MerchantDashboard() {
 
   return (
     <div className="h-full w-full bg-slate-300 overflow-hidden   ">
-      <div className="w-full h-full bg-slate-300 ">
         <div className="w-full h-20  top-0 bg-violet-600 shadow-md px-16 ">
           <div className="w-full h-full flex gap-3 p-2">
             <div className="flex justify-between w-full ">
@@ -96,13 +95,24 @@ function MerchantDashboard() {
             </div>
           </div>
         </div>
-        <div className="w-full h-full gap-1  bg-slate-100 shadow-md justify-between flex">
-          <div className="w-80  h-full text-transparent bg-clip-text bg-gradient-to-br from-violet-500 to-fuchsia-500 bg-opacity-10 p-2 overflow-hidden overflow-y-scroll custom-scrollbar">
-            <div className="w-full h-16 bg-slate-50"></div>
+        <div className="w-full h-[60%] gap-1  bg-slate-900 shadow-md justify-between flex">
+          <div className="w-80 bg-slate-50  h-[60%] mt-2 ">
+            
           </div>
-          <div className="w-full h-full bg-slate-900"></div>
-          <div className="w-52 h-full bg-slate-400"></div>
-        </div>
+          <div className="w-full h-[60%] mt-2 overflow-hidden overflow-y-scroll bg-slate-900  custom-scrollbar">
+            <div className="h-20 w-full mt-2 bg-slate-100"></div>
+            <div className="h-20 w-full mt-2 bg-slate-100"></div>
+            <div className="h-20 w-full mt-2 bg-slate-100"></div>
+            <div className="h-20 w-full mt-2 bg-slate-100"></div>
+            <div className="h-20 w-full mt-2 bg-slate-100"></div>
+            <div className="h-20 w-full mt-2 bg-slate-100"></div>
+            <div className="h-20 w-full mt-2 bg-slate-100"></div>
+            <div className="h-20 w-full mt-2 bg-slate-100"></div>
+
+             <div className="h-20 w-full mt-2 bg-slate-100"></div>
+            
+          </div>
+          <div className="w-52 h-[60%] bg-slate-400"></div>
       </div>
     </div>
   );
