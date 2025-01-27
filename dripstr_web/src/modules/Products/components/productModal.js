@@ -75,7 +75,7 @@ const ProductModal = ({ item, onClose }) => {
                         className="w-[32rem]  h-[65vh] object-contain"
                       />
                       {allImages.length > 1 && (
-                        <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
+                        <div className="absolute left-5 right-5 opacity-50 hover:opacity-100 top-1/2 flex -translate-y-1/2 transform justify-between">
                           <a href={`#${prevSlideId}`} className="btn btn-circle">
                             ❮
                           </a>
