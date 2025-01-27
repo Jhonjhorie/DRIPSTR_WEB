@@ -53,7 +53,7 @@ const AuthScreen = () => {
       alert(`Sign In Error: ${error.message} please check your email and confirm`);
     } else {
       alert("Sign In successful!");
-      navigate("/account/cc"); // Redirect to the dashboard or account page
+      navigate("/account/cc");  
     }
   };
 
@@ -72,6 +72,7 @@ const AuthScreen = () => {
       options: {
         data: {
           fullName, // Custom field to store additional user info
+          
         },
       },
     });

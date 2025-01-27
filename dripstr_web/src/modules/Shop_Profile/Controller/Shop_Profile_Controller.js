@@ -14,6 +14,7 @@ import ArtistDashboard from '../View/Artist/ArtistDashboard';
 import ArtistMessage from '../View/Artist/ArtistMessages';
 import ArtistOrders from '../View/Artist/ArtistOrders';
 import ArtistAddArts from '../View/Artist/AddArt';
+import AddItem  from '../View/AddItem';
 
 
 const ShopProfileController = () => {
@@ -29,10 +30,12 @@ const ShopProfileController = () => {
       <Route path="/MerchantOrders" element={<MerchantOrders />} />
       <Route path="/Shop_profile" element={<Shop_profile />} />
       <Route path="/MerchantVouchers" element={<MerchantVouchers />} />
+      <Route path="/AddItem" element={<AddItem />} />
       <Route path="/Artist/ArtistDashboard" element={<ArtistDashboard />} />
       <Route path="/Artist/ArtistAddArts" element={<ArtistAddArts />} />
       <Route path="/Artist/ArtistMessage" element={<ArtistMessage />} />
       <Route path="/Artist/ArtistOrders" element={<ArtistOrders />} />
+      
     </Routes>
   );
 };

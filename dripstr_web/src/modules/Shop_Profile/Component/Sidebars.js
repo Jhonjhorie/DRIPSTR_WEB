@@ -1,31 +1,89 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../../../assets/shop/shoplogo.jpg';
+import { supabase } from "../../../constants/supabase";  
+
 
 function SideBar() { 
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
   const navbarRef = useRef(null);
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [shopImageUrl, setShopImageUrl] = useState('');
+  const [shopName, setShopName] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
-};
+  };
 
- 
+  useEffect(() => {
+    const fetchShopImage = async () => {
+      try {
+        // Get the current user session
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        
+        if (userError) {
+          console.error('Error fetching user:', userError);
+          setErrorMessage('Unable to fetch user session.');
+          return;
+        }
 
+        const user = userData.user;
+        if (!user) {
+          console.error('No user logged in.');
+          setErrorMessage('User not logged in.');
+          return;
+        }
+
+        // Fetch shop image URL where user is the shop owner
+        const { data, error } = await supabase
+          .from('shop') // Replace 'shop' with your table name
+          .select('shop_image, shop_name') // Replace 'shop_image' with your column name
+          .eq('owner_Id', user.id) // Assuming 'user_id' links shop to user
+          .single();
+
+        if (error) {
+          console.error('Error fetching shop image:', error.message);
+          setErrorMessage('Unable to fetch shop image.');
+          return;
+        }
+
+        if (data) {
+          console.log('Shop data:', data);
+          setShopImageUrl(data.shop_image);
+          setShopName(data.shop_name);
+        } else {
+          console.warn('No shop data found for this user.');
+          setErrorMessage('No shop image found.');
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err.message);
+        setErrorMessage('An unexpected error occurred.');
+      }
+    };
+
+    fetchShopImage();
+  }, []);
+  
   return (
     <div className="relative flex  md:mr-0" ref={navbarRef}>
     
     <div className="dropdown dropdown-bottom dropdown-end bg-slate-100 shadow-md border-2 border-primary-color 
     shadow-primary-color h-12 w-20 mt-2 rounded-md mr-16 ">
-      <div>
-          <img
-            src={logo}
-            alt="Shop Logo"
-            className="drop-shadow-custom object-cover rounded-md h-11 w-full"
-          />
-      </div>
+        {shopImageUrl ? (
+        <img
+          src={shopImageUrl}
+          alt="Shop Profile"
+          className="object-cover h-full w-full rounded-md"
+        />
+      ) : (
+        <div className="h-full w-full flex items-center justify-center">
+          <span>Loading...</span>
+        </div>
+      )}
     </div>
 
 
@@ -35,7 +93,7 @@ function SideBar() {
       className="fixed w-12 h-12 right-3 z-10 bg-custom-purple  glass text-white rounded-md m-2 shadow-lg"
       onClick={toggleSidebar}
     >
-      <box-icon name='menu' color="#ffffff" ></box-icon>
+      <i className="fa-solid fa-bars"></i>
                     </button>
                     {isSidebarOpen && (
                         <div 
@@ -50,15 +108,23 @@ function SideBar() {
           <div className='h-24 w-full rounded-md bg-slate-900'>
           <div className='bg-slate-100 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-full border-[3px]  border-slate-800 ' >
             <img
-              src={logo}
+              src={shopImageUrl}
               alt="Shop Logo"
-              className="drop-shadow-custom object-cover rounded-full h-full w-full"
+              className="drop-shadow-custom object-cover rounded-full h-36    w-full"
             />
           </div>
            
           </div>
 
-          <div className='text-slate-900 font-semibold pt-[30%]  text-center'> Saint Mercy Apparel </div>
+         
+          {shopName ? (
+        <div className='text-slate-900 font-semibold pt-[30%]  text-center'> {shopName} </div>
+        ) : (
+          <div className="h-full w-full flex items-center justify-center">
+            <span>Loading...</span>
+          </div>
+        )}
+         
           <li
           onClick={() => navigate('/shop/MerchantDashboard')}
           className='flex justify-between p-1 hover:bg-slate-300 mt-4 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer '>
