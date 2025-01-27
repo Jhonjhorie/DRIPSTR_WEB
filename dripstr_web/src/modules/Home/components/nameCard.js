@@ -6,7 +6,7 @@ const NameCard = () => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
 
   return (
-    <Link className="flex bg-secondary-color rounded-md group drop-shadow-lg w-full lg:w-full h-24  md:h-32  scale-100 duration-300 transition-all "
+    <Link className="flex bg-secondary-color rounded-md group drop-shadow-lg w-full  h-24  md:h-32  scale-100 duration-300 transition-all "
     to="account/profile"
     >
       <div className="flex flex-row gap-2 md:gap-2 p-2 md:p-3  h-full justify-start">

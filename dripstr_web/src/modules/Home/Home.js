@@ -28,7 +28,7 @@ function Home() {
    
       <div className="flex flex-col-reverse gap-4 md:flex-row items-center p-4 h-[39%] lg:h-[38%]">
         <Carousel images={Images} />
-        <div className="flex flex-col w-full md:w-1/3 lg:w-1/3 h-24 md:h-42 lg:h-80 justify-between">
+        <div className="flex flex-col w-full md:w-1/3 lg:w-1/3 h-24 md:h-42 lg:h-80 justify-start gap-6">
           <NameCard /> 
           <InvitationCard />
         </div>
