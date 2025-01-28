@@ -6,7 +6,6 @@ import { supabase } from "../../../constants/supabase";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 import sadEmote from "../../../../src/assets/emote/sad.png";
 import successEmote from "../../../../src/assets/emote/success.png";
-import questionEmote from "../../../../src/assets/emote/hmmm.png";
 
 const { useState, useEffect } = React;
 
