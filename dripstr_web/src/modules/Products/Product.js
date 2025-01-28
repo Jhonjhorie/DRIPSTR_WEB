@@ -213,7 +213,7 @@ function Product() {
           {item.description || "No description available."}
         </p>
       </div>
-      {/* <RatingSection item={item} /> */}
+       <RatingSection item={item} />  
     </div>
   );
 }
