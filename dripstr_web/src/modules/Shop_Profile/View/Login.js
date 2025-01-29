@@ -4,6 +4,9 @@ import "../../../assets/shop/fonts/font.css";
 import { useNavigate } from "react-router-dom";
 import "boxicons";
 import { supabase } from "../../../constants/supabase";
+import questionEmote from "../../../../src/assets/emote/question.png";
+
+
 function Login() {
   const navigate = useNavigate();
   const [shopName, setShopName] = useState("");
@@ -282,7 +285,7 @@ function Login() {
       <div className="h-full w-full lg:flex bg-slate-300 p-1 justify-center  ">
         {/* FIRST CONTAINER */}
 
-        <div className=" h-auto w-full lg:w-[55%]  overflow-hidden ">
+        <div className=" h-auto w-full lg:w-[55%] bg-white shadow-lg rounded-lg p-3 px-7 overflow-hidden ">
           <div className="flex md:gap-2 md:justify-start justify-center  ">
             <box-icon
               name="store"
@@ -436,9 +439,18 @@ function Login() {
 
       {showAlert && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -459,9 +471,18 @@ function Login() {
       )}
       {showAlert2 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+         <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -482,9 +503,18 @@ function Login() {
       )}
       {showAlert3 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -505,9 +535,18 @@ function Login() {
       )}
       {showAlert4 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+           <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -528,9 +567,18 @@ function Login() {
       )}
       {showAlert5 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+           <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -551,9 +599,18 @@ function Login() {
       )}
       {showAlert6 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+           <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+            className="alert bg-custom-purple shadow-md flex items-center p-4  font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -574,9 +631,18 @@ function Login() {
       )}
       {showAlert7 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-error shadow-md flex items-center p-4  font-semibold rounded-md"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -647,6 +713,7 @@ function Login() {
           </div>
         </div>
       )}
+   
     </div>
   );
 }

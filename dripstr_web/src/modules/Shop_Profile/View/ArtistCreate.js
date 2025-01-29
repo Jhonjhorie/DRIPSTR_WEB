@@ -4,7 +4,7 @@ import "../../../assets/shop/fonts/font.css";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import questionEmote from "../../../../src/assets/emote/question.png";
-
+import successEmote from "../../../../src/assets/emote/success.png";
 import "boxicons";
 
 function ArtistCreate() {
@@ -23,6 +23,8 @@ function ArtistCreate() {
   const [showAlert5, setShowAlert5] = React.useState(false); // AlertAddress
   const [showAlert6, setShowAlert6] = React.useState(false); // AlertImageMissing
   const [showAlert7, setShowAlert7] = React.useState(false); // AlertImageMissing
+  const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
+  const [loading, setLoading] = useState(false);
 
   const handleArtistNameChange = (e) => setArtistName(e.target.value);
   const handleArtistDescriptionChange = (e) =>
@@ -46,7 +48,7 @@ function ArtistCreate() {
   };
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload on form submit
-
+    setLoading(true);
     //handles alerts on missing inputs
     //handles alerts on missing inputs
     if (!artistName.trim()) {
@@ -55,6 +57,7 @@ function ArtistCreate() {
       setTimeout(() => {
         setShowAlert(false);
       }, 3000);
+      setLoading(false);
       return; // Do not proceed if the field is empty
     }
     if (!selectedCategory.trim()) {
@@ -63,6 +66,7 @@ function ArtistCreate() {
       setTimeout(() => {
         setShowAlert7(false);
       }, 3000);
+      setLoading(false);
       return; // Do not proceed if the field is empty
     }
     if (!phoneNumber.trim()) {
@@ -71,6 +75,7 @@ function ArtistCreate() {
       setTimeout(() => {
         setShowAlert2(false);
       }, 3000);
+      setLoading(false);
       return; // Do not proceed if the phone number is empty
     }
     if (phoneNumber.length !== 11) {
@@ -79,6 +84,7 @@ function ArtistCreate() {
       setTimeout(() => {
         setShowAlert4(false);
       }, 3000);
+      setLoading(false);
       return; // Ensure phone number is exactly 11 digits
     }
     if (!artistDescription.trim()) {
@@ -87,6 +93,7 @@ function ArtistCreate() {
       setTimeout(() => {
         setShowAlert5(false);
       }, 3000);
+      setLoading(false);
       return; // Do not proceed if the field is empty
     }
     if (!selectedImage) {
@@ -95,6 +102,7 @@ function ArtistCreate() {
       setTimeout(() => {
         setShowAlert6(false);
       }, 3000);
+      setLoading(false);
       return; // Do not proceed if the field is empty
     }
     //define current user credit
@@ -107,9 +115,8 @@ function ArtistCreate() {
       return;
     }
 
-    //set null if there's no Image & File Inputted
     let uploadedImageUrl = null;
-    //Set Image from shop to DB
+
     if (imageFile) {
       try {
         // Upload the image to Supabase storage
@@ -140,11 +147,9 @@ function ArtistCreate() {
       }
     }
 
-    const userId = user.id; // Get the current user's ID
+    const userId = user.id;
 
-    // Insert the shop with the user ID as the owner ID
     try {
-      // Insert the shop with the user ID as the owner ID
       const { data: shopData, error: shopError } = await supabase
         .from("artist")
         .insert([
@@ -164,6 +169,7 @@ function ArtistCreate() {
         return;
       }
 
+      setShowAlertSuccess(true);
       console.log("Artist page created successfully:", shopData);
 
       const { error: updateError } = await supabase
@@ -176,25 +182,27 @@ function ArtistCreate() {
         return;
       }
 
-      console.log(
-        "User profile updated with merchant_id and ismerchant = true"
-      );
-
       // Reset form fields after successful insertion
       setArtistName("");
       setPhoneNumber("");
       setArtistDescription("");
       setImageFile(null);
-      // Navigate to the Merchant Dashboard
-      navigate("/shop/Artist/ArtistDashboard");
     } catch (err) {
       console.error("Unexpected error:", err);
+    } finally {
+      setLoading(false);
     }
+  };
+  const closeConfirmArtistCreation = () => {
+    setTimeout(() => {
+      setShowAlertSuccess(false);
+    }, 1000);
+    navigate("/shop/Artist/ArtistDashboard");
   };
 
   return (
     <div className="h-full w-full">
-      <div className="h-auto w-full lg:flex justify-center items-center bg-slate-300 p-1  ">
+      <div className="h-full w-full lg:flex justify-center items-center bg-slate-300 p-1  ">
         {/* SECOND CONTAINER */}
 
         {/* FIRST CONTAINER */}
@@ -308,9 +316,10 @@ function ArtistCreate() {
                     />
                   ) : (
                     <div className=" w-full text-4xl text-custom-purple place-content-center text-center h-full">
-                    <i className="fa-solid fa-image"></i>
-                   </div>
-                  )}{""}
+                      <i className="fa-solid fa-image"></i>
+                    </div>
+                  )}
+                  {""}
                 </div>
                 <div className="h-auto w-full flex mt-6 justify-center ">
                   <input
@@ -338,10 +347,19 @@ function ArtistCreate() {
               ></textarea>
             </label>
           </div>
-          <div className="w-full h-auto justify-end flex m-2  mb-14 md:mb-0">
-            <button className="btn glass bg-custom-purple   mr-5 iceland-regular tracking-wide text-lg text-white ">
-              SUBMIT
-            </button>
+          <div className="w-full h-auto justify-end flex m-2 bg-slate-300 mb-14 md:mb-0">
+            {loading ? (
+              <div className="text-center place-content-center px-5 mr-14 glass rounded-md bg-custom-purple">
+                <span className="loading loading-dots loading-lg bg-slate-100"></span>
+              </div>  
+            ) : (
+              <button
+                type="submit"
+                className="btn glass bg-custom-purple   mr-[8%] iceland-regular tracking-wide text-lg text-white "
+              >
+                SUBMIT
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -566,6 +584,33 @@ function ArtistCreate() {
               />
             </svg>
             <span>Artist Category is Required!</span>
+          </div>
+        </div>
+      )}
+      {/* ALLERTS ADD Item SUCCESS */}
+      {showAlertSuccess && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
+            <div className="p-5">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+              />
+            </div>
+
+            <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
+              Artist Page Created Successfully
+            </h2>
+            <div
+              onClick={closeConfirmArtistCreation}
+              className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+            >
+              Okay!
+            </div>
           </div>
         </div>
       )}
