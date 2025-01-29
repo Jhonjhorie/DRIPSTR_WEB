@@ -3,7 +3,6 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
 import { bodyTypeURLs, hairURLs } from "../../../constants/avatarConfig";
 

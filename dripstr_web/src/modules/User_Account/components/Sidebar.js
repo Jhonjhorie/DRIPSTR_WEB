@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCog as faSettings,
@@ -12,7 +12,9 @@ import {
   faHeart,
   faStoreAlt as faStore,
   faUserCircle,
+  faSignOutAlt, // Add icon for log out
 } from "@fortawesome/free-solid-svg-icons";
+import { supabase } from "../../../constants/supabase"; // Ensure this import is correct
 
 // Sidebar Navigation Items
 const navItems = [
@@ -26,15 +28,21 @@ const navItems = [
   { label: "Avatar", path: "/account/avatar", icon: faUserCircle },
 ];
 
- /*{ label: "My Cancellations", path: "/account/cancellations", icon: faCloseCircle },
-  { label: "My Reviews", path: "/account/reviews", icon: faStar },*/
-
 const AccountLayout = () => {
   const [isMinimized, setIsMinimized] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate(); // For programmatic navigation
 
-  // Automatically minimize sidebar on smaller screens
   useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser(); // Correct method to check user
+      if (!user) {
+        // If no user is signed in, redirect to login
+        navigate("/login");
+      }
+    };
+
+    checkUser(); // Check user status
     const handleResize = () => {
       setIsMinimized(window.innerWidth < 768); // Adjust breakpoint as needed
     };
@@ -43,60 +51,91 @@ const AccountLayout = () => {
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [navigate]); // Make sure to include navigate as a dependency
+
+  // Logout function
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut(); // Call Supabase's signOut method
+      // Redirect to home or login page after logging out
+      navigate("/login"); // Redirect to login page after logging out
+    } catch (error) {
+      console.error("Error logging out:", error.message);
+    }
+  };
 
   return (
-<div className="flex min-h-full bg-gray-100">
-  {/* Sidebar */}
-  <nav
-    className={`bg-white shadow-md h-full flex flex-col transition-all duration-300 ease-in-out ${
-      isMinimized ? "w-16" : "w-64"
-    }`}
-    onMouseEnter={() => setIsMinimized(false)} // Expand on hover
-    onMouseLeave={() => setIsMinimized(window.innerWidth < 768)} // Minimize on hover out
-  >
-    {/* Sidebar Header */}
-    <div
-      className={`flex p-4 text-purple-700 font-bold text-xl transition-all ${
-        isMinimized ? "opacity-0 invisible" : "opacity-100 visible"
-      }`}
-    >
-      User Account
-    </div>
-
-    {/* Navigation Items */}
-    <ul className="flex-grow space-y-2 px-2">
-      {navItems.map((item) => (
-        <li key={item.path}>
-          <Link
-            to={item.path}
-            className={`flex items-center p-2 rounded-lg transition-all duration-300 ${
-              location.pathname === item.path
-                ? "bg-purple-100 text-purple-700"
-                : "text-gray-700 hover:bg-gray-200 hover:text-purple-500"
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <nav
+        className={`bg-white shadow-md h-screen flex flex-col transition-all duration-300 ease-in-out ${
+          isMinimized ? "w-16" : "w-64"
+        }`}
+        onMouseEnter={() => setIsMinimized(false)} // Expand on hover
+        onMouseLeave={() => setIsMinimized(window.innerWidth < 768)} // Minimize on hover out
+      >
+        {/* Sidebar Header */}
+        <div
+          className={`flex p-4 text-purple-700 font-bold text-xl transition-all ${
+            isMinimized ? "opacity-0 invisible" : "opacity-100 visible"
+          }`}
+        >
+          User Account
+        </div>
+  
+        {/* Navigation Items */}
+        <ul className="flex-grow space-y-2 px-2">
+          {navItems.map((item) => (
+            <li key={item.path}>
+              <Link
+                to={item.path}
+                className={`flex items-center p-2 rounded-lg transition-all duration-300 ${
+                  location.pathname === item.path
+                    ? "bg-purple-100 text-purple-700"
+                    : "text-gray-700 hover:bg-gray-200 hover:text-purple-500"
+                }`}
+              >
+                <FontAwesomeIcon
+                  icon={item.icon}
+                  className={`text-xl transition-transform duration-300 ${
+                    isMinimized ? "mx-auto" : "mr-3"
+                  }`}
+                />
+                <span
+                  className={`whitespace-nowrap transition-all duration-300 ${
+                    isMinimized ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
+                  }`}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+  
+        {/* Logout Button */}
+        <button
+          onClick={handleLogout}
+          className={`flex items-center p-2 rounded-lg transition-all duration-300 mt-4 px-4 text-gray-700 hover:bg-gray-200 hover:text-purple-500`}
+        >
+          <FontAwesomeIcon
+            icon={faSignOutAlt}
+            className={`text-xl transition-transform duration-300 ${
+              isMinimized ? "mx-auto" : "mr-3"
+            }`}
+          />
+          <span
+            className={`whitespace-nowrap transition-all duration-300 ${
+              isMinimized ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
             }`}
           >
-            <FontAwesomeIcon
-              icon={item.icon}
-              className={`text-xl transition-transform duration-300 ${
-                isMinimized ? "mx-auto" : "mr-3"
-              }`}
-            />
-            <span
-              className={`whitespace-nowrap transition-all duration-300 ${
-                isMinimized ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-              }`}
-            >
-              {item.label}
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ul>
-  </nav>
-</div>
-
+            Log Out
+          </span>
+        </button>
+      </nav>
+    </div>
   );
+  
 };
 
 export default AccountLayout;

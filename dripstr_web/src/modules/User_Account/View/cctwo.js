@@ -4,7 +4,7 @@ import { OrbitControls, useGLTF } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
-import { bodyTypeURLs, hairURLs, tshirURLs  } from "../../../constants/avatarConfig";
+import { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs  } from "../../../constants/avatarConfig";
 
 function Part({ url, position, color }) {
   const gltf = useGLTF(url);
@@ -85,12 +85,17 @@ const CharacterCustomization = () => {
   const getTShirtURL = () => {
     return tshirURLs[gender][selectedBodyType] || null;
   };
+
+  const getShortsURL = () => {
+    return shortsURLs[gender][selectedBodyType] || null;
+  };
   
 /* Fix Later: Problem with handleUpdate, null lumalabas sa data tama naman yong object, walang indication kung anong error nakakainis nakakapagod parang legday
-  const handleUpdate = async () => {
+    const handleUpdate = async (e) => {
+      e.preventDefault();
     try {
       const { data: session, error: sessionError } = await supabase.auth.getSession();
-  
+      
       if (sessionError) {
         console.error("Session Error:", sessionError);
         alert("Unable to update character. Please try again.");
@@ -148,8 +153,7 @@ const CharacterCustomization = () => {
       alert("An unexpected error occurred. Please try again.");
     }
   };
-  */
-
+*/
   const handleCancel = () => {
     setGender(originalAvatar.gender);
     setSelectedBodyType(originalAvatar.bodyType);
@@ -264,6 +268,7 @@ const CharacterCustomization = () => {
                 )}
                 <Part url={bodyTypeURLs[gender][selectedBodyType]} position={[0, 0, 0]} color={skincolor} />
                 {getTShirtURL() && <Part url={getTShirtURL()} position={[0, 0, 0]} />}
+                {getShortsURL() && <Part url={getShortsURL()} position={[0, 0, 0]} />}
               </group>
               <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
             </Canvas>

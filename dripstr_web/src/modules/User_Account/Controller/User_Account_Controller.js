@@ -13,7 +13,7 @@ import ShopSetup from '../View/ShopSetup';
 import SetupShop from '../../Shop_Profile/View/Login';
 import Avatar from '../View/Avatar';  
 import CharacterCreation from '../View/CharacterCreation';  
-import CharacterCreation2 from '../View/cctwo';
+import Try from '../View/RPMCreateAvatar';
  
 const UserController = () => {
   return (
@@ -30,7 +30,7 @@ const UserController = () => {
       <Route path="/avatar" element={<Avatar />} />
       <Route path="/ShopSetup" element={<SetupShop />} />
       <Route path="/CC" element={<CharacterCreation />} />
-      <Route path="/CC2" element={<CharacterCreation2 />} />
+      <Route path="/Try" element={<Try />} />
       <Route path="/avatar" element={<Avatar />} />
 
     </Routes>
