@@ -300,35 +300,41 @@ const CharacterCustomization = () => {
 
       {/* Right Panel: 3D Canvas */}
       <div className="flex-1 h-[500px] rounded-lg shadow-lg bg-gray-100">
-        <Canvas
-          camera={{ position: [0, -20, 120] }}
-          style={{ background: "linear-gradient(to top, #1e3a8a, #3b82f6)" }}
-        >
-          <ambientLight intensity={0.8} />
-          <hemisphereLight intensity={1} />
-          <directionalLight intensity={1.2} position={[0, 0, 1]} />
-          <group>
-            {selectedHair && hairURLs[selectedHair] && (
-              <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={haircolor} />
-            )}
-            <Part url={bodyTypeURLs[gender][selectedBodyType]} position={[0, 0, 0]} color={skincolor} />
-            {getTShirtURL() && (
-              <Part
-                key={`tshirt-${gender}-${selectedBodyType}`}
-                url={getTShirtURL()}
-                position={[0, 0, 0]}
-              />
-            )}
-            {getShortsURL() && (
-              <Part
-                key={`shorts-${gender}-${selectedBodyType}`}
-                url={getShortsURL()}
-                position={[0, 0, 0]}
-              />
-            )}
-          </group>
-          <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
-        </Canvas>
+      <div className="relative flex flex-1 w-full h-full">
+  {/* Darkened Background Image */}
+  <div 
+    className="absolute inset-0 bg-black bg-opacity-100" // Dark overlay
+    style={{ 
+      backgroundImage: "url('/3d/canvasBG/ClosetBG.jpg')", 
+      backgroundSize: "cover", 
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      filter: "brightness(50%)"
+    }} 
+  />
+
+  {/* 3D Canvas (Ensuring it Renders Properly) */}
+  <div className="relative w-full h-full">
+    <Canvas camera={{ position: [0, -20, 120] }}>
+      <ambientLight intensity={0.8} />
+      <hemisphereLight intensity={1} />
+      <directionalLight intensity={1.2} position={[0, 0, 1]} />
+      <group>
+        {selectedHair && hairURLs[selectedHair] && (
+          <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={haircolor} />
+        )}
+        <Part url={bodyTypeURLs[gender][selectedBodyType]} position={[0, 0, 0]} color={skincolor} />
+        {getTShirtURL() && (
+          <Part key={`tshirt-${gender}-${selectedBodyType}`} url={getTShirtURL()} position={[0, 0, 0]} />
+        )}
+        {getShortsURL() && (
+          <Part key={`shorts-${gender}-${selectedBodyType}`} url={getShortsURL()} position={[0, 0, 0]} />
+        )}
+      </group>
+      <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
+    </Canvas>
+  </div>
+</div>
 
         {/* Action Buttons */}
         <div className="flex justify-end mt-4 space-x-2 p-4">
