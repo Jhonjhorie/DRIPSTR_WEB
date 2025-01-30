@@ -111,6 +111,7 @@ function Headline() {
 
                     <p className="text-white text-xl mt-6">Uploaded Images:</p>
                     <div className="flex flex-row gap-1 mt-4">
+                        {/* Display uploaded images */}
                         {uploadedImages.map((url, index) => (
                             <img key={index} src={url} alt={`Uploaded ${index}`} className="w-32 h-32 object-cover rounded-md" />
                         ))}
