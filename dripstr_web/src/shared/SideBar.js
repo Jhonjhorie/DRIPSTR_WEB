@@ -8,12 +8,14 @@ import {
   faShop,
   faStore,
   faBell,
+  fapalette,
+  faPalette,
 } from "@fortawesome/free-solid-svg-icons";
-
 
 const SideBar = () => {
   const [activeName, setActiveName] = useState("Home");
   const [isMerchant, setIsMerchant] = useState(false); 
+  const [isArtist, setIsArtist] = useState(false);
 
   useEffect(() => {
     // Fetch the current user profile and yung IsMerchant == false ELSE == True
@@ -23,7 +25,7 @@ const SideBar = () => {
         console.log("Current user:", user);
         const { data: profiles, error } = await supabase
           .from("profiles")
-          .select("isMerchant")
+          .select("isMerchant, isArtist")
           .eq("id", user.id)
           .single();
 
@@ -32,6 +34,7 @@ const SideBar = () => {
         } else {
           console.log("Profile data:", profiles);
           setIsMerchant(profiles?.isMerchant || false); // Set the isMerchant state
+          setIsArtist(profiles?.isArtist || false); // Set the isMerchant state
         }
       } else {
         console.log("No user is signed in");
@@ -44,6 +47,7 @@ const SideBar = () => {
   const mainSideBar = [
     { label: 'Home', path: '/', icon: faHome },
     ...(isMerchant ? [{ label: 'Shop', path: '/shop/MerchantDashboard', icon: faStore }] : []),
+    ...(isArtist ? [{ label: 'Art', path: '/shop/Artist/ArtistDashboard', icon: faPalette }] : []),
     { label: 'Notification', path: '/notification', icon: faBell },
     { label: 'Account', path: '/account', icon: faUser },
   ];

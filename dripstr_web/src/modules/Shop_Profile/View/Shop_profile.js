@@ -26,6 +26,7 @@ function Shop_profile() {
   const [shopImageUrl, setShopImageUrl] = useState("");
   const [shopName, setShopName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [shopAds, setShopAds] = useState([]);
 
   const fetchUserProfileAndShop = async () => {
     setLoading(true);
@@ -50,7 +51,7 @@ function Shop_profile() {
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
           .from("shop")
-          .select("id, shop_name, shop_Rating, shop_image")
+          .select("id, shop_name, shop_Rating, shop_image, shop_Ads")
           .eq("owner_Id", user.id);
 
         if (shopError) {
@@ -78,6 +79,23 @@ function Shop_profile() {
           console.log("Fetched shops:", shops);
 
           const selectedShopId = shops[0].id; // Assuming the first shop is selected
+
+          // Fetch ads for the selected shop
+          const ads = shops[0].shop_Ads || []; // Correctly initialize `ads`
+
+          const updatedAds = ads.map((ad) => {
+            console.log("Ad ID:", ad.id); // Debugging
+            console.log("Ad Image URL:", ad.ad_Image); // Debugging
+
+            return {
+              id: ad.id,
+              ad_Name: ad.ad_Name,
+              imageUrl: ad.ad_Image || "path/to/placeholder/image.jpg", // Use URL directly or add fallback
+            };
+          });
+
+          console.log("Updated Ads with URLs:", updatedAds); // Log the updated ads
+          setShopAds(updatedAds); // Set the updated ads
 
           // Fetch products for the selected shop
           const { data: products, error: productError } = await supabase
@@ -165,38 +183,18 @@ function Shop_profile() {
   useEffect(() => {
     fetchUserProfileAndShop();
   }, []);
-  const images = [
-    {
-      src: "https://placehold.co/600x400?text=Image+1",
-      alt: "Placeholder image 1 with dimensions 600x400",
-    },
-    {
-      src: "https://placehold.co/600x400?text=Image+2",
-      alt: "Placeholder image 2 with dimensions 600x400",
-    },
-    {
-      src: "https://placehold.co/600x400?text=Image+3",
-      alt: "Placeholder image 3 with dimensions 600x400",
-    },
-    {
-      src: "https://placehold.co/600x400?text=Image+4",
-      alt: "Placeholder image 4 with dimensions 600x400",
-    },
-    {
-      src: "https://placehold.co/600x400?text=Image+5",
-      alt: "Placeholder image 5 with dimensions 600x400",
-    },
-  ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 3000); // Change image every 3 seconds
+    if (shopAds.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % shopAds.length);
+      }, 3000); // Change ad every 3 seconds
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [shopAds]);
 
   return (
     <div className="h-full w-full  bg-slate-300 px-2 ">
@@ -288,38 +286,38 @@ function Shop_profile() {
               </div>
             </div>
           </div>
-      
+
           <div className="relative w-full max-w-2xl bg-slate-50 p-2 rounded-sm mx-auto">
-            <div className="overflow-hidden relative h-64">
-              {images.map((image, index) => (
+            <div className="relative w-full h-80">
+              {shopAds.map((ad, index) => (
                 <div
-                  key={index}
+                  key={ad.id}
                   className={`absolute inset-0 transition-opacity duration-1000 ${
                     index === currentIndex ? "opacity-100" : "opacity-0"
                   }`}
                 >
                   <img
-                    src={image.src}
-                    alt={image.alt}
+                    src={ad.imageUrl} // Corrected to use `ad.ad_Image`
+                    alt={ad.ad_Name || "Ad image"}
                     className="w-full h-full object-cover"
                   />
                 </div>
               ))}
-            </div>
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center p-2">
-              {images.map((_, index) => (
-                <button
-                  key={index}
-                  className={`h-2 w-2 mx-1 rounded-full ${
-                    index === currentIndex ? "bg-white" : "bg-gray-400"
-                  }`}
-                  onClick={() => setCurrentIndex(index)}
-                ></button>
-              ))}
+
+              {/* Dots for navigation */}
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center p-2">
+                {shopAds.map((_, index) => (
+                  <button
+                    key={index}
+                    className={`h-2 w-2 mx-1 rounded-full ${
+                      index === currentIndex ? "bg-white" : "bg-gray-400"
+                    }`}
+                    onClick={() => setCurrentIndex(index)}
+                  ></button>
+                ))}
+              </div>
             </div>
           </div>
-         
-        
         </div>
 
         <div className="h-full  w-full   ">

@@ -4,6 +4,9 @@ import sampleads from "../../../assets/shop/s2.jpg";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
+import sadEmote from "../../../../src/assets/emote/sad.png";
+import successEmote from "../../../../src/assets/emote/success.png";
+
 const { useState, useEffect } = React;
 
 function Products() {
@@ -27,6 +30,7 @@ function Products() {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(null);
   const [uploadedImages, setUploadedImages] = useState({});
   const [shopData, setShopData] = useState(null);
+  const [shopAds, setShopAds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [shopItem, setShopProducts] = useState("");
@@ -35,7 +39,7 @@ function Products() {
   const [adName, setAdName] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imageSrcAd, setImageSrcAd] = useState("");
-  const [imageSrcAds, setImageSrcAds] = useState("");
+  const [imageSrcAds, setImageSrcAds] = useState(null);
   const [selectedShopId, setSelectedShopId] = useState(null);
 
   const fetchUserProfileAndShop = async () => {
@@ -60,7 +64,7 @@ function Products() {
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
           .from("shop")
-          .select("id, shop_name, shop_Rating")
+          .select("id, shop_name, shop_Rating, shop_Ads")
           .eq("owner_Id", user.id);
 
         if (shopError) {
@@ -73,13 +77,59 @@ function Products() {
           setShopData(shops);
           console.log("Fetched shops:", shops);
 
-          const selectedShopId = shops[0].id; // Assuming the first shop is selected
+          const selectedShopId = shops[0].id; 
           setSelectedShopId(selectedShopId);
-          // Fetch products for the selected shop
+
+         
+          const ads = shops[0].shop_Ads || []; 
+
+          const updatedAds = await Promise.all(
+            ads.map(async (ad) => {
+              console.log("Ad ID:", ad.id); 
+              console.log("Ad Image Path:", ad.ad_Image); 
+
+              let imageUrl = null;
+
+              if (ad.ad_Image) {
+             
+                const fullImagePath = ad.ad_Image.startsWith(
+                  "shop_profile/shop_Ads/"
+                )
+                  ? ad.ad_Image
+                  : `shop_profile/shop_Ads/${ad.ad_Image}`; 
+
+                const { data: publicUrlData, error: publicUrlError } =
+                  supabase.storage
+                    .from("shop_profile") 
+                    .getPublicUrl(fullImagePath); 
+
+                if (publicUrlError) {
+                  console.error(
+                    "Error fetching ad URL:",
+                    publicUrlError.message
+                  );
+                }
+
+                console.log("Generated image URL:", publicUrlData?.publicUrl);
+
+                imageUrl = publicUrlData?.publicUrl || null;
+              }
+
+              return {
+                id: ad.id,
+                ad_Name: ad.ad_Name,
+                imageUrl, // Use the fetched or existing image URL
+              };
+            })
+          );
+
+          console.log("Updated Ads with URLs:", updatedAds); // Log the updated ads
+          setShopAds(updatedAds); // Set the updated ads
+
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
             .select(
-              "id, item_Name, item_Description, item_Tags, item_Rating, item_Orders, item_Variant, is_Post"
+              "id, item_Name, item_Description, item_Tags, item_Rating, item_Orders, item_Variant, is_Post, item_Category"
             )
             .eq("shop_Id", selectedShopId);
 
@@ -157,7 +207,6 @@ function Products() {
       setLoading(false); // Stop loading state
     }
   };
-
   useEffect(() => {
     fetchUserProfileAndShop();
   }, []);
@@ -168,7 +217,6 @@ function Products() {
       [variantIndex]: !prev[variantIndex],
     }));
   };
-
   const handleSizeChange = (variantIndex, sizeIndex, field, value) => {
     setSelectedItem((prevItem) => {
       const updatedVariants = [...prevItem.item_Variant];
@@ -180,7 +228,6 @@ function Products() {
       };
     });
   };
-
   const handleUpdate = async (variantIndex) => {
     try {
       const updatedVariant = selectedItem.item_Variant[variantIndex];
@@ -202,7 +249,6 @@ function Products() {
       console.error("Error updating the variant:", error);
     }
   };
-
   const handleDeleteVarInfo = async (variantIndex, sizeIndex) => {
     try {
       // Ensure `selectedItem` and `item_Variant` exist
@@ -246,7 +292,6 @@ function Products() {
       console.error("Error deleting the size:", error);
     }
   };
-
   const PostNotify = async () => {
     try {
       // Update the `is_Post` status
@@ -356,14 +401,9 @@ function Products() {
       console.error("Error updating the post status:", error);
     }
   };
-
   const handleViewImageClose = () => {
     setIsModalOpenImage(false);
     setSelectedVariantIndex(null);
-  };
-  const handleAddAds = () => {
-    //ADS
-    setIsModalOpenAds(true);
   };
   const handleCloseModal = async () => {
     // Close all modals and reset data
@@ -375,7 +415,6 @@ function Products() {
     // Fetch updated shop and product details
     await fetchUserProfileAndShop();
   };
-
   const handlePostItem = () => {
     setShowAlert2(true);
   };
@@ -411,19 +450,115 @@ function Products() {
   const handleDelItem = () => {
     setShowAlertDelCon(true);
   };
-
   const handleClosePostItem = () => {
     setShowAlert2(false);
     setShowAlertDelCon(false);
     setShowAlertUnpost(false);
     setShowAlertUnP(false);
   };
-
   const handleViewClick = (item) => {
     setSelectedItem(item);
     console.log("Viewing item:", item);
   };
+  const handleAddSize = (variantIndex) => {
+    const updatedVariants = [...selectedItem.item_Variant];
+    updatedVariants[variantIndex].sizes = [
+      ...(updatedVariants[variantIndex].sizes || []),
+      { size: "", qty: 0, price: 0 },
+    ];
+    setSelectedItem({
+      ...selectedItem,
+      item_Variant: updatedVariants,
+    });
+  };
 
+  //Shops ads images
+  const handleAddAd = async () => {
+    if (!imageSrcAd || !adName) {
+      alert("Please provide both the ad name and marketing visual.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Fetch existing ads
+      const { data: shopData, error: fetchError } = await supabase
+        .from("shop")
+        .select("shop_Ads")
+        .eq("id", selectedShopId)
+        .single();
+
+      if (fetchError) {
+        console.error("Error fetching shop ads:", fetchError);
+        setError(fetchError.message);
+        return;
+      }
+
+      // Upload the selected image to Supabase storage
+      const fileName = `${Date.now()}-${imageFile.name}`; // Unique file name
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("shop_profile/shop_Ads")
+        .upload(fileName, imageFile);
+
+      if (uploadError) {
+        console.error("Image upload error:", uploadError.message);
+        alert("Failed to upload image.");
+        return;
+      }
+
+      // Get the public URL for the uploaded image
+      const { data: publicUrlData, error: urlError } = supabase.storage
+        .from("shop_profile/shop_Ads")
+        .getPublicUrl(fileName);
+
+      if (urlError) {
+        console.error("Error fetching public URL:", urlError.message);
+        alert("Failed to fetch image URL.");
+        return;
+      }
+
+      const imageUrl = publicUrlData?.publicUrl; // Get the public URL
+
+      if (!imageUrl) {
+        alert("Failed to get image URL.");
+        return;
+      }
+
+      const existingAds = shopData?.shop_Ads || [];
+
+      const newAd = {
+        id: Date.now(),
+        ad_Name: adName,
+        ad_Image: imageUrl,
+      };
+
+      const updatedAds = [...existingAds, newAd];
+
+      const { error: updateError } = await supabase
+        .from("shop")
+        .update({ shop_Ads: updatedAds })
+        .eq("id", selectedShopId);
+
+      if (updateError) {
+        console.error("Error adding ad:", updateError.message);
+        alert("Failed to add ad.");
+      } else {
+        alert("Ad successfully added!");
+        handleCloseModal();
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddAds = () => {
+    //ADS
+    setIsModalOpenAds(true);
+  };
   //Ads image appear in the div
   const handleImagePick = (event) => {
     const file = event.target.files[0];
@@ -438,71 +573,8 @@ function Products() {
     }
   };
   const cancelImage = () => {
-    setImageSrc("");
+    setImageSrcAds(null);
     document.getElementById("imageInput").value = "";
-  };
-
-  const handleAddSize = (variantIndex) => {
-    const updatedVariants = [...selectedItem.item_Variant];
-    updatedVariants[variantIndex].sizes = [
-      ...(updatedVariants[variantIndex].sizes || []),
-      { size: "", qty: 0, price: 0 },
-    ];
-    setSelectedItem({
-      ...selectedItem,
-      item_Variant: updatedVariants,
-    });
-  };
-
-  //Items sample datas
-  const handleAddAd = async () => {
-    if (!imageSrcAd || !adName) {
-      alert("Please provide both the ad name and marketing visual.");
-      return;
-    }
-
-    try {
-      // Show loading indicator
-      setLoading(true);
-
-      // Upload the selected image to Supabase storage
-      const fileName = `${Date.now()}-${imageFile.name}`; // Unique file name
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("shop_Ads")
-        .upload(fileName, imageFile);
-
-      if (uploadError) {
-        console.error("Image upload error:", uploadError.message);
-        alert("Failed to upload image.");
-        return;
-      }
-
-      // Get the public URL for the uploaded image
-      const { data: publicUrlData } = supabase.storage
-        .from("ads")
-        .getPublicUrl(fileName);
-
-      // Insert ad details into the shop_Ads table
-      const { error: insertError } = await supabase.from("shop_Ads").insert({
-        shop_Id: selectedShopId, // Use the shop ID from state
-        ad_Name: adName,
-        ad_Image: publicUrlData.publicUrl,
-      });
-
-      if (insertError) {
-        console.error("Error adding ad:", insertError.message);
-        alert("Failed to add ad.");
-      } else {
-        alert("Ad successfully added!");
-        handleCloseModal(); // Close the modal after success
-      }
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      alert("An unexpected error occurred.");
-    } finally {
-      // Hide loading indicator
-      setLoading(false);
-    }
   };
 
   return (
@@ -653,8 +725,22 @@ function Products() {
                     );
                   })
                 ) : (
-                  <div className="text-center text-slate-500">
-                    No products found.
+                  <div className="">
+                    <div className="w-fill h-full justify-items-center content-center">
+                      <div className="mt-10">
+                        <img
+                          src={sadEmote}
+                          alt="Success Emote"
+                          className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                        />
+                      </div>
+                      <div className="">
+                        {" "}
+                        <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">
+                          No Products
+                        </h1>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -665,53 +751,84 @@ function Products() {
                   <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">
                     Manage Shop Advertisement
                     <div
-                      className="tooltip tooltip-bottom "
-                      data-tip=" Maximum advertisement photos to be posted is 3 to 5 Images only.  "
+                      className="tooltip tooltip-bottom"
+                      data-tip=" Maximum advertisement photos to be posted is 3 to 5 Images only."
                     >
                       <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
                         <box-icon color="#FFFFFF" name="info-circle"></box-icon>
                       </button>
                     </div>
                   </h2>
-                  <div className="flex gap-2 justify-center  place-items-center">
+                  <div className="flex gap-2 justify-center place-items-center">
                     <div
                       onClick={handleAddAds}
-                      className="bg-custom-purple text-sm p-1 md:px-2 text-slate-50 cursor-pointer duration-200 hover:scale-95 rounded-sm "
+                      className="bg-custom-purple text-sm p-1 md:px-2 text-slate-50 cursor-pointer duration-200 hover:scale-95 rounded-sm"
                     >
                       Add photo Ads
                     </div>
                   </div>
                 </div>
 
-                <div className=" flex font-semibold justify-between px-2 text-slate-800">
-                  <li className="list-none">Ads ID / Photo</li>
+                <div className="flex font-semibold justify-between px-2 text-slate-800">
+                  <li className="list-none">Ads Photo</li>
                   <li className="list-none">Name</li>
                   <li className="list-none pr-4">Action</li>
                 </div>
-                <div className="p-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2">
-                  <div className="h-full w-20 place-items-center justify-center flex">
-                    {" "}
-                    10{" "}
+                {shopData.length > 0 &&
+                shopData[0].shop_Ads &&
+                shopData[0].shop_Ads.length > 0 ? (
+                  shopData[0].shop_Ads.map((ad, index) => {
+                    return (
+                      <div
+                        key={index}
+                        className="p-2 mt-2 text-slate-900 h-16 shadow-sm w-full bg-slate-100 flex justify-between gap-2"
+                      >
+                        <div className="h-full w-20 place-items-center justify-center flex">
+                          {`${index + 1}`}
+                        </div>
+                        <div className="h-full w-24 flex justify-center items-center bg-slate-200 rounded-md">
+                          {ad.ad_Image ? (
+                            <img
+                              src={ad.ad_Image}
+                              alt={ad.ad_Name || "Advertisement"}
+                              className="h-full w-full object-cover rounded-md shadow-lg"
+                              sizes="100%"
+                            />
+                          ) : (
+                            <p>No image available</p>
+                          )}
+                        </div>
+                        <div className="h-full w-full place-items-center flex justify-center">
+                          {ad.ad_Name || "No Name"}
+                        </div>
+                        <div
+                          className="h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
+            hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex"
+                        >
+                          View
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="">
+                    <div className="w-fill h-full justify-items-center content-center">
+                      <div className="mt-10">
+                        <img
+                          src={sadEmote}
+                          alt="Success Emote"
+                          className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                        />
+                      </div>
+                      <div className="">
+                        {" "}
+                        <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">
+                          No Advertisement yet.
+                        </h1>
+                      </div>
+                    </div>
                   </div>
-                  <div className="h-full w-14 rounded-sm bg-slate-200">
-                    <img
-                      src={sampleads}
-                      alt="Shop Logo"
-                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                      sizes="100%"
-                    />
-                  </div>
-                  <div className="h-full w-full place-items-center flex justify-center ">
-                    {" "}
-                    Latest Drip Design{" "}
-                  </div>
-                  <div
-                    className=" h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
-                          hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex "
-                  >
-                    View
-                  </div>
-                </div>
+                )}
               </div>
             )}
           </div>
@@ -766,8 +883,8 @@ function Products() {
                   </div>
                 </div>
               </div>
-              <div className="w-[180px] h-2/3 md:w-1/2 md:h-full bg-custom-purple shadow-md glass rounded-sm p-2">
-                <div className="bg-slate-100 h-[200px] md:h-[350px] rounded-sm shadow-md place-items-center flex place-content-center">
+              <div className="w-[180px] h-2/3 md:w-full md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
+                <div className="bg-slate-100 h-[200px] md:h-full rounded-sm shadow-md place-items-center flex place-content-center">
                   {imageSrcAds ? (
                     <img
                       src={imageSrcAds}
@@ -802,6 +919,15 @@ function Products() {
       {/* ALLERTS */}
       {showAlert && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
             className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
@@ -825,9 +951,18 @@ function Products() {
       )}
       {showAlertDel && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+           <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain h-40 w-40 rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
-            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+            className="alert alert-success shadow-md flex items-center p-4 bg-red-600 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -848,6 +983,15 @@ function Products() {
       )}
       {showAlertUnpost && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain h-40 w-40 rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
           <div
             role="alert"
             className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
@@ -865,7 +1009,7 @@ function Products() {
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span>Item is Unposted.</span>
+            <span>Item is Unposted in Dripstr.</span>
           </div>
         </div>
       )}
@@ -963,12 +1107,12 @@ function Products() {
                           {selectedItem.item_Description}
                         </div>
                       </div>
-                      <div className="mt-2">
+                      <div className="mt-2 flex gap-1">
                         <label className="text-sm text-slate-800 font-semibold">
                           Category:
                         </label>
                         <div className="text-sm text-primary-color font-semibold">
-                          {selectedItem.category}
+                          {selectedItem.item_Category}
                         </div>
                       </div>
                       <div className="mt-2 mb-2">
@@ -1152,7 +1296,7 @@ function Products() {
                                   readOnly={!editableVariants[variantIndex]}
                                 />
                               </div>
-                              <div>
+                              {/*<div>
                                 {editableVariants[variantIndex] && (
                                   <button
                                     onClick={handleDeleteVarInfo}
@@ -1161,7 +1305,7 @@ function Products() {
                                     <i className="fa-solid fa-trash-can"></i>
                                   </button>
                                 )}
-                              </div>
+                              </div>*/}
                             </div>
                           </div>
                         ))

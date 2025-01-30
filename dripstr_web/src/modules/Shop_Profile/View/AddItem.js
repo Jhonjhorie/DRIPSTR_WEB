@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
+import successEmote from "../../../../src/assets/emote/success.png";
+import questionEmote from "../../../../src/assets/emote/hmmm.png";
 
 const AddItem = () => {
   const navigate = useNavigate();
@@ -21,7 +23,12 @@ const AddItem = () => {
   const [shopData, setShopData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
 
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+  };
   //Get the user Shop Data
   const [formData, setFormData] = useState({
     itemTitle: "",
@@ -113,7 +120,7 @@ const AddItem = () => {
       setTimeout(() => {
         setShowAlert2(false);
       }, 3000);
-      return; // Do not add more items if the limit is reached
+      return;
     }
     updatedVariants[index].info.push({
       size: "",
@@ -122,20 +129,27 @@ const AddItem = () => {
     });
     setVariants(updatedVariants);
   };
-
+  // Handle item on submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const { itemTitle, itemDescription, tag1, tag2, tag3 } = formData;
-    const tags = [tag1, tag2, tag3].filter(Boolean); // Remove empty values
+    const tags = [tag1, tag2, tag3].filter(Boolean);
 
     try {
       // Validate required fields
-      if (!itemTitle || !itemDescription || !selectedShopId) {
+      if (
+        !itemTitle ||
+        !itemDescription ||
+        !selectedShopId ||
+        !selectedCategory
+      ) {
         console.log("Please fill in all required fields.");
         setShowAlert3(true);
         setTimeout(() => {
           setShowAlert3(false);
         }, 3000);
+        setLoading(false);
         return;
       }
       //if no varainst is added
@@ -145,6 +159,7 @@ const AddItem = () => {
         setTimeout(() => {
           setShowAlert6(false);
         }, 3000);
+        setLoading(false);
         return;
       }
       // Validate that all variants have a selected image
@@ -156,6 +171,7 @@ const AddItem = () => {
         setTimeout(() => {
           setShowAlert5(false);
         }, 3000);
+        setLoading(false);
         return;
       }
       if (hasMissingImages) {
@@ -164,6 +180,7 @@ const AddItem = () => {
         setTimeout(() => {
           setShowAlert4(false);
         }, 3000);
+        setLoading(false);
         return;
       }
 
@@ -173,25 +190,32 @@ const AddItem = () => {
           if (variant.file) {
             const filePath = `product/${Date.now()}_${variant.file.name}`;
             const { data, error } = await supabase.storage
-              .from("product") // Use the correct bucket name
+              .from("product")
               .upload(filePath, variant.file);
 
             if (error) throw error;
 
+            const { data: publicUrlData } = supabase.storage
+            .from("product")
+            .getPublicUrl(filePath);
+
             return {
               ...variant,
-              image: data.path, // Replace the preview URL with the uploaded image path
+              image: data.path,
+              imagePath: publicUrlData.publicUrl,
             };
           }
-          return variant; // If no file, return the variant as is
+          return variant; //
         })
       );
 
       // Prepare the formatted variants
       const formattedVariants = updatedVariants.map((variant) => ({
         img: variant.image || "", // Use the uploaded image path
+        imagePath: variant.imagePath || "", // Include the public URL
         variant_Name: variant.name,
-        sizes: variant.info.map((info) => ({
+        sizes: variant.info.map((info, index) => ({
+          id: index + 1,
           qty: info.quantity,
           size: info.size,
           price: info.price,
@@ -204,6 +228,7 @@ const AddItem = () => {
           item_Name: itemTitle,
           item_Description: itemDescription,
           item_Tags: tags,
+          item_Category: selectedCategory,
           item_Rating: 0,
           item_Orders: 0,
           is_Post: false,
@@ -215,7 +240,7 @@ const AddItem = () => {
 
       if (error) throw error;
 
-      alert("Product added successfully!");
+      setShowAlertSuccess(true);
       setFormData({
         itemTitle: "",
         itemDescription: "",
@@ -223,13 +248,20 @@ const AddItem = () => {
         tag2: "",
         tag3: "",
       });
+      setSelectedCategory("");
       setVariants([]);
     } catch (error) {
       console.error("Error adding product:", error.message);
       alert("Failed to add product.");
+    } finally {
+      setLoading(false);
     }
   };
-
+  const closeConfirmAdd = () => {
+    setTimeout(() => {
+      setShowAlertSuccess(false);
+    }, 1000);
+  }
   const removeVariant = () => {
     if (variantToDelete !== null) {
       const newVariants = variants.filter((_, i) => i !== variantToDelete);
@@ -316,7 +348,7 @@ const AddItem = () => {
                 </div>
                 <span className="ml-3 ">Add Item</span>
               </div>
-              <div className=" w-full mt-5 md:mt-10">
+              <div className=" w-full mt-2 ">
                 <label className="text-slate-950  font-semibold mr-2 text-[15px]">
                   Item Title:
                 </label>
@@ -342,6 +374,40 @@ const AddItem = () => {
                   onChange={handleChange}
                   name="itemDescription"
                 ></textarea>
+              </div>
+              <label className="text-slate-950  font-semibold mr-2 text-[15px]">
+                Item Category:
+              </label>
+              <div className="">
+                <div className="dropdown dropdown-top w-full">
+                  <div
+                    tabIndex={0}
+                    role="button"
+                    className="bg-custom-purple glass hover:scale-95 duration-300 rounded-md text-center text-slate-100 p-2 mt-2 w-full"
+                  >
+                    {selectedCategory || "Choose a Category"}
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
+                  >
+                    {[
+                      "Top",
+                      "Bottom",
+                      "Tumbler",
+                      "Mug",
+                      "Shoes",
+                      "Totebag",
+                      "Others",
+                    ].map((category) => (
+                      <li key={category}>
+                        <a onClick={() => handleCategorySelect(category)}>
+                          {category}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
               <div className="w-full h-56">
                 <div className="w-full flex justify-between align">
@@ -392,8 +458,16 @@ const AddItem = () => {
               </div>
               <div className="w-full h-[70vh]   overflow-y-scroll mt-2 p-3">
                 {variants.length === 0 && (
-                  <div className="text-slate-800 text-sm mt-2 text-center">
-                    Please Add a Variant
+                  <div className="w-fill h-full justify-items-center content-center">
+                    <div className="-mt-10">
+                      <img
+                        src={questionEmote}
+                        alt="Success Emote"
+                        className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                      />
+                    </div>
+                    <div className="-ml-7    ">  <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">Add Variants</h1></div>
+                  
                   </div>
                 )}
                 {variants.map((variant, index) => (
@@ -536,13 +610,22 @@ const AddItem = () => {
               </div>
             </div>
             <div className=" absolute bottom-16 md:bottom-10 right-10 p-2 bg-violet-700 bg-opacity-40 rounded-md">
-              <button
-                type="submit"
-                className="text-slate-100 font-semibold px-5 shadow-md shadow-primary-color
-             p-2 hover:scale-105 hover:bg-primary-color duration-300 rounded-md bg-custom-purple glass "
-              >
-                Submit
-              </button>
+              {loading ? (
+                <div className="text-center">
+                  <span className="loading loading-infinity text-slate-50 w-16"></span>
+                  <h1 className="text-slate-50 font-semibold iceland-regular text-xl">
+                    Submitting
+                  </h1>
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  className="text-slate-100 font-semibold px-5 shadow-md shadow-primary-color
+                 p-2 hover:scale-105 hover:bg-primary-color duration-300 rounded-md bg-custom-purple glass "
+                >
+                  Submit
+                </button>
+              )}
             </div>
           </div>
           {/* Reach Max Variant */}
@@ -725,6 +808,32 @@ const AddItem = () => {
                   >
                     I'm sure!
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* ALLERTS ADD Item SUCCESS */}
+          {showAlertSuccess && (
+            <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+              <div className="bg-white w-80  justify-items-center rounded-md shadow-md relative">
+                <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+                <div className="p-5">
+                  <img
+                    src={successEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
+                  Item Successfully Added
+                </h2>
+                <div 
+                onClick={closeConfirmAdd}
+                className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer">
+                  Okay!
                 </div>
               </div>
             </div>
