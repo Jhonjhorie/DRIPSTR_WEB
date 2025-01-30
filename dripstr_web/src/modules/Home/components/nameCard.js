@@ -14,14 +14,14 @@ const NameCard = () => {
           
             <img
               src={
-                profile.avatar_url != null
-                  ? typeof profile.avatar_url === "string"
-                    ? profile.avatar_url
-                    : profile.avatar_url
+                profile.profile_picture != null
+                  ? typeof profile.profile_picture === "string"
+                    ? profile.profile_picture
+                    : profile.profile_picture
                   : require("@/assets/emote/success.png")
               }
               alt="User Avatar"
-              className="z-20 duration-300 transition-all left-0 bottom-0 bg-gray-200 drop-shadow-lg rounded-b-lg hover:bottom-2 hover:scale-105 hover:-left-2 hover:rounded-2xl object-contain "
+              className="z-20 duration-300 transition-all left-0 bottom-0 bg-gray-200 drop-shadow-lg rounded-b-lg hover:bottom-2 hover:scale-105 hover:-left-2 hover:rounded-2xl object-cover h-[130%] max-w-28 border-white border-2 "
             />
          
         </div>

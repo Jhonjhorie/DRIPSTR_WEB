@@ -47,7 +47,18 @@ const BuyConfirm = ({ action, item, onClose }) => {
   const imagePreview = `${selectedColor.imagePath}`
 
   const handleProductClick = () => {
-    navigate(`/product/${item.product}`, { state: { item } });
+    navigate(`/product/${item.item_Name}`, { state: { item } });
+  };
+
+  const onConfirm = () => {
+    const formOrder = {
+      item: item,               
+      quantity: quantity,       
+      selectedColor: selectedColor, 
+      selectedSize: selectedSize    
+    };
+  
+    navigate(`/placeOrder/${item.item_Name}`, { state: { formOrder } });
   };
 
 
@@ -182,7 +193,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
                 Go to Product Page
               </button>
               <button
-                onClick={onClose}
+                onClick={onConfirm}
                 className="btn btn-sm btn-outline btn-primary  "
               >
                 Confirm
