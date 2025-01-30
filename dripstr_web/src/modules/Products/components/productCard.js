@@ -61,36 +61,41 @@ const ProductCard = ({ item, onClick }) => {
       {currentImage ? (
         <img
           src={currentImage}
-          alt={item.product_name}
+          alt={item.item_Name}
           className="object-contain mb-2 mt-1 w-[180px] h-[200px]"
         />
       ) : (
+        <div>
         <img
-          src={require('@/assets/images/blackLogo.png')}
+        src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
-          className="object-contain mb-2 mt-1 w-[180px] h-[200px]"
+          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
         />
+                        <p className="font-semibold text-sm absolute bottom-20 left-6">No image provided.</p>
+        </div>
       )}
 
       <div className="w-full flex flex-col px-3 py-2 bg-slate-200 rounded-b-md">
-        {item.product_name && (
+        {item.item_Name && (
           <p className="text-secondary-color text-md font-medium truncate">
-            {item.product_name}
+            {item.item_Name}
           </p>
         )}
         <div className="flex flex-row justify-between items-center">
-          {item.price && (
+           {item?.item_Variant[0]?.sizes[0]?.price && (
             <p className="text-primary-color text-md font-medium">
-              ₱{item.price}
+              {item.discount > 0
+                      ? (item.item_Variant[0].sizes[0].price * (1 - item.discount / 100)).toFixed(2)
+                      : item.item_Variant[0].sizes[0].price.toFixed(2)}
             </p>
-          )}
+          )} 
           <div className="flex flex-row items-center gap-0.5">
             <p className="text-primary-color text-md">
               {averageRate(item.reviews)}
             </p>
             <RateSymbol item={averageRate(item.reviews)} size="4" />
             <span className="text-secondary-color justify-center text-sm">
-              | {item.sold} sold
+              | {item.item_Orders} sold
             </span>
           </div>
         

@@ -17,7 +17,7 @@ const Notification = () => {
       "Joli's Shop",
       "Timmie's Hub",
       "The Gift Box",
-      "Quilies's Store",
+      "Quilies's asdasd",
       "Happy Deals",
     ];
     return shops[Math.floor(Math.random() * shops.length)];

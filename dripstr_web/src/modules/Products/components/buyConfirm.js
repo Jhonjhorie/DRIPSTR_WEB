@@ -3,13 +3,18 @@ import { useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
 import ItemOptions from "./itemOptions.js";
-const SUPABASE_STORAGE_URL = 'https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public';
+import useUserProfile from "@/shared/mulletCheck.js";
+import LoginFirst from "@/shared/mulletFirst";
+
+
+ 
 
 const BuyConfirm = ({ action, item, onClose }) => {
+  const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(item?.color_variant[0] || ""); 
-  const [selectedSize, setSelectedSize] = useState(item?.size_variant[0] || "");
+  const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
+  const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
   
   const [isCart, setIsCart] = useState(action === 'cart');
 
@@ -39,7 +44,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
     setSelectedSize(size);
   };
 
-  const imagePreview =`${SUPABASE_STORAGE_URL}/${selectedColor.image}`
+  const imagePreview = `${selectedColor.imagePath}`
 
   const handleProductClick = () => {
     navigate(`/product/${item.product}`, { state: { item } });
@@ -49,17 +54,19 @@ const BuyConfirm = ({ action, item, onClose }) => {
    
   };
 
+
+  if(isLoggedIn){
   return (
-    <div className="relative right-16 sm:-right-40 ">
+    <div className="w-[40rem] relative right-16 sm:-right-40 ">
       <div className="absolute right-[75%] top-[55%] sm:right-[100%] sm:-top-4 w-[30vw] h-[30vw] z-50 bg-slate-50 rounded-l-lg">
         <img
-          src={imagePreview}
-          alt={selectedColor.name}
-          className="h-full w-full object-contain"
+          src={selectedColor.imagePath != null || "" ? imagePreview : require("@/assets/emote/success.png")}
+          alt={selectedColor.variant_Name}
+          className={`h-full w-full ${selectedColor.imagePath != null || "" ? 'object-contain' : 'object-none'}`}
         />
         
       </div>
-      <div className="lg:w-[80rem] rounded-md w-full justify-center -top-20 relative items-center p-0  overflow-y-auto custom-scrollbar  modal-box  bg-slate-300 gap-2 z-40">
+      <div className="lg:w-[200rem] max-w-[200rem] rounded-md w-[100rem]  justify-center -top-20 relative items-center p-0  custom-scrollbar  modal-box  bg-slate-300 gap-2 z-40">
         <img
           src={require("@/assets/images/starDrp.png")}
           className=" absolute bottom-0 lg:-bottom-0 -left-12 z-0 opacity-50 
@@ -72,7 +79,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
             </h1>
             <div className="items-center justify-center bg-slate-50 rounded-md flex">
               <h1 className="text-2xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
-                {item.product_name}
+                {item.item_Name}
               </h1>
             </div>
             <div className="flex flex-col justify-between p-1  gap-4 mb-2">
@@ -80,7 +87,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
                 <div className="flex items-center gap-2 ">
                   <p className="text-sm font-medium">Shop:</p>
                   <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                    {item.shop?.shop_name || "No shop available"}
+                    {item.shop_Name || "No shop available"}
                   </div>
                 </div>
                 <div className="flex gap-1">
@@ -95,14 +102,14 @@ const BuyConfirm = ({ action, item, onClose }) => {
               </div>
             </div>
             <div className="flex flex-row justify-between">
-              <div className="flex flex-col gap-2">
+               <div className="flex flex-col gap-2">
                 <ItemOptions
                   item={item}
                   selectedColor={selectedColor}
                   selectedSize={selectedSize}
                   onSelectedValuesChange={handleSelectedValues}
                 />
-              </div>
+              </div> 
             </div>
           </div>
           <div className="flex items-center justify-center gap-2">
@@ -139,36 +146,32 @@ const BuyConfirm = ({ action, item, onClose }) => {
             <div className="justify-end flex flex-col mt-2  mb-3">
               <div className="flex justify-end">
                 <p className=" text-sm font-semibold lg:text-lg text-secondary-color">
-                  Variant: {selectedColor.name} - Size: {selectedSize} -
+                  Variant: {selectedColor?.variant_Name} - Size: {selectedSize?.size} -
                   Quantity: {quantity}
                 </p>
               </div>
               <div className="flex justify-end pl-2 ">
                 <p className="text-2xl text-primary-color">₱</p>
                 <h2 className="text-6xl font-bold text-primary-color">
-                  {item.discount > 0
-                    ? (
-                        item.price *
-                        (1 - item.discount / 100) *
-                        quantity
-                      ).toFixed(2)
-                    : item.price.toFixed(2) * quantity}
+                {selectedSize != null ? item.discount > 0
+                      ? ((Number(selectedSize?.price) || 0).toFixed(2) * (1 - item.discount / 100) * quantity).toFixed(2)
+                      : (Number(selectedSize?.price) || 0).toFixed(2) : 'N/A'}
                 </h2>
               </div>
               <div className="justify-end flex items-end gap-2 ">
-                {item.vouchers && (
+                {item?.vouchers && (
                   <span className="text-lg font-bold border border-primary-color px-2 ">
                     SHOP VOUCHER
                   </span>
                 )}
                 <div className="flex justify-end items-center gap-2 flex-col">
-                  {item.discount > 0 && (
+                  {item?.discount > 0 && (
                     <div className="flex items-center">
                       <span className="text-lg text-white bg-primary-color border border-primary-color px-0.5 font-bold">
-                        {item.discount}%
+                        {item?.discount}%
                       </span>
                       <span className="text-3xl text-secondary-color px-1 font-bold opacity-50 line-through ">
-                        ₱{item.price.toFixed(2) || "N/A"}
+                      ₱{(Number(selectedSize?.price) || 0).toFixed(2) || "N/A"}
                       </span>
                     </div>
                   )}
@@ -195,6 +198,9 @@ const BuyConfirm = ({ action, item, onClose }) => {
       </div>
     </div>
   );
+}else{
+  return <LoginFirst />
+}
 };
 
 export default BuyConfirm;

@@ -1,16 +1,13 @@
-const SUPABASE_STORAGE_URL = 'https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public';
 
 const useGetImage = (item) => {
   if (!item) return [];
 
-  const images = item.images ? item.images.map((path) => `${SUPABASE_STORAGE_URL}/${path}`) : [];
 
-  const variantImages = item.color_variant && item.color_variant.length > 0 
-    ? item.color_variant
-        .map(variant => variant.image && `${SUPABASE_STORAGE_URL}/${variant.image}`)
+  const variantImages = item.item_Variant && item.item_Variant.length > 0 && item.item_Variant[0].imagePath != null
+    ? item.item_Variant.map(variant => variant.imagePath)
     : [];
 
-  return [...images, ...variantImages];  
+  return [...variantImages];  
 };
 
 export default useGetImage;

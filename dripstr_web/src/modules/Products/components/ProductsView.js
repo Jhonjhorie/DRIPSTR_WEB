@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import ProductModal from './productModal';
 import ProductCard from './productCard';
@@ -35,16 +35,16 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
       case 4:
         return;
       case 5:
-        return item.sold > 99;
-      case 6:
-        return item.reviews.length > 2;
+        return item.item_Orders > 99;
+      // case 6:
+      //   return item?.reviews?.length > 2;
       default:
         return true;
     }
   });
 
   const filteredProductsC = filteredProducts.filter(
-    (item) => categories === 'All' || item.category === categories
+    (item) => categories === 'All' || item.item_Category === categories
   );
 
   const totalItems = filteredProductsC.length;
