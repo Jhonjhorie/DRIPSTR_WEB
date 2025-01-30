@@ -88,8 +88,8 @@ function Headline() {
     return (
         <div className="flex">
             <Sidebar />
-            <div className="w-full h-screen flex flex-col items-center justify-center">
-                <div className="bg-slate-900 p-6 rounded-3xl shadow-lg w-3/4">
+            <div className="w-full h-screen flex flex-col items-center">
+                <div className="bg-slate-900 p-6 rounded-3xl shadow-lg w-full h-full">
                     <p className="text-white text-2xl font-bold">Upload Headline Image</p>
                     
                     <div className="border-dashed border-2 border-gray-400 p-6 flex flex-col items-center justify-center mt-4 w-full">

@@ -22,7 +22,7 @@ const ThemeSelector = ({ selectedTheme, setSelectedTheme }) => {
     { id: "christmas", name: "Christmas Cheer" },
     { id: "newYear", name: "New Year Sparkle" },
   ];
-
+  // Theme View
   return (
     <div>
       <div className="mb-4"> 
@@ -49,29 +49,6 @@ const ThemeSelector = ({ selectedTheme, setSelectedTheme }) => {
   );
 };
 
-// Image Uploader Component
-const ImageUploader = ({ image, setImage }) => {
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setImage(URL.createObjectURL(file));
-    }
-  };
-
-  return (
-    <div>
-      <p>Upload an image:</p>
-      <div className="border-dashed border-2 border-gray-400 p-6 flex flex-col items-center justify-center">
-        {image ? (
-          <img src={image} alt="Uploaded" className="w-32 h-32 object-cover" />
-        ) : (
-          <p>Drag an image here or click to upload</p>
-        )}
-        <input type="file" onChange={handleImageUpload} className="mt-4" />
-      </div>
-    </div>
-  );
-};
 
 // Voucher Form Component
 const VoucherForm = ({ voucherDetails, handleVoucherChange }) => (
@@ -97,7 +74,7 @@ const VoucherForm = ({ voucherDetails, handleVoucherChange }) => (
         </div>
       ))}
     </div>
-
+  
     <div className="mt-4">
       <label className="block text-sm font-medium text-white" htmlFor="description">
         Description of the voucher
@@ -142,7 +119,7 @@ const Settings = () => {
 
           {/* Tab Navigation */}
           <div className="border-b-4 border-violet-600 text-white flex">
-            {["Themes", "Headlines", "Vouchers"].map((label) => (
+            {["Themes", "Vouchers"].map((label) => (
               <TabButton key={label} label={label} activeTab={activeTab} setActiveTab={setActiveTab} />
             ))}
           </div>
@@ -151,7 +128,6 @@ const Settings = () => {
           <div className="flex h-full flex-row p-2">
             <div className="text-white 2xl:w-3/6 m-4 flex">
               {activeTab === "themes" && <ThemeSelector selectedTheme={selectedTheme} setSelectedTheme={setSelectedTheme} />}
-              {activeTab === "headlines" && <ImageUploader image={image} setImage={setImage} />}
               {activeTab === "vouchers" && <VoucherForm voucherDetails={voucherDetails} handleVoucherChange={handleVoucherChange} />}
             </div>
           </div>
