@@ -30,7 +30,7 @@ const SearchSortFilter = () => {
           value={searchQuery}
           onChange={handleSearchChange}
           placeholder="Enter account name/id"
-          className="p-2 rounded-xl border text-white border-gray-300"
+          className="p-2 h-7 w-[13rem] rounded-xl border text-black border-gray-300 bg-white"
         />
       </div>
 
