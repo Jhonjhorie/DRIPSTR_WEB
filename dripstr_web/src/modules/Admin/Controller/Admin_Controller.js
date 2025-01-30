@@ -8,7 +8,7 @@ import Accounts from "../View/Accounts";
 import AccountDetail from "../View/Components/AccountDetail";
 import Settings from "../View/Settings";
 import ReportDetail from "../View/Components/ReportDetail";
-
+import Headline from "../View/Headline";
 const AdminController = () => {
   return (
     <main className="bg-slate-800 p-4">
@@ -19,7 +19,7 @@ const AdminController = () => {
       <Route path="/reports" element={<Reports />} />
       <Route path="/accounts" element={<Accounts />} />
       <Route path="/accounts/:accountId" element={<AccountDetail />} />
-
+      <Route path="/headline" element={<Headline />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/reports/:reportNo" element={<ReportDetail />} />
      
