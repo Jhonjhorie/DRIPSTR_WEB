@@ -150,9 +150,10 @@ function Headline() {
                                 />
                                 <img src={image_url} alt="Uploaded" className="w-32 h-32 object-cover rounded-md" />
                             </div>
+
                         ))}
                     </div>
-
+                            
                 </div>
             </div>
         </div>
