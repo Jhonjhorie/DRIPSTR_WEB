@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from 'react-router-dom';
 import { faSearch, faShoppingCart, faMessage, faUser } from '@fortawesome/free-solid-svg-icons';
 import ChatMessages from '../modules/Messaging/View/Messaging'; 
+import Cart from '../modules/Products/Cart';
 
 const Header = () => {
   const [openChat, setOpenChat] = useState(false);
@@ -21,6 +22,8 @@ const Header = () => {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
+
+
 
   return (
     <div className="flex items-center gap-2 h-16 sm:h-20 px-4 sm:px-8 md:px-16 py-4 sm:py-8 md:py-12 bg-slate-50 sticky top-0 z-30">
@@ -67,15 +70,24 @@ const Header = () => {
       </form>
 
       {/* Icons */}
-      <div className="flex space-x-4">
-        <Link to="/cart">
-          <button>
-            <FontAwesomeIcon
+      <div className='space-x-4 flex'>
+     
+        <div className="drawer drawer-end ">
+          <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
+          <div className="drawer-content">
+     
+            <label htmlFor="my-drawer-4" className="drawer-button">            <FontAwesomeIcon
               icon={faShoppingCart}
               className="text-black hover:text-[--primary-color]"
-            />
-          </button>
-        </Link>
+            /></label>
+            
+          </div>
+          
+          <div className="drawer-side z-50">
+            <label htmlFor="my-drawer-4" aria-label="close sidebar" className="drawer-overlay"></label>
+           <Cart />
+          </div>
+          </div>
         <button onClick={toggleChat}>
           <FontAwesomeIcon
             icon={faMessage}
