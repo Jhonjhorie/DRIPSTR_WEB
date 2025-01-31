@@ -21,7 +21,7 @@ const navItems = [
   { label: "Manage Account", path: "/account/", icon: faSettings },
   { label: "My Profile", path: "/account/profile", icon: faPerson },
   { label: "My Address Book", path: "/account/address", icon: faLocation },
-  { label: "My Payment Options", path: "/account/payment", icon: faCreditCard },
+ // { label: "My Payment Options", path: "/account/payment", icon: faCreditCard },
   { label: "My Order", path: "/account/orders", icon: faReceipt },
   { label: "My Wishlist", path: "/account/wishlist", icon: faHeart },
   { label: "Set up Shop", path: "/account/shop-setup", icon: faStore },

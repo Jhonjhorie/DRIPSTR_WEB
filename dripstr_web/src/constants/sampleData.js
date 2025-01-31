@@ -1,5 +1,5 @@
 export const Images = [
-  {  product: "Viscount Blank", 
+  {  product: "Corner Blank", 
     rate: 4.1, 
     reviews: [
       {
@@ -21,7 +21,7 @@ export const Images = [
     category: "top", 
     colorVariant: ['Black', 'Blue', 'Dark Black'], 
     sizeVariant: ['S', 'M', 'L', 'XL', '2XL'], 
-    shop: "Viscount", 
+    shop: "Corner", 
     url: require('@/assets/images/home/a.png'), 
     str: true, 
     discount: 50, 

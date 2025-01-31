@@ -7,6 +7,7 @@ const bodyTypeURLs = {
       Muscular: "/3d/avatars/guyz/Muscular.glb",
       PlusSize: "/3d/avatars/guyz/PlusSize.glb",
       Petite: "/3d/avatars/guyz/Thin.glb",
+      Dagul: "/3d/avatars/guyz/Dagul.glb",
     },
     Girl: {
       Average: "/3d/avatars/gurlz/Average.glb",

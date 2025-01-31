@@ -54,7 +54,7 @@ function MerchantDashboard() {
 
         const { data: artists, error: artistError } = await supabase
           .from("artist")
-          .select("artist_Name, id")
+          .select("artist_Name, id, artist_Image")
           .eq("owner_Id", user.id);
 
         if (artistError) {
@@ -202,7 +202,7 @@ function MerchantDashboard() {
               </div>
               <div className="">
                 <h1 className="text-[20px] pt-1 font-semibold text-slate-100">
-                  Cat perspective
+                    Cat perspective 
                 </h1>
                 <h2 className="text-[13px]  text-slate-50">Digital Art</h2>
               </div>

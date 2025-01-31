@@ -32,7 +32,7 @@ const Orders = () => {
       {/* Sidebar */}
       <Sidebar />
 
-      <div className="px-5 flex-1 flex flex-col">
+      <div className="px-5 flex-1 flex flex-col">  
         {/* Main Content */}
         <div className="p-4 bg-slate-200 flex-1">
           <h1 className="text-xl font-bold text-gray-800 mb-6">My Orders</h1>

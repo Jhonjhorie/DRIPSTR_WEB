@@ -175,7 +175,7 @@ const CharacterCustomization = () => {
           </span>
         </div>
 
-        {/* Name Field */}
+        {/* Name Field 
         <div>
           <label className="block text-gray-700 font-semibold mb-2">Name</label>
           <input
@@ -189,7 +189,7 @@ const CharacterCustomization = () => {
             onChange={(e) => setName(e.target.value)}
             disabled={!isEditing}
           />
-        </div>
+        </div>  */}
 
         {/* Gender Field */}
         <div className="mt-4">
@@ -315,7 +315,7 @@ const CharacterCustomization = () => {
 
   {/* 3D Canvas (Ensuring it Renders Properly) */}
   <div className="relative w-full h-full">
-    <Canvas camera={{ position: [0, -20, 120] }}>
+    <Canvas camera={{ position: [0, 100, 200] }}>
       <ambientLight intensity={0.8} />
       <hemisphereLight intensity={1} />
       <directionalLight intensity={1.2} position={[0, 0, 1]} />
@@ -331,7 +331,7 @@ const CharacterCustomization = () => {
           <Part key={`shorts-${gender}-${selectedBodyType}`} url={getShortsURL()} position={[0, 0, 0]} />
         )}
       </group>
-      <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
+      <OrbitControls target={[0, 110, 0]} />
     </Canvas>
   </div>
 </div>

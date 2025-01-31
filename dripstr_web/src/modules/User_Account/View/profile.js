@@ -88,9 +88,7 @@ const UserProfile = () => {
   useEffect(() => {
     fetchUserProfile();
   }, []);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className="text-red-600">{error}</div>;
+ 
 
   return (
     <div className="p-4 flex min-h-screen bg-slate-200">
@@ -101,6 +99,13 @@ const UserProfile = () => {
           <h1 className="text-xl font-bold text-gray-800 mb-6">My Profile</h1>
 
           <div className="bg-gray-100 p-4 rounded-lg shadow">
+          {loading ? (
+          <div className="flex flex-col justify-center items-center">
+            <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-50" />
+            <label>Loading...</label>
+          </div>
+        ) : (
+        <div className="">
             <div className="flex justify-between mb-4">
               <div className="flex items-center">
                 <img
@@ -243,7 +248,11 @@ const UserProfile = () => {
                 {isEditing ? "Save Changes" : "Edit"}
               </button>
             </div>
+            </div>
+                    )}
+
           </div>
+          
         </div>
       </div>
     </div>
