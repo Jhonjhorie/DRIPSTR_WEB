@@ -6,6 +6,7 @@ import rank from "../../../../assets/starrank.png";
 import art1 from "../../../../assets/art1.jpg";
 import art2 from "../../../../assets/art2.jpg";
 import art3 from "../../../../assets/art3.jpg";
+
 import { PieChart } from "@mui/x-charts/PieChart";
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +18,7 @@ function MerchantDashboard() {
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [artistData, setArtistData] = useState(null);
+  const [artistData, setArtistData] = useState([]);
   const [showAddArt, setShowSelectedArts] = React.useState(false); // Alert Success
   const [adName, setAdName] = useState("");
   const [imageFile, setImageFile] = useState(null);
@@ -25,6 +26,17 @@ function MerchantDashboard() {
   const [imageSrcArts, setImageSrcArts] = useState(null);
   const [selectedArtistId, setSelectedArtistId] = useState(null);
   const [artistArts, setArtistArts] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null); // show the image of the selected post
+
+  const [imageOrientations, setImageOrientations] = useState({});
+
+  const handleImageLoad = (event, artId) => {
+    const { naturalWidth, naturalHeight } = event.target;
+    setImageOrientations((prev) => ({
+      ...prev,
+      [artId]: naturalWidth > naturalHeight ? "landscape" : "portrait",
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,7 +66,7 @@ function MerchantDashboard() {
 
         const { data: artists, error: artistError } = await supabase
           .from("artist")
-          .select("artist_Name, id")
+          .select("artist_Name, id, artist_Bio, art_Type, artist_Image")
           .eq("owner_Id", user.id);
 
         if (artistError) {
@@ -195,16 +207,19 @@ function MerchantDashboard() {
             <div className="flex gap-2">
               <div className="h-full w-24 rounded-md border bg-gradient-to-br from-violet-500 to-fuchsia-500 p-1">
                 <img
-                  src={avatar}
-                  alt="Shop Logo"
+                  src={artistData.artist_Image}
+                  alt={artistData.artist_Name}
                   className="drop-shadow-custom h-full w-full object-cover rounded-md"
                 />
               </div>
               <div className="">
                 <h1 className="text-[20px] pt-1 font-semibold text-slate-100">
-                  Cat perspective
+                  {artistData.artist_Name}
                 </h1>
-                <h2 className="text-[13px]  text-slate-50">Digital Art</h2>
+
+                <h2 className="text-[13px]  text-slate-50">
+                  {artistData.art_Type}
+                </h2>
               </div>
               <div></div>
             </div>
@@ -286,30 +301,68 @@ function MerchantDashboard() {
         </div>
       </div>
       <div className="p-2">
-        <div className="bg-slate-300 h-[520px] rounded-md w-full overflow-hidden flex flex-wrap gap-9 overflow-y-scroll p-5">
+        <div className="bg-slate-300 h-[520px] rounded-md w-full overflow-hidden  overflow-y-scroll p-5">
           {artistArts && artistArts.length > 0 ? (
-            <div className="art-gallery h-auto flex flex-wrap items-centers gap-9 px-10">
-              {artistArts.map((art) => (
-                <div
-                  key={art.id}
-                  className="bg-slate-50 rounded-sm cursor-pointer h-auto hover:scale-105 duration-300 shadow-md p-1 flex flex-col"
-                >
-                  <div className="flex justify-center h-auto bg-slate-100 w-full">
-                    {art.art_Image ? (
+            <div className="art-gallery h-auto w-auto gap-9 px-10  place-items-center">
+              {artistArts
+                .slice()
+                .reverse()
+                .map((art) => (
+                  <div
+                    key={art.id}
+                    className="bg-slate-50 relative rounded-md w-[50%] mb-5 m-2 p-4 h-auto"
+                  >
+                    <div className="w-full flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="h-14 w-14 rounded-full border bg-gradient-to-br from-violet-500 to-fuchsia-500 p-1">
+                          <img
+                            src={artistData.artist_Image}
+                            alt="Shop Logo"
+                            className="drop-shadow-custom h-full w-full object-cover rounded-full"
+                          />
+                        </div>
+                        <div className="-mt-1">
+                          <h1 className="text-[18px] pt-1 font-semibold text-custom-purple">
+                            {artistData.artist_Name}
+                          </h1>
+
+                          <h2 className="text-[13px]  text-custom-purple ">
+                            {artistData.art_Type}
+                          </h2>
+                        </div>
+                      </div>
+                      <div className="hover:scale-105 duration-200 cursor-pointer">
+                        <box-icon type="solid" name="edit"></box-icon>
+                      </div>
+                    </div>
+
+                    <div className="text-slate-800 font-semibold text-sm px-5 mt-2">
+                      {art.art_Description}
+                    </div>
+
+                    <div
+                      className={`mt-3 overflow-hidden cursor-pointer rounded-md border shadow-md border-custom-purple ${
+                        imageOrientations[art.id] === "landscape"
+                          ? "w-full h-[300px] flex justify-center"
+                          : "w-[300px] h-[400px] mx-auto"
+                      }`}
+                      onClick={() => setSelectedImage(art.art_Image)}
+                    >
                       <img
                         src={art.art_Image}
-                        alt={art.art_Name}
-                        className="object-cover w-full h-48 rounded-sm"
+                        alt="Art"
+                        onLoad={(event) => handleImageLoad(event, art.id)}
+                        className="h-full w-full object-contain"
                       />
-                    ) : (
-                      <span>No image available</span>
-                    )}
+                    </div>
+                    
+                    <div className="bg-custom-purple flex place-content-center gap-2 right-2 text-slate-50 font-semibold  rounded-md absolute w-auto bottom-2 h-auto p-3"> <img
+                        src={drplogo}
+                        alt="Art"
+                        className="h-6 w-6 object-contain drop-shadow-custom"
+                      />{art.art_Name}</div>
                   </div>
-                  <div className="w-full bg-slate-900 text-sm text-center text-slate-200 p-1">
-                    <span>{art.art_Name}</span>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           ) : (
             <p>No arts found for this artist.</p>
@@ -416,6 +469,30 @@ function MerchantDashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Image Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div
+            className="relative bg-gradient-to-br from-violet-500 to-fuchsia-500 p-4 rounded-lg shadow-lg max-w-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-0 right-0 text-white bg-gradient-to-br from-violet-500 to-fuchsia-500 px-3  rounded-full p-2"
+              onClick={() => setSelectedImage(null)}
+            >
+              ✕
+            </button>
+            <img
+              src={selectedImage}
+              alt="Expanded Art"
+              className="max-h-[80vh] max-w-full object-contain rounded-md"
+            />
           </div>
         </div>
       )}
