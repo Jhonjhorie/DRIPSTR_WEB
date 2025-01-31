@@ -587,7 +587,7 @@ function ArtistCreate() {
           </div>
         </div>
       )}
-      {/* ALLERTS ADD Item SUCCESS */}
+      {/* ALLERTS ARTIST PAGE SUCCESSFULLY */}
       {showAlertSuccess && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">

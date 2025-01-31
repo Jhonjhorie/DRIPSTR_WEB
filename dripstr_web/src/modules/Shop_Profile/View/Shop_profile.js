@@ -297,7 +297,7 @@ function Shop_profile() {
                   }`}
                 >
                   <img
-                    src={ad.imageUrl} // Corrected to use `ad.ad_Image`
+                    src={ad.imageUrl} 
                     alt={ad.ad_Name || "Ad image"}
                     className="w-full h-full object-cover"
                   />

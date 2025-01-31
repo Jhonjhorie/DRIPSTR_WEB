@@ -11,7 +11,7 @@ import Shop_profile from '../View/Shop_profile';
 import MerchantMessages from '../View/Messages';
 import MerchantVouchers from '../View/Vouchers';
 import ArtistDashboard from '../View/Artist/ArtistDashboard';
-import ArtistMessage from '../View/Artist/ArtistMessages';
+import ArtistAccount from '../View/Artist/ArtistAccount';
 import ArtistOrders from '../View/Artist/ArtistOrders';
 import ArtistAddArts from '../View/Artist/AddArt';
 import AddItem  from '../View/AddItem';
@@ -33,9 +33,9 @@ const ShopProfileController = () => {
       <Route path="/AddItem" element={<AddItem />} />
       <Route path="/Artist/ArtistDashboard" element={<ArtistDashboard />} />
       <Route path="/Artist/ArtistAddArts" element={<ArtistAddArts />} />
-      <Route path="/Artist/ArtistMessage" element={<ArtistMessage />} />
+      <Route path="/Artist/ArtistAccount" element={<ArtistAccount />} />
       <Route path="/Artist/ArtistOrders" element={<ArtistOrders />} />
-      
+        
     </Routes>
   );
 };

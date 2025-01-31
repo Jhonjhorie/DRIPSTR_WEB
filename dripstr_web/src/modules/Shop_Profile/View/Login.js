@@ -26,6 +26,7 @@ function Login() {
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [user, setUser] = useState(null);
+  const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
 
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
   const [pdfFile, setpdfFile] = useState(null);
@@ -121,12 +122,12 @@ function Login() {
       try {
         // Upload the image to Supabase storage
         const { data, error: uploadError } = await supabase.storage
-          .from("shop_profile") // Replace with your storage bucket name
+          .from("shop_profile") 
           .upload(`shop_profile/${imageFile.name}`, imageFile);
 
         if (uploadError) {
           console.error("Error uploading image:", uploadError.message);
-          return; // Exit if there's an error uploading the image
+          return;
         }
         if (data?.path) {
           const { data: publicUrlData, error: urlError } = supabase.storage
@@ -135,7 +136,7 @@ function Login() {
 
           if (urlError) {
             console.error("Error fetching image URL:", urlError.message);
-            return; // Exit if there's an error fetching the image URL
+            return; 
           }
 
           uploadedImageUrl = publicUrlData.publicUrl; // Correctly assign the public URL
@@ -143,7 +144,7 @@ function Login() {
         }
       } catch (err) {
         console.error("Unexpected error while uploading image:", err);
-        return; // Exit if there's an unexpected error during image upload
+        return; 
       }
     }
 
@@ -177,13 +178,10 @@ function Login() {
         return; // Exit if there's an unexpected error during image upload
       }
     }
-    const userId = user.id; // Get the current user's ID
+    const userId = user.id; 
 
   // Insert the shop with the user ID as the owner ID
     try {
-      // Fetch current user ID
-
-      // Insert the shop with the user ID as the owner ID
       const { data: shopData, error: shopError } = await supabase
         .from("shop")
         .insert([
@@ -197,11 +195,11 @@ function Login() {
             shop_BusinessPermit: uploadedPdfUrl || null,
           },
         ])
-        .single(); // Insert a single shop and get the inserted row
+        .single(); 
 
       if (shopError) {
         console.error("Error inserting shop data:", shopError.message);
-        return; // Exit early if there's an error inserting the shop data
+        return; 
       }
 
       console.log("Shop created successfully:", shopData);
@@ -210,11 +208,11 @@ function Login() {
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ isMerchant: true })
-        .eq("id", userId); // Update the user's profile with ismerchant = true
+        .eq("id", userId); 
 
       if (updateError) {
         console.error("Error updating user profile:", updateError.message);
-        return; // Exit if there's an error updating the user profile
+        return; 
       }
 
       console.log(
