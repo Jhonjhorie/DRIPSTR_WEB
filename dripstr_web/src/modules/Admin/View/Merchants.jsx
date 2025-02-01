@@ -4,11 +4,11 @@ import Sidebar from './Shared/Sidebar';
 
 const Merchants = () => {
     const [merchants, setMerchants] = useState([]);
-    const [status, setStatus] = useState('all'); // State to track the selected category
+    const [status, setStatus] = useState('all'); // State to track the selected category (approved, pending, all)
     const [loading, setLoading] = useState(true); // Track loading state
     const [error, setError] = useState(null); // Track error state
 
-    // Fetch merchants data from Supabase where isMerchant is true
+    // Fetch merchants data from Supabase where isMerchant is true or false
     useEffect(() => {
         const fetchMerchants = async () => {
             setLoading(true); // Set loading to true while fetching data
@@ -17,17 +17,17 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('profiles')
-                    .select('*')
-                    .eq('isMerchant', true); // Fetch where isMerchant is true
-                
+                    .select('*'); // Fetch all profiles
+
                 if (error) {
                     throw error;
                 }
 
-                // Update status to 'approved' for all merchants where isMerchant is true
+                // Assign 'approved' status to merchants who have isMerchant = true
+                // Assign 'pending' status to new merchants (isMerchant = false or in registration)
                 const updatedMerchants = data.map(merchant => ({
                     ...merchant,
-                    status: 'Approved', // Set status to 'approved'
+                    status: merchant.isMerchant ? 'approved' : 'pending', // Check if already a merchant or new registration
                 }));
 
                 setMerchants(updatedMerchants); // Update merchants state with the fetched data
@@ -47,7 +47,7 @@ const Merchants = () => {
         status === 'all' ? true : merchant.status === status
     );
 
-    // Handle status update for merchant
+    // Handle status update for merchant (optional)
     const updateMerchantStatus = (id, newStatus) => {
         setMerchants(prevMerchants =>
             prevMerchants.map(merchant =>
@@ -72,7 +72,6 @@ const Merchants = () => {
                         <button onClick={() => setStatus('all')} className="px-4 py-2 mx-2 text-white bg-gray-800 rounded-lg">Merchant List</button>
                         <button onClick={() => setStatus('pending')} className="px-4 py-2 mx-2 text-white bg-gray-800 rounded-lg">Pending</button>
                         <button onClick={() => setStatus('approved')} className="px-4 py-2 mx-2 text-white bg-gray-800 rounded-lg">Approved</button>
-                        <button onClick={() => setStatus('declined')} className="px-4 py-2 mx-2 text-white bg-gray-800 rounded-lg">Declined</button>
                     </div>
                     <div className='flex text-white text-md mb-4'>
                         <p className='mr-2'>Total Merchants: {filteredMerchants.length}</p>
