@@ -9,6 +9,8 @@ import AccountDetail from "../View/Components/AccountDetail";
 import Settings from "../View/Settings";
 import ReportDetail from "../View/Components/ReportDetail";
 import Headline from "../View/Headline";
+import Merchants from "../View/Merchants";
+
 const AdminController = () => {
   return (
     <main className="bg-slate-800 p-4">
@@ -21,8 +23,9 @@ const AdminController = () => {
       <Route path="/accounts/:accountId" element={<AccountDetail />} />
       <Route path="/headline" element={<Headline />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/merchants" element={<Merchants />} />
       <Route path="/reports/:reportNo" element={<ReportDetail />} />
-     
+
     </Routes>
     </main>
   );
