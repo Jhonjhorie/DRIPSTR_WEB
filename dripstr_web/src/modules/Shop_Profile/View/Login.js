@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "boxicons";
 import { supabase } from "../../../constants/supabase";
 import questionEmote from "../../../../src/assets/emote/question.png";
-
+import successEmote from "../../../../src/assets/emote/success.png";
 
 function Login() {
   const navigate = useNavigate();
@@ -30,6 +30,73 @@ function Login() {
 
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
   const [pdfFile, setpdfFile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isMerchant, setIsMerchant] = useState(null);
+  const [hasCreatedAccount, setHasCreatedAccount] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchUserProfile = async () => {
+    setLoading(true);
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+  
+      if (authError) {
+        setError(authError.message);
+        setLoading(false);
+        return;
+      }
+  
+      if (user) {
+        const { data: shopData, error: shopError } = await supabase
+          .from("shop")
+          .select("is_Approved")
+          .eq("owner_Id", user.id);
+  
+        if (shopError) {
+          console.error("Error fetching shop data:", shopError.message);
+        } else if (shopData && shopData.length > 0) {
+          // If shop exists, determine its approval status
+          const firstShop = shopData[0]; // Assuming one shop per user
+          setHasCreatedAccount(true);
+  
+          if (firstShop.is_Approved === true) {
+            setIsMerchant("approved");
+          } else if (firstShop.is_Approved === false) {
+            setIsMerchant("declined");
+          } else {
+            setIsMerchant("pending");
+          }
+        } else {
+          // No shop exists, user is not a merchant yet
+          setHasCreatedAccount(false);
+          setIsMerchant(null); // No merchant status
+        }
+      } else {
+        console.log("No user is signed in.");
+        setError("No user is signed in.");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error.message);
+      setError("An error occurred while fetching user data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  
+  useEffect(() => {
+    fetchUserProfile();
+  }, []); // This will run once on mount
+  
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []); // Run once on mount
+
   const phonedigit = (e) => {
     let value = e.target.value;
     value = value.replace(/[^0-9]/g, "").slice(0, 11);
@@ -44,10 +111,10 @@ function Login() {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload on form submit
-
+    setIsSubmitting(true);
     //handles alerts on missing inputs
     if (!shopName.trim()) {
-      console.error("Shop name is required");
+      console.error("Shop name is required"); setIsSubmitting(false);
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false);
@@ -55,7 +122,7 @@ function Login() {
       return; // Do not proceed if the field is empty
     }
     if (!phoneNumber.trim()) {
-      console.error("Phone Number is required");
+      console.error("Phone Number is required"); setIsSubmitting(false);
       setShowAlert2(true);
       setTimeout(() => {
         setShowAlert2(false);
@@ -63,7 +130,7 @@ function Login() {
       return; // Do not proceed if the phone number is empty
     }
     if (phoneNumber.length !== 11) {
-      console.error("Phone Number must be 11 digits");
+      console.error("Phone Number must be 11 digits"); setIsSubmitting(false);
       setShowAlert4(true);
       setTimeout(() => {
         setShowAlert4(false);
@@ -71,7 +138,7 @@ function Login() {
       return; // Ensure phone number is exactly 11 digits
     }
     if (!shopDescription.trim()) {
-      console.error("Shop Description is required");
+      console.error("Shop Description is required"); setIsSubmitting(false);
       setShowAlert5(true);
       setTimeout(() => {
         setShowAlert5(false);
@@ -79,7 +146,7 @@ function Login() {
       return; // Do not proceed if the field is empty
     }
     if (!shopAddress.trim()) {
-      console.error("Shop Address is required");
+      console.error("Shop Address is required"); setIsSubmitting(false);
       setShowAlert3(true);
       setTimeout(() => {
         setShowAlert3(false);
@@ -87,7 +154,7 @@ function Login() {
       return; // Do not proceed if the field is empty
     }
     if (!selectedImage) {
-      console.error("Shop Image is required");
+      console.error("Shop Image is required"); setIsSubmitting(false);
       setShowAlert6(true);
       setTimeout(() => {
         setShowAlert6(false);
@@ -95,7 +162,7 @@ function Login() {
       return; // Do not proceed if the field is empty
     }
     if (!selectedFile) {
-      console.error("Shop File is required");
+      console.error("Shop File is required"); setIsSubmitting(false);
       setShowAlert7(true);
       setTimeout(() => {
         setShowAlert7(false);
@@ -122,7 +189,7 @@ function Login() {
       try {
         // Upload the image to Supabase storage
         const { data, error: uploadError } = await supabase.storage
-          .from("shop_profile") 
+          .from("shop_profile")
           .upload(`shop_profile/${imageFile.name}`, imageFile);
 
         if (uploadError) {
@@ -136,7 +203,7 @@ function Login() {
 
           if (urlError) {
             console.error("Error fetching image URL:", urlError.message);
-            return; 
+            return;
           }
 
           uploadedImageUrl = publicUrlData.publicUrl; // Correctly assign the public URL
@@ -144,7 +211,7 @@ function Login() {
         }
       } catch (err) {
         console.error("Unexpected error while uploading image:", err);
-        return; 
+        return;
       }
     }
 
@@ -178,9 +245,9 @@ function Login() {
         return; // Exit if there's an unexpected error during image upload
       }
     }
-    const userId = user.id; 
+    const userId = user.id;
 
-  // Insert the shop with the user ID as the owner ID
+    // Insert the shop with the user ID as the owner ID
     try {
       const { data: shopData, error: shopError } = await supabase
         .from("shop")
@@ -195,11 +262,12 @@ function Login() {
             shop_BusinessPermit: uploadedPdfUrl || null,
           },
         ])
-        .single(); 
+        .single();
 
       if (shopError) {
         console.error("Error inserting shop data:", shopError.message);
-        return; 
+        setIsSubmitting(false);
+        return;
       }
 
       console.log("Shop created successfully:", shopData);
@@ -207,12 +275,13 @@ function Login() {
       // Now, update the user's profile to set merchant_id to the new shop's shop_id
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ isMerchant: true })
-        .eq("id", userId); 
+        .update({ isMerchant: false })
+        .eq("id", userId);
 
       if (updateError) {
         console.error("Error updating user profile:", updateError.message);
-        return; 
+        setIsSubmitting(false);
+        return;
       }
 
       console.log(
@@ -226,13 +295,18 @@ function Login() {
       setShopAddress("");
       setImageFile(null);
       setpdfFile(null);
+      setShowAlertSuccess(true);
+      setIsSubmitting(false);
       // Navigate to the Merchant Dashboard
-      navigate("/shop/MerchantDashboard");
     } catch (err) {
       console.error("Unexpected error:", err);
+    } finally {
+      setIsSubmitting(false);
     }
-    };
-
+  };
+  const closeConfirmArtistCreation = () => {
+    window.location.reload(); 
+  };
   //Open Modal for Viewing Image
   const handleOpenImage = () => {
     if (selectedImage) {
@@ -283,161 +357,198 @@ function Login() {
       <div className="h-full w-full lg:flex bg-slate-300 p-1 justify-center  ">
         {/* FIRST CONTAINER */}
 
-        <div className=" h-auto w-full lg:w-[55%] bg-white shadow-lg rounded-lg p-3 px-7 overflow-hidden ">
-          <div className="flex md:gap-2 md:justify-start justify-center  ">
-            <box-icon
-              name="store"
-              type="solid"
-              color="#4D077C"
-              size="md"
-            ></box-icon>
-            <div className="font-bold text-2xl  flex p-2 text-custom-purple iceland-regular ">
-              Create Merchant Account
+        {loading ? (
+          <div className="text-center text-gray-500">Loading...</div>
+        ) : hasCreatedAccount ? ( // Only show merchant status if the account is created
+          isMerchant === "approved" ? (
+            <div className="text-center text-green-600 font-bold text-xl p-4">
+              ✅ You are already a merchant! 🎉
             </div>
-          </div>
-          <div className="font-bold text-5xl text-center md:text-left p-1 text-custom-purple iceland-bold">
-            Get Started
-          </div>
-          <form onSubmit={handleSubmit}>
-            <div className="md:flex w-full place-items-center h-[50%] gap-2 lg:gap-5  p-2 ">
-              <div className="w-full lg:w-1/2 h-full flex  items-center justify-center">
-                <div className="w-full max-w-xs">
-                  <label className="form-control w-full">
-                    <div className="label">
-                      <span className="label-text text-slate-800 font-semibold">
-                        What is your SHOP name?
-                      </span>
-                    </div>
-                    <input
-                      id="shopName"
-                      value={shopName}
-                      onChange={handleShopNameChange}
-                      type="text"
-                      placeholder="Type here"
-                      className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
-                    />
-                  </label>
-                  <label className="form-control w-full max-w-xs mt-2">
-                    <div className="label">
-                      <span className="label-text text-slate-800 font-semibold">
-                        What is your SHOP contact number?
-                      </span>
-                    </div>
-                    <input
-                      type="tel"
-                      id="phoneNumber"
-                      value={phoneNumber}
-                      placeholder="Type here"
-                      onChange={phonedigit}
-                      className="input input-bordered bg-slate-100 text-black border-violet-950 border-[2px] w-full"
-                    />
-                  </label>
-                  <div className="label">
-                    <span className="label-text-alt text-slate-700">
-                      Phone number should be 11 digits.
-                    </span>
-                  </div>
-                </div>
+          ) : isMerchant === "pending" ? (
+            <div className="text-center text-yellow-600 font-bold text-xl p-4">
+              ⏳ Your merchant account is pending approval.
+            </div>
+          ) : isMerchant === "declined" ? (
+            <div className="text-center text-red-600 font-bold text-xl p-4">
+              ❌ Your merchant account request was declined. Please contact
+              support.
+            </div>
+          ) : null
+        ) : (
+          <div className="h-auto w-full lg:w-[55%] bg-white shadow-lg rounded-lg p-3 px-7 overflow-hidden">
+            <div className="flex md:gap-2 md:justify-start justify-center">
+              <box-icon
+                name="store"
+                type="solid"
+                color="#4D077C"
+                size="md"
+              ></box-icon>
+              <div className="font-bold text-2xl flex p-2 text-custom-purple iceland-regular">
+                Create Merchant Account
               </div>
-
-              <div className="w-full md:w-1/2 h-full rounded-md   justify-center mt-1 p-2">
-                <label className="label-text font-semibold ml-2 text-slate-800">
-                  Upload shop photo
-                </label>
-                <div className="h-auto w-full flex mt-2 justify-center gap-2 ">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    placeholder={fileName || "Choose a file..."}
-                    className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
-                  />
-                  <div
-                    onClick={handleOpenImage}
-                    className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
-                  >
-                    <box-icon
-                      type="solid"
-                      name="image-alt"
-                      color="#FFFFFF"
-                    ></box-icon>
+            </div>
+            <div className="font-bold text-5xl text-center md:text-left p-1 text-custom-purple iceland-bold">
+              Get Started
+            </div>
+            <form onSubmit={handleSubmit}>
+              <div className="md:flex w-full place-items-center h-[50%] gap-2 lg:gap-5 p-2">
+                <div className="w-full lg:w-1/2 h-full flex items-center justify-center">
+                  <div className="w-full max-w-xs">
+                    <label className="form-control w-full">
+                      <div className="label">
+                        <span className="label-text text-slate-800 font-semibold">
+                          What is your SHOP name?
+                        </span>
+                      </div>
+                      <input
+                        id="shopName"
+                        value={shopName}
+                        onChange={handleShopNameChange}
+                        type="text"
+                        placeholder="Type here"
+                        className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
+                      />
+                    </label>
+                    <label className="form-control w-full max-w-xs mt-2">
+                      <div className="label">
+                        <span className="label-text text-slate-800 font-semibold">
+                          What is your SHOP contact number?
+                        </span>
+                      </div>
+                      <input
+                        type="tel"
+                        id="phoneNumber"
+                        value={phoneNumber}
+                        placeholder="Type here"
+                        onChange={phonedigit}
+                        className="input input-bordered bg-slate-100 text-black border-violet-950 border-[2px] w-full"
+                      />
+                    </label>
+                    <div className="label">
+                      <span className="label-text-alt text-slate-700">
+                        Phone number should be 11 digits.
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="w-full md:w-1/2 h-full rounded-md justify-center mt-1 p-2">
                   <label className="label-text font-semibold ml-2 text-slate-800">
-                    Upload business permit
+                    Upload shop photo
                   </label>
-                  <div className="h-auto w-full flex mt-1 justify-center gap-2 ">
+                  <div className="h-auto w-full flex mt-2 justify-center gap-2">
                     <input
                       type="file"
-                      accept=".pdf"
-                      onChange={handleFileChange2}
-                      className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      placeholder={fileName || "Choose a file..."}
+                      className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
                     />
                     <div
-                      onClick={handleOpenFile}
+                      onClick={handleOpenImage}
                       className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
                     >
                       <box-icon
                         type="solid"
-                        name="file"
+                        name="image-alt"
                         color="#FFFFFF"
                       ></box-icon>
                     </div>
                   </div>
-                  <div className="label">
-                    <span className="label-text-alt text-slate-700">
-                      PDF file format is only accepted.
-                    </span>
+                  <div className="mt-4">
+                    <label className="label-text font-semibold ml-2 text-slate-800">
+                      Upload business permit
+                    </label>
+                    <div className="h-auto w-full flex mt-1 justify-center gap-2">
+                      <input
+                        type="file"
+                        accept=".pdf"
+                        onChange={handleFileChange2}
+                        className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
+                      />
+                      <div
+                        onClick={handleOpenFile}
+                        className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                      >
+                        <box-icon
+                          type="solid"
+                          name="file"
+                          color="#FFFFFF"
+                        ></box-icon>
+                      </div>
+                    </div>
+                    <div className="label">
+                      <span className="label-text-alt text-slate-700">
+                        PDF file format is only accepted.
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <label className="form-control mx-5 -mt-3 flex justify-center items-center md:items-start ">
-              <label className="form-control w-full  ">
+              <label className="form-control mx-5 -mt-3 flex justify-center items-center md:items-start">
+                <label className="form-control w-full">
+                  <div className="label">
+                    <span className="label-text font-semibold text-slate-800">
+                      Shop description?
+                    </span>
+                  </div>
+                  <textarea
+                    id="shopDescription"
+                    value={shopDescription}
+                    onChange={handleShopDescriptionChange}
+                    className="w-full textarea h-16 textarea-bordered bg-slate-100 text-black border-violet-950 rounded-md border-[2px] p-1 resize-none"
+                  ></textarea>
+                </label>
                 <div className="label">
-                  <span className="label-text font-semibold text-slate-800 ">
-                    Shop description?
+                  <span className="label-text font-semibold text-slate-800">
+                    What is your SHOP address?
                   </span>
                 </div>
                 <textarea
-                  id="shopDescription"
-                  value={shopDescription}
-                  onChange={handleShopDescriptionChange}
-                  className="w-full textarea h-16 textarea-bordered bg-slate-100 text-black border-violet-950 rounded-md border-[2px] p-1 resize-none"
+                  value={shopAddress}
+                  onChange={handleShopAddressChange}
+                  className="textarea resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-16"
+                  placeholder="Type your Shop Address here"
                 ></textarea>
               </label>
-              <div className="label">
-                <span className="label-text font-semibold text-slate-800">
-                  What is your SHOP address?
-                </span>
-              </div>
-              <textarea
-                value={shopAddress}
-                onChange={handleShopAddressChange}
-                className="textarea resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-16"
-                placeholder="Type your Shop Address here"
-              ></textarea>
-            </label>
-            <button className="btn mt-4 ml-2 glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white ">
-              SUBMIT
-            </button>
-          </form>
-          <div className="w-full md:mb-0 mb-16 bg-slate-400 h-auto relative justify-between flex m-2 ">
-            <button
-              onClick={() => navigate("/shop/ArtistCreate")}
-              className="  text-slate-600 iceland-bold absolute right-0 bottom-1 hover:text-custom-purple hover:duration-300 self-end mx-5 m-2"
-            >
-              BE A DRIPSTR ARTIST?{" "}
-            </button>
+              <button
+                type="submit"
+                className="btn mt-4 ml-2 glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white flex items-center justify-center"
+                disabled={isSubmitting} // Disable button while loading
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
+                    </svg>
+                    Loading...
+                  </span>
+                ) : (
+                  "SUBMIT"
+                )}
+              </button>
+            </form>
           </div>
-        </div>
+        )}
       </div>
 
       {showAlert && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={questionEmote}
@@ -469,7 +580,7 @@ function Login() {
       )}
       {showAlert2 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-         <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={questionEmote}
@@ -533,7 +644,7 @@ function Login() {
       )}
       {showAlert4 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-           <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={questionEmote}
@@ -565,7 +676,7 @@ function Login() {
       )}
       {showAlert5 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-           <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={questionEmote}
@@ -597,7 +708,7 @@ function Login() {
       )}
       {showAlert6 && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-           <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={questionEmote}
@@ -711,7 +822,36 @@ function Login() {
           </div>
         </div>
       )}
-   
+      {showAlertSuccess && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
+
+            <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+              Merchant Account Created Successfully
+            </h2>
+            <div className="p-5">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+              />
+            </div>
+
+            <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+              Wait for the Admin Approval
+            </h2>
+            <div
+              onClick={closeConfirmArtistCreation}
+              className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+            >
+              Okay!
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

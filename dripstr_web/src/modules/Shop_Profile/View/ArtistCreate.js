@@ -27,8 +27,7 @@ function ArtistCreate() {
   const [loading, setLoading] = useState(false);
 
   const handleArtistNameChange = (e) => setArtistName(e.target.value);
-  const handleArtistDescriptionChange = (e) =>
-    setArtistDescription(e.target.value);
+  const handleArtistDescriptionChange = (e) => setArtistDescription(e.target.value);
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
   };
