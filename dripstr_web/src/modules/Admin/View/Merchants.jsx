@@ -91,7 +91,7 @@ const Merchants = () => {
                             {filteredMerchants.map(merchant => (
                                 <tr key={merchant.id}>
                                     <td className="py-2 px-4 border-b text-center">{merchant.name}</td>
-                                    <td className="py-2 px-4 border-b text-center">{merchant.id}</td>
+                                    <td className="py-2 px-4 border-b text-center">{merchant.full_name}</td>
                                     <td className="py-2 px-4 border-b text-center">{merchant.email}</td>
                                     <td className="py-2 px-4 border-b text-center">{merchant.status}</td>
                                     {status === 'pending' && (
