@@ -1,119 +1,146 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "../../../constants/supabase"; // Assuming supabase client is properly initialized
 import Sidebar from './Shared/Sidebar';
+import { faChevronCircleDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const Merchants = () => {
     const [merchants, setMerchants] = useState([]);
-    const [status, setStatus] = useState('all'); // State to track the selected category (approved, pending, all)
+    const [shops, setShops] = useState([]);
+    const [status, setStatus] = useState('pending'); // Default to 'pending' tab
     const [loading, setLoading] = useState(true); // Track loading state
     const [error, setError] = useState(null); // Track error state
+    const [expandedCard, setExpandedCard] = useState(null);
 
-    // Fetch merchants data from Supabase where isMerchant is true or false
     useEffect(() => {
         const fetchMerchants = async () => {
-            setLoading(true); // Set loading to true while fetching data
-            setError(null); // Reset error state
-
+            setLoading(true);
             try {
                 const { data, error } = await supabase
                     .from('profiles')
-                    .select('*'); // Fetch all profiles
-
-                if (error) {
-                    throw error;
-                }
-
-                // Assign 'approved' status to merchants who have isMerchant = true
-                // Assign 'pending' status to new merchants (isMerchant = false or in registration)
-                const updatedMerchants = data.map(merchant => ({
-                    ...merchant,
-                    status: merchant.isMerchant ? 'approved' : 'pending', // Check if already a merchant or new registration
-                }));
-
-                setMerchants(updatedMerchants); // Update merchants state with the fetched data
-            } catch (err) {
-                setError('Error fetching merchants data.');
-                console.error(err);
+                    .select('username, full_name, email, mobile')
+                    .eq('isApplying', true);
+                if (error) throw error;
+                setMerchants(data);
+            } catch (error) {
+                setError(error.message);
             } finally {
-                setLoading(false); // Set loading to false after fetch is complete
+                setLoading(false);
             }
         };
 
-        fetchMerchants(); // Call the fetch function
+        const fetchShops = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('shop')
+                    .select('shop_name, description, address, shop_image, shop_BusinessPermit')
+                    .eq('is_Approved', true);
+                if (error) throw error;
+                setShops(data);
+            } catch (error) {
+                setError(error.message);
+            }
+        };
+
+        fetchMerchants();
+        fetchShops();
     }, []);
 
-    // Filter merchants based on selected status
-    const filteredMerchants = merchants.filter(merchant =>
-        status === 'all' ? true : merchant.status === status
-    );
-
-    // Handle status update for merchant (optional)
-    const updateMerchantStatus = (id, newStatus) => {
-        setMerchants(prevMerchants =>
-            prevMerchants.map(merchant =>
-                merchant.id === id ? { ...merchant, status: newStatus } : merchant
-            )
-        );
+    const toggleCard = (index) => {
+        setExpandedCard(expandedCard === index ? null : index);
     };
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>{error}</div>;
+    const handleAccept = async (id) => {
+        try {
+            await supabase
+                .from('merchant')
+                .update({ is_Approved: true })
+                .eq('id', id);
+            setMerchants();
+        } catch (error) {
+            setError(error.message);
+        }
+    };
+
+    const handleDecline = async (id) => {
+        try {
+            await supabase
+                .from('merchant')
+                .update({ is_Approved: false })
+                .eq('id', id);
+            setMerchants();
+        } catch (error) {
+            setError(error.message);
+        }
+    };
 
     return (
         <div className="flex">
             <Sidebar />
-            <div className="w-full h-screen flex flex-col items-center">
-                <div className="bg-slate-900 p-6 rounded-3xl shadow-lg w-full h-full">
-                    <div className='flex justify-between'>
-                        <h1 className="text-white text-2xl font-bold mb-4">Merchants</h1>
-                        <input type="text" placeholder="Search..." className="px-4 py-2 rounded-lg bg-gray-800 text-white" />
-                    </div>
-                    <div className='flex mb-4'>
-                        <button onClick={() => setStatus('all')} className="px-4 py-2 mx-2 text-white bg-gray-800 rounded-lg">Merchant List</button>
-                        <button onClick={() => setStatus('pending')} className="px-4 py-2 mx-2 text-white bg-gray-800 rounded-lg">Pending</button>
-                        <button onClick={() => setStatus('approved')} className="px-4 py-2 mx-2 text-white bg-gray-800 rounded-lg">Approved</button>
-                    </div>
-                    <div className='flex text-white text-md mb-4'>
-                        <p className='mr-2'>Total Merchants: {filteredMerchants.length}</p>
-                    </div>
-                    <table className="min-w-full bg-transparent text-white border border-gray-300">
-                        <thead>
-                            <tr>
-                                <th className="py-2 px-4 border-b">Shop Name</th>
-                                <th className="py-2 px-4 border-b">Merchant Username</th>
-                                <th className="py-2 px-4 border-b">Email</th>
-                                <th className="py-2 px-4 border-b">Status</th>
-                                {status === 'pending' && <th className="py-2 px-4 border-b">Actions</th>}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredMerchants.map(merchant => (
-                                <tr key={merchant.id}>
-                                    <td className="py-2 px-4 border-b text-center">{merchant.name}</td>
-                                    <td className="py-2 px-4 border-b text-center">{merchant.full_name}</td>
-                                    <td className="py-2 px-4 border-b text-center">{merchant.email}</td>
-                                    <td className="py-2 px-4 border-b text-center">{merchant.status}</td>
-                                    {status === 'pending' && (
-                                        <td className="py-2 px-4 border-b text-center">
+            <div className="flex-1 p-4">
+                <h1 className="text-2xl font-bold mb-4">Merchants</h1>
+                <div className="flex space-x-4 mb-4">
+                    <button onClick={() => setStatus('merchants')} className="px-4 py-2 bg-blue-500 text-white rounded">Merchants</button>
+                    <button onClick={() => setStatus('pending')} className="px-4 py-2 bg-gray-500 text-white rounded">Pending</button>
+                </div>
+
+                {status === 'pending' && (
+                    <div>
+                        {loading ? (
+                            <p>Loading...</p>
+                        ) : error ? (
+                            <p className="text-red-500">{error}</p>
+                        ) : (
+                            <ul>
+                                {merchants.map((merchant, index) => (
+                                    <li key={index} className="border p-4 mb-2 rounded shadow-sm">
+                                        <p><strong>Username:</strong> {merchant.username}</p>
+                                        <p><strong>Full Name:</strong> {merchant.full_name}</p>
+                                        <p><strong>Email:</strong> {merchant.email}</p>
+
+                                        <div className="flex justify-end">
                                             <button
-                                                onClick={() => updateMerchantStatus(merchant.id, 'approved')}
-                                                className="px-4 py-2 mx-2 text-white bg-green-500 rounded-lg"
+                                                onClick={() => handleAccept(merchant.id)}
+                                                className="px-4 py-2 bg-green-500 text-white rounded mr-2"
                                             >
-                                                Approve
+                                                Accept
                                             </button>
                                             <button
-                                                onClick={() => updateMerchantStatus(merchant.id, 'declined')}
-                                                className="px-4 py-2 mx-2 text-white bg-red-500 rounded-lg"
+                                                onClick={() => handleDecline(merchant.id)}
+                                                className="px-4 py-2 bg-red-500 text-white rounded"
                                             >
                                                 Decline
                                             </button>
-                                        </td>
-                                    )}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                )}
+
+                {status === 'merchants' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {shops.map((shop, index) => (
+                            <div key={index} className="border rounded-lg shadow-lg p-4 relative">
+                                <img src={shop.shop_image} alt={shop.shop_name} className="w-full h-40 object-cover rounded-md mb-4" />
+                                <h2 className="text-xl font-semibold mb-2 text-white">{shop.shop_name}</h2>
+                                <p className="text-gray-700 mb-1">{shop.description}</p>
+                                <p className="text-gray-500 mb-4">{shop.address}</p>
+
+                                <button onClick={() => toggleCard(index)} className="absolute top-4 right-4">
+                                    <FontAwesomeIcon icon={faChevronCircleDown} className={`transform transition-transform ${expandedCard === index ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {expandedCard === index && (
+                                    <div className="mt-4 transition-all duration-300 ease-in-out">
+                                        <img src={shop.shop_BusinessPermit} alt="Business Permit" className="w-full h-40 object-contain" />
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
