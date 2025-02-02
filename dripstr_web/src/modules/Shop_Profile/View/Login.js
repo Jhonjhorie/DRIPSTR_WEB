@@ -6,6 +6,8 @@ import "boxicons";
 import { supabase } from "../../../constants/supabase";
 import questionEmote from "../../../../src/assets/emote/question.png";
 import successEmote from "../../../../src/assets/emote/success.png";
+import sadEmote from "../../../../src/assets/emote/error.png";
+import hmmEmote from "../../../../src/assets/emote/hmmm.png";
 
 function Login() {
   const navigate = useNavigate();
@@ -30,50 +32,48 @@ function Login() {
 
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
   const [pdfFile, setpdfFile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [isMerchant, setIsMerchant] = useState(null);
+  const [isStat, setStatus] = useState(null);
   const [hasCreatedAccount, setHasCreatedAccount] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [loadingFetch, setLoadingFetch] = useState(false);
   const fetchUserProfile = async () => {
-    setLoading(true);
+    setLoading(false);
     try {
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-  
+
       if (authError) {
         setError(authError.message);
-        setLoading(false);
+
         return;
       }
-  
+
       if (user) {
         const { data: shopData, error: shopError } = await supabase
           .from("shop")
           .select("is_Approved")
           .eq("owner_Id", user.id);
-  
+
         if (shopError) {
           console.error("Error fetching shop data:", shopError.message);
         } else if (shopData && shopData.length > 0) {
-          // If shop exists, determine its approval status
-          const firstShop = shopData[0]; // Assuming one shop per user
+          const firstShop = shopData[0];
           setHasCreatedAccount(true);
-  
+
           if (firstShop.is_Approved === true) {
-            setIsMerchant("approved");
+            setStatus("approved");
           } else if (firstShop.is_Approved === false) {
-            setIsMerchant("declined");
+            setStatus("declined");
           } else {
-            setIsMerchant("pending");
+            setStatus("pending");
           }
         } else {
-          // No shop exists, user is not a merchant yet
           setHasCreatedAccount(false);
-          setIsMerchant(null); // No merchant status
+          setStatus(null);
         }
       } else {
         console.log("No user is signed in.");
@@ -86,23 +86,22 @@ function Login() {
       setLoading(false);
     }
   };
-  
-  
   useEffect(() => {
     fetchUserProfile();
-  }, []); // This will run once on mount
-  
-
-  useEffect(() => {
-    fetchUserProfile();
-  }, []); // Run once on mount
+  }, []);
 
   const phonedigit = (e) => {
     let value = e.target.value;
     value = value.replace(/[^0-9]/g, "").slice(0, 11);
     setPhoneNumber(value);
   };
-
+  const handleClickFetch = () => {
+    setLoadingFetch(true);
+    setTimeout(() => {
+      setLoadingFetch(false);
+    }, 5000);
+    fetchUserProfile();
+  };
   // Handle input change
   const handleShopNameChange = (e) => setShopName(e.target.value);
   const handleShopAddressChange = (e) => setShopAddress(e.target.value);
@@ -114,7 +113,8 @@ function Login() {
     setIsSubmitting(true);
     //handles alerts on missing inputs
     if (!shopName.trim()) {
-      console.error("Shop name is required"); setIsSubmitting(false);
+      console.error("Shop name is required");
+      setIsSubmitting(false);
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false);
@@ -122,7 +122,8 @@ function Login() {
       return; // Do not proceed if the field is empty
     }
     if (!phoneNumber.trim()) {
-      console.error("Phone Number is required"); setIsSubmitting(false);
+      console.error("Phone Number is required");
+      setIsSubmitting(false);
       setShowAlert2(true);
       setTimeout(() => {
         setShowAlert2(false);
@@ -130,7 +131,8 @@ function Login() {
       return; // Do not proceed if the phone number is empty
     }
     if (phoneNumber.length !== 11) {
-      console.error("Phone Number must be 11 digits"); setIsSubmitting(false);
+      console.error("Phone Number must be 11 digits");
+      setIsSubmitting(false);
       setShowAlert4(true);
       setTimeout(() => {
         setShowAlert4(false);
@@ -138,7 +140,8 @@ function Login() {
       return; // Ensure phone number is exactly 11 digits
     }
     if (!shopDescription.trim()) {
-      console.error("Shop Description is required"); setIsSubmitting(false);
+      console.error("Shop Description is required");
+      setIsSubmitting(false);
       setShowAlert5(true);
       setTimeout(() => {
         setShowAlert5(false);
@@ -146,7 +149,8 @@ function Login() {
       return; // Do not proceed if the field is empty
     }
     if (!shopAddress.trim()) {
-      console.error("Shop Address is required"); setIsSubmitting(false);
+      console.error("Shop Address is required");
+      setIsSubmitting(false);
       setShowAlert3(true);
       setTimeout(() => {
         setShowAlert3(false);
@@ -154,7 +158,8 @@ function Login() {
       return; // Do not proceed if the field is empty
     }
     if (!selectedImage) {
-      console.error("Shop Image is required"); setIsSubmitting(false);
+      console.error("Shop Image is required");
+      setIsSubmitting(false);
       setShowAlert6(true);
       setTimeout(() => {
         setShowAlert6(false);
@@ -162,7 +167,8 @@ function Login() {
       return; // Do not proceed if the field is empty
     }
     if (!selectedFile) {
-      console.error("Shop File is required"); setIsSubmitting(false);
+      console.error("Shop File is required");
+      setIsSubmitting(false);
       setShowAlert7(true);
       setTimeout(() => {
         setShowAlert7(false);
@@ -187,15 +193,21 @@ function Login() {
     //Set Image from shop to DB
     if (imageFile) {
       try {
+        // Generate a unique name using timestamp + random ID
+        const uniqueImageName = `shop_profile/${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 10)}-${imageFile.name}`;
+
         // Upload the image to Supabase storage
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
-          .upload(`shop_profile/${imageFile.name}`, imageFile);
+          .upload(uniqueImageName, imageFile);
 
         if (uploadError) {
           console.error("Error uploading image:", uploadError.message);
           return;
         }
+
         if (data?.path) {
           const { data: publicUrlData, error: urlError } = supabase.storage
             .from("shop_profile")
@@ -211,43 +223,45 @@ function Login() {
         }
       } catch (err) {
         console.error("Unexpected error while uploading image:", err);
-        return;
       }
     }
 
     //Set Business Permit from shop to DB
     if (pdfFile) {
       try {
-        // Upload the image to Supabase storage
+        const uniquePdfName = `pdfs/${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 10)}-${pdfFile.name}`;
+
         const { data, error: uploadError } = await supabase.storage
-          .from("shop_profile") // Replace with your storage bucket name
-          .upload(`pdfs/${pdfFile.name}`, pdfFile);
+          .from("shop_profile")
+          .upload(uniquePdfName, pdfFile);
 
         if (uploadError) {
-          console.error("Error uploading pdffile:", uploadError.message);
-          return; // Exit if there's an error uploading the image
+          console.error("Error uploading PDF:", uploadError.message);
+          return;
         }
+
         if (data?.path) {
           const { data: publicUrlData, error: urlError } = supabase.storage
-            .from("shop_profile")
+            .from("pdfs")
             .getPublicUrl(data.path);
 
           if (urlError) {
-            console.error("Error fetching pdf URL:", urlError.message);
-            return; // Exit if there's an error fetching the image URL
+            console.error("Error fetching PDF URL:", urlError.message);
+            return;
           }
 
-          uploadedPdfUrl = publicUrlData.publicUrl; // Correctly assign the public URL
-          console.log("Image uploaded successfully:", uploadedPdfUrl);
+          uploadedPdfUrl = publicUrlData.publicUrl;
+          console.log("PDF uploaded successfully:", uploadedPdfUrl);
         }
       } catch (err) {
-        console.error("Unexpected error while uploading image:", err);
-        return; // Exit if there's an unexpected error during image upload
+        console.error("Unexpected error while uploading PDF:", err);
       }
     }
+
     const userId = user.id;
 
-    // Insert the shop with the user ID as the owner ID
     try {
       const { data: shopData, error: shopError } = await supabase
         .from("shop")
@@ -257,7 +271,8 @@ function Login() {
             contact_number: phoneNumber,
             description: shopDescription,
             address: shopAddress,
-            owner_Id: userId, // Set the owner_id to the current user's ID
+            owner_Id: userId,
+            is_Approved: null,
             shop_image: uploadedImageUrl || null,
             shop_BusinessPermit: uploadedPdfUrl || null,
           },
@@ -271,11 +286,9 @@ function Login() {
       }
 
       console.log("Shop created successfully:", shopData);
-
-      // Now, update the user's profile to set merchant_id to the new shop's shop_id
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ isMerchant: false })
+        .update({ isMerchant: false, isApplying: true })
         .eq("id", userId);
 
       if (updateError) {
@@ -304,8 +317,103 @@ function Login() {
       setIsSubmitting(false);
     }
   };
+  const handleSetisMerchant = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (!user || userError) {
+      console.error("No user found");
+      return;
+    }
+
+    const userId = user.id;
+
+    try {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ isMerchant: true })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Error updating user profile:", updateError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log(
+        "User profile updated with merchant_id and ismerchant = true"
+      );
+      navigate("/shop/MerchantDashboard");
+      window.location.reload(); 
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  const handleRedo = async (shopId) => {
+    if (!shopId) {
+      console.error("No shop ID provided");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Ensure user is authenticated
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (!user || userError) {
+        console.error("No user found");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const userId = user.id;
+
+      // Delete the shop row where shop_id matches
+      const { error: deleteError } = await supabase
+        .from("shop")
+        .delete()
+        .eq("owner_Id", userId);
+
+      if (deleteError) {
+        console.error("Error deleting shop:", deleteError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Update the user's profile to remove merchant status
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ isApplying: false })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Error updating user profile:", updateError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log("Shop deleted and user profile updated.");
+      fetchUserProfile();
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const closeConfirmArtistCreation = () => {
-    window.location.reload(); 
+    setShowAlertSuccess(false);
+    fetchUserProfile();
   };
   //Open Modal for Viewing Image
   const handleOpenImage = () => {
@@ -358,20 +466,125 @@ function Login() {
         {/* FIRST CONTAINER */}
 
         {loading ? (
-          <div className="text-center text-gray-500">Loading...</div>
+          <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
+            <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
+              <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                {" "}
+              </div>
+
+              <div className="p-5">
+                <img
+                  src={hmmEmote}
+                  alt="hmmm Emote"
+                  className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                />
+              </div>
+
+              <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                Waiting...
+              </h2>
+            </div>
+          </div>
         ) : hasCreatedAccount ? ( // Only show merchant status if the account is created
-          isMerchant === "approved" ? (
-            <div className="text-center text-green-600 font-bold text-xl p-4">
-              ✅ You are already a merchant! 🎉
+          isStat === "approved" ? (
+            <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
+              <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
+                <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  ✅ You are already a merchant! 🎉{" "}
+                </h2>
+                <div className="p-5">
+                  <img
+                    src={successEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  Start Selling now!
+                </h2>
+                <div
+                  onClick={handleSetisMerchant}
+                  className="p-4 bg-custom-purple cursor-pointer hover:scale-95 duration-200 text-white rounded flex items-center justify-center"
+                >
+                  {" "}
+                  <span className="iceland-regular text-2xl ">
+                    Enter Dripstr Merchant
+                  </span>{" "}
+                </div>
+              </div>
             </div>
-          ) : isMerchant === "pending" ? (
-            <div className="text-center text-yellow-600 font-bold text-xl p-4">
-              ⏳ Your merchant account is pending approval.
+          ) : isStat === "pending" ? (
+            <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
+              <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
+                <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  ⏳ Your merchant account is pending for approval.
+                </h2>
+                <div className="p-5">
+                  <img
+                    src={successEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  Wait for the Admin Approval
+                </h2>
+                <button
+                  onClick={handleClickFetch}
+                  className="p-4 bg-custom-purple text-white rounded flex items-center justify-center"
+                  disabled={loadingFetch}
+                >
+                  {loadingFetch ? (
+                    <span className="loading loading-dots loading-lg"></span>
+                  ) : (
+                    <span className="iceland-regular text-2xl">
+                      Reload for Update
+                    </span>
+                  )}
+                </button>
+              </div>
             </div>
-          ) : isMerchant === "declined" ? (
-            <div className="text-center text-red-600 font-bold text-xl p-4">
-              ❌ Your merchant account request was declined. Please contact
-              support.
+          ) : isStat === "declined" ? (
+            <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
+              <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
+                <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  ❌ Your merchant account request was declined.
+                </h2>
+                <div className="p-5">
+                  <img
+                    src={sadEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  Create new registration? or Contact our support.
+                </h2>
+                <div
+                  onClick={handleRedo}
+                  className="bg-primary-color m-2 p-1 px-2 hover:scale-95 glass duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                >
+                  {" "}
+                  <span className="iceland-regular text-2xl ">
+                    Redo registration
+                  </span>{" "}
+                </div>
+              </div>
             </div>
           ) : null
         ) : (
