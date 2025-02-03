@@ -1,32 +1,39 @@
-import React,  { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
 
-
-
 const shop = [{ label: "Shop", path: "/shop/MerchantCreate" }];
 
 const Shop = () => {
-
   const [isMerchant, setIsMerchant] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
+  const [isDeclined, setIsDeclined] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchUserStatus = async () => {
       setLoading(true);
       try {
-        // Get the current user
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+
         if (userError || !user) {
-          console.error("Error fetching user:", userError?.message || "No user found");
+          console.error(
+            "Error fetching user:",
+            userError?.message || "No user found"
+          );
           return;
         }
 
-        // Fetch the user's profile from the 'profiles' table
         const { data: profiles, error: profileError } = await supabase
           .from("profiles")
-          .select("isMerchant")
+          .select("isMerchant, isApplying")
           .eq("id", user.id)
           .single();
 
@@ -35,18 +42,41 @@ const Shop = () => {
           return;
         }
 
-        // Set the isMerchant status
-        setIsMerchant(profiles.isMerchant === true);
+        if (isMounted) {
+          setIsApplying(profiles?.isApplying === true);
+        }
+
+        const { data: shop, error: shopError } = await supabase
+          .from("shop")
+          .select("is_Approved")
+          .eq("owner_Id", user.id)
+          .single();
+
+        if (shopError) {
+          console.error("Error fetching shop:", shopError.message);
+          return;
+        }
+
+        if (isMounted) {
+          setIsApproved(shop?.is_Approved === true);
+          setIsDeclined(shop?.is_Approved === false);
+        }
       } catch (err) {
         console.error("Unexpected error:", err);
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchUserStatus();
+
+    return () => {
+      isMounted = false; // Cleanup function to prevent state updates on unmount
+    };
   }, []);
-  
+
   return (
     <div className="p-4 flex min-h-screen bg-slate-200">
       {/* Sidebar */}
@@ -106,7 +136,11 @@ const Shop = () => {
             How to Get Started
           </h2>
           <ol className="steps steps-vertical lg:steps-horizontal">
-            <li className="step step-primary">
+            <li
+              className={`step ${
+                !isApproved && !isDeclined ? "step-primary" : ""
+              }`}
+            >
               <h3 className="font-medium text-gray-800">
                 1. Register Your Account
               </h3>
@@ -115,28 +149,34 @@ const Shop = () => {
                 started.
               </p>
             </li>
-            <li className="step">
+
+            <li
+              className={`step ${
+                !isApproved && !isDeclined ? "step-primary" : ""
+              }`}
+            >
               <h3 className="font-medium text-gray-800">
-                2. Set Up Your Store
+                2. Wait for admin approval
               </h3>
               <p className="text-gray-600">
-                Upload product details, add descriptions, and set your prices.
+                The admin will decide if you're valid to sell in DRPSTR.
               </p>
             </li>
-            <li className="step">
+
+            <li className={`step ${isApproved ? "step-success" : ""}`}>
               <h3 className="font-medium text-gray-800">3. Start Selling</h3>
               <p className="text-gray-600">
                 Once approved, your products go live on DRPSTR, and you can
                 start selling.
               </p>
             </li>
-            <li className="step">
+
+            <li className={`step ${isDeclined ? "step-error" : ""}`}>
               <h3 className="font-medium text-gray-800">
-                4. Manage Orders and Payments
+                4. Declined by the admin
               </h3>
               <p className="text-gray-600">
-                Track orders and payments in your seller dashboard and grow your
-                business.
+                Contact the web moderator or re-create a new application.
               </p>
             </li>
           </ol>
@@ -157,10 +197,13 @@ const Shop = () => {
                 loading ? (
                   "Loading..."
                 ) : (
-                 "You Are Already a Merchant"
+                  "You Are Already a Merchant"
                 )
               ) : (
-                <Link to="/shop/MerchantCreate" className="text-white text-inherit no-underline">
+                <Link
+                  to="/shop/MerchantCreate"
+                  className="text-white text-inherit no-underline"
+                >
                   Be a Merchant
                 </Link>
               )}

@@ -346,7 +346,7 @@ function ArtistCreate() {
               ></textarea>
             </label>
           </div>
-          <div className="w-full h-auto justify-end flex m-2 bg-slate-300 mb-14 md:mb-0">
+          <div className="w-full h-auto justify-end flex m-2 mb-14 md:mb-0">
             {loading ? (
               <div className="text-center place-content-center px-5 mr-14 glass rounded-md bg-custom-purple">
                 <span className="loading loading-dots loading-lg bg-slate-100"></span>

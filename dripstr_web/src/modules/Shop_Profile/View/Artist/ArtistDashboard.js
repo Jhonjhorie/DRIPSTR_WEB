@@ -13,6 +13,8 @@ import questionEmote from "../../../../../src/assets/emote/question.png";
 import { supabase } from "../../../../constants/supabase";
 import successEmote from "../../../../../src/assets/emote/success.png";
 const { useState, useEffect } = React;
+
+
 function MerchantDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);

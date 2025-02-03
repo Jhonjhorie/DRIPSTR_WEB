@@ -109,7 +109,7 @@ function Login() {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent page reload on form submit
+    e.preventDefault(); 
     setIsSubmitting(true);
     //handles alerts on missing inputs
     if (!shopName.trim()) {
