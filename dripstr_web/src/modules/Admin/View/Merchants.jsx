@@ -134,19 +134,19 @@ const Merchants = () => {
                                 </button>
 
                                 {expandedCard === index && (
-    <div className="mt-4 transition-all duration-300 ease-in-out">
-        {shop.shop_BusinessPermit && (
-            <object
-                data={shop.shop_BusinessPermit}  // Use URL or base64 here
-                type="application/pdf"
-                width="100%"
-                height="600px"
-            >
-                <p>Your browser does not support PDF viewing. You can <a href={shop.shop_BusinessPermit}>download the PDF</a> instead.</p>
-            </object>
-        )}
-    </div>
-)}
+                                    <div className="mt-4 transition-all duration-300 ease-in-out">
+                                        {shop.shop_BusinessPermit && (
+                                            <object
+                                                data={shop.shop_BusinessPermit}  // Use URL or base64 here
+                                                type="application/pdf"
+                                                width="100%"
+                                                height="600px"
+                                            >
+                                                <p>Your browser does not support PDF viewing. You can <a href={shop.shop_BusinessPermit}>download the PDF</a> instead.</p>
+                                            </object>
+                                        )}
+                                    </div>
+                                )}
 
 
 
