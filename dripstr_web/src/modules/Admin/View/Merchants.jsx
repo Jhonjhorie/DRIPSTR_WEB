@@ -82,6 +82,7 @@ const Merchants = () => {
                 <div className="flex space-x-4 mb-4">
                     <button onClick={() => setStatus('merchants')} className="px-4 py-2 bg-blue-500 text-white rounded">Merchants</button>
                     <button onClick={() => setStatus('pending')} className="px-4 py-2 bg-gray-500 text-white rounded">Pending</button>
+                    <input type="text" placeholder="Search" className="px-4 py-2 border rounded" />
                 </div>
 
                 {status === 'pending' && (
@@ -133,10 +134,23 @@ const Merchants = () => {
                                 </button>
 
                                 {expandedCard === index && (
-                                    <div className="mt-4 transition-all duration-300 ease-in-out">
-                                        <img src={shop.shop_BusinessPermit} alt="Business Permit" className="w-full h-40 object-contain" />
-                                    </div>
-                                )}
+    <div className="mt-4 transition-all duration-300 ease-in-out">
+        {shop.shop_BusinessPermit && (
+            <object
+                data={shop.shop_BusinessPermit}  // Use URL or base64 here
+                type="application/pdf"
+                width="100%"
+                height="600px"
+            >
+                <p>Your browser does not support PDF viewing. You can <a href={shop.shop_BusinessPermit}>download the PDF</a> instead.</p>
+            </object>
+        )}
+    </div>
+)}
+
+
+
+
                             </div>
                         ))}
                     </div>

@@ -127,7 +127,7 @@ function Sidebar() {
                 ></path>
               </svg>
             }
-            label="Accounts"
+            label="Users"
             to="/admin/accounts"
           />
           <SidebarItem

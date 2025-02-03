@@ -1,17 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import TopItems from "./Components/TopItems";
 import Sidebar from "./Shared/Sidebar";
 import SalesStatistics from "./Components/SalesStatistics";
+import { supabase } from "../../../constants/supabase";
 
 // Mock Data
 const topItems = Array(6).fill({ label: "Item", soldCount: "6" });
-
-const statisticsData = [
-  { label: "Customer", count: 456, icon: "user-group" },
-  { label: "Merchant", count: 456, icon: "store" },
-  { label: "Designer", count: 456, icon: "pencil" },
-  { label: "Overall User", count: 456, icon: "users" },
-];
 
 // Icon Component
 const Icon = ({ name }) => {
@@ -50,10 +44,90 @@ const UserStatisticCard = ({ label, count, icon }) => (
 );
 
 const Dashboard = () => {
+  const [merchantNum, setMerchantNum] = useState(0);
+  const [custNum, setCustNum] = useState(0);
+  const [designerNum, setDesignerNum] = useState(0);
+  const [statisticsData, setStatisticsData] = useState([]);
+
+  const fetchMerchantCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('shop')
+        .select('id', { count: 'exact' })  // Replace 'id' with any column in the table
+        .eq('is_Approved', true);  // Filter where is_Approved is true
+
+      if (error) throw error;
+      
+      return count;  // Return the count to use it later
+    } catch (error) {
+      console.error('Error fetching merchant count:', error.message);
+      return 0;  // Return 0 in case of an error
+    }
+  };
+
+  const fetchCustomerCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('accounts')
+        .select('id', { count: 'exact' })  // Replace 'id' with any column in the table
+
+      if (error) throw error;
+      
+      return count;  // Return the count to use it later
+    } catch (error) {
+      console.error('Error fetching customer count:', error.message);
+      return 0;  // Return 0 in case of an error
+    }
+  };
+
+  const fetchDesignerCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('artist')
+        .select('id', { count: 'exact' })  // Replace 'id' with any column in the table
+
+      if (error) throw error;
+      
+      return count;  // Return the count to use it later
+    } catch (error) {
+      console.error('Error fetching designer count:', error.message);
+      return 0;  // Return 0 in case of an error
+    }
+  };
+
+
+
+
+
+  useEffect(() => {
+    const updateStatisticsData = async () => {
+      const merchantCount = await fetchMerchantCount();
+      setMerchantNum(merchantCount);
+      const customerCount = await fetchCustomerCount();
+      setCustNum(customerCount);
+      const designerCount = await fetchDesignerCount();
+      setDesignerNum(designerCount);
+
+      const overall = customerCount + merchantCount + designerCount;
+
+      const updatedStatisticsData = [
+        { label: "Customer", count: customerCount, icon: "user-group" },
+        { label: "Merchant", count: merchantCount, icon: "store" },
+        { label: "Designer", count: designerCount, icon: "pencil" },
+        { label: "Overall User", count: overall, icon: "users" },
+      ];
+
+      setStatisticsData(updatedStatisticsData);
+    };
+
+    updateStatisticsData();
+  }, []);
+
   return (
     <div className="flex flex-row min-h-screen">
       <Sidebar />
       <div className="flex flex-col w-full p-4">
+        <h1 className="text-white font-extrabold text-4xl mb-4">Dashboard</h1>
         {/* User Statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statisticsData.map((stat, index) => (
