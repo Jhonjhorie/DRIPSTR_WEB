@@ -1,64 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from "../../../constants/supabase"; // Assuming supabase client is properly initialized
+import { supabase } from "../../../constants/supabase";
 import Sidebar from './Shared/Sidebar';
 import { faChevronCircleDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const Merchants = () => {
-    const [merchants, setMerchants] = useState([]);
-    const [shops, setShops] = useState([]);
+    const [register, setRegister] = useState([]);
     const [acceptedMerchants, setAcceptedMerchants] = useState([]);
-    const [status, setStatus] = useState('pending'); // Default to 'pending' tab
-    const [loading, setLoading] = useState(true); // Track loading state
-    const [error, setError] = useState(null); // Track error state
+    const [status, setStatus] = useState('pending');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [expandedCard, setExpandedCard] = useState(null);
 
     useEffect(() => {
-        const fetchMerchants = async () => {
-            setLoading(true);
+        const fetchMerchantRegistration = async () => {
             try {
                 const { data, error } = await supabase
-                    .from('profiles')
-                    .select('id, username, full_name, email, mobile')
-                    .eq('isApplying', true);
+                    .from('merchantRegistration')
+                    .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved')
+                    .is('is_Approved', null); // Correct way to check for null
+
                 if (error) throw error;
-                setMerchants(data);
+                setRegister(data);
             } catch (error) {
                 setError(error.message);
             } finally {
-                setLoading(false);
+                setLoading(false); // Ensure loading stops even if there's an error
             }
         };
 
-        const fetchShops = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('shop')
-                    .select('id, shop_name, description, address, shop_image, shop_BusinessPermit')
-                    .eq('is_Approved', true);
-                if (error) throw error;
-                setShops(data);
-            } catch (error) {
-                setError(error.message);
-            }
-        };
-
-        const fetchAcceptedMerchants = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('id, username, full_name, email, mobile')
-                    .eq('isMerchant', true);
-                if (error) throw error;
-                setAcceptedMerchants(data);
-            } catch (error) {
-                setError(error.message);
-            }
-        };
-
-        fetchMerchants();
-        fetchShops();
-        fetchAcceptedMerchants();
+        fetchMerchantRegistration();
     }, []);
 
     const toggleCard = (index) => {
@@ -67,31 +38,66 @@ const Merchants = () => {
 
     const handleAccept = async (id) => {
         try {
-            await supabase
-                .from('shop')
+            // Step 1: Update is_Approved to true in merchantRegistration
+            const { data: merchantData, error: fetchError } = await supabase
+                .from('merchantRegistration')
+                .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved')
+                .eq('id', id)
+                .single();
+    
+            if (fetchError) throw fetchError;
+    
+            const { error: updateError } = await supabase
+                .from('merchantRegistration')
                 .update({ is_Approved: true })
-                .eq('owner_id', id);
-
-            await supabase
+                .eq('id', id);
+    
+            if (updateError) throw updateError;
+    
+            // Step 2: Insert merchant data into the shop table
+            const { error: insertError } = await supabase
+                .from('shop')
+                .insert([
+                    {
+                        owner_Id: merchantData.id,
+                        shop_name: merchantData.shop_name,
+                        description: merchantData.description,
+                        address: merchantData.address,
+                        shop_image: merchantData.shop_image,
+                        contact_number: merchantData.contact_number,
+                        shop_BusinessPermit: merchantData.shop_BusinessPermit,
+                        is_Approved: true
+                    }
+                ]);
+    
+            if (insertError) throw insertError;
+    
+            // Step 3: Update isMerchant to true in profiles
+            const { error: profileError } = await supabase
                 .from('profiles')
                 .update({ isMerchant: true })
                 .eq('id', id);
-
-            setMerchants(prev => prev.filter(merchant => merchant.id !== id));
-            setAcceptedMerchants(prev => [...prev, merchants.find(merchant => merchant.id === id)]);
+    
+            if (profileError) throw profileError;
+    
+            // Step 4: Update UI state
+            setRegister(prev => prev.filter(merchant => merchant.id !== id));
+            setAcceptedMerchants(prev => [...prev, merchantData]);
+    
         } catch (error) {
             setError(error.message);
         }
     };
+    
 
     const handleDecline = async (id) => {
         try {
             await supabase
-                .from('shop')
+                .from('merchantRegistration')
                 .update({ is_Approved: false })
-                .eq('owner_id', id);
+                .eq('id', id);
 
-            setMerchants(prev => prev.filter(merchant => merchant.id !== id));
+            setRegister(prev => prev.filter(merchant => merchant.id !== id));
         } catch (error) {
             setError(error.message);
         }
@@ -115,17 +121,19 @@ const Merchants = () => {
                         ) : error ? (
                             <p className="text-red-500">{error}</p>
                         ) : (
-                            <ul>
-                                {merchants.map((merchant, index) => (
-                                    <li key={index} className="border p-4 mb-2 rounded shadow-sm">
-                                        <p><strong>Username:</strong> {merchant.username}</p>
-                                        <p><strong>Full Name:</strong> {merchant.full_name}</p>
-                                        <p><strong>Email:</strong> {merchant.email}</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {register.map((merchant, index) => (
+                                    <div key={merchant.id} className="border rounded-lg shadow-lg p-4 relative">
+                                        <img src={merchant.shop_image} alt={merchant.shop_name} className="w-full h-40 object-cover rounded-md mb-4" />
+                                        <h2 className="text-xl font-semibold mb-2">{merchant.shop_name}</h2>
+                                        <p className="text-gray-700 mb-1">{merchant.description}</p>
+                                        <p className="text-gray-500 mb-1">{merchant.address}</p>
+                                        <p className="text-gray-500 mb-4">Contact: {merchant.contact_number}</p>
 
-                                        <div className="flex justify-end">
+                                        <div className="flex justify-center items-center space-x-2">
                                             <button
                                                 onClick={() => handleAccept(merchant.id)}
-                                                className="px-4 py-2 bg-green-500 text-white rounded mr-2"
+                                                className="px-4 py-2 bg-green-500 text-white rounded"
                                             >
                                                 Accept
                                             </button>
@@ -136,9 +144,36 @@ const Merchants = () => {
                                                 Decline
                                             </button>
                                         </div>
-                                    </li>
+
+                                        <button onClick={() => toggleCard(index)} className="absolute top-4 right-4">
+                                            <FontAwesomeIcon
+                                                icon={faChevronCircleDown}
+                                                className={`transform transition-transform ${expandedCard === index ? 'rotate-180' : ''}`}
+                                            />
+                                        </button>
+
+                                        {expandedCard === index && (
+                                            <div className="mt-4 transition-all duration-300 ease-in-out">
+                                                {merchant.shop_BusinessPermit ? (
+                                                    <object
+                                                        data={merchant.shop_BusinessPermit}
+                                                        type="application/pdf"
+                                                        width="100%"
+                                                        height="400px"
+                                                    >
+                                                        <p>
+                                                            Your browser does not support PDF viewing. 
+                                                            <a href={merchant.shop_BusinessPermit} target="_blank" rel="noopener noreferrer" className="text-blue-500">Download PDF</a>
+                                                        </p>
+                                                    </object>
+                                                ) : (
+                                                    <p>No Business Permit Uploaded.</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
-                            </ul>
+                            </div>
                         )}
                     </div>
                 )}
@@ -148,44 +183,13 @@ const Merchants = () => {
                         <h2 className="text-xl font-semibold mb-2">Accepted Merchants</h2>
                         <ul>
                             {acceptedMerchants.map((merchant, index) => (
-                                <li key={index} className="border p-4 mb-2 rounded shadow-sm">
-                                    <p><strong>Username:</strong> {merchant.username}</p>
-                                    <p><strong>Full Name:</strong> {merchant.full_name}</p>
-                                    <p><strong>Email:</strong> {merchant.email}</p>
+                                <li key={merchant.id} className="border p-4 mb-2 rounded shadow-sm">
+                                    <p><strong>Shop Name:</strong> {merchant.shop_name}</p>
+                                    <p><strong>Address:</strong> {merchant.address}</p>
+                                    <p><strong>Contact:</strong> {merchant.contact_number}</p>
                                 </li>
                             ))}
                         </ul>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {shops.map((shop, index) => (
-                                <div key={index} className="border rounded-lg shadow-lg p-4 relative">
-                                    <img src={shop.shop_image} alt={shop.shop_name} className="w-full h-40 object-cover rounded-md mb-4" />
-                                    <h2 className="text-xl font-semibold mb-2 text-white">{shop.shop_name}</h2>
-                                    <p className="text-gray-700 mb-1">{shop.description}</p>
-                                    <p className="text-gray-500 mb-4">{shop.address}</p>
-                                    
-
-                                    <button onClick={() => toggleCard(index)} className="absolute top-4 right-4">
-                                        <FontAwesomeIcon icon={faChevronCircleDown} className={`transform transition-transform ${expandedCard === index ? 'rotate-180' : ''}`} />
-                                    </button>
-
-                                    {expandedCard === index && (
-                                        <div className="mt-4 transition-all duration-300 ease-in-out">
-                                            {shop.shop_BusinessPermit && (
-                                                <object
-                                                    data={shop.shop_BusinessPermit}
-                                                    type="application/pdf"
-                                                    width="100%"
-                                                    height="600px"
-                                                >
-                                                    <p>Your browser does not support PDF viewing. You can <a href={shop.shop_BusinessPermit}>download the PDF</a> instead.</p>
-                                                </object>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
                     </div>
                 )}
             </div>
