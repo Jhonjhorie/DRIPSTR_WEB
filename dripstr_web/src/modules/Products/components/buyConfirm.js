@@ -5,16 +5,20 @@ import { averageRate } from "../hooks/useRate.ts";
 import ItemOptions from "./itemOptions.js";
 import useUserProfile from "@/shared/mulletCheck.js";
 import LoginFirst from "@/shared/mulletFirst";
+import addToCart from "../hooks/useAddtoCart.js";
+import useCarts from "../hooks/useCart.js";
 
 
  
 
 const BuyConfirm = ({ action, item, onClose }) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
+  const { fetchDataCart } = useCarts();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
   const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
+  
   
   const [isCart, setIsCart] = useState(action === 'cart');
 
@@ -61,6 +65,21 @@ const BuyConfirm = ({ action, item, onClose }) => {
     navigate(`/placeOrder/${item.item_Name}`, { state: { formOrder } });
   };
 
+  const handleAddToCart = async () => {
+    if (!profile || !item || !isCart) return;
+  
+    const response = await addToCart(profile.id, item.id, quantity, selectedColor, selectedSize);
+  
+    if (response.success) {
+      console.log("Item added to cart successfully:", response.data);
+    } else {
+      console.error("Failed to add item to cart:", response.error);
+    }
+    onClose();
+    document.getElementById('my_modal_4').close();
+    fetchDataCart();
+  };
+
 
   if(isLoggedIn){
   return (
@@ -98,10 +117,10 @@ const BuyConfirm = ({ action, item, onClose }) => {
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <h2 className="text-base font-medium">{item.sold} Sold / </h2>
+                  <h2 className="text-base font-medium">{item.item_Orders} Sold / </h2>
                   <div className="flex gap-1 items-center">
                     <h2 className="text-base font-medium text-primary-color">
-                      {averageRate(item.reviews) || "N/A"}
+                      {averageRate(item.reviews) || "No"} Reviews
                     </h2>
                     <RateSymbol item={averageRate(item.reviews)} size={"4"} />
                   </div>
@@ -193,7 +212,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
                 Go to Product Page
               </button>
               <button
-                onClick={onConfirm}
+                onClick={isCart ? handleAddToCart: onConfirm}
                 className="btn btn-sm btn-outline btn-primary  "
               >
                 Confirm
