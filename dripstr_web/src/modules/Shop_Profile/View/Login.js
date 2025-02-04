@@ -54,9 +54,9 @@ function Login() {
 
       if (user) {
         const { data: shopData, error: shopError } = await supabase
-          .from("shop")
+          .from("merchantRegistration")
           .select("is_Approved")
-          .eq("owner_Id", user.id);
+          .eq("id", user.id);
 
         if (shopError) {
           console.error("Error fetching shop data:", shopError.message);
@@ -264,14 +264,14 @@ function Login() {
 
     try {
       const { data: shopData, error: shopError } = await supabase
-        .from("shop")
+        .from("merchantRegistration")
         .insert([
           {
             shop_name: shopName,
             contact_number: phoneNumber,
             description: shopDescription,
             address: shopAddress,
-            owner_Id: userId,
+            id: userId,
             is_Approved: null,
             shop_image: uploadedImageUrl || null,
             shop_BusinessPermit: uploadedPdfUrl || null,
@@ -288,7 +288,7 @@ function Login() {
       console.log("Shop created successfully:", shopData);
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ isMerchant: false, isApplying: true })
+        .update({ isMerchant: false })
         .eq("id", userId);
 
       if (updateError) {
@@ -380,24 +380,12 @@ function Login() {
 
       // Delete the shop row where shop_id matches
       const { error: deleteError } = await supabase
-        .from("shop")
+        .from("merchantRegistration")
         .delete()
         .eq("owner_Id", userId);
 
       if (deleteError) {
         console.error("Error deleting shop:", deleteError.message);
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Update the user's profile to remove merchant status
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ isApplying: false })
-        .eq("id", userId);
-
-      if (updateError) {
-        console.error("Error updating user profile:", updateError.message);
         setIsSubmitting(false);
         return;
       }
