@@ -10,7 +10,7 @@ const Merchants = () => {
     const [status, setStatus] = useState('pending');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [expandedCard, setExpandedCard] = useState(null);
+    const [expandedCards, setExpandedCards] = useState({});
     const [merchants, setMerchants] = useState([]);
 
     // Fetch accepted merchants (Auto-refresh every 5 seconds)
@@ -62,10 +62,16 @@ const Merchants = () => {
     }, []);
 
     // Open business permit
-    const toggleCard = (index) => {
-        setExpandedCard(expandedCard === index ? null : index);
+    const toggleCard = (id) => {
+        setExpandedCards((prevState) => ({
+            ...prevState,
+            [id]: !prevState[id],  // Toggles only the clicked card
+        }));
     };
 
+
+
+    // Accept Merchant Function
     const handleAccept = async (id) => {
         try {
             const { data: merchantData, error: fetchError } = await supabase
@@ -127,8 +133,18 @@ const Merchants = () => {
             <div className="flex-1 p-4">
                 <h1 className="text-2xl font-bold mb-4">Merchants</h1>
                 <div className="flex space-x-4 mb-4">
-                    <button onClick={() => setStatus('merchants')} className="px-4 py-2 bg-blue-500 text-white rounded">Merchants</button>
-                    <button onClick={() => setStatus('pending')} className="px-4 py-2 bg-gray-500 text-white rounded">Pending</button>
+                    <button
+                        onClick={() => setStatus('merchants')}
+                        className={`px-4 py-2 rounded ${status === 'merchants' ? 'bg-blue-500' : 'bg-gray-500'} text-white`}
+                    >
+                        Merchants
+                    </button>
+                    <button
+                        onClick={() => setStatus('pending')}
+                        className={`px-4 py-2 rounded ${status === 'pending' ? 'bg-blue-500' : 'bg-gray-500'} text-white`}
+                    >
+                        Pending
+                    </button>
                     <input type="text" placeholder="Search" className="px-4 py-2 border rounded" />
                 </div>
 
@@ -139,9 +155,9 @@ const Merchants = () => {
                         ) : error ? (
                             <p className="text-red-500">{error}</p>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {register.map((merchant, index) => (
-                                    <div key={merchant.id} className="border rounded-lg shadow-lg p-4 relative">
+                            <div className="flex flex-row flex-wrap items-start gap-4 w-auto">
+                                {register.map((merchant) => (
+                                    <div key={merchant.id} className="border rounded-lg shadow-lg p-4 relative w-full md:w-1/2 lg:w-1/3">
                                         <img src={merchant.shop_image} alt={merchant.shop_name} className="w-full h-40 object-cover rounded-md mb-4" />
                                         <h2 className="text-xl font-semibold mb-2">{merchant.shop_name}</h2>
                                         <p className="text-gray-700 mb-1">{merchant.description}</p>
@@ -153,23 +169,24 @@ const Merchants = () => {
                                             <button onClick={() => handleDecline(merchant.id)} className="px-4 py-2 bg-red-500 text-white rounded">Decline</button>
                                         </div>
 
-                                        <button onClick={() => toggleCard(index)} className="absolute top-4 right-4">
-                                            <FontAwesomeIcon icon={faChevronCircleDown} className={`transform transition-transform ${expandedCard === index ? 'rotate-180' : ''}`} />
+                                        <button onClick={() => toggleCard(merchant.id)} className="absolute top-4 right-4">
+                                            <FontAwesomeIcon
+                                                icon={faChevronCircleDown}
+                                                className={`transform transition-transform duration-300 ${expandedCards[merchant.id] ? 'rotate-180' : ''}`}
+                                            />
                                         </button>
 
-                                        {expandedCard === index && (
-                                            <div className="mt-4 transition-all duration-300 ease-in-out">
-                                                {merchant.shop_BusinessPermit ? (
-                                                    <object data={merchant.shop_BusinessPermit} type="application/pdf" width="100%" height="400px">
-                                                        <p>Your browser does not support PDF viewing. 
-                                                            <a href={merchant.shop_BusinessPermit} target="_blank" rel="noopener noreferrer" className="text-blue-500">Download PDF</a>
-                                                        </p>
-                                                    </object>
-                                                ) : (
-                                                    <p>No Business Permit Uploaded.</p>
-                                                )}
-                                            </div>
-                                        )}
+                                        <div className={`transition-all duration-500 ease-in-out ${expandedCards[merchant.id] ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden mt-4`}>
+                                            {merchant.shop_BusinessPermit ? (
+                                                <object data={merchant.shop_BusinessPermit} type="application/pdf" width="100%" height="400px">
+                                                    <p>Your browser does not support PDFs.
+                                                        <a href={merchant.shop_BusinessPermit} target="_blank" rel="noopener noreferrer" className="text-blue-500">Download PDF</a>
+                                                    </p>
+                                                </object>
+                                            ) : (
+                                                <p>No Business Permit Uploaded.</p>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -182,11 +199,18 @@ const Merchants = () => {
                         <h2 className="text-xl font-semibold mb-2">Accepted Merchants</h2>
                         <ul>
                             {merchants.map((merchant, index) => (
-                                <li key={merchant.id} className="border p-4 mb-2 rounded shadow-sm">
-                                    <p><strong>Shop Name:</strong> {merchant.shop_name}</p>
-                                    <p><strong>Description:</strong> {merchant.description}</p>
-                                    <p><strong>Address:</strong> {merchant.address}</p>
-                                    <p><strong>Contact:</strong> {merchant.contact_number}</p>
+                                <li key={merchant.id} className="border p-2 rounded shadow-sm flex mb-4">
+                                    <div className='flex gap-4'>
+                                        <div className='justify-start'>
+                                            <img src={merchant.shop_image} alt={merchant.shop_name} className="w-20 h-30 object-cover rounded-md mr-1" />
+                                        </div>
+                                        <div className='flex flex-col'>
+                                            <p><strong>Shop Name:</strong> {merchant.shop_name}</p>
+                                            <p><strong>Description:</strong> {merchant.description}</p>
+                                            <p><strong>Address:</strong> {merchant.address}</p>
+                                            <p><strong>Contact:</strong> {merchant.contact_number}</p>
+                                        </div>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
