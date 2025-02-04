@@ -3,14 +3,18 @@ import React, { useState, useEffect } from "react";
 const SUPABASE_STORAGE_URL = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public";
 
 const ItemOptions = ({ item, selectedColor, selectedSize, onSelectedValuesChange }) => {
-  const [color, setColor] = useState(selectedColor || null);
-  const [size, setSize] = useState(selectedSize || null);
+  const [color, setColor] = useState(selectedColor);
+  const [size, setSize] = useState(selectedSize);
   const disab = onSelectedValuesChange == null;
 
 
   const variants = item?.item_Variant || [];
 
   const [sizes, setSizes] = useState(color?.sizes || []);
+  useEffect(() => {
+    setColor(selectedColor);
+    setSize(selectedSize);
+  }, [item]); 
 
   useEffect(() => {
     if (color) {
