@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 const Merchants = () => {
     const [merchants, setMerchants] = useState([]);
     const [shops, setShops] = useState([]);
+    const [acceptedMerchants, setAcceptedMerchants] = useState([]);
     const [status, setStatus] = useState('pending'); // Default to 'pending' tab
     const [loading, setLoading] = useState(true); // Track loading state
     const [error, setError] = useState(null); // Track error state
@@ -18,7 +19,7 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('profiles')
-                    .select('username, full_name, email, mobile')
+                    .select('id, username, full_name, email, mobile')
                     .eq('isApplying', true);
                 if (error) throw error;
                 setMerchants(data);
@@ -33,7 +34,7 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('shop')
-                    .select('shop_name, description, address, shop_image, shop_BusinessPermit')
+                    .select('id, shop_name, description, address, shop_image, shop_BusinessPermit')
                     .eq('is_Approved', true);
                 if (error) throw error;
                 setShops(data);
@@ -42,8 +43,22 @@ const Merchants = () => {
             }
         };
 
+        const fetchAcceptedMerchants = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('id, username, full_name, email, mobile')
+                    .eq('isMerchant', true);
+                if (error) throw error;
+                setAcceptedMerchants(data);
+            } catch (error) {
+                setError(error.message);
+            }
+        };
+
         fetchMerchants();
         fetchShops();
+        fetchAcceptedMerchants();
     }, []);
 
     const toggleCard = (index) => {
@@ -53,10 +68,17 @@ const Merchants = () => {
     const handleAccept = async (id) => {
         try {
             await supabase
-                .from('merchant')
+                .from('shop')
                 .update({ is_Approved: true })
+                .eq('owner_id', id);
+
+            await supabase
+                .from('profiles')
+                .update({ isMerchant: true })
                 .eq('id', id);
-            setMerchants();
+
+            setMerchants(prev => prev.filter(merchant => merchant.id !== id));
+            setAcceptedMerchants(prev => [...prev, merchants.find(merchant => merchant.id === id)]);
         } catch (error) {
             setError(error.message);
         }
@@ -65,10 +87,11 @@ const Merchants = () => {
     const handleDecline = async (id) => {
         try {
             await supabase
-                .from('merchant')
+                .from('shop')
                 .update({ is_Approved: false })
-                .eq('id', id);
-            setMerchants();
+                .eq('owner_id', id);
+
+            setMerchants(prev => prev.filter(merchant => merchant.id !== id));
         } catch (error) {
             setError(error.message);
         }
@@ -121,38 +144,48 @@ const Merchants = () => {
                 )}
 
                 {status === 'merchants' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {shops.map((shop, index) => (
-                            <div key={index} className="border rounded-lg shadow-lg p-4 relative">
-                                <img src={shop.shop_image} alt={shop.shop_name} className="w-full h-40 object-cover rounded-md mb-4" />
-                                <h2 className="text-xl font-semibold mb-2 text-white">{shop.shop_name}</h2>
-                                <p className="text-gray-700 mb-1">{shop.description}</p>
-                                <p className="text-gray-500 mb-4">{shop.address}</p>
+                    <div>
+                        <h2 className="text-xl font-semibold mb-2">Accepted Merchants</h2>
+                        <ul>
+                            {acceptedMerchants.map((merchant, index) => (
+                                <li key={index} className="border p-4 mb-2 rounded shadow-sm">
+                                    <p><strong>Username:</strong> {merchant.username}</p>
+                                    <p><strong>Full Name:</strong> {merchant.full_name}</p>
+                                    <p><strong>Email:</strong> {merchant.email}</p>
+                                </li>
+                            ))}
+                        </ul>
 
-                                <button onClick={() => toggleCard(index)} className="absolute top-4 right-4">
-                                    <FontAwesomeIcon icon={faChevronCircleDown} className={`transform transition-transform ${expandedCard === index ? 'rotate-180' : ''}`} />
-                                </button>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {shops.map((shop, index) => (
+                                <div key={index} className="border rounded-lg shadow-lg p-4 relative">
+                                    <img src={shop.shop_image} alt={shop.shop_name} className="w-full h-40 object-cover rounded-md mb-4" />
+                                    <h2 className="text-xl font-semibold mb-2 text-white">{shop.shop_name}</h2>
+                                    <p className="text-gray-700 mb-1">{shop.description}</p>
+                                    <p className="text-gray-500 mb-4">{shop.address}</p>
+                                    
 
-                                {expandedCard === index && (
-                                    <div className="mt-4 transition-all duration-300 ease-in-out">
-                                        {shop.shop_BusinessPermit && (
-                                            <object
-                                                data={shop.shop_BusinessPermit}  // Use URL or base64 here
-                                                type="application/pdf"
-                                                width="100%"
-                                                height="600px"
-                                            >
-                                                <p>Your browser does not support PDF viewing. You can <a href={shop.shop_BusinessPermit}>download the PDF</a> instead.</p>
-                                            </object>
-                                        )}
-                                    </div>
-                                )}
+                                    <button onClick={() => toggleCard(index)} className="absolute top-4 right-4">
+                                        <FontAwesomeIcon icon={faChevronCircleDown} className={`transform transition-transform ${expandedCard === index ? 'rotate-180' : ''}`} />
+                                    </button>
 
-
-
-
-                            </div>
-                        ))}
+                                    {expandedCard === index && (
+                                        <div className="mt-4 transition-all duration-300 ease-in-out">
+                                            {shop.shop_BusinessPermit && (
+                                                <object
+                                                    data={shop.shop_BusinessPermit}
+                                                    type="application/pdf"
+                                                    width="100%"
+                                                    height="600px"
+                                                >
+                                                    <p>Your browser does not support PDF viewing. You can <a href={shop.shop_BusinessPermit}>download the PDF</a> instead.</p>
+                                                </object>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
