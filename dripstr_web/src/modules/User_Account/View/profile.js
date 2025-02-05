@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import { Link } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
+import ProfilePictureUploadModal from "../components/ProfilePictureUploadModal";
+
+import useUserData from "../Model/User_Account_Model";
+
 
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -13,10 +17,10 @@ const UserProfile = () => {
     gender: "",
     profile_picture: "",
   });
-
   const [originalProfile, setOriginalProfile] = useState(null); // Store original profile
   const [loading, setLoading] = useState(true); // Show loading while fetching
   const [error, setError] = useState(""); // Handle errors
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Fetch logged-in user info and profile
   const fetchUserProfile = async () => {
@@ -108,11 +112,12 @@ const UserProfile = () => {
         <div className="">
             <div className="flex justify-between mb-4">
               <div className="flex items-center">
-                <img
-                  src={profile.profile_picture || "path_to_placeholder_image"}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full border-2 border-gray-300 mr-4"
-                />
+              <img
+                src={profile.profile_picture || "/default-avatar.png"}
+                alt="Profile"
+                className="w-24 h-24 rounded-full border-2 border-gray-300 mr-2 cursor-pointer"
+                onClick={() => setIsModalOpen(true)}
+              />
                 <div>
                 {isEditing ? (
                       <input
@@ -127,7 +132,8 @@ const UserProfile = () => {
                        <h2 className="text-lg text-gray-900 font-semibold">{profile.full_name}</h2>
 
                     )}
-                  <button className="text-blue-600 font-medium">
+                  <button className="text-blue-600 font-medium" onClick={() => setIsModalOpen(true)}
+                  >
                     Change Picture
                   </button>
                 </div>
@@ -255,6 +261,23 @@ const UserProfile = () => {
           
         </div>
       </div>
+
+
+
+      {/* Modal for Upload */}
+      {isModalOpen && (
+        <ProfilePictureUploadModal
+          isOpen={isModalOpen}
+          onClose={(newImageUrl) => {
+            if (newImageUrl) setProfile((prev) => ({ ...prev, profile_picture: newImageUrl }));
+            setIsModalOpen(false);
+          }}
+          userId={profile.id}
+          currentImage={profile.profile_picture}
+        />
+      )}
+
+
     </div>
   );
 };

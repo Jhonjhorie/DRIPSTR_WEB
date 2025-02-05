@@ -161,9 +161,9 @@ const CharacterCustomization = () => {
   <Sidebar />
 
   <div className="p-4 flex-1">
-    <div className="grid md:grid-cols-2 gap-6">
+    <div className="flex flex-row gap-4">
       {/* Left Panel: Edit Form */}
-      <div className="bg-white p-4 rounded-lg shadow-lg">
+      <div className="bg-white p-4 rounded-lg shadow-lg ">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-xl font-bold text-gray-800">Edit Character</h1>
           <span
@@ -299,19 +299,20 @@ const CharacterCustomization = () => {
       </div>
 
       {/* Right Panel: 3D Canvas */}
-      <div className="flex-1 h-[500px] rounded-lg shadow-lg bg-gray-100">
-      <div className="relative flex flex-1 w-full h-full">
-  {/* Darkened Background Image */}
-  <div 
-    className="absolute inset-0 bg-black bg-opacity-100" // Dark overlay
-    style={{ 
-      backgroundImage: "url('/3d/canvasBG/ClosetBG.jpg')", 
-      backgroundSize: "cover", 
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-      filter: "brightness(50%)"
-    }} 
-  />
+      <div className="flex-1 h-[500px] rounded-lg shadow-lg flex-1 bg-gray-100">
+        <div className="relative flex flex-1 w-full h-full">
+
+          {/* Darkened Background Image */}
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-100" // Dark overlay
+            style={{ 
+              backgroundImage: "url('/3d/canvasBG/ClosetBG.jpg')", 
+              backgroundSize: "cover", 
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              filter: "brightness(50%)"
+            }} 
+          />
 
   {/* 3D Canvas (Ensuring it Renders Properly) */}
   <div className="relative w-full h-full">
@@ -331,7 +332,7 @@ const CharacterCustomization = () => {
           <Part key={`shorts-${gender}-${selectedBodyType}`} url={getShortsURL()} position={[0, 0, 0]} />
         )}
       </group>
-      <OrbitControls target={[0, 110, 0]} />
+      <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
     </Canvas>
   </div>
 </div>

@@ -127,7 +127,7 @@ const AuthScreen = () => {
     if (error) {
       alert("Google login error: " + error.message);
     } else {
-      alert(`Google login successful. Welcome, ${user?.email}!`);
+      console.log(`Google login successful. Welcome, ${user?.email}!`);
       // Check if the user has an avatar and redirect accordingly
       checkAvatarAndRedirect(user.id);
     }
@@ -142,7 +142,7 @@ const AuthScreen = () => {
     if (error) {
       alert("Facebook login error: " + error.message);
     } else {
-      alert(`Facebook login successful. Welcome, ${user?.email}!`);
+      console.log(`Facebook login successful. Welcome, ${user?.email}!`);
       // Check if the user has an avatar and redirect accordingly
       checkAvatarAndRedirect(user.id);
     }

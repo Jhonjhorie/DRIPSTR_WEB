@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
-
+import ProfilePictureUploadModal from "../components/ProfilePictureUploadModal";
+import { Navigate } from "react-router-dom";
 const Account = () => {
   const [profile, setProfile] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -74,10 +76,12 @@ const Account = () => {
           <>
           <div className="flex items-center gap-4">
             <img
-              src="https://via.placeholder.com/80"
-              alt="Avatar"
-              className="w-20 h-20 rounded-full bg-gray-300"
-            />
+              src={profile?.profile_picture || "/default-avatar.png"}
+              alt="Profile"
+              className="w-24 h-24 rounded-full border-2 border-gray-300 mr-2 cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+              /> 
+
             <div>
                 <p className="text-gray-600">{profile?.full_name || "N/A"}</p>
                 <p className="text-gray-600">{profile?.email || "N/A"}</p>
@@ -178,6 +182,18 @@ const Account = () => {
         </div>
       </div>
     </div>
+          {/* Modal for Upload */}
+          {isModalOpen && (
+        <ProfilePictureUploadModal
+          isOpen={isModalOpen}
+          onClose={(newImageUrl) => {
+            if (newImageUrl) setProfile((prev) => ({ ...prev, profile_picture: newImageUrl }));
+            setIsModalOpen(false);
+          }}
+          userId={profile.id}
+          currentImage={profile.profile_picture}
+        />
+      )}
     </div>
   );
 };
