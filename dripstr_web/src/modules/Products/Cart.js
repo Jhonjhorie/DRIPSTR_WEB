@@ -7,23 +7,19 @@ import { faShoppingCart, faPen } from "@fortawesome/free-solid-svg-icons";
 import useCarts from "./hooks/useCart";
 import EditConfirm from "./components/editConfirm";
 
-const Cart = ({ item, action }) => {
+const Cart = ({action, closeDrawer }) => {
   const { isLoggedIn } = useUserProfile();
   const { cartItems, orderCart, loading, error, fetchDataCart, handleToggleOrder } = useCarts();
   const navigate = useNavigate();
-  const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || "");
-  const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
+ 
   const totalOrderPrice = orderCart.reduce((sum, item) => sum + item.size.price * item.qty, 0);
   const totalQuantity = orderCart.reduce((sum, item) => sum + item.qty, 0);
 
-  const [selectedAction, setSelectedAction] = useState(null);
   const [cartItemS, setCartItemS] = useState(null);
+  const [selectedAction, setSelectedAction] = useState("edit");
 
-  const handleIncrement = () => {
-    setQuantity((prev) => prev + 1);
-  };
 
+  
   useEffect(() => {
     fetchDataCart();
   }, []);
@@ -42,14 +38,21 @@ const Cart = ({ item, action }) => {
   };
 
   const onConfirm = () => {
-    const formOrder = {
-      item: item,
-      quantity: quantity,
-      selectedColor: selectedColor,
-      selectedSize: selectedSize,
-    };
-    navigate(`/placeOrder/${item.item_Name}`, { state: { formOrder } });
+    
+    const selectedItems = cartItems.filter((item) => item.to_order);
+  
+    if (selectedItems.length === 0) {
+      alert("No items selected for order. Please select at least one item.");
+      return;
+    }
+    if (closeDrawer) {
+      closeDrawer();
+    }
+    
+    navigate(`/placeOrder`, { state: { selectedItems } });
+   
   };
+  
 
   if (isLoggedIn) {
     return (
@@ -147,7 +150,10 @@ const Cart = ({ item, action }) => {
             <h1 className="text-lg font-bold">₱{totalOrderPrice.toFixed(2)}</h1>
           </div>
           <div className="flex flex-col">
-            <button className="btn glass btn-outline bg-slate-50 hover:bg-primary-color">
+            <button className="btn glass btn-outline bg-slate-50 hover:bg-primary-color"
+            onClick={onConfirm}
+            disabled={cartItems.filter((item) => item.to_order).length <= 0}
+            >
               Place Order
             </button>
           </div>
