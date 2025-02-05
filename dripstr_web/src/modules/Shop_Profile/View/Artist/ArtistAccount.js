@@ -170,7 +170,6 @@ function ArtistAccount() {
         updatedData.artist_Image = imageUrl;
       }
 
-      // Perform Supabase Update
       const { data: updatedArtist, error: updateError } = await supabase
         .from("artist")
         .update(updatedData)

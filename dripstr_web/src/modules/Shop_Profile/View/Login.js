@@ -119,7 +119,7 @@ function Login() {
       setTimeout(() => {
         setShowAlert(false);
       }, 3000);
-      return; // Do not proceed if the field is empty
+      return; 
     }
     if (!phoneNumber.trim()) {
       console.error("Phone Number is required");
@@ -128,7 +128,7 @@ function Login() {
       setTimeout(() => {
         setShowAlert2(false);
       }, 3000);
-      return; // Do not proceed if the phone number is empty
+      return;
     }
     if (phoneNumber.length !== 11) {
       console.error("Phone Number must be 11 digits");
@@ -137,7 +137,7 @@ function Login() {
       setTimeout(() => {
         setShowAlert4(false);
       }, 3000);
-      return; // Ensure phone number is exactly 11 digits
+      return; 
     }
     if (!shopDescription.trim()) {
       console.error("Shop Description is required");
@@ -146,7 +146,7 @@ function Login() {
       setTimeout(() => {
         setShowAlert5(false);
       }, 3000);
-      return; // Do not proceed if the field is empty
+      return; 
     }
     if (!shopAddress.trim()) {
       console.error("Shop Address is required");
@@ -155,7 +155,7 @@ function Login() {
       setTimeout(() => {
         setShowAlert3(false);
       }, 3000);
-      return; // Do not proceed if the field is empty
+      return; 
     }
     if (!selectedImage) {
       console.error("Shop Image is required");
@@ -164,7 +164,7 @@ function Login() {
       setTimeout(() => {
         setShowAlert6(false);
       }, 3000);
-      return; // Do not proceed if the field is empty
+      return; 
     }
     if (!selectedFile) {
       console.error("Shop File is required");
@@ -173,7 +173,7 @@ function Login() {
       setTimeout(() => {
         setShowAlert7(false);
       }, 3000);
-      return; // Do not proceed if the field is empty
+      return;
     }
 
     //define current user credit
@@ -198,7 +198,6 @@ function Login() {
           .toString(36)
           .substring(2, 10)}-${imageFile.name}`;
 
-        // Upload the image to Supabase storage
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
           .upload(uniqueImageName, imageFile);
@@ -218,7 +217,7 @@ function Login() {
             return;
           }
 
-          uploadedImageUrl = publicUrlData.publicUrl; // Correctly assign the public URL
+          uploadedImageUrl = publicUrlData.publicUrl; 
           console.log("Image uploaded successfully:", uploadedImageUrl);
         }
       } catch (err) {
@@ -310,7 +309,6 @@ function Login() {
       setpdfFile(null);
       setShowAlertSuccess(true);
       setIsSubmitting(false);
-      // Navigate to the Merchant Dashboard
     } catch (err) {
       console.error("Unexpected error:", err);
     } finally {
