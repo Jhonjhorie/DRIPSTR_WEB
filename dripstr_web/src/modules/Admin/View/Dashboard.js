@@ -114,7 +114,7 @@ const Dashboard = () => {
         { label: `${customerCount === 1 ? "Customer" : "Customers"}` , count: customerCount, icon: "user-group" },
         { label: `${merchantCount === 1 ? "Merchant" : "Merchants"}`, count: merchantCount, icon: "store" },
         { label: `${designerCount === 1 ? "Designer" : "Designers"}`, count: designerCount, icon: "pencil" },
-        { label: "Overall User", count: overall, icon: "users" },
+        { label: `${overall === 1 ? "Total User" : "Total Users"}`, count: overall, icon: "users" },
       ];
 
       setStatisticsData(updatedStatisticsData);
