@@ -12,6 +12,8 @@ const Merchants = () => {
     const [error, setError] = useState(null);
     const [expandedCards, setExpandedCards] = useState({});
     const [merchants, setMerchants] = useState([]);
+    const [successAdd, setSuccessAdd] = useState('');
+    const [successDecline, setSuccessDecline] = useState('');
 
     // Fetch accepted merchants (Auto-refresh every 5 seconds)
     useEffect(() => {
@@ -107,7 +109,8 @@ const Merchants = () => {
 
             setRegister(prev => prev.filter(merchant => merchant.id !== id));
             setAcceptedMerchants(prev => [...prev, merchantData]);
-            console.log('Merchant accepted successfully!');
+            setSuccessAdd('Merchant added successfully.');
+            setTimeout(() => setSuccessAdd(''), 1500);
 
         } catch (error) {
             setError(error.message);
@@ -122,6 +125,8 @@ const Merchants = () => {
                 .eq('id', id);
 
             setRegister(prev => prev.filter(merchant => merchant.id !== id));
+            setSuccessDecline('Merchant declined successfully.');
+            setTimeout(() => setSuccessDecline(''), 1500);
         } catch (error) {
             setError(error.message);
         }
@@ -155,6 +160,7 @@ const Merchants = () => {
                         ) : error ? (
                             <p className="text-red-500">{error}</p>
                         ) : (
+
                             <div className="flex flex-row flex-wrap items-start gap-4 w-auto">
                                 {register.map((merchant) => (
                                     <div key={merchant.id} className="border rounded-lg shadow-lg p-4 relative w-full md:w-1/2 lg:w-1/3">
@@ -194,6 +200,18 @@ const Merchants = () => {
                     </div>
                 )}
 
+                {successAdd && (
+                    <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-lg z-50">
+                        {successAdd}
+                    </div>
+                )}
+                {successDecline && (
+                    <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-md shadow-lg z-50">
+                        {successDecline}
+                    </div>
+                )}
+
+
                 {status === 'merchants' && (
                     <div>
                         <h2 className="text-xl font-semibold mb-2">Accepted Merchants</h2>
@@ -216,6 +234,7 @@ const Merchants = () => {
                         </ul>
                     </div>
                 )}
+
             </div>
         </div>
     );
