@@ -164,7 +164,7 @@ const Merchants = () => {
                             <div className="flex flex-row flex-wrap items-start gap-4 w-auto">
                                 {register.map((merchant) => (
                                     <div key={merchant.id} className="border rounded-lg shadow-lg p-4 relative w-full md:w-1/2 lg:w-1/3">
-                                        <img src={merchant.shop_image} alt={merchant.shop_name} className="w-full h-40 object-cover rounded-md mb-4" />
+                                        <img src={merchant.shop_image} alt={merchant.shop_name} className="w-full h-40 object-cover rounded-md" />
                                         <h2 className="text-xl font-semibold mb-2">{merchant.shop_name}</h2>
                                         <p className="text-gray-700 mb-1">{merchant.description}</p>
                                         <p className="text-gray-500 mb-1">{merchant.address}</p>
