@@ -54,6 +54,10 @@ const BuyConfirm = ({ action, item, onClose }) => {
   const handleProductClick = () => {
     navigate(`/product/${item.item_Name}`, { state: { item } });
   };
+  const handleToCart = () => {
+    navigate(`/cart`, { state: { item } });
+   
+  };
 
   const onConfirm = () => {
     const solo = true;
@@ -248,7 +252,8 @@ const BuyConfirm = ({ action, item, onClose }) => {
                 Go to Product Page
               </button>
               <button
-                onClick={isCart ? handleAddToCart: onConfirm}
+              
+                onClick={isCart ? () => handleToCart() : onClose}
                 className="btn btn-sm btn-outline btn-primary  "
               >
                 Confirm

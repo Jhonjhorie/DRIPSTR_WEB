@@ -8,9 +8,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import { supabase } from "../../../constants/supabase";  
 import { useNavigate } from "react-router-dom";  
 
- 
 const AuthScreen = () => {
-  
   const [isSignIn, setIsSignIn] = useState(true); // State to toggle between Sign In and Sign Up
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false); // State for modal visibility
   const [signInData, setSignInData] = useState({
@@ -23,7 +21,8 @@ const AuthScreen = () => {
     email: "",
     password: "",
   });
-  
+
+  const navigate = useNavigate();  
 
   // Handle input changes for both forms
   const handleInputChange = (e, form) => {
@@ -34,8 +33,31 @@ const AuthScreen = () => {
       setSignUpData({ ...signUpData, [name]: value });
     }
   };
-
-
+  const checkAvatarAndRedirect = async (userId) => {
+    try {
+      // Fetch user profile data (including avatar) from Supabase
+      const { data, error } = await supabase
+        .from('avatars') // Querying the 'avatars' table
+        .select('avatar_id') // Fetching the primary key to check for existence
+        .eq('account_id', userId)
+        .single();
+  
+      if (error) {
+        console.error('Error fetching user profile:', error.message);
+        return;
+      }
+  
+      // Check if avatar exists
+      if (data) {
+        navigate('/'); // Redirect to homepage if avatar exists
+      } else {
+        navigate('/account/cc'); // Redirect to create avatar page if no avatar
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err.message);
+    }
+  };
+  
   const handleSignIn = async () => {
     const { email, password } = signInData;
 
@@ -53,10 +75,10 @@ const AuthScreen = () => {
       alert(`Sign In Error: ${error.message} please check your email and confirm`);
     } else {
       alert("Sign In successful!");
-      navigate("/account/cc");  
+      // Check if the user has an avatar and redirect accordingly
+      checkAvatarAndRedirect(data.user.id);
     }
   };
-
 
   const handleSignUp = async () => {
     const { email, password, fullName } = signUpData;
@@ -72,7 +94,6 @@ const AuthScreen = () => {
       options: {
         data: {
           fullName, // Custom field to store additional user info
-          
         },
       },
     });
@@ -97,8 +118,6 @@ const AuthScreen = () => {
     setIsForgotPasswordOpen(false);
   };
 
-  const navigate = useNavigate();  
-
   // Google login handler
   const handleGoogleLogin = async () => {
     const { user, session, error } = await supabase.auth.signInWithOAuth({
@@ -108,10 +127,10 @@ const AuthScreen = () => {
     if (error) {
       alert("Google login error: " + error.message);
     } else {
-      alert(`Google login successful. Welcome, ${user?.email}!`);
-
-      navigate("/account");
-     }
+      console.log(`Google login successful. Welcome, ${user?.email}!`);
+      // Check if the user has an avatar and redirect accordingly
+      checkAvatarAndRedirect(user.id);
+    }
   };
 
   // Facebook login handler
@@ -123,8 +142,9 @@ const AuthScreen = () => {
     if (error) {
       alert("Facebook login error: " + error.message);
     } else {
-      alert(`Facebook login successful. Welcome, ${user?.email}!`);
-      navigate("/account");
+      console.log(`Facebook login successful. Welcome, ${user?.email}!`);
+      // Check if the user has an avatar and redirect accordingly
+      checkAvatarAndRedirect(user.id);
     }
   };
 

@@ -1,74 +1,146 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { supabase } from "../../../constants/supabase";
+import ProfilePictureUploadModal from "../components/ProfilePictureUploadModal";
+import { Navigate } from "react-router-dom";
 const Account = () => {
+  const [profile, setProfile] = useState(null);
+  const [addresses, setAddresses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+  useEffect(() => {
+    fetchProfile();
+    fetchAddresses();
+  }, []);
+
+  const fetchProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      let { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (error) console.error("Error fetching profile:", error);
+      else setProfile(data);
+    }
+  };
+
+  const fetchAddresses = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      let { data, error } = await supabase
+        .from("addresses")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) console.error("Error fetching addresses:", error);
+      else setAddresses(data);
+    }
+    setLoading(false);
+  };
+
   return (
     <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
 
     <Sidebar />
-    <div className="p-4 px-9">
+    <div className="p-4 px-9 flex-1 ">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-bold text-gray-800">Manage My Account</h1>
       </div>
 
       {/* Profile Section */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+      <div className="flex flex-row gap-4 justify-between mb-6">
         {/* Personal Profile */}
-        <div className="bg-gray-100 p-4 rounded-lg shadow">
+        <div className="bg-gray-100 p-4 flex-1 rounded-lg shadow">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-800">Personal Profile</h2>
-            <Link to="/account/edit" className="text-indigo-600">
+            <Link to="/account/profile" className="text-indigo-600">
               Edit Profile
             </Link>
           </div>
+
+                  {loading ? (
+          <div className="flex flex-col justify-center items-center">
+            <img src="/emote/hmmm.png" alt="Loading..." className="w-20 h-20" />
+            <label>Loading...</label>
+          </div>
+        ) : (
+          <>
           <div className="flex items-center gap-4">
             <img
-              src="https://via.placeholder.com/80"
-              alt="Avatar"
-              className="w-20 h-20 rounded-full bg-gray-300"
-            />
+              src={profile?.profile_picture || "/default-avatar.png"}
+              alt="Profile"
+              className="w-24 h-24 rounded-full border-2 border-gray-300 mr-2 cursor-pointer"
+              onClick={() => setIsModalOpen(true)}
+              /> 
+
             <div>
-              <p className="text-gray-600">Behnigno Ahuilar</p>
-              <p className="text-gray-600">Beh@example.com</p>
+                <p className="text-gray-600">{profile?.full_name || "N/A"}</p>
+                <p className="text-gray-600">{profile?.email || "N/A"}</p>
+                <p className="text-gray-600">Mobile: {profile?.mobile || "N/A"}</p>
             </div>
           </div>
           <div className="mt-4 text-right">
             <button className="btn btn-primary">Edit Avatar</button>
           </div>
+          </>
+        )}
         </div>
 
-        {/* Address Book Section */}
-        <div className="bg-gray-100 p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Address Book</h2>
-            <Link to="/account/address/edit" className="text-indigo-600">
-              Edit
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-semibold text-gray-600">Default Shipping Address</h3>
-              <p className="mt-2">Jhonjhorie Quiling</p>
-              <p className="text-gray-600">Mangga St. no. 16</p>
-              <p className="text-gray-600">Metro Manila - Quezon City - Payatas</p>
-              <p className="text-gray-600">09563592007</p>
+          {/* Address Book Section */}
+          <div className="bg-gray-100 p-4 flex-1 rounded-lg shadow">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-800">Address Book</h2>
+              <Link to="/account/address" className="text-indigo-600">Edit</Link>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-600">Default Billing Address</h3>
-              <p className="mt-2">Jhonjhorie Quiling</p>
-              <p className="text-gray-600">Mangga St. no. 16</p>
-              <p className="text-gray-600">Metro Manila - Quezon City - Payatas</p>
-              <p className="text-gray-600">(+63) 09563592007</p>
-            </div>
+            {loading ? (
+          <div className="flex flex-col justify-center items-center">
+            <img src="/emote/hmmm.png" alt="Loading..." className="w-20 h-20" />
+            <label>Loading...</label>
           </div>
+        ) : (
+            <div className="grid grid-cols-2 gap-4">
+            {addresses.length > 0 ? (
+              addresses
+                .filter((address) => address.is_default_shipping) // Filter for the default shipping address
+                .map((address, index) => (
+                  <div key={index}>
+                    <h3 className="font-semibold text-gray-600">
+                      Default Shipping Address
+                    </h3>
+                    <p className="text-gray-600">{address.address}</p>
+                    <p className="text-gray-600">Postcode: {address.postcode}</p>
+                  </div>
+                ))
+            ) : (
+              <p className="text-gray-600">No addresses found.</p>
+            )}
+            </div>       
+           )}
+
+          </div>
+
+
         </div>
-      </div>
 
       {/* Recent Orders Section */}
       <div className="bg-gray-100 p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Orders</h2>
         <div className="overflow-x-auto">
+        {loading ? (
+          <div className="flex flex-col justify-center items-center">
+            <img src="/emote/hmmm.png" alt="Loading..." className="w-25 h-25" />
+            <label>Loading...</label>
+          </div>
+        ) : (
           <table className="table table-auto w-full">
             <thead>
               <tr className="bg-gray-200">
@@ -105,9 +177,23 @@ const Account = () => {
               </tr>
             </tbody>
           </table>
+                     )}
+
         </div>
       </div>
     </div>
+          {/* Modal for Upload */}
+          {isModalOpen && (
+        <ProfilePictureUploadModal
+          isOpen={isModalOpen}
+          onClose={(newImageUrl) => {
+            if (newImageUrl) setProfile((prev) => ({ ...prev, profile_picture: newImageUrl }));
+            setIsModalOpen(false);
+          }}
+          userId={profile.id}
+          currentImage={profile.profile_picture}
+        />
+      )}
     </div>
   );
 };

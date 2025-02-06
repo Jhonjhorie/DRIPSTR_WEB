@@ -10,12 +10,11 @@ import Cancellations from '../View/Cancellations';
 import Reviews from '../View/Reviews';  
 import Wishlist from '../View/Wishlist';  
 import ShopSetup from '../View/ShopSetup';  
-import Avatar from '../View/Avatar';  
 import SetupShop from '../../Shop_Profile/View/Login';
-import RPMCreateAvatar from '../View/RPMCreateAvatar';  
-import XPAvatar from '../View/ExperimentAvatar';  
+import Avatar from '../View/Avatar';  
 import CharacterCreation from '../View/CharacterCreation';  
-
+import Try from '../View/RPMCreateAvatar';
+ 
 const UserController = () => {
   return (
     <Routes>
@@ -30,9 +29,9 @@ const UserController = () => {
       <Route path="/shop-setup" element={<ShopSetup />} />
       <Route path="/avatar" element={<Avatar />} />
       <Route path="/ShopSetup" element={<SetupShop />} />
-      <Route path="/RPMAvatar" element={<RPMCreateAvatar />} />
-      <Route path="/XPAvatar" element={<XPAvatar />} />
       <Route path="/CC" element={<CharacterCreation />} />
+      <Route path="/Try" element={<Try />} />
+      <Route path="/avatar" element={<Avatar />} />
 
     </Routes>
   );

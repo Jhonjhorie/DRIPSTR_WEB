@@ -2,13 +2,17 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";  
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
-
+import { useLocation, useNavigate } from "react-router-dom";
 const Orders = () => {
   const [selectedTab, setSelectedTab] = useState("All");
 
   const tabs = ["All", "To Pay", "To Ship", "To Receive", "Received (32)"];
 
   const [orderDetails, setOrderDetails] = useState(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { item } = location.state || {}; // Retrieve the passed product details
 
   useEffect(() => {
     // Fetch data from localStorage
@@ -28,11 +32,10 @@ const Orders = () => {
       {/* Sidebar */}
       <Sidebar />
 
-      <div className="px-5 flex-1 flex flex-col">
+      <div className="px-5 flex-1 flex flex-col">  
         {/* Main Content */}
         <div className="p-4 bg-slate-200 flex-1">
           <h1 className="text-xl font-bold text-gray-800 mb-6">My Orders</h1>
-
           {/* Navigation Tabs */}
           <div className="tabs mb-1 border-b border-gray-300 flex flex-row justify-around">
             {tabs.map((tab, index) => (
@@ -50,15 +53,18 @@ const Orders = () => {
             ))}
           </div>
 
-          {/* Search Button */}
-          <div className="group relative flex items-center bg-gray-50 rounded-md my-2 ">
-            <button className="w-10 h-10 flex items-center justify-center group-hover:bg-primary-color transition-all duration-300" />
-            <FontAwesomeIcon
-              icon={faSearch}
-              className="text-primary-color group-hover:text-black transition-all duration-300"
-            /> 
-          </div>
+
           
+          {/* Removed unnecessary margin-top */}
+          <div className="group relative flex items-center bg-gray-50 rounded-md my-2">
+            <button className="w-10 h-10 flex items-center justify-center group-hover:bg-primary-color transition-all duration-300">
+              <FontAwesomeIcon
+                icon={faSearch}
+                className="text-primary-color group-hover:text-black transition-all duration-300"
+              />
+            </button>
+          </div>
+
           {/* Order Items */}
           <div className="bg-gray-100 rounded-lg p-4 mb-4">
             <h2 className="text-lg font-bold text-gray-800 mb-2">
@@ -84,6 +90,7 @@ const Orders = () => {
             </div>
           </div>
 
+          {/* Adjust Margin and Padding Here */}
           <div className="bg-gray-100 rounded-lg p-4">
             <h2 className="text-lg font-bold text-gray-800 mb-2">
               Top_Appliancer
@@ -109,9 +116,9 @@ const Orders = () => {
             </div>
           </div>
 
-          {/* Fetched Orders */}
-          <div className="mt-4">
-            {orderDetails.items?.length >= 1 ? (
+          {/*Fetched orders */}
+          <div className="mt-2">
+            {orderDetails.items?.length > 0 ? (
               orderDetails.items.map((item, index) => (
                 <div key={index} className="mb-2">
                   <div className="bg-gray-100 rounded-lg p-4">
