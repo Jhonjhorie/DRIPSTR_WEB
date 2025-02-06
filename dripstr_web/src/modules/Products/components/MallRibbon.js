@@ -12,7 +12,6 @@ const MallRibbon = ({ active, items, onItemClick }) => {
   
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Show only two items at a time
   const visibleItems = items.slice(currentIndex, currentIndex + 3);
 
   const next = () => {
@@ -35,7 +34,10 @@ const MallRibbon = ({ active, items, onItemClick }) => {
           {items.slice(2).map((_, index) => (
             <button
               key={index}
-              onClick={() => setCurrentIndex(index)}
+              onClick={(e) => {
+                e.preventDefault(); 
+                setCurrentIndex(index); 
+              }}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === currentIndex
                   ? "bg-primary-color w-10" // Bar covering 3 dots
@@ -65,7 +67,7 @@ const MallRibbon = ({ active, items, onItemClick }) => {
           {visibleItems.map((item, index) => (
             <div
               onClick={() => onItemClick(currentIndex + index)} 
-              key={currentIndex + index} // Ensure unique keys across transitions
+              key={currentIndex + index} 
               className={`h-24 flex-1 ${item.color} group text-slate-50 rounded-lg w-[25vw]  md:w-[10.5vw]   items-center justify-center text-sm md:text-md flex py-4 px-8 md:px-42 font-bold drop-shadow-lg btn glass hover:${item.activeColor} overflow-hidden`}
             >
               {active == index + currentIndex ? (

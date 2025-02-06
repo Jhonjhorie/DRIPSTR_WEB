@@ -3,13 +3,23 @@ import { useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
 import BuyConfirm from "./buyConfirm.js";
+import ItemOptions from "./itemOptions.js";
+import useGetImage from "../hooks/useGetImageUrl.js";
+
 
 const ProductModal = ({ item, onClose }) => {
   const [selectedAction, setSelectedAction] = useState(null);
   const navigate = useNavigate();
+  const allImages = useGetImage(item); 
+  const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
+    const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
+    const handleSelectedValues = (color, size) => {
+      setSelectedColor(color);
+      setSelectedSize(size);
+    };
 
   const handleProductClick = () => {
-    navigate(`/product/${item.product}`, { state: { item } });
+    navigate(`/product/${item.item_Name}`, { state: { item } });
   };
 
   const openModal = (action) => {
@@ -22,10 +32,9 @@ const ProductModal = ({ item, onClose }) => {
     document.getElementById('buyConfirm_Modal').close();
   };
 
-  const allImages = [item.url, ...(item.images || [])];
   return (
     <div className="lg:w-[70rem] lg:max-w-[70rem] p-0 h-[40rem] overflow-y-auto overflow-x-hidden lg:overflow-hidden custom-scrollbar  modal-box">
-      {item  && <dialog id="buyConfirm_Modal" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
+      {item  && <dialog id="buyConfirm_Modal" className="  max-w-full modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
                    <BuyConfirm action={selectedAction} item={item} onClose={closeModal}/>
                    <form method="dialog" class="modal-backdrop">
                     <button onClick={closeModal}></button>
@@ -44,39 +53,53 @@ const ProductModal = ({ item, onClose }) => {
               className=" absolute top-[55%] lg:top-[60%] -left-[10%] -z-10 opacity-30  w-[35%] h-[40%] object-contain "
             />
             <div className="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
-              {allImages.map((image, imageIndex) => {
-                const slideId = `slide${imageIndex}`;
-                const prevSlideId = `slide${
-                  (imageIndex - 1 + allImages.length) % allImages.length
-                }`;
-                const nextSlideId = `slide${
-                  (imageIndex + 1) % allImages.length
-                }`;
-
-                return (
-                  <div
-                    id={slideId}
-                    key={slideId}
-                    className="carousel-item relative w-full  justify-center items-center"
-                  >
-                    <img
-                      src={image}
-                      alt={`${item.product}-${imageIndex}`}
-                      className="w-[32rem]  h-[65vh] object-contain"
-                    />
-                    {allImages.length > 1 && (
-                      <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                        <a href={`#${prevSlideId}`} className="btn btn-circle">
-                          ❮
-                        </a>
-                        <a href={`#${nextSlideId}`} className="btn btn-circle">
-                          ❯
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {allImages.length > 0 ?
+                (allImages.map((image, imageIndex) => {
+                  const slideId = `slide${imageIndex}`;
+                  const prevSlideId = `slide${
+                    (imageIndex - 1 + allImages.length) % allImages.length
+                  }`;
+                  const nextSlideId = `slide${
+                    (imageIndex + 1) % allImages.length
+                  }`;
+  
+                  return (
+                    <div
+                      id={slideId}
+                      key={slideId}
+                      className="carousel-item relative w-full  justify-center items-center"
+                    >
+                      <img
+                        src={image}
+                        alt={`${item.item_Name}-${imageIndex}`}
+                        className="w-[32rem]  h-[65vh] object-contain"
+                      />
+                      {allImages.length > 1 && (
+                        <div className="absolute left-5 right-5 opacity-50 hover:opacity-100 top-1/2 flex -translate-y-1/2 transform justify-between">
+                          <a href={`#${prevSlideId}`} className="btn btn-circle">
+                            ❮
+                          </a>
+                          <a href={`#${nextSlideId}`} className="btn btn-circle">
+                            ❯
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  );
+              }))
+              :
+                <div
+                className="carousel-item relative w-full  justify-center items-center flex flex-col"
+              >
+                <img
+                src={require("@/assets/emote/hmmm.png")}
+                  alt={`${item.item_Name}`}
+                  className="w-[32rem]  h-[65vh] object-none "
+                />
+                <p className="font-bold absolute bottom-32 left-36">No image provided.</p>
+              </div>
+              }
+              
             </div>
             {item.str && (
               <div className="bg-primary-color  w-full rounded-md pl-1 z-50">
@@ -92,7 +115,7 @@ const ProductModal = ({ item, onClose }) => {
           <div className="flex flex-col gap-2 justify-between  h-full w-full lg:max-w-[50%] lg:min-w-[50%] pt-6 ">
             <div className="flex flex-col gap-1 ">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md ">
-                {item.product}
+                {item.item_Name}
               </h1>
               <div className="h-1 mb-2 w-full bg-primary-color"></div>
               <div className="flex flex-col justify-between  gap-4 mb-2">
@@ -100,12 +123,12 @@ const ProductModal = ({ item, onClose }) => {
                   <div className="flex items-center gap-2 ">
                     <p className="text-sm font-medium">Shop:</p>
                     <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                      {item.shop}
+                        {item.shop_Name || 'No shop available'}
                     </div>
                   </div>
                   <div className="flex gap-1">
                     <h2 className="text-base font-medium">
-                      {item.sold} Sold /{" "}
+                      {item.item_Orders} Sold /{" "}
                     </h2>
                     <div className="flex gap-1 items-center">
                       <h2 className="text-base font-medium text-primary-color">
@@ -118,39 +141,16 @@ const ProductModal = ({ item, onClose }) => {
               </div>
               <div className="flex flex-row justify-between">
                 <div className="flex flex-col gap-2">
-                  {[
-                    { label: "Variant", items: item.colorVariant },
-                    {
-                      label: "Sizes",
-                      items: item.sizeVariant ? item.sizeVariant : [],
-                    }, // Ensure size is handled as an array
-                  ].map((choice, choiceIndex) => (
-                    <div key={choiceIndex} className="flex items-center gap-2">
-                      <p className="text-lg font-medium">{choice.label}:</p>
-                      <div className="flex gap-1">
-                        {choice.items.map((choiceItem, index) => (
-                          <label
-                            key={index}
-                            className="p-0 form-control btn  text-xs cursor-pointer flex items-center justify-center duration-300 transition-all min-w-10 h-8 bg-slate-50"
-                          >
-                            <input
-                              type="radio"
-                              name={`radio-${choice.label.toLowerCase()}`}
-                              value={choiceItem}
-                              className="hidden peer"
-                            />
-                            <span className="peer-checked:bg-primary-color peer-checked:opacity-100 opacity-50 peer-checked:text-white w-full h-full flex items-center justify-center p-2 rounded-md duration-300 transition-all glass btn">
-                              {choiceItem}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+              <ItemOptions
+               item={item}
+               selectedColor={selectedColor}
+               selectedSize={selectedSize}
+               onSelectedValuesChange={handleSelectedValues}
+              />
                 </div>
               </div>
               <p className="mt-2 rounded-md bg-base-300 p-2 max-h-60 overflow-y-auto custom-scrollbar">
-                {item.description || "No description available."}
+                {item.item_Description || "No description available."}
               </p>
             </div>
 
@@ -163,7 +163,7 @@ const ProductModal = ({ item, onClose }) => {
               </button>
               <div className="justify-end flex my-1 mb-3">
                 <div className="flex justify-end items-center gap-0 flex-row">
-                  {item.voucher && (
+                  {item.vouchers && (
                     <span className="text-lg bg-slate-50 border border-primary-color px-2 ">
                       SHOP VOUCHER
                     </span>
@@ -176,7 +176,9 @@ const ProductModal = ({ item, onClose }) => {
                   <div className="flex pl-2">
                     <p className="text-2xl  text-primary-color">₱</p>
                     <h2 className="text-5xl font-bold text-primary-color">
-                      {item.price}
+                    {selectedSize != null ? item.discount > 0
+                      ? ((Number(selectedSize?.price) || 0).toFixed(2) * (1 - item.discount / 100)).toFixed(2)
+                      : (Number(selectedSize?.price) || 0).toFixed(2) : 'N/A'}
                     </h2>
                   </div>
                 </div>

@@ -4,14 +4,25 @@ import RateSymbol from "@/shared/products/rateSymbol";
 import {averageRate} from "./hooks/useRate.ts";
 import RatingSection from "./components/RatingSection.js";
 import BuyConfirm from "./components/buyConfirm.js";
+import ItemOptions from "./components/itemOptions.js";
+import useGetImage from "./hooks/useGetImageUrl.js";
+
 
 
 function Product() {
   const location = useLocation();
   const item = location.state?.item;
- 
-  // Move the hook outside any conditionals
-  const allImages = item?.url ? [item.url, ...(item.images || [])] : [];
+  const imageUrls = useGetImage(item); 
+  const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
+      const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
+      const handleSelectedValues = (color, size) => {
+        setSelectedColor(color);
+        setSelectedSize(size);
+      };
+
+  const allImages = [
+    ...imageUrls
+  ];
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedAction, setSelectedAction] = useState(null);
 
@@ -87,7 +98,16 @@ function Product() {
                   )}
                 </div>
               ) : (
-                <p className="text-center w-full py-4">No images available.</p>
+                <div className="flex flex-col items-center justify-center">
+                 
+                    
+       
+                <img
+                    src={require("@/assets/emote/hmmm.png")}
+                    alt="No Images Available"
+                    className="w-[40rem] h-[35%] object-none"
+                  />                <p className="text-center font-bold pr-8">No images available.</p>
+                </div>
               )}
             </div>
             {item.str && (
@@ -103,7 +123,7 @@ function Product() {
           <div className="flex flex-col  justify-between z-10 lg:items-end min-h-[74vh]  h-full w-full  pt-6">
             <div className="flex flex-col w-full gap-1">
               <h1 className="text-5xl font-bold text-secondary-color  p-1 pb-2 rounded-t-md">
-                {item.product}
+                {item.item_Name}
               </h1>
               <div className="h-1 mb-2 w-full bg-primary-color"></div>
               <div className="flex flex-col justify-between gap-4">
@@ -111,12 +131,12 @@ function Product() {
                   <div className="flex items-center gap-2 ">
                     <p className="text-sm font-medium">Shop:</p>
                     <div className="hover:underline  py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all ">
-                      {item.shop}
+                    {item.shop_Name || 'No shop available'}
                     </div>
                   </div>
                   <div className="flex gap-1">
                     <h2 className="text-base font-medium">
-                      {item.sold} Sold /{" "}
+                      {item.item_Orders} Sold /{" "}
                     </h2>
                     <div className="flex gap-1 items-center">
                       <h2 className="text-base font-medium text-primary-color">
@@ -128,46 +148,20 @@ function Product() {
                 </div>
                 <div className="flex flex-row justify-between">
                   <div className="flex flex-col gap-2">
-                    {[
-                      { label: "Variant", items: item.colorVariant },
-                      {
-                        label: "Sizes",
-                        items: item.sizeVariant ? item.sizeVariant : [],
-                      }, // Ensure size is handled as an array
-                    ].map((choice, choiceIndex) => (
-                      <div
-                        key={choiceIndex}
-                        className="flex items-center gap-2"
-                      >
-                        <p className="text-lg font-medium">{choice.label}:</p>
-                        <div className="flex gap-1">
-                          {choice.items.map((choiceItem, index) => (
-                            <label
-                              key={index}
-                              className="p-0 form-control btn  text-xs cursor-pointer flex items-center justify-center duration-300 transition-all min-w-10 h-8 bg-slate-50"
-                            >
-                              <input
-                                type="radio"
-                                name={`radio-${choice.label.toLowerCase()}`}
-                                value={choiceItem}
-                                className="hidden peer"
-                              />
-                              <span className="peer-checked:bg-primary-color peer-checked:opacity-100 opacity-50 peer-checked:text-white w-full h-full flex items-center justify-center p-2 rounded-md duration-300 transition-all glass btn">
-                                {choiceItem}
-                              </span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                  <ItemOptions
+                  item={item}
+                  selectedColor={selectedColor}
+                  selectedSize={selectedSize}
+                  onSelectedValuesChange={handleSelectedValues}
+                />
                   </div>
                 </div>
                 <div className="flex justify-end pl-2 mt-2 md:mt-8">
                   <p className="text-2xl text-primary-color">₱</p>
                   <h2 className="text-6xl font-bold text-primary-color">
-                    {item.discount > 0
-                      ? (item.price * (1 - item.discount / 100)).toFixed(2)
-                      : item.price.toFixed(2)}
+                  {selectedSize != null ? item.discount > 0
+                      ? ((Number(selectedSize?.price) || 0).toFixed(2) * (1 - item.discount / 100)).toFixed(2)
+                      : (Number(selectedSize?.price) || 0).toFixed(2) : 'N/A'}
                   </h2>
                 </div>
                 <div className="justify-end flex flex-col items-end gap-2 ">
@@ -178,12 +172,12 @@ function Product() {
                           {item.discount}%
                         </span>
                         <span className="text-3xl text-secondary-color px-1 font-bold opacity-50 line-through ">
-                          ₱{item.price.toFixed(2) || "N/A"}
+                          ₱{(Number(selectedSize?.price) || 0).toFixed(2) || "N/A"}
                         </span>
                       </div>
                     )}
                   </div>
-                  {item.voucher && (
+                  {item.vouchers && (
                     <span className="text-lg font-bold border border-primary-color px-2 ">
                       SHOP VOUCHER
                     </span>
@@ -219,7 +213,7 @@ function Product() {
           {item.description || "No description available."}
         </p>
       </div>
-      <RatingSection item={item} />
+       <RatingSection item={item} />  
     </div>
   );
 }

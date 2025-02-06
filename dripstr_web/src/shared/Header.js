@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
-import { ReactComponent as Logo } from '../assets/images/BlackLongLogo.svg'; 
+import React, { useState, useRef } from 'react';
+import { ReactComponent as Logo } from '../assets/images/BlackLongLogo.svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, useNavigate } from 'react-router-dom';
 import { faSearch, faShoppingCart, faMessage, faUser } from '@fortawesome/free-solid-svg-icons';
-import ChatMessages from '../modules/Messaging/View/Messaging'; 
+import ChatMessages from '../modules/Messaging/View/Messaging';
+import Cart from '../modules/Products/Cart';
 
 const Header = () => {
   const [openChat, setOpenChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigate();
+  const drawerCheckboxRef = useRef(null);
 
   const toggleChat = () => {
     setOpenChat(!openChat);
@@ -19,6 +21,13 @@ const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  // Function to close the drawer
+  const closeDrawer = () => {
+    if (drawerCheckboxRef.current) {
+      drawerCheckboxRef.current.checked = false;
     }
   };
 
@@ -67,15 +76,32 @@ const Header = () => {
       </form>
 
       {/* Icons */}
-      <div className="flex space-x-4">
-        <Link to="/cart">
-          <button>
-            <FontAwesomeIcon
-              icon={faShoppingCart}
-              className="text-black hover:text-[--primary-color]"
-            />
-          </button>
-        </Link>
+      <div className="space-x-4 flex">
+        <div className="drawer drawer-end">
+          <input
+            id="my-drawer-4"
+            type="checkbox"
+            className="drawer-toggle"
+            ref={drawerCheckboxRef} // Attach the ref
+          />
+          <div className="drawer-content">
+            <label htmlFor="my-drawer-4" className="drawer-button">
+              <FontAwesomeIcon
+                icon={faShoppingCart}
+                className="text-black hover:text-[--primary-color]"
+              />
+            </label>
+          </div>
+          <div className="drawer-side z-50">
+            <label
+              htmlFor="my-drawer-4"
+              aria-label="close sidebar"
+              className="drawer-overlay"
+            ></label>
+            {/* Pass the closeDrawer function to Cart */}
+            <Cart closeDrawer={closeDrawer} />
+          </div>
+        </div>
         <button onClick={toggleChat}>
           <FontAwesomeIcon
             icon={faMessage}
@@ -91,7 +117,7 @@ const Header = () => {
           </button>
         </Link>
       </div>
-      {openChat && <ChatMessages/>}
+      {openChat && <ChatMessages />}
     </div>
   );
 };

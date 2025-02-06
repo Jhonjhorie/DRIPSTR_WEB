@@ -3,14 +3,15 @@ import { useLocation } from "react-router-dom";
 import CategoriesRibbon from "./components/CategoriesRibbon";
 import MallRibbon from "./components/MallRibbon";
 import ProductsView from "./components/ProductsView";
+import useProducts from "./hooks/useProducts";
 
 // Data
 import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from "@/constants/categories.ts";
-import { products } from "@/constants/sampleData";
 import { searchProducts } from "@/utils/searchProducts";
 
 function Search() {
+  const { products, loading, error } = useProducts();
   const location = useLocation();
   const [query, setQuery] = useState("");
   const [filMall, setFilMall] = useState(0); 
@@ -21,19 +22,22 @@ function Search() {
     const params = new URLSearchParams(location.search);
     const searchQuery = params.get("q") || ""; 
     setQuery(searchQuery);
+  }, [location.search]);
 
-    let result = searchProducts(searchQuery, products);
+  useEffect(() => {
+    if (!products || products.length === 0) return; 
+
+    let result = searchProducts(query, products);
     result = result.filter((item) =>
       (filMall === 0 || item.mallId === MallItems[filMall]?.id) &&
-      (filCat === categories[0].label || item.category === filCat)
+      (filCat === categories[0].label || item.item_Category === filCat)
     );
 
     setFilteredProducts(result);
-  }, [location.search, filMall, filCat]);
+  }, [query, products, filMall, filCat]);  // Dependencies: query, products, filter criteria
 
   return (
     <div className="w-full relative inset-0 bg-slate-300 flex flex-col pt-2">
-     
       <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-between px-1 lg:px-2 mt-1">
         <CategoriesRibbon
           active={filCat}
@@ -46,6 +50,7 @@ function Search() {
           onItemClick={(index) => setFilMall(index)}
         />
       </div>
+
       <div className="flex flex-col-reverse mt-2 md:mt-12 bg-slate-50 mx-2 rounded-md gap-4 md:flex-row items-center justify-center p-4 ">
         <h1 className="text-xl font-bold">
           Search Results for "{query}"
@@ -57,6 +62,8 @@ function Search() {
           products={filteredProducts}
           categories={filCat}
           filter={filMall}
+          loading={loading}
+          error={error}
         />
       </div>
     </div>

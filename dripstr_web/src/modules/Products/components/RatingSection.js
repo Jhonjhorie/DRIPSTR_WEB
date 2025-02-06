@@ -1,31 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import RateSymbol from "@/shared/products/rateSymbol";
 import {averageRate} from "../hooks/useRate.ts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
+import useUserProfile from "@/shared/mulletCheck.js";
+import LoginFirst from "@/shared/mulletFirst";
 
 export default function RatingSection ({item}) {
+const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public/";
+ const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [likesData, setLikesData] = useState(
-    item.reviews.reduce((acc, review) => {
+    item?.reviews?.reduce((acc, review) => {
       acc[review.id] = { likes: review.likes, isLiked: false };
       return acc;
     }, {})
   );
 
   const itemR = (min, max) => {
-    return item.reviews.filter((review) => min < review.rate && review.rate <= max).length;
+    return item?.reviews?.filter((review) => min < review.rate && review.rate <= max).length;
   };
   const [selectedItem, setSelectedItem] = useState(null);
   const toggleLike = (reviewId) => {
-    setLikesData((prev) => {
-      const updatedData = { ...prev };
-      const isLiked = updatedData[reviewId].isLiked;
-      updatedData[reviewId] = {
-        isLiked: !isLiked,
-        likes: isLiked ? updatedData[reviewId].likes - 1 : updatedData[reviewId].likes + 1,
-      };
-      return updatedData;
-    });
+    if(isLoggedIn){
+      setLikesData((prev) => {
+        const updatedData = { ...prev };
+        const isLiked = updatedData[reviewId].isLiked;
+        updatedData[reviewId] = {
+          isLiked: !isLiked,
+          likes: isLiked ? updatedData[reviewId].likes - 1 : updatedData[reviewId].likes + 1,
+        };
+        return updatedData;
+      });
+    }else{
+      setTimeout(() => {
+        document.getElementById('login_Modal').showModal();
+      }, 50);
+    }
+   
+  };
+  
+  const closeModalL = () => {
+    document.getElementById('login_Modal').close();
   };
   const [currentSlide, setCurrentSlide] = useState(0);
   const [reviewImages, setReviewImages] = useState([]);
@@ -55,7 +70,14 @@ export default function RatingSection ({item}) {
   };
       
     return (
+       
       <div className="flex flex-col mt-4 w-full z-10 px-4">
+  {!isLoggedIn && <dialog id="login_Modal" className=" modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
+                   <LoginFirst />
+                   <form method="dialog" class="modal-backdrop">
+                    <button onClick={closeModalL}></button>
+                  </form>
+      </dialog>}
         <div class="my-0 divider"></div>
         <p className="text-2xl font-bold">Rating & Reviews</p>
 
@@ -64,14 +86,14 @@ export default function RatingSection ({item}) {
           <div className="flex items-center gap-12">
             <div className="flex items-end gap-1">
               <h1 className="text-5xl font-bold">
-                {averageRate(item.reviews) || "0.0"}
+                {averageRate(item?.reviews) || "0.0"}
               </h1>
               <p className="text-3xl font-semibold opacity-75 text-secondary-color">
                 /5
               </p>
             </div>
             <p className="text-xl  text-secondary-color">
-              || {item.reviews.length} Reviews
+              || {item?.reviews?.length || 0} Reviews
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-5 items-start">
@@ -89,7 +111,7 @@ export default function RatingSection ({item}) {
                   <progress
                     class="progress ml-4 h-4 w-56"
                     value={itemR(4.7, 5.0)}
-                    max={item.reviews.length}
+                    max={item?.reviews?.length || 0}
                   ></progress>
                   <p>{itemR(4.7, 5.0)}</p>
                 </div>
@@ -104,7 +126,7 @@ export default function RatingSection ({item}) {
                   <progress
                     class="progress ml-4 h-4 w-56"
                     value={itemR(3.9, 4.7)}
-                    max={item.reviews.length}
+                    max={item?.reviews?.length  || 0}
                   ></progress>
                   <p>{itemR(3.9, 4.7)}</p>
                 </div>
@@ -119,7 +141,7 @@ export default function RatingSection ({item}) {
                   <progress
                     class="progress ml-4 h-4 w-56"
                     value={itemR(2.9, 3.9)}
-                    max={item.reviews.length}
+                    max={item?.reviews?.length || 0}
                   ></progress>
                   <p>{itemR(2.9, 3.9)}</p>
                 </div>
@@ -134,7 +156,7 @@ export default function RatingSection ({item}) {
                   <progress
                     class="progress ml-4 h-4 w-56"
                     value={itemR(1.9, 2.9)}
-                    max={item.reviews.length}
+                    max={item.reviews?.length  || 0}
                   ></progress>
                   <p>{itemR(1.9, 2.9)}</p>
                 </div>
@@ -149,7 +171,7 @@ export default function RatingSection ({item}) {
                   <progress
                     class="progress ml-4 h-4 w-56"
                     value={itemR(0.9, 1.9)}
-                    max={item.reviews.length}
+                    max={item.reviews?.length || 0}
                   ></progress>
                   <p>{itemR(0.9, 1.9)}</p>
                 </div>
@@ -161,7 +183,7 @@ export default function RatingSection ({item}) {
           <div className="flex mt-4 flex-col gap-2">
             <p className="text-2xl font-bold">Reviews</p>
             <div className="flex flex-col items-star gap-2">
-              {item.reviews.map((review) => {
+              {item?.reviews?.map((review) => {
                 const { likes, isLiked } = likesData[review.id] || {
                   likes: review.likes,
                   isLiked: false,
@@ -201,9 +223,10 @@ export default function RatingSection ({item}) {
                             key={index}
                             className="border-base-content card bg-base-100 w-36 border text-center"
                           >
+                       
                             <div className="card-body">
                               <img
-                                src={image}
+                                src={`${supabaseBaseUrl}${image}`}
                                 alt={`Review image ${index + 1}`}
                                 onClick={() => openModal(review)}
                                 className="w-full h-24 object-fill rounded-md cursor-pointer"
@@ -214,31 +237,14 @@ export default function RatingSection ({item}) {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-end space-x-2">
-                      <div className="flex items-center space-x-1">
-                        <button
-                          onClick={() => toggleLike(review.id)}
-                          className="text-blue-500"
-                        >
-                          <FontAwesomeIcon
-                            icon={faThumbsUp}
-                            className={`${
-                              isLiked
-                                ? "text-primary-color"
-                                : "text-secondary-color"
-                            } cursor-pointer duration-300 transition-all h-5`}
-                          />
-                        </button>
-                        <span>{likes}</span>
-                      </div>
-                    </div>
+                 
                   </div>
                 );
               })}
             </div>
           </div>
         </div>
-         {/* Modal for Image Carousel */}
+   
       {selectedItem && (
         <dialog id="my_modal_R" className="modal">
           <div className="modal-box">
@@ -246,7 +252,7 @@ export default function RatingSection ({item}) {
               {selectedItem.images.length > 0 ? (
                 <div className="carousel-item relative w-full justify-center items-center">
                   <img
-                    src={selectedItem.images[currentSlide]}
+                    src={`${supabaseBaseUrl}${selectedItem.images[currentSlide]}`}
                     alt={`Review Image ${currentSlide}`}
                     className="w-[40rem] h-[90%] object-contain"
                   />
