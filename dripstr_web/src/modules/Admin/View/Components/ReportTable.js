@@ -1,7 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const ReportTable = () => {
-  // Placeholder data for 12 rows
+  const navigate = useNavigate();
+
   const tableData = Array.from({ length: 7 }, (_, i) => ({
     reportNo: `RPT-${i + 1}`,
     reportedUser: `User_${i + 1}`,
@@ -10,6 +12,10 @@ const ReportTable = () => {
     category: "Spam",
     description: `This is a sample description for report ${i + 1}.`,
   }));
+
+  const handleRowClick = (reportNo) => {
+    navigate(`/admin/reports/${reportNo}`);
+  };
 
   return (
     <div className="h-full overflow-x-auto">
@@ -25,10 +31,11 @@ const ReportTable = () => {
           </tr>
         </thead>
         <tbody>
-          {tableData.map((row, index) => (
+          {tableData.map((row) => (
             <tr
-              key={index}
-              className="h-20 border-b-2 border-violet-600 hover:scale-105 duration-500"
+              key={row.reportNo}
+              onClick={() => handleRowClick(row.reportNo)}
+              className="h-20 border-b-2 border-violet-600 hover:scale-105 duration-500 cursor-pointer"
             >
               <td className="px-4 py-2 text-sm text-white text-center">
                 {row.reportNo}
@@ -43,7 +50,7 @@ const ReportTable = () => {
                 {row.createdAt}
               </td>
               <td className="px-4 py-2 text-sm text-white text-center">
-                <div className="bg-red-950 border-red-600 border-2 rounded-3xl ">
+                <div className="bg-red-950 border-red-600 border-2 rounded-3xl">
                   {row.category}
                 </div>
               </td>

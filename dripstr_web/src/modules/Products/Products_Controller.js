@@ -4,7 +4,6 @@ import Product from './Product';
 import Search from './Search';
 import PlaceOrder from './PlaceOrder';
 
-
 const HomeController = () => {
   return (
     <Routes>
