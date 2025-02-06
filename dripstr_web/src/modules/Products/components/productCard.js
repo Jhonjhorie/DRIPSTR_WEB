@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg';
-import { averageRate } from '../hooks/useRate.ts';
-import RateSymbol from '@/shared/products/rateSymbol';
-import useGetImage from '../hooks/useGetImageUrl.js';
+import React, { useState, useEffect } from "react";
+import { ReactComponent as Logo } from "@/assets/images/BlackLogo.svg";
+import { averageRate } from "../hooks/useRate.ts";
+import RateSymbol from "@/shared/products/rateSymbol";
+import useGetImage from "../hooks/useGetImageUrl.js";
 
 const ProductCard = ({ item, onClick }) => {
-  
   const [currentImage, setCurrentImage] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
-  const imageUrls = useGetImage(item); 
+  const imageUrls = useGetImage(item);
 
   useEffect(() => {
     let interval;
-    
+
     if (isHovered && imageUrls.length > 1) {
       interval = setInterval(() => {
-    
         setImageIndex((prevIndex) => {
           const nextIndex = (prevIndex + 1) % imageUrls.length;
           setCurrentImage(imageUrls[nextIndex]);
@@ -30,8 +28,10 @@ const ProductCard = ({ item, onClick }) => {
     return () => {
       clearInterval(interval);
     };
-  }, [isHovered, imageUrls]); 
+  }, [isHovered, imageUrls]);
 
+  const price = Number(item?.item_Variant?.[0]?.sizes?.[0]?.price) || 0;
+  const discountedPrice = (price * (1 - (item?.discount || 0) / 100)).toFixed(2);
   
 
   return (
@@ -66,12 +66,14 @@ const ProductCard = ({ item, onClick }) => {
         />
       ) : (
         <div>
-        <img
-        src={require("@/assets/emote/hmmm.png")}
-          alt="No Images Available"
-          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
-        />
-                        <p className="font-semibold text-sm absolute bottom-20 left-6">No image provided.</p>
+          <img
+            src={require("@/assets/emote/hmmm.png")}
+            alt="No Images Available"
+            className="object-none mb-2 mt-1 w-[180px] h-[200px]"
+          />
+          <p className="font-semibold text-sm absolute bottom-20 left-6">
+            No image provided.
+          </p>
         </div>
       )}
 
@@ -82,13 +84,13 @@ const ProductCard = ({ item, onClick }) => {
           </p>
         )}
         <div className="flex flex-row justify-between items-center">
-           {item?.item_Variant[0]?.sizes[0]?.price && (
+          {item?.item_Variant[0]?.sizes[0]?.price && (
             <p className="text-primary-color text-md font-medium">
-             ₱{item.discount > 0
-                      ? (item.item_Variant[0].sizes[0].price * (1 - item.discount / 100)).toFixed(2)
-                      : item.item_Variant[0].sizes[0].price.toFixed(2)}
+              
+              ₱{discountedPrice}
             </p>
-          )} 
+          )}
+
           <div className="flex flex-row items-center gap-0.5">
             <p className="text-primary-color text-md">
               {averageRate(item.reviews)}
@@ -98,9 +100,7 @@ const ProductCard = ({ item, onClick }) => {
               | {item.item_Orders} sold
             </span>
           </div>
-        
         </div>
-    
       </div>
     </div>
   );

@@ -29,15 +29,16 @@ function Login() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [user, setUser] = useState(null);
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
-
+  const [TermsandCondition, setTermsandCondition] = React.useState(true); // Alert Success
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
-  const [pdfFile, setpdfFile] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isStat, setStatus] = useState(null);
   const [hasCreatedAccount, setHasCreatedAccount] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingFetch, setLoadingFetch] = useState(false);
+
   const fetchUserProfile = async () => {
     setLoading(false);
     try {
@@ -109,95 +110,103 @@ function Login() {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setIsSubmitting(true);
-    //handles alerts on missing inputs
+
+    const maxImageSize = 2 * 1024 * 1024;
+    const maxPdfSize = 5 * 1024 * 1024;
+
     if (!shopName.trim()) {
       console.error("Shop name is required");
       setIsSubmitting(false);
       setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert(false), 3000);
+      return;
     }
+
     if (!phoneNumber.trim()) {
       console.error("Phone Number is required");
       setIsSubmitting(false);
       setShowAlert2(true);
-      setTimeout(() => {
-        setShowAlert2(false);
-      }, 3000);
+      setTimeout(() => setShowAlert2(false), 3000);
       return;
     }
+
     if (phoneNumber.length !== 11) {
       console.error("Phone Number must be 11 digits");
       setIsSubmitting(false);
       setShowAlert4(true);
-      setTimeout(() => {
-        setShowAlert4(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert4(false), 3000);
+      return;
     }
+
     if (!shopDescription.trim()) {
       console.error("Shop Description is required");
       setIsSubmitting(false);
       setShowAlert5(true);
-      setTimeout(() => {
-        setShowAlert5(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert5(false), 3000);
+      return;
     }
+
     if (!shopAddress.trim()) {
       console.error("Shop Address is required");
       setIsSubmitting(false);
       setShowAlert3(true);
-      setTimeout(() => {
-        setShowAlert3(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert3(false), 3000);
+      return;
     }
+
     if (!selectedImage) {
       console.error("Shop Image is required");
       setIsSubmitting(false);
       setShowAlert6(true);
-      setTimeout(() => {
-        setShowAlert6(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert6(false), 3000);
+      return;
     }
+
     if (!selectedFile) {
       console.error("Shop File is required");
       setIsSubmitting(false);
       setShowAlert7(true);
-      setTimeout(() => {
-        setShowAlert7(false);
-      }, 3000);
+      setTimeout(() => setShowAlert7(false), 3000);
       return;
     }
 
-    //define current user credit
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (!user || userError) {
-      console.error("No user found");
+    if (imageFile.size > maxImageSize) {
+      console.error("Image size exceeds the 2MB limit.");
+      setIsSubmitting(false);
+      setShowAlert6(true);
+      setTimeout(() => setShowAlert6(false), 3000);
       return;
     }
 
-    //set null if there's no Image & File Inputted
-    let uploadedImageUrl = null;
-    let uploadedPdfUrl = null;
+    if (pdfFile.size > maxPdfSize) {
+      console.error("PDF file size exceeds the 5MB limit.");
+      setIsSubmitting(false);
+      setShowAlert7(true);
+      setTimeout(() => setShowAlert7(false), 3000);
+      return;
+    }
 
-    //Set Image from shop to DB
-    if (imageFile) {
-      try {
-        // Generate a unique name using timestamp + random ID
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const image = new Image();
+      image.onload = async () => {
+        const width = image.width;
+        const height = image.height;
+
+        if (width !== height) {
+          console.error("Image must be square.");
+          setIsSubmitting(false);
+          setShowAlert6(true);
+          setTimeout(() => setShowAlert6(false), 3000);
+          return;
+        }
+
+        // Upload image to Supabase if everything is valid
         const uniqueImageName = `shop_profile/${Date.now()}-${Math.random()
           .toString(36)
           .substring(2, 10)}-${imageFile.name}`;
-
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
           .upload(uniqueImageName, imageFile);
@@ -207,114 +216,117 @@ function Login() {
           return;
         }
 
+        let uploadedImageUrl = null;
         if (data?.path) {
           const { data: publicUrlData, error: urlError } = supabase.storage
             .from("shop_profile")
             .getPublicUrl(data.path);
-
           if (urlError) {
             console.error("Error fetching image URL:", urlError.message);
             return;
           }
-
-          uploadedImageUrl = publicUrlData.publicUrl; 
+          uploadedImageUrl = publicUrlData.publicUrl;
           console.log("Image uploaded successfully:", uploadedImageUrl);
         }
-      } catch (err) {
-        console.error("Unexpected error while uploading image:", err);
-      }
-    }
 
-    //Set Business Permit from shop to DB
-    if (pdfFile) {
-      try {
-        const uniquePdfName = `pdfs/${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 10)}-${pdfFile.name}`;
+        // Upload PDF file
+        let uploadedPdfUrl = null;
+        if (pdfFile) {
+          const uniquePdfName = `pdfs/${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2, 10)}-${pdfFile.name}`;
+          const { data, error: uploadError } = await supabase.storage
+            .from("shop_profile")
+            .upload(uniquePdfName, pdfFile);
 
-        const { data, error: uploadError } = await supabase.storage
-          .from("shop_profile")
-          .upload(uniquePdfName, pdfFile);
-
-        if (uploadError) {
-          console.error("Error uploading PDF:", uploadError.message);
-          return;
-        }
-
-        if (data?.path) {
-          const { data: publicUrlData, error: urlError } = supabase.storage
-            .from("pdfs")
-            .getPublicUrl(data.path);
-
-          if (urlError) {
-            console.error("Error fetching PDF URL:", urlError.message);
+          if (uploadError) {
+            console.error("Error uploading PDF:", uploadError.message);
             return;
           }
 
-          uploadedPdfUrl = publicUrlData.publicUrl;
-          console.log("PDF uploaded successfully:", uploadedPdfUrl);
+          if (data?.path) {
+            const { data: publicUrlData, error: urlError } = supabase.storage
+              .from("pdfs")
+              .getPublicUrl(data.path);
+            if (urlError) {
+              console.error("Error fetching PDF URL:", urlError.message);
+              return;
+            }
+            uploadedPdfUrl = publicUrlData.publicUrl;
+            console.log("PDF uploaded successfully:", uploadedPdfUrl);
+          }
         }
-      } catch (err) {
-        console.error("Unexpected error while uploading PDF:", err);
-      }
-    }
 
-    const userId = user.id;
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+        if (!user || userError) {
+          console.error("No user found");
+          return;
+        }
 
-    try {
-      const { data: shopData, error: shopError } = await supabase
-        .from("merchantRegistration")
-        .insert([
-          {
-            shop_name: shopName,
-            contact_number: phoneNumber,
-            description: shopDescription,
-            address: shopAddress,
-            id: userId,
-            is_Approved: null,
-            shop_image: uploadedImageUrl || null,
-            shop_BusinessPermit: uploadedPdfUrl || null,
-          },
-        ])
-        .single();
+        const userId = user.id;
+        try {
+          const { data: shopData, error: shopError } = await supabase
+            .from("merchantRegistration")
+            .insert([
+              {
+                shop_name: shopName,
+                contact_number: phoneNumber,
+                description: shopDescription,
+                address: shopAddress,
+                id: userId,
+                is_Approved: null,
+                shop_image: uploadedImageUrl || null,
+                shop_BusinessPermit: uploadedPdfUrl || null,
+              },
+            ])
+            .single();
 
-      if (shopError) {
-        console.error("Error inserting shop data:", shopError.message);
-        setIsSubmitting(false);
-        return;
-      }
+          if (shopError) {
+            console.error("Error inserting shop data:", shopError.message);
+            setIsSubmitting(false);
+            return;
+          }
 
-      console.log("Shop created successfully:", shopData);
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ isMerchant: false })
-        .eq("id", userId);
+          console.log("Shop created successfully:", shopData);
 
-      if (updateError) {
-        console.error("Error updating user profile:", updateError.message);
-        setIsSubmitting(false);
-        return;
-      }
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ isMerchant: false })
+            .eq("id", userId);
 
-      console.log(
-        "User profile updated with merchant_id and ismerchant = true"
-      );
+          if (updateError) {
+            console.error("Error updating user profile:", updateError.message);
+            setIsSubmitting(false);
+            return;
+          }
 
-      // Reset form fields after successful insertion
-      setShopName("");
-      setPhoneNumber("");
-      setShopDescription("");
-      setShopAddress("");
-      setImageFile(null);
-      setpdfFile(null);
-      setShowAlertSuccess(true);
-      setIsSubmitting(false);
-    } catch (err) {
-      console.error("Unexpected error:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
+          console.log(
+            "User profile updated with merchant_id and ismerchant = true"
+          );
+
+          // Reset form fields after successful insertion
+          setShopName("");
+          setPhoneNumber("");
+          setShopDescription("");
+          setShopAddress("");
+          setImageFile(null);
+          setPdfFile(null);
+          setShowAlertSuccess(true);
+          setIsSubmitting(false);
+        } catch (err) {
+          console.error("Unexpected error:", err);
+          setIsSubmitting(false);
+        }
+      };
+
+      image.src = e.target.result;
+    };
+    reader.readAsDataURL(imageFile);
   };
+
   const handleSetisMerchant = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -346,7 +358,7 @@ function Login() {
         "User profile updated with merchant_id and ismerchant = true"
       );
       navigate("/shop/MerchantDashboard");
-      window.location.reload(); 
+      window.location.reload();
     } catch (err) {
       console.error("Unexpected error:", err);
     } finally {
@@ -380,7 +392,7 @@ function Login() {
       const { error: deleteError } = await supabase
         .from("merchantRegistration")
         .delete()
-        .eq("owner_Id", userId);
+        .eq("id", userId);
 
       if (deleteError) {
         console.error("Error deleting shop:", deleteError.message);
@@ -424,12 +436,14 @@ function Login() {
     setshowImage(false);
     setshowFile(false);
   };
-
+  const handleCloseTandC = () => {
+    setTermsandCondition(false);
+  };
   //define image input
   const handleFileChange = (event) => {
-    const file = event.target.files[0]; // Get the selected file
+    const file = event.target.files[0];
     if (file) {
-      setImageFile(file); // Store the file in state
+      setImageFile(file);
       setSelectedImage(URL.createObjectURL(file));
       console.log("Selected file:", file);
     }
@@ -439,7 +453,7 @@ function Login() {
   const handleFileChange2 = (event) => {
     const file = event.target.files[0];
     if (file && file.type === "application/pdf") {
-      setpdfFile(file);
+      setPdfFile(file);
       setFileName(file.name);
       setSelectedFile(file);
     } else {
@@ -516,7 +530,7 @@ function Login() {
                 </h2>
                 <div className="p-5">
                   <img
-                    src={successEmote}
+                    src={hmmEmote}
                     alt="Success Emote"
                     className="object-contain rounded-lg p-1  drop-shadow-customViolet"
                   />
@@ -1044,6 +1058,137 @@ function Login() {
             </h2>
             <div
               onClick={closeConfirmArtistCreation}
+              className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+            >
+              Okay!
+            </div>
+          </div>
+        </div>
+      )}
+      {TermsandCondition && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white w-auto p-5   justify-items-center rounded-md shadow-md relative">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
+
+            <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+              Terms And Condition
+            </h2>
+
+            <div className="bg-slate-200 rounded-md text-slate-800 shadow-inner shadow-slate-600 h-[350px] w-[700px] overflow-y-scroll p-4 space-y-4">
+              <h1 className="text-xl font-bold">Welcome to Dripstr!</h1>
+              <p className="text-sm">
+                These Terms and Conditions govern your use of our website and
+                services. By accessing or using Dripstr, you agree to comply
+                with and be bound by these terms. Please read them carefully.
+              </p>
+
+              <h2 className="text-lg font-semibold">1. General Information</h2>
+              <p className="text-sm">
+                Dripstr is an online marketplace for [briefly describe your
+                products/services]. By using our website, you agree to follow
+                these terms. If you do not agree, please refrain from using our
+                website.
+              </p>
+
+              <h2 className="text-lg font-semibold">2. User Account</h2>
+              <p className="text-sm">
+                To access certain features of Dripstr, you may need to create an
+                account. You are responsible for maintaining the confidentiality
+                of your account and for all activities that occur under your
+                account. You must be at least 18 years old or have parental
+                consent to use our website.
+              </p>
+
+              <h2 className="text-lg font-semibold">3. Products and Pricing</h2>
+              <p className="text-sm">
+                Dripstr strives to provide accurate product information,
+                including descriptions, prices, and availability. However, we
+                cannot guarantee the accuracy of all product details, and prices
+                are subject to change without notice. We reserve the right to
+                modify or discontinue products at any time.
+              </p>
+
+              <h2 className="text-lg font-semibold">4. Payment and Orders</h2>
+              <p className="text-sm">
+                By placing an order on Dripstr, you agree to pay the total price
+                of your order, including shipping and handling fees. Payment
+                must be made at the time of purchase via our accepted payment
+                methods. We reserve the right to cancel any order at our
+                discretion, including due to issues with payment processing.
+              </p>
+
+              <h2 className="text-lg font-semibold">
+                5. Shipping and Delivery
+              </h2>
+              <p className="text-sm">
+                Shipping fees and delivery times are calculated based on your
+                location and the chosen shipping method. Dripstr is not
+                responsible for delays caused by third-party carriers. Once your
+                order is shipped, you will receive a tracking number.
+              </p>
+
+              <h2 className="text-lg font-semibold">6. Returns and Refunds</h2>
+              <p className="text-sm">
+                We accept returns in accordance with our Return Policy. To be
+                eligible for a return, items must be in their original
+                condition, unused, and with all tags intact. Please refer to our
+                Return Policy for detailed instructions and timeframes.
+              </p>
+
+              <h2 className="text-lg font-semibold">7. User Conduct</h2>
+              <p className="text-sm">
+                You agree not to engage in any unlawful, harmful, or disruptive
+                behavior while using Dripstr. This includes, but is not limited
+                to, posting offensive content, engaging in fraudulent
+                activities, or violating the intellectual property rights of
+                others.
+              </p>
+
+              <h2 className="text-lg font-semibold">
+                8. Intellectual Property
+              </h2>
+              <p className="text-sm">
+                All content on Dripstr, including logos, images, and product
+                descriptions, are the property of Dripstr or its licensors. You
+                may not use or reproduce any of our intellectual property
+                without permission.
+              </p>
+
+              <h2 className="text-lg font-semibold">9. Privacy Policy</h2>
+              <p className="text-sm">
+                We respect your privacy and are committed to protecting your
+                personal data. Please refer to our Privacy Policy for details on
+                how we collect, use, and protect your information.
+              </p>
+
+              <h2 className="text-lg font-semibold">
+                10. Limitation of Liability
+              </h2>
+              <p className="text-sm">
+                Dripstr is not liable for any indirect, incidental, or
+                consequential damages arising from the use of our website or
+                products. Our liability is limited to the amount paid for the
+                products in question.
+              </p>
+
+              <h2 className="text-lg font-semibold">11. Changes to Terms</h2>
+              <p className="text-sm">
+                We may update or revise these Terms and Conditions at any time.
+                Any changes will be posted on this page, and the effective date
+                will be updated accordingly.
+              </p>
+
+              <h2 className="text-lg font-semibold">12. Contact Us</h2>
+              <p className="text-sm">
+                If you have any questions or concerns about these Terms and
+                Conditions, please contact us at [insert email/contact info].
+              </p>
+            </div>
+
+            <div
+              onClick={handleCloseTandC}
               className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
             >
               Okay!

@@ -16,6 +16,7 @@ function Product() {
   const imageUrls = useGetImage(item); 
   const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
       const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
+      
       const handleSelectedValues = (color, size) => {
         setSelectedColor(color);
         setSelectedSize(size);
