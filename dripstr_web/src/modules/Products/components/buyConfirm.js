@@ -7,12 +7,13 @@ import useUserProfile from "@/shared/mulletCheck.js";
 import LoginFirst from "@/shared/mulletFirst";
 import addToCart from "../hooks/useAddtoCart.js";
 import useCarts from "../hooks/useCart.js";
-
+import AddtoCartAlert from "./alertDialog2.js";
 
  
 
 const BuyConfirm = ({ action, item, onClose }) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
+  const [showAlert, setShowAlert] = useState(false);
   const { fetchDataCart } = useCarts();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
@@ -55,14 +56,25 @@ const BuyConfirm = ({ action, item, onClose }) => {
   };
 
   const onConfirm = () => {
+    const solo = true;
     const formOrder = {
-      item: item,               
-      quantity: quantity,       
-      selectedColor: selectedColor, 
-      selectedSize: selectedSize    
+      acc_id: profile,       
+      prod: item,        
+      qty: quantity,       
+      variant: selectedColor, 
+      size: selectedSize,
+      to_order: true,    
     };
+
+    const selectedItems = [formOrder];
   
-    navigate(`/placeOrder/${item.item_Name}`, { state: { formOrder } });
+    if (selectedItems.length === 0) {
+      alert("No items selected for order. Please select at least one item.");
+      return;
+    }
+    
+    navigate(`/placeOrder`, { state: { selectedItems, solo} });
+   
   };
 
   const handleAddToCart = async () => {
@@ -75,15 +87,39 @@ const BuyConfirm = ({ action, item, onClose }) => {
     } else {
       console.error("Failed to add item to cart:", response.error);
     }
-    onClose();
-    document.getElementById('my_modal_4').close();
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      onClose();
+      document.getElementById('my_modal_4').close();
+    }, 3000);
+   
     fetchDataCart();
+    
   };
+  if (loadingP) {
+    return (
+      <div className="w-full relative pb-16 items-center justify-center bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 h-[100%] py-4">
+         <img
+        src={require("@/assets/emote/hmmm.png")}
+          alt="No Images Available"
+          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
+        />
+        <h1 className="top-20 bg-primary-color p-4 rounded-md drop-shadow-lg">
+          Loading
+        </h1>
+        
+      </div>
+    );
+  }
 
 
   if(isLoggedIn){
   return (
     <div className="w-[40rem] relative right-16 sm:-right-40 ">
+       {showAlert && <div className=" w-[95%] absolute pb-16 items-center justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
+   
+   <AddtoCartAlert />    </div>}
       <div className="absolute right-[75%] top-[55%] sm:right-[100%] sm:-top-4 w-[30vw] h-[30vw] z-50 bg-slate-50 rounded-l-lg">
         <img
           src={selectedColor.imagePath != null || "" ? imagePreview : require("@/assets/emote/success.png")}

@@ -1,19 +1,22 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useUserProfile from "@/shared/mulletCheck.js";
 import LoginFirst from "../../shared/mulletFirst.js";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from '@/constants/supabase';
+import SuccessAlert from "./components/alertDialog.js";
 
 function PlaceOrder() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
+  const [showAlert, setShowAlert] = useState(false);
   const location = useLocation();
-  const selectedItems = location.state?.selectedItems; // Array of selected items
-
+    const navigate = useNavigate();
+  const selectedItems = location.state?.selectedItems; 
+  const solo = location.state?.solo; 
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [shippingMethod, setShippingMethod] = useState("Standard");
-  const [shippingFee, setShippingFee] = useState(50); // Default shipping fee
+  const [shippingFee, setShippingFee] = useState(50); 
 
   if (!selectedItems || selectedItems.length === 0) {
     return (
@@ -21,6 +24,22 @@ function PlaceOrder() {
         <p className="text-lg font-semibold">
           No items selected for order. Please return to the cart page.
         </p>
+      </div>
+    );
+  }
+
+  if (loadingP) {
+    return (
+      <div className="w-full relative pb-16 items-center justify-center bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 h-[100%] py-4">
+         <img
+        src={require("@/assets/emote/hmmm.png")}
+          alt="No Images Available"
+          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
+        />
+        <h1 className="top-20 bg-primary-color p-4 rounded-md drop-shadow-lg">
+          Loading
+        </h1>
+        
       </div>
     );
   }
@@ -75,8 +94,12 @@ function PlaceOrder() {
         alert("Failed to place order. Please try again.");
       } else {
         console.log("Orders placed successfully:", data);
-        alert("Orders placed successfully!");
-        // Optionally, navigate to a confirmation page
+        setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      navigate(`/`); // Redirect after 5 seconds
+    }, 3000);
+        
       }
     } catch (error) {
       console.error("Error placing order:", error);
@@ -86,6 +109,10 @@ function PlaceOrder() {
 
   return (
     <div className="w-full relative pb-16 items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 h-[100%] py-4">
+      
+      {showAlert && <div className=" w-[95%] absolute pb-16 items-center justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
+   
+      <SuccessAlert />    </div>}
       <h1 className="font-bold text-xl">Check Out</h1>
       <div className="flex flex-col gap-2 bg-slate-50 p-2 w-full border-t-primary-color border-t-2 rounded-md">
         <h1 className="font-semibold text-primary-color text-sm">
@@ -112,14 +139,15 @@ function PlaceOrder() {
             const variant = item.variant;
             const size = item.size;
             const qty = item.qty;
+            const itemI = solo ? item.prod : item.prod;
 
             return (
               <div
                 key={item.id}
-                className="flex flex-row bg-primary-color border-b-8 border-white gap-2 py-3 px-2 rounded-md text-white drop-shadow-lg w-full justify-between items-center"
+                className="flex flex-row bg-white border-b-8 border-primary-color gap-2 py-3 pl-2 pr-4 rounded-md text-secondary-color drop-shadow-lg w-full justify-between items-center"
               >
                 <div className="flex gap-2">
-                  <div className="w-20 h-20 z-50 bg-slate-50 rounded-l-lg">
+                  <div className="w-20 h-20 z-50 bg-slate-200 rounded-l-lg">
                     <img
                       src={
                         variant.imagePath != null || ""
@@ -136,10 +164,10 @@ function PlaceOrder() {
                   </div>
                   <div>
                     <h1 className="text-3xl font-semibold">
-                      {item.prod.item_Name}
+                      {itemI.item_Name}
                     </h1>
                     <h1 className="text-md mt-1">
-                      Shop: {item.prod.shop_Name}
+                      Shop: {itemI.shop_Name}
                     </h1>
                   </div>
                 </div>
@@ -164,16 +192,29 @@ function PlaceOrder() {
               </div>
             );
           })}
-          <div className="flex justify-end p-4">
-            <h1 className="text-2xl font-bold">
-              Grand Total: ₱{grandTotal.toFixed(2)}
+          <div className="flex justify-end p-4 gap-4">
+            <div>
+          <h1 className="text-lg font-semibold">Total Price</h1>
+            <h1 className="text-xl font-bold">
+              ₱{totalPrice.toFixed(2)}
             </h1>
+            </div>  <div>
+            <h1 className="text-lg font-semibold">Shipping Fee</h1>
+            <h1 className="text-xl font-bold">
+               ₱{shippingFee}
+            </h1>
+              </div>  <div>
+            <h1 className="text-lg font-semibold">Grand Total:</h1>
+            <h1 className="text-5xl font-bold">
+               ₱{grandTotal.toFixed(2)}
+            </h1>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Payment Method */}
-      <div className="flex flex-col gap-2 mb-4 w-full">
+     <div className="flex flex-row w-full justify-between items-start">
+      <div className="flex flex-col gap-2 mb-4 ">
         <h1 className="font-bold text-xl">Payment Method:</h1>
         <div className="flex gap-4">
           <label className="flex items-center gap-2">
@@ -202,7 +243,7 @@ function PlaceOrder() {
       </div>
 
       {/* Shipping Details */}
-      <div className="flex flex-col gap-2 w-full">
+      <div className="flex flex-col gap-2 ">
         <h1 className="font-bold text-xl">Shipping Details:</h1>
         <div className="flex flex-row gap-5">
           <label className="form-control w-full max-w-xs">
@@ -232,15 +273,15 @@ function PlaceOrder() {
           </label>
         </div>
       </div>
-
-      {/* Place Order Button */}
+    
       <div className="flex justify-end p-4">
         <button
-          className="btn btn-primary"
+          className="btn glass py-4 text-xl bg-primary-color h-20 w-auto px-10"
           onClick={handlePlaceOrder}
         >
           Place Order
         </button>
+      </div>
       </div>
     </div>
   );
