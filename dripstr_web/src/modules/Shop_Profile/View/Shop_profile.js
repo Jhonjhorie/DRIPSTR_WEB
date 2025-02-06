@@ -52,7 +52,7 @@ function Shop_profile() {
         const { data: shops, error: shopError } = await supabase
           .from("shop")
           .select("id, shop_name, shop_Rating, shop_image, shop_Ads")
-          .eq("owner_Id", user.id);
+          .eq("owner_Id", user.id)
 
         if (shopError) {
           console.error("Shop fetch error:", shopError.message);
@@ -103,7 +103,8 @@ function Shop_profile() {
             .select(
               "id, item_Name, item_Description, item_Tags, item_Rating, item_Orders, item_Variant, is_Post"
             )
-            .eq("shop_Id", selectedShopId);
+            .eq("shop_Id", selectedShopId)
+            .eq("is_Post", true);
 
           if (productError) {
             console.error("Product fetch error:", productError.message);
@@ -297,7 +298,7 @@ function Shop_profile() {
                   }`}
                 >
                   <img
-                    src={ad.imageUrl} // Corrected to use `ad.ad_Image`
+                    src={ad.imageUrl} 
                     alt={ad.ad_Name || "Ad image"}
                     className="w-full h-full object-cover"
                   />
@@ -394,7 +395,7 @@ function Shop_profile() {
                             <p className="text-primary-color">₱100</p>
                             <div className="flex place-items-center ">
                               <div className="text-primary-color">4.1 </div>
-                              <div c>
+                              <div>
                                 <img
                                   src={starrate}
                                   alt="Placeholder image of a scenic landscape with mountains and a lake"

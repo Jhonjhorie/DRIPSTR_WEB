@@ -75,7 +75,7 @@ function SideBar() {
     shadow-primary-color h-12 w-20 mt-2 rounded-md mr-16 ">
         {shopImageUrl ? (
         <img
-          src={shopImageUrl}
+          src={shopImageUrl} 
           alt="Shop Profile"
           className="object-cover h-full w-full rounded-md"
         />

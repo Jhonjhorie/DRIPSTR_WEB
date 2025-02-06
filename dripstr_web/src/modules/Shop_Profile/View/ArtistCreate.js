@@ -27,8 +27,7 @@ function ArtistCreate() {
   const [loading, setLoading] = useState(false);
 
   const handleArtistNameChange = (e) => setArtistName(e.target.value);
-  const handleArtistDescriptionChange = (e) =>
-    setArtistDescription(e.target.value);
+  const handleArtistDescriptionChange = (e) => setArtistDescription(e.target.value);
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
   };
@@ -347,7 +346,7 @@ function ArtistCreate() {
               ></textarea>
             </label>
           </div>
-          <div className="w-full h-auto justify-end flex m-2 bg-slate-300 mb-14 md:mb-0">
+          <div className="w-full h-auto justify-end flex m-2 mb-14 md:mb-0">
             {loading ? (
               <div className="text-center place-content-center px-5 mr-14 glass rounded-md bg-custom-purple">
                 <span className="loading loading-dots loading-lg bg-slate-100"></span>
@@ -587,7 +586,7 @@ function ArtistCreate() {
           </div>
         </div>
       )}
-      {/* ALLERTS ADD Item SUCCESS */}
+      {/* ALLERTS ARTIST PAGE SUCCESSFULLY */}
       {showAlertSuccess && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
