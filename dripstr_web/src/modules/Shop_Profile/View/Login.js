@@ -29,7 +29,7 @@ function Login() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [user, setUser] = useState(null);
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
-  const [TermsandCondition, setTermsandCondition] = React.useState(true); // Alert Success
+  const [TermsandCondition, setTermsandCondition] = React.useState(false); // Alert Success
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
   const [pdfFile, setPdfFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -192,16 +192,6 @@ function Login() {
     reader.onload = (e) => {
       const image = new Image();
       image.onload = async () => {
-        const width = image.width;
-        const height = image.height;
-
-        if (width !== height) {
-          console.error("Image must be square.");
-          setIsSubmitting(false);
-          setShowAlert6(true);
-          setTimeout(() => setShowAlert6(false), 3000);
-          return;
-        }
 
         // Upload image to Supabase if everything is valid
         const uniqueImageName = `shop_profile/${Date.now()}-${Math.random()
@@ -438,6 +428,9 @@ function Login() {
   };
   const handleCloseTandC = () => {
     setTermsandCondition(false);
+  };
+  const ShowTandC = () => {
+    setTermsandCondition(true);
   };
   //define image input
   const handleFileChange = (event) => {
@@ -757,6 +750,13 @@ function Login() {
             </form>
           </div>
         )}
+        <div onClick={ShowTandC} data-tip="Read Merchant Terms and Condition" className=" tooltip-left tooltip bg-slate-50 hover:scale-95 duration-200 cursor-pointer rounded-full shadow-md  absolute right-7 bottom-7">
+          <img
+            src={questionEmote}
+            alt="Success Emote"
+            className="object-contain h-16 w-16 rounded-lg p-1 drop-shadow-customViolet"
+          />
+        </div>
       </div>
 
       {showAlert && (
@@ -1076,122 +1076,234 @@ function Login() {
               Terms And Condition
             </h2>
 
-            <div className="bg-slate-200 rounded-md text-slate-800 shadow-inner shadow-slate-600 h-[350px] w-[700px] overflow-y-scroll p-4 space-y-4">
-              <h1 className="text-xl font-bold">Welcome to Dripstr!</h1>
-              <p className="text-sm">
-                These Terms and Conditions govern your use of our website and
-                services. By accessing or using Dripstr, you agree to comply
-                with and be bound by these terms. Please read them carefully.
-              </p>
+            <div className="bg-gradient-to-r top-0 left-0 from-violet-500 to-fuchsia-500 rounded-md text-slate-800 shadow-inner shadow-slate-600 h-[400px] w-[800px] overflow-y-scroll p-4 space-y-4">
+              <div className="bg-gray-200 p-6 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+                <h1 className="text-3xl font-bold text-center text-gray-900 mb-6 border-b pb-3">
+                  MERCHANT’S TERMS AND CONDITIONS OF USE
+                </h1>
 
-              <h2 className="text-lg font-semibold">1. General Information</h2>
-              <p className="text-sm">
-                Dripstr is an online marketplace for [briefly describe your
-                products/services]. By using our website, you agree to follow
-                these terms. If you do not agree, please refrain from using our
-                website.
-              </p>
+                <div className="space-y-6 text-gray-700">
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      1. DEFINITIONS
+                    </h2>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>
+                        <strong>Merchant:</strong> Any individual, business, or
+                        entity that uploads and sells products via the DRIPSTR
+                        platform.
+                      </li>
+                      <li>
+                        <strong>Platform:</strong> DRIPSTR, the integrated
+                        e-commerce and design software system for 3D apparel
+                        creation and virtual shopping experiences.
+                      </li>
+                      <li>
+                        <strong>Products:</strong> Any 3D apparel designs,
+                        clothing items, or related digital content uploaded by
+                        Merchants onto the DRIPSTR platform.
+                      </li>
+                      <li>
+                        <strong>Agreement:</strong> These Terms and Conditions,
+                        which govern the Merchant’s use of the DRIPSTR platform.
+                      </li>
+                      <li>
+                        <strong>Customer:</strong> Any individual or business
+                        purchasing Products through the DRIPSTR platform.
+                      </li>
+                    </ul>
+                  </section>
 
-              <h2 className="text-lg font-semibold">2. User Account</h2>
-              <p className="text-sm">
-                To access certain features of Dripstr, you may need to create an
-                account. You are responsible for maintaining the confidentiality
-                of your account and for all activities that occur under your
-                account. You must be at least 18 years old or have parental
-                consent to use our website.
-              </p>
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      2. AGREEMENT
+                    </h2>
+                    <p>
+                      These Terms and Conditions (referred to as "Agreement")
+                      apply to all services and functionality provided by
+                      DRIPSTR to the Merchant, including the uploading of
+                      products, storefront management, and customer
+                      interactions.
+                    </p>
+                    <p>
+                      By using the DRIPSTR platform, Merchants agree to comply
+                      with all terms laid out herein, as well as any additional
+                      guidelines issued by DRIPSTR from time to time.
+                    </p>
+                    <p>
+                      DRIPSTR reserves the right to modify these Terms at any
+                      time. Changes will take effect immediately upon posting to
+                      the platform. Merchants are responsible for reviewing the
+                      Terms regularly.
+                    </p>
+                  </section>
 
-              <h2 className="text-lg font-semibold">3. Products and Pricing</h2>
-              <p className="text-sm">
-                Dripstr strives to provide accurate product information,
-                including descriptions, prices, and availability. However, we
-                cannot guarantee the accuracy of all product details, and prices
-                are subject to change without notice. We reserve the right to
-                modify or discontinue products at any time.
-              </p>
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      3. MERCHANT REGISTRATION AND BUSINESS VERIFICATION
+                    </h2>
+                    <p>
+                      Upon registration, Merchants must provide valid and
+                      accurate business documentation, including but not limited
+                      to:
+                    </p>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>A valid Business Permit</li>
+                      <li>
+                        A Government-Issued ID of the business owner or
+                        authorized representative
+                      </li>
+                      <li>
+                        Business Information (e.g., legal name, business
+                        address)
+                      </li>
+                      <li>
+                        Owner or Representative Information (e.g., full name,
+                        contact details)
+                      </li>
+                    </ul>
+                    <p>
+                      These documents will be used for the verification of the
+                      business to ensure compliance with legal and operational
+                      standards. Failure to provide the required documentation
+                      will result in the denial of access to merchant
+                      functionalities on the DRIPSTR platform.
+                    </p>
+                    <p>
+                      DRIPSTR reserves the right to suspend or terminate
+                      accounts that fail to comply with the verification process
+                      or provide fraudulent or inaccurate information.
+                    </p>
+                  </section>
 
-              <h2 className="text-lg font-semibold">4. Payment and Orders</h2>
-              <p className="text-sm">
-                By placing an order on Dripstr, you agree to pay the total price
-                of your order, including shipping and handling fees. Payment
-                must be made at the time of purchase via our accepted payment
-                methods. We reserve the right to cancel any order at our
-                discretion, including due to issues with payment processing.
-              </p>
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      4. MERCHANT RESPONSIBILITIES
+                    </h2>
+                    <p>
+                      Merchants are responsible for uploading accurate and
+                      original 3D apparel designs to the platform. They must
+                      ensure that they have the legal rights to sell any
+                      Products uploaded.
+                    </p>
+                    <p>
+                      Merchants are expected to actively manage their
+                      storefronts, upload Products regularly, and engage with
+                      Customers through the platform's communication tools.
+                    </p>
+                    <p>
+                      Merchants must not upload content that is fraudulent,
+                      misleading, or in violation of any applicable laws.
+                    </p>
+                  </section>
 
-              <h2 className="text-lg font-semibold">
-                5. Shipping and Delivery
-              </h2>
-              <p className="text-sm">
-                Shipping fees and delivery times are calculated based on your
-                location and the chosen shipping method. Dripstr is not
-                responsible for delays caused by third-party carriers. Once your
-                order is shipped, you will receive a tracking number.
-              </p>
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      5. PAYMENT AND REVENUE SHARING
+                    </h2>
+                    <p>
+                      The platform will charge a commission on each sale, as
+                      stated in the Merchant's Agreement, which may be updated
+                      from time to time by DRIPSTR.
+                    </p>
+                    <p>
+                      Payments to Merchants will be processed through DRIPSTR’s
+                      integrated payment system and distributed within 30 days
+                      following the successful completion of each sale.
+                    </p>
+                    <p>
+                      <strong>Subscription Plans:</strong>
+                    </p>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>
+                        Merchants can subscribe to a Monthly or Annual plan with
+                        premium features like enhanced marketplace exposure,
+                        analytics, and customer engagement tools.
+                      </li>
+                      <li>
+                        Pricing and benefits are outlined on the platform and
+                        may be subject to change with prior notice.
+                      </li>
+                      <li>
+                        Subscription payments are auto-debited, and
+                        cancellations do not offer refunds for partially used
+                        months or years.
+                      </li>
+                    </ul>
+                  </section>
 
-              <h2 className="text-lg font-semibold">6. Returns and Refunds</h2>
-              <p className="text-sm">
-                We accept returns in accordance with our Return Policy. To be
-                eligible for a return, items must be in their original
-                condition, unused, and with all tags intact. Please refer to our
-                Return Policy for detailed instructions and timeframes.
-              </p>
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      6. DELIVERY AND PRODUCT DISPLAY
+                    </h2>
+                    <p>
+                      DRIPSTR offers tools for Merchants to showcase Products
+                      via 3D visualizations. Merchants are responsible for
+                      ensuring the accuracy of these digital representations.
+                    </p>
+                    <p>
+                      Merchants acknowledge that delivery of virtual goods is
+                      instant and final upon successful purchase. For physical
+                      goods, Merchants are responsible for managing delivery
+                      logistics and ensuring timely shipping to Customers.
+                    </p>
+                  </section>
 
-              <h2 className="text-lg font-semibold">7. User Conduct</h2>
-              <p className="text-sm">
-                You agree not to engage in any unlawful, harmful, or disruptive
-                behavior while using Dripstr. This includes, but is not limited
-                to, posting offensive content, engaging in fraudulent
-                activities, or violating the intellectual property rights of
-                others.
-              </p>
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      7. LIABILITY AND WARRANTIES
+                    </h2>
+                    <p>
+                      DRIPSTR makes no warranties regarding the performance or
+                      accuracy of the platform, including the 3D apparel
+                      creation tools and any marketplace services.
+                    </p>
+                    <p>
+                      DRIPSTR will not be liable for any indirect, incidental,
+                      or consequential damages resulting from the use of the
+                      platform, including but not limited to, loss of profits,
+                      data, or business interruptions.
+                    </p>
+                  </section>
 
-              <h2 className="text-lg font-semibold">
-                8. Intellectual Property
-              </h2>
-              <p className="text-sm">
-                All content on Dripstr, including logos, images, and product
-                descriptions, are the property of Dripstr or its licensors. You
-                may not use or reproduce any of our intellectual property
-                without permission.
-              </p>
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      8. TERMINATION OF SERVICE
+                    </h2>
+                    <p>
+                      DRIPSTR reserves the right to suspend or terminate a
+                      Merchant’s access to the platform if they are found to be
+                      in violation of these Terms or if their use of the
+                      platform causes harm or reputational damage to DRIPSTR.
+                    </p>
+                    <p>
+                      Merchants may terminate their use of the platform at any
+                      time, but they will remain responsible for any obligations
+                      that arise before the termination date.
+                    </p>
+                  </section>
 
-              <h2 className="text-lg font-semibold">9. Privacy Policy</h2>
-              <p className="text-sm">
-                We respect your privacy and are committed to protecting your
-                personal data. Please refer to our Privacy Policy for details on
-                how we collect, use, and protect your information.
-              </p>
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      9. INTELLECTUAL PROPERTY
+                    </h2>
+                    <p>
+                      All intellectual property rights related to the DRIPSTR
+                      platform, including the software, interface, and design
+                      tools, remain the exclusive property of DRIPSTR.
+                    </p>
+                  </section>
+                </div>
 
-              <h2 className="text-lg font-semibold">
-                10. Limitation of Liability
-              </h2>
-              <p className="text-sm">
-                Dripstr is not liable for any indirect, incidental, or
-                consequential damages arising from the use of our website or
-                products. Our liability is limited to the amount paid for the
-                products in question.
-              </p>
-
-              <h2 className="text-lg font-semibold">11. Changes to Terms</h2>
-              <p className="text-sm">
-                We may update or revise these Terms and Conditions at any time.
-                Any changes will be posted on this page, and the effective date
-                will be updated accordingly.
-              </p>
-
-              <h2 className="text-lg font-semibold">12. Contact Us</h2>
-              <p className="text-sm">
-                If you have any questions or concerns about these Terms and
-                Conditions, please contact us at [insert email/contact info].
-              </p>
-            </div>
-
-            <div
-              onClick={handleCloseTandC}
-              className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
-            >
-              Okay!
+                <div className="mt-6 text-center">
+                  <button
+                    onClick={handleCloseTandC}
+                    className="bg-primary-color m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                  >
+                    Accept Terms
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

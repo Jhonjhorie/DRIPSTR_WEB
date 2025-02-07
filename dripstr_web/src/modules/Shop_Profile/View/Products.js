@@ -396,7 +396,7 @@ function Products() {
       if (ordersError) throw ordersError; 
 
       const { error } = await supabase
-        .from("shop_Product")
+        .from("shop_Product") 
         .delete()
         .eq("id", selectedItem.id);
 
@@ -1115,7 +1115,7 @@ function Products() {
                         <label className="text-sm text-slate-800 font-semibold">
                           Description:
                         </label>
-                        <div className="text-sm text-primary-color font-semibold">
+                        <div className="text-sm h-[100px] overflow-hidden overflow-y-scroll text-primary-color font-semibold">
                           {selectedItem.item_Description}
                         </div>
                       </div>
