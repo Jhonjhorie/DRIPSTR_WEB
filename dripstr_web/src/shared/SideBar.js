@@ -10,6 +10,8 @@ import {
   faBell,
   fapalette,
   faPalette,
+  faWandMagicSparkles,
+  faPaintBrush
 } from "@fortawesome/free-solid-svg-icons";
 
 const SideBar = () => {
@@ -46,10 +48,11 @@ const SideBar = () => {
 
   const mainSideBar = [
     { label: 'Home', path: '/', icon: faHome },
-    ...(isMerchant ? [{ label: 'Shop', path: '/shop/MerchantDashboard', icon: faStore }] : []),
-    ...(isArtist ? [{ label: 'Art', path: '/shop/Artist/ArtistDashboard', icon: faPalette }] : []),
+    { label: 'Arts', path: '/arts/Artists', icon: faPalette },
     { label: 'Notification', path: '/notification', icon: faBell },
     { label: 'Account', path: '/account', icon: faUser },
+    ...(isMerchant ? [{ label: 'Shop', path: '/shop/MerchantDashboard', icon: faStore }] : []),
+    ...(isArtist ? [{ label: 'Artist', path: '/shop/Artist/ArtistDashboard', icon: faPaintBrush }] : []),
   ];
 
   return (
