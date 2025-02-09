@@ -15,6 +15,7 @@ function Artists() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [likes, setLikes] = useState({});
   const [userId, setUserId] = useState(null);
+  const [topArtists, setTopArtists] = useState([]);
 
   const handleImageLoad = (event, artId) => {
     const { naturalWidth, naturalHeight } = event.target;
@@ -48,6 +49,86 @@ function Artists() {
     fetchUserAndArtworks();
   }, []);
 
+  useEffect(() => {
+    const fetchLikesData = async () => {
+      try {
+        const { data: artworks, error } = await supabase
+          .from("artist_Arts")
+          .select("artist_Id, likes");
+
+        if (error) {
+          console.error("Error fetching artworks:", error.message);
+          return;
+        }
+
+        const likeCounts = {};
+        artworks.forEach(({ artist_Id, likes }) => {
+          if (artist_Id) {
+            likeCounts[artist_Id] =
+              (likeCounts[artist_Id] || 0) + (likes?.length || 0);
+          }
+        });
+
+        if (Object.keys(likeCounts).length === 0) {
+          console.warn("No likes found.");
+          return;
+        }
+
+        const sortedArtists = Object.entries(likeCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3);
+
+        const topArtistIds = sortedArtists.map(([id]) => parseInt(id, 10));
+
+        if (topArtistIds.length === 0) return;
+
+        const { data: artists, error: artistError } = await supabase
+          .from("artist")
+          .select("id, artist_Name, artist_Image, art_Type")
+          .in("id", topArtistIds);
+
+        if (artistError) {
+          console.error("Error fetching artist names:", artistError.message);
+          return;
+        }
+
+        const marginTops = ["mt-10", "mt-24", "mt-32"];
+        const colors = ["yellow-400", "sky-400", "pink-400"];
+        const topArtistsList = sortedArtists.map(([id, likes], index) => {
+          const artist = artists.find((a) => a.id === parseInt(id, 10));
+          return {
+            name: artist?.artist_Name || "Unknown",
+            type: artist?.art_Type || "Not set",
+            color: colors[index],
+            image: artist?.artist_Image || "/default-image.png",
+            mt: marginTops[index],
+            tag: `${index + 1}`,
+            likes: likes || 0,
+          };
+        });
+
+        setTopArtists([
+          topArtistsList[1],
+          topArtistsList[0],
+          topArtistsList[2],
+        ]);
+      } catch (err) {
+        console.error("Unexpected error:", err.message);
+      }
+    };
+
+    fetchLikesData();
+  }, []);
+  const colorClasses = {
+    "sky-400": "bg-sky-400",
+    "yellow-400": "bg-yellow-400",
+    "pink-400": "bg-pink-400",
+    "red-400": "bg-red-400",
+    "green-400": "bg-green-400",
+    "purple-400": "bg-purple-400",
+    "teal-400": "bg-teal-400",
+    "indigo-400": "bg-indigo-400",
+  };
   const fetchArtworks = async () => {
     try {
       const { data: arts, error } = await supabase.from("artist_Arts").select(`
@@ -140,58 +221,59 @@ function Artists() {
           alt="Artist"
           className="h-80  blur-sm w-80  rounded-md absolute bottom-2 right-2"
         />
-        <img
-          src={drplogo}
-          alt="Artist"
-          className="h-80  blur-sm w-80 -scale-x-100 rounded-md absolute bottom-2 left-2"
-        />
-        {[
-          {
-            name: "Paolo Corporal",
-            color: "sky-400",
-            image: cust2,
-            mt: "mt-24",
-            tag: "2",
-          },
-          {
-            name: "Pablo Jabo",
-            color: "yellow-400",
-            image: cust1,
-            mt: "mt-10",
-            tag: "1",
-          },
-          {
-            name: "Paolo Corporal",
-            color: "pink-400",
-            image: cust2,
-            mt: "mt-32",
-            tag: "3",
-          },
-        ].map((person, index) => (
+        <div className="">
+          <img
+            src={drplogo}
+            alt="Artist"
+            className="h-80  blur-sm w-80 -scale-x-100 rounded-md absolute bottom-2 left-2"
+          />
+        </div>
+
+        {topArtists.map((artist, index) => (
           <div
             key={index}
-            className={`w-[150px] hover:scale-105 duration-150 h-[300px] rounded-sm bg-${person.color} relative ${person.mt}`}
+            style={{
+              backgroundColor: "rgba(0, 0, 0, 0.3)",
+              backdropFilter: "blur(100px)",
+            }}
+            className={`w-[150px] cursor-pointer group hover:scale-105 duration-150 h-[300px] rounded-sm relative ${
+              colorClasses[artist.color] || "bg-gray-400"
+            } ${artist.mt}`}
           >
             <div
-              className={`rounded-full z-10 shadow-lg  h-[170px] w-[170px] absolute p-1 -top-20 left-1/2 -translate-x-1/2 bg-${person.color}`}
+              className={`rounded-full z-10 shadow-lg h-[170px] w-[170px] absolute p-1 -top-20 left-1/2 -translate-x-1/2 ${
+                colorClasses[artist.color] || "bg-gray-400"
+              }`}
             >
-              <img alt="top2" src={person.image} className="rounded-full" />
+              <img
+                alt="top2"
+                src={artist.image}
+                className="rounded-full object-cover w-full h-full"
+              />
             </div>
-            <div
-              className={`absolute z-20 px-3 -translate-x-1/2 text-slate-50 font-semibold iceland-regular left-1/2 top-1/4 shadow-md border-slate-50 border-2   bg-${person.color} rounded-full p-1`}
-            >
-              {person.tag}
+
+            <div className="absolute z-20 px-3 bg-slate-50 -translate-x-1/2 text-yellow-700 font-semibold iceland-regular left-1/2 top-1/4 shadow-md border-slate-50 border-2 bg-opacity-80 rounded-full p-1">
+              {artist.tag}
             </div>
 
             <div
-              className={`w-[150px] h-[250px]  rounded-sm overflow-hidden bg-${person.color} mt-20 relative `}
+              className={`w-[150px] h-[250px] rounded-sm overflow-hidden mt-20 relative ${
+                colorClasses[artist.color] || "bg-gray-400"
+              }`}
+              style={{
+                backgroundColor: "rgba(0, 0, 0, 0.3)",
+                backdropFilter: "blur(100px)",
+              }}
             >
               <div className="place-content-center pb-12 justify-items-center h-full w-full">
                 <div className="text-lg font-semibold text-slate-100">
-                  {person.name}
+                  {artist.name}
                 </div>
                 <div className="text-sm mt-2 text-slate-50 bg-custom-purple shadow-md rounded-full px-5 p-1 font-semibold">
-                  Digital Art
+                  {artist.type}
+                </div>
+                <div className="text-xs mt-2 text-slate-50 glass bg-gray-700 bg-opacity-50 shadow-md rounded-full px-4 p-1 font-semibold">
+                  ❤️ {artist.likes} Likes
                 </div>
               </div>
               <div className="bg-fuchsia-500 h-36 w-36 rotate-45 absolute -bottom-24 right-1"></div>
