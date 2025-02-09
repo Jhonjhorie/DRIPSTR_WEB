@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+
 import { supabase } from "../../../constants/supabase";
 
 function Admin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,7 +32,7 @@ function Admin() {
 
     console.log('Login successful:', data);
     alert('Login successful');
-    // Redirect to the admin dashboard or set session state
+    navigate('/admin/dashboard');
   };
 
   return (
