@@ -12,11 +12,11 @@ import Headline from "../View/Headline";
 import Merchants from "../View/Merchants";
 import Admin from "../View/Admin";
 
-
 const AdminController = () => {
   return (
     <main className="bg-slate-800 p-4">
     <Routes>
+   
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/reviews" element={<Reviews />} />
       <Route path="/reports" element={<Reports />} />
@@ -27,6 +27,7 @@ const AdminController = () => {
       <Route path="/merchants" element={<Merchants />} />
       <Route path="/" element={<Admin />} />
       <Route path="/reports/:reportNo" element={<ReportDetail />} />
+
     </Routes>
     </main>
   );
