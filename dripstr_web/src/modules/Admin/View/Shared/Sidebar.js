@@ -1,16 +1,19 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../../../assets/logoName.png";
 
 function Sidebar() {
   // State to control sidebar visibility on small screens
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-
+  const navigate = useNavigate();
   // Toggle function for sidebar
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
   };
 
+  const handleLogout = async () => {
+    navigate("/admin");
+  }
   const SidebarItem = ({ icon, label, to }) => (
     <NavLink
       to={to} // Use 'to' prop to link to the route
@@ -193,6 +196,13 @@ function Sidebar() {
             label="Merchants"
             to="/admin/merchants"
           />
+  <button
+    onClick={handleLogout} // Replace with your logout function
+    className="mt-auto w-full p-3 text-center bg-red-600 rounded-2xl hover:bg-red-700 transition-all duration-300"
+  >
+    Logout
+  </button>
+
         </nav>
       </div>
     </div>
