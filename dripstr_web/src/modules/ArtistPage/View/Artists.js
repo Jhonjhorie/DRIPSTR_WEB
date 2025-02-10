@@ -16,6 +16,7 @@ function Artists() {
   const [likes, setLikes] = useState({});
   const [userId, setUserId] = useState(null);
   const [topArtists, setTopArtists] = useState([]);
+  const [selectArt, setSelectArt] = useState(null);
 
   const handleImageLoad = (event, artId) => {
     const { naturalWidth, naturalHeight } = event.target;
@@ -24,7 +25,14 @@ function Artists() {
       [artId]: naturalWidth > naturalHeight ? "landscape" : "portrait",
     }));
   };
-
+  const handleSelectArt = (art) => {
+    if (!art) {
+      console.error("Selected art is null!");
+      return;
+    }
+    console.log("Selected Art:", art); // Debugging
+    setSelectArt(art);
+  };
   useEffect(() => {
     const fetchUserAndArtworks = async () => {
       try {
@@ -179,7 +187,9 @@ function Artists() {
       console.error("Error updating likes:", error.message);
     }
   };
-
+  const closeModal = async () => {
+    setSelectArt(null);
+  };
   return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar  ">
       <h1 className="text-center pt-5 text-5xl text-slate-50  bg-violet-500 font-extrabold  iceland-regular">
@@ -292,6 +302,7 @@ function Artists() {
         <div className="grid grid-cols-1 md:grid-cols-2  gap-10">
           {artistData.map((art) => (
             <div
+              onClick={() => handleSelectArt(art)}
               key={art.id}
               className="bg-white relative group p-2 shadow-lg h-auto rounded-md"
             >
@@ -359,6 +370,60 @@ function Artists() {
           ))}
         </div>
       </div>
+
+      {selectArt && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
+          onClick={() => setSelectArt(null)}
+        >
+          <div
+            className="relative min-h-[300px] bg-gradient-to-br from-violet-500 to-fuchsia-500 place-content-center justify-items-center p-4 rounded-lg shadow-lg min-w-[300px] max-w-3xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              className="absolute top-0 right-0 text-white bg-gradient-to-br from-violet-500 to-fuchsia-500 px-3 rounded-full p-2"
+              onClick={() => setSelectArt(null)}
+            >
+              ✕
+            </button>
+
+            {/* Art Image */}
+            {selectArt?.art_Image && (
+              <img
+                src={selectArt.art_Image}
+                alt="Expanded Art"
+                className={`overflow-hidden cursor-pointer rounded-md border shadow-md border-custom-purple ${
+                  imageOrientations[selectArt.id] === "landscape"
+                    ? "w-full h-[550px] flex justify-center"
+                    : "w-auto h-[550px] mx-auto"
+                }`}
+              />
+            )}
+
+            {/* Art Name */}
+            <div className="bg-violet-500 text-white px-3 text-xl iceland-bold py-2 rounded-md absolute top-2 left-2">
+              {selectArt?.art_Name || "Untitled"}
+            </div>
+
+            {/* Artist Info */}
+            <div className="absolute bottom-2 right-2 flex">
+              <div className="text-white text-xl drop-shadow-customWhite iceland-bold p-2 h-auto w-auto">
+                {selectArt?.artists?.artist_Name || "Unknown Artist"}
+              </div>
+              <div className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md">
+                <img
+                  src={
+                    selectArt?.artists?.artist_Image || "default-profile.png"
+                  }
+                  alt="Artist"
+                  className="h-full w-full object-cover rounded-md"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
