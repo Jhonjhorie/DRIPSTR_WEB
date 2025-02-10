@@ -129,7 +129,7 @@ const AddItem = () => {
     });
     setVariants(updatedVariants);
   };
-
+  // Handle item on submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -195,9 +195,14 @@ const AddItem = () => {
 
             if (error) throw error;
 
+            const { data: publicUrlData } = supabase.storage
+            .from("product")
+            .getPublicUrl(filePath);
+
             return {
               ...variant,
               image: data.path,
+              imagePath: publicUrlData.publicUrl,
             };
           }
           return variant; //
@@ -207,8 +212,10 @@ const AddItem = () => {
       // Prepare the formatted variants
       const formattedVariants = updatedVariants.map((variant) => ({
         img: variant.image || "", // Use the uploaded image path
+        imagePath: variant.imagePath || "", // Include the public URL
         variant_Name: variant.name,
-        sizes: variant.info.map((info) => ({
+        sizes: variant.info.map((info, index) => ({
+          id: index + 1,
           qty: info.quantity,
           size: info.size,
           price: info.price,

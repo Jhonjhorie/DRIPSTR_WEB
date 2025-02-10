@@ -22,7 +22,7 @@ const FromToCalendar = () => {
           startDate={startDate}
           endDate={endDate}
           placeholderText="From"
-          className="bg-white border border-gray-300 font-bold rounded-2xl p-1 m-1"
+          className="text-white border border-gray-300 rounded-xl p-1 m-1"
         />
       </div>
 
@@ -36,7 +36,7 @@ const FromToCalendar = () => {
           endDate={endDate}
           minDate={startDate}
           placeholderText="To"
-          className="bg-white border border-gray-300 font-bold rounded-2xl p-1 m-1"
+          className="text-white border border-gray-300 rounded-xl p-1 m-1"
         />
       </div>
 
@@ -45,7 +45,7 @@ const FromToCalendar = () => {
         <select
           value={category}
           onChange={handleCategoryChange}
-          className="bg-white border border-gray-300 font-bold rounded-2xl p-1 m-1"
+          className="text-white border border-gray-300 rounded-xl p-1 m-1"
         >
           <option value="All">All</option>
           <option value="Category1">Category 1</option>
@@ -55,7 +55,7 @@ const FromToCalendar = () => {
       </div>
 
       {/* Display Selected Dates and Category */}
-      <div className="text-gray-800">
+      <div className="text-white">
         <p>
           <strong>Selected Range:</strong>
         </p>

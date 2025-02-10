@@ -26,7 +26,7 @@ const Shop = () => {
         // Fetch the user's profile from the 'profiles' table
         const { data: profiles, error: profileError } = await supabase
           .from("profiles")
-          .select("isMerchant")
+          .select("isMerchant, isArtist")
           .eq("id", user.id)
           .single();
 
@@ -167,9 +167,28 @@ const Shop = () => {
             </button>
           </div>
           <div className="text-center">
-            <Link to="/shop/ArtistCreate">
-              <button className="btn btn-primary btn-lg">Be an Artist</button>
-            </Link>
+          <div className="text-center">
+            <button
+              className={` ${
+                isMerchant || loading
+                  ? "btn-lg rounded-md hover:bg-slate-800 cursor-not-allowed bg-slate-900 text-gray-100 "
+                  : "btn-lg bg-primary rounded-md font-semibold hover:bg-opacity-80 text-slate-900"
+              }`}
+              disabled={isMerchant || loading}
+            >
+              {loading || isMerchant ? (
+                loading ? (
+                  "Loading..."
+                ) : (
+                 "You Are Already a Merchant"
+                )
+              ) : (
+                <Link to="/shop/ArtistCreate" className="text-white text-inherit no-underline">
+                  Be an Artist
+                </Link>
+              )}
+            </button>
+          </div>
           </div>
         </div>
       </div>

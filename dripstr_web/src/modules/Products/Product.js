@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import RateSymbol from "@/shared/products/rateSymbol";
 import {averageRate} from "./hooks/useRate.ts";
 import RatingSection from "./components/RatingSection.js";
@@ -11,6 +11,7 @@ import useGetImage from "./hooks/useGetImageUrl.js";
 
 function Product() {
   const location = useLocation();
+  const navigate = useNavigate();
   const item = location.state?.item;
   const imageUrls = useGetImage(item); 
   const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
@@ -19,6 +20,14 @@ function Product() {
         setSelectedColor(color);
         setSelectedSize(size);
       };
+
+  //Pass the product to cart through add to cart button
+  const handleAddToCart = () => {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    cart.push(item);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    navigate("/cart");
+  }
 
   const allImages = [
     ...imageUrls
@@ -189,7 +198,7 @@ function Product() {
             <div>
               <div className="justify-end gap-2 mt-4 items-center flex">
               <button
-                  onClick={() => openModal('cart')}
+                  onClick={handleAddToCart}
                   className="btn btn-sm btn-outline btn-secondary  "
                 >
                   Add to Cart

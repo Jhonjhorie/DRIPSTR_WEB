@@ -6,7 +6,6 @@ import { supabase } from "../../../constants/supabase";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 import sadEmote from "../../../../src/assets/emote/sad.png";
 import successEmote from "../../../../src/assets/emote/success.png";
-import questionEmote from "../../../../src/assets/emote/hmmm.png";
 
 const { useState, useEffect } = React;
 
@@ -78,31 +77,31 @@ function Products() {
           setShopData(shops);
           console.log("Fetched shops:", shops);
 
-          const selectedShopId = shops[0].id; // Assuming the first shop is selected
+          const selectedShopId = shops[0].id; 
           setSelectedShopId(selectedShopId);
 
-          // Fetch ads for the selected shop
-          const ads = shops[0].shop_Ads || []; // Correctly initialize `ads`
+         
+          const ads = shops[0].shop_Ads || []; 
 
           const updatedAds = await Promise.all(
             ads.map(async (ad) => {
-              console.log("Ad ID:", ad.id); // Log Ad ID
-              console.log("Ad Image Path:", ad.ad_Image); // Log the path
+              console.log("Ad ID:", ad.id); 
+              console.log("Ad Image Path:", ad.ad_Image); 
 
               let imageUrl = null;
 
               if (ad.ad_Image) {
-                // Ensure the path starts with shop_profile/shop_Ads/ and fetch the public URL
+             
                 const fullImagePath = ad.ad_Image.startsWith(
                   "shop_profile/shop_Ads/"
                 )
                   ? ad.ad_Image
-                  : `shop_profile/shop_Ads/${ad.ad_Image}`; // Prepend the path if needed
+                  : `shop_profile/shop_Ads/${ad.ad_Image}`; 
 
                 const { data: publicUrlData, error: publicUrlError } =
                   supabase.storage
-                    .from("shop_profile") // Make sure this is the correct bucket name
-                    .getPublicUrl(fullImagePath); // Fetch public URL using the full path
+                    .from("shop_profile") 
+                    .getPublicUrl(fullImagePath); 
 
                 if (publicUrlError) {
                   console.error(
@@ -1297,7 +1296,7 @@ function Products() {
                                   readOnly={!editableVariants[variantIndex]}
                                 />
                               </div>
-                              <div>
+                              {/*<div>
                                 {editableVariants[variantIndex] && (
                                   <button
                                     onClick={handleDeleteVarInfo}
@@ -1306,7 +1305,7 @@ function Products() {
                                     <i className="fa-solid fa-trash-can"></i>
                                   </button>
                                 )}
-                              </div>
+                              </div>*/}
                             </div>
                           </div>
                         ))
