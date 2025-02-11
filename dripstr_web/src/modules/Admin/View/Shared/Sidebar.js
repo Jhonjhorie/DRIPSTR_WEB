@@ -1,11 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { supabase } from "@/constants/supabase";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../../../assets/logoName.png";
 
 function Sidebar() {
   // State to control sidebar visibility on small screens
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isChief, setIsChief] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      const { data: admin, error } = await supabase
+        .from("admins")
+        .select("isChief")
+        .eq("isChief", true)
+        .single();
+
+      if (error) {
+        console.error("Error fetching admin data:", error);
+      } else {
+        setIsChief(admin?.isChief || false);
+      }
+    };
+
+    fetchAdminData();
+  }, []);
+
   // Toggle function for sidebar
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -26,7 +47,7 @@ function Sidebar() {
       {label}
     </NavLink>
   );
-
+  
   return (
     <div className="flex">
       {/* Burger Menu Button */}
@@ -196,7 +217,7 @@ function Sidebar() {
             label="Merchants"
             to="/admin/merchants"
           />
-          <SidebarItem
+          {isChief &&<SidebarItem
             icon={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -214,10 +235,10 @@ function Sidebar() {
             }
             label="Admins"
             to="/admin/admins"
-          />
+          />}
           <button
             onClick={handleLogout} // Replace with your logout function
-            className="mt-auto w-full p-3 text-center bg-red-600 rounded-2xl hover:bg-red-700 transition-all duration-300 flex items-end align-end"
+            className="mt-auto w-full p-3 text-center bg-red-600 rounded-2xl hover:bg-red-700 transition-all duration-300"
           >
             Logout
           </button>

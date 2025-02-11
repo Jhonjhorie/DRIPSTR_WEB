@@ -200,7 +200,7 @@ function Admins() {
                                     disabled={loading}
                                     className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
                                 >
-                                    {loading ? "Saving..." : isEditMode ? "Update" : "Save"}
+                                    {loading ? "Saving..." : isEditMode ? "Update" : "Add"}
                                 </button>
                             </div>
                         </div>
