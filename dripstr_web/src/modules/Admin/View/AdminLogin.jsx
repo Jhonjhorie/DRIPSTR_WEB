@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { supabase } from "../../../constants/supabase";
 
-function Admin() {
+function AdminLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -72,4 +72,4 @@ function Admin() {
   );
 }
 
-export default Admin;
+export default AdminLogin;

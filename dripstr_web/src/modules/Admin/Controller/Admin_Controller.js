@@ -10,8 +10,8 @@ import Settings from "../View/Settings";
 import ReportDetail from "../View/Components/ReportDetail";
 import Headline from "../View/Headline";
 import Merchants from "../View/Merchants";
-import Admin from "../View/Admin";
-
+import AdminLogin from "../View/AdminLogin";
+import Admins from "../View/Admins";
 const AdminController = () => {
   return (
     <main className="bg-slate-800 p-4">
@@ -25,9 +25,9 @@ const AdminController = () => {
       <Route path="/headline" element={<Headline />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/merchants" element={<Merchants />} />
-      <Route path="/" element={<Admin />} />
+      <Route path="/" element={<AdminLogin />} />
       <Route path="/reports/:reportNo" element={<ReportDetail />} />
-
+      <Route path="/admins" element={<Admins/>} />
     </Routes>
     </main>
   );

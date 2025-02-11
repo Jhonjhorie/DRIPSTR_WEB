@@ -135,8 +135,8 @@ const Merchants = () => {
     return (
         <div className="flex">
             <Sidebar />
-            <div className="flex-1 p-4">
-                <h1 className="text-2xl font-bold mb-4">Merchants</h1>
+            <div className="flex-1 p-4  bg-slate-900 rounded-lg">
+                <h1 className="text-2xl font-bold mb-4 text-white">Merchants</h1>
                 <div className="flex space-x-4 mb-4">
                     <button
                         onClick={() => setStatus('merchants')}
@@ -214,7 +214,7 @@ const Merchants = () => {
 
                 {status === 'merchants' && (
                     <div>
-                        <h2 className="text-xl font-semibold mb-2">Accepted Merchants</h2>
+                        <h2 className="text-xl font-semibold mb-2 text-white">Accepted Merchants</h2>
                         <ul>
                             {merchants.map((merchant, index) => (
                                 <li key={merchant.id} className="border p-2 rounded shadow-sm flex mb-4">
@@ -223,10 +223,10 @@ const Merchants = () => {
                                             <img src={merchant.shop_image} alt={merchant.shop_name} className="w-20 h-30 object-cover rounded-md mr-1" />
                                         </div>
                                         <div className='flex flex-col'>
-                                            <p><strong>Shop Name:</strong> {merchant.shop_name}</p>
-                                            <p><strong>Description:</strong> {merchant.description}</p>
-                                            <p><strong>Address:</strong> {merchant.address}</p>
-                                            <p><strong>Contact:</strong> {merchant.contact_number}</p>
+                                            <p className='text-white'><strong>Shop Name:</strong> {merchant.shop_name}</p>
+                                            <p className='text-white'><strong>Description:</strong> {merchant.description}</p>
+                                            <p className='text-white'><strong>Address:</strong> {merchant.address}</p>
+                                            <p className='text-white'><strong>Contact:</strong> {merchant.contact_number}</p>
                                         </div>
                                     </div>
                                 </li>
