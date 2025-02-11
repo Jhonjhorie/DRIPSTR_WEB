@@ -161,7 +161,13 @@ const Cart = ({action, closeDrawer }) => {
       </div>
     );
   } else {
-    return <LoginFirst />;
+    return (
+    <div className="bg-slate-200 text-base-content justify-center min-h-full gap-2 w-[40rem] pr-8 pt-4 pl-4 flex flex-col">
+    <div className="flex items-center justify-center gap-2 text-lg">
+
+    <LoginFirst />
+    </div>
+    </div>);
   }
 };
 

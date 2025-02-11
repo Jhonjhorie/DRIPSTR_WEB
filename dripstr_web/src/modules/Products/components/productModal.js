@@ -21,7 +21,7 @@ const ProductModal = ({ item, onClose }) => {
   const handleProductClick = () => {
     navigate(`/product/${item.item_Name}`, { state: { item } });
   };
-
+const imagePreview = `${selectedColor.imagePath}`
   const openModal = (action) => {
     setSelectedAction(action);  
     setTimeout(() => {
@@ -32,13 +32,6 @@ const ProductModal = ({ item, onClose }) => {
     document.getElementById('buyConfirm_Modal').close();
   };
 
- /* const allImages = [
-    ...imageUrls,  
-    ...(item.variant && item.variant.length > 0 
-      ? item.variant.map(variant => variant.image)  // Add variant images
-      : [])
-  ];
-*/
 
 
   return (
@@ -62,47 +55,24 @@ const ProductModal = ({ item, onClose }) => {
               className=" absolute top-[55%] lg:top-[60%] -left-[10%] -z-10 opacity-30  w-[35%] h-[40%] object-contain "
             />
             <div className="carousel w-full h-full bg-slate-50 rounded-md overflow-y-hidden">
-              {allImages.length > 0 ?
-                (allImages.map((image, imageIndex) => {
-                  const slideId = `slide${imageIndex}`;
-                  const prevSlideId = `slide${
-                    (imageIndex - 1 + allImages.length) % allImages.length
-                  }`;
-                  const nextSlideId = `slide${
-                    (imageIndex + 1) % allImages.length
-                  }`;
-  
-                  return (
+              {imagePreview != null ? 
                     <div
-                      id={slideId}
-                      key={slideId}
                       className="carousel-item relative w-full  justify-center items-center"
                     >
                       <img
-                        src={image}
-                        alt={`${item.item_Name}-${imageIndex}`}
+                        src={imagePreview}
+                        alt={`${selectedColor.variant_Name}`}
                         className="w-[32rem]  h-[65vh] object-contain"
                       />
-                      {allImages.length > 1 && (
-                        <div className="absolute left-5 right-5 opacity-50 hover:opacity-100 top-1/2 flex -translate-y-1/2 transform justify-between">
-                          <a href={`#${prevSlideId}`} className="btn btn-circle">
-                            ❮
-                          </a>
-                          <a href={`#${nextSlideId}`} className="btn btn-circle">
-                            ❯
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  );
-              }))
+
+                    </div>             
               :
                 <div
                 className="carousel-item relative w-full  justify-center items-center flex flex-col"
               >
                 <img
                 src={require("@/assets/emote/hmmm.png")}
-                  alt={`${item.item_Name}`}
+                  alt={`${selectedColor.variant_Name}`}
                   className="w-[32rem]  h-[65vh] object-none "
                 />
                 <p className="font-bold absolute bottom-32 left-36">No image provided.</p>
