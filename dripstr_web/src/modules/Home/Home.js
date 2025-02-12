@@ -6,6 +6,7 @@ import CategoriesRibbon from "../Products/components/CategoriesRibbon";
 import ProductsView from "../Products/components/ProductsView";
 import MallRibbon from "../Products/components/MallRibbon";
 import FilterProducts from '../Products/components/FilterProducts';
+import LandingPage from "./Landing";
 
 //Data
 import { MallItems } from "@/constants/mallItems.ts";
@@ -22,6 +23,9 @@ function Home() {
   const [filCat, setFilCat] = useState(categories[0].label);
   const { products, loading, error } = useProducts();
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
+
+  if(!isLoggedIn) return <LandingPage />
+  
   
   return (
     <div className=" w-full relative inset-0 bg-slate-300 flex flex-col ">
@@ -29,8 +33,13 @@ function Home() {
       <div className="flex flex-col-reverse gap-4 md:flex-row items-center p-4 h-[39%] lg:h-[38%]">
         <Carousel images={Images} />
         <div className="flex flex-col w-full md:w-1/3 lg:w-1/3 h-24 md:h-42 lg:h-80 justify-start gap-6">
-          <NameCard /> 
-          <InvitationCard />
+        {isLoggedIn ?? 
+        <div>
+           <NameCard /> 
+           <InvitationCard />
+        </div>
+        }
+         
         </div>
         
       </div>

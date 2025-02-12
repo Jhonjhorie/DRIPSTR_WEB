@@ -84,13 +84,15 @@ const ProductCard = ({ item, onClick }) => {
           </p>
         )}
         <div className="flex flex-row justify-between items-center">
-          {item?.item_Variant[0]?.sizes[0]?.price && (
-            <p className="text-primary-color text-md font-medium">
-              
-              ₱{discountedPrice}
-            </p>
-          )}
-
+           {item?.item_Variant[0]?.sizes[0]?.price && (
+           <p className="text-primary-color text-md font-medium">
+           ₱{
+             item.discount > 0
+               ? (Number(item?.item_Variant[0]?.sizes[0]?.price) * (1 - item.discount / 100)).toFixed(2)
+               : Number(item?.item_Variant[0]?.sizes[0]?.price).toFixed(2)
+           }
+         </p>
+          )} 
           <div className="flex flex-row items-center gap-0.5">
             <p className="text-primary-color text-md">
               {averageRate(item.reviews)}

@@ -14,6 +14,7 @@ import Product from './modules/Products/Product';
 import Search from './modules/Products/Search';
 import PlaceOrder from "./modules/Products/PlaceOrder";
 
+
 // Shared Components
 import Header from './shared/Header';
 import Sidebar from './shared/SideBar';
@@ -49,6 +50,7 @@ function AppContent() {
             <Route path="/mall/*" element={<ProductsController />} />
             <Route path="/arts/*" element={<ArtistController />} />
             <Route path="/product/*" element={<Product />} />
+              <Route path="/placeOrder/*" element={<PlaceOrder />} />
             <Route path="/search" element={<Search />} />
             <Route path="/cart/*" element={<OrderController />} />
             <Route path="/login/*" element={<LoginController />} />
