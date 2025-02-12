@@ -149,7 +149,7 @@ const Address = () => {
 
             
             <table className="w-full  border-1 border-gray-300 bg-white shadow-md rounded-lg mt-4">
-              <thead className="bg-violet-600 rounded-lg text-gray-200 border-1 border-gray-300">
+              <thead className=" shadow-md bg-violet-500 rounded-lg text-gray-200 border-1">
                 <tr>
                   <th className="px-4 py-2">Address</th>
                   <th className="px-4 py-2">Postcode</th>
@@ -178,7 +178,7 @@ const Address = () => {
           </div>
         ) : (
           <table className="w-full   border-1 border-gray-300 bg-white shadow-md rounded-lg mt-4">
-            <thead className="bg-gray-600 rounded-lg text-gray-200 border-1 border-gray-300">
+            <thead className="border border-solid bg-gray-600 rounded-lg text-gray-200 border-1 border-gray-300">
               <tr>
                 <th className="px-4 py-2">Address</th>
                 <th className="px-4 py-2">Postcode</th>

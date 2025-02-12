@@ -45,9 +45,6 @@ const Orders = () => {
     }
   }, [profile]); // Add profile as a dependency
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -89,43 +86,50 @@ const Orders = () => {
             </button>
           </div>
 
-          {/* Order Items */}
-          {orders.length > 0 ? (
-            orders.map((order) => (
-              <div key={order.id} className="bg-gray-100 rounded-lg p-4 mb-4">
-                <h2 className="text-lg font-bold text-gray-800 mb-2">
-                  Order ID: {order.id}
-                </h2>
-                <span className="text-green-500 font-medium mb-4 block">
-                  Status: {order.order_status}
-                </span>
-                <div className="flex gap-4">
-                  <img
-                    src={order.order_variation.imagePath}
-                    alt="Order Item"
-                    className="w-20 h-20 rounded-lg"
-                  />
-                  <div className="flex-1">
-                    <p className="text-gray-800 font-medium">
-                      Product Number: {order.prod_num}
-                    </p>
-                    <p className="text-gray-500">Quantity: {order.quantity}</p>
-                    <p className="text-gray-800 font-bold">
-                      Total Price: ₱{order.total_price}
-                    </p>
-                    <p className="text-gray-500">
-                      Payment Method: {order.payment_method}
-                    </p>
-                    <p className="text-gray-500">
-                      Shipping Address: {order.shipping_addr}
-                    </p>
-                  </div>
+
+          {loading ? (
+          <div className="flex flex-col items-center">
+            <img src="/emote/hmmm.png" alt="Loading..." className="w-16 h-16" />
+            <span>Loading...</span>
+          </div>
+        ) : orders.length > 0 ? (
+          orders.map((order) => (
+            <div key={order.id} className="bg-gray-100 rounded-lg p-4 mb-4">
+              <h2 className="text-lg font-bold text-gray-800 mb-2">
+                Order ID: {order.id}
+              </h2>
+              <span className="text-green-500 font-medium mb-4 block">
+                Status: {order.order_status}
+              </span>
+              <div className="flex gap-4">
+                <img
+                  src={order.order_variation?.imagePath}  // Ensure order_variation exists
+                  alt="Order Item"
+                  className="w-20 h-20 rounded-lg"
+                />
+                <div className="flex-1">
+                  <p className="text-gray-800 font-medium">
+                    Product Number: {order.prod_num}
+                  </p>
+                  <p className="text-gray-500">Quantity: {order.quantity}</p>
+                  <p className="text-gray-800 font-bold">
+                    Total Price: ₱{order.total_price}
+                  </p>
+                  <p className="text-gray-500">
+                    Payment Method: {order.payment_method}
+                  </p>
+                  <p className="text-gray-500">
+                    Shipping Address: {order.shipping_addr}
+                  </p>
                 </div>
               </div>
-            ))
-          ) : (
-            <p>No orders found.</p>
-          )}
+            </div>
+          ))
+        ) : (
+          <p>No orders found.</p>
+        )}
+
+          
         </div>
       </div>
     </div>
