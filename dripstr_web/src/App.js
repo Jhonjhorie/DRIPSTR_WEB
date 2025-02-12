@@ -12,6 +12,7 @@ import ProductsController from './modules/Products/Products_Controller';
 import Product from './modules/Products/Product';
 import Search from './modules/Products/Search';
 import PlaceOrder from "./modules/Products/PlaceOrder";
+import GuestHome from "./modules/Home/GuestHome";
 
 
 // Shared Components
@@ -46,6 +47,7 @@ function AppContent() {
         <main className={`flex-1 ${!isAdmin ? "sm:ml-8 sm:pl-2":"" } overflow-y-auto`}>
           <Routes>
             <Route path="/" element={<HomeController />} />
+             <Route path="/guest" element={<GuestHome />} />
             <Route path="/mall/*" element={<ProductsController />} />
             <Route path="/product/*" element={<Product />} />
               <Route path="/placeOrder/*" element={<PlaceOrder />} />

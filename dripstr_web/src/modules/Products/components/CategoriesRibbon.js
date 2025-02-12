@@ -62,7 +62,9 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
     >
       {/* Title */}
       <div className="flex justify-center gap-2 items-end flex-col">
-        <h2 className="text-sm sm:text-lg md:text-2xl font-semibold">Categories</h2>
+        <button className="text-sm sm:text-md md:text-xl duration-300 transition-all font-semibold hover:bg-primary-color p-1 rounded-full hover:text-white glass cursor-pointer"
+       onClick={() => onItemClick("Choose Categories")} 
+        >Categories</button>
         <div className="flex justify-center space-x-2">
           {Array.from({ length: totalScreens }).map((_, index) => (
             <button
