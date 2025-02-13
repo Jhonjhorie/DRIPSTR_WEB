@@ -15,62 +15,53 @@ import PlaceOrder from "./modules/Products/PlaceOrder";
 import GuestHome from "./modules/Home/GuestHome";
 
 
+
 // Shared Components
 import Header from './shared/Header';
 import Sidebar from './shared/SideBar';
 import Notifications from './modules/Notification/Notification_Controller';
 import Reminder from './modules/Messaging/View/Reminder';
 
-// Main App Component
-function AppContent() {
-  const location = useLocation();
-  const isAdmin = location.pathname.startsWith("/admin") || location.pathname.startsWith("/Admin");
 
-  return (
-    <div className="flex flex-col h-screen w-screen overflow-x-hidden custom-scrollbar">
-      {/* Navbar (Header) */}
-      {!isAdmin && <Header />}
-
-      {/* Main Layout */}
-      <div className="flex flex-1 flex-col sm:flex-row">
-        {/* Sidebar */}
-        <div className="hidden sm:block">
-          {!isAdmin && <Sidebar />}
-        </div>
-
-        {/* Sidebar for mobile */}
-        <div className="block sm:hidden fixed bottom-0 w-full z-50">
-          {!isAdmin && <Sidebar />}
-        </div>
-
-        {/* Main Content */}
-        <main className={`flex-1 ${!isAdmin ? "sm:ml-8 sm:pl-2":"" } overflow-y-auto`}>
-          <Routes>
-            <Route path="/" element={<HomeController />} />
-             <Route path="/guest" element={<GuestHome />} />
-            <Route path="/mall/*" element={<ProductsController />} />
-            <Route path="/product/*" element={<Product />} />
-              <Route path="/placeOrder/*" element={<PlaceOrder />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/cart/*" element={<OrderController />} />
-            <Route path="/login/*" element={<LoginController />} />
-            <Route path="/admin/*" element={<AdminController />} />
-            <Route path="/shop/*" element={<ShopController />} />
-            <Route path="/account/*" element={<UserAccountController />} />
-            <Route path="/notification" element={<Notifications />} />
-            <Route path="/reminder" element={<Reminder />} />
-          </Routes>
-        </main>
-      </div>
-    </div>
-  );
-}
-
-// Wrapper Component
+// Shared Component
 function App() {
   return (
     <Router>
-      <AppContent />
+      <div className="flex flex-col h-screen w-screen overflow-x-hidden custom-scrollbar">
+        {/* Navbar (Header) */}
+        <Header />
+
+        {/* Main Layout */}
+        <div className="flex flex-1 flex-col sm:flex-row">
+          {/* Sidebar */}
+          <div className="hidden sm:block">
+            <Sidebar />
+          </div>
+          {/* Sidebar for mobile */}
+          <div className="block sm:hidden fixed bottom-0 w-full z-50">
+            <Sidebar />
+          </div>
+
+          {/* Main Content */}
+          <main className="flex-1 sm:ml-8 sm:pl-2 overflow-y-auto">
+            <Routes>
+              <Route path="/" element={<HomeController />} />
+              <Route path="/guest" element={<GuestHome />} />
+              <Route path="/mall/*" element={<ProductsController />} />
+              <Route path="/product/*" element={<Product />} />
+              <Route path="/placeOrder/*" element={<PlaceOrder />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/cart/*" element={<OrderController />} />
+              <Route path="/login/*" element={<LoginController />} />
+              <Route path="/admin/*" element={<AdminController />} />
+              <Route path="/shop/*" element={<ShopController />} />
+              <Route path="/account/*" element={<UserAccountController />} />
+              <Route path="/notification" element={<Notifications />} />
+              <Route path="/reminder" element={<Reminder/>}/>
+            </Routes>
+          </main>
+        </div>
+      </div>
     </Router>
   );
 }
