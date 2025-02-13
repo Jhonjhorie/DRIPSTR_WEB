@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { supabase } from "../../../constants/supabase";
 
 function AdminLogin() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -13,26 +12,30 @@ function AdminLogin() {
     e.preventDefault();
     setError(null);
 
-    // Step 1: Query the "admins" table for the username
+    // Query the "admins" table to check if the username exists
     const { data, error } = await supabase
-      .from('admins')
-      .select('username, password') // Select username & password_hash
-      .eq('username', username)
+      .from("admins")
+      .select("username, password") // Select username & password
+      .eq("username", username)
       .single();
 
     if (error || !data) {
-      setError('Invalid credentials');
+      setError("Invalid username or password");
       return;
     }
 
-    if (username !== data.username || password !== data.password) { 
-      setError('Invalid username or password');
+    // Compare the entered password with the stored password
+    if (password !== data.password) {
+      setError("Invalid username or password");
       return;
     }
 
-    console.log('Login successful:', data);
-    alert('Login successful');
-    navigate('/admin/dashboard');
+    // Manually generate a session token
+    const adminToken = `admin-${new Date().getTime()}`;
+    localStorage.setItem("adminToken", adminToken);
+
+    // Redirect to the dashboard
+    navigate("/admin/dashboard");
   };
 
   return (
@@ -43,10 +46,10 @@ function AdminLogin() {
         <form className="space-y-4" onSubmit={handleLogin}>
           <div>
             <label className="block text-gray-300 text-sm font-semibold mb-2">Username:</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               className="w-full px-3 py-2 border border-gray-400 rounded-md bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter Username" 
+              placeholder="Enter Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -54,10 +57,10 @@ function AdminLogin() {
           </div>
           <div>
             <label className="block text-gray-300 text-sm font-semibold mb-2">Password:</label>
-            <input 
-              type="password" 
+            <input
+              type="password"
               className="w-full px-3 py-2 border border-gray-400 rounded-md bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter Password" 
+              placeholder="Enter Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

@@ -12,23 +12,29 @@ import Headline from "../View/Headline";
 import Merchants from "../View/Merchants";
 import AdminLogin from "../View/AdminLogin";
 import Admins from "../View/Admins";
+import PrivateRoute from "./PrivateRoute";
+
 const AdminController = () => {
   return (
     <main className="bg-slate-800 p-4">
-    <Routes>
-   
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/reviews" element={<Reviews />} />
-      <Route path="/reports" element={<Reports />} />
-      <Route path="/accounts" element={<Accounts />} />
-      <Route path="/accounts/:accountId" element={<AccountDetail />} />
-      <Route path="/headline" element={<Headline />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/merchants" element={<Merchants />} />
-      <Route path="/" element={<AdminLogin />} />
-      <Route path="/reports/:reportNo" element={<ReportDetail />} />
-      <Route path="/admins" element={<Admins/>} />
-    </Routes>
+      <Routes>
+        {/* Public Route (Login) */}
+        <Route path="/" element={<AdminLogin />} />
+
+        {/* Protected Routes */}
+        <Route element={<PrivateRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/reviews" element={<Reviews />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/accounts" element={<Accounts />} />
+          <Route path="/accounts/:accountId" element={<AccountDetail />} />
+          <Route path="/headline" element={<Headline />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/merchants" element={<Merchants />} />
+          <Route path="/reports/:reportNo" element={<ReportDetail />} />
+          <Route path="/admins" element={<Admins />} />
+        </Route>
+      </Routes>
     </main>
   );
 };

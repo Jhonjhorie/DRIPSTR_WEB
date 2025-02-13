@@ -33,8 +33,10 @@ function Sidebar() {
   };
 
   const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem("adminToken");
     navigate("/admin");
-  }
+  };
   const SidebarItem = ({ icon, label, to }) => (
     <NavLink
       to={to} // Use 'to' prop to link to the route
