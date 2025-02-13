@@ -260,7 +260,7 @@ const BuyConfirm = ({ action, item, onClose }) => {
     </div>
   );
 }else{
-  return <LoginFirst />
+  return <LoginFirst item={item} action={action} onClose={onClose} />
 }
 };
 

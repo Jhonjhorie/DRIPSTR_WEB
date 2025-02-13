@@ -56,18 +56,40 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
     ...Array(placeholdersNeeded).fill({ empty: true }),
   ];
   
-  if (loading) return (<div className='min-h-24'>
+  if (loading) return (
+  <div className='min-h-24'>
+    <img
+          src={require("@/assets/emote/hmmm.png")}
+          alt="No Images Available"
+          className=" drop-shadow-customViolet animate-pulse"
+        />
   <p>Loading...</p>
   </div>
   )
   ;
+  if(categories == "Choose Categories") return (
+    <div className='min-h-24'>
+    <img
+          src={require("@/assets/emote/question.png")}
+          alt="No Images Available"
+          className=" drop-shadow-customViolet animate-bounce"
+        />
+  <p>Please Choose a Category</p>
+  </div>
+  )
+
   if (error) return (<div className='min-h-24'> 
+  <img
+          src={require("@/assets/emote/error.png")}
+          alt="No Images Available"
+          className=" drop-shadow-customViolet "
+        />
   <p>Error: {error}</p>
   </div>
 );
 
   return (
-    <div className="w-full flex flex-col items-center pb-24 min-h-20">
+    <div className="w-full flex flex-col items-center pb-24 min-h-[22rem]">
       {selectedItem && (
         <dialog
           id="my_modal_4"

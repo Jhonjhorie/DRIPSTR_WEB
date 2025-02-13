@@ -63,7 +63,14 @@ const Cart = ({action, closeDrawer }) => {
         </div>
         <div className="h-[78vh] overflow-y-auto flex flex-col gap-2 custom-scrollbar pr-2">
           {loading ? (
+            <div>
+                <img
+          src={require("@/assets/emote/hmmm.png")}
+          alt="No Images Available"
+          className=" drop-shadow-customViolet "
+        />
             <p className="text-center text-lg font-semibold">Loading your cart...</p>
+            </div>
           ) : error ? (
             <p className="text-center text-lg text-red-600 font-semibold">
               Error fetching cart: {error}
@@ -161,10 +168,13 @@ const Cart = ({action, closeDrawer }) => {
       </div>
     );
   } else {
-    return    <div className="bg-slate-200 text-base-content justify-center items-center min-h-full gap-2 w-[40rem] pr-8 pt-4 pl-4 flex flex-col">
-        <div className="flex justify-center items-center gap-2 text-lg">
-          
-          <LoginFirst /></div></div>;
+    return (
+    <div className="bg-slate-200 text-base-content justify-center min-h-full gap-2 w-[40rem] pr-8 pt-4 pl-4 flex flex-col">
+    <div className="flex items-center justify-center gap-2 text-lg">
+
+    <LoginFirst />
+    </div>
+    </div>);
   }
 };
 
