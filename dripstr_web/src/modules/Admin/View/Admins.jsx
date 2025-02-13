@@ -172,7 +172,7 @@ function Admins() {
                             </h2>
 
                             {error && <p className="text-red-500">{error}</p>}
-
+                            <h1 className="text-white text-md font-bold mb-1">Username</h1>
                             <input
                                 type="text"
                                 placeholder="Username"
@@ -180,6 +180,7 @@ function Admins() {
                                 onChange={(e) => setAdminUsername(e.target.value)}
                                 className="w-full p-2 border rounded mb-2"
                             />
+                            <h1 className="text-white text-md font-bol mb-1">Password</h1>
                             <input
                                 type="text"
                                 placeholder="Password"
