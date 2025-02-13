@@ -1,7 +1,8 @@
 import React from "react";
 import style from "../Style/style.css";
 import drplogo from "@/assets/logoBlack.png";
-import hmmEmote from "../../../../src/assets/emote/hmmm.png";
+import hmmEmote from "@/assets/emote/hmmm.png";
+import successEmote from "@/assets/emote/success.png";
 import { supabase } from "@/constants/supabase";
 
 const { useState, useEffect } = React;
@@ -255,11 +256,11 @@ function Artists() {
     if (!artId) return;
 
     try {
-    
+      setLoading(true);
       const { data: commentsData, error } = await supabase
         .from("artist_Arts")
         .select("comments")
-        .eq("id", artId) 
+        .eq("id", artId)
         .single();
 
       if (error) {
@@ -267,18 +268,15 @@ function Artists() {
         return;
       }
 
-      // Ensure comments is an array
       const comments = Array.isArray(commentsData?.comments)
         ? commentsData.comments
         : [];
 
-      // Extract unique userIds from comments
       const userIds = [
         ...new Set(comments.map((cmt) => cmt.userId).filter(Boolean)),
       ];
 
       if (userIds.length > 0) {
-        // Fetch user details
         const { data: usersData, error: usersError } = await supabase
           .from("profiles")
           .select("id, full_name, profile_picture")
@@ -300,7 +298,7 @@ function Artists() {
           ...cmt,
           user: userMap?.[cmt.userId] || null,
         }));
-
+        setLoading(false);
         setComments(updatedComments);
       } else {
         setComments(comments);
@@ -308,8 +306,8 @@ function Artists() {
     } catch (err) {
       console.error("Unexpected error:", err.message);
     }
+    setLoading(false);
   };
-
 
   useEffect(() => {
     if (selectArt?.id) {
@@ -435,10 +433,10 @@ function Artists() {
               <div className=" w-full absolute top-0 left-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
                 {" "}
               </div>
-              <div className="flex  justify-between  items-center p-4">
+              <div className="flex   justify-between  items-center py-2 px-4">
                 <div className="flex gap-2">
                   <img
-                    src={art.artists?.artist_Image || "default-profile.png"}
+                    src={art.artists?.artist_Image || successEmote}
                     alt="Artist"
                     className="h-14 w-14 rounded-full object-cover border border-gray-300"
                   />
@@ -471,13 +469,14 @@ function Artists() {
                   </div>
                 </div>
               </div>
-
-              <p className="text-gray-900 p-2 px-10 mt-1 font-semibold">
-                {art.art_Description}
-              </p>
+              <div className=" h-auto max-h-20 overflow-auto scrollbar-hide  py-2 px-5  w-full">
+                <p className="text-gray-900 text-sm   font-semibold">
+                  {art.art_Description}
+                </p>
+              </div>
               <div
                 onClick={() => handleSelectArt(art)}
-                className="w-full px-5 border shadow-md border-custom-purple  rounded-md p-2"
+                className="w-full px-5 border shadow-md border-custom-purple mt-1 rounded-md p-2"
               >
                 <div
                   className={`mt-3 overflow-hidden cursor-pointer  ${
@@ -521,7 +520,6 @@ function Artists() {
             className="relative min-h-[300px] bg-gradient-to-br from-violet-500 to-fuchsia-500 place-content-center justify-items-center p-4 rounded-lg shadow-lg min-w-[300px] max-w-3xl"
             onClick={(e) => {
               e.stopPropagation();
-              setComments([]);
             }}
           >
             {/* Close Button */}
@@ -558,7 +556,7 @@ function Artists() {
               <div className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md">
                 <img
                   src={
-                    selectArt?.artists?.artist_Image || "default-profile.png"
+                    selectArt?.artists?.artist_Image || successEmote
                   }
                   alt="Artist"
                   className="h-full w-full object-cover rounded-md"
@@ -579,23 +577,53 @@ function Artists() {
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              className="h-[60%] w-full rounded-md shadow-inner shadow-slate-400 bg-slate-300"
+              className="h-[60%] w-full rounded-md shadow-inner overflow-y-auto shadow-slate-400 bg-slate-300"
             >
-              {Array.isArray(comments) && comments.length > 0 ? (
+              {loading ? (
+                <div className="flex w-52 flex-col p-2 gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="skeleton bg-slate-500 h-10 w-10 shrink-0 rounded-full"></div>
+                    <div className="flex flex-col gap-4">
+                      <div className="skeleton bg-slate-500  h-4 w-20"></div>
+                      <div className="skeleton bg-slate-500  h-4 w-28"></div>
+                    </div>
+                  </div>
+                </div>
+              ) : Array.isArray(comments) && comments.length > 0 ? (
                 comments.map((cmt, index) => (
                   <div key={index} className="flex items-center gap-3 p-2 mb-2">
                     <img
-                      src={cmt.user?.profile_picture || "default-profile.png"}
+                      src={
+                        cmt.isArtist
+                          ? cmt.artistImage
+                          : cmt.user?.profile_picture || successEmote
+                      }
                       alt="User"
-                      className="w-12 h-12 rounded-md object-cover border-2 border-gray-100"
+                      className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
+                      ${
+                        cmt.isArtist
+                          ? "bg-purple-500 border-purple-900 rounded-md drop-shadow-customViolet"
+                          : "bg-white"
+                      }`}
                     />
+
                     <div>
                       <div className="text-sm font-semibold text-gray-800">
-                        {cmt.user?.full_name || "Unknown"}
+                        {cmt.isArtist
+                          ? cmt.artistName
+                          : cmt.user?.full_name || "Unknown"}
                       </div>
-                      <span className="text-sm px-2 p-1 bg-white rounded-md text-gray-900">
+                      <span
+                        className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
+                      ${
+                        cmt.isArtist
+                          ? "bg-purple-500 px-2 text-slate-100  rounded-md "
+                          : "bg-white text-slate-900 px-1"
+                      }`}
+                      >
                         {cmt.text}
                       </span>
+
                       <span className="text-xs text-gray-400 ml-2">
                         {new Date(cmt.timestamp).toLocaleString()}
                       </span>

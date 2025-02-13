@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import questionEmote from "../../../../../src/assets/emote/question.png";
 import { supabase } from "../../../../constants/supabase";
 import hmmmEmote from "../../../../../src/assets/emote/hmmm.png";
-import successEmote from "../../../../../src/assets/emote/success.png";
+import successEmote from "@/assets/emote/success.png";
 const { useState, useEffect } = React;
 
 function MerchantDashboard() {
@@ -34,8 +34,53 @@ function MerchantDashboard() {
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
   const [imageLoading, setImageLoading] = useState(true);
   const [artsCounts, setArtsCounts] = useState([]);
-  const [totalArtsCount, setTotalArtsCount] = useState(0); // Initialize with 0
+  const [totalArtsCount, setTotalArtsCount] = useState(0);
+  const [selectArt, setSelectArt] = useState(null);
+  const [selectMessage, setMessage] = useState(false);
+  const [newComment, setNewComment] = useState("");
+  const [comments, setComments] = useState([]);
+  const [userId, setUserId] = useState(null);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: userData, error } = await supabase.auth.getUser();
+      if (error || !userData?.user) {
+        console.error("Error fetching user:", error?.message);
+        return;
+      }
+      setUserId(userData.user.id);
+    };
+    fetchUser();
+  }, []);
+  const handleSelectArt = async (art) => {
+    if (!art) {
+      console.error("Selected art is null!");
+      return;
+    }
+
+    console.log("Selected Art:", art);
+    setSelectArt(art);
+
+    try {
+      const { data: artData, error } = await supabase
+        .from("artist_Arts")
+        .select("comments")
+        .eq("id", art.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching comments:", error.message);
+        setComments([]);
+        return;
+      }
+      setSelectedImage(true);
+      const commentsList = artData?.comments || [];
+      setComments(commentsList);
+    } catch (err) {
+      console.error("Unexpected error:", err.message);
+      setComments([]);
+    }
+  };
   const handleImageLoad = (event, artId) => {
     const { naturalWidth, naturalHeight } = event.target;
     setImageOrientations((prev) => ({
@@ -67,66 +112,51 @@ function MerchantDashboard() {
         return;
       }
 
-      if (user) {
-        console.log("Current user:", user);
-
-        const { data: artists, error: artistError } = await supabase
-          .from("artist")
-          .select("artist_Name, id, artist_Bio, art_Type, artist_Image")
-          .eq("owner_Id", user.id);
-
-        if (artistError) {
-          throw artistError;
-        }
-
-        if (artists && artists.length > 0) {
-          const artist = artists[0];
-          setArtistData(artist);
-          setSelectedArtistId(artist.id);
-          console.log("Artist Name:", artist.artist_Name);
-          console.log("Artist ID:", artist.id);
-
-          const { data: arts, error: artsError } = await supabase
-            .from("artist_Arts")
-            .select("art_Name, id, art_Description, art_Image")
-            .eq("artist_Id", artist.id);
-          if (artsError) {
-            console.error("Error fetching products:", artsError.message);
-            setError(artsCounts.message);
-          } else {
-            // Count products by shop
-            const artCountByArtist = artists.map((artist) => ({
-              artist_Id: artist.id,
-              artsCount: arts.filter((art) => art.artist_Id === artists.id)
-                .length,
-            }));
-
-            setArtsCounts(artCountByArtist);
-
-            // Calculate total art count
-            const totalArtCount = artCountByArtist.reduce(
-              (acc, artist) => acc + artist.artsCount,
-              0
-            );
-
-            console.log("Total arts count:", totalArtCount);
-            setTotalArtsCount(totalArtCount);
-
-            setArtistArts(arts);
-          }
-          if (artsError) {
-            throw artsError;
-          }
-
-          setArtistArts(arts); // Assuming `setArtistArts` is a state setter
-        } else {
-          console.log("No artist page found for the current user.");
-          setError("No artist page found for the current user.");
-        }
-      } else {
+      if (!user) {
         console.log("No user is signed in.");
         setError("No user is signed in.");
+        setLoading(false);
+        return;
       }
+
+      console.log("Current user:", user);
+
+      // Fetch artist profile associated with the logged-in user
+      const { data: artists, error: artistError } = await supabase
+        .from("artist")
+        .select("id, artist_Name, artist_Bio, art_Type, artist_Image")
+        .eq("owner_Id", user.id)
+        .single();
+
+      if (artistError || !artists) {
+        console.log("No artist account found.");
+        setError("No artist account found.");
+        setLoading(false);
+        return;
+      }
+
+      setArtistData(artists);
+      setSelectedArtistId(artists.id);
+      console.log("Artist Name:", artists.artist_Name);
+      console.log("Artist ID:", artists.id);
+
+      // Fetch only arts linked to this artist
+      const { data: arts, error: artsError } = await supabase
+        .from("artist_Arts")
+        .select("id, art_Name, art_Description, art_Image, likes, comments")
+        .eq("artist_Id", artists.id);
+
+      if (artsError) {
+        console.error("Error fetching arts:", artsError.message);
+        setError("Error fetching arts.");
+        setLoading(false);
+        return;
+      }
+
+      setArtistArts(arts);
+      setTotalArtsCount(arts.length);
+
+      console.log("Total arts count:", arts.length);
     } catch (error) {
       console.error("Error fetching user/shop data:", error.message);
       setError("An error occurred while fetching user/shop data.");
@@ -134,9 +164,10 @@ function MerchantDashboard() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchUserProfileAndArt();
-  }, []); // Run once on mount
+  }, []);
 
   //handle Add art to the gallery
   const handleAddAd = async () => {
@@ -266,6 +297,208 @@ function MerchantDashboard() {
   const handleOpenAddArt = () => {
     setShowSelectedArts(true);
   };
+
+  const handleLike = async (artId, currentLikes) => {
+    try {
+      const { data: userData, error: authError } =
+        await supabase.auth.getUser();
+      if (authError || !userData?.user) {
+        console.error("Authentication error:", authError?.message);
+        return;
+      }
+
+      const userId = userData.user.id;
+      const likesArray = Array.isArray(currentLikes) ? currentLikes : [];
+
+      const updatedLikes = likesArray.includes(userId)
+        ? likesArray.filter((id) => id !== userId)
+        : [...likesArray, userId];
+
+      const { error } = await supabase
+        .from("artist_Arts")
+        .update({ likes: updatedLikes })
+        .eq("id", artId)
+        .eq("artist_Id", selectedArtistId || userId);
+
+      if (error) throw error;
+
+      setArtistArts((prevArts) =>
+        prevArts.map((art) =>
+          art.id === artId ? { ...art, likes: updatedLikes } : art
+        )
+      );
+    } catch (error) {
+      console.error("Error updating likes:", error.message);
+    }
+  };
+
+  const handleAddComment = async (artId) => {
+    if (!newComment.trim()) return;
+  
+    try {
+      // Get current user data
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) throw new Error("User fetch failed: " + userError.message);
+  
+      const userId = userData?.user?.id;
+      if (!userId) throw new Error("User not logged in");
+  
+      // Check if the user is an artist
+      const { data: artistData, error: artistError } = await supabase
+        .from("artist")
+        .select("id, artist_Name, artist_Image")
+        .eq("id", selectedArtistId) // Get artist details using artist_Id
+        .single();
+  
+      let commentAuthor = {};
+      
+      if (artistData) {
+        // If user is an artist, store artist details
+        commentAuthor = {
+          isArtist: true,
+          artistId: artistData.id,
+          artistName: artistData.artist_Name,
+          artistImage: artistData.artist_Image,
+        };
+      } else {
+        // If user is a regular profile, fetch from "profiles" table
+        const { data: userProfile, error: profileError } = await supabase
+          .from("profiles")
+          .select("id, full_name, profile_picture")
+          .eq("id", userId)
+          .single();
+  
+        if (profileError) throw new Error("Error fetching user profile");
+  
+        commentAuthor = {
+          isArtist: false,
+          userId: userProfile.id,
+          userName: userProfile.full_name,
+          userImage: userProfile.profile_picture,
+        };
+      }
+  
+      // Fetch existing comments
+      const { data: artData, error: fetchError } = await supabase
+        .from("artist_Arts")
+        .select("comments")
+        .eq("id", artId)
+        .single();
+  
+      if (fetchError) throw new Error("Error fetching comments: " + fetchError.message);
+  
+      const existingComments = artData?.comments || [];
+  
+      // Add new comment with correct author details
+      const updatedComments = [
+        ...existingComments,
+        {
+          ...commentAuthor,
+          text: newComment,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+  
+      // Update the database
+      const { error: updateError } = await supabase
+        .from("artist_Arts")
+        .update({ comments: updatedComments })
+        .eq("id", artId);
+  
+      if (updateError) throw new Error("Error updating comment: " + updateError.message);
+  
+      // Update UI
+      setArtistArts((prevArts) =>
+        prevArts.map((art) =>
+          art.id === artId ? { ...art, comments: updatedComments } : art
+        )
+      );
+  
+      setNewComment("");
+      setComments(updatedComments);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  
+
+  const fetchCommentsWithUsers = async (artId) => {
+    if (!artId) return;
+
+    try {
+      setLoading(true);
+
+      const { data: commentsData, error } = await supabase
+        .from("artist_Arts")
+        .select("comments")
+        .eq("id", artId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching comments:", error.message);
+        return;
+      }
+
+      console.log("Fetched Comments Data:", commentsData);
+
+      const comments = Array.isArray(commentsData?.comments)
+        ? commentsData.comments
+        : [];
+
+      if (comments.length === 0) {
+        console.warn("No comments found for this art.");
+        setComments([]);
+        return;
+      }
+
+      const userIds = [
+        ...new Set(comments.map((cmt) => cmt.userId).filter(Boolean)),
+      ];
+
+      console.log("User IDs:", userIds);
+
+      if (userIds.length > 0) {
+        const { data: usersData, error: usersError } = await supabase
+          .from("profiles")
+          .select("id, full_name, profile_picture")
+          .in("id", userIds);
+
+        if (usersError) {
+          console.error("Error fetching users:", usersError.message);
+          return;
+        }
+
+        console.log("Fetched Users Data:", usersData);
+
+        const userMap = usersData.reduce((acc, user) => {
+          acc[user.id] = user;
+          return acc;
+        }, {});
+
+        const updatedComments = comments.map((cmt) => ({
+          ...cmt,
+          user: userMap[cmt.userId] || null,
+        }));
+
+        console.log("Updated Comments with Users:", updatedComments);
+
+        setComments(updatedComments);
+      } else {
+        setComments(comments);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectArt?.id) {
+      fetchCommentsWithUsers(selectArt.id);
+    }
+  }, [selectArt]);
+
   return (
     <div className="h-full w-full bg-slate-300  overflow-hidden  ">
       <div className="absolute mx-3 right-0 z-20">
@@ -429,8 +662,22 @@ function MerchantDashboard() {
                             </h2>
                           </div>
                         </div>
-                        <div className="hover:scale-105 duration-200 cursor-pointer">
-                          <box-icon type="solid" name="edit"></box-icon>
+                        <div className="flex gap-2 justify-items-center">
+                          <div className="text-xl font-bold text-slate-800">
+                            {" "}
+                            {art.likes?.length || 0}
+                          </div>
+                          <div className="hover:scale-105 duration-200 mt-1 cursor-pointer">
+                            <box-icon
+                              name="heart"
+                              color={
+                                art.likes?.includes(userId) ? "red" : "gray"
+                              }
+                              onClick={() => handleLike(art.id, art.likes)}
+                              className="cursor-pointer"
+                              type="solid"
+                            ></box-icon>
+                          </div>
                         </div>
                       </div>
 
@@ -444,15 +691,7 @@ function MerchantDashboard() {
                             ? "w-full h-[300px] flex justify-center"
                             : "w-[300px] h-[400px] mx-auto"
                         }`}
-                        onClick={() =>
-                          setSelectedImage({
-                            image: art.art_Image,
-                            name: art.art_Name,
-                            artist: artistData.artist_Image,
-                            artist_name: artistData.artist_Name,
-                            id: art.id,
-                          })
-                        }
+                        onClick={() => handleSelectArt(art)}
                       >
                         <img
                           src={art.art_Image}
@@ -481,7 +720,9 @@ function MerchantDashboard() {
                   alt="Shop Logo"
                   className="drop-shadow-custom h-28 justify-center w-28 object-cover"
                 />
-                <h1 className="text-slate-900 font-semibold ">No upload yet.</h1>
+                <h1 className="text-slate-900 font-semibold ">
+                  No upload yet.
+                </h1>
               </div>
             )}
           </div>
@@ -592,46 +833,166 @@ function MerchantDashboard() {
         </div>
       )}
       {/* Image Modal */}
-      {selectedImage && (
+      {selectArt && (
         <div
           className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
-          onClick={() => setSelectedImage(null)}
+          onClick={() => {
+            setSelectArt(null);
+            setComments([]);
+          }}
         >
           <div
             className="relative min-h-[300px] bg-gradient-to-br from-violet-500 to-fuchsia-500 place-content-center justify-items-center p-4 rounded-lg shadow-lg min-w-[300px] max-w-3xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
+            {/* Close Button */}
             <button
-              className="absolute top-0 right-0 text-white bg-gradient-to-br from-violet-500 to-fuchsia-500 px-3  rounded-full p-2"
-              onClick={() => setSelectedImage(null)}
+              className="absolute top-0 right-0 text-white bg-gradient-to-br from-violet-500 to-fuchsia-500 px-3 rounded-full p-2"
+              onClick={() => {
+                setSelectArt(null);
+                setComments([]);
+              }}
             >
               ✕
             </button>
 
-            <img
-              src={selectedImage.image}
-              alt="Expanded Art"
-              className={` overflow-hidden cursor-pointer rounded-md border shadow-md border-custom-purple ${
-                imageOrientations[selectedImage.id] === "landscape"
-                  ? "w-full h-[550px] flex justify-center"
-                  : "w-auto h-[550px] mx-auto"
-              }`}
-            />
-
-            <div className="bg-violet-500 text-white px-3 text-xl iceland-bold py-2 rounded-md absolute top-2 left-2 ">
-              {selectedImage.name}
+            {/* Art Image */}
+            {selectArt?.art_Image && (
+              <img
+                src={selectArt.art_Image}
+                alt="Expanded Art"
+                className={`overflow-hidden cursor-pointer rounded-md border shadow-md border-custom-purple ${
+                  imageOrientations[selectArt.id] === "landscape"
+                    ? "w-full h-[550px] flex justify-center"
+                    : "w-auto h-[550px] mx-auto"
+                }`}
+              />
+            )}
+            <div className="bg-violet-500 text-white px-3 text-xl iceland-bold py-2 rounded-md absolute top-2 left-2">
+              {selectArt?.art_Name || "Untitled"}
             </div>
-            <div className=" absolute bottom-2 right-2 flex  ">
-              <div className="text-white text-xl  drop-shadow-customWhite iceland-bold p-2 h-auto w-auto">
-                {selectedImage.artist_name}
+
+            <div className="absolute bottom-2 right-2 flex">
+              <div className="text-white text-xl drop-shadow-customWhite iceland-bold p-2 h-auto w-auto">
+                {artistData.artist_Name || "Unknown Artist"}
               </div>
-              <div className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md ">
+              <div className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md">
                 <img
-                  src={selectedImage.artist}
-                  alt="Expanded Art"
-                  className="h-full w-full  object-cover rounded-md"
+                  src={artistData.artist_Image || successEmote}
+                  alt="Artist"
+                  className="h-full w-full object-cover rounded-md"
                 />
               </div>
+            </div>
+          </div>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            className="w-1/3 h-full relative bg-slate-200 px-5"
+          >
+            <div className="text-2xl mt-14 text-fuchsia-800 font-bold text-center p-2">
+              Comment on {selectArt?.art_Name || "Untitled"}
+            </div>
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="h-[60%] w-full rounded-md shadow-inner overflow-y-auto shadow-slate-400 bg-slate-300"
+            >
+              {loading ? (
+                <div className="flex w-52 flex-col p-2 gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="skeleton bg-slate-500 h-10 w-10 shrink-0 rounded-full"></div>
+                    <div className="flex flex-col gap-4">
+                      <div className="skeleton bg-slate-500  h-4 w-20"></div>
+                      <div className="skeleton bg-slate-500  h-4 w-28"></div>
+                    </div>
+                  </div>
+                </div>
+              ) : Array.isArray(comments) && comments.length > 0 ? (
+                comments.map((cmt, index) => (
+                  <div key={index} className="flex items-center gap-3 p-2 mb-2">
+                  <img
+                    src={
+                      cmt.isArtist
+                        ? cmt.artistImage
+                        : cmt.user?.profile_picture || successEmote
+                    }
+                    alt="User"
+                    className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
+                    ${
+                      cmt.isArtist
+                        ? "bg-purple-500 border-purple-900 rounded-md drop-shadow-customViolet"
+                        : "bg-white"
+                    }`}
+                  />
+
+                  <div>
+                    <div className="text-sm font-semibold text-gray-800">
+                      {cmt.isArtist
+                        ? cmt.artistName
+                        : cmt.user?.full_name || "Unknown"}
+                    </div>
+                    <span
+                      className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
+                    ${
+                      cmt.isArtist
+                        ? "bg-purple-500 px-2 text-slate-100  rounded-md "
+                        : "bg-white text-slate-900 px-1"
+                    }`}
+                    >
+                      {cmt.text}
+                    </span>
+
+                    <span className="text-xs text-gray-400 ml-2">
+                      {new Date(cmt.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+                ))
+              ) : (
+                <div className="w-full h-full place-content-center align-middle justify-center place-items-center">
+                  <div className="">
+                    <img src={hmmmEmote} alt="" className="h-20 w-20" />
+                  </div>
+                  <div>
+                    <p className="text-gray-900 font-bold text-sm">
+                      No comments yet.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="h-[10%] mt-1 p-2 w-full bg-slate-300"
+            >
+              <textarea
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Type your thoughts about this art..."
+                className="w-full text-sm font-semibold text-slate-900 p-1 resize-none h-full bg-slate-50 rounded-md"
+              ></textarea>
+            </div>
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="w-full h-auto p-1 flex justify-end "
+            >
+              <button
+                onClick={() => handleAddComment(selectArt.id)}
+                className="px-4 text-slate-50 p-1 bg-custom-purple glass hover:scale-95 duration-200 rounded-md "
+              >
+                Comment
+              </button>
             </div>
           </div>
         </div>
