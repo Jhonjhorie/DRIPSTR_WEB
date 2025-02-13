@@ -3,9 +3,11 @@ import { Link } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 const    Review = () => {
   return (
-    <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
-
-    <Sidebar />
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">  
+      <Sidebar />
+      </div>
+      
     <div className="px-5">
     <div className="bg-slate-200 min-h-screen p-4">
       {/* Header */}

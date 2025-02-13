@@ -51,9 +51,10 @@ const Orders = () => {
   }
 
   return (
-    <div className="p-4 bg-slate-200 flex flex-row min-h-screen">
-      {/* Sidebar */}
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">  
       <Sidebar />
+      </div>
 
       <div className="px-5 flex-1 flex flex-col">  
         {/* Main Content */}
@@ -88,8 +89,8 @@ const Orders = () => {
 
 
           {loading ? (
-          <div className="flex flex-col items-center">
-            <img src="/emote/hmmm.png" alt="Loading..." className="w-16 h-16" />
+            <div className="flex flex-col h-100 align-middle justify-center items-center">
+            <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-auto animate-pulse" />
             <span>Loading...</span>
           </div>
         ) : orders.length > 0 ? (
@@ -126,7 +127,7 @@ const Orders = () => {
             </div>
           ))
         ) : (
-          <p>No orders found.</p>
+          <p className="flex flex-col h-dvh align-middle justify-center items-center" >No orders found.</p>
         )}
 
           

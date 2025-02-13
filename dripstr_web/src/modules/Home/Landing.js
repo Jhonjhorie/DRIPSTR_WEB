@@ -385,7 +385,7 @@ function LandingPage() {
                     <FontAwesomeIcon icon={faAngleDown} />
                   </div>
                   <button
-                    onClick={handleLogin("toArtist")}
+                    onClick={() => {handleLogin("toArtist")}}
                     className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
                   >
                     Login
@@ -506,7 +506,7 @@ function LandingPage() {
                     <FontAwesomeIcon icon={faAngleDown} />
                   </div>
                   <button
-                    onClick={handleLogin("toMerchant")}
+                    onClick={() => {handleLogin("toMerchant")}}
                     className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
                   >
                     Login

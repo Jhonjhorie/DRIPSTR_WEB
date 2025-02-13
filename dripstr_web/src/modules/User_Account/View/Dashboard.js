@@ -47,25 +47,36 @@ const Account = () => {
   };
 
   return (
-    <div className="p-4 bg-slate-200 flex flex-row min-h-screen">
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">  
       <Sidebar />
+      </div>
+      
       <div className="flex-1 px-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Manage My Account</h1>
 
+
+        {loading ? (
+              <div className="flex flex-col h-auto align-middle justify-center items-center">
+                <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-auto animate-pulse" />
+                <span>Loading...</span>
+              </div>
+            ) : (
+<div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Personal Profile */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
+
+
+          <div className="bg-white p-6 relative rounded-lg shadow-md">
+          <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
             <div className="flex justify-between items-center mb-4">
+
               <h2 className="text-lg font-semibold text-gray-800">Personal Profile</h2>
               <Link to="/account/profile" className="text-blue-600 hover:underline">Edit Profile</Link>
             </div>
 
-            {loading ? (
-              <div className="flex flex-col items-center">
-                <img src="/emote/hmmm.png" alt="Loading..." className="w-16 h-16" />
-                <span>Loading...</span>
-              </div>
-            ) : (
+
               <div className="flex items-center gap-4">
                 <img
                   src={profile?.profile_picture || "/default-avatar.png"}
@@ -79,18 +90,19 @@ const Account = () => {
                   <p className="text-gray-600">Mobile: {profile?.mobile || "N/A"}</p>
                 </div>
               </div>
-            )}
+            
           </div>
 
-          {/* Address Book */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
+
+          <div className="bg-white p-6 rounded-lg relative shadow-md">
+          <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-800">Address Book</h2>
               <Link to="/account/address" className="text-blue-600 hover:underline">Edit</Link>
             </div>
-            {loading ? (
-              <p className="text-gray-600">Loading addresses...</p>
-            ) : addresses.length > 0 ? (
+            { addresses.length > 0 ? (
               addresses.filter(a => a.is_default_shipping).map((address, index) => (
                 <div key={index} className="text-gray-700">
                   <p className="font-semibold">Default Shipping Address</p>
@@ -102,17 +114,20 @@ const Account = () => {
               <p className="text-gray-600">No addresses found.</p>
             )}
           </div>
+          
         </div>
 
-        {/* Recent Orders */}
-        <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+
+
+        <div className="bg-white relative p-6 rounded-lg shadow-md mt-6">
+        <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-2 rounded-t-md">
+              {" "}
+            </div>
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Orders</h2>
-          {loading ? (
-            <p className="text-gray-600">Loading orders...</p>
-          ) : (
+          
             <table className="w-full border-collapse border border-gray-300">
               <thead>
-                <tr className="bg-gray-200 text-left">
+                <tr className="bg-custom-purple glass text-left text-white">
                   <th className="p-2 border">Order #</th>
                   <th className="p-2 border">Placed On</th>
                   <th className="p-2 border">Items</th>
@@ -130,8 +145,13 @@ const Account = () => {
                 </tr>
               </tbody>
             </table>
-          )}
+            
         </div>
+        
+        </div> 
+        )}
+
+
 
         {/* Modal */}
         {isModalOpen && (

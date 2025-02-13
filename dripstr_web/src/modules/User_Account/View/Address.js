@@ -123,8 +123,10 @@ const Address = () => {
   };
 
   return (
-    <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">  
       <Sidebar />
+      </div>
       <div className="px-5 flex-1">
         <div className="p-4 bg-slate-200 min-h-screen">
         <div className="flex flex-1 justify-between align-bottom flex-row">

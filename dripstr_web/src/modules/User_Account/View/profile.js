@@ -95,8 +95,10 @@ const UserProfile = () => {
  
 
   return (
-    <div className="p-4 flex min-h-screen bg-slate-200">
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">  
       <Sidebar />
+      </div>
 
       <div className="flex-1 p-4 px-9">
         <div className="bg-slate-200 ">
