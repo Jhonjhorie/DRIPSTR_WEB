@@ -15,6 +15,7 @@ import ArtistAccount from '../View/Artist/ArtistAccount';
 import ArtistOrders from '../View/Artist/ArtistOrders';
 import ArtistAddArts from '../View/Artist/AddArt';
 import AddItem  from '../View/AddItem';
+import Account from '../View/Account';
 
 
 const ShopProfileController = () => {
@@ -35,7 +36,7 @@ const ShopProfileController = () => {
       <Route path="/Artist/ArtistAddArts" element={<ArtistAddArts />} />
       <Route path="/Artist/ArtistAccount" element={<ArtistAccount />} />
       <Route path="/Artist/ArtistOrders" element={<ArtistOrders />} />
-        
+      <Route path="/Account" element={<Account />} />
     </Routes>
   );
 };

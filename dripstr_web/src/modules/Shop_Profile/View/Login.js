@@ -29,15 +29,16 @@ function Login() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [user, setUser] = useState(null);
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
-
+  const [TermsandCondition, setTermsandCondition] = React.useState(false); // Alert Success
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
-  const [pdfFile, setpdfFile] = useState(null);
+  const [pdfFile, setPdfFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isStat, setStatus] = useState(null);
   const [hasCreatedAccount, setHasCreatedAccount] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingFetch, setLoadingFetch] = useState(false);
+
   const fetchUserProfile = async () => {
     setLoading(false);
     try {
@@ -109,95 +110,93 @@ function Login() {
 
   // Handle form submission
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setIsSubmitting(true);
-    //handles alerts on missing inputs
+
+    const maxImageSize = 2 * 1024 * 1024;
+    const maxPdfSize = 5 * 1024 * 1024;
+
     if (!shopName.trim()) {
       console.error("Shop name is required");
       setIsSubmitting(false);
       setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert(false), 3000);
+      return;
     }
+
     if (!phoneNumber.trim()) {
       console.error("Phone Number is required");
       setIsSubmitting(false);
       setShowAlert2(true);
-      setTimeout(() => {
-        setShowAlert2(false);
-      }, 3000);
+      setTimeout(() => setShowAlert2(false), 3000);
       return;
     }
+
     if (phoneNumber.length !== 11) {
       console.error("Phone Number must be 11 digits");
       setIsSubmitting(false);
       setShowAlert4(true);
-      setTimeout(() => {
-        setShowAlert4(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert4(false), 3000);
+      return;
     }
+
     if (!shopDescription.trim()) {
       console.error("Shop Description is required");
       setIsSubmitting(false);
       setShowAlert5(true);
-      setTimeout(() => {
-        setShowAlert5(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert5(false), 3000);
+      return;
     }
+
     if (!shopAddress.trim()) {
       console.error("Shop Address is required");
       setIsSubmitting(false);
       setShowAlert3(true);
-      setTimeout(() => {
-        setShowAlert3(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert3(false), 3000);
+      return;
     }
+
     if (!selectedImage) {
       console.error("Shop Image is required");
       setIsSubmitting(false);
       setShowAlert6(true);
-      setTimeout(() => {
-        setShowAlert6(false);
-      }, 3000);
-      return; 
+      setTimeout(() => setShowAlert6(false), 3000);
+      return;
     }
+
     if (!selectedFile) {
       console.error("Shop File is required");
       setIsSubmitting(false);
       setShowAlert7(true);
-      setTimeout(() => {
-        setShowAlert7(false);
-      }, 3000);
+      setTimeout(() => setShowAlert7(false), 3000);
       return;
     }
 
-    //define current user credit
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (!user || userError) {
-      console.error("No user found");
+    if (imageFile.size > maxImageSize) {
+      console.error("Image size exceeds the 2MB limit.");
+      setIsSubmitting(false);
+      setShowAlert6(true);
+      setTimeout(() => setShowAlert6(false), 3000);
       return;
     }
 
-    //set null if there's no Image & File Inputted
-    let uploadedImageUrl = null;
-    let uploadedPdfUrl = null;
+    if (pdfFile.size > maxPdfSize) {
+      console.error("PDF file size exceeds the 5MB limit.");
+      setIsSubmitting(false);
+      setShowAlert7(true);
+      setTimeout(() => setShowAlert7(false), 3000);
+      return;
+    }
 
-    //Set Image from shop to DB
-    if (imageFile) {
-      try {
-        // Generate a unique name using timestamp + random ID
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const image = new Image();
+      image.onload = async () => {
+
+        // Upload image to Supabase if everything is valid
         const uniqueImageName = `shop_profile/${Date.now()}-${Math.random()
           .toString(36)
           .substring(2, 10)}-${imageFile.name}`;
-
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
           .upload(uniqueImageName, imageFile);
@@ -207,114 +206,117 @@ function Login() {
           return;
         }
 
+        let uploadedImageUrl = null;
         if (data?.path) {
           const { data: publicUrlData, error: urlError } = supabase.storage
             .from("shop_profile")
             .getPublicUrl(data.path);
-
           if (urlError) {
             console.error("Error fetching image URL:", urlError.message);
             return;
           }
-
-          uploadedImageUrl = publicUrlData.publicUrl; 
+          uploadedImageUrl = publicUrlData.publicUrl;
           console.log("Image uploaded successfully:", uploadedImageUrl);
         }
-      } catch (err) {
-        console.error("Unexpected error while uploading image:", err);
-      }
-    }
 
-    //Set Business Permit from shop to DB
-    if (pdfFile) {
-      try {
-        const uniquePdfName = `pdfs/${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 10)}-${pdfFile.name}`;
+        // Upload PDF file
+        let uploadedPdfUrl = null;
+        if (pdfFile) {
+          const uniquePdfName = `pdfs/${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2, 10)}-${pdfFile.name}`;
+          const { data, error: uploadError } = await supabase.storage
+            .from("shop_profile")
+            .upload(uniquePdfName, pdfFile);
 
-        const { data, error: uploadError } = await supabase.storage
-          .from("shop_profile")
-          .upload(uniquePdfName, pdfFile);
-
-        if (uploadError) {
-          console.error("Error uploading PDF:", uploadError.message);
-          return;
-        }
-
-        if (data?.path) {
-          const { data: publicUrlData, error: urlError } = supabase.storage
-            .from("pdfs")
-            .getPublicUrl(data.path);
-
-          if (urlError) {
-            console.error("Error fetching PDF URL:", urlError.message);
+          if (uploadError) {
+            console.error("Error uploading PDF:", uploadError.message);
             return;
           }
 
-          uploadedPdfUrl = publicUrlData.publicUrl;
-          console.log("PDF uploaded successfully:", uploadedPdfUrl);
+          if (data?.path) {
+            const { data: publicUrlData, error: urlError } = supabase.storage
+              .from("pdfs")
+              .getPublicUrl(data.path);
+            if (urlError) {
+              console.error("Error fetching PDF URL:", urlError.message);
+              return;
+            }
+            uploadedPdfUrl = publicUrlData.publicUrl;
+            console.log("PDF uploaded successfully:", uploadedPdfUrl);
+          }
         }
-      } catch (err) {
-        console.error("Unexpected error while uploading PDF:", err);
-      }
-    }
 
-    const userId = user.id;
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser();
+        if (!user || userError) {
+          console.error("No user found");
+          return;
+        }
 
-    try {
-      const { data: shopData, error: shopError } = await supabase
-        .from("merchantRegistration")
-        .insert([
-          {
-            shop_name: shopName,
-            contact_number: phoneNumber,
-            description: shopDescription,
-            address: shopAddress,
-            id: userId,
-            is_Approved: null,
-            shop_image: uploadedImageUrl || null,
-            shop_BusinessPermit: uploadedPdfUrl || null,
-          },
-        ])
-        .single();
+        const userId = user.id;
+        try {
+          const { data: shopData, error: shopError } = await supabase
+            .from("merchantRegistration")
+            .insert([
+              {
+                shop_name: shopName,
+                contact_number: phoneNumber,
+                description: shopDescription,
+                address: shopAddress,
+                id: userId,
+                is_Approved: null,
+                shop_image: uploadedImageUrl || null,
+                shop_BusinessPermit: uploadedPdfUrl || null,
+              },
+            ])
+            .single();
 
-      if (shopError) {
-        console.error("Error inserting shop data:", shopError.message);
-        setIsSubmitting(false);
-        return;
-      }
+          if (shopError) {
+            console.error("Error inserting shop data:", shopError.message);
+            setIsSubmitting(false);
+            return;
+          }
 
-      console.log("Shop created successfully:", shopData);
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ isMerchant: false })
-        .eq("id", userId);
+          console.log("Shop created successfully:", shopData);
 
-      if (updateError) {
-        console.error("Error updating user profile:", updateError.message);
-        setIsSubmitting(false);
-        return;
-      }
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ isMerchant: false })
+            .eq("id", userId);
 
-      console.log(
-        "User profile updated with merchant_id and ismerchant = true"
-      );
+          if (updateError) {
+            console.error("Error updating user profile:", updateError.message);
+            setIsSubmitting(false);
+            return;
+          }
 
-      // Reset form fields after successful insertion
-      setShopName("");
-      setPhoneNumber("");
-      setShopDescription("");
-      setShopAddress("");
-      setImageFile(null);
-      setpdfFile(null);
-      setShowAlertSuccess(true);
-      setIsSubmitting(false);
-    } catch (err) {
-      console.error("Unexpected error:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
+          console.log(
+            "User profile updated with merchant_id and ismerchant = true"
+          );
+
+          // Reset form fields after successful insertion
+          setShopName("");
+          setPhoneNumber("");
+          setShopDescription("");
+          setShopAddress("");
+          setImageFile(null);
+          setPdfFile(null);
+          setShowAlertSuccess(true);
+          setIsSubmitting(false);
+        } catch (err) {
+          console.error("Unexpected error:", err);
+          setIsSubmitting(false);
+        }
+      };
+
+      image.src = e.target.result;
+    };
+    reader.readAsDataURL(imageFile);
   };
+
   const handleSetisMerchant = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -346,7 +348,7 @@ function Login() {
         "User profile updated with merchant_id and ismerchant = true"
       );
       navigate("/shop/MerchantDashboard");
-      window.location.reload(); 
+      window.location.reload();
     } catch (err) {
       console.error("Unexpected error:", err);
     } finally {
@@ -380,7 +382,7 @@ function Login() {
       const { error: deleteError } = await supabase
         .from("merchantRegistration")
         .delete()
-        .eq("owner_Id", userId);
+        .eq("id", userId);
 
       if (deleteError) {
         console.error("Error deleting shop:", deleteError.message);
@@ -424,12 +426,17 @@ function Login() {
     setshowImage(false);
     setshowFile(false);
   };
-
+  const handleCloseTandC = () => {
+    setTermsandCondition(false);
+  };
+  const ShowTandC = () => {
+    setTermsandCondition(true);
+  };
   //define image input
   const handleFileChange = (event) => {
-    const file = event.target.files[0]; // Get the selected file
+    const file = event.target.files[0];
     if (file) {
-      setImageFile(file); // Store the file in state
+      setImageFile(file);
       setSelectedImage(URL.createObjectURL(file));
       console.log("Selected file:", file);
     }
@@ -439,7 +446,7 @@ function Login() {
   const handleFileChange2 = (event) => {
     const file = event.target.files[0];
     if (file && file.type === "application/pdf") {
-      setpdfFile(file);
+      setPdfFile(file);
       setFileName(file.name);
       setSelectedFile(file);
     } else {
@@ -516,7 +523,7 @@ function Login() {
                 </h2>
                 <div className="p-5">
                   <img
-                    src={successEmote}
+                    src={hmmEmote}
                     alt="Success Emote"
                     className="object-contain rounded-lg p-1  drop-shadow-customViolet"
                   />
@@ -743,6 +750,13 @@ function Login() {
             </form>
           </div>
         )}
+        <div onClick={ShowTandC} data-tip="Read Merchant Terms and Condition" className=" tooltip-left tooltip bg-slate-50 hover:scale-95 duration-200 cursor-pointer rounded-full shadow-md  absolute right-7 bottom-7">
+          <img
+            src={questionEmote}
+            alt="Success Emote"
+            className="object-contain h-16 w-16 rounded-lg p-1 drop-shadow-customViolet"
+          />
+        </div>
       </div>
 
       {showAlert && (
@@ -1047,6 +1061,249 @@ function Login() {
               className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
             >
               Okay!
+            </div>
+          </div>
+        </div>
+      )}
+      {TermsandCondition && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white w-auto p-5   justify-items-center rounded-md shadow-md relative">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
+
+            <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+              Terms And Condition
+            </h2>
+
+            <div className="bg-gradient-to-r top-0 left-0 from-violet-500 to-fuchsia-500 rounded-md text-slate-800 shadow-inner shadow-slate-600 h-[400px] w-[800px] overflow-y-scroll p-4 space-y-4">
+              <div className="bg-gray-200 p-6 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+                <h1 className="text-3xl font-bold text-center text-gray-900 mb-6 border-b pb-3">
+                  MERCHANT’S TERMS AND CONDITIONS OF USE
+                </h1>
+
+                <div className="space-y-6 text-gray-700">
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      1. DEFINITIONS
+                    </h2>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>
+                        <strong>Merchant:</strong> Any individual, business, or
+                        entity that uploads and sells products via the DRIPSTR
+                        platform.
+                      </li>
+                      <li>
+                        <strong>Platform:</strong> DRIPSTR, the integrated
+                        e-commerce and design software system for 3D apparel
+                        creation and virtual shopping experiences.
+                      </li>
+                      <li>
+                        <strong>Products:</strong> Any 3D apparel designs,
+                        clothing items, or related digital content uploaded by
+                        Merchants onto the DRIPSTR platform.
+                      </li>
+                      <li>
+                        <strong>Agreement:</strong> These Terms and Conditions,
+                        which govern the Merchant’s use of the DRIPSTR platform.
+                      </li>
+                      <li>
+                        <strong>Customer:</strong> Any individual or business
+                        purchasing Products through the DRIPSTR platform.
+                      </li>
+                    </ul>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      2. AGREEMENT
+                    </h2>
+                    <p>
+                      These Terms and Conditions (referred to as "Agreement")
+                      apply to all services and functionality provided by
+                      DRIPSTR to the Merchant, including the uploading of
+                      products, storefront management, and customer
+                      interactions.
+                    </p>
+                    <p>
+                      By using the DRIPSTR platform, Merchants agree to comply
+                      with all terms laid out herein, as well as any additional
+                      guidelines issued by DRIPSTR from time to time.
+                    </p>
+                    <p>
+                      DRIPSTR reserves the right to modify these Terms at any
+                      time. Changes will take effect immediately upon posting to
+                      the platform. Merchants are responsible for reviewing the
+                      Terms regularly.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      3. MERCHANT REGISTRATION AND BUSINESS VERIFICATION
+                    </h2>
+                    <p>
+                      Upon registration, Merchants must provide valid and
+                      accurate business documentation, including but not limited
+                      to:
+                    </p>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>A valid Business Permit</li>
+                      <li>
+                        A Government-Issued ID of the business owner or
+                        authorized representative
+                      </li>
+                      <li>
+                        Business Information (e.g., legal name, business
+                        address)
+                      </li>
+                      <li>
+                        Owner or Representative Information (e.g., full name,
+                        contact details)
+                      </li>
+                    </ul>
+                    <p>
+                      These documents will be used for the verification of the
+                      business to ensure compliance with legal and operational
+                      standards. Failure to provide the required documentation
+                      will result in the denial of access to merchant
+                      functionalities on the DRIPSTR platform.
+                    </p>
+                    <p>
+                      DRIPSTR reserves the right to suspend or terminate
+                      accounts that fail to comply with the verification process
+                      or provide fraudulent or inaccurate information.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      4. MERCHANT RESPONSIBILITIES
+                    </h2>
+                    <p>
+                      Merchants are responsible for uploading accurate and
+                      original 3D apparel designs to the platform. They must
+                      ensure that they have the legal rights to sell any
+                      Products uploaded.
+                    </p>
+                    <p>
+                      Merchants are expected to actively manage their
+                      storefronts, upload Products regularly, and engage with
+                      Customers through the platform's communication tools.
+                    </p>
+                    <p>
+                      Merchants must not upload content that is fraudulent,
+                      misleading, or in violation of any applicable laws.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      5. PAYMENT AND REVENUE SHARING
+                    </h2>
+                    <p>
+                      The platform will charge a commission on each sale, as
+                      stated in the Merchant's Agreement, which may be updated
+                      from time to time by DRIPSTR.
+                    </p>
+                    <p>
+                      Payments to Merchants will be processed through DRIPSTR’s
+                      integrated payment system and distributed within 30 days
+                      following the successful completion of each sale.
+                    </p>
+                    <p>
+                      <strong>Subscription Plans:</strong>
+                    </p>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>
+                        Merchants can subscribe to a Monthly or Annual plan with
+                        premium features like enhanced marketplace exposure,
+                        analytics, and customer engagement tools.
+                      </li>
+                      <li>
+                        Pricing and benefits are outlined on the platform and
+                        may be subject to change with prior notice.
+                      </li>
+                      <li>
+                        Subscription payments are auto-debited, and
+                        cancellations do not offer refunds for partially used
+                        months or years.
+                      </li>
+                    </ul>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      6. DELIVERY AND PRODUCT DISPLAY
+                    </h2>
+                    <p>
+                      DRIPSTR offers tools for Merchants to showcase Products
+                      via 3D visualizations. Merchants are responsible for
+                      ensuring the accuracy of these digital representations.
+                    </p>
+                    <p>
+                      Merchants acknowledge that delivery of virtual goods is
+                      instant and final upon successful purchase. For physical
+                      goods, Merchants are responsible for managing delivery
+                      logistics and ensuring timely shipping to Customers.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      7. LIABILITY AND WARRANTIES
+                    </h2>
+                    <p>
+                      DRIPSTR makes no warranties regarding the performance or
+                      accuracy of the platform, including the 3D apparel
+                      creation tools and any marketplace services.
+                    </p>
+                    <p>
+                      DRIPSTR will not be liable for any indirect, incidental,
+                      or consequential damages resulting from the use of the
+                      platform, including but not limited to, loss of profits,
+                      data, or business interruptions.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      8. TERMINATION OF SERVICE
+                    </h2>
+                    <p>
+                      DRIPSTR reserves the right to suspend or terminate a
+                      Merchant’s access to the platform if they are found to be
+                      in violation of these Terms or if their use of the
+                      platform causes harm or reputational damage to DRIPSTR.
+                    </p>
+                    <p>
+                      Merchants may terminate their use of the platform at any
+                      time, but they will remain responsible for any obligations
+                      that arise before the termination date.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      9. INTELLECTUAL PROPERTY
+                    </h2>
+                    <p>
+                      All intellectual property rights related to the DRIPSTR
+                      platform, including the software, interface, and design
+                      tools, remain the exclusive property of DRIPSTR.
+                    </p>
+                  </section>
+                </div>
+
+                <div className="mt-6 text-center">
+                  <button
+                    onClick={handleCloseTandC}
+                    className="bg-primary-color m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                  >
+                    Accept Terms
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

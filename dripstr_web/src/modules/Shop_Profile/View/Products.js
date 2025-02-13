@@ -77,31 +77,29 @@ function Products() {
           setShopData(shops);
           console.log("Fetched shops:", shops);
 
-          const selectedShopId = shops[0].id; 
+          const selectedShopId = shops[0].id;
           setSelectedShopId(selectedShopId);
 
-         
-          const ads = shops[0].shop_Ads || []; 
+          const ads = shops[0].shop_Ads || [];
 
           const updatedAds = await Promise.all(
             ads.map(async (ad) => {
-              console.log("Ad ID:", ad.id); 
-              console.log("Ad Image Path:", ad.ad_Image); 
+              console.log("Ad ID:", ad.id);
+              console.log("Ad Image Path:", ad.ad_Image);
 
               let imageUrl = null;
 
               if (ad.ad_Image) {
-             
                 const fullImagePath = ad.ad_Image.startsWith(
                   "shop_profile/shop_Ads/"
                 )
                   ? ad.ad_Image
-                  : `shop_profile/shop_Ads/${ad.ad_Image}`; 
+                  : `shop_profile/shop_Ads/${ad.ad_Image}`;
 
                 const { data: publicUrlData, error: publicUrlError } =
                   supabase.storage
-                    .from("shop_profile") 
-                    .getPublicUrl(fullImagePath); 
+                    .from("shop_profile")
+                    .getPublicUrl(fullImagePath);
 
                 if (publicUrlError) {
                   console.error(
@@ -383,8 +381,22 @@ function Products() {
   };
   const DeleteItem = async () => {
     try {
+      const { error: cartError } = await supabase
+        .from("cart")
+        .delete()
+        .eq("prod_id", selectedItem.id);
+
+      if (cartError) throw cartError; 
+
+      const { error: ordersError } = await supabase
+        .from("orders")
+        .delete()
+        .eq("prod_num", selectedItem.id);
+
+      if (ordersError) throw ordersError; 
+
       const { error } = await supabase
-        .from("shop_Product")
+        .from("shop_Product") 
         .delete()
         .eq("id", selectedItem.id);
 
@@ -951,7 +963,7 @@ function Products() {
       )}
       {showAlertDel && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-           <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+          <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={successEmote}
@@ -1103,7 +1115,7 @@ function Products() {
                         <label className="text-sm text-slate-800 font-semibold">
                           Description:
                         </label>
-                        <div className="text-sm text-primary-color font-semibold">
+                        <div className="text-sm h-[100px] overflow-hidden overflow-y-scroll text-primary-color font-semibold">
                           {selectedItem.item_Description}
                         </div>
                       </div>

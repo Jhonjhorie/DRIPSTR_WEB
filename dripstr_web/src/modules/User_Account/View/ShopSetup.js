@@ -6,7 +6,7 @@ import { supabase } from "../../../constants/supabase";
 const shop = [{ label: "Shop", path: "/shop/MerchantCreate" }];
 
 const Shop = () => {
-  const [isMerchant, setIsMerchant] = useState(false);
+  const [isArtist, setIsMerchant] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
   const [isDeclined, setIsDeclined] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
@@ -33,7 +33,7 @@ const Shop = () => {
 
         const { data: profiles, error: profileError } = await supabase
           .from("profiles")
-          .select("isMerchant, isApplying")
+          .select("isMerchant, isArtist")
           .eq("id", user.id)
           .single();
 
@@ -43,7 +43,7 @@ const Shop = () => {
         }
 
         if (isMounted) {
-          setIsApplying(profiles?.isApplying === true);
+          setIsMerchant(profiles?.isArtist === true);
         }
 
         const { data: shop, error: shopError } = await supabase
@@ -60,6 +60,7 @@ const Shop = () => {
         if (isMounted) {
           setIsApproved(shop?.is_Approved === true);
           setIsDeclined(shop?.is_Approved === false);
+          
         }
       } catch (err) {
         console.error("Unexpected error:", err);
@@ -188,17 +189,17 @@ const Shop = () => {
           <div className="text-center">
             <button
               className={` ${
-                isMerchant || loading
+                isApproved || loading
                   ? "btn-lg rounded-md hover:bg-slate-800 cursor-not-allowed bg-slate-900 text-gray-100 "
                   : "btn-lg bg-primary rounded-md font-semibold hover:bg-opacity-80 text-slate-900"
               }`}
-              disabled={isMerchant || loading}
+              disabled={isApproved || loading}
             >
-              {loading || isMerchant ? (
+              {loading || isApproved ? (
                 loading ? (
                   "Loading..."
                 ) : (
-                  "You Are Already a Merchant"
+                  "You're Already a Merchant"
                 )
               ) : (
                 <Link
@@ -211,9 +212,28 @@ const Shop = () => {
             </button>
           </div>
           <div className="text-center">
-            <Link to="/shop/ArtistCreate">
-              <button className="btn btn-primary btn-lg">Be an Artist</button>
-            </Link>
+          <div className="text-center">
+            <button
+              className={` ${
+                isApproved || loading
+                  ? "btn-lg rounded-md hover:bg-slate-800 cursor-not-allowed bg-slate-900 text-gray-100 "
+                  : "btn-lg bg-primary rounded-md font-semibold hover:bg-opacity-80 text-slate-900"
+              }`}
+              disabled={isArtist || loading}
+            >
+              {loading || isArtist ? (
+                loading ? (
+                  "Loading..."
+                ) : (
+                 "You're Already an Artist"
+                )
+              ) : (
+                <Link to="/shop/ArtistCreate" className="text-white text-inherit no-underline">
+                  Be an Artist
+                </Link>
+              )}
+            </button>
+          </div>
           </div>
         </div>
       </div>
