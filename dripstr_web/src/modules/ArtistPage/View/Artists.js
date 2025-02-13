@@ -213,101 +213,150 @@ function Artists() {
   };
   const handleAddComment = async (artId) => {
     if (!newComment.trim()) return;
-
+  
     try {
-      const { data: userData, error: userError } =
-        await supabase.auth.getUser();
+      const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError) throw new Error("User fetch failed: " + userError.message);
-
+  
       const userId = userData?.user?.id;
       if (!userId) throw new Error("User not logged in");
+  
+      // Fetch the user's full_name and profile_picture from 'profiles' table
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("full_name, profile_picture")
+        .eq("id", userId)
+        .single();
+  
+      if (profileError) throw new Error("User profile fetch failed: " + profileError.message);
+  
+      // Optimistically update UI with fetched profile data
+      const newCommentObj = {
+        userId,
+        text: newComment,
+        timestamp: new Date().toISOString(),
+        user: { 
+          full_name: profileData?.full_name || "Unknown",
+          profile_picture: profileData?.profile_picture || successEmote,
+        }
+      };
+  
+      setComments((prevComments) => [...prevComments, newCommentObj]);
+      setNewComment(""); 
+  
 
       const { data: artData, error: fetchError } = await supabase
         .from("artist_Arts")
         .select("comments")
         .eq("id", artId)
         .single();
-
-      if (fetchError)
-        throw new Error("Error fetching comments: " + fetchError.message);
-
+  
+      if (fetchError) throw new Error("Error fetching comments: " + fetchError.message);
+  
       const existingComments = artData?.comments || [];
-      const updatedComments = [
-        ...existingComments,
-        { userId, text: newComment, timestamp: new Date().toISOString() },
-      ];
-
+      const updatedComments = [...existingComments, { ...newCommentObj, user: undefined }];
+  
       const { error: updateError } = await supabase
         .from("artist_Arts")
         .update({ comments: updatedComments })
         .eq("id", artId);
-
-      if (updateError)
-        throw new Error("Error updating comment: " + updateError.message);
-
-      setComments(updatedComments);
-      setNewComment("");
+  
+      if (updateError) throw new Error("Error updating comment: " + updateError.message);
+      
     } catch (error) {
       console.error(error.message);
     }
   };
+  
+const fetchCommentsWithUsers = async (artId) => {
+  if (!artId) return;
 
-  const fetchCommentsWithUsers = async (artId) => {
-    if (!artId) return;
+  try {
+    setLoading(true);
 
-    try {
-      setLoading(true);
-      const { data: commentsData, error } = await supabase
-        .from("artist_Arts")
-        .select("comments")
-        .eq("id", artId)
-        .single();
+    // Fetch current user
+    const { data: user, error: userError } = await supabase.auth.getUser();
+    if (userError) {
+      console.error("Error fetching user:", userError.message);
+      return;
+    }
+    const currentUserId = user?.user?.id;
 
-      if (error) {
-        console.error("Error fetching comments:", error.message);
+    // Fetch the artwork's artist ID
+    const { data: artData, error: artError } = await supabase
+      .from("artist_Arts")
+      .select("artist_Id, comments")
+      .eq("id", artId)
+      .single();
+
+    if (artError) {
+      console.error("Error fetching artwork:", artError.message);
+      return;
+    }
+
+    const { artist_Id, comments } = artData || {};
+    if (!artist_Id) return;
+
+    // Fetch artist owner_Id
+    const { data: artistData, error: artistError } = await supabase
+      .from("artist")
+      .select("owner_Id")
+      .eq("id", artist_Id)
+      .single();
+
+    if (artistError) {
+      console.error("Error fetching artist:", artistError.message);
+      return;
+    }
+
+    const isOwner = artistData?.owner_Id === currentUserId;
+
+    const formattedComments = Array.isArray(comments)
+      ? comments.map((cmt) => ({
+          ...cmt,
+          isOwner: cmt.userId === currentUserId && isOwner, // Mark owner comments
+        }))
+      : [];
+
+    // Fetch user profiles for comments
+    const userIds = [
+      ...new Set(formattedComments.map((cmt) => cmt.userId).filter(Boolean)),
+    ];
+
+    if (userIds.length > 0) {
+      const { data: usersData, error: usersError } = await supabase
+        .from("profiles")
+        .select("id, full_name, profile_picture")
+        .in("id", userIds);
+
+      if (usersError) {
+        console.error("Error fetching users:", usersError.message);
         return;
       }
 
-      const comments = Array.isArray(commentsData?.comments)
-        ? commentsData.comments
-        : [];
+      // Create user lookup
+      const userMap = usersData.reduce((acc, user) => {
+        acc[user.id] = user;
+        return acc;
+      }, {});
 
-      const userIds = [
-        ...new Set(comments.map((cmt) => cmt.userId).filter(Boolean)),
-      ];
+      // Attach user details
+      const updatedComments = formattedComments.map((cmt) => ({
+        ...cmt,
+        user: userMap?.[cmt.userId] || null,
+      }));
 
-      if (userIds.length > 0) {
-        const { data: usersData, error: usersError } = await supabase
-          .from("profiles")
-          .select("id, full_name, profile_picture")
-          .in("id", userIds);
-
-        if (usersError) {
-          console.error("Error fetching users:", usersError.message);
-          return;
-        }
-
-        // Create a user lookup map
-        const userMap = usersData?.reduce((acc, user) => {
-          acc[user.id] = user;
-          return acc;
-        }, {});
-
-        // Attach user details to comments
-        const updatedComments = comments.map((cmt) => ({
-          ...cmt,
-          user: userMap?.[cmt.userId] || null,
-        }));
-        setLoading(false);
-        setComments(updatedComments);
-      } else {
-        setComments(comments);
-      }
-    } catch (err) {
-      console.error("Unexpected error:", err.message);
+      setComments(updatedComments);
+    } else {
+      setComments(formattedComments);
     }
-    setLoading(false);
-  };
+  } catch (err) {
+    console.error("Unexpected error:", err.message);
+    setComments([]);
+  }
+  setLoading(false);
+};
+
 
   useEffect(() => {
     if (selectArt?.id) {
@@ -628,6 +677,7 @@ function Artists() {
                         {new Date(cmt.timestamp).toLocaleString()}
                       </span>
                     </div>
+                    
                   </div>
                 ))
               ) : (

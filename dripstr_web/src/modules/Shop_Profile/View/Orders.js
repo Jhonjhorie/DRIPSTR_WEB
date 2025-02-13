@@ -18,9 +18,26 @@ function Orders({ shopOwnerId }) {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const handleOpenModal = (order) => {
-    setSelectedOrder(order);
+    if (!order) return;
+  
+    setSelectedOrder({
+      id: order.id,
+      transaction_id: order.transaction_id,
+      buyerName: order.buyerName || "N/A",
+      buyerAddress: order.buyerAddress || "N/A",
+      buyerPhone: order.buyerPhone || "N/A",
+      variantImg: order.order_variation?.imagePath || "", 
+      variantName: order.order_variation?.variant_Name || "Unknown Variant",
+      size: order.order_size?.size || "Unknown Size", 
+      price: order.order_size?.price || 0, 
+      total_price: order.total_price,
+      shipping: order.shipping || 0,
+      final_price: order.total_price + (order.shipping || 0),
+    });
+  
     setIsModalOpen(true);
   };
+  
   const handlePrepare = () => {
     setIsModalOpen2(true);
   };
@@ -100,42 +117,39 @@ function Orders({ shopOwnerId }) {
       const { data: orders, error: orderError } = await supabase
         .from("orders")
         .select(
-          `id, order_status, payment_method, transaction_id, total_price, quantity, shipping_fee, created_at, order_variation, order_size, 
-           shop_Product!inner(id, item_Name, item_Variant, shop_Id),
+          `id, order_status, payment_method, transaction_id, total_price, quantity, shipping_fee, created_at, 
+           order_variation, order_size, 
+           shop_Product!inner(id, item_Name, shop_Id),
            profile:acc_num (full_name, email, mobile, address)`
         )
-        .eq("shop_Product.shop_Id", shopId);
+        .eq("shop_Product.shop_Id", shopId)
+        .eq("approve_Admin", "accepted");
 
       if (orderError) throw orderError;
 
       const processedOrders = orders.map((order) => {
-        const product = order.shop_Product;
-        const variantName = order.order_variation;
-        const sizeName = order.order_size;
-        const shipping_fee = order.shipping_fee;
-        const transaction_id = order.transaction_id;
-        const variant = product.item_Variant.find(
-          (v) => v.variant_Name === variantName
-        );
+        const variant =
+          typeof order.order_variation === "string"
+            ? JSON.parse(order.order_variation)
+            : order.order_variation;
 
-        if (!variant) {
-          console.warn("Variant not found for:", order);
-          return { ...order, variantImg: null, sizePrice: null };
-        }
-
-        const sizeDetails = variant.sizes.find((s) => s.size === sizeName);
+        const sizeDetails =
+          typeof order.order_size === "string"
+            ? JSON.parse(order.order_size)
+            : order.order_size;
 
         return {
           ...order,
-          productName: product.item_Name,
-          variantImg: variant.imagePath,
-          size: sizeName,
-          shipping: shipping_fee,
-          transaction: transaction_id,
-          price: sizeDetails ? sizeDetails.price : null,
+          productName: order.shop_Product.item_Name,
+          variantImg: variant?.imagePath || null, 
+          variantName: variant?.variant_Name || "N/A", 
+          size: sizeDetails?.size || "N/A",
+          price: sizeDetails?.price || null,
+          shipping: order.shipping_fee,
+          transaction: order.transaction_id,
           buyerName: order.profile?.full_name || "N/A",
           buyerEmail: order.profile?.email || "N/A",
-          buyerPhone: order.profile?.phone_number || "N/A",
+          buyerPhone: order.profile?.mobile || "N/A",
           buyerAddress: order.profile?.address || "N/A",
         };
       });
@@ -421,122 +435,121 @@ function Orders({ shopOwnerId }) {
             <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
             </div>
-          <div className="p-4">
-          <h2 className="font-medium text-slate-800 py-2">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Information
-              </span>
-              <div className="text-SM font-semibold text-slate-950">
-                Transaction ID: {selectedOrder.transaction_id}
-              </div>
-            </h2>
+            <div className="p-4">
+              <h2 className="font-medium text-slate-800 py-2">
+                <span className="font-bold text-[20px] md:text-2xl">
+                  Order Information
+                </span>
+                <div className="text-SM font-semibold text-slate-950">
+                  Transaction ID: {selectedOrder.transaction_id}
+                </div>
+              </h2>
 
-            {/* Order Details */}
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={selectedOrder.variantImg || sample1}
-                  alt={selectedOrder.shop_Product.item_Name}
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto p-2 relative">
-                <div className="flex w-full justify-between place-items-center">
-                  <div className="text-lg md:text-3xl font-bold text-slate-950">
-                    {selectedOrder.shop_Product.item_Name}
+              {/* Order Details */}
+              <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
+                <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
+                  <img
+                    src={logo}
+                    alt={selectedOrder?.variantName || "No Variant"}
+                    className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                    sizes="100%"
+                  />
+                </div>
+                <div className="w-1/3 h-full bg-slate-100">
+                  <img
+                    src={selectedOrder.variantImg || sample1}
+                    alt={selectedOrder.variantName || "N/A"}
+                    className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                    sizes="100%"
+                  />
+                </div>
+                <div className="w-full md:w-2/3 h-auto p-2 relative">
+                  <div className="flex w-full justify-between place-items-center">
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Variant:{" "}
+                      <span className="text-sm text-slate-800">
+                        {selectedOrder.variantName || "N/A"}
+                      </span>
+                    </div>
+
+                    <div className="text-xl font-semibold text-slate-950">
+                      ID: {selectedOrder.id}
+                    </div>
                   </div>
-                  <div className="text-xl font-semibold text-slate-950">
-                    ID: {selectedOrder.id}
+
+                  <a className="text-sm text-custom-purple font-semibold">
+                    Name:{" "}
+                    <span className="text-slate-900">
+                      {selectedOrder.buyerName || "N/A"}
+                    </span>
+                  </a>
+                  <br />
+                  <a className="text-sm text-custom-purple font-semibold">
+                    Address:{" "}
+                    <span className="text-slate-900">
+                      {selectedOrder.buyerAddress || "N/A"}
+                    </span>
+                  </a>
+                  <br />
+                  <a className="text-sm text-custom-purple font-semibold">
+                    Phone number:{" "}
+                    <span className="text-slate-900">
+                      {selectedOrder.buyerPhone || "N/A"}
+                    </span>
+                  </a>
+
+                  <div className="text-custom-purple text-sm font-semibold">
+                    Size:{" "}
+                    <span className="text-sm text-slate-800">
+                      {selectedOrder.size}
+                    </span>
+                  </div>
+                  <div className="text-custom-purple text-sm font-semibold">
+                    Vouchers:{" "}
+                    <span className="text-sm text-slate-800">
+                      {selectedOrder.voucher || "None"}
+                    </span>
+                  </div>
+                  <div className="text-custom-purple text-sm font-semibold">
+                    Item Price:{" "}
+                    <span className="text-sm text-slate-800">
+                      ₱{selectedOrder.price}
+                    </span>
+                  </div>
+                  <div className="text-custom-purple text-sm font-semibold">
+                    Delivery fee:{" "}
+                    <span className="text-sm text-slate-800">
+                      ₱{selectedOrder.shipping || "N/A"}
+                    </span>
+                  </div>
+
+                  <div className="text-xl font-semibold bg-slate-50 px-2 glass rounded-md right-2 text-slate-900 bottom-0 absolute">
+                    PRICE:{" "}
+                    <span className="text-yellow-500 text-3xl">
+                      ₱
+                      {selectedOrder.final_price ||
+                        selectedOrder.total_price + selectedOrder.shipping_fee}
+                    </span>
                   </div>
                 </div>
+              </div>
 
-                <a className="text-sm text-custom-purple font-semibold">
-                  Name:{" "}
-                  <span className="text-slate-900">
-                    {selectedOrder.buyerName || "N/A"}
-                  </span>
-                </a>
-                <br />
-                <a className="text-sm text-custom-purple font-semibold">
-                  Address:{" "}
-                  <span className="text-slate-900">
-                    {selectedOrder.buyerAddress || "N/A"}
-                  </span>
-                </a>
-                <br />
-                <a className="text-sm text-custom-purple font-semibold">
-                  Phone number:{" "}
-                  <span className="text-slate-900">
-                    {selectedOrder.buyerPhone || "N/A"}
-                  </span>
-                </a>
-
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800">
-                    {selectedOrder.order_variation || "N/A"}
-                  </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size:{" "}
-                  <span className="text-sm text-slate-800">
-                    {selectedOrder.order_size || "N/A"}
-                  </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800">
-                    {selectedOrder.voucher || "None"}
-                  </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800">
-                    ₱{selectedOrder.total_price}
-                  </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800">
-                    ₱{selectedOrder.shipping || "N/A"}
-                  </span>
-                </div>
-
-                <div className="text-xl font-semibold bg-slate-50 px-2 glass rounded-md right-2 text-slate-900 bottom-0 absolute">
-                  PRICE:{" "}
-                  <span className="text-yellow-500 text-3xl">
-                    ₱{selectedOrder.final_price || selectedOrder.total_price + selectedOrder.shipping_fee}
-                  </span>
-                </div>
+              {/* Buttons */}
+              <div className="flex justify-between w-full">
+                <button
+                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                  onClick={handleCloseModal}
+                >
+                  Close
+                </button>
+                <button
+                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+                  onClick={handleCloseModal}
+                >
+                  Prepare
+                </button>
               </div>
             </div>
-
-            {/* Buttons */}
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-              <button
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-                onClick={handleCloseModal}
-              >
-                Prepare
-              </button>
-            </div>
-          </div>
-       
           </div>
         </div>
       )}

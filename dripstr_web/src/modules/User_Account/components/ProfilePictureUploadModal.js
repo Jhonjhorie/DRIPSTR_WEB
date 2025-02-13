@@ -25,7 +25,7 @@ const ProfilePictureUploadModal = ({ isOpen, onClose, userId, currentImage }) =>
 
     // Upload image to Supabase Storage
     const { error: uploadError } = await supabase.storage
-      .from("avatars")
+      .from("ProfilePicture")
       .upload(filePath, selectedFile, { upsert: true });
 
     if (uploadError) {
@@ -36,7 +36,7 @@ const ProfilePictureUploadModal = ({ isOpen, onClose, userId, currentImage }) =>
 
     // Get public URL of the uploaded image
     const { data: publicUrlData } = supabase.storage
-      .from("avatars")
+      .from("ProfilePicture")
       .getPublicUrl(filePath);
 
     const imageUrl = publicUrlData.publicUrl;
