@@ -34,7 +34,7 @@ const Carousel = () => {
   };
 
   return (
-    <div className="w-[100%] h-80 md:w-[65%] relative rounded-md bg-slate-200 drop-shadow-lg group overflow-hidden">
+    <div className="w-[100%] h-96 md:w-[85%] relative rounded-md bg-slate-200 drop-shadow-lg group overflow-hidden">
       
       {/* Images */}
       <div className="w-full h-full flex transition-transform duration-500 ease-in-out"
@@ -43,7 +43,7 @@ const Carousel = () => {
         {images.map((url, index) => (
           <div key={index} className="flex-shrink-0 h-full w-full">
             <img src={url} alt={`Slide ${index}`} 
-              className="w-[80%] h-[80%] md:w-[90%] md:h-[90%] lg:w-full lg:h-full object-contain z-20 duration-300 transition-all relative left-10 lg:left-0 lg:top-0 md:left-5 md:top-4 top-4 group-hover:left-24"
+              className="w-[80%] h-[80%] md:w-[90%] md:h-[90%] lg:w-full lg:h-full object-cover z-20 duration-300 transition-all relative left-10 lg:left-0 lg:top-0 md:left-5 md:top-4 top-4 "
             />
           </div>
         ))}
@@ -70,7 +70,7 @@ const Carousel = () => {
         ))}
       </div>
 
-      <Logo className='z-20 absolute left-8 top-16 lg:top-10 opacity-100 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all group-hover:scale-110 w-[50%] h-[50%] object-contain' />
+    
       <img src={require('@/assets/images/others/carouselframe.png')} className='z-10 absolute left-[-2rem] bottom-[0rem] w-[100%] h-[100%] opacity-50 object-cover' />
       <img src={require('@/assets/images/others/carouselframe.png')} className='z-10 absolute right-[-2rem] rotate-180 bottom-[0rem] w-[150%] h-[150%] opacity-10 object-cover' />
       <img src={require('@/assets/images/others/name.png')} className='z-10 absolute right-2 bottom-[-1rem] lg:bottom-0 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all group-hover:scale-110 w-[15%] h-[50%] object-contain'/>

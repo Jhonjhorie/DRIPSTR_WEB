@@ -58,13 +58,16 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
   return (
     <div
       ref={containerRef}
-      className="relative min-w-[96%] md:min-w-[58%] h-20 md:h-28 justify-center items-center bg-slate-50 rounded-full shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex overflow-hidden"
+      className="relative min-w-[96%] md:min-w-[85%] h-20 md:h-28 justify-center  items-center bg-slate-50 rounded-md shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex overflow-hidden"
     >
+       <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md z-20">
+              {" "}
+            </div>
       {/* Title */}
-      <div className="flex justify-center gap-2 items-end flex-col">
-        <button className="text-sm sm:text-md md:text-xl duration-300 transition-all font-semibold hover:bg-primary-color p-1 rounded-full hover:text-white glass cursor-pointer"
-       onClick={() => onItemClick("Choose Categories")} 
-        >Categories</button>
+      <div className="flex justify-center gap-2 items-end flex-col ">
+        <h1 className="text-sm sm:text-md md:text-3xl  pl-10 duration-300 transition-all font-semibold text-secondary-color p-1 rounded-full"
+       
+        >Categories</h1>
         <div className="flex justify-center space-x-2">
           {Array.from({ length: totalScreens }).map((_, index) => (
             <button

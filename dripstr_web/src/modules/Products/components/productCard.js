@@ -41,6 +41,9 @@ const ProductCard = ({ item, onClick }) => {
       onClick={onClick}
       className="flex flex-col flex-1 max-w-[13.5rem] w-[13.5rem] items-center mx-1 mb-2 rounded-md bg-slate-100 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
     >
+       <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md z-20">
+              {" "}
+            </div>
       {item.str && (
         <Logo className="absolute top-2 left-2 group-hover:opacity-100 duration-300 transition-all opacity-50 w-7 h-7" />
       )}

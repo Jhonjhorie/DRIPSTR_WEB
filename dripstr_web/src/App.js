@@ -49,6 +49,7 @@ function App() {
               <Route path="/" element={<HomeController />} />
               <Route path="/guest" element={<GuestHome />} />
               <Route path="/mall/*" element={<ProductsController />} />
+              <Route path="/arts/*" element={<ArtistController />} />
               <Route path="/product/*" element={<Product />} />
               <Route path="/placeOrder/*" element={<PlaceOrder />} />
               <Route path="/search" element={<Search />} />
