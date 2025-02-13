@@ -3,34 +3,58 @@ import Sidebar from "../components/Sidebar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "../../../constants/supabase";
+import useUserProfile from "@/shared/mulletCheck.js";
+
 const Orders = () => {
+  const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [selectedTab, setSelectedTab] = useState("All");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const tabs = ["All", "To Pay", "To Ship", "To Receive", "Received (32)"];
-
-  const [orderDetails, setOrderDetails] = useState(null);
 
   const location = useLocation();
   const navigate = useNavigate();
   const { item } = location.state || {}; // Retrieve the passed product details
 
   useEffect(() => {
-    // Fetch data from localStorage
-    const savedOrderDetails = localStorage.getItem("orderDetails");
-    if (savedOrderDetails) {
-      setOrderDetails(JSON.parse(savedOrderDetails));
+    if (profile?.id) {
+      const fetchOrders = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .eq('acc_num', profile.id);
+  
+          if (error) {
+            throw error;
+          }
+  
+          setOrders(data);
+        } catch (error) {
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+  
+      fetchOrders();
     }
-  }, []);
+  }, [profile]); // Add profile as a dependency
 
 
-  if (!orderDetails) {
-    return <div>No orders found.</div>;
+  if (error) {
+    return <div>Error: {error}</div>;
   }
 
   return (
-    <div className="p-4 bg-slate-200 flex flex-row min-h-screen">
-      {/* Sidebar */}
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">  
       <Sidebar />
+      </div>
 
       <div className="px-5 flex-1 flex flex-col">  
         {/* Main Content */}
@@ -53,9 +77,7 @@ const Orders = () => {
             ))}
           </div>
 
-
-          
-          {/* Removed unnecessary margin-top */}
+          {/* Search Bar */}
           <div className="group relative flex items-center bg-gray-50 rounded-md my-2">
             <button className="w-10 h-10 flex items-center justify-center group-hover:bg-primary-color transition-all duration-300">
               <FontAwesomeIcon
@@ -65,88 +87,50 @@ const Orders = () => {
             </button>
           </div>
 
-          {/* Order Items */}
-          <div className="bg-gray-100 rounded-lg p-4 mb-4">
-            <h2 className="text-lg font-bold text-gray-800 mb-2">
-              LIXIAOJU 1718344222
-            </h2>
-            <span className="text-green-500 font-medium mb-4 block">Received</span>
-            <div className="flex gap-4">
-              <img
-                src="https://via.placeholder.com/80"
-                alt="Order Item"
-                className="w-20 h-20 rounded-lg"
-              />
-              <div className="flex-1">
-                <p className="text-gray-800 font-medium">
-                  [LIXIAOJU] For Dell Latitude 3410 3510 E3510 E3410 Laptop Charging
-                  Flex Cable 07DM5H 0N8R4T DC Power Jack cable
-                </p>
-                <p className="text-gray-500">5CM</p>
-                <p className="text-green-500">Free Returns</p>
-                <p className="text-gray-800 font-bold">₱93.60</p>
-                <p className="text-gray-500">Qty: 1</p>
-              </div>
-            </div>
-          </div>
 
-          {/* Adjust Margin and Padding Here */}
-          <div className="bg-gray-100 rounded-lg p-4">
-            <h2 className="text-lg font-bold text-gray-800 mb-2">
-              Top_Appliancer
-            </h2>
-            <span className="text-green-500 font-medium mb-4 block">Received</span>
-            <div className="flex gap-4">
-              <img
-                src="https://via.placeholder.com/80"
-                alt="Order Item"
-                className="w-20 h-20 rounded-lg"
-              />
-              <div className="flex-1">
-                <p className="text-gray-800 font-medium">
-                  1Pc Universal Crossbody Nylon Patch Phone Lanyards Rope Strap
-                  Lanyard / Nylon Soft Rope Cell Phone Hanging Cord with curing
-                  cloth
-                </p>
-                <p className="text-gray-500">Black</p>
-                <p className="text-green-500">30 Days Free Returns</p>
-                <p className="text-gray-800 font-bold">₱54.00</p>
-                <p className="text-gray-500">Qty: 1</p>
-              </div>
-            </div>
+          {loading ? (
+            <div className="flex flex-col h-100 align-middle justify-center items-center">
+            <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-auto animate-pulse" />
+            <span>Loading...</span>
           </div>
-
-          {/*Fetched orders */}
-          <div className="mt-2">
-            {orderDetails.items?.length > 0 ? (
-              orderDetails.items.map((item, index) => (
-                <div key={index} className="mb-2">
-                  <div className="bg-gray-100 rounded-lg p-4">
-                    <h2 className="text-lg font-bold text-gray-800 mb-2">
-                      {item.shopName}
-                    </h2>
-                    <span className="text-green-500 font-medium mb-4 block">Received</span>
-                    <div className="flex gap-4">
-                      <img
-                        src="https://via.placeholder.com/80"
-                        alt="Order Item"
-                        className="w-20 h-20 rounded-lg"
-                      />
-                      <div className="flex-1">
-                        <p className="text-gray-800 font-medium">
-                          {item.productName}
-                        </p>
-                        <p className="text-black">Price: {item.price}</p>
-                        <p className="text-black">Qty: {item.quantity}</p>
-                      </div>
-                    </div>
-                  </div>
+        ) : orders.length > 0 ? (
+          orders.map((order) => (
+            <div key={order.id} className="bg-gray-100 rounded-lg p-4 mb-4">
+              <h2 className="text-lg font-bold text-gray-800 mb-2">
+                Order ID: {order.id}
+              </h2>
+              <span className="text-green-500 font-medium mb-4 block">
+                Status: {order.order_status}
+              </span>
+              <div className="flex gap-4">
+                <img
+                  src={order.order_variation?.imagePath}  // Ensure order_variation exists
+                  alt="Order Item"
+                  className="w-20 h-20 rounded-lg"
+                />
+                <div className="flex-1">
+                  <p className="text-gray-800 font-medium">
+                    Product Number: {order.prod_num}
+                  </p>
+                  <p className="text-gray-500">Quantity: {order.quantity}</p>
+                  <p className="text-gray-800 font-bold">
+                    Total Price: ₱{order.total_price}
+                  </p>
+                  <p className="text-gray-500">
+                    Payment Method: {order.payment_method}
+                  </p>
+                  <p className="text-gray-500">
+                    Shipping Address: {order.shipping_addr}
+                  </p>
                 </div>
-              ))
-            ) : (
-              <p>No items in your order.</p>
-            )}
-          </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="flex flex-col h-dvh align-middle justify-center items-center" >No orders found.</p>
+        )}
+
+          
         </div>
       </div>
     </div>

@@ -157,8 +157,10 @@ const CharacterCustomization = () => {
   };
 
   return (
-<div className="p-4 flex min-h-screen bg-slate-200">
-  <Sidebar />
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">  
+      <Sidebar />
+      </div>
 
   <div className="p-4 flex-1">
     <div className="flex flex-row gap-4">

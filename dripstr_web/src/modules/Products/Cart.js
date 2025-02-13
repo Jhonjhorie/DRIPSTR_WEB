@@ -63,7 +63,14 @@ const Cart = ({action, closeDrawer }) => {
         </div>
         <div className="h-[78vh] overflow-y-auto flex flex-col gap-2 custom-scrollbar pr-2">
           {loading ? (
+            <div>
+                <img
+          src={require("@/assets/emote/hmmm.png")}
+          alt="No Images Available"
+          className=" drop-shadow-customViolet "
+        />
             <p className="text-center text-lg font-semibold">Loading your cart...</p>
+            </div>
           ) : error ? (
             <p className="text-center text-lg text-red-600 font-semibold">
               Error fetching cart: {error}
