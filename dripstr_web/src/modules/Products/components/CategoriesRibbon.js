@@ -20,7 +20,7 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
         const containerWidth = containerRef.current.offsetWidth;
 
         const itemWidth = calculateItemWidth();
-        const gap = 48;
+        const gap = 40;
         const totalItemWidth = itemWidth + gap;
 
        
@@ -58,7 +58,7 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
   return (
     <div
       ref={containerRef}
-      className="relative min-w-[96%] md:min-w-[85%] h-20 md:h-28 justify-center  items-center bg-slate-50 rounded-md shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex overflow-hidden"
+      className="relative min-w-[96%] md:min-w-[85%] h-16 md:h-20 justify-center  items-center bg-slate-50 rounded-md shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex overflow-hidden"
     >
        <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md z-20">
               {" "}
@@ -92,12 +92,12 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
                 active === categories[0].label
                   ? "opacity-100 border-2 border-primary-color rounded-lg"
                   : "opacity-70 border-secondary-color hover:border-[1px] rounded-none hover:rounded-lg"
-              } hover:opacity-100 mr-4 ml-1 px-1 md:px-4 md:w-32 md:h-28 sm:w-16 sm:h-20 w-12 h-16 flex flex-col items-start justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
+              } hover:opacity-100 mr-4 ml-1 px-1 md:px-4 md:w-28 md:h-20 sm:w-16 sm:h-16 w-16 h-16 flex flex-col items-start justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
             >
               <img
                 src={categories[0].icon}
                 alt={categories[0].label}
-                className="w-7 h-7 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain mb-2"
+                className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 object-contain mb-1"
               />
               <p
                 className={`${
@@ -118,7 +118,7 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
         )}
 
         {/* Categories List */}
-        <div className="flex flex-wrap justify-start w-full space-x-6 md:space-x-4 overflow-hidden">
+        <div className="flex flex-wrap justify-start w-full space-x-4 overflow-hidden">
         
           {getVisibleItems().map((category, index) => (
             <div
@@ -128,17 +128,17 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
                 active === category.label
                   ? "opacity-100 border-2 border-primary-color  rounded-lg"
                   : "opacity-70 border-secondary-color hover:border-[1px] rounded-none hover:rounded-lg"
-              } hover:opacity-100 md:w-24 md:h-28 sm:w-16 sm:h-20 w-12 h-16 flex flex-col items-center justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
+              } hover:opacity-100 md:w-20 md:h-20 sm:w-16 sm:h-16 w-10 h-16 flex flex-col items-center justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
             >
               <img
                 src={category.icon}
                 alt={category.label}
-                className="w-7 h-7 sm:w-10 sm:h-10 md:w-14 md:h-14 object-contain mb-2"
+                className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 object-contain mb-1"
               />
               <p
                 className={`${
-                  active === category.label ? "text-primary-color text-sm md:text-base" : "text-gray-700 text-xs md:text-sm"
-                }  font-medium duration-300 transition-all`}
+                  active === category.label ? "text-primary-color text-[0.65rem] sm:text-xs md:text-[0.85rem] md:text-base font-semibold" : "text-gray-700 text-[0.65rem] sm:text-xs md:text-[0.80rem]  font-normal"
+                }   duration-300 transition-all`}
               >
                 {category.label}
               </p>

@@ -34,7 +34,7 @@ const Carousel = () => {
   };
 
   return (
-    <div className="w-[100%] h-96 md:w-[85%] relative rounded-md bg-slate-200 drop-shadow-lg group overflow-hidden">
+    <div className="w-[100%] h-96 md:w-[98%] relative rounded-md bg-slate-200 drop-shadow-lg group overflow-hidden">
       
       {/* Images */}
       <div className="w-full h-full flex transition-transform duration-500 ease-in-out"
