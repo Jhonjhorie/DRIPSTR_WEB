@@ -3,11 +3,15 @@ import style from "../Style/style.css";
 import drplogo from "@/assets/logoBlack.png";
 import hmmEmote from "@/assets/emote/hmmm.png";
 import successEmote from "@/assets/emote/success.png";
+import questionEmote from "@/assets/emote/question.png";
 import { supabase } from "@/constants/supabase";
-
+import { useNavigate } from "react-router-dom";
 const { useState, useEffect } = React;
+
 function Artists() {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [showAlert, setShowAlert] = React.useState(false); // AlertReportArt
   const [error, setError] = useState(null);
   const [artistData, setArtistData] = useState([]);
   const [imageOrientations, setImageOrientations] = useState({});
@@ -19,6 +23,10 @@ function Artists() {
   const [selectMessage, setMessage] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState([]);
+  const [report, setReport] = useState(false);
+  const [selectArt2, setSelectArt2] = useState(null);
+  const [reportReason, setReportReason] = useState("");
+  const [otherReason, setOtherReason] = useState("");
 
   const handleImageLoad = (event, artId) => {
     const { naturalWidth, naturalHeight } = event.target;
@@ -56,7 +64,14 @@ function Artists() {
       setComments([]);
     }
   };
-
+  const handleSelectArtReport = async (art2) => {
+    if (!art2) {
+      console.error("Selected art is null!");
+      return;
+    }
+    setSelectArt2(art2);
+    setReport(true);
+  };
   useEffect(() => {
     const fetchUserAndArtworks = async () => {
       try {
@@ -81,76 +96,72 @@ function Artists() {
     fetchUserAndArtworks();
   }, []);
 
-  useEffect(() => {
-    const fetchLikesData = async () => {
-      try {
-        const { data: artworks, error } = await supabase
-          .from("artist_Arts")
-          .select("artist_Id, likes");
+  const fetchLikesData = async () => {
+    try {
+      const { data: artworks, error } = await supabase
+        .from("artist_Arts")
+        .select("artist_Id, likes");
 
-        if (error) {
-          console.error("Error fetching artworks:", error.message);
-          return;
-        }
-
-        const likeCounts = {};
-        artworks.forEach(({ artist_Id, likes }) => {
-          if (artist_Id) {
-            likeCounts[artist_Id] =
-              (likeCounts[artist_Id] || 0) + (likes?.length || 0);
-          }
-        });
-
-        if (Object.keys(likeCounts).length === 0) {
-          console.warn("No likes found.");
-          return;
-        }
-
-        const sortedArtists = Object.entries(likeCounts)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 3);
-
-        const topArtistIds = sortedArtists.map(([id]) => parseInt(id, 10));
-
-        if (topArtistIds.length === 0) return;
-
-        const { data: artists, error: artistError } = await supabase
-          .from("artist")
-          .select("id, artist_Name, artist_Image, art_Type")
-          .in("id", topArtistIds);
-
-        if (artistError) {
-          console.error("Error fetching artist names:", artistError.message);
-          return;
-        }
-
-        const marginTops = ["mt-10", "mt-24", "mt-32"];
-        const colors = ["yellow-400", "sky-400", "pink-400"];
-        const topArtistsList = sortedArtists.map(([id, likes], index) => {
-          const artist = artists.find((a) => a.id === parseInt(id, 10));
-          return {
-            name: artist?.artist_Name || "Unknown",
-            type: artist?.art_Type || "Not set",
-            color: colors[index],
-            image: artist?.artist_Image || "/default-image.png",
-            mt: marginTops[index],
-            tag: `${index + 1}`,
-            likes: likes || 0,
-          };
-        });
-
-        setTopArtists([
-          topArtistsList[1],
-          topArtistsList[0],
-          topArtistsList[2],
-        ]);
-      } catch (err) {
-        console.error("Unexpected error:", err.message);
+      if (error) {
+        console.error("Error fetching artworks:", error.message);
+        return;
       }
-    };
 
+      const likeCounts = {};
+      artworks.forEach(({ artist_Id, likes }) => {
+        if (artist_Id) {
+          likeCounts[artist_Id] =
+            (likeCounts[artist_Id] || 0) + (likes?.length || 0);
+        }
+      });
+
+      if (Object.keys(likeCounts).length === 0) {
+        console.warn("No likes found.");
+        return;
+      }
+
+      const sortedArtists = Object.entries(likeCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3);
+
+      const topArtistIds = sortedArtists.map(([id]) => parseInt(id, 10));
+
+      if (topArtistIds.length === 0) return;
+
+      const { data: artists, error: artistError } = await supabase
+        .from("artist")
+        .select("id, artist_Name, artist_Image, art_Type")
+        .in("id", topArtistIds);
+
+      if (artistError) {
+        console.error("Error fetching artist names:", artistError.message);
+        return;
+      }
+
+      const marginTops = ["mt-10", "mt-24", "mt-32"];
+      const colors = ["yellow-400", "sky-400", "pink-400"];
+      const topArtistsList = sortedArtists.map(([id, likes], index) => {
+        const artist = artists.find((a) => a.id === parseInt(id, 10));
+        return {
+          name: artist?.artist_Name || "Unknown",
+          type: artist?.art_Type || "Not set",
+          color: colors[index],
+          image: artist?.artist_Image || "/default-image.png",
+          mt: marginTops[index],
+          tag: `${index + 1}`,
+          likes: likes || 0,
+        };
+      });
+
+      setTopArtists([topArtistsList[1], topArtistsList[0], topArtistsList[2]]);
+    } catch (err) {
+      console.error("Unexpected error:", err.message);
+    }
+  };
+  useEffect(() => {
     fetchLikesData();
   }, []);
+
   const colorClasses = {
     "sky-400": "bg-sky-400",
     "yellow-400": "bg-yellow-400",
@@ -169,7 +180,8 @@ function Artists() {
         art_Image, 
         art_Description, 
         likes, 
-        artists:artist_Id (artist_Name, artist_Image) 
+        artist_Id,
+        artists:artist_Id (id, artist_Name, artist_Image) 
       `);
 
       if (error) throw error;
@@ -207,162 +219,198 @@ function Artists() {
           art.id === artId ? { ...art, likes: updatedLikes } : art
         )
       );
+      fetchLikesData();
     } catch (error) {
       console.error("Error updating likes:", error.message);
     }
   };
   const handleAddComment = async (artId) => {
     if (!newComment.trim()) return;
-  
+
     try {
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
       if (userError) throw new Error("User fetch failed: " + userError.message);
-  
+
       const userId = userData?.user?.id;
       if (!userId) throw new Error("User not logged in");
-  
+
       // Fetch the user's full_name and profile_picture from 'profiles' table
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("full_name, profile_picture")
         .eq("id", userId)
         .single();
-  
-      if (profileError) throw new Error("User profile fetch failed: " + profileError.message);
-  
+
+      if (profileError)
+        throw new Error("User profile fetch failed: " + profileError.message);
+
       // Optimistically update UI with fetched profile data
       const newCommentObj = {
         userId,
         text: newComment,
         timestamp: new Date().toISOString(),
-        user: { 
+        user: {
           full_name: profileData?.full_name || "Unknown",
           profile_picture: profileData?.profile_picture || successEmote,
-        }
+        },
       };
-  
+
       setComments((prevComments) => [...prevComments, newCommentObj]);
-      setNewComment(""); 
-  
+      setNewComment("");
 
       const { data: artData, error: fetchError } = await supabase
         .from("artist_Arts")
         .select("comments")
         .eq("id", artId)
         .single();
-  
-      if (fetchError) throw new Error("Error fetching comments: " + fetchError.message);
-  
+
+      if (fetchError)
+        throw new Error("Error fetching comments: " + fetchError.message);
+
       const existingComments = artData?.comments || [];
-      const updatedComments = [...existingComments, { ...newCommentObj, user: undefined }];
-  
+      const updatedComments = [
+        ...existingComments,
+        { ...newCommentObj, user: undefined },
+      ];
+
       const { error: updateError } = await supabase
         .from("artist_Arts")
         .update({ comments: updatedComments })
         .eq("id", artId);
-  
-      if (updateError) throw new Error("Error updating comment: " + updateError.message);
-      
+
+      if (updateError)
+        throw new Error("Error updating comment: " + updateError.message);
     } catch (error) {
       console.error(error.message);
     }
   };
-  
-const fetchCommentsWithUsers = async (artId) => {
-  if (!artId) return;
 
-  try {
-    setLoading(true);
+  const fetchCommentsWithUsers = async (artId) => {
+    if (!artId) return;
 
-    // Fetch current user
-    const { data: user, error: userError } = await supabase.auth.getUser();
-    if (userError) {
-      console.error("Error fetching user:", userError.message);
-      return;
-    }
-    const currentUserId = user?.user?.id;
+    try {
+      setLoading(true);
 
-    // Fetch the artwork's artist ID
-    const { data: artData, error: artError } = await supabase
-      .from("artist_Arts")
-      .select("artist_Id, comments")
-      .eq("id", artId)
-      .single();
+      // Fetch current user
+      const { data: user, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        console.error("Error fetching user:", userError.message);
+        return;
+      }
+      const currentUserId = user?.user?.id;
 
-    if (artError) {
-      console.error("Error fetching artwork:", artError.message);
-      return;
-    }
+      // Fetch the artwork's artist ID
+      const { data: artData, error: artError } = await supabase
+        .from("artist_Arts")
+        .select("artist_Id, comments")
+        .eq("id", artId)
+        .single();
 
-    const { artist_Id, comments } = artData || {};
-    if (!artist_Id) return;
-
-    // Fetch artist owner_Id
-    const { data: artistData, error: artistError } = await supabase
-      .from("artist")
-      .select("owner_Id")
-      .eq("id", artist_Id)
-      .single();
-
-    if (artistError) {
-      console.error("Error fetching artist:", artistError.message);
-      return;
-    }
-
-    const isOwner = artistData?.owner_Id === currentUserId;
-
-    const formattedComments = Array.isArray(comments)
-      ? comments.map((cmt) => ({
-          ...cmt,
-          isOwner: cmt.userId === currentUserId && isOwner, // Mark owner comments
-        }))
-      : [];
-
-    // Fetch user profiles for comments
-    const userIds = [
-      ...new Set(formattedComments.map((cmt) => cmt.userId).filter(Boolean)),
-    ];
-
-    if (userIds.length > 0) {
-      const { data: usersData, error: usersError } = await supabase
-        .from("profiles")
-        .select("id, full_name, profile_picture")
-        .in("id", userIds);
-
-      if (usersError) {
-        console.error("Error fetching users:", usersError.message);
+      if (artError) {
+        console.error("Error fetching artwork:", artError.message);
         return;
       }
 
-      // Create user lookup
-      const userMap = usersData.reduce((acc, user) => {
-        acc[user.id] = user;
-        return acc;
-      }, {});
+      const { artist_Id, comments } = artData || {};
+      if (!artist_Id) return;
 
-      // Attach user details
-      const updatedComments = formattedComments.map((cmt) => ({
-        ...cmt,
-        user: userMap?.[cmt.userId] || null,
-      }));
+      // Fetch artist owner_Id
+      const { data: artistData, error: artistError } = await supabase
+        .from("artist")
+        .select("owner_Id")
+        .eq("id", artist_Id)
+        .single();
 
-      setComments(updatedComments);
-    } else {
-      setComments(formattedComments);
+      if (artistError) {
+        console.error("Error fetching artist:", artistError.message);
+        return;
+      }
+
+      const isOwner = artistData?.owner_Id === currentUserId;
+
+      const formattedComments = Array.isArray(comments)
+        ? comments.map((cmt) => ({
+            ...cmt,
+            isOwner: cmt.userId === currentUserId && isOwner,
+          }))
+        : [];
+
+      // Fetch user profiles for comments
+      const userIds = [
+        ...new Set(formattedComments.map((cmt) => cmt.userId).filter(Boolean)),
+      ];
+
+      if (userIds.length > 0) {
+        const { data: usersData, error: usersError } = await supabase
+          .from("profiles")
+          .select("id, full_name, profile_picture")
+          .in("id", userIds);
+
+        if (usersError) {
+          console.error("Error fetching users:", usersError.message);
+          return;
+        }
+
+        // Create user lookup
+        const userMap = usersData.reduce((acc, user) => {
+          acc[user.id] = user;
+          return acc;
+        }, {});
+
+        // Attach user details
+        const updatedComments = formattedComments.map((cmt) => ({
+          ...cmt,
+          user: userMap?.[cmt.userId] || null,
+        }));
+
+        setComments(updatedComments);
+      } else {
+        setComments(formattedComments);
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err.message);
+      setComments([]);
     }
-  } catch (err) {
-    console.error("Unexpected error:", err.message);
-    setComments([]);
-  }
-  setLoading(false);
-};
-
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (selectArt?.id) {
       fetchCommentsWithUsers(selectArt.id);
     }
   }, [selectArt]);
+
+  const handleReportSubmit = async () => {
+    if (!selectArt2) {
+      console.error("No art selected for reporting!");
+      return;
+    }
+
+    const finalReport = reportReason === "Others" ? otherReason : reportReason;
+
+    const { data, error } = await supabase.from("reported_Art").insert([
+      {
+        art_Id: selectArt2.id,
+        reason: finalReport,
+        action: "Pending Review",
+        art_Name: selectArt2.art_Name,
+      },
+    ]);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+      setSelectArt2(null);
+    }, 3000);
+    setReport(false);
+    if (error) {
+      console.error("Error reporting art:", error);
+    } else {
+      console.log("Report submitted successfully:", data);
+    }
+  };
+
+
 
   return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar  ">
@@ -505,12 +553,24 @@ const fetchCommentsWithUsers = async (artId) => {
                     ></box-icon>
                   </div>
                   <div
+                onClick={() => {
+                  console.log("Selected Art Data:", art); 
+                  console.log("Artist Data:", art.artist); 
+              
+                  if (art.artists && art.artists.id) {
+                    navigate(`/arts/ArtistPage/${art.artists.id}`);
+                  } else {
+                    console.error("Artist ID is undefined! Check if artist_Id exists in your database.");
+                  }
+                }}
+                  
                     data-tip="Visit Artist."
                     className="flex tooltip items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm  text-slate-800 "
                   >
                     <box-icon type="solid" name="user-pin"></box-icon>
                   </div>
                   <div
+                    onClick={() => handleSelectArtReport(art)}
                     data-tip="Report this Post."
                     className=" tooltip text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
                   >
@@ -604,9 +664,7 @@ const fetchCommentsWithUsers = async (artId) => {
               </div>
               <div className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md">
                 <img
-                  src={
-                    selectArt?.artists?.artist_Image || successEmote
-                  }
+                  src={selectArt?.artists?.artist_Image || successEmote}
                   alt="Artist"
                   className="h-full w-full object-cover rounded-md"
                 />
@@ -677,7 +735,6 @@ const fetchCommentsWithUsers = async (artId) => {
                         {new Date(cmt.timestamp).toLocaleString()}
                       </span>
                     </div>
-                    
                   </div>
                 ))
               ) : (
@@ -721,6 +778,119 @@ const fetchCommentsWithUsers = async (artId) => {
                 Comment
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {report && selectArt2 && (
+        <div
+          onClick={() => {
+            setSelectArt2(null);
+          }}
+          className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
+        >
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            className="w-96 h-auto rounded-md relative bg-slate-100"
+          >
+            <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-2 rounded-t-md"></div>
+
+            <div className="text-violet-900 flex justify-center px-3 text-2xl iceland-bold py-2 rounded-md">
+              Report {selectArt2?.art_Name || "Untitled"} ?
+            </div>
+
+            <div className="w-full h-auto bg-slate-300 rounded-b-md overflow-hidden overflow-y-scroll p-4">
+              <p className="text-gray-900 font-semibold">Select a reason:</p>
+              {/* Report Options */}
+              <div className="mt-2 flex text-sm flex-col gap-2">
+                {[
+                  "Inappropriate Content",
+                  "Plagiarism",
+                  "Hate Speech",
+                  "Spam or Misleading",
+                  "Sexually Explicit Content",
+                  "Violence or Gore",
+                  "Harassment or Bullying",
+                  "Copyright Violation",
+                  "Scam or Fraud",
+                  "Misuse of Platform",
+                ].map((reason, index) => (
+                  <label
+                    key={index}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="reportReason"
+                      value={reason}
+                      className="form-radio text-violet-500"
+                      onChange={() => setReportReason(reason)}
+                    />
+                    <span className="text-gray-800">{reason}</span>
+                  </label>
+                ))}
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="reportReason"
+                    value="Others"
+                    className="form-radio text-violet-500"
+                    onChange={() => setReportReason("Others")}
+                  />
+                  <span className="text-gray-800">Others</span>
+                </label>
+
+                {reportReason === "Others" && (
+                  <textarea
+                    className="w-full mt-2 p-2 border bg-slate-50 text-slate-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    placeholder="Please describe your concern..."
+                    onChange={(e) => setOtherReason(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <button
+                className="mt-4 w-full bg-violet-500 text-white py-2 rounded-md hover:bg-violet-600 transition"
+                onClick={handleReportSubmit}
+              >
+                Submit Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAlert && selectArt2 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span> Art Reported "{selectArt2?.art_Name || "Untitled"}"</span>
           </div>
         </div>
       )}
