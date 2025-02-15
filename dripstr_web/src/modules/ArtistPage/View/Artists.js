@@ -410,8 +410,6 @@ function Artists() {
     }
   };
 
-
-
   return (
     <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar  ">
       <h1 className="text-center pt-5 text-5xl text-slate-50  bg-violet-500 font-extrabold  iceland-regular">
@@ -513,104 +511,85 @@ function Artists() {
           </div>
         ))}
       </div>
-      <div className="bg-gradient-to-b  from-fuchsia-500 to-slate-300 h-40"></div>
-      <div className="h-auto p-10 w-full bg-slate-300 ">
+      <div className="bg-gradient-to-b  from-fuchsia-500 to-slate-300 h-40">
+        <div className="text-slate-800 text-5xl font-bold iceland-regular text-center w-full p-5 ">
+          DRIPSTR GALLERY
+        </div>
+      </div>
+      <div className="h-auto p-2 md:px-10 w-full bg-slate-300 ">
         {loading && (
           <div className="flex justify-center items-center">
             <span className="loading loading-spinner loading-lg"></span>
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2  gap-10">
+        <div className="columns-2 sm:columns-3 md:columns-4  gap-2 px-4 space-y-2">
           {artistData.map((art) => (
             <div
               key={art.id}
-              className="bg-white relative group p-2 shadow-lg h-auto rounded-md"
+              className="relative hover:scale-105 duration-200 bg-white shadow-lg rounded-md overflow-hidden break-inside-avoid"
             >
-              <div className=" w-full absolute top-0 left-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
-                {" "}
-              </div>
-              <div className="flex   justify-between  items-center py-2 px-4">
-                <div className="flex gap-2">
-                  <img
-                    src={art.artists?.artist_Image || successEmote}
-                    alt="Artist"
-                    className="h-14 w-14 rounded-full object-cover border border-gray-300"
-                  />
-                  <div className="text-xl mt-3 text-slate-800 font-bold">
-                    {art.artists?.artist_Name || "Unknown Artist"}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-xl text-slate-800 font-bold">
-                    {art.likes?.length || 0}
-                    <box-icon
-                      name="heart"
-                      color={art.likes?.includes(userId) ? "red" : "gray"}
-                      onClick={() => handleLike(art.id, art.likes)}
-                      className="cursor-pointer "
-                      type="solid"
-                    ></box-icon>
-                  </div>
-                  <div
-                onClick={() => {
-                  console.log("Selected Art Data:", art); 
-                  console.log("Artist Data:", art.artist); 
-              
-                  if (art.artists && art.artists.id) {
-                    navigate(`/arts/ArtistPage/${art.artists.id}`);
-                  } else {
-                    console.error("Artist ID is undefined! Check if artist_Id exists in your database.");
-                  }
-                }}
-                  
-                    data-tip="Visit Artist."
-                    className="flex tooltip items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm  text-slate-800 "
-                  >
-                    <box-icon type="solid" name="user-pin"></box-icon>
-                  </div>
-                  <div
-                    onClick={() => handleSelectArtReport(art)}
-                    data-tip="Report this Post."
-                    className=" tooltip text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
-                  >
-                    <box-icon name="shield-x" type="solid"></box-icon>
-                  </div>
-                </div>
-              </div>
-              <div className=" h-auto max-h-20 overflow-auto scrollbar-hide  py-2 px-5  w-full">
-                <p className="text-gray-900 text-sm   font-semibold">
-                  {art.art_Description}
-                </p>
-              </div>
+              {/* Art Image */}
               <div
                 onClick={() => handleSelectArt(art)}
-                className="w-full px-5 border shadow-md border-custom-purple mt-1 rounded-md p-2"
+                className="cursor-pointer overflow-hidden rounded-md"
               >
-                <div
-                  className={`mt-3 overflow-hidden cursor-pointer  ${
-                    imageOrientations[art.id] === "landscape"
-                      ? "w-full h-[300px] flex justify-center"
-                      : "w-[300px] h-[300px] mx-auto"
-                  }`}
-                  onDoubleClick={() => handleLike(art.id, art.likes)}
-                >
-                  <img
-                    src={art.art_Image}
-                    alt="Art"
-                    onLoad={(event) => handleImageLoad(event, art.id)}
-                    className="h-full w-full object-contain"
-                  />
-                </div>
+                <img
+                  src={art.art_Image}
+                  alt="Art"
+                  className="w-full h-auto object-cover rounded-md"
+                />
               </div>
 
-              <div className="bg-custom-purple glass transition-transform duration-300 group-hover:scale-125 flex place-content-center gap-2 right-5 text-slate-50 font-semibold rounded-md absolute w-auto bottom-5 h-auto p-3">
-                <img
-                  src={drplogo}
-                  alt="Art"
-                  className="h-6 w-6 object-contain drop-shadow-custom"
-                />
+              {/* Art Name Badge */}
+              <div className="absolute bottom-2 left-2 bg-custom-purple text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2">
+                <img src={drplogo} alt="Logo" className="h-5 w-5" />
                 {art.art_Name}
+              </div>
+              <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2  gap-2">
+                <div className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold">
+                  {art.likes?.length || 0}
+                  <box-icon
+                    name="heart"
+                    color={art.likes?.includes(userId) ? "red" : "gray"}
+                    onClick={() => handleLike(art.id, art.likes)}
+                    className="cursor-pointer "
+                    type="solid"
+                  ></box-icon>
+                </div>
+                <div
+                  onClick={() => {
+                    console.log("Selected Art Data:", art);
+                    console.log("Artist Data:", art.artist);
+
+                    if (art.artists && art.artists.id) {
+                      navigate(`/arts/ArtistPage/${art.artists.id}`);
+                    } else {
+                      console.error(
+                        "Artist ID is undefined! Check if artist_Id exists in your database."
+                      );
+                    }
+                  }}
+                  data-tip="Visit Artist"
+                  className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm  text-slate-800 "
+                >
+                  <box-icon
+                    type="solid"
+                    name="user-pin"
+                    color="blue"
+                  ></box-icon>
+                </div>
+                <div
+                  onClick={() => handleSelectArtReport(art)}
+                  data-tip="Report this Post"
+                  className=" tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
+                >
+                  <box-icon
+                    name="shield-x"
+                    type="solid"
+                    color="gold"
+                  ></box-icon>
+                </div>
               </div>
             </div>
           ))}
@@ -647,7 +626,7 @@ function Artists() {
               <img
                 src={selectArt.art_Image}
                 alt="Expanded Art"
-                className={`overflow-hidden cursor-pointer rounded-md border shadow-md border-custom-purple ${
+                className={`overflow-hidden rounded-md border shadow-md border-custom-purple ${
                   imageOrientations[selectArt.id] === "landscape"
                     ? "w-full h-[550px] flex justify-center"
                     : "w-auto h-[550px] mx-auto"
@@ -662,7 +641,21 @@ function Artists() {
               <div className="text-white text-xl drop-shadow-customWhite iceland-bold p-2 h-auto w-auto">
                 {selectArt?.artists?.artist_Name || "Unknown Artist"}
               </div>
-              <div className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md">
+              <div
+                onClick={() => {
+                  console.log("Selected Art Data:", selectArt);
+                  console.log("Artist Data:", selectArt.artist);
+
+                  if (selectArt.artists && selectArt.artists.id) {
+                    navigate(`/arts/ArtistPage/${selectArt.artists.id}`);
+                  } else {
+                    console.error(
+                      "Artist ID is undefined! Check if artist_Id exists in your database."
+                    );
+                  }
+                }}
+                className="bg-fuchsia-500 cursor-pointer text-white w-20 h-16 p-1 rounded-md"
+              >
                 <img
                   src={selectArt?.artists?.artist_Image || successEmote}
                   alt="Artist"
@@ -677,14 +670,22 @@ function Artists() {
             }}
             className="w-1/3 h-full relative bg-slate-200 px-5"
           >
-            <div className="text-2xl mt-14 text-fuchsia-800 font-bold text-center p-2">
+            <div className="text-2xl mt-5 text-fuchsia-800 font-bold text-center p-2">
               Comment on {selectArt?.art_Name || "Untitled"}
+            </div>
+            <div className="text-sm text-slate-900 font-bold ">
+              Description:
+            </div>
+            <div className=" h-auto max-h-20 mb-2 overflow-auto scrollbar-hide  py-2 px-5  w-full">
+              <p className="text-gray-900 text-sm ">
+                {selectArt.art_Description}
+              </p>
             </div>
             <div
               onClick={(e) => {
                 e.stopPropagation();
               }}
-              className="h-[60%] w-full rounded-md shadow-inner overflow-y-auto shadow-slate-400 bg-slate-300"
+              className="h-[55%] w-full rounded-md shadow-inner overflow-y-auto shadow-slate-400 bg-slate-300"
             >
               {loading ? (
                 <div className="flex w-52 flex-col p-2 gap-4">
@@ -878,18 +879,16 @@ function Artists() {
             className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 shrink-0 stroke-current"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6 shrink-0 stroke-current"
+    fill="none"
+    viewBox="0 0 24 24">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
             <span> Art Reported "{selectArt2?.art_Name || "Untitled"}"</span>
           </div>
         </div>
