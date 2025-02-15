@@ -301,7 +301,7 @@ const CharacterCustomization = () => {
       </div>
 
       {/* Right Panel: 3D Canvas */}
-      <div className="flex-1 h-[500px] rounded-lg shadow-lg flex-1 bg-gray-100">
+      <div className="flex-1 h-[500px] rounded-lg shadow-lg bg-gray-100">
         <div className="relative flex flex-1 w-full h-full">
 
           {/* Darkened Background Image */}
@@ -340,7 +340,7 @@ const CharacterCustomization = () => {
 </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end mt-4 space-x-2 p-4">
+        <div className="flex justify-end space-x-2 p-4">
           {isEditing ? (
             <>
               <button
