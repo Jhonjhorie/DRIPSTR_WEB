@@ -61,7 +61,6 @@ function ArtistPage() {
         { id: currentUser.id, name: currentUser.name },
       ];
 
-      // ✅ Update UI immediately before sending request
       setIsFollowing(true);
 
       const { error: updateError } = await supabase
@@ -160,7 +159,7 @@ function ArtistPage() {
     }
   };
 
-  //Fetch currenlky sign user
+  //Fetch artist arts
   useEffect(() => {
     const fetchArtistArts = async () => {
       try {
@@ -186,8 +185,6 @@ function ArtistPage() {
   }, [id]);
 
   const handleLike = async (artId, likes) => {
-    if (!userId) return alert("Login to like!");
-
     let updatedLikes = likes.includes(userId)
       ? likes.filter((id) => id !== userId) // Unlike
       : [...likes, userId]; // Like
@@ -203,9 +200,11 @@ function ArtistPage() {
           art.id === artId ? { ...art, likes: updatedLikes } : art
         )
       );
+      
     } else {
       console.error("Error liking:", error);
     }
+    fetchTotalLikes();
   };
 
   const handleSelectArtReport = (art) => {
@@ -582,6 +581,18 @@ function ArtistPage() {
       setComments([]);
     }
   };
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error.message);
+        return;
+      }
+      setCurrentUser(data?.user || null);
+    };
+
+    fetchUser();
+  }, []);
 
   countArtists();
 
@@ -730,6 +741,7 @@ function ArtistPage() {
           </div>
         </div>
       </div>
+      {/* Artist Arts */}
       <div className="h-auto p-2 md:px-10 w-full bg-slate-300 ">
         <div className="columns-2 sm:columns-3 md:columns-4 gap-2 px-4 space-y-2">
           {artistArts.length > 0 ? (
@@ -766,11 +778,7 @@ function ArtistPage() {
                     <box-icon
                       name="heart"
                       type="solid"
-                      className={
-                        art.likes?.includes(userId)
-                          ? "text-red-600"
-                          : "text-gray-400"
-                      }
+                      color={art.likes?.includes(userId) ? "red" : "gray"}
                     ></box-icon>
                   </div>
                   <div
@@ -796,7 +804,7 @@ function ArtistPage() {
       </div>
 
       {showAlertFollow && (
-        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:top-72  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
@@ -829,7 +837,7 @@ function ArtistPage() {
       )}
 
       {showAlertUnfollow && (
-        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:top-72 w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
