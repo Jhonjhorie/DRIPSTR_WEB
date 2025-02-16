@@ -35,6 +35,12 @@ function ArtistPage() {
   const [imageOrientations, setImageOrientations] = useState({});
   const [loading, setLoading] = useState(false);
   const [showAlert, setShowAlert] = React.useState(false); // AlertReportArt
+  const [messageModal, setMessageModal] = useState(false);
+  const [messageContent, setMessageContent] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [commissionActive, setCommissionActive] = useState(false);
 
   const handleFollow = async () => {
     if (!artist || !currentUser) return;
@@ -200,7 +206,6 @@ function ArtistPage() {
           art.id === artId ? { ...art, likes: updatedLikes } : art
         )
       );
-      
     } else {
       console.error("Error liking:", error);
     }
@@ -214,7 +219,6 @@ function ArtistPage() {
     }
     setSelectArt2(art2);
     setReport(true);
-
   };
 
   const fetchTotalLikes = async () => {
@@ -335,7 +339,7 @@ function ArtistPage() {
 
     if (id) fetchArtist();
   }, [id]);
-
+  //Rank out of all artists
   const countArtists = async () => {
     const { count, error } = await supabase
       .from("artist")
@@ -371,7 +375,7 @@ function ArtistPage() {
 
     if (id) fetchArtistArts();
   }, [id]);
-
+  //add comment
   const handleAddComment = async (artId) => {
     if (!newComment.trim()) return;
 
@@ -433,7 +437,7 @@ function ArtistPage() {
       console.error(error.message);
     }
   };
-
+  //Comments of the users/visitors
   const fetchCommentsWithUsers = async (artId) => {
     if (!artId) return;
 
@@ -448,7 +452,7 @@ function ArtistPage() {
       }
       const currentUserId = user?.user?.id;
 
-      // Fetch the artwork's artist ID
+      // Fetch the artwork's artist ID and comments
       const { data: artData, error: artError } = await supabase
         .from("artist_Arts")
         .select("artist_Id, comments")
@@ -477,16 +481,21 @@ function ArtistPage() {
 
       const isOwner = artistData?.owner_Id === currentUserId;
 
+      // Adjust the key here if your comments store the sender id under a different name
       const formattedComments = Array.isArray(comments)
         ? comments.map((cmt) => ({
             ...cmt,
-            isOwner: cmt.userId === currentUserId && isOwner,
+            isOwner: (cmt.sender_Id || cmt.userId) === currentUserId && isOwner,
           }))
         : [];
 
-      // Fetch user profiles for comments
+      // Use the appropriate key for sender id
       const userIds = [
-        ...new Set(formattedComments.map((cmt) => cmt.userId).filter(Boolean)),
+        ...new Set(
+          formattedComments
+            .map((cmt) => cmt.sender_Id || cmt.userId)
+            .filter(Boolean)
+        ),
       ];
 
       if (userIds.length > 0) {
@@ -500,16 +509,16 @@ function ArtistPage() {
           return;
         }
 
-        // Create user lookup
+        // Create a lookup object for user profiles
         const userMap = usersData.reduce((acc, user) => {
           acc[user.id] = user;
           return acc;
         }, {});
 
-        // Attach user details
+        // Attach user details using the correct sender id key
         const updatedComments = formattedComments.map((cmt) => ({
           ...cmt,
-          user: userMap?.[cmt.userId] || null,
+          user: userMap[cmt.sender_Id || cmt.userId] || null,
         }));
 
         setComments(updatedComments);
@@ -529,6 +538,7 @@ function ArtistPage() {
     }
   }, [selectArt]);
 
+  //Report submit
   const handleReportSubmit = async () => {
     if (!selectArt2) {
       console.error("No art selected for reporting!");
@@ -557,15 +567,15 @@ function ArtistPage() {
       console.log("Report submitted successfully:", data);
     }
   };
-  //comments
 
+  //artist details
   const fetchArtistDetails = async (artistId) => {
     const { data, error } = await supabase
       .from("artist")
       .select("artist_Name, artist_Image, owner_Id")
       .eq("id", artistId)
       .single();
-  
+
     if (error) {
       console.error("Error fetching artist details:", error.message);
       return null;
@@ -574,9 +584,8 @@ function ArtistPage() {
   };
 
   const handleSelectArt = async (art) => {
-
     setSelectArt(art);
-  
+
     // If the art has an artist_Id, fetch the artist details
     if (art.artist_Id) {
       const artistDetails = await fetchArtistDetails(art.artist_Id);
@@ -584,13 +593,12 @@ function ArtistPage() {
         // Update the selectArt state to include the artist details
         setSelectArt((prevArt) => ({
           ...prevArt,
-          artist: artistDetails, 
+          artist: artistDetails,
         }));
       }
     }
-    
   };
-  
+
   useEffect(() => {
     const fetchUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -604,9 +612,207 @@ function ArtistPage() {
     fetchUser();
   }, []);
 
+  // Message function commision
+  const handleSendMessage = async () => {
+    // If both text and image are empty, do nothing
+    if (!messageContent.trim() && !imageFile) return;
+
+    let imageUrl = null;
+    if (imageFile) {
+      imageUrl = await handleUploadImage();
+      console.log("Image URL returned:", imageUrl);
+    }
+
+    const newMsg = {
+      sender_Id: currentUser?.id,
+      text: messageContent,
+      timestamp: new Date().toISOString(),
+      send_file: imageUrl, // Store image URL inside the message JSON
+    };
+
+    // Check if a conversation already exists for this sender and artist
+    const { data: existingConversation, error: selectError } = await supabase
+      .from("artist_Messages")
+      .select("*")
+      .eq("sender_Id", currentUser?.id)
+      .eq("artist_Id", artist?.id)
+      .maybeSingle();
+    if (selectError) {
+      console.error("Error fetching conversation:", selectError.message);
+      return;
+    }
+
+    if (existingConversation) {
+      // Append the new message to the existing content array.
+      const existingContent = Array.isArray(existingConversation.content)
+        ? existingConversation.content
+        : [];
+      const updatedContent = [...existingContent, newMsg];
+
+      // Update the conversation record with the new content.
+      // When creating a new conversation, we also set what_for to the selected option.
+      const updatePayload = { content: updatedContent };
+      if (!existingConversation.what_for && selectedOption) {
+        updatePayload.what_for = selectedOption;
+      }
+      const { error: updateError } = await supabase
+        .from("artist_Messages")
+        .update(updatePayload)
+        .eq("id", existingConversation.id);
+      if (updateError) {
+        console.error("Error updating conversation:", updateError.message);
+        return;
+      }
+      setMessages(updatedContent);
+    } else {
+      // Create a new conversation record with the new message
+      const messageData = {
+        sender_Id: currentUser?.id,
+        artist_Id: artist?.id,
+        artist_Name: artist?.artist_Name,
+        artist_Image: artist?.artist_Image,
+        content: [newMsg],
+        send_file: null, // Not used here
+        what_for: selectedOption, // "inquire" or "commission"
+      };
+
+      const { data, error } = await supabase
+        .from("artist_Messages")
+        .insert([messageData]);
+      if (error) {
+        console.error("Error creating conversation:", error.message);
+        return;
+      }
+      setMessages([newMsg]);
+    }
+
+    setMessageContent("");
+    setImageFile(null);
+  };
+
+  const fetchMessages = async () => {
+    // Replace the query with your own logic to fetch messages for the conversation
+    const { data, error } = await supabase
+      .from("artist_Messages")
+      .select("content")
+      .eq("sender_Id", currentUser?.id)
+      .eq("artist_Id", artist?.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Error fetching messages:", error.message);
+    } else if (data) {
+      // Assume that the content field is an array of message objects
+      setMessages(data.content || []);
+    }
+  };
+
+  const handleUploadImage = async () => {
+    if (!imageFile) return null;
+
+    // Create a unique image name
+    const uniqueImageName = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2, 10)}-${imageFile.name}`;
+    // Use the unique name in the file path (adjust bucket name as needed)
+    const filePath = `messages/${currentUser.id}/${uniqueImageName}`;
+    console.log("Uploading image to:", filePath);
+
+    const { error: uploadError } = await supabase.storage
+      .from("art_messages")
+      .upload(filePath, imageFile);
+    if (uploadError) {
+      console.error("Error uploading image:", uploadError.message);
+      return null;
+    }
+
+    // Retrieve public URL – note: getPublicUrl returns an object with data.publicUrl
+    const { data, error: publicUrlError } = supabase.storage
+      .from("art_messages")
+      .getPublicUrl(filePath);
+    if (publicUrlError) {
+      console.error("Error getting public URL:", publicUrlError.message);
+      return null;
+    }
+    console.log("Image uploaded successfully. Public URL:", data.publicUrl);
+    return data.publicUrl;
+  };
+  // Update: Start Commission
+  const startCommission = async () => {
+    const { error } = await supabase
+      .from("artist_Messages")
+      .update({ what_for: "commission" })
+      .eq("sender_Id", currentUser?.id)
+      .eq("artist_Id", artist?.id);
+    if (error) {
+      console.error("Error starting commission:", error.message);
+    } else {
+      console.log("Commission started.");
+      setSelectedOption("commission");
+      setCommissionActive(true);
+    }
+  };
+  const startInquiry = async () => {
+    const { error } = await supabase
+      .from("artist_Messages")
+      .update({ what_for: "inquire" })
+      .eq("sender_Id", currentUser?.id)
+      .eq("artist_Id", artist?.id);
+    if (error) {
+      console.error("Error starting inquiry:", error.message);
+    } else {
+      console.log("Inquiry started.");
+      setSelectedOption("inquire");
+    }
+  };
+
+  // Update: Complete Commission
+  const completeCommission = async () => {
+    const { error } = await supabase
+      .from("artist_Messages")
+      .update({ what_for: "completed" }) // Keep or set what_for to "commission"
+      .eq("sender_Id", currentUser?.id)
+      .eq("artist_Id", artist?.id);
+    if (error) {
+      console.error("Error completing commission:", error.message);
+    } else {
+      console.log("Commission completed.");
+    }
+  };
+
+  // Update: Cancel Commission (set what_for to null)
+  const cancelCommission = async () => {
+    const { error } = await supabase
+      .from("artist_Messages")
+      .update({ what_for: "cancelled" }) // Instead of using an undefined variable, set to null
+      .eq("sender_Id", currentUser?.id)
+      .eq("artist_Id", artist?.id);
+    if (error) {
+      console.error("Error canceling commission:", error.message);
+    } else {
+      console.log("Commission canceled.");
+    }
+  };
+
+  useEffect(() => {
+    if (messageModal) {
+      fetchMessages();
+    }
+  }, [messageModal]);
+
   countArtists();
 
-  if (!artist) return <p>Loading...</p>;
+  if (!artist)
+    return (
+      <div className="w-full h-full flex justify-center items-center">
+        <div className="flex flex-col gap-4 w-52 animate-pulse">
+          <div className="h-32 w-full bg-gray-500 rounded"></div>
+          <div className="h-4 w-28 bg-gray-500 rounded"></div>
+          <div className="h-4 w-full bg-gray-500 rounded"></div>
+          <div className="h-4 w-full bg-gray-500 rounded"></div>
+        </div>
+      </div>
+    );
 
   return (
     <div className="h-full w-full overflow-y-scroll relative bg-slate-300 custom-scrollbar  ">
@@ -635,7 +841,10 @@ function ArtistPage() {
               </h1>
             </div>
             <div className="flex gap-2">
-              <div className="flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1">
+              <div
+                onClick={() => setMessageModal(true)}
+                className="flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
+              >
                 Message{" "}
                 <box-icon
                   name="message-dots"
@@ -924,9 +1133,7 @@ function ArtistPage() {
               <div className="text-white text-xl drop-shadow-customWhite iceland-bold p-2 h-auto w-auto">
                 {selectArt?.artist?.artist_Name || "Unknown Artist"}
               </div>
-              <div
-                className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md"
-              >
+              <div className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md">
                 <img
                   src={selectArt?.artist?.artist_Image || successEmote}
                   alt="Artist"
@@ -1167,6 +1374,208 @@ function ArtistPage() {
           </div>
         </div>
       )}
+
+      {/* Message Modal */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50 transition-opacity duration-300 ${
+          messageModal ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className={`bg-white rounded-t-lg relative w-full max-w-md px-5 py-3 transform transition-transform duration-300 ${
+            messageModal ? "translate-y-0" : "translate-y-full"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Top Gradient */}
+          <div className="w-full py-2 mb-2 flex justify-between items-center h-auto">
+            <h2 className="text-3xl font-bold iceland-regular text-custom-purple">
+              Message
+            </h2>
+
+            <button
+              className="hover:text-primary-color duration-100 text-custom-purple text-4xl rounded"
+              onClick={() => setMessageModal(false)}
+            >
+              &times;
+            </button>
+          </div>
+
+          <div className="w-full absolute top-0 left-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md"></div>
+
+          {/* Chat History */}
+          <div className="h-96 mb-2 p-2 overflow-hidden overflow-y-scroll w-full bg-slate-200 shadow-inner shadow-slate-400 rounded-md relative">
+            {messages.map((message, index) => {
+              const isCurrentUser = message.sender_Id === currentUser?.id;
+              return (
+                <div
+                  key={index}
+                  className={`chat ${
+                    isCurrentUser ? "chat-end" : "chat-start"
+                  }`}
+                >
+                  {/* Only show the artist avatar if it's not the current user */}
+                  {!isCurrentUser && (
+                    <div className="chat-image avatar">
+                      <div className="w-10 rounded-full">
+                        <img alt="Artist Avatar" src={artist.artist_Image} />
+                      </div>
+                    </div>
+                  )}
+                  <div className="chat-header text-slate-800">
+                    {isCurrentUser ? currentUser.full_name : artist.artist_Name}
+                    <time className="text-xs ml-2 opacity-50">
+                      {new Date(message.timestamp).toLocaleTimeString()}
+                    </time>
+                  </div>
+                  <div
+                    className={`chat-bubble ${
+                      isCurrentUser
+                        ? "bg-white text-black"
+                        : "bg-violet-500 text-white"
+                    }`}
+                  >
+                    {message.text}
+                    {message.send_file && (
+                      <div className="mt-2">
+                        <img
+                          src={message.send_file}
+                          alt="Attached"
+                          className="min-w-[5rem] min-h-[5rem] object-cover rounded"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  {/* Floating Commission Options */}
+                </div>
+              );
+            })}
+          </div>
+          {commissionActive && selectedOption === "commission" && (
+            <div className="  right-5 bg-white justify-between shadow-lg rounded p-1 text-sm z-10 flex gap-4">
+              <button
+                onClick={async () => {
+                  await completeCommission();
+                  handleSendMessage();
+                  setCommissionActive(false);
+                  setSelectedOption(null);
+                }}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Complete Commission
+              </button>
+              <button
+                onClick={async () => {
+                  await cancelCommission();
+                  setCommissionActive(false);
+                  setSelectedOption(null);
+                  setMessageContent("");
+                  setImageFile(null);
+                }}
+                className="bg-red-500 text-white px-4 py-1 rounded"
+              >
+                Cancel Commission
+              </button>
+            </div>
+          )}
+          {selectedOption === "inquire" && (
+            <div className=" right-5 bg-white justify-between shadow-lg rounded p-1 text-sm z-10 flex gap-4">
+              <button
+                onClick={startCommission}
+                className="px-3 py-1 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors duration-150"
+              >
+                Start Commission
+              </button>
+            </div>
+          )}
+          {!selectedOption && (
+            <div className=" right-5 justify-between  rounded p-1 text-sm z-10 flex gap-4">
+              <button
+                onClick={startInquiry}
+                className="px-6 py-1 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors duration-150"
+              >
+                Inquire
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedOption("commission");
+                  setCommissionActive(true);
+                }}
+                className="px-6 py-1 bg-purple-500 text-white rounded-md shadow hover:bg-purple-600 transition-colors duration-150"
+              >
+                Commission
+              </button>
+            </div>
+          )}
+          {/* Message Input Area */}
+          {selectedOption && (
+            <div className="w-full h-20 bg-slate-600 rounded-md flex gap-1 p-1 items-center">
+              <div className="w-full h-full relative">
+                {/* Image Preview (if selected) */}
+                {imageFile && (
+                  <div className="absolute top-0 left-0 z-10 p-1">
+                    <img
+                      src={URL.createObjectURL(imageFile)}
+                      alt="Preview"
+                      className="w-5 h-5 object-cover rounded"
+                    />
+                    <button
+                      onClick={() => setImageFile(null)}
+                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                      data-tip="Cancel Image"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                )}
+                <textarea
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  placeholder="Type your Inquiry Here..."
+                  className={`h-full w-full p-1 bg-slate-200 border-custom-purple rounded-l-md border resize-none text-slate-800 text-sm ${
+                    imageFile ? "pt-7" : ""
+                  }`}
+                />
+                <div
+                  data-tip="Add image"
+                  className="w-7 tooltip tooltip-left absolute right-0 top-11 h-7 cursor-pointer hover:scale-105 duration-150"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      console.log("Selected file:", file);
+                      setImageFile(file);
+                    }}
+                    className="hidden"
+                    id="message-image-input"
+                  />
+                  <label
+                    htmlFor="message-image-input"
+                    className="cursor-pointer"
+                  >
+                    <box-icon
+                      type="solid"
+                      color="black"
+                      name="file-image"
+                    ></box-icon>
+                  </label>
+                </div>
+              </div>
+              <div className="w-2/12 flex justify-center items-center hover:bg-primary-color glass bg-custom-purple rounded-r-md hover:scale-95 duration-150 cursor-pointer h-full">
+                <div
+                  onClick={handleSendMessage}
+                  className="px-4 py-2 place-content-center"
+                >
+                  <box-icon type="solid" name="send" size="30px"></box-icon>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
