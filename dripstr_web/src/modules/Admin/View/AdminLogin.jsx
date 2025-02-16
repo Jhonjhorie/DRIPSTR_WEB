@@ -33,7 +33,7 @@ function AdminLogin() {
     // Manually generate a session token
     const adminToken = `admin-${new Date().getTime()}`;
     localStorage.setItem("adminToken", adminToken);
-
+    localStorage.setItem("username", data.username); 
     // Redirect to the dashboard
     navigate("/admin/dashboard");
   };
