@@ -214,7 +214,7 @@ function Reports() {
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
             onClick={closeModal}
           >
-            <div className="relative bg-gray-900 p-6 rounded-md">
+            <div className="relative bg-gray-900 p-7 rounded-md">
               <h2 className="text-xl mb-4">Select Action for Report ID: {modalContent.content.id}</h2>
               <button
                 className="w-full py-2 mb-2 bg-yellow-500 text-black hover:bg-gray-300"
@@ -236,7 +236,7 @@ function Reports() {
               </button>
 
               <button
-                className="absolute top-4 right-4 text-white font-bold text-2xl hover:text-black"
+                className="absolute top-1 right-2 text-white font-bold text-2xl hover:text-black"
                 onClick={closeModal}
               >
                 X
