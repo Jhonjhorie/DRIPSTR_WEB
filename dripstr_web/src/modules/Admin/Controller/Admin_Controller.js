@@ -2,7 +2,6 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 
 import Dashboard from "../View/Dashboard";
-import Reviews from "../View/Reviews";
 import Reports from "../View/Reports";
 import Accounts from "../View/Accounts";
 import AccountDetail from "../View/Components/AccountDetail";
