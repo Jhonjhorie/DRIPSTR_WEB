@@ -206,19 +206,19 @@ function Reports() {
               <div className="text-white p-6">
                 <h2 className="text-xl mb-4">Select Action for Report ID: {modalContent.content.id}</h2>
                 <button
-                  className="w-full py-2 mb-2 bg-yellow-500 text-black"
+                  className="w-full py-2 mb-2 bg-yellow-500 text-black hover:bg-gray-300"
                   onClick={() => {}}
                 >
                   Warn
                 </button>
                 <button
-                  className="w-full py-2 mb-2 bg-red-600 text-white"
+                  className="w-full py-2 mb-2 bg-red-600 text-white hover:bg-gray-300"
                   onClick={() => {}}
                 >
                   Suspend Account
                 </button>
                 <button
-                  className="w-full py-2 mb-2 bg-green-500 text-white"
+                  className="w-full py-2 mb-2 bg-green-500 text-white hover:bg-gray-300"
                   onClick={() => {}}
                 >
                   Dismiss
@@ -227,7 +227,7 @@ function Reports() {
             )}
 
             <button
-              className="absolute top-4 right-4 text-white font-bold text-2xl"
+              className="absolute top-4 right-4 text-white font-bold text-2xl hover:text-black"
               onClick={closeModal}  // Close the modal
             >
               X
