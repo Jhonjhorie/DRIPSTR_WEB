@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
 import ProductModal from './productModal';
+import BuyConfirm from './buyConfirm';
 import ProductCard from './productCard';
 
 
@@ -93,10 +94,10 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
       {selectedItem && (
         <dialog
           id="my_modal_4"
-          className="modal modal-bottom sm:modal-middle absolute right-4 sm:right-0"
+          className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
         >
-          <ProductModal item={selectedItem} onClose={closeModal} />
-          <form method="dialog" className="modal-backdrop">
+          <BuyConfirm item={selectedItem} onClose={closeModal} />
+          <form method="dialog" className="modal-backdrop min-h-full min-w-full absolute ">
             <button onClick={closeModal}></button>
           </form>
         </dialog>
