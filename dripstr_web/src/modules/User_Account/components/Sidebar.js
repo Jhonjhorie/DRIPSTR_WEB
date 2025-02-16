@@ -51,14 +51,14 @@ const AccountLayout = () => {
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
-  }, [navigate]); // Make sure to include navigate as a dependency
+  }, [navigate]);  
 
   // Logout function
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut(); // Call Supabase's signOut method
-      // Redirect to home or login page after logging out
-      navigate("/login"); // Redirect to login page after logging out
+      await supabase.auth.signOut();  
+       navigate("/");  
+       window.location.reload();
     } catch (error) {
       console.error("Error logging out:", error.message);
     }
