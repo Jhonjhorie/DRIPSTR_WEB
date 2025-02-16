@@ -137,12 +137,12 @@ function Admins() {
                         Add Admin
                     </button>
                     <div className="flex items-center space-x-2">
-                        <label htmlFor="sortOrder" className="text-lg font-medium">Sort by Admin ID:</label>
+                        <label htmlFor="sortOrder" className="text-lg font-medium text-white">Sort by Admin ID:</label>
                         <select
                             id="sortOrder"
                             value={sortOrder}
                             onChange={handleSortChange}
-                            className="bg-blue-500 text-white font-bold rounded py-2 px-4"
+                            className="bg-blue-500 text-white font-bold rounded py-2 "
                         >
                             <option value="ascending">Ascending</option>
                             <option value="descending">Descending</option>
