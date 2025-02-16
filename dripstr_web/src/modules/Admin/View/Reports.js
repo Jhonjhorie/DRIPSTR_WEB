@@ -175,7 +175,7 @@ function Reports() {
                     <td className="p-2 border border-gray-500">{report.art_Name || "No Name"}</td>
                     <td className="p-2 border border-gray-500">{report.artist_Name || "No Name"}</td>
                     <td className="p-2 border border-gray-500">{report.reason}</td>
-                    <td className="p-2 border border-gray-500 cursor-pointer " onClick={() => openActionModal(report)}  >{report.action}</td>
+                    <td className="p-2 border border-gray-500 cursor-pointer hover:text-blue-500 underline" onClick={() => openActionModal(report)}   >{report.action}</td>
                   </tr>
                 ))
               ) : (
