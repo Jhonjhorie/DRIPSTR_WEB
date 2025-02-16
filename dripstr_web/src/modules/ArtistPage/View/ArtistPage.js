@@ -5,6 +5,7 @@ import star from "@/assets/starrank.png";
 import hmmEmote from "@/assets/emote/hmmm.png";
 import successEmote from "@/assets/emote/success.png";
 import questionEmote from "@/assets/emote/question.png";
+import qrCode from "@/assets/qr.png";
 import { supabase } from "@/constants/supabase";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -40,7 +41,10 @@ function ArtistPage() {
   const [messages, setMessages] = useState([]);
   const [imageFile, setImageFile] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
-  const [commissionActive, setCommissionActive] = useState(false);
+  const [commisionQR, setCommissionQR] = useState(false);
+  const [showAlertYO, setShowAlertYO] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imageOrientation, setImageOrientation] = useState("landscape");
 
   const handleFollow = async () => {
     if (!artist || !currentUser) return;
@@ -614,6 +618,12 @@ function ArtistPage() {
 
   // Message function commision
   const handleSendMessage = async () => {
+    // Check if the current user is the owner of the artist page
+    if (currentUser?.id === artist?.owner_Id) {
+      alert("You own this art page");
+      return;
+    }
+
     // If both text and image are empty, do nothing
     if (!messageContent.trim() && !imageFile) return;
 
@@ -672,8 +682,7 @@ function ArtistPage() {
         artist_Name: artist?.artist_Name,
         artist_Image: artist?.artist_Image,
         content: [newMsg],
-        send_file: null, // Not used here
-        what_for: selectedOption, // "inquire" or "commission"
+
       };
 
       const { data, error } = await supabase
@@ -737,62 +746,6 @@ function ArtistPage() {
     console.log("Image uploaded successfully. Public URL:", data.publicUrl);
     return data.publicUrl;
   };
-  // Update: Start Commission
-  const startCommission = async () => {
-    const { error } = await supabase
-      .from("artist_Messages")
-      .update({ what_for: "commission" })
-      .eq("sender_Id", currentUser?.id)
-      .eq("artist_Id", artist?.id);
-    if (error) {
-      console.error("Error starting commission:", error.message);
-    } else {
-      console.log("Commission started.");
-      setSelectedOption("commission");
-      setCommissionActive(true);
-    }
-  };
-  const startInquiry = async () => {
-    const { error } = await supabase
-      .from("artist_Messages")
-      .update({ what_for: "inquire" })
-      .eq("sender_Id", currentUser?.id)
-      .eq("artist_Id", artist?.id);
-    if (error) {
-      console.error("Error starting inquiry:", error.message);
-    } else {
-      console.log("Inquiry started.");
-      setSelectedOption("inquire");
-    }
-  };
-
-  // Update: Complete Commission
-  const completeCommission = async () => {
-    const { error } = await supabase
-      .from("artist_Messages")
-      .update({ what_for: "completed" }) // Keep or set what_for to "commission"
-      .eq("sender_Id", currentUser?.id)
-      .eq("artist_Id", artist?.id);
-    if (error) {
-      console.error("Error completing commission:", error.message);
-    } else {
-      console.log("Commission completed.");
-    }
-  };
-
-  // Update: Cancel Commission (set what_for to null)
-  const cancelCommission = async () => {
-    const { error } = await supabase
-      .from("artist_Messages")
-      .update({ what_for: "cancelled" }) // Instead of using an undefined variable, set to null
-      .eq("sender_Id", currentUser?.id)
-      .eq("artist_Id", artist?.id);
-    if (error) {
-      console.error("Error canceling commission:", error.message);
-    } else {
-      console.log("Commission canceled.");
-    }
-  };
 
   useEffect(() => {
     if (messageModal) {
@@ -815,7 +768,7 @@ function ArtistPage() {
     );
 
   return (
-    <div className="h-full w-full overflow-y-scroll relative bg-slate-300 custom-scrollbar  ">
+    <div className="h-full w-full relative bg-slate-300  ">
       <div className="absolute top-5 left-5">
         <button
           onClick={() => navigate("/arts/Artists")}
@@ -842,7 +795,16 @@ function ArtistPage() {
             </div>
             <div className="flex gap-2">
               <div
-                onClick={() => setMessageModal(true)}
+                onClick={() => {
+                  if (currentUser?.id === artist?.owner_Id) {
+                    setShowAlertYO(true);
+                    setTimeout(() => {
+                      setShowAlertYO(false);
+                    }, 3000);
+                  } else {
+                    setMessageModal(true);
+                  }
+                }}
                 className="flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
               >
                 Message{" "}
@@ -852,6 +814,7 @@ function ArtistPage() {
                   color="white"
                 ></box-icon>
               </div>
+
               <button
                 onClick={isFollowing ? handleUnfollow : handleFollow}
                 className={`flex items-center gap-4 rounded-md hover:scale-95 duration-200 cursor-pointer justify-center font-semibold iceland-regular glass px-2 
@@ -1084,6 +1047,38 @@ function ArtistPage() {
               />
             </svg>
             <span>You Unfollow this Artist</span>
+          </div>
+        </div>
+      )}
+      {showAlertYO && (
+        <div className="fixed bottom-10 right-10 z-50 px-4 py-2  shadow-md rounded-md transition-opacity duration-1000 ease-in-out">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>You are the Owner of this Artist Page.</span>
           </div>
         </div>
       )}
@@ -1383,17 +1378,18 @@ function ArtistPage() {
         }`}
       >
         <div
-          className={`bg-white rounded-t-lg relative w-full max-w-md px-5 py-3 transform transition-transform duration-300 ${
+          className={`bg-white rounded-t-lg relative w-full max-w-xl px-5 py-3 transform transition-transform duration-300 ${
             messageModal ? "translate-y-0" : "translate-y-full"
           }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Top Gradient */}
+          <div className="w-full absolute top-0 left-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md"></div>
+
           <div className="w-full py-2 mb-2 flex justify-between items-center h-auto">
             <h2 className="text-3xl font-bold iceland-regular text-custom-purple">
               Message
             </h2>
-
             <button
               className="hover:text-primary-color duration-100 text-custom-purple text-4xl rounded"
               onClick={() => setMessageModal(false)}
@@ -1401,8 +1397,6 @@ function ArtistPage() {
               &times;
             </button>
           </div>
-
-          <div className="w-full absolute top-0 left-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md"></div>
 
           {/* Chat History */}
           <div className="h-96 mb-2 p-2 overflow-hidden overflow-y-scroll w-full bg-slate-200 shadow-inner shadow-slate-400 rounded-md relative">
@@ -1446,6 +1440,7 @@ function ArtistPage() {
                             src={message.send_file}
                             alt="Attached"
                             className="min-w-[5rem] min-h-[5rem] object-cover rounded"
+                            onClick={() => setSelectedImage(message.send_file)}
                           />
                         </div>
                       )}
@@ -1462,135 +1457,144 @@ function ArtistPage() {
                     className="object-contain h-20 w-20 rounded-lg p-1 drop-shadow-customViolet"
                   />
                 </div>
-                <div className="text-sm font-bold text-slate-700">Start art commision now!</div>
+                <div className="text-sm font-bold text-slate-700">
+                  Start art commission now!
+                </div>
               </div>
             )}
           </div>
 
-          {commissionActive && selectedOption === "commission" && (
-            <div className="  right-5 bg-white justify-between shadow-lg rounded p-1 text-sm z-10 flex gap-4">
-              <button
-                onClick={async () => {
-                  await completeCommission();
-                  handleSendMessage();
-                  setCommissionActive(false);
-                  setSelectedOption(null);
-                }}
-                className="bg-green-500 text-white px-4 py-2 rounded"
-              >
-                Complete Commission
-              </button>
-              <button
-                onClick={async () => {
-                  await cancelCommission();
-                  setCommissionActive(false);
-                  setSelectedOption(null);
-                  setMessageContent("");
-                  setImageFile(null);
-                }}
-                className="bg-red-500 text-white px-4 py-1 rounded"
-              >
-                Cancel Commission
-              </button>
-            </div>
-          )}
-          {selectedOption === "inquire" && (
-            <div className=" right-5 bg-white justify-between shadow-lg rounded p-1 text-sm z-10 flex gap-4">
-              <button
-                onClick={startCommission}
-                className="px-3 py-1 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors duration-150"
-              >
-                Start Commission
-              </button>
-            </div>
-          )}
-          {!selectedOption && (
-            <div className=" right-5 justify-between  rounded p-1 text-sm z-10 flex gap-4">
-              <button
-                onClick={startInquiry}
-                className="px-6 py-1 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 transition-colors duration-150"
-              >
-                Inquire
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedOption("commission");
-                  setCommissionActive(true);
-                }}
-                className="px-6 py-1 bg-purple-500 text-white rounded-md shadow hover:bg-purple-600 transition-colors duration-150"
-              >
-                Commission
-              </button>
-            </div>
-          )}
-          {/* Message Input Area */}
-          {selectedOption && (
-            <div className="w-full h-20 bg-slate-600 rounded-md flex gap-1 p-1 items-center">
-              <div className="w-full h-full relative">
-                {/* Image Preview (if selected) */}
-                {imageFile && (
-                  <div className="absolute top-0 left-0 z-10 p-1">
-                    <img
-                      src={URL.createObjectURL(imageFile)}
-                      alt="Preview"
-                      className="w-5 h-5 object-cover rounded"
-                    />
-                    <button
-                      onClick={() => setImageFile(null)}
-                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-                      data-tip="Cancel Image"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                )}
-                <textarea
-                  value={messageContent}
-                  onChange={(e) => setMessageContent(e.target.value)}
-                  placeholder="Type your Inquiry Here..."
-                  className={`h-full w-full p-1 bg-slate-200 border-custom-purple rounded-l-md border resize-none text-slate-800 text-sm ${
-                    imageFile ? "pt-7" : ""
-                  }`}
-                />
-                <div
-                  data-tip="Add image"
-                  className="w-7 tooltip tooltip-left absolute right-0 top-11 h-7 cursor-pointer hover:scale-105 duration-150"
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      console.log("Selected file:", file);
-                      setImageFile(file);
-                    }}
-                    className="hidden"
-                    id="message-image-input"
+          <div className="right-5 justify-between rounded p-1 text-sm z-10 flex gap-4">
+            <button
+              onClick={() => {
+                setCommissionQR(true);
+              }}
+              className="px-6 py-1 bg-purple-500 text-white rounded-md shadow hover:bg-purple-600 transition-colors duration-150"
+            >
+              Pay Commission
+            </button>
+          </div>
+
+          {/* Message Input Area: Always shown */}
+          <div className="w-full h-20 bg-slate-600 rounded-md flex gap-1 p-1 items-center">
+            <div className="w-full h-full relative">
+              {/* Image Preview (if selected) */}
+              {imageFile && (
+                <div className="absolute top-0 left-0 z-10 p-1">
+                  <img
+                    src={URL.createObjectURL(imageFile)}
+                    alt="Preview"
+                    className="w-5 h-5 object-cover rounded"
                   />
-                  <label
-                    htmlFor="message-image-input"
-                    className="cursor-pointer"
+                  <button
+                    onClick={() => setImageFile(null)}
+                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                    data-tip="Cancel Image"
                   >
-                    <box-icon
-                      type="solid"
-                      color="black"
-                      name="file-image"
-                    ></box-icon>
-                  </label>
+                    &times;
+                  </button>
                 </div>
-              </div>
-              <div className="w-2/12 flex justify-center items-center hover:bg-primary-color glass bg-custom-purple rounded-r-md hover:scale-95 duration-150 cursor-pointer h-full">
-                <div
-                  onClick={handleSendMessage}
-                  className="px-4 py-2 place-content-center"
-                >
-                  <box-icon type="solid" name="send" size="30px"></box-icon>
-                </div>
+              )}
+              <textarea
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                placeholder="Type your Inquiry Here..."
+                className={`h-full w-full p-1 bg-slate-200 border-custom-purple rounded-l-md border resize-none text-slate-800 text-sm ${
+                  imageFile ? "pt-7" : ""
+                }`}
+              />
+              <div
+                data-tip="Add image"
+                className="w-7 tooltip tooltip-left absolute right-0 top-11 h-7 cursor-pointer hover:scale-105 duration-150"
+              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    console.log("Selected file:", file);
+                    setImageFile(file);
+                  }}
+                  className="hidden"
+                  id="message-image-input"
+                />
+                <label htmlFor="message-image-input" className="cursor-pointer">
+                  <box-icon
+                    type="solid"
+                    color="black"
+                    name="file-image"
+                  ></box-icon>
+                </label>
               </div>
             </div>
-          )}
+            <div className="w-2/12 flex justify-center items-center hover:bg-primary-color glass bg-custom-purple rounded-r-md hover:scale-95 duration-150 cursor-pointer h-full">
+              <div
+                onClick={handleSendMessage}
+                className="px-4 py-2 place-content-center"
+              >
+                <box-icon type="solid" name="send" size="30px"></box-icon>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+          onClick={() => setSelectedImage(null)}
+        >
+          <div className="relative bg-custom-purple p-2 rounded-md ">
+            <img
+              src={selectedImage}
+              alt="Full-size preview"
+              onLoad={(e) => {
+                const img = e.target;
+                // Check natural dimensions to determine orientation
+                const orientation =
+                  img.naturalWidth > img.naturalHeight
+                    ? "landscape"
+                    : "portrait";
+                setImageOrientation(orientation);
+              }}
+              className={`rounded ${
+                imageOrientation === "landscape"
+                  ? "max-w-full max-h-[80vh]"
+                  : "max-w-[80vw] max-h-[80vh]"
+              }`}
+            />
+            <button
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-2 right-0 text-white text-3xl p-2 drop-shadow-lg "
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+      {commisionQR && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+          onClick={() => {
+            setCommissionQR(false);
+          }}
+        >
+          <div className="relative bg-custom-purple h-80 w-80 p-2 rounded-md ">
+            <img
+              src={qrCode}
+              alt="Success Emote"
+              className="object-contain h-full w-full rounded-lg p-1 drop-shadow-customViolet"
+            />
+            <button
+                onClick={() => {
+                  setCommissionQR(false);
+                }}
+              className="absolute -top-2 right-0  text-3xl p-2 drop-shadow-lg "
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

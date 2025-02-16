@@ -501,9 +501,7 @@ function MerchantDashboard() {
 
   return (
     <div className="h-full w-full bg-slate-300  overflow-hidden  ">
-      <div className="absolute mx-3 right-0 z-20">
-        <ArtistSideBar></ArtistSideBar>
-      </div>
+      <ArtistSideBar></ArtistSideBar>
       <div className="w-full h-20  sticky top-0 z-10 bg-violet-600 shadow-md pr-20 px-16 ">
         <div className="w-full h-full flex gap-3 p-2">
           <div className="flex justify-between w-full ">
@@ -628,9 +626,11 @@ function MerchantDashboard() {
         </div>
       </div>
       <div className=" flex w-full h-full bg-slate-300 overflow-hidden">
-        <div className="bg-violet-900 z-10 overflow-y-scroll sticky max-h-[550px] my-1 rounded-sm w-[350px]">
-          <MessagesArtist></MessagesArtist>
-        </div>
+      <div className="bg-violet-900 z-10 overflow-y-scroll sticky top-0 max-h-[550px] my-1 rounded-sm w-[350px]">
+  <MessagesArtist />
+</div>
+
+
         <div className="p-2 w-full">
           <div className="bg-slate-300 h-[545px]  z-0 rounded-md w-full overflow-hidden  overflow-y-scroll p-5">
             {artistArts && artistArts.length > 0 ? (
