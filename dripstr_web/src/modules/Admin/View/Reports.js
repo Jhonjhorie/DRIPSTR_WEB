@@ -7,20 +7,16 @@ function Reports() {
   const navigate = useNavigate();
   const [fetchedReports, setFetchedReports] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const [selectedImage, setSelectedImage] = useState(null); // State to hold the clicked image
-
-  // Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
 
   const fetchReports = async () => {
     setLoading(true);
 
-    // Fetch reports from the 'reported_Art' table
     const { data: reports, error: reportError } = await supabase
       .from("reported_Art")
-      .select("id, created_at, art_Id, art_Name, reason, action");  // Fetch data including art_Id
+      .select("id, created_at, art_Id, art_Name, reason, action");
 
     if (reportError) {
       console.error("❌ Error fetching reports:", reportError.message);
@@ -28,14 +24,11 @@ function Reports() {
       return;
     }
 
-    // Now, fetch the art_Image from 'artist_Arts' table using art_Id (which corresponds to 'id' in artist_Arts)
-    const artIds = reports.map((report) => report.art_Id);  // Extract all art_Id values
-
-    // Fetch the art_Image from artist_Arts where the artist_Arts.id matches the art_Id in reported_Art
+    const artIds = reports.map((report) => report.art_Id);
     const { data: arts, error: artsError } = await supabase
       .from("artist_Arts")
-      .select("id, art_Image, artist_Id")  // Fetch art Image and artist_Id columns
-      .in("id", artIds);  // Filter based on the art_Id values from reported_Art
+      .select("id, art_Image, artist_Id")
+      .in("id", artIds);
 
     if (artsError) {
       console.error("❌ Error fetching arts:", artsError.message);
@@ -43,12 +36,11 @@ function Reports() {
       return;
     }
 
-    // Now, fetch the artist data based on the artist_Id
-    const artistIds = arts.map((art) => art.artist_Id);  // Extract all artist_Id values
+    const artistIds = arts.map((art) => art.artist_Id);
     const { data: artists, error: artistsDataError } = await supabase
       .from("artist")
-      .select("id, artist_Name")  // Fetch artist's name
-      .in("id", artistIds);  // Filter based on the artist_Id values from artist_Arts
+      .select("id, artist_Name")
+      .in("id", artistIds);
 
     if (artistsDataError) {
       console.error("❌ Error fetching artists:", artistsDataError.message);
@@ -56,25 +48,20 @@ function Reports() {
       return;
     }
 
-    // Merge the reports, arts, and artists data
     const reportsWithDetails = reports.map((report) => {
-      // Find the corresponding art data
       const art = arts.find((artItem) => artItem.id === report.art_Id);
-      // Find the corresponding artist data
       const artist = artists.find((artistItem) => artistItem.id === art?.artist_Id);
 
       return {
         ...report,
         art_Image: art ? art.art_Image : null,
-        artist_Name: artist ? artist.artist_Name : "Unknown Artist",  // Default to "Unknown Artist" if not found
+        artist_Name: artist ? artist.artist_Name : "Unknown Artist",
       };
     });
 
-    setFetchedReports(reportsWithDetails);  // Set the final data to state
-    setLoading(false);  // Stop loading
+    setFetchedReports(reportsWithDetails);
+    setLoading(false);
   };
-
-
 
   useEffect(() => {
     fetchReports();
@@ -82,55 +69,89 @@ function Reports() {
 
   const openImageModal = (image) => {
     setModalContent({
-      type: "image", // Type for identifying that it's an image
+      type: "image",
       content: image,
     });
     setIsModalOpen(true);
   };
 
-  // Open modal with action options (Warn, Suspend, Dismiss)
   const openActionModal = (report) => {
     setModalContent({
-      type: "action", // Type for identifying that it's action options
+      type: "action",
       content: report,
     });
     setIsModalOpen(true);
   };
 
-  // Close modal function
   const closeModal = () => {
     setIsModalOpen(false);
     setModalContent(null);
   };
 
+  // Function to update the action field in the `reported_Art` table
+  const updateReportAction = async (reportId, action) => {
+    const { data, error } = await supabase
+      .from("reported_Art")
+      .update({ action })
+      .eq("id", reportId);
+
+    if (error) {
+      console.error("❌ Error updating report action:", error.message);
+    } else {
+      setFetchedReports((prevReports) =>
+        prevReports.map((report) =>
+          report.id === reportId ? { ...report, action } : report
+        )
+      );
+      closeModal();
+    }
+  };
+
+  // Function to delete a report (called when "Dismiss" is clicked)
+  const deleteReport = async (reportId) => {
+    const { data, error } = await supabase
+      .from("reported_Art")
+      .delete()
+      .eq("id", reportId);
+
+    if (error) {
+      console.error("❌ Error deleting report:", error.message);
+    } else {
+      // Remove the deleted report from the local state
+      setFetchedReports((prevReports) =>
+        prevReports.filter((report) => report.id !== reportId)
+      );
+      closeModal();
+    }
+  };
+
+  const handleActionClick = (action) => {
+    if (modalContent && modalContent.type === "action") {
+      if (action === "Dismiss") {
+        deleteReport(modalContent.content.id);  // Call delete function when "Dismiss" is clicked
+      } else {
+        updateReportAction(modalContent.content.id, action);  // Update action for Warn or Suspend
+      }
+    }
+  };
 
   // Format date
-  // Function to format the date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-
-    // Options to format the date
     const formattedDate = date.toLocaleDateString('en-US', {
       month: '2-digit',
       day: '2-digit',
       year: 'numeric',
     });
-
-    // Options to format the time
     const formattedTime = date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
       hour12: true,
     });
-
-    // Get the day of the week
     const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
-
     return `${formattedDate} - ${dayOfWeek} - ${formattedTime}`;
   };
-
-
 
   return (
     <div className="flex flex-row">
@@ -175,7 +196,7 @@ function Reports() {
                     <td className="p-2 border border-gray-500">{report.art_Name || "No Name"}</td>
                     <td className="p-2 border border-gray-500">{report.artist_Name || "No Name"}</td>
                     <td className="p-2 border border-gray-500">{report.reason}</td>
-                    <td className="p-2 border border-gray-500 cursor-pointer hover:text-blue-500 underline" onClick={() => openActionModal(report)}   >{report.action}</td>
+                    <td className="p-2 border border-gray-500 cursor-pointer hover:text-blue-500 underline" onClick={() => openActionModal(report)}>{report.action}</td>
                   </tr>
                 ))
               ) : (
@@ -185,57 +206,44 @@ function Reports() {
               )}
             </tbody>
           </table>
-
         )}
-{/* Modal for image or action */}
-{isModalOpen && modalContent && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
-          onClick={closeModal} // Close modal when clicking outside of the modal
-        >
-          <div className="relative bg-gray-900 p-4 rounded-md">
-            {modalContent.type === "image" && (
-              <img
-                src={modalContent.content}
-                alt="Full Screen"
-                className="max-h-[90vh] max-w-[90vw] object-contain"
-              />
-            )}
+        
+        {/* Modal for action buttons */}
+        {isModalOpen && modalContent && modalContent.type === "action" && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+            onClick={closeModal}
+          >
+            <div className="relative bg-gray-900 p-6 rounded-md">
+              <h2 className="text-xl mb-4">Select Action for Report ID: {modalContent.content.id}</h2>
+              <button
+                className="w-full py-2 mb-2 bg-yellow-500 text-black hover:bg-gray-300"
+                onClick={() => handleActionClick("Warn")}
+              >
+                Warn
+              </button>
+              <button
+                className="w-full py-2 mb-2 bg-red-600 text-white hover:bg-gray-300"
+                onClick={() => handleActionClick("Suspend Account")}
+              >
+                Suspend Account
+              </button>
+              <button
+                className="w-full py-2 mb-2 bg-green-500 text-white hover:bg-gray-300"
+                onClick={() => handleActionClick("Dismiss")}
+              >
+                Dismiss
+              </button>
 
-            {modalContent.type === "action" && (
-              <div className="text-white p-6">
-                <h2 className="text-xl mb-4">Select Action for Report ID: {modalContent.content.id}</h2>
-                <button
-                  className="w-full py-2 mb-2 bg-yellow-500 text-black hover:bg-gray-300"
-                  onClick={() => {}}
-                >
-                  Warn
-                </button>
-                <button
-                  className="w-full py-2 mb-2 bg-red-600 text-white hover:bg-gray-300"
-                  onClick={() => {}}
-                >
-                  Suspend Account
-                </button>
-                <button
-                  className="w-full py-2 mb-2 bg-green-500 text-white hover:bg-gray-300"
-                  onClick={() => {}}
-                >
-                  Dismiss
-                </button>
-              </div>
-            )}
-
-            <button
-              className="absolute top-4 right-4 text-white font-bold text-2xl hover:text-black"
-              onClick={closeModal}  // Close the modal
-            >
-              X
-            </button>
+              <button
+                className="absolute top-4 right-4 text-white font-bold text-2xl hover:text-black"
+                onClick={closeModal}
+              >
+                X
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-
+        )}
       </div>
     </div>
   );
