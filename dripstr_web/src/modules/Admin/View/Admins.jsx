@@ -109,25 +109,38 @@ function Admins() {
         setLoading(false);
     };
     
+    const handleSort = () => {
+        const sortedAdmins = [...fetchedAdmins].sort((a, b) => a.id - b.id);
+        setFetchedAdmins(sortedAdmins);
+    };
 
     return (
         <div className="flex flex-row h-screen">
             <Sidebar />
             <div className="bg-slate-900 p-6 rounded-3xl shadow-lg w-full h-full">
                 <h2 className="text-white text-2xl font-bold mb-4">Admins</h2>
+                <div className="flex justify-between">
                 <button 
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4" 
                     onClick={handleAddAdmin}
                 >
                     Add Admin
                 </button>
+                <button 
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4" 
+                    onClick={handleSort}
+                >
+                    Sort Admin ID
+                </button>
 
+                </div>
                 {loading ? (
                     <p className="text-white text-center">Loading admins...</p>
                 ) : (
                     <table className="w-full text-white border border-gray-600 bg-gray-800">
                         <thead>
                             <tr className="bg-gray-700">
+                            <th className="p-2 border border-gray-500">Username</th>
                                 <th className="p-2 border border-gray-500">Username</th>
                                 <th className="p-2 border border-gray-500">Password</th>
                                 <th className="p-2 border border-gray-500">Actions</th>
@@ -137,6 +150,7 @@ function Admins() {
                             {fetchedAdmins.length > 0 ? (
                                 fetchedAdmins.map((admin) => (
                                     <tr key={admin.id} className="text-center border-b border-gray-600">
+                                        <td className="p-2 border border-gray-500">{admin.id}</td>
                                         <td className="p-2 border border-gray-500">{admin.username}</td>
                                         <td className="p-2 border border-gray-500">{admin.password}</td>
                                         <td className="p-2 border-gray-500 flex justify-center gap-4">

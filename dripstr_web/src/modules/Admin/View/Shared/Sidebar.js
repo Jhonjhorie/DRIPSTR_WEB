@@ -30,6 +30,7 @@ function Sidebar() {
 
     fetchAdminData();
   }, []);
+  
   // Toggle function for sidebar
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
