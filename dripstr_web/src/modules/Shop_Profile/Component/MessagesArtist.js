@@ -1,25 +1,93 @@
 import React from "react";
+import { supabase } from "@/constants/supabase";
+
 const { useState, useEffect } = React;
 
 function MessagesArtist() {
   const [selectedMessage, setSelectedMessage] = useState(null);
-  const messages = [
-    { id: 1, name: "Alice", message: "Hello, how are you?" },
-    { id: 2, name: "Bob", message: "Hi, what's up?" },
-    { id: 3, name: "Charlie", message: "Good morning!" },
-    {
-      id: 4,
-      name: "David",
-      message:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    },
-    { id: 5, name: "Eve", message: "How's it going?" },
-    { id: 6, name: "Frank", message: "Nice to meet you!" },
-    { id: 7, name: "Grace", message: "What's new?" },
-    { id: 8, name: "Hank", message: "Good evening!" },
-    { id: 9, name: "Ivy", message: "How have you been?" },
-    { id: 10, name: "Jack", message: "Hello there!" },
-  ];
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [messageModal, setMessageModal] = useState(false);
+  const [messageContent, setMessageContent] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [artistData, setArtistData] = useState(null);
+  const [selectedArtistId, setSelectedArtistId] = useState(null);
+  const [artistArts, setArtistArts] = useState([]);
+  const [totalArtsCount, setTotalArtsCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [artist, setArtist] = useState(null);
+
+  // Fetch current user (example)
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: userData, error } = await supabase.auth.getUser();
+      if (error || !userData?.user) {
+        console.error("Error fetching user:", error?.message);
+        return;
+      }
+      setCurrentUser(userData.user);
+    };
+    fetchUser();
+  }, []);
+
+  // Example: Fetch artist details (using owner_Id or id as required)
+  useEffect(() => {
+    const fetchArtist = async () => {
+      if (!currentUser) return;
+      // For example, fetch the artist where currentUser is the owner
+      const { data, error } = await supabase
+        .from("artist")
+        .select("id, artist_Name, artist_Bio, art_Type, artist_Image, owner_Id")
+        .eq("owner_Id", currentUser.id)
+        .single();
+      if (error) {
+        console.error("Error fetching artist:", error.message);
+        return;
+      }
+      setArtist(data);
+      setSelectedArtistId(data.id);
+    };
+    fetchArtist();
+  }, [currentUser]);
+
+  // Fetch messages function (corrected)
+  const fetchMessages = async () => {
+    // Only proceed if both currentUser and artist exist
+    if (!currentUser || !artist) return;
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("artist_Messages")
+        .select("content")
+        .eq("sender_Id", currentUser.id)
+        .eq("artist_Id", artist.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching messages:", error.message);
+      } else {
+        const conversationContent = data ? data.content : [];
+        setMessages(
+          Array.isArray(conversationContent) ? conversationContent : []
+        );
+      }
+    } catch (err) {
+      console.error("Unexpected error fetching messages:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Example: call fetchMessages when artist changes
+  useEffect(() => {
+    if (artist) {
+      fetchMessages();
+    }
+  }, [artist]);
 
   return (
     <div>
@@ -27,11 +95,16 @@ function MessagesArtist() {
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className="bg-slate-50 w-full mb-2  p-2 cursor-pointer"
+            className="bg-slate-50 w-full mb-2 p-2 cursor-pointer"
             onClick={() => setSelectedMessage(msg)}
           >
-            <div className="flex justify-items-center gap-2">
-              <div className="h-10 min-w-10 mt-1 rounded-full bg-slate-200"></div>
+            <div className="flex items-center gap-2">
+              {/* You can display an avatar image if available */}
+              <div className="h-10 w-10 mt-1 rounded-full bg-slate-200">
+                {/* For example, if msg.avatar exists, you can use:
+              <img src={msg.avatar} alt="Avatar" className="object-cover rounded-full" />
+              */}
+              </div>
               <div className="overflow-hidden">
                 <div className="font-bold">{msg.name}</div>
                 <div className="truncate">{msg.message}</div>
