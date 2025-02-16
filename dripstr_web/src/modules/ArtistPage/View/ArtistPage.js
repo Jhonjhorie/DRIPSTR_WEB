@@ -1406,52 +1406,67 @@ function ArtistPage() {
 
           {/* Chat History */}
           <div className="h-96 mb-2 p-2 overflow-hidden overflow-y-scroll w-full bg-slate-200 shadow-inner shadow-slate-400 rounded-md relative">
-            {messages.map((message, index) => {
-              const isCurrentUser = message.sender_Id === currentUser?.id;
-              return (
-                <div
-                  key={index}
-                  className={`chat ${
-                    isCurrentUser ? "chat-end" : "chat-start"
-                  }`}
-                >
-                  {/* Only show the artist avatar if it's not the current user */}
-                  {!isCurrentUser && (
-                    <div className="chat-image avatar">
-                      <div className="w-10 rounded-full">
-                        <img alt="Artist Avatar" src={artist.artist_Image} />
-                      </div>
-                    </div>
-                  )}
-                  <div className="chat-header text-slate-800">
-                    {isCurrentUser ? currentUser.full_name : artist.artist_Name}
-                    <time className="text-xs ml-2 opacity-50">
-                      {new Date(message.timestamp).toLocaleTimeString()}
-                    </time>
-                  </div>
+            {messages.length > 0 ? (
+              messages.map((message, index) => {
+                const isCurrentUser = message.sender_Id === currentUser?.id;
+                return (
                   <div
-                    className={`chat-bubble ${
-                      isCurrentUser
-                        ? "bg-white text-black"
-                        : "bg-violet-500 text-white"
+                    key={index}
+                    className={`chat ${
+                      isCurrentUser ? "chat-end" : "chat-start"
                     }`}
                   >
-                    {message.text}
-                    {message.send_file && (
-                      <div className="mt-2">
-                        <img
-                          src={message.send_file}
-                          alt="Attached"
-                          className="min-w-[5rem] min-h-[5rem] object-cover rounded"
-                        />
+                    {/* Only show the artist avatar if it's not the current user */}
+                    {!isCurrentUser && (
+                      <div className="chat-image avatar">
+                        <div className="w-10 rounded-full">
+                          <img alt="Artist Avatar" src={artist.artist_Image} />
+                        </div>
                       </div>
                     )}
+                    <div className="chat-header text-slate-800">
+                      {isCurrentUser
+                        ? currentUser.full_name
+                        : artist.artist_Name}
+                      <time className="text-xs ml-2 opacity-50">
+                        {new Date(message.timestamp).toLocaleTimeString()}
+                      </time>
+                    </div>
+                    <div
+                      className={`chat-bubble ${
+                        isCurrentUser
+                          ? "bg-white text-black"
+                          : "bg-violet-500 text-white"
+                      }`}
+                    >
+                      {message.text}
+                      {message.send_file && (
+                        <div className="mt-2">
+                          <img
+                            src={message.send_file}
+                            alt="Attached"
+                            className="min-w-[5rem] min-h-[5rem] object-cover rounded"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {/* Floating Commission Options */}
+                );
+              })
+            ) : (
+              <div className="flex flex-col justify-center items-center h-full">
+                <div className="mt-10 ">
+                  <img
+                    src={hmmEmote}
+                    alt="Success Emote"
+                    className="object-contain h-20 w-20 rounded-lg p-1 drop-shadow-customViolet"
+                  />
                 </div>
-              );
-            })}
+                <div className="text-sm font-bold text-slate-700">Start art commision now!</div>
+              </div>
+            )}
           </div>
+
           {commissionActive && selectedOption === "commission" && (
             <div className="  right-5 bg-white justify-between shadow-lg rounded p-1 text-sm z-10 flex gap-4">
               <button
