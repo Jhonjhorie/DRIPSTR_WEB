@@ -143,6 +143,7 @@ function Artists() {
       const topArtistsList = sortedArtists.map(([id, likes], index) => {
         const artist = artists.find((a) => a.id === parseInt(id, 10));
         return {
+          id: parseInt(id, 10), 
           name: artist?.artist_Name || "Unknown",
           type: artist?.art_Type || "Not set",
           color: colors[index],
@@ -461,6 +462,18 @@ function Artists() {
 
         {topArtists.map((artist, index) => (
           <div
+          onClick={() => {
+            console.log("Selected Artist Data:", artist);
+            // Use artist.id if available, otherwise try artist.artist_Id
+            const artistId = artist.id;
+            if (artistId) {
+              navigate(`/arts/ArtistPage/${artistId}`);
+            } else {
+              console.error(
+                "Artist ID is undefined! Check if the correct ID property exists in your data."
+              );
+            }
+          }}
             key={index}
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.3)",

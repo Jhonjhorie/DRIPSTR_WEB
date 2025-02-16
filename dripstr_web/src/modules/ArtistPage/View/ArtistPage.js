@@ -207,9 +207,14 @@ function ArtistPage() {
     fetchTotalLikes();
   };
 
-  const handleSelectArtReport = (art) => {
-    console.log("Reporting Art:", art);
-    // Open report modal
+  const handleSelectArtReport = (art2) => {
+    if (!art2) {
+      console.error("Selected art is null!");
+      return;
+    }
+    setSelectArt2(art2);
+    setReport(true);
+
   };
 
   const fetchTotalLikes = async () => {
@@ -552,35 +557,40 @@ function ArtistPage() {
       console.log("Report submitted successfully:", data);
     }
   };
-  const handleSelectArt = async (art) => {
-    if (!art) {
-      console.error("Selected art is null!");
-      return;
+  //comments
+
+  const fetchArtistDetails = async (artistId) => {
+    const { data, error } = await supabase
+      .from("artist")
+      .select("artist_Name, artist_Image, owner_Id")
+      .eq("id", artistId)
+      .single();
+  
+    if (error) {
+      console.error("Error fetching artist details:", error.message);
+      return null;
     }
-
-    console.log("Selected Art:", art);
-    setSelectArt(art);
-
-    try {
-      const { data: artData, error } = await supabase
-        .from("artist_Arts")
-        .select("comments")
-        .eq("id", art.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching comments:", error.message);
-        setComments([]);
-        return;
-      }
-
-      const commentsList = artData?.comments || [];
-      setComments(commentsList);
-    } catch (err) {
-      console.error("Unexpected error:", err.message);
-      setComments([]);
-    }
+    return data;
   };
+
+  const handleSelectArt = async (art) => {
+
+    setSelectArt(art);
+  
+    // If the art has an artist_Id, fetch the artist details
+    if (art.artist_Id) {
+      const artistDetails = await fetchArtistDetails(art.artist_Id);
+      if (artistDetails) {
+        // Update the selectArt state to include the artist details
+        setSelectArt((prevArt) => ({
+          ...prevArt,
+          artist: artistDetails, 
+        }));
+      }
+    }
+    
+  };
+  
   useEffect(() => {
     const fetchUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -804,7 +814,7 @@ function ArtistPage() {
       </div>
 
       {showAlertFollow && (
-        <div className="md:top-72  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="fixed bottom-10 right-10 z-50 px-4 py-2  shadow-md rounded-md transition-opacity duration-1000 ease-in-out">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
@@ -837,7 +847,7 @@ function ArtistPage() {
       )}
 
       {showAlertUnfollow && (
-        <div className="md:top-72 w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="fixed bottom-10 right-10 z-50 px-4 py-2  shadow-md rounded-md transition-opacity duration-1000 ease-in-out">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
@@ -912,25 +922,13 @@ function ArtistPage() {
 
             <div className="absolute bottom-2 right-2 flex">
               <div className="text-white text-xl drop-shadow-customWhite iceland-bold p-2 h-auto w-auto">
-                {selectArt?.artists?.artist_Name || "Unknown Artist"}
+                {selectArt?.artist?.artist_Name || "Unknown Artist"}
               </div>
               <div
-                onClick={() => {
-                  console.log("Selected Art Data:", selectArt);
-                  console.log("Artist Data:", selectArt.artist);
-
-                  if (selectArt.artists && selectArt.artists.id) {
-                    navigate(`/arts/ArtistPage/${selectArt.artists.id}`);
-                  } else {
-                    console.error(
-                      "Artist ID is undefined! Check if artist_Id exists in your database."
-                    );
-                  }
-                }}
-                className="bg-fuchsia-500 cursor-pointer text-white w-20 h-16 p-1 rounded-md"
+                className="bg-fuchsia-500 text-white w-20 h-16 p-1 rounded-md"
               >
                 <img
-                  src={selectArt?.artists?.artist_Image || successEmote}
+                  src={selectArt?.artist?.artist_Image || successEmote}
                   alt="Artist"
                   className="h-full w-full object-cover rounded-md"
                 />
@@ -1138,7 +1136,7 @@ function ArtistPage() {
         </div>
       )}
       {showAlert && selectArt2 && (
-        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className=" fixed bottom-10 right-10 z-50 px-4 py-2  shadow-md rounded-md transition-opacity duration-1000 ease-in-out">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
