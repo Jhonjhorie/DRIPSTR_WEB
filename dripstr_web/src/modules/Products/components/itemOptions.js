@@ -44,7 +44,7 @@ const ItemOptions = ({
     <div className="flex flex-col">
       <label className="flex form-control  gap-0.5">
         <div className="label py-0">
-          <span class="label-text text-xs">Variant:</span>
+          <span class="label-text text-xs text-slate-400">Variant:</span>
         </div>
         <div className="flex gap-1 w-full overflow-x-auto custom-scrollbar ml-2 pb-1">
           {variants.length > 0 ? (
@@ -86,7 +86,7 @@ const ItemOptions = ({
 
       <label className="flex form-control gap-0.5 justify-between">
         <div className="label py-0">
-          <span class="label-text text-xs">Size:</span>
+          <span class="label-text text-xs text-slate-400">Size:</span>
         </div>
         <div className="flex gap-1  w-full overflow-x-auto custom-scrollbar ml-2 pb-1">
           {sizes.length > 0 ? (
@@ -106,7 +106,7 @@ const ItemOptions = ({
                 <span
                   className={`peer-checked:bg-primary-color peer-checked:opacity-100 ${
                     disab ? "opacity-100" : "opacity-80"
-                  } peer-checked:text-white w-full items-center  form-control justify-center rounded-md duration-300 transition-all glass btn min-w-9 min-h-9 h-9 p-0 font-semibold`}
+                  } peer-checked:text-white w-full items-center  form-control justify-center rounded-md duration-300 transition-all glass btn min-w-9 min-h-9 h-9 p-0 px-1 font-semibold`}
                 >
                   {sizeOption.size} 
                 </span>
@@ -118,9 +118,9 @@ const ItemOptions = ({
           )}
         </div>
       </label>
-      <div className="ml-2 mt-1 text-xs font-semibold
+      <div className="ml-2 mt-1 text-xs  text-slate-400
       ">
-        Stocks: {size?.qty}
+        Stocks: <span className="text-slate-800 font-semibold">{size?.qty}</span>
       </div>
     </div>
   );
