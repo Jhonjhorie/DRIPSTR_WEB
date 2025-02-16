@@ -24,7 +24,6 @@ const AdminController = () => {
         {/* Protected Routes */}
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/reviews" element={<Reviews />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/accounts/:accountId" element={<AccountDetail />} />
