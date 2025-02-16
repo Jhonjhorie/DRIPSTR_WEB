@@ -9,24 +9,27 @@ function Sidebar() {
   const [isChief, setIsChief] = useState(false);
   const navigate = useNavigate();
 
+
   useEffect(() => {
     const fetchAdminData = async () => {
-      const { data: admin, error } = await supabase
-        .from("admins")
-        .select("isChief")
-        .eq("isChief", true)
-        .single();
+      const adminId = localStorage.getItem("id"); // Get the stored admin ID from localStorage
+      if (adminId) {
+        const { data: admin, error } = await supabase
+          .from("admins")
+          .select("id, chief")
+          .eq("id", adminId)
+          .single();
 
-      if (error) {
-        console.error("Error fetching admin data:", error);
-      } else {
-        setIsChief(admin?.isChief || false);
+        if (error) {
+          console.error("Error fetching admin data:", error);
+        } else {
+          setIsChief(admin?.chief); // Set chief status based on the fetched admin data
+        }
       }
     };
 
     fetchAdminData();
   }, []);
-
   // Toggle function for sidebar
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
