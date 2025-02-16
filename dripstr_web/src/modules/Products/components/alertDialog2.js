@@ -20,7 +20,7 @@ const AddtoCartAlert = () => {
             <img
         src={require("@/assets/emote/success.png")}
           alt="No Images Available"
-          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
+          className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet"
         />
           <span>Added to Cart</span>
           

@@ -82,14 +82,14 @@ const Cart = ({action, closeDrawer }) => {
                 className={`flex flex-col gap-2 pb-2 ${cartItem.to_order ? "bg-secondary-color" : "bg-primary-color"} w-full custom_scrollbar rounded-md duration-300 transition-all`}
               >
                 {cartItem && (
-                  <dialog id="editConfirm_Modal" className="max-w-full modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
+                  <dialog id="editConfirm_Modal" className="max-w-full modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0">
                     <EditConfirm
                       action={selectedAction}
                       item={cartItemS}
                       onClose={closeModal}
                   
                     />
-                    <form method="dialog" className="modal-backdrop">
+                    <form method="dialog" className="modal-backdrop min-h-full min-w-full absolute">
                       <button onClick={closeModal}></button>
                     </form>
                   </dialog>
@@ -104,7 +104,7 @@ const Cart = ({action, closeDrawer }) => {
                             : require("@/assets/emote/success.png")
                         }
                         alt={cartItem.variant_Name}
-                        className={`h-full w-full ${cartItem.imagePath != null || "" ? "object-contain" : "object-none"}`}
+                        className={`h-full w-full ${cartItem.imagePath != null || "" ? "object-contain" : "object-scale-down"}`}
                       />
                     </div>
                     <div>

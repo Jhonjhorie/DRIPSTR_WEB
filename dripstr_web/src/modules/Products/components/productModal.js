@@ -10,7 +10,7 @@ import useGetImage from "../hooks/useGetImageUrl.js";
 const ProductModal = ({ item, onClose }) => {
   const [selectedAction, setSelectedAction] = useState(null);
   const navigate = useNavigate();
-  const allImages = useGetImage(item); 
+  
   const [selectedColor, setSelectedColor] = useState(item?.item_Variant[0] || ""); 
     const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
     const handleSelectedValues = (color, size) => {

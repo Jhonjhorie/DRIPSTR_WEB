@@ -97,7 +97,6 @@ const BuyConfirm = ({ item, onClose }) => {
     setTimeout(() => {
       setShowAlert(false);
       onClose();
-      document.getElementById("my_modal_4").close();
     }, 3000);
 
     fetchDataCart();
