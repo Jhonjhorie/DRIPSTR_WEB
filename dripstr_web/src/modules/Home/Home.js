@@ -26,6 +26,7 @@ function Home() {
   const [filCat, setFilCat] = useState(categories[0].label);
   const { products, loading, error } = useProducts();
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
+  
 
   if(loadingP) return <LoadingMullet />
 

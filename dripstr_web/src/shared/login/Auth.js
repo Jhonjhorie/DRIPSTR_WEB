@@ -42,7 +42,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
     if (error) return alert(`Sign In Error: ${error.message}`);
     alert("Sign In successful!");
     onClose();
-    
+    if(actionLog === "cart" || actionLog === "placeOrder"){
     try {
       const { data: session, error: sessionError } = await supabase.auth.getSession();
       if (sessionError) throw sessionError;
@@ -88,6 +88,11 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
     } finally {
       setLoadingP(false);
     }
+  }else{
+    
+    navigate("/");
+    window.location.reload();
+  }
   };
 
   const handleSignUp = async () => {

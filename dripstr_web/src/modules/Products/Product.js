@@ -13,6 +13,7 @@ import LoginFirst from "@/shared/mulletFirst";
 import addToCart from "./hooks/useAddtoCart.js";
 import useCarts from "./hooks/useCart.js";
 import AddtoCartAlert from "./components/alertDialog2.js";
+import AlertDialog from "./components/alertDialog2.js";
 
 function Product() {
   const location = useLocation();
@@ -110,7 +111,7 @@ function Product() {
     <div className="w-full relative pb-16 items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 py-4">
        {showAlert && (
           <div className=" w-[95%] absolute -top-60 justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
-            <AddtoCartAlert />{" "}
+            <AlertDialog emote={require("@/assets/emote/success.png")} text={"Item added to cart successfully!"} />
           </div>
         )}
       <img
