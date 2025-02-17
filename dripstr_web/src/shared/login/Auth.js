@@ -16,10 +16,11 @@ const AuthModal = ({ isOpen, onClose }) => {
     email: "",
     password: "",
     fullName: "",
-    address: "",
     mobile: "",
     gender: "",
-    birthDate: "",
+    sbirthDate: "",
+    address: "",
+    potcode: "",
   });
 
   const handleInputChange = (e, form) => {
@@ -41,21 +42,32 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   const handleSignUp = async () => {
-    const { email, password, fullName, address, mobile, gender, birthDate } = signUpData;
-    if (!email || !password || !fullName || !address || !mobile || !gender || !birthDate)
+    const { email, password, fullName, mobile, gender, birthDate, address, postcode } = signUpData;
+    if (!email || !password || !fullName || !mobile || !gender || !birthDate || !address || !postcode)
       return alert("Please fill in all fields.");
     
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { 
-        data: { fullName, address, mobile, gender, birthDate } 
+        data: { fullName, mobile, gender, birthDate } 
       },
     });
 
     if (error) return alert(`Sign Up Error: ${error.message}`);
+    
+    const user = data.user;
+    if (user) {
+      await supabase.from("addresses").insert({
+        user_id: user.id,
+        address,
+        postcode,
+        is_default_shipping: true,
+      });
+    }
+
     alert("Sign Up successful! Check your email for confirmation.");
-    onClose(); // Close the modal
+    onClose();
     navigate("/");
     window.location.reload();
   };
@@ -74,7 +86,7 @@ const AuthModal = ({ isOpen, onClose }) => {
 
             {/* Form Fields */}
             <div className="form-control w-full">
-              {!isSignIn && (
+            {!isSignIn && (
                 <>
                   <input
                     type="text"
@@ -82,14 +94,6 @@ const AuthModal = ({ isOpen, onClose }) => {
                     placeholder="Full Name"
                     className="input input-bordered bg-gray-100 w-full mb-4"
                     value={signUpData.fullName}
-                    onChange={(e) => handleInputChange(e, "signUp")}
-                  />
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="Address"
-                    className="input input-bordered bg-gray-100 w-full mb-4"
-                    value={signUpData.address}
                     onChange={(e) => handleInputChange(e, "signUp")}
                   />
                   <input
@@ -117,8 +121,26 @@ const AuthModal = ({ isOpen, onClose }) => {
                     value={signUpData.birthDate}
                     onChange={(e) => handleInputChange(e, "signUp")}
                   />
+                  <input
+                    type="text"
+                    name="address"
+                    placeholder="Address"
+                    className="input input-bordered bg-gray-100 w-full mb-4"
+                    value={signUpData.address}
+                    onChange={(e) => handleInputChange(e, "signUp")}
+                  />
+                  <input
+                    type="text"
+                    name="postcode"
+                    placeholder="Postcode"
+                    className="input input-bordered bg-gray-100 w-full mb-4"
+                    value={signUpData.postcode}
+                    onChange={(e) => handleInputChange(e, "signUp")}
+                  />
                 </>
               )}
+
+              
               <input
                 type="email"
                 name="email"
