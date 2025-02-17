@@ -9,37 +9,7 @@ const useCarts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleToggleOrder = async (cartId, newValue) => {
-    try {
-      const { error } = await supabase
-        .from("cart")
-        .update({ to_order: newValue })
-        .eq("id", cartId);
-
-      if (error) throw error;
-
-      setCartItems((prevItems) =>
-        prevItems.map((item) =>
-          item.id === cartId ? { ...item, to_order: newValue } : item
-        )
-      );
-      setOrderCart((prevItems) => {
-        const updatedItem = cartItems.find((item) => item.id === cartId);
-        if (!updatedItem) return prevItems;
-
-        if (newValue) {
-          return [...prevItems, { ...updatedItem, to_order: newValue }];
-        } else {
-          return prevItems.filter((item) => item.id !== cartId);
-        }
-      });
-
-      console.log(`Cart item ${cartId} updated to_order: ${newValue}`);
-    } catch (err) {
-      console.error("Error updating cart item:", err.message);
-    }
-  };
-
+  // Fetch cart data
   const fetchDataCart = useCallback(async () => {
     if (!profile?.id) return;
 
@@ -49,14 +19,15 @@ const useCarts = () => {
         .from("cart")
         .select(
           `
-                  id, qty, variant, size, acc_id, prod_id, to_order,
-                  prod:prod_id (id, item_Name, item_Variant, shop_Name, reviews, item_Orders, discount),
-                  profile:acc_id (id)
-                `
+            id, qty, variant, size, acc_id, prod_id, to_order,
+            prod:prod_id (id, item_Name, item_Variant, shop_Name, reviews, item_Orders, discount),
+            profile:acc_id (id)
+          `
         )
         .eq("acc_id", profile?.id);
 
       if (error) throw error;
+
       const sortedData = data.sort((a, b) => a.id - b.id);
       setCartItems(sortedData || []);
       setOrderCart(sortedData.filter((item) => item.to_order === true) || []);
@@ -69,6 +40,40 @@ const useCarts = () => {
     }
   }, [profile?.id]);
 
+  // Toggle "to_order" for a cart item
+  const handleToggleOrder = async (cartId, newValue) => {
+    try {
+      const { error } = await supabase
+        .from("cart")
+        .update({ to_order: newValue })
+        .eq("id", cartId);
+
+      if (error) throw error;
+
+      // Optimistically update the state
+      setCartItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === cartId ? { ...item, to_order: newValue } : item
+        )
+      );
+
+      setOrderCart((prevItems) => {
+        if (newValue) {
+          const updatedItem = cartItems.find((item) => item.id === cartId);
+          return updatedItem ? [...prevItems, { ...updatedItem, to_order: newValue }] : prevItems;
+        } else {
+          return prevItems.filter((item) => item.id !== cartId);
+        }
+      });
+
+      console.log(`Cart item ${cartId} updated to_order: ${newValue}`);
+    } catch (err) {
+      console.error("Error updating cart item:", err.message);
+      setError(err.message);
+    }
+  };
+
+  // Edit a cart item
   const handleEdit = async (item, quantity, selectedColor, selectedSize) => {
     if (!profile || !item) return;
 
@@ -83,38 +88,33 @@ const useCarts = () => {
         .eq("id", item.id)
         .eq("acc_id", profile.id);
 
-      if (error) {
-        console.error("Failed to update item in cart:", error);
-      } else {
-        console.log("Item updated successfully:", data);
+      if (error) throw error;
 
-        setCartItems((prevItems) =>
-          prevItems.map((prevItem) =>
-            prevItem.id === item.id
-              ? {
-                  ...prevItem,
-                    ...item
-                }
-              : prevItem
-          )
-        );
-        setOrderCart((prevItems) =>
-            prevItems.map((prevItem) =>
-              prevItem.id === item.id
-                ? {
-                    ...prevItem,
-                      ...item
-                  }
-                : prevItem
-            )
-          );
-        
-      }
-    } catch (error) {
-      console.error("Error updating cart item:", error);
+      // Optimistically update the state
+      setCartItems((prevItems) =>
+        prevItems.map((prevItem) =>
+          prevItem.id === item.id
+            ? { ...prevItem, qty: quantity, variant: selectedColor, size: selectedSize }
+            : prevItem
+        )
+      );
+
+      setOrderCart((prevItems) =>
+        prevItems.map((prevItem) =>
+          prevItem.id === item.id
+            ? { ...prevItem, qty: quantity, variant: selectedColor, size: selectedSize }
+            : prevItem
+        )
+      );
+
+      console.log("Item updated successfully:", data);
+    } catch (err) {
+      console.error("Error updating cart item:", err.message);
+      setError(err.message);
     }
   };
 
+ 
   useEffect(() => {
     fetchDataCart();
   }, [fetchDataCart]);

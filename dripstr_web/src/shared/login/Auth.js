@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "daisyui/dist/full.css";
 import logo from "./auth/logoBlack.png";
 import Fb from "./auth/facebook.png";
@@ -6,9 +6,14 @@ import Google from "./auth/google.png";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { supabase } from "../../constants/supabase";  
 import { useNavigate } from "react-router-dom";  
+import useUserProfile from "@/shared/mulletCheck.js";
+import addToCart from "@/modules/Products/hooks/useAddtoCart.js";
 
-const AuthModal = ({ isOpen, onClose }) => {
+const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const [isSignIn, setIsSignIn] = useState(true);
+  const [showAlert, setShowAlert] = useState(false);
+  const [loadingP, setLoadingP] = useState(false);
+  const [profile, setProfile] = useState(null);
   const navigate = useNavigate();  
   
   const [signInData, setSignInData] = useState({ email: "", password: "" });
@@ -32,12 +37,57 @@ const AuthModal = ({ isOpen, onClose }) => {
   const handleSignIn = async () => {
     const { email, password } = signInData;
     if (!email || !password) return alert("Please enter both email and password.");
+    setLoadingP(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return alert(`Sign In Error: ${error.message}`);
     alert("Sign In successful!");
     onClose();
-    navigate("/");
-    window.location.reload();
+    
+    try {
+      const { data: session, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+      if (!session || !session.session || !session.session.user) {
+        throw new Error("User not logged in or session invalid.");
+      }
+
+      const userId = session.session.user.id;
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, mobile , birthday, gender, profile_picture")
+        .eq("id", userId)
+        .single();
+
+      if (profileError) throw profileError;
+      setProfile(profileData);
+
+      if (actionLog === "cart" && order) {
+        const response = await addToCart(
+          profileData.id,
+          order.itemT.id,
+          order.qty,
+          order.variant,
+          order.size
+        );
+
+        if (response.success) {
+          console.log("Item added to cart successfully:", response.data);
+        } else {
+          console.error("Failed to add item to cart:", response.error);
+        }
+
+        setTimeout(() => {
+          setShowAlert(false);
+          navigate("/");
+          window.location.reload();
+        }, 3000);
+      } else if (actionLog === "placeOrder") {
+        // Handle place order logic here
+      }
+    } catch (err) {
+      console.log(err.message || "An error occurred while fetching the profile.");
+    } finally {
+      setLoadingP(false);
+    }
   };
 
   const handleSignUp = async () => {

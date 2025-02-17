@@ -11,6 +11,7 @@ import { averageRate } from "../hooks/useRate.ts";
 import ItemOptions from "./itemOptions.js";
 import useUserProfile from "@/shared/mulletCheck.js";
 import LoginFirst from "@/shared/mulletFirst";
+import AuthModal from "@/shared/login/Auth.js";
 import addToCart from "../hooks/useAddtoCart.js";
 import useCarts from "../hooks/useCart.js";
 import AddtoCartAlert from "./alertDialog2.js";
@@ -18,9 +19,14 @@ import AddtoCartAlert from "./alertDialog2.js";
 const BuyConfirm = ({ item, onClose }) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [showAlert, setShowAlert] = useState(false);
+  const [loginDialog, setLoginDialog] = useState(false);
+  const [actionLog, setActionLog] = useState("");
   const { fetchDataCart } = useCarts();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
+  const [imagePreview, setImagePreview] = useState(
+    item?.item_Variant[0].imagePath || ""
+  );
   const [selectedColor, setSelectedColor] = useState(
     item?.item_Variant[0] || ""
   );
@@ -48,84 +54,90 @@ const BuyConfirm = ({ item, onClose }) => {
   const handleSelectedValues = (color, size) => {
     setSelectedColor(color);
     setSelectedSize(size);
+    setImagePreview(color.imagePath);
   };
-
-  const imagePreview = `${selectedColor.imagePath}`;
 
   const handleProductClick = () => {
     navigate(`/product/${item.item_Name}`, { state: { item } });
   };
 
   const onConfirm = () => {
-    const solo = true;
-    const formOrder = {
-      acc_id: profile,
-      prod: item,
-      qty: quantity,
-      variant: selectedColor,
-      size: selectedSize,
-      to_order: true,
-    };
+    if (isLoggedIn) {
+      const solo = true;
+      const formOrder = {
+        acc_id: profile,
+        prod: item,
+        qty: quantity,
+        variant: selectedColor,
+        size: selectedSize,
+        to_order: true,
+      };
 
-    const selectedItems = [formOrder];
+      const selectedItems = [formOrder];
 
-    if (selectedItems.length === 0) {
-      alert("No items selected for order. Please select at least one item.");
-      return;
+      if (selectedItems.length === 0) {
+        alert("No items selected for order. Please select at least one item.");
+        return;
+      }
+
+      navigate(`/placeOrder`, { state: { selectedItems, solo } });
+    } else {
+      setActionLog("placeOrder")
+      setLoginDialog(true);
     }
-
-    navigate(`/placeOrder`, { state: { selectedItems, solo } });
   };
 
   const handleAddToCart = async () => {
-    if (!profile || !item) return;
+    if (isLoggedIn) {
+      if (!profile || !item) return;
+      const response = await addToCart(
+        profile.id,
+        item.id,
+        quantity,
+        selectedColor,
+        selectedSize
+      );
 
-    const response = await addToCart(
-      profile.id,
-      item.id,
-      quantity,
-      selectedColor,
-      selectedSize
-    );
-
-    if (response.success) {
-      console.log("Item added to cart successfully:", response.data);
+      if (response.success) {
+        console.log("Item added to cart successfully:", response.data);
+        await fetchDataCart();
+      } else {
+        console.error("Failed to add item to cart:", response.error);
+      }
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+        onClose();
+      }, 3000);
+     
     } else {
-      console.error("Failed to add item to cart:", response.error);
+      setActionLog("cart")
+      setLoginDialog(true);
     }
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-      onClose();
-    }, 3000);
-
-    fetchDataCart();
   };
   if (loadingP) {
     return (
-      <div className="w-full relative pb-16 items-center justify-center bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 h-[100%] py-4">
+      <div className="w-[60.40rem] rounded-lg relative pb-16 items-center justify-center bg-slate-100 flex flex-col  px-2 lg:px-8 h-[27rem] py-4">
         <img
           src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
-          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
+          className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
         />
-        <h1 className="top-20 bg-primary-color p-4 rounded-md drop-shadow-lg">
+        <h1 className=" font-[iceland] font-semibold text-3xl  rounded-md drop-shadow-lg">
           Loading
         </h1>
       </div>
     );
-  }
-
-  if (isLoggedIn) {
+  } else {
     return (
-      <div className="flex font-sans w-[60.40rem] bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="flex font-sans w-[60.40rem] h-[27rem] bg-white rounded-lg shadow-lg overflow-hidden">
         {showAlert && (
           <div className=" w-[95%] absolute pb-16 items-center justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
             <AddtoCartAlert />{" "}
           </div>
         )}
 
-        <div className="flex-none w-80 relative">
+        <div className="flex-none w-80 relative items-center flex justify-center">
           <img
             src={
               selectedColor.imagePath != null || ""
@@ -270,19 +282,19 @@ const BuyConfirm = ({ item, onClose }) => {
               <div className=" justify-end gap-4 items-center flex h-auto ">
                 <button
                   onClick={() => handleProductClick()}
-                  className="h-10 px-6 font-semibold rounded-md bg-transparent border-slate-400 border  text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all" 
+                  className="h-10 px-6 font-semibold rounded-md bg-transparent border-slate-400 border  text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
                 >
                   More Detail
                 </button>
                 <button
                   onClick={handleAddToCart}
-                  className="h-10 px-6 font-semibold rounded-md bg-secondary-color border-black border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all" 
+                  className="h-10 px-6 font-semibold rounded-md bg-secondary-color border-black border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
                 >
                   Add to Cart
                 </button>
                 <button
                   onClick={onConfirm}
-                  className="h-10 px-6 font-semibold rounded-md bg-primary-color border-secondary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all" 
+                  className="h-10 px-6 font-semibold rounded-md bg-primary-color border-secondary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
                 >
                   Place Order
                 </button>
@@ -290,10 +302,22 @@ const BuyConfirm = ({ item, onClose }) => {
             </div>
           </div>
         </div>
+        {loginDialog && (
+          <AuthModal
+            isOpen={loginDialog}
+            onClose={() => setLoginDialog(false)}
+            action={actionLog}
+            order={{
+              itemT: item,
+              qty: quantity,
+              variant: selectedColor,
+              size: selectedSize,
+              to_order: true
+            }}
+          />
+        )}
       </div>
     );
-  } else {
-    return <LoginFirst item={item} onClose={onClose} />;
   }
 };
 

@@ -76,22 +76,22 @@ const EditConfirm = ({ action, item, onClose }) => {
 
   if (loadingP) {
     return (
-      <div className="w-full relative pb-16 items-center justify-center bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 h-[100%] py-4">
-        <img
-          src={require("@/assets/emote/hmmm.png")}
-          alt="No Images Available"
-          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
-        />
-        <h1 className="top-20 bg-primary-color p-4 rounded-md drop-shadow-lg">
-          Loading
-        </h1>
-      </div>
+      <div className="w-[60.40rem] rounded-lg relative pb-16 items-center justify-center bg-slate-100 flex flex-col gap-2 px-2 lg:px-8 h-[27rem] py-4">
+      <img
+        src={require("@/assets/emote/hmmm.png")}
+        alt="No Images Available"
+        className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
+      />
+      <h1 className="top-20 font-[iceland] font-semibold text-3xl p-4 rounded-md drop-shadow-lg">
+        Loading
+      </h1>
+    </div>
     );
   }
 
   if (isLoggedIn) {
     return (
-      <div className="flex font-sans w-[60.40rem] bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="flex font-sans w-[60.40rem] h-[27rem] bg-white rounded-lg shadow-lg overflow-hidden">
         <div className="flex-none w-80 relative">
           <img
             src={
@@ -122,7 +122,7 @@ const EditConfirm = ({ action, item, onClose }) => {
                       <h2 className="text-xs font-medium">
                         {averageRate(item?.prod.reviews) || "N/A"}
                       </h2>
-                      <RateSymbol item={averageRate(item?.prod.reviews)} size={"4"} />
+                      <RateSymbol item={averageRate(item?.prod.reviews || [])} size={"4"} />
                     </div>
                     <h2 className="text-xs font-medium">
                       {item?.prod.item_Orders}{" "}

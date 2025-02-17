@@ -96,13 +96,13 @@ const Header = () => {
       <div className="space-x-4 flex">
         <div className="drawer drawer-end">
           <input
-            id="my-drawer-4"
+            id="my-drawer-cart"
             type="checkbox"
             className="drawer-toggle"
             ref={drawerCheckboxRef}
           />
           <div className="drawer-content">
-            <label htmlFor="my-drawer-4" className="drawer-button" aria-label="Open cart">
+            <label htmlFor="my-drawer-cart" className="drawer-button" aria-label="Open cart">
               <FontAwesomeIcon
                 icon={faShoppingCart}
                 className="text-black hover:text-[--primary-color]"
@@ -111,7 +111,7 @@ const Header = () => {
           </div>
           <div className="drawer-side z-50">
             <label
-              htmlFor="my-drawer-4"
+              htmlFor="my-drawer-cart"
               aria-label="close sidebar"
               className="drawer-overlay"
             ></label>
