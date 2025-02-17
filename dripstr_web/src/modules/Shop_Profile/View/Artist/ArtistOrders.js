@@ -14,45 +14,6 @@ import hmmmEmote from "@/assets/emote/hmmm.png";
 import { supabase } from "@/constants/supabase";
 
 const { useState, useEffect } = React;
-const CustnameData = [
-  {
-    id: 1,
-    photo: cust1,
-    order: sample2,
-    name: "Erina Mae",
-    message: "Just order an Item.",
-    status: "sent",
-    orderRating: "to rate",
-    timeSent: "2m ago",
-    reply: " Thank you for purchasing on our store.",
-    follow: "Followers",
-  },
-  {
-    id: 2,
-    photo: cust2,
-    order: sample3,
-    name: "Paolo",
-    message: "Just order an Item.",
-    status: "read",
-    timeSent: "1h ago",
-    orderRating: "4",
-    follow: "Followers",
-    message2: "The product is good<3",
-    reply: " Thank you for purchasing on our store.",
-  },
-  {
-    id: 3,
-    photo: cust3,
-    order: sample1,
-    name: "Queen",
-    message: "Just order an Item.",
-    status: "sent",
-    timeSent: "1m ago",
-    orderRating: "to rate",
-    reply: " Thank you for purchasing on our store.",
-    follow: "Customer",
-  },
-];
 
 function AristOrders() {
   const [selectedUser, setSelectedUser] = React.useState(null);
@@ -68,309 +29,108 @@ function AristOrders() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [messageContent, setMessageContent] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [artistId, setArtistId] = useState(null);
 
-  // Fetch current user
   useEffect(() => {
     const fetchUser = async () => {
-      const { data: userData, error } = await supabase.auth.getUser();
-      if (error || !userData?.user) {
-        console.error("Error fetching user:", error?.message);
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error.message);
         return;
       }
-      setCurrentUser(userData.user);
+      setCurrentUser(data?.user || null);
     };
+
     fetchUser();
   }, []);
 
-  // Fetch artist details for the current user
-  useEffect(() => {
-    if (!currentUser) return;
+  // Fetch artist details based on currentUser.id
+  const fetchArtistDetails = async (userId) => {
+    if (!userId) {
+      console.error("User ID is null or undefined.");
+      return null;
+    }
+    const { data, error } = await supabase
+      .from("artist")
+      .select("id, artist_Name, artist_Image, owner_Id")
+      .eq("owner_Id", userId)
+      .single();
 
-    const fetchArtistDetails = async () => {
-      const { data, error } = await supabase
-        .from("artist")
-        .select("id, artist_Name, artist_Image, owner_Id")
-        .eq("owner_Id", currentUser.id)
-        .maybeSingle();
+    if (error) {
+      console.error("Error fetching artist details:", error.message);
+      return null;
+    }
+    return data;
+  };
 
-      if (error) {
-        console.error("Error fetching artist details:", error.message);
-        return;
-      }
-      if (data) {
-        setArtist(data);
-        setSelectedArtistId(data.id);
-      }
-    };
-
-    fetchArtistDetails();
-  }, [currentUser]);
-
-  // Fetch messages with sender profile joined (for current artist)
-  const fetchMessagesWithSenderProfile = async () => {
-    if (!artist || !artist.id) return;
+  // Fetch messages based on artistId
+  const fetchMessages = async (artistId) => {
+    if (!artistId) {
+      console.error("Artist ID is null or undefined.");
+      return;
+    }
 
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("artist_Messages")
-        .select(
-          `
-        id,
-        sender_Id,
-        content,
-        what_for,
-        created_at,
-        status,
-        profiles:sender_Id (id, full_name, profile_picture)
-      `
-        )
-        .eq("artist_Id", artist.id);
+    const { data, error } = await supabase
+      .from("artist_Messages")
+      .select(
+        `id, sender_Id, content, what_for, created_at, status, profiles:sender_Id (id, full_name, profile_picture)`
+      )
+      .eq("artist_Id", artistId) // Filter messages based on artistId
+      .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error(
-          "Error fetching messages with sender profile:",
-          error.message
-        );
-        return;
-      }
-
-      console.log("Fetched messages with sender profile:", data);
-
-      // Flatten messages and attach sender profile
-      const allMessages = data.flatMap((row) => {
-        if (!row || !row.content) {
-          console.warn("Skipping row due to missing content:", row);
-          return [];
-        }
-
-        let parsedContent;
-        try {
-          parsedContent =
-            typeof row.content === "string"
-              ? JSON.parse(row.content)
-              : row.content;
-        } catch (error) {
-          console.error("Error parsing content:", error);
-          return [];
-        }
-
-        return (
-          Array.isArray(parsedContent) ? parsedContent : [parsedContent]
-        ).map((msg) => ({
-          ...msg,
-          sender: row.profiles || {
-            id: "unknown",
-            full_name: "Unknown User",
-            profile_picture: null,
-          },
-          artist_Id: row.artist_Id, 
-          conversation_Id: row.id || "unknown",
-          created_at: row.created_at || new Date().toISOString(),
-          what_for: row.what_for || "",
-          status: row.status ?? false,
-        }));
-        
-      });
-
-      console.log("Processed messages:", allMessages);
-
-      setMessages(allMessages);
-    } catch (err) {
-      console.error("Unexpected error fetching messages:", err.message);
-    } finally {
+    if (error) {
+      console.error(
+        "Error fetching messages with sender profile:",
+        error.message
+      );
       setLoading(false);
+      return;
     }
+
+    console.log("Fetched Messages:", data);
+    setMessages(data);
+    setLoading(false);
   };
-  useEffect(() => {
-    console.log("Selected user updated:", selectedUser);
-  }, [selectedUser]);
 
-  // Fetch messages when artist is set
+  // Fetch artist and messages once currentUser is available
   useEffect(() => {
-    if (artist && artist.id) {
-      fetchMessagesWithSenderProfile();
-    }
-  }, [artist]);
+    if (!currentUser) return; // Wait until currentUser is set
 
-  const sortedData = [...messages].sort((a, b) =>
-    a.status === "sent" ? -1 : 1
-  );
+    const getArtistAndMessages = async () => {
+      const artistDetails = await fetchArtistDetails(currentUser.id);
+      if (!artistDetails) return;
 
-  // Use useEffect to call the function when artist is set
-  useEffect(() => {
-    if (artist && artist.id) {
-      fetchMessagesWithSenderProfile();
-    }
-  }, [artist]);
+      setArtist(artistDetails);
+      fetchMessages(artistDetails.id);
+    };
 
-  useEffect(() => {
-    console.log("Updated selectedUser:", selectedUser);
-  }, [selectedUser]);
+    getArtistAndMessages();
+  }, [currentUser]); // Only runs when currentUser changes
+
+  if (loading) return <div>Loading...</div>;
+
+  // Handle other logic such as message sending, image uploading, etc.
+
+  const handleChatClick = (message) => {
+    setIsOpening(true);
+    setTimeout(() => {
+      setSelectedUser({
+        name: message.profiles?.full_name || "Unknown User",
+        photo: message.profiles?.profile_picture || "/default-avatar.png",
+        messages: message.content || [],
+        follow: "Following", // If this is dynamic, update accordingly
+      });
+      setIsOpening(false);
+    }, 1);
+  };
 
   const handleCloseChat = () => {
     setIsClosing(true);
     setTimeout(() => {
-      setSelectedUser(null);
+      setSelectedUser(null); 
       setIsClosing(false);
     }, 500);
-  };
-  const handleChatClick = async (clickedMessage) => {
-    console.log("Clicked Sender Data:", clickedMessage);
-  
-    const senderMessages = messages.filter(
-      (msg) => msg.sender_Id === clickedMessage.sender_Id
-    );
-  
-    if (senderMessages.length === 0) {
-      console.error("No messages found for this sender.");
-      return;
-    }
-  
-    // Force re-render by setting a new object reference
-    setSelectedUser((prev) => ({
-      ...prev,
-      sender: clickedMessage.sender,
-      messages: [...senderMessages], // Ensure it's a new array reference
-    }));
-  
-    // Update status in DB
-    const { error } = await supabase
-      .from("artist_Messages")
-      .update({ status: true })
-      .eq("sender_Id", clickedMessage.sender_Id)
-      .eq("artist_Id", artist.id);
-  
-    if (error) {
-      console.error("Error updating message status:", error.message);
-    } else {
-      console.log("Message status updated in DB!");
-    }
-  };
-  useEffect(() => {
-    console.log("Updated selectedUser:", selectedUser);
-    setMessages(selectedUser?.messages || []);
-  }, [selectedUser]);  
-
-  const uniqueSenders = Object.values(
-    sortedData.reduce((acc, message) => {
-      if (!acc[message.sender?.id]) {
-        acc[message.sender?.id] = message;
-      }
-      return acc;
-    }, {})
-  );
-
-  const handleSendMessage = async () => {
-    if (!selectedUser || !selectedUser.messages.length) {
-      console.error(" No selected user or messages to update!");
-      return;
-    }
-
-    const messageId = selectedUser.messages[0].conversation_Id; // Get conversation ID
-    const artistId = artist?.id;
-
-    console.log("🛠 Sending message with:", {
-      messageId,
-      artistId,
-      senderId: currentUser?.id,
-    });
-
-    if (!messageId || !artistId) {
-      console.error("No selected message or invalid message ID!");
-      return;
-    }
-
-    // Upload image if it exists
-    let imageUrl = null;
-    if (imageFile) {
-      imageUrl = await handleUploadImage();
-      if (!imageUrl) {
-        console.error(" Failed to upload image.");
-        return;
-      }
-    }
-
-    const newMessage = {
-      text: messageContent,
-      send_file: imageUrl || null,
-      artist_Id: artist.id,
-      timestamp: new Date().toISOString(),
-    };
-
-    try {
-      // Fetch the current message content
-      const { data, error: fetchError } = await supabase
-        .from("artist_Messages")
-        .select("content")
-        .eq("id", messageId)
-        .single();
-
-      if (fetchError) {
-        console.error("Error fetching selected message:", fetchError.message);
-        return;
-      }
-
-      const updatedContent = Array.isArray(data.content)
-        ? [...data.content, newMessage]
-        : [newMessage];
-
-      // Update the content in the DB
-      const { error: updateError } = await supabase
-        .from("artist_Messages")
-        .update({ content: updatedContent })
-        .eq("id", messageId);
-
-      if (updateError) {
-        console.error(" Error updating message:", updateError.message);
-        return;
-      }
-
-      console.log("Message sent successfully!");
-
-      // Update the local state immediately
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        {
-          ...newMessage,
-          sender: {
-            id: currentUser.id,
-            full_name: currentUser.full_name,
-            profile_picture: currentUser.profile_picture,
-          },
-          conversation_Id: messageId,
-          created_at: new Date().toISOString(),
-          what_for: selectedUser.messages[0].what_for,
-          status: true,
-        },
-      ]);
-
-      // Update the selectedUser's messages
-      setSelectedUser((prevSelectedUser) => ({
-        ...prevSelectedUser,
-        messages: [
-          ...prevSelectedUser.messages,
-          {
-            ...newMessage,
-            sender: {
-              id: currentUser.id,
-              full_name: currentUser.full_name,
-              profile_picture: currentUser.profile_picture,
-            },
-            conversation_Id: messageId,
-            created_at: new Date().toISOString(),
-            what_for: selectedUser.messages[0].what_for,
-            status: true,
-          },
-        ],
-      }));
-
-      // Clear input fields
-      setMessageContent("");
-      setImageFile(null);
-    } catch (error) {
-      console.error("Unexpected error sending message:", error.message);
-    }
   };
 
   const handleUploadImage = async () => {
@@ -423,10 +183,10 @@ function AristOrders() {
               />
             </div>
             <div className="h-[500px] overflow-hidden overflow-y-scroll rounded-md bg-slate-100 bg-opacity-40 glass shadow-black w-full shadow-inner pt-2 pl-2">
-              {uniqueSenders.map((message, index) => (
+              {messages.map((message, index) => (
                 <div
                   key={index}
-                  onClick={() => handleChatClick(message)} // Show the conversation in another UI
+                  onClick={() => handleChatClick(message)}
                   className={`relative hover:scale-95 duration-300 cursor-pointer items-center mb-1 flex gap-2 p-1 rounded-md shadow-md ${
                     message.status === false
                       ? "bg-violet-500 text-white"
@@ -442,10 +202,11 @@ function AristOrders() {
                   >
                     <img
                       src={
-                        message.sender?.profile_picture || "/default-avatar.png"
+                        message.profiles?.profile_picture ||
+                        "/default-avatar.png"
                       }
                       alt={`Profile picture of ${
-                        message.sender?.full_name || "User"
+                        message.profiles?.full_name || "User"
                       }`}
                       className="h-full w-full object-cover rounded-full"
                     />
@@ -458,7 +219,7 @@ function AristOrders() {
                           : "text-slate-700"
                       }`}
                     >
-                      {message.sender?.full_name || "Unknown User"}
+                      {message.profiles?.full_name || "Unknown User"}
                     </div>
                   </div>
                   <div className="absolute top-1 text-sm right-2">
@@ -498,37 +259,29 @@ function AristOrders() {
                   isClosing ? "fade-out" : "fade-in"
                 }`}
               >
-                <div className="w-full">
-                  {/* Chat Header: Display sender's image & name */}
-                  <div className="bg-white relative z-10 shadow-sm shadow-slate-400 w-full p-2 px-5 py-3 flex items-center justify-between gap-2">
-                    <div className="flex gap-4 items-center">
-                      <div className="h-10 w-10 border-[2px] border-primary-color rounded-full">
-                        {selectedUser.sender?.profile_picture ? (
-                          <img
-                            src={selectedUser.sender.profile_picture}
-                            alt={selectedUser.sender.full_name}
-                            className="h-full w-full object-cover rounded-full"
-                          />
-                        ) : (
-                          <div className="flex items-center justify-center h-full w-full">
-                            No Image
-                          </div>
-                        )}
+                <div className="w-full h-auto">
+                  <div className="bg-white relative z-10 shadow-sm shadow-slate-400 w-full h-auto p-2 px-5 py-3 flex place-items-center justify-between gap-2">
+                    <div className="flex gap-2 place-items-center">
+                      <div className="h-12 w-12 border-[2px] border-primary-color rounded-full">
+                        <img
+                          src={selectedUser.photo}
+                          className="h-full w-full object-cover rounded-full"
+                          sizes="100%"
+                        />
                       </div>
-                      <span className="text-2xl font-bold iceland-regular text-slate-800">
-                        {selectedUser.sender?.full_name || "Unknown User"}
-                      </span>
+                      <label className="text-slate-800 font-semibold">
+                        {selectedUser.name}
+                      </label>
                     </div>
                     <div
                       onClick={handleCloseChat}
-                      className="cursor-pointer rounded-md p-1 hover:scale-95 duration-300 flex justify-center"
+                      className="hover:scale-95 duration-300 cursor-pointer rounded-md p-1 justify-center flex"
                     >
                       <box-icon name="message-square-x" color="#000"></box-icon>
                     </div>
                   </div>
 
-                  {/* Chat History */}
-                  <div className="h-[500px] w-full bg-white overflow-y-scroll custom-scrollbar p-2 overflow-hidden">
+                  <div className="h-[500px] w-full bg-white overflow-y-scroll custom-scrollbar p-4">
                     {selectedUser && selectedUser.messages ? (
                       <>
                         {selectedUser.messages.length > 0 ? (
@@ -536,65 +289,78 @@ function AristOrders() {
                             console.log("Rendering Message:", message);
 
                             const isSenderMessage =
-                              message.sender_Id !== undefined; // If sender_Id exists, it's on the left
+                              message.sender_Id !== undefined;
                             const isArtistMessage =
-                              message.artist_Id !== undefined; // If artist_Id exists, it's on the right
+                              message.artist_Id !== undefined;
 
                             return (
                               <div
                                 key={index}
                                 className={`chat ${
                                   isSenderMessage ? "chat-start" : "chat-end"
-                                }`}
+                                } mb-4`}
                               >
-                                {isSenderMessage && (
-                                  <div className="chat-image avatar">
-                                    <div className="w-10 rounded-full">
+                                {/* Sender Image */}
+                                {isSenderMessage && selectedUser && (
+                                  <div className="chat-image avatar mr-3">
+                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300">
                                       <img
-                                        src={
-                                          message.sender?.profile_picture ||
-                                          "/default-avatar.png"
-                                        }
+                                        src={selectedUser.photo}
                                         alt={
                                           message.sender?.full_name || "Sender"
                                         }
+                                        className="w-full h-full object-cover"
                                       />
                                     </div>
                                   </div>
                                 )}
 
-                                <div className="chat-header font-semibold text-slate-800">
-                                  {isSenderMessage
-                                    ? message.sender?.full_name || "Sender"
-                                    : "Artist"}
-                                  <time className="text-xs ml-2 opacity-50">
-                                    {new Date(
-                                      message.timestamp
-                                    ).toLocaleTimeString()}
-                                  </time>
-                                </div>
+                                {/* Chat Body */}
+                                <div className="chat-body flex flex-col">
+                                  <div
+                                    className={`chat-header font-semibold text-slate-800 flex items-center ${
+                                      isSenderMessage
+                                        ? "justify-start"
+                                        : "justify-end"
+                                    }`}
+                                  >
+                                    <span
+                                      className={`mr-2 ${
+                                        isSenderMessage
+                                          ? "text-left"
+                                          : "text-right"
+                                      }`}
+                                    >
+                                      {isSenderMessage && selectedUser
+                                        ? selectedUser.name || "Sender"
+                                        : "You"}
+                                    </span>
 
-                                <div
-                                  className={`chat-bubble text-sm ${
-                                    isSenderMessage
-                                      ? "bg-violet-500 text-white"
-                                      : "bg-white text-black"
-                                  }`}
-                                >
-                                  {message.text || "No message content"}
+                                  </div>
 
-                                  {message.send_file && (
-                                    <div className="mt-2 w-auto max-w-full sm:max-w-[12rem] lg:max-w-[20rem]">
-                                      <img
-                                        src={message.send_file}
-                                        alt="Attached"
-                                        className="w-full h-auto object-cover rounded-md"
-                                        onClick={() =>
-                                          setSelectedImage(message.send_file)
-                                        }
-                                      />
-                                    </div>
-                                  )}
+                                  <div
+                                    className={`chat-bubble p-2 justify-center w-auto rounded-lg text-sm mt-2 ${
+                                      isSenderMessage
+                                        ? "bg-violet-500 text-white"
+                                        : "bg-gray-300 text-gray-800"
+                                    }`}
+                                  >
+                                    {message.text || "No message content"}
+
+                                    {/* Attachments */}
+                                    {message.send_file && (
+                                      <div className="mt-2 w-full max-w-[18rem] sm:max-w-[20rem] lg:max-w-[25rem]">
+                                        <img
+                                          src={message.send_file}
+                                          alt="Attached"
+                                          className="w-full h-auto object-cover rounded-lg shadow-md cursor-pointer"
+                                          onClick={() =>
+                                            setSelectedImage(message.send_file)
+                                          }
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -611,75 +377,21 @@ function AristOrders() {
                       </p>
                     )}
                   </div>
-                  <div className="w-full h-20 bg-slate-500">
-                    {/* Message Input Area: Always shown */}
-                    <div className="w-full h-20 bg-slate-600 rounded-md flex gap-1 p-1 items-center">
-                      <div className="w-full h-full relative">
-                        {/* Image Preview (if selected) */}
-                        {imageFile && (
-                          <div className="absolute top-0 left-0 z-10 p-1">
-                            <img
-                              src={URL.createObjectURL(imageFile)}
-                              alt="Preview"
-                              className="w-5 h-5 object-cover rounded"
-                            />
-                            <button
-                              onClick={() => setImageFile(null)}
-                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
-                              data-tip="Cancel Image"
-                            >
-                              &times;
-                            </button>
-                          </div>
-                        )}
-                        <textarea
-                          value={messageContent}
-                          onChange={(e) => setMessageContent(e.target.value)}
-                          placeholder="Type your Inquiry Here..."
-                          className={`h-full w-full p-1 bg-slate-200 border-custom-purple rounded-l-md border resize-none text-slate-800 text-sm ${
-                            imageFile ? "pt-7" : ""
-                          }`}
-                        />
-                        <div
-                          data-tip="Add image"
-                          className="w-7 tooltip tooltip-left absolute right-0 top-11 h-7 cursor-pointer hover:scale-105 duration-150"
-                        >
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files[0];
-                              console.log("Selected file:", file);
-                              setImageFile(file);
-                            }}
-                            className="hidden"
-                            id="message-image-input"
-                          />
-                          <label
-                            htmlFor="message-image-input"
-                            className="cursor-pointer"
-                          >
-                            <box-icon
-                              type="solid"
-                              color="black"
-                              name="file-image"
-                            ></box-icon>
-                          </label>
-                        </div>
-                      </div>
-                      <div className="w-2/12 flex justify-center items-center hover:bg-primary-color glass bg-custom-purple rounded-r-md hover:scale-95 duration-150 cursor-pointer h-full">
-                        <div
-                          onClick={handleSendMessage}
-                          className="px-4 py-2 place-content-center"
-                        >
-                          <box-icon
-                            type="solid"
-                            name="send"
-                            size="30px"
-                          ></box-icon>
-                        </div>
-                      </div>
-                    </div>
+
+                  <div className="h-auto w-full flex gap-2 p-1 border-t-2 border-slate-400 bg-slate-100">
+                    <textarea
+                      placeholder="Type your message here..."
+                      type="text"
+                      className="bg-slate-100 w-5/6 h-14 border-custom-purple border-[0.5px] shadow-inner shadow-slate-400 rounded-md text-slate-800 p-2"
+                    ></textarea>
+                    <button className="iceland-regular text-xl text-slate-800 shadow shadow-black glass rounded-md duration-300 place-items-center flex gap-2 px-5 hover:bg-slate-400 hover:scale-95">
+                      <box-icon
+                        color="#000"
+                        type="solid"
+                        name="send"
+                      ></box-icon>
+                      SENT
+                    </button>
                   </div>
                 </div>
               </div>
