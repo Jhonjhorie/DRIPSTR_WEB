@@ -76,7 +76,7 @@ function AristOrders() {
       .select(
         `id, sender_Id, content, what_for, created_at, status, profiles:sender_Id (id, full_name, profile_picture)`
       )
-      .eq("artist_Id", artistId) // Filter messages based on artistId
+      .eq("artist_Id", artistId) 
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -106,74 +106,177 @@ function AristOrders() {
     };
 
     getArtistAndMessages();
-  }, [currentUser]); // Only runs when currentUser changes
+  }, [currentUser]);
 
   if (loading) return <div>Loading...</div>;
 
-  // Handle other logic such as message sending, image uploading, etc.
 
-  const handleChatClick = (message) => {
+  const handleChatClick = async (message) => {
     setIsOpening(true);
+  
+    const messageContent = Array.isArray(message.content) ? message.content : [];
+  
+    try {
+      // Make an API call to update the message's status in Supabase
+      const { data, error } = await supabase
+        .from("artist_Messages")
+        .update({ status: true })  
+        .eq("id", message.id);
+      
+      if (error) {
+        console.error("Error updating message:", error);
+      } else {
+        console.log("Message updated successfully:", data);
+
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg.id === message.id ? { ...msg, status: true } : msg
+          )
+        );
+  
+        setMessageContent("");
+        setImageFile(null);
+      }
+    } catch (error) {
+      console.error("Error updating message:", error);
+    }
+  
     setTimeout(() => {
       setSelectedUser({
         name: message.profiles?.full_name || "Unknown User",
         photo: message.profiles?.profile_picture || "/default-avatar.png",
-        messages: message.content || [],
-        follow: "Following", // If this is dynamic, update accordingly
+        messages: messageContent,
+        id: message.id,
+        follow: "Following",
       });
+  
+      // Now you can access the message ID here
+      console.log("Selected Message ID:", message.id);
+  
       setIsOpening(false);
     }, 1);
   };
+  
+  
 
   const handleCloseChat = () => {
     setIsClosing(true);
     setTimeout(() => {
-      setSelectedUser(null); 
+      setSelectedUser(null);
       setIsClosing(false);
     }, 500);
   };
 
-  const handleUploadImage = async () => {
-    if (!imageFile) return null;
+  const handleSendMessage = async () => {
+    if (!messageContent || !selectedUser || !selectedUser.messages) {
+      return; 
+    }
 
+    const messageId = selectedUser.id; 
+
+    // Prepare the new message to be added
+    const newMessage = {
+      artist_Id: selectedUser.artist_Id,
+      text: messageContent,
+      file: imageFile ? URL.createObjectURL(imageFile) : null, 
+      created_at: new Date().toISOString(), 
+    };
+
+    // Add the new message to the existing content array
+    const updatedContent = [...selectedUser.messages, newMessage];
+
+    try {
+      const { data, error } = await supabase
+        .from("artist_Messages")
+        .update({ content: updatedContent })
+        .match({ id: messageId });
+
+      if (error) {
+        console.error("Error updating message:", error);
+      } else {
+        console.log("Message updated successfully:", data);
+
+        setMessageContent("");
+        setImageFile(null);
+        fetchMessages();
+      }
+      
+    } catch (error) {
+      console.error("Error updating message:", error);
+    }
+  };
+
+  // Image upload helper function
+  const handleUploadImage = async () => {
+    if (!imageFile) {
+      console.log("No image file selected.");
+      return null;
+    }
+  
+    // Validate file type and size (optional)
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!allowedTypes.includes(imageFile.type)) {
+      alert("Invalid file type. Please upload a JPEG, PNG, or GIF.");
+      return null;
+    }
+  
+    const maxSize = 5 * 1024 * 1024; // 5MB max file size
+    if (imageFile.size > maxSize) {
+      alert("File size is too large. Please upload an image smaller than 5MB.");
+      return null;
+    }
+  
     // Create a unique image name
     const uniqueImageName = `${Date.now()}-${Math.random()
       .toString(36)
       .substring(2, 10)}-${imageFile.name}`;
-    // Use the unique name in the file path (adjust bucket name as needed)
     const filePath = `messages/${currentUser.id}/${uniqueImageName}`;
     console.log("Uploading image to:", filePath);
-
-    const { error: uploadError } = await supabase.storage
-      .from("art_messages")
-      .upload(filePath, imageFile);
-    if (uploadError) {
-      console.error("Error uploading image:", uploadError.message);
+  
+    try {
+      // Upload the image to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from("art_messages")
+        .upload(filePath, imageFile);
+  
+      if (uploadError) {
+        console.error("Error uploading image:", uploadError.message);
+        return null;
+      }
+  
+      // Retrieve public URL after uploading
+      const { data, error: publicUrlError } = supabase.storage
+        .from("art_messages")
+        .getPublicUrl(filePath);
+  
+      if (publicUrlError) {
+        console.error("Error getting public URL:", publicUrlError.message);
+        return null;
+      }
+  
+      console.log("Image uploaded successfully. Public URL:", data.publicUrl);
+  
+      // Optionally, clean up object URL after usage
+      URL.revokeObjectURL(imageFile);
+  
+      return data.publicUrl; // Return the public URL for the image
+    } catch (error) {
+      console.error("Unexpected error during image upload:", error);
       return null;
     }
-
-    // Retrieve public URL – note: getPublicUrl returns an object with data.publicUrl
-    const { data, error: publicUrlError } = supabase.storage
-      .from("art_messages")
-      .getPublicUrl(filePath);
-    if (publicUrlError) {
-      console.error("Error getting public URL:", publicUrlError.message);
-      return null;
-    }
-    console.log("Image uploaded successfully. Public URL:", data.publicUrl);
-    return data.publicUrl;
   };
+  
 
   return (
-    <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar">
+    <div className="h-full w-full overflow-hidden bg-slate-300">
       <div className="absolute mx-3 right-0 z-20">
         <ArtistSideBar />
       </div>
 
-      <div className="w-full h-full bg-slate-300 md:px-10 lg:px-16">
+      <div className="w-full h-full overflow-hidden bg-slate-300 md:px-10 lg:px-16">
         <div className="w-full h-full bg-slate-100 flex">
           {/* Left Sidebar with Customer Data */}
-          <div className="w-2/5 bg-gradient-to-br from-violet-500 to-fuchsia-500 p-1 h-full shadow-black">
+          <div className="w-2/5 bg-gradient-to-br relative from-violet-500 to-fuchsia-500 p-1 h-auto shadow-black">
             <div className="text-2xl font-semibold p-2 py-5 text-white flex items-center justify-between">
               <label>Messages</label>
               <box-icon
@@ -255,7 +358,7 @@ function AristOrders() {
             </div>
             {selectedUser && (
               <div
-                className={`w-full relative z-10 bg-violet-100 h-full flex ${
+                className={`w-full h-full relative z-10 bg-custom-purple glass flex ${
                   isClosing ? "fade-out" : "fade-in"
                 }`}
               >
@@ -281,7 +384,8 @@ function AristOrders() {
                     </div>
                   </div>
 
-                  <div className="h-[500px] w-full bg-white overflow-y-scroll custom-scrollbar p-4">
+                  {/* Set fixed height for the chat area */}
+                  <div className="h-[65vh] w-full bg-white overflow-y-scroll custom-scrollbar p-4">
                     {selectedUser && selectedUser.messages ? (
                       <>
                         {selectedUser.messages.length > 0 ? (
@@ -335,7 +439,6 @@ function AristOrders() {
                                         ? selectedUser.name || "Sender"
                                         : "You"}
                                     </span>
-
                                   </div>
 
                                   <div
@@ -378,20 +481,83 @@ function AristOrders() {
                     )}
                   </div>
 
-                  <div className="h-auto w-full flex gap-2 p-1 border-t-2 border-slate-400 bg-slate-100">
-                    <textarea
-                      placeholder="Type your message here..."
-                      type="text"
-                      className="bg-slate-100 w-5/6 h-14 border-custom-purple border-[0.5px] shadow-inner shadow-slate-400 rounded-md text-slate-800 p-2"
-                    ></textarea>
-                    <button className="iceland-regular text-xl text-slate-800 shadow shadow-black glass rounded-md duration-300 place-items-center flex gap-2 px-5 hover:bg-slate-400 hover:scale-95">
-                      <box-icon
-                        color="#000"
-                        type="solid"
-                        name="send"
-                      ></box-icon>
-                      SENT
-                    </button>
+                  <div className="w-full h-20 bg-slate-900">
+                    {/* Message Input Area: Always shown */}
+                    <div className="w-full h-20 bg-custom-purple glass rounded-sm flex gap-1 p-1 items-center">
+                      <div className="w-full h-full relative">
+                        {/* Image Preview (if selected) */}
+                        {imageFile && (
+                          <div className="absolute top-0 left-0 z-10 p-1">
+                            <img
+                              src={URL.createObjectURL(imageFile)}
+                              alt="Preview"
+                              className="w-5 h-5 object-cover rounded"
+                            />
+                            <button
+                              onClick={() => setImageFile(null)}
+                              className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs"
+                              data-tip="Cancel Image"
+                            >
+                              &times;
+                            </button>
+                          </div>
+                        )}
+                        <textarea
+                          value={messageContent}
+                          onChange={(e) => setMessageContent(e.target.value)}
+                          placeholder="Type your Inquiry Here..."
+                          className={`h-full w-full p-1 bg-slate-200 border-custom-purple rounded-l-md border resize-none text-slate-800 text-sm ${
+                            imageFile ? "pt-7" : ""
+                          }`}
+                        />
+                        <div
+                          data-tip="Add image"
+                          className="w-7 tooltip tooltip-left absolute right-0 top-11 h-7 cursor-pointer hover:scale-105 duration-150"
+                        >
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files[0];
+                              console.log("Selected file:", file);
+                              setImageFile(file);
+                            }}
+                            className="hidden"
+                            id="message-image-input"
+                          />
+                          <label
+                            htmlFor="message-image-input"
+                            className="cursor-pointer"
+                          >
+                            <box-icon
+                              type="solid"
+                              color="black"
+                              name="file-image"
+                            ></box-icon>
+                          </label>
+                        </div>
+                      </div>
+                      <div
+                        className={`w-2/12 flex justify-center items-center hover:bg-primary-color glass bg-custom-purple rounded-r-md hover:scale-95 duration-150 cursor-pointer h-full ${
+                          !messageContent || !selectedUser
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        onClick={
+                          messageContent && selectedUser
+                            ? handleSendMessage
+                            : null
+                        }
+                      >
+                        <div className="px-4 py-2 place-content-center">
+                          <box-icon
+                            type="solid"
+                            name="send"
+                            size="30px"
+                          ></box-icon>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
