@@ -7,6 +7,7 @@ import ChatMessages from '../modules/Messaging/View/Messaging';
 import Cart from '../modules/Products/Cart';
 import AuthModal from "../shared/login/Auth";
 import { supabase } from "../constants/supabase";
+import useCarts from '../modules/Products/hooks/useCart';
 
 const Header = () => {
   const [openChat, setOpenChat] = useState(false);
@@ -16,6 +17,8 @@ const Header = () => {
   const drawerCheckboxRef = useRef(null);
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const { cartItems, setCartItems, fetchDataCart } = useCarts();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -47,6 +50,13 @@ const Header = () => {
       setIsAuthModalOpen(true); // Open the auth modal if user is not logged in
     } else {
       navigate("/account"); // Redirect to /account if user is logged in
+    }
+  };
+
+  const handleCartClick = async () => {
+    await fetchDataCart(); // Fetch the latest cart data
+    if (drawerCheckboxRef.current) {
+      drawerCheckboxRef.current.checked = true; // Open the cart drawer
     }
   };
 
@@ -102,12 +112,17 @@ const Header = () => {
             ref={drawerCheckboxRef}
           />
           <div className="drawer-content">
-            <label htmlFor="my-drawer-cart" className="drawer-button" aria-label="Open cart">
+            <button
+              htmlFor="my-drawer-cart"
+              className="drawer-button"
+              aria-label="Open cart"
+              onClick={handleCartClick} 
+            >
               <FontAwesomeIcon
                 icon={faShoppingCart}
                 className="text-black hover:text-[--primary-color]"
               />
-            </label>
+            </button>
           </div>
           <div className="drawer-side z-50">
             <label
@@ -115,7 +130,7 @@ const Header = () => {
               aria-label="close sidebar"
               className="drawer-overlay"
             ></label>
-            <Cart closeDrawer={closeDrawer} />
+            <Cart closeDrawer={closeDrawer} cartItems2={cartItems} setCartItems={setCartItems} />
           </div>
         </div>
         <button onClick={toggleChat} aria-label="Open chat">
@@ -124,7 +139,7 @@ const Header = () => {
             className="indicator text-black hover:text-[--primary-color]"
           />
         </button> 
-        <button onClick={handleAuth} aria-label="User account"  >
+        <button onClick={handleAuth} aria-label="User account">
           {user ? (
             <FontAwesomeIcon
               icon={faUser}

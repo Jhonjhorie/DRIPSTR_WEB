@@ -26,7 +26,13 @@ const ItemOptions = ({
       setSizes(color.sizes || []);
       setSize(sizes[0]);
     }
-  }, [color]);
+  }, [color, size]);
+
+  useEffect(() => {
+    if (size) {
+      setSize(size);
+    }
+  }, [size]);
 
   const handleRadioChange = (event, type, choiceItem) => {
     if (type == "variant" && !disab) {

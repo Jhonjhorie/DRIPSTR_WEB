@@ -8,7 +8,7 @@ import useCarts from "./hooks/useCart";
 import EditConfirm from "./components/editConfirm";
 import { supabase } from "@/constants/supabase";
 
-const Cart = ({action, closeDrawer }) => {
+const Cart = ({action, cartItems2, setCartItems, closeDrawer }) => {
   const { isLoggedIn } = useUserProfile();
   const { cartItems, orderCart, loading, error, fetchDataCart, handleToggleOrder } = useCarts();
   const navigate = useNavigate();
@@ -37,6 +37,9 @@ const Cart = ({action, closeDrawer }) => {
       return { success: false, error: err.message };
     }
   };
+  useEffect(() => {
+      fetchDataCart();
+  }, [cartItems2, fetchDataCart]);
   
   useEffect(() => {
     fetchDataCart();

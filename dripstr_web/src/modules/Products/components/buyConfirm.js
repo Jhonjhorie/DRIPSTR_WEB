@@ -12,7 +12,6 @@ import ItemOptions from "./itemOptions.js";
 import useUserProfile from "@/shared/mulletCheck.js";
 import LoginFirst from "@/shared/mulletFirst";
 import AuthModal from "@/shared/login/Auth.js";
-import addToCart from "../hooks/useAddtoCart.js";
 import useCarts from "../hooks/useCart.js";
 import AddtoCartAlert from "./alertDialog2.js";
 
@@ -21,7 +20,7 @@ const BuyConfirm = ({ item, onClose }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [loginDialog, setLoginDialog] = useState(false);
   const [actionLog, setActionLog] = useState("");
-  const { fetchDataCart } = useCarts();
+  const { fetchDataCart, addToCart } = useCarts();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [imagePreview, setImagePreview] = useState(
@@ -91,7 +90,6 @@ const BuyConfirm = ({ item, onClose }) => {
     if (isLoggedIn) {
       if (!profile || !item) return;
       const response = await addToCart(
-        profile.id,
         item.id,
         quantity,
         selectedColor,
@@ -209,10 +207,10 @@ const BuyConfirm = ({ item, onClose }) => {
             </div>
 
             <div>
-              <div className="justify-start flex flex-col  mb-3">
-                <div className="flex justify-end gap-2 pl-2 ">
-                  <div className="flex items-center justify-center gap-2">
-                    <label className="form-control w-20 max-w-xs">
+            <div className="justify-start flex flex-col  mb-10">
+                <div className="flex justify-between gap-5 pl-2 ">
+                  <div className="flex items-end justify-center gap-2">
+                    <label className="form-control  w-20 max-w-xs">
                       <div className="label">
                         <span className="label-text">Quantity:</span>
                       </div>
@@ -223,9 +221,7 @@ const BuyConfirm = ({ item, onClose }) => {
                         placeholder="How many"
                         className="input input-bordered input-primary w-full max-w-xs"
                       />
-                      <div className="label justify-end">
-                        <span className="label-text-alt">Only Number</span>
-                      </div>
+                     
                     </label>
                     <button
                       className="btn btn-success"
@@ -241,15 +237,19 @@ const BuyConfirm = ({ item, onClose }) => {
                     <div className="flex  justify-end pl-2">
                       <p className="text-2xl text-primary-color">₱</p>
                       <h2 className="text-6xl font-bold text-primary-color">
-                        {selectedSize != null
-                          ? item.discount > 0
+                            {selectedSize
+                          ? item?.discount > 0
                             ? (
-                                (Number(selectedSize?.price) || 0).toFixed(2) *
-                                (1 - item.discount / 100) *
-                                quantity
+                                (Number(selectedSize?.price) || 0) *
+                                (1 - (Number(item?.discount) || 0) / 100) *
+                                (Number(quantity) || 1)
                               ).toFixed(2)
-                            : (Number(selectedSize?.price) || 0).toFixed(2)
+                            : (
+                                (Number(selectedSize?.price) || 0) *
+                                (Number(quantity) || 1)
+                              ).toFixed(2)
                           : "N/A"}
+                          
                       </h2>
                     </div>
                     <div className="justify-end flex items-end gap-2 w-full">
