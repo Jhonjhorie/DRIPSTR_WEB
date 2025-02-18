@@ -182,8 +182,8 @@ function Sidebar() {
                 />
               </svg>
             }
-            label="Settings"
-            to="/admin/settings"
+            label="Vouchers"
+            to="/admin/vouchers"
           />
           <SidebarItem
             icon={
