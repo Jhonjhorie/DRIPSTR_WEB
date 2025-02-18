@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from "@/constants/supabase";
 import SuccessAlert from "./components/alertDialog.js";
+import GcashDialog from "./components/GcashDialog.js";
 
 function PlaceOrder() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -20,6 +21,10 @@ function PlaceOrder() {
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedPostcode, setSelectedPostcode] = useState("");
   const [shippingFee, setShippingFee] = useState(50);
+
+  const closeModalGcash = () => {
+    document.getElementById("my_modal_gcash").close();
+  };
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -98,7 +103,7 @@ function PlaceOrder() {
 
   const grandTotal = totalPrice + shippingFee;
 
-  const handlePlaceOrder = async () => {
+  const sendOrder = async () => {
     try {
       const orders = selectedItems.map((item) => ({
         acc_num: profile.id,
@@ -121,7 +126,6 @@ function PlaceOrder() {
         order_status: "Pending to Admin",
       }));
 
-      // Insert each order individually into the Supabase table
       const { data, error } = await supabase
         .from("orders")
         .insert(orders)
@@ -142,10 +146,34 @@ function PlaceOrder() {
       console.error("Error placing order:", error);
       alert("Failed to place order. Please try again.");
     }
+  }
+
+  const handlePlaceOrder = async () => {
+    if(paymentMethod == "COD"){
+await sendOrder();
+    }else if(paymentMethod == "Gcash"){
+      document.getElementById("my_modal_gcash").showModal();
+    }
   };
 
   return (
     <div className="w-full relative items-start justify-start bg-slate-300 flex flex-col font-[iceland] gap-2 px-2 lg:px-8 h-[100%] py-4">
+       <dialog
+              id="my_modal_gcash"
+              className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
+            >
+              <GcashDialog
+                onClose={closeModalGcash}
+                order={sendOrder}
+                total={grandTotal}
+              />
+              <form
+                method="dialog"
+                className="modal-backdrop min-h-full min-w-full absolute "
+              >
+                <button onClick={closeModalGcash}></button>
+              </form>
+            </dialog>
       {showAlert && (
         <div className=" w-[95%] absolute pb-16 items-center justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
           <SuccessAlert />{" "}
