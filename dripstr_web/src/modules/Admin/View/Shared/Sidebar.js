@@ -138,7 +138,7 @@ function Sidebar() {
                 ></path>
               </svg>
             }
-            label="Payout"
+            label="Payouts"
             to="/admin/payout"
           />
           <SidebarItem
