@@ -123,7 +123,7 @@ function Vouchers() {
                                 <tr key={index}>
                                     <td className="py-2 px-4 border-b">{voucher.voucher_name}</td>
                                     <td className="py-2 px-4 border-b">{voucher.voucher_type}</td>
-                                    <td className="py-2 px-4 border-b">{voucher.discount}</td>
+                                    <td className="py-2 px-4 border-b">P{voucher.discount}.00</td>
                                     <td className="py-2 px-4 border-b">
                                         <button className="text-red-400 hover:text-red-600" onClick={() => handleDeleteVoucher(voucher.id)}>
                                             <FontAwesomeIcon icon={faTrash} />
