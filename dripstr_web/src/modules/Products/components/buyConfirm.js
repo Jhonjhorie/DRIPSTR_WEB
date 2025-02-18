@@ -14,10 +14,10 @@ import LoginFirst from "@/shared/mulletFirst";
 import AuthModal from "@/shared/login/Auth.js";
 import useCarts from "../hooks/useCart.js";
 import AlertDialog from "./alertDialog2.js";
+import ReportDialog from "./reportModal.js";
 
 const BuyConfirm = ({ item, onClose }) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
-  const [showAlert, setShowAlert] = useState(false);
   const [loginDialog, setLoginDialog] = useState(false);
   const [actionLog, setActionLog] = useState("");
   const { fetchDataCart, addToCart } = useCarts();
@@ -87,6 +87,14 @@ const BuyConfirm = ({ item, onClose }) => {
     }
   };
 
+  const closeModalRep = () => {
+    document.getElementById('my_modal_report').close();
+  };
+
+  const mulletReport = () => {
+    document.getElementById('my_modal_report').showModal();
+  }
+
   const handleAddToCart = async () => {
     if (isLoggedIn) {
       if (!profile || !item) return;
@@ -141,6 +149,7 @@ const BuyConfirm = ({ item, onClose }) => {
           </div>
         ) : (
           <div className="flex">
+            
             <div className="flex-none w-80 relative items-center flex justify-center">
               <img
                 src={
@@ -192,7 +201,9 @@ const BuyConfirm = ({ item, onClose }) => {
                       <button class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
                         <FontAwesomeIcon icon={faHeart} />
                       </button>
-                      <button class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
+                      <button 
+                      onClick={mulletReport}
+                      class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
                         <FontAwesomeIcon icon={faTriangleExclamation} />
                       </button>
                       <button
@@ -332,6 +343,17 @@ const BuyConfirm = ({ item, onClose }) => {
                 }}
               />
             )}
+         
+                    <dialog
+                      id="my_modal_report"
+                      className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
+                    >
+                      <ReportDialog item={item} onClose={closeModalRep} accId={profile.id} type={"product"} />
+                      <form method="dialog" className="modal-backdrop min-h-full min-w-full absolute ">
+                        <button onClick={closeModalRep}></button>
+                      </form>
+                    </dialog>
+                
           </div>
         )}
       </div>

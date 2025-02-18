@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
-import ProductModal from './productModal';
 import BuyConfirm from './buyConfirm';
 import ProductCard from './productCard';
 
@@ -19,9 +18,13 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
   };
 
   const closeModal = () => {
-    document.getElementById('my_modal_4').close();
-    setSelectedItem(null);
+    const modal = document.getElementById('my_modal_4');
+    if (modal) {
+      modal.close();
+      setSelectedItem(null);
+    }
   };
+  
 
   const filteredProducts = products.filter((item) => {
     switch (filter) {
