@@ -85,9 +85,10 @@ function ShopPage() {
       )}
       <div className="justify-start w-full">
         <div className="max-w-[120rem] flex items-start justify-center p-4 hero-content flex-col  w-full lg:flex-col">
-          <div className=" flex gap-2 items-start w-full h-full justify-between min-h-40 ">
+          <div className=" flex gap-4 items-start w-full h-full justify-between min-h-40 ">
+            <div className="flex justify-center items-center  mt-1">
             {imagePreview != null || "" ? (
-              <div className="relative bg-slate-50  border-primary-color border rounded-md   w-[15rem] h-auto justify-center items-center">
+              <div className="relative  border-primary-color border rounded-md  flex min-h-40 w-[15rem] justify-center items-center">
                 <img
                   src={imagePreview}
                   alt={`${shop.shop_name}`}
@@ -106,10 +107,10 @@ function ShopPage() {
                 </p>
               </div>
             )}
-
+</div>
             <div className="flex justify-between w-full min-h-[12.5rem] h-[100%]  items-center">
               <div className="flex flex-col w-full">
-                <h1 className="text-5xl font-bold text-secondary-color p-1 pb-2 rounded-t-md">
+                <h1 className="text-5xl font-bold text-secondary-color p-1 pb-2 rounded-t-md line-clamp-2">
                   {shop.shop_name}
                 </h1>
                 <div className="divider p-0 m-0"></div>
@@ -141,21 +142,6 @@ function ShopPage() {
             />
           </div>
           <div className="flex flex-wrap justify-center mb-4 p-4 gap-2">
-            <div className="relative flex flex-row w-full items-center justify-center">
-              <div className="breadcrumbs text-2xl text-slate-500  font-[iceland]">
-                <ul>
-                  <li className="text-bold text-primary-color flex items-center gap-2">
-                    START{" "}
-                    <FontAwesomeIcon fontSize={16} icon={faShoppingCart} />{" "}
-                    SHOPPING
-                  </li>
-                  <li className="text-bold text-secondary-color flex items-center gap-2">
-                    STAR <FontAwesomeIcon fontSize={16} icon={faStar} />{" "}
-                    DRIPPING
-                  </li>
-                </ul>
-              </div>
-            </div>
 
             <ProductsView
               products={products}

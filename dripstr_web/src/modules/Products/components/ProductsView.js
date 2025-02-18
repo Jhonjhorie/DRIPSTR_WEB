@@ -118,13 +118,12 @@ const ProductsView = ({
           </form>
         </dialog>
       )}
-
-      <div
-        className="grid gap-1 items-center justify-center"
-        style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}
-      >
-        {filteredProductsD.length > 0 ? (
-          dataWithPlaceholders.map((item, index) =>
+      {filteredProductsD.length > 0 ? (
+        <div
+          className="grid gap-1 items-center justify-center"
+          style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}
+        >
+          {dataWithPlaceholders.map((item, index) =>
             item.empty ? (
               <div
                 key={`placeholder-${index}`}
@@ -138,20 +137,20 @@ const ProductsView = ({
                 onClick={() => openModal(item)}
               />
             )
-          )
-        ) : (
-          <div className=" items-center justify-center flex flex-col ">
-            <img
-              src={require("@/assets/emote/sad.png")}
-              alt="Sad"
-              className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
-            />
-            <h1 className="top-20 font-[iceland] font-semibold text-3xl p-4 rounded-md drop-shadow-lg">
-              No Available Products
-            </h1>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      ) : (
+        <div className=" items-center justify-center flex flex-col ">
+          <img
+            src={require("@/assets/emote/sad.png")}
+            alt="Sad"
+            className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
+          />
+          <h1 className="top-20 font-[iceland] font-semibold text-3xl p-4 rounded-md drop-shadow-lg">
+            No Available Products
+          </h1>
+        </div>
+      )}
     </div>
   );
 };

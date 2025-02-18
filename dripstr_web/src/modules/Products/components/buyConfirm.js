@@ -223,7 +223,7 @@ const BuyConfirm = ({ item, onClose }) => {
                       </button>
                     </div>
                   </div>
-                  <h1 className="flex-auto text-3xl font-semibold text-slate-900">
+                  <h1 className="flex-auto text-3xl font-semibold text-slate-900 line-clamp-1">
                     {item.item_Name}
                   </h1>
 
