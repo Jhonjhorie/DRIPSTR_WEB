@@ -67,7 +67,7 @@ const Cart = ({action, cartItems2, setCartItems, closeDrawer }) => {
       closeDrawer();
     }
     
-    navigate(`/placeOrder`, { state: { selectedItems } });
+    navigate(`/product/placeOrder`, { state: { selectedItems } });
    
   };
   
