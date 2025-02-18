@@ -31,6 +31,10 @@ function Product() {
     setSelectedSize(size);
   };
 
+  const handleShopClick = () => {
+    navigate(`/product/merchant-shop/${item.shop.shop_Name}`, { state: { shop: item.shop } });
+  };
+
   const handleIncrement = () => {
     setQuantity((prev) => prev + 1);
   };
@@ -199,9 +203,11 @@ function Product() {
                 <div className="flex justify-between gap-2 items-center">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium">Shop:</p>
-                    <div className="hover:underline py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all">
+                    <button 
+                    onClick={handleShopClick}
+                    className="hover:underline py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all">
                       {item.shop_Name || "No shop available"}
-                    </div>
+                    </button>
                   </div>
                   <div className="flex gap-1">
                     <h2 className="text-base font-medium">
