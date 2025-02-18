@@ -207,36 +207,25 @@ function Reports() {
             </tbody>
           </table>
         )}
-        
+
         {/* Modal for action buttons */}
-        {isModalOpen && modalContent && modalContent.type === "action" && (
+        {isModalOpen && modalContent && modalContent.type === "image" && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
             onClick={closeModal}
           >
-            <div className="relative bg-gray-900 p-7 rounded-md">
-              <h2 className="text-xl mb-4">Select Action for Report ID: {modalContent.content.id}</h2>
-              <button
-                className="w-full py-2 mb-2 bg-yellow-500 text-black hover:bg-gray-300"
-                onClick={() => handleActionClick("Warn")}
-              >
-                Warn
-              </button>
-              <button
-                className="w-full py-2 mb-2 bg-red-600 text-white hover:bg-gray-300"
-                onClick={() => handleActionClick("Suspend Account")}
-              >
-                Suspend Account
-              </button>
-              <button
-                className="w-full py-2 mb-2 bg-green-500 text-white hover:bg-gray-300"
-                onClick={() => handleActionClick("Dismiss")}
-              >
-                Dismiss
-              </button>
+            <div
+              className="relative bg-gray-900 p-4 rounded-md"
+              onClick={(e) => e.stopPropagation()} // Prevents closing modal when clicking inside it
+            >
+              <img
+                src={modalContent.content}
+                alt="Full view"
+                className="max-w-screen-lg h-[25rem] w-[25rem] object-contain" // Ensures image doesn't overflow
+              />
 
               <button
-                className="absolute top-1 right-2 text-white font-bold text-2xl hover:text-black"
+                className="absolute top-2 right-2 text-white font-bold text-2xl hover:text-black"
                 onClick={closeModal}
               >
                 X
@@ -244,6 +233,7 @@ function Reports() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
