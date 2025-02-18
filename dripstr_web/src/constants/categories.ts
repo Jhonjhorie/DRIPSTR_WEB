@@ -6,4 +6,7 @@ export const categories = [
     {label:'Bag', icon: require('@/assets/images/categoriesIcon/bag.png'), value:'Bag'},
     {label:'Tumbler', icon: require('@/assets/images/categoriesIcon/tum.png'), value:'Tum'},
     {label:'Mug', icon: require('@/assets/images/categoriesIcon/mug.png'), value:'Mug'},
+    {label:'Underwear', icon: require('@/assets/images/categoriesIcon/mug.png'), value:'Underwear'},
+    {label:'Others', icon: require('@/assets/images/categoriesIcon/mug.png'), value:'Others'},
+
   ]

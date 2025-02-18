@@ -23,7 +23,7 @@ const navItems = [
   { label: "My Address Book", path: "/account/address", icon: faLocation },
  // { label: "My Payment Options", path: "/account/payment", icon: faCreditCard },
   { label: "My Order", path: "/account/orders", icon: faReceipt },
-  { label: "My Wishlist", path: "/account/wishlist", icon: faHeart },
+ // { label: "My Wishlist", path: "/account/wishlist", icon: faHeart },
   { label: "Set up Shop", path: "/account/shop-setup", icon: faStore },
   { label: "Avatar", path: "/account/avatar", icon: faUserCircle },
 ];
@@ -51,24 +51,24 @@ const AccountLayout = () => {
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
-  }, [navigate]); // Make sure to include navigate as a dependency
+  }, [navigate]);  
 
   // Logout function
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut(); // Call Supabase's signOut method
-      // Redirect to home or login page after logging out
-      navigate("/login"); // Redirect to login page after logging out
+      await supabase.auth.signOut();  
+       navigate("/");  
+       window.location.reload();
     } catch (error) {
       console.error("Error logging out:", error.message);
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex h-full  bg-gray-100">
       {/* Sidebar */}
       <nav
-        className={`bg-white shadow-md h-screen flex flex-col transition-all duration-300 ease-in-out ${
+        className={`bg-white shadow-md h-auto flex flex-col transition-all duration-300 ease-in-out ${
           isMinimized ? "w-16" : "w-64"
         }`}
         onMouseEnter={() => setIsMinimized(false)} // Expand on hover
