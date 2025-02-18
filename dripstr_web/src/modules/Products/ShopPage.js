@@ -4,15 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTriangleExclamation,
   faHeart,
-  faShoppingCart,
-  faStar,
 } from "@fortawesome/free-solid-svg-icons";
-import RateSymbol from "@/shared/products/rateSymbol";
-import { averageRate } from "./hooks/useRate.ts";
-import RatingSection from "./components/RatingSection.js";
-import ItemOptions from "./components/itemOptions.js";
-import LoginFirst from "@/shared/mulletFirst";
-import addToCart from "./hooks/useAddtoCart.js";
 import useCarts from "./hooks/useCart.js";
 import ReportDialog from "./components/reportModal.js";
 import CategoriesRibbon from "./components/CategoriesRibbon.js";
@@ -23,7 +15,6 @@ import ProductsView from "./components/ProductsView.js";
 import { categories } from "@/constants/categories.ts";
 import useProducts from "./hooks/useProducts";
 import useUserProfile from "@/shared/mulletCheck";
-import LoadingMullet from "@/shared/Loading";
 
 function ShopPage() {
   const location = useLocation();
@@ -36,12 +27,12 @@ function ShopPage() {
   const [filCat, setFilCat] = useState(categories[0].label);
   const { products, loading, error } = useProducts();
 
-  const closeModalRep = () => {
-    document.getElementById("my_modal_report").close();
+  const closeModalRepS = () => {
+    document.getElementById("my_modal_reportS").close();
   };
 
   const mulletReport = () => {
-    document.getElementById("my_modal_report").showModal();
+    document.getElementById("my_modal_reportS").showModal();
   };
 
   const imagePreview = shop.shop_image != null ? shop.shop_image : null;
@@ -59,12 +50,12 @@ function ShopPage() {
   return (
     <div className="w-full relative inset-0  items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 py-4">
       <dialog
-        id="my_modal_report"
+        id="my_modal_reportS"
         className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
       >
         <ReportDialog
           item={shop}
-          onClose={closeModalRep}
+          onClose={closeModalRepS}
           accId={profile.id}
           type={"shop"}
         />
@@ -72,7 +63,7 @@ function ShopPage() {
           method="dialog"
           className="modal-backdrop min-h-full min-w-full absolute "
         >
-          <button onClick={closeModalRep}></button>
+          <button onClick={closeModalRepS}></button>
         </form>
       </dialog>
       {showAlert && (
@@ -118,14 +109,14 @@ function ShopPage() {
               </div>
               {isLoggedIn && (
                 <div className="flex gap-2 min-h-[12.5rem] items-start ">
-                  <button className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
-                    <FontAwesomeIcon icon={faHeart} />
+                  <button className="flex-none flex items-center justify-center px-2 gap-1 h-10 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 font-[iceland] hover:border-slate-800">
+                    <FontAwesomeIcon icon={faHeart} /> Follow
                   </button>
                   <button
                     onClick={mulletReport}
-                    className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+                    className="flex-none flex items-center justify-center  h-10 px-2 gap-1 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border font-[iceland] border-slate-400 hover:border-slate-800"
                   >
-                    <FontAwesomeIcon icon={faTriangleExclamation} />
+                    <FontAwesomeIcon icon={faTriangleExclamation} /> Report
                   </button>
                 </div>
               )}
