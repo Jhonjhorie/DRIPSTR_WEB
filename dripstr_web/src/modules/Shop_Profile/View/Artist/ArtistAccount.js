@@ -74,7 +74,7 @@ function ArtistAccount() {
   };
   useEffect(() => {
     fetchUserProfileAndArt();
-  }, []); // Run once on mount
+  }, []); 
 
   const handleCloseModalEdit = () => {
     setShowEdit(false);
@@ -265,7 +265,7 @@ function ArtistAccount() {
                 {artistData.contact_number}
               </div>
             </div>
-            <div>
+            <div className="w-full">
               <div className=" text-slate-700 text-sm font-semibold text-left">
                 Your Bio
               </div>

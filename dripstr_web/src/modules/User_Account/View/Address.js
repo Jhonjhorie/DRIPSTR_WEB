@@ -21,13 +21,11 @@ const Address = () => {
   useEffect(() => {
     fetchUser();
   }, []);
-
   useEffect(() => {
     if (userId) {
       fetchAddresses();
     }
   }, [userId]);
-
   const fetchUser = async () => {
     setLoading(true);
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -35,7 +33,6 @@ const Address = () => {
     setUserId(user?.id || null);
     setLoading(false);
   };
-
   const fetchAddresses = async () => {
     if (!userId) return;
     setLoading(true);
@@ -48,8 +45,6 @@ const Address = () => {
     }
     setLoading(false);
   };
-
-
   const addAddress = async () => {
     if (!userId || !newAddress.trim() || !postcode.trim()) return;
     setLoading(true);
@@ -67,9 +62,6 @@ const Address = () => {
     setLoading(false);
     setShowAddModal(false)
   };
-
-
-
   const confirmDeleteAddress = (id) => {
     setAddressToDelete(id);
     setShowDeleteModal(true);
@@ -80,8 +72,6 @@ const Address = () => {
     setEditPostcode(address.postcode);
     setShowEditModal(true);
   };
-
-
   const updateAddress = async () => {
     if (!editAddressId || !editAddress.trim() || !editPostcode.trim()) return;
     setLoading(true);
@@ -97,10 +87,6 @@ const Address = () => {
     }
     setLoading(false);
   };
-
-
-
-
   const deleteAddress = async () => {
     if (!addressToDelete) return;
     setLoading(true);
@@ -111,7 +97,6 @@ const Address = () => {
     fetchAddresses();
     setLoading(false);
   };
-
   const setDefaultAddressHandler = async (id) => {
     if (!userId || defaultAddress?.id === id) return;
     setLoading(true);
@@ -123,42 +108,48 @@ const Address = () => {
   };
 
   return (
-    <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
-      <Sidebar />
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">
+        <Sidebar />
+      </div>
       <div className="px-5 flex-1">
-        <div className="p-4 bg-slate-200 min-h-screen">
+        <div className="p-4 bg-slate-200">
         <div className="flex flex-1 justify-between align-bottom flex-row">
 
-          <h1 className="text-xl font-bold text-gray-800 mb-6">Address Book</h1>
-          <button className="bg-violet-600 text-white px-4 rounded-lg mb-2" onClick={() => setShowAddModal(true)}>
+          <h1 className="text-xl font-bold text-gray-800 mb-4">Address Book</h1>
+          <button className="text-violet-600 px-4 rounded-lg mb-2 hover:underline" onClick={() => setShowAddModal(true)}>
               Add New Address
           </button>
         </div>
 
 
-          <div className="bg-gray-100 p-4 rounded-lg shadow">
+          <div className="bg-gray-100 relative p-4 rounded-lg shadow">
+
+          <div className=" w-full  bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
             <h3 className="text-l font-bold text-gray-700">Default Address</h3>
 
 
            {loading ? (
             <div className="flex flex-col items-center justify-center">
-              <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-50" />
+              <img src="/emote/hmmm.png" alt="Loading..." className="w-32 h-32" />
               <label>Loading...</label>
             </div>
           ) : defaultAddress ? (
 
             
-            <table className="w-full  border-1 border-gray-300 bg-white shadow-md rounded-lg mt-4">
-              <thead className="bg-violet-600 rounded-lg text-gray-200 border-1 border-gray-300">
+            <table className="w-full  border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
+              <thead className=" shadow-md bg-custom-purple glass rounded-lg text-gray-200 border-1">
                 <tr>
-                  <th className="px-4 py-2">Address</th>
-                  <th className="px-4 py-2">Postcode</th>
+                  <th className="px-3 py-2">Address</th>
+                  <th className="px-3 py-2">Postcode</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="px-4 py-2">{defaultAddress.address}</td>
-                  <td className="px-4 py-2">{defaultAddress.postcode}</td>
+                  <td className="px-3 py-2">{defaultAddress.address}</td>
+                  <td className="px-3 py-2">{defaultAddress.postcode}</td>
                 </tr>
               </tbody>
             </table>
@@ -167,18 +158,20 @@ const Address = () => {
 
 
           <div className="divider p-2"></div>
-          <div className="bg-gray-100 p-4 rounded-lg shadow">
-
-          <h3 className="text-l font-bold text-gray-900">Addresses</h3>
+          <div className="bg-gray-100 relative p-4 rounded-lg shadow">
+          <div className=" w-full  bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
+          <h3 className="text-l font-bold text-gray-800 glass">Addresses</h3>
 
           {loading ? (
           <div className="flex flex-col justify-center items-center">
-            <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-50" />
+            <img src="/emote/hmmm.png" alt="Loading..." className="w-32 h-32" />
             <label>Loading...</label>
           </div>
         ) : (
-          <table className="w-full   border-1 border-gray-300 bg-white shadow-md rounded-lg mt-4">
-            <thead className="bg-gray-600 rounded-lg text-gray-200 border-1 border-gray-300">
+          <table className="w-full   border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
+            <thead className="border border-solid bg-gray-600 rounded-lg text-gray-200 border-1 border-gray-300">
               <tr>
                 <th className="px-4 py-2">Address</th>
                 <th className="px-4 py-2">Postcode</th>

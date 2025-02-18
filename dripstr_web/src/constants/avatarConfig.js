@@ -27,8 +27,8 @@ const bodyTypeURLs = {
 
   const tshirURLs = {
     Boy:{
-      //Average: "/3d/wears/guyz/tshirts/Average_Tshirt.glb",
-      Average: "/3d/uvmap/average.glb",
+      Average: "/3d/wears/guyz/tshirts/Average_Tshirt.glb",
+      //Average: "/3d/uvmap/average.glb",
       Muscular: "/3d/wears/guyz/tshirts/Muscular_Tshirt.glb",
       Petite: "/3d/wears/guyz/tshirts/Petite_Tshirt.glb",
       PlusSize: "/3d/wears/guyz/tshirts/PlusSize_Tshirt.glb",

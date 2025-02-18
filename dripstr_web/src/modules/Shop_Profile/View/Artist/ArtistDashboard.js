@@ -11,9 +11,9 @@ import { PieChart } from "@mui/x-charts/PieChart";
 import { useNavigate } from "react-router-dom";
 import questionEmote from "../../../../../src/assets/emote/question.png";
 import { supabase } from "../../../../constants/supabase";
+import hmmmEmote from "../../../../../src/assets/emote/hmmm.png";
 import successEmote from "../../../../../src/assets/emote/success.png";
 const { useState, useEffect } = React;
-
 
 function MerchantDashboard() {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ function MerchantDashboard() {
   const [imageOrientations, setImageOrientations] = useState({});
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
   const [imageLoading, setImageLoading] = useState(true);
-  const [artsCounts, setArtsCounts] = useState([]); 
+  const [artsCounts, setArtsCounts] = useState([]);
   const [totalArtsCount, setTotalArtsCount] = useState(0); // Initialize with 0
 
   const handleImageLoad = (event, artId) => {
@@ -90,29 +90,30 @@ function MerchantDashboard() {
             .from("artist_Arts")
             .select("art_Name, id, art_Description, art_Image")
             .eq("artist_Id", artist.id);
-            if (artsError) {
-              console.error("Error fetching products:", artsError.message);
-              setError(artsCounts.message);
-            } else {
-              // Count products by shop
-              const artCountByArtist = artists.map((artist) => ({
-                artist_Id: artist.id,
-                artsCount: arts.filter(art => art.artist_Id === artists.id).length,
-              }));
-    
-              setArtsCounts(artCountByArtist);
-      
-              // Calculate total art count
-              const totalArtCount = artCountByArtist.reduce(
-                (acc, artist) => acc + artist.artsCount, 
-                0
-              );
-          
-              console.log("Total arts count:", totalArtCount);
-              setTotalArtsCount(totalArtCount);
-      
-              setArtistArts(arts); 
-            }
+          if (artsError) {
+            console.error("Error fetching products:", artsError.message);
+            setError(artsCounts.message);
+          } else {
+            // Count products by shop
+            const artCountByArtist = artists.map((artist) => ({
+              artist_Id: artist.id,
+              artsCount: arts.filter((art) => art.artist_Id === artists.id)
+                .length,
+            }));
+
+            setArtsCounts(artCountByArtist);
+
+            // Calculate total art count
+            const totalArtCount = artCountByArtist.reduce(
+              (acc, artist) => acc + artist.artsCount,
+              0
+            );
+
+            console.log("Total arts count:", totalArtCount);
+            setTotalArtsCount(totalArtCount);
+
+            setArtistArts(arts);
+          }
           if (artsError) {
             throw artsError;
           }
@@ -334,7 +335,9 @@ function MerchantDashboard() {
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
-                    <div className="text-2xl text-slate-100">{totalArtsCount}</div>
+                    <div className="text-2xl text-slate-100">
+                      {totalArtsCount}
+                    </div>
                     <div className="pt-1">
                       {" "}
                       <box-icon
@@ -472,7 +475,14 @@ function MerchantDashboard() {
                   ))}
               </div>
             ) : (
-              <p>No arts found for this artist.</p>
+              <div className=" h-full w-full place-content-center justify-items-center">
+                <img
+                  src={hmmmEmote}
+                  alt="Shop Logo"
+                  className="drop-shadow-custom h-28 justify-center w-28 object-cover"
+                />
+                <h1 className="text-slate-900 font-semibold ">No upload yet.</h1>
+              </div>
             )}
           </div>
         </div>
