@@ -169,11 +169,11 @@ const Cart = ({action, cartItems2, setCartItems, closeDrawer }) => {
           ) : (
             <div className="flex items-center justify-center h-full flex-col gap-2">
                 <img
-          src={require("@/assets/emote/error.png")}
+          src={require("@/assets/emote/success.png")}
           alt="No Images Available"
           className=" drop-shadow-customViolet "
         />
-            <p className="font-semibold font-[iceland] text-xl">Your cart is empty.</p>
+            <p className="font-semibold font-[iceland] text-xl">Your cart is empty. Start Shopping Now.</p>
             </div>
           )}
         </div>

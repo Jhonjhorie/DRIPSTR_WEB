@@ -55,76 +55,115 @@ function PlaceOrder() {
     fetchAddresses();
   }, [profile]);
 
-  if (!selectedItems || selectedItems.length === 0) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <p className="text-lg font-semibold">
-          No items selected for order. Please return to the cart page.
-        </p>
-      </div>
-    );
-  }
-
-  if (loadingP) {
-    return (
-      <div className="w-full relative pb-16 items-center justify-center bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 h-[100%] py-4">
-        <img
-          src={require("@/assets/emote/hmmm.png")}
-          alt="No Images Available"
-          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
-        />
-        <h1 className="top-20 bg-primary-color p-4 rounded-md drop-shadow-lg">
-          Loading
-        </h1>
-      </div>
-    );
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <div className="w-full relative pb-16 items-center justify-center bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 h-[100%] py-4">
-        <h1 className="absolute top-20 bg-red-500 p-4 rounded-md drop-shadow-lg">
-          Error: You are not logged in
-        </h1>
-        <LoginFirst />
-      </div>
-    );
-  }
-
-  const totalPrice = selectedItems.reduce(
-    (sum, item) =>
-      sum +
-      (item.prod.discount
-        ? item.size.price * (1 - item.prod.discount / 100)
-        : item.size.price) *
-        item.qty,
-    0
-  );
-
-  const grandTotal = totalPrice + shippingFee;
-
-  const sendOrder = async () => {
+  const deleteItem = async (item) => {
     try {
-      const orders = selectedItems.map((item) => ({
-        acc_num: profile.id,
-        prod_num: item.prod.id,
-        quantity: item.qty,
-        total_price: item.size.price * item.qty,
-        payment_method: paymentMethod,
-        payment_stamp: new Date().toISOString(), // Current timestamp
-        order_variation: item.variant,
-        order_size: item.size,
-        shipping_addr: selectedAddress || "No address provided",
-        shipping_postcode: selectedPostcode || "No postcode provided",
-        shipping_method: shippingMethod,
-        shipping_fee: shippingFee,
-        discount: item.prod.discount || 0, // Assuming discount is available in item.prod
-        final_price:
+      const { error } = await supabase
+        .from("cart")
+        .delete()
+        .eq("acc_id", profile.id)
+        .eq("prod_id", item.prod.id)
+        .eq("variant->>variant_Name", item.variant.variant_Name)
+        .eq("size->>id", item.size.id)
+        ;
+
+      if (error) {
+        console.error("Error deleting item from cart:", error.message);
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const groupItemsByShop = (items) => {
+    const grouped = {};
+    items.forEach((item) => {
+      const shopName = item.prod.shop_Name;
+      if (!grouped[shopName]) {
+        grouped[shopName] = {
+          items: [],
+          shippingFee: shippingFee, // Apply shipping fee only once per shop
+        };
+      }
+      grouped[shopName].items.push(item);
+    });
+    return grouped;
+  };
+
+  const calculateTotals = (items) => {
+    const groupedItems = groupItemsByShop(items);
+  
+    let totalPrice = 0;
+    let totalShippingFee = 0;
+  
+    // Calculate total price and shipping fee
+    for (const shopName in groupedItems) {
+      const { items: shopItems, shippingFee: shopShippingFee } = groupedItems[shopName];
+      const shopTotal = shopItems.reduce(
+        (sum, item) =>
+          sum +
           (item.prod.discount
             ? item.size.price * (1 - item.prod.discount / 100)
-            : item.size.price) * item.qty,
-        order_status: "Pending to Admin",
-      }));
+            : item.size.price) *
+            item.qty,
+        0
+      );
+      totalPrice += shopTotal;
+      totalShippingFee += shopShippingFee; // Add shipping fee only once per shop
+    }
+  
+    const grandTotal = totalPrice + totalShippingFee;
+  
+    return { totalPrice, grandTotal, totalShippingFee };
+  };
+
+  const { totalPrice, grandTotal, totalShippingFee } = calculateTotals(selectedItems);
+
+  const sendOrder = async (image) => {
+    try {
+      const groupedItems = groupItemsByShop(selectedItems);
+      const transactionId = Date.now(); 
+
+      const orders = [];
+      for (const shopName in groupedItems) {
+        const { items, shippingFee: shopShippingFee } = groupedItems[shopName];
+        const shopTotal = items.reduce(
+          (sum, item) =>
+            sum +
+            (item.prod.discount
+              ? item.size.price * (1 - item.prod.discount / 100)
+              : item.size.price) *
+              item.qty,
+          0
+        );
+
+        orders.push(
+          ...items.map((item) => ({
+            acc_num: profile.id,
+            prod_num: item.prod.id,
+            quantity: item.qty,
+            total_price: item.size.price * item.qty,
+            payment_method: paymentMethod,
+            payment_stamp: new Date().toISOString(),
+            order_variation: item.variant,
+            order_size: item.size,
+            shipping_addr: selectedAddress || "No address provided",
+            shipping_postcode: selectedPostcode || "No postcode provided",
+            shipping_method: shippingMethod,
+            shipping_fee: shopShippingFee,
+            discount: item.prod.discount || 0,
+            final_price:
+              ((item.prod.discount
+                ? item.size.price * (1 - item.prod.discount / 100)
+                : item.size.price) * item.qty) + shopShippingFee,
+            order_status: "Pending to Admin",
+            proof_of_payment: image,
+            shop_transaction_id: transactionId, 
+          }))
+        );
+      }
 
       const { data, error } = await supabase
         .from("orders")
@@ -137,16 +176,21 @@ function PlaceOrder() {
       } else {
         console.log("Orders placed successfully:", data);
         setShowAlert(true);
+
+        for (const item of selectedItems) {
+          await deleteItem(item);
+        }
+
         setTimeout(() => {
           setShowAlert(false);
-          navigate(`/`); // Redirect after 5 seconds
+          navigate(`/`); 
         }, 3000);
       }
     } catch (error) {
       console.error("Error placing order:", error);
       alert("Failed to place order. Please try again.");
     }
-  }
+  };
 
   const handlePlaceOrder = async () => {
     if(paymentMethod == "COD"){
@@ -165,7 +209,7 @@ await sendOrder();
               <GcashDialog
                 onClose={closeModalGcash}
                 order={sendOrder}
-                total={grandTotal}
+                total={grandTotal.toFixed(2)}
               />
               <form
                 method="dialog"
@@ -371,7 +415,7 @@ await sendOrder();
                 <h1 className="label-text text-xs text-slate-400">
                   Shipping Fee
                 </h1>
-                <h1 className="text-xl font-bold text-end">₱{shippingFee}</h1>
+                <h1 className="text-xl font-bold text-end">₱{totalShippingFee}</h1>
               </div>{" "}
             </div>
             <p className="label-text text-xs text-slate-700 text-end">
