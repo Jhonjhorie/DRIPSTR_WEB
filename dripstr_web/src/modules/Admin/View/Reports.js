@@ -11,6 +11,8 @@ function Reports() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
 
+  const [selectedTab, setSelectedTab] = useState("Products");
+
   const fetchReports = async () => {
     setLoading(true);
 
@@ -88,7 +90,6 @@ function Reports() {
     setModalContent(null);
   };
 
-  // Function to update the action field in the `reported_Art` table
   const updateReportAction = async (reportId, action) => {
     const { data, error } = await supabase
       .from("reported_Art")
@@ -107,7 +108,6 @@ function Reports() {
     }
   };
 
-  // Function to delete a report (called when "Dismiss" is clicked)
   const deleteReport = async (reportId) => {
     const { data, error } = await supabase
       .from("reported_Art")
@@ -117,7 +117,6 @@ function Reports() {
     if (error) {
       console.error("❌ Error deleting report:", error.message);
     } else {
-      // Remove the deleted report from the local state
       setFetchedReports((prevReports) =>
         prevReports.filter((report) => report.id !== reportId)
       );
@@ -128,14 +127,13 @@ function Reports() {
   const handleActionClick = (action) => {
     if (modalContent && modalContent.type === "action") {
       if (action === "Dismiss") {
-        deleteReport(modalContent.content.id);  // Call delete function when "Dismiss" is clicked
+        deleteReport(modalContent.content.id); 
       } else {
-        updateReportAction(modalContent.content.id, action);  // Update action for Warn or Suspend
+        updateReportAction(modalContent.content.id, action); 
       }
     }
   };
 
-  // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const formattedDate = date.toLocaleDateString('en-US', {
@@ -160,55 +158,125 @@ function Reports() {
         <div>
           <h1 className="text-white text-3xl font-bold mb-4">Reports</h1>
         </div>
-        {loading ? (
-          <p className="text-white text-center">Loading reports...</p>
-        ) : (
-          <table className="w-full table-fixed text-white border border-gray-600 bg-gray-800">
-            <thead>
-              <tr className="bg-gray-700">
-                <th className="p-2 border border-gray-500">ID</th>
-                <th className="p-2 border border-gray-500">Report Date</th>
-                <th className="p-2 border border-gray-500">Image</th>
-                <th className="p-2 border border-gray-500">Art Name</th>
-                <th className="p-2 border border-gray-500">Artist</th>
-                <th className="p-2 border border-gray-500">Reason</th>
-                <th className="p-2 border border-gray-500">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fetchedReports.length > 0 ? (
-                fetchedReports.map((report) => (
-                  <tr key={report.id} className="text-center border-b border-gray-600">
-                    <td className="p-2 border border-gray-500">{report.id}</td>
-                    <td className="p-2 border border-gray-500">{formatDate(report.created_at)}</td>
-                    <td className="p-2 border border-gray-500">
-                      {report.art_Image ? (
-                        <img
-                          src={report.art_Image}
-                          alt="Art"
-                          className="cursor-pointer h-16 w-16 object-cover mx-auto"
-                          onClick={() => openImageModal(report.art_Image)}
-                        />
-                      ) : (
-                        <span>No Image</span>
-                      )}
-                    </td>
-                    <td className="p-2 border border-gray-500">{report.art_Name || "No Name"}</td>
-                    <td className="p-2 border border-gray-500">{report.artist_Name || "No Name"}</td>
-                    <td className="p-2 border border-gray-500">{report.reason}</td>
-                    <td className="p-2 border border-gray-500 cursor-pointer hover:text-blue-500 underline" onClick={() => openActionModal(report)}>{report.action}</td>
+
+        {/* Tab Buttons */}
+        <div className="flex mb-4">
+          <button
+            className={`p-2 w-1/2 text-center ${selectedTab === "Products" ? "bg-blue-500" : "bg-gray-700"} text-white`}
+            onClick={() => setSelectedTab("Products")}
+          >
+            Products
+          </button>
+          <button
+            className={`p-2 w-1/2 text-center ${selectedTab === "Arts" ? "bg-blue-500" : "bg-gray-700"} text-white`}
+            onClick={() => setSelectedTab("Arts")}
+          >
+            Arts
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        {selectedTab === "Products" && (
+          <div>
+            <p className="text-white">Content for Products will go here.</p>
+          </div>
+        )}
+
+        {selectedTab === "Arts" && (
+          <div>
+            {loading ? (
+              <p className="text-white text-center">Loading reports...</p>
+            ) : (
+              <table className="w-full table-fixed text-white border border-gray-600 bg-gray-800">
+                <thead>
+                  <tr className="bg-gray-700">
+                    <th className="p-2 border border-gray-500">ID</th>
+                    <th className="p-2 border border-gray-500">Report Date</th>
+                    <th className="p-2 border border-gray-500">Image</th>
+                    <th className="p-2 border border-gray-500">Art Name</th>
+                    <th className="p-2 border border-gray-500">Artist</th>
+                    <th className="p-2 border border-gray-500">Reason</th>
+                    <th className="p-2 border border-gray-500">Actions</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center p-2">No Reports found</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                </thead>
+                <tbody>
+                  {fetchedReports.length > 0 ? (
+                    fetchedReports.map((report) => (
+                      <tr key={report.id} className="text-center border-b border-gray-600">
+                        <td className="p-2 border border-gray-500">{report.id}</td>
+                        <td className="p-2 border border-gray-500">{formatDate(report.created_at)}</td>
+                        <td className="p-2 border border-gray-500">
+                          {report.art_Image ? (
+                            <img
+                              src={report.art_Image}
+                              alt="Art"
+                              className="cursor-pointer h-16 w-16 object-cover mx-auto"
+                              onClick={() => openImageModal(report.art_Image)}
+                            />
+                          ) : (
+                            <span>No Image</span>
+                          )}
+                        </td>
+                        <td className="p-2 border border-gray-500">{report.art_Name || "No Name"}</td>
+                        <td className="p-2 border border-gray-500">{report.artist_Name || "No Name"}</td>
+                        <td className="p-2 border border-gray-500">{report.reason}</td>
+                        <td className="p-2 border border-gray-500 cursor-pointer hover:text-blue-500 underline" onClick={() => openActionModal(report)}>{report.action}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="text-center p-2">No Reports found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
         )}
 
         {/* Modal for action buttons */}
+        {isModalOpen && modalContent && modalContent.type === "action" && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+            onClick={closeModal}
+          >
+            <div
+              className="relative bg-gray-900 p-4 rounded-md"
+              onClick={(e) => e.stopPropagation()} // Prevents closing modal when clicking inside it
+            >
+              <h2 className="text-white text-2xl mb-4">Pending Review</h2>
+              <p className="text-white mb-4">Choose an action for the report:</p>
+              <div className="flex justify-between flex-col w-auto gap-2">
+                <button
+                  className="bg-yellow-500 text-white p-2 rounded hover:bg-gray-500"
+                  onClick={() => handleActionClick("Warn")}
+                >
+                  Warn
+                </button>
+                <button
+                  className="bg-red-500 text-white p-2 rounded hover:bg-gray-500"
+                  onClick={() => handleActionClick("Suspend")}
+                >
+                  Suspend
+                </button>
+                <button
+                  className="bg-green-500 text-white p-2 rounded hover:bg-gray-500"
+                  onClick={() => handleActionClick("Dismiss")}
+                >
+                  Dismiss
+                </button>
+              </div>
+              <button
+                className="absolute top-2 right-2 text-white font-bold text-2xl hover:text-black"
+                onClick={closeModal}
+              >
+                X
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Modal for full image */}
         {isModalOpen && modalContent && modalContent.type === "image" && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
@@ -223,7 +291,6 @@ function Reports() {
                 alt="Full view"
                 className="max-w-screen-lg h-[25rem] w-[25rem] object-contain" // Ensures image doesn't overflow
               />
-
               <button
                 className="absolute top-2 right-2 text-white font-bold text-2xl hover:text-black"
                 onClick={closeModal}
@@ -233,7 +300,6 @@ function Reports() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

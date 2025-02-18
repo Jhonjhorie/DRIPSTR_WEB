@@ -212,7 +212,7 @@ function Admins() {
                             />
                             <h1 className="text-white text-md font-bol mb-1">Password</h1>
                             <input
-                                type="text"
+                                type="password"
                                 placeholder="Password"
                                 value={adminPassword}
                                 onChange={(e) => setAdminPassword(e.target.value)}
