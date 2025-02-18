@@ -62,7 +62,7 @@ function Home() {
                     </div>
                   </div>
       
-        <ProductsView products={products}  categories={filCat} filter={filMall} loading={loading} error={error} />
+        <ProductsView products={products} shopFil={0} categories={filCat} filter={filMall} loading={loading} error={error} />
       </div>
     </div>
   );

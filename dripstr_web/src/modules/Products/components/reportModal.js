@@ -73,7 +73,7 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
               <img
                 src={require("@/assets/emote/error.png")}
                 alt={"Report"}
-                className="w-full h-auto object-none "
+                className="w-full h-auto object-none drop-shadow-customViolet"
               />
               <p className="font-semibold font-sans">
                 We apologize for the inconvenience. Rest assured, we will

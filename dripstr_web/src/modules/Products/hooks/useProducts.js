@@ -12,8 +12,8 @@ const useProducts = () => {
       try {
         const { data, error } = await supabase
           .from('shop_Product') 
-           .select('*, shop(shop_name)');
-
+           .select('*, shop(*)')
+           .eq('is_Post', true);
         if (error) throw error;
         setProducts(data); 
       } catch (err) {

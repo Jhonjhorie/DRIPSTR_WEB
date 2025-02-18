@@ -41,9 +41,6 @@ const Cart = ({action, cartItems2, setCartItems, closeDrawer }) => {
       fetchDataCart();
   }, [cartItems2, fetchDataCart]);
   
-  useEffect(() => {
-    fetchDataCart();
-  }, []);
 
   const openModal = (item, action) => {
     setCartItemS(item);

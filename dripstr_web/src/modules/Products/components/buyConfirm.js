@@ -60,6 +60,9 @@ const BuyConfirm = ({ item, onClose }) => {
   const handleProductClick = () => {
     navigate(`/product/${item.item_Name}`, { state: { item } });
   };
+  const handleShopClick = () => {
+    navigate(`/product/merchant-shop/${item.shop.shop_Name}`, { state: { shop: item.shop } });
+  };
 
   const onConfirm = () => {
     if (isLoggedIn) {
@@ -80,7 +83,7 @@ const BuyConfirm = ({ item, onClose }) => {
         return;
       }
 
-      navigate(`/placeOrder`, { state: { selectedItems, solo } });
+      navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
     } else {
       setActionLog("placeOrder");
       setLoginDialog(true);
@@ -88,12 +91,12 @@ const BuyConfirm = ({ item, onClose }) => {
   };
 
   const closeModalRep = () => {
-    document.getElementById('my_modal_report').close();
+    document.getElementById("my_modal_report").close();
   };
 
   const mulletReport = () => {
-    document.getElementById('my_modal_report').showModal();
-  }
+    document.getElementById("my_modal_report").showModal();
+  };
 
   const handleAddToCart = async () => {
     if (isLoggedIn) {
@@ -149,7 +152,6 @@ const BuyConfirm = ({ item, onClose }) => {
           </div>
         ) : (
           <div className="flex">
-            
             <div className="flex-none w-80 relative items-center flex justify-center">
               <img
                 src={
@@ -173,9 +175,11 @@ const BuyConfirm = ({ item, onClose }) => {
                       <p className="text-xs text-slate-400 font-medium">
                         Shop:
                       </p>
-                      <div className=" px-1 text-xs py-0 min-h-6 h-6 rounded-md btn-ghost btn duration-300 transition-all ">
+                      <button
+                      onClick={handleShopClick}
+                      className=" px-1 text-xs py-0 min-h-6 h-6 rounded-md btn-ghost btn duration-300 transition-all ">
                         {item.shop_Name || "No shop available"}
-                      </div>
+                      </button>
                     </div>
 
                     <div className="flex justify-end gap-2 items-center">
@@ -198,14 +202,19 @@ const BuyConfirm = ({ item, onClose }) => {
                       </div>
                     </div>
                     <div className="flex justify-end gap-1 items-center">
-                      <button class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
-                        <FontAwesomeIcon icon={faHeart} />
-                      </button>
-                      <button 
-                      onClick={mulletReport}
-                      class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
-                        <FontAwesomeIcon icon={faTriangleExclamation} />
-                      </button>
+                      {isLoggedIn && (
+                        <button class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
+                          <FontAwesomeIcon icon={faHeart} />
+                        </button>
+                      )}
+                      {isLoggedIn && (
+                        <button
+                          onClick={mulletReport}
+                          class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+                        >
+                          <FontAwesomeIcon icon={faTriangleExclamation} />
+                        </button>
+                      )}
                       <button
                         onClick={onClose}
                         class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
@@ -343,17 +352,24 @@ const BuyConfirm = ({ item, onClose }) => {
                 }}
               />
             )}
-         
-                    <dialog
-                      id="my_modal_report"
-                      className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
-                    >
-                      <ReportDialog item={item} onClose={closeModalRep} accId={profile.id} type={"product"} />
-                      <form method="dialog" className="modal-backdrop min-h-full min-w-full absolute ">
-                        <button onClick={closeModalRep}></button>
-                      </form>
-                    </dialog>
-                
+
+            <dialog
+              id="my_modal_report"
+              className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
+            >
+              <ReportDialog
+                item={item}
+                onClose={closeModalRep}
+                accId={profile.id}
+                type={"product"}
+              />
+              <form
+                method="dialog"
+                className="modal-backdrop min-h-full min-w-full absolute "
+              >
+                <button onClick={closeModalRep}></button>
+              </form>
+            </dialog>
           </div>
         )}
       </div>

@@ -5,14 +5,12 @@ import { faTriangleExclamation, faHeart } from "@fortawesome/free-solid-svg-icon
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "./hooks/useRate.ts";
 import RatingSection from "./components/RatingSection.js";
-import BuyConfirm from "./components/buyConfirm.js";
 import ItemOptions from "./components/itemOptions.js";
-import useGetImage from "./hooks/useGetImageUrl.js";
 import useUserProfile from "@/shared/mulletCheck.js";
 import LoginFirst from "@/shared/mulletFirst";
 import addToCart from "./hooks/useAddtoCart.js";
 import useCarts from "./hooks/useCart.js";
-import AddtoCartAlert from "./components/alertDialog2.js";
+import ReportDialog from "./components/reportModal.js";
 import AlertDialog from "./components/alertDialog2.js";
 
 function Product() {
@@ -94,6 +92,14 @@ function Product() {
     fetchDataCart();
   };
 
+  const closeModalRep = () => {
+    document.getElementById('my_modal_report').close();
+  };
+
+  const mulletReport = () => {
+    document.getElementById('my_modal_report').showModal();
+  }
+
   const imagePreview = `${selectedColor.imagePath}`;
 
  
@@ -107,8 +113,19 @@ function Product() {
     );
   }
 
+  
+
   return (
     <div className="w-full relative pb-16 items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 py-4">
+        <dialog
+                      id="my_modal_report"
+                      className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
+                    >
+                      <ReportDialog item={item} onClose={closeModalRep} accId={profile.id} type={"product"} />
+                      <form method="dialog" className="modal-backdrop min-h-full min-w-full absolute ">
+                        <button onClick={closeModalRep}></button>
+                      </form>
+                    </dialog>
        {showAlert && (
           <div className=" w-[95%] absolute -top-60 justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
             <AlertDialog emote={require("@/assets/emote/success.png")} text={"Item added to cart successfully!"} />
@@ -161,14 +178,21 @@ function Product() {
                 <h1 className="text-5xl font-bold text-secondary-color p-1 pb-2 rounded-t-md">
                   {item.item_Name}
                 </h1>
+                {isLoggedIn &&
                 <div className="flex gap-2">
+                 
                   <button className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
                     <FontAwesomeIcon icon={faHeart} />
                   </button>
-                  <button className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
+                  <button 
+                  onClick={mulletReport}
+                  className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
+
                     <FontAwesomeIcon icon={faTriangleExclamation} />
                   </button>
+                  
                 </div>
+                }
               </div>
               <div className="h-0.5 mb-2 w-full bg-primary-color"></div>
               <div className="flex flex-col justify-between gap-4">

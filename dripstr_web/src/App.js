@@ -23,6 +23,7 @@ import Header from "./shared/Header";
 import Sidebar from "./shared/SideBar";
 import Notifications from "./modules/Notification/Notification_Controller";
 import Reminder from "./modules/Messaging/View/Reminder";
+import ProductController from "./modules/Products/Products_Controller";
 
 // Shared Component
 function App() {
@@ -56,8 +57,7 @@ function App() {
               <Route path="/guest" element={<GuestHome />} />
               <Route path="/mall/*" element={<ProductsController />} />
               <Route path="/arts/*" element={<ArtistController />} />
-              <Route path="/product/*" element={<Product />} />
-              <Route path="/placeOrder/*" element={<PlaceOrder />} />
+              <Route path="/product/*" element={<ProductController />} />
               <Route path="/search" element={<Search />} />
               <Route path="/cart/*" element={<OrderController />} />
               <Route path="/login/*" element={<LoginController />} />
