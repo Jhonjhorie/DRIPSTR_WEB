@@ -76,7 +76,7 @@ function AristOrders() {
       .select(
         `id, sender_Id, content, what_for, created_at, status, profiles:sender_Id (id, full_name, profile_picture)`
       )
-      .eq("artist_Id", artistId) 
+      .eq("artist_Id", artistId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -90,6 +90,17 @@ function AristOrders() {
 
     console.log("Fetched Messages:", data);
     setMessages(data);
+
+    // Update selectedUser with the fetched messages
+    if (selectedUser) {
+      const userMessages =
+        data.find((msg) => msg.id === selectedUser.id)?.content || [];
+      setSelectedUser((prevUser) => ({
+        ...prevUser,
+        messages: userMessages,
+      }));
+    }
+
     setLoading(false);
   };
 
@@ -110,19 +121,20 @@ function AristOrders() {
 
   if (loading) return <div>Loading...</div>;
 
-
   const handleChatClick = async (message) => {
     setIsOpening(true);
-  
-    const messageContent = Array.isArray(message.content) ? message.content : [];
-  
+
+    const messageContent = Array.isArray(message.content)
+      ? message.content
+      : [];
+
     try {
       // Make an API call to update the message's status in Supabase
       const { data, error } = await supabase
         .from("artist_Messages")
-        .update({ status: true })  
+        .update({ status: true })
         .eq("id", message.id);
-      
+
       if (error) {
         console.error("Error updating message:", error);
       } else {
@@ -133,14 +145,14 @@ function AristOrders() {
             msg.id === message.id ? { ...msg, status: true } : msg
           )
         );
-  
+
         setMessageContent("");
         setImageFile(null);
       }
     } catch (error) {
       console.error("Error updating message:", error);
     }
-  
+
     setTimeout(() => {
       setSelectedUser({
         name: message.profiles?.full_name || "Unknown User",
@@ -149,15 +161,13 @@ function AristOrders() {
         id: message.id,
         follow: "Following",
       });
-  
+
       // Now you can access the message ID here
       console.log("Selected Message ID:", message.id);
-  
+
       setIsOpening(false);
     }, 1);
   };
-  
-  
 
   const handleCloseChat = () => {
     setIsClosing(true);
@@ -167,105 +177,119 @@ function AristOrders() {
     }, 500);
   };
 
-  const handleSendMessage = async () => {
-    if (!messageContent || !selectedUser || !selectedUser.messages) {
-      return; 
-    }
-
-    const messageId = selectedUser.id; 
-
-    // Prepare the new message to be added
-    const newMessage = {
-      artist_Id: selectedUser.artist_Id,
-      text: messageContent,
-      file: imageFile ? URL.createObjectURL(imageFile) : null, 
-      created_at: new Date().toISOString(), 
-    };
-
-    // Add the new message to the existing content array
-    const updatedContent = [...selectedUser.messages, newMessage];
-
-    try {
-      const { data, error } = await supabase
-        .from("artist_Messages")
-        .update({ content: updatedContent })
-        .match({ id: messageId });
-
-      if (error) {
-        console.error("Error updating message:", error);
-      } else {
-        console.log("Message updated successfully:", data);
-
-        setMessageContent("");
-        setImageFile(null);
-        fetchMessages();
-      }
-      
-    } catch (error) {
-      console.error("Error updating message:", error);
-    }
-  };
-
   // Image upload helper function
   const handleUploadImage = async () => {
     if (!imageFile) {
       console.log("No image file selected.");
       return null;
     }
-  
+
     // Validate file type and size (optional)
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
     if (!allowedTypes.includes(imageFile.type)) {
       alert("Invalid file type. Please upload a JPEG, PNG, or GIF.");
       return null;
     }
-  
+
     const maxSize = 5 * 1024 * 1024; // 5MB max file size
     if (imageFile.size > maxSize) {
       alert("File size is too large. Please upload an image smaller than 5MB.");
       return null;
     }
-  
+
     // Create a unique image name
     const uniqueImageName = `${Date.now()}-${Math.random()
       .toString(36)
       .substring(2, 10)}-${imageFile.name}`;
     const filePath = `messages/${currentUser.id}/${uniqueImageName}`;
     console.log("Uploading image to:", filePath);
-  
+
     try {
       // Upload the image to Supabase storage
       const { error: uploadError } = await supabase.storage
         .from("art_messages")
         .upload(filePath, imageFile);
-  
+
       if (uploadError) {
         console.error("Error uploading image:", uploadError.message);
         return null;
       }
-  
+
       // Retrieve public URL after uploading
       const { data, error: publicUrlError } = supabase.storage
         .from("art_messages")
         .getPublicUrl(filePath);
-  
+
       if (publicUrlError) {
         console.error("Error getting public URL:", publicUrlError.message);
         return null;
       }
-  
+
       console.log("Image uploaded successfully. Public URL:", data.publicUrl);
-  
+
       // Optionally, clean up object URL after usage
       URL.revokeObjectURL(imageFile);
-  
+
       return data.publicUrl; // Return the public URL for the image
     } catch (error) {
       console.error("Unexpected error during image upload:", error);
       return null;
     }
   };
-  
+  const handleSendMessage = async () => {
+    if (!messageContent.trim() && !imageFile) return;
+
+    let imageUrl = null;
+    if (imageFile) {
+      imageUrl = await handleUploadImage();
+      console.log("Image URL returned:", imageUrl);
+    }
+
+    const newMessage = {
+      artist_Id: selectedUser.artist_Id,
+      text: messageContent,
+      send_file: imageUrl,
+      created_at: new Date().toISOString(),
+    };
+
+    const updatedContent = Array.isArray(selectedUser.messages)
+      ? [...selectedUser.messages, newMessage]
+      : [newMessage];
+
+    try {
+      const { data, error } = await supabase
+        .from("artist_Messages")
+        .update({ content: updatedContent })
+        .match({ id: selectedUser.id });
+
+      if (error) {
+        console.error("Error updating message:", error);
+      } else {
+        console.log("Message updated successfully:", data);
+
+        // Update messages state
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg.id === selectedUser.id
+              ? { ...msg, content: updatedContent }
+              : msg
+          )
+        );
+
+        // Update selectedUser state
+        setSelectedUser((prevUser) => ({
+          ...prevUser,
+          messages: updatedContent,
+        }));
+
+        // Clear input fields
+        setMessageContent("");
+        setImageFile(null);
+      }
+    } catch (error) {
+      console.error("Error updating message:", error);
+    }
+  };
 
   return (
     <div className="h-full w-full overflow-hidden bg-slate-300">
@@ -420,35 +444,39 @@ function AristOrders() {
                                 )}
 
                                 {/* Chat Body */}
-                                <div className="chat-body flex flex-col">
+                                <div
+                                  className={`chat-body flex flex-col space-y-2 ${
+                                    isSenderMessage
+                                      ? "items-end"
+                                      : "items-start"
+                                  }`}
+                                >
+                                  {/* Chat Header */}
                                   <div
-                                    className={`chat-header font-semibold text-slate-800 flex items-center ${
+                                    className={`chat-header font-semibold w-full  text-slate-800 flex items-center ${
                                       isSenderMessage
                                         ? "justify-start"
                                         : "justify-end"
                                     }`}
                                   >
-                                    <span
-                                      className={`mr-2 ${
-                                        isSenderMessage
-                                          ? "text-left"
-                                          : "text-right"
-                                      }`}
-                                    >
+                                    <span className={`text-sm ${isSenderMessage ? "text-start" : "text-left"}`}>
                                       {isSenderMessage && selectedUser
                                         ? selectedUser.name || "Sender"
                                         : "You"}
                                     </span>
                                   </div>
 
+                                  {/* Chat Bubble */}
                                   <div
-                                    className={`chat-bubble p-2 justify-center w-auto rounded-lg text-sm mt-2 ${
+                                    className={`chat-bubble shadow-lg px-4 py-2 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg rounded-lg text-sm relative ${
                                       isSenderMessage
-                                        ? "bg-violet-500 text-white"
-                                        : "bg-gray-300 text-gray-800"
+                                        ? "bg-violet-500 text-white "
+                                        : "bg-gray-300 text-gray-800 "
                                     }`}
                                   >
-                                    {message.text || "No message content"}
+                                    <p>
+                                      {message.text || "No message content"}
+                                    </p>
 
                                     {/* Attachments */}
                                     {message.send_file && (

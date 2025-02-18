@@ -412,7 +412,7 @@ function Artists() {
   };
 
   return (
-    <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar  ">
+    <div className="h-full w-full  bg-slate-300   ">
       <h1 className="text-center pt-5 text-5xl text-slate-50  bg-violet-500 font-extrabold  iceland-regular">
         DRIPSTR TOP ARTIST
       </h1>

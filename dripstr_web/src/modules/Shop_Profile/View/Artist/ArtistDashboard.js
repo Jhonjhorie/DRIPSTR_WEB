@@ -501,7 +501,9 @@ function MerchantDashboard() {
 
   return (
     <div className="h-full w-full bg-slate-300  overflow-hidden  ">
-      <ArtistSideBar></ArtistSideBar>
+     <div className="absolute mx-3 right-0 z-20">
+        <ArtistSideBar />
+      </div>
       <div className="w-full h-20  sticky top-0 z-10 bg-violet-600 shadow-md pr-20 px-16 ">
         <div className="w-full h-full flex gap-3 p-2">
           <div className="flex justify-between w-full ">
