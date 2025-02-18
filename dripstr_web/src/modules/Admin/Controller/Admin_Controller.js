@@ -11,6 +11,7 @@ import Headline from "../View/Headline";
 import Merchants from "../View/Merchants";
 import AdminLogin from "../View/AdminLogin";
 import Admins from "../View/Admins";
+import Payout from "../View/Payout";
 import PrivateRoute from "./PrivateRoute";
 
 const AdminController = () => {
@@ -31,6 +32,7 @@ const AdminController = () => {
           <Route path="/merchants" element={<Merchants />} />
           <Route path="/reports/:reportNo" element={<ReportDetail />} />
           <Route path="/admins" element={<Admins />} />
+          <Route path="/payout" element={<Payout />} />
         </Route>
       </Routes>
     </main>

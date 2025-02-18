@@ -11,29 +11,35 @@ function AdminLogin() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
-
+  
     // Query the "admins" table to check if the username exists
     const { data, error: queryError } = await supabase
       .from("admins")
-      .select("id, username, password, chief") // Select uiid, username & password
+      .select("id, username, password") // Select id, username & password
       .eq("username", username)
       .single();
-
+  
     if (queryError || !data) {
       setError("Invalid username or password");
       return;
     }
-
-
+  
+    // Compare the entered password with the stored password
+    if (data.password !== password) {
+      setError("Invalid username or password");
+      return;
+    }
+  
     // Manually generate a session token
     const adminToken = `admin-${new Date().getTime()}`;
     localStorage.setItem("adminToken", adminToken);
     localStorage.setItem("username", data.username);
     localStorage.setItem("id", data.id);  // Store id for future use
-
+  
     // Redirect to the dashboard
     navigate("/admin/dashboard");
   };
+  
 
   return (
     <div className="min-h-screen flex justify-center items-center bg-gray-900 bg-opacity-75">
