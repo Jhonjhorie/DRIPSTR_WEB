@@ -8,7 +8,7 @@ import MallRibbon from "../Products/components/MallRibbon";
 import FilterProducts from "../Products/components/FilterProducts";
 import LandingPage from "./Landing";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faShoppingCart, faStore } from "@fortawesome/free-solid-svg-icons";
 
 //Data
 import { MallItems } from "@/constants/mallItems.ts";
@@ -34,37 +34,80 @@ function Home() {
       <div className="flex  gap-4 md:flex-row justify-center items-center p-4 h-[49%] lg:h-[48%]">
         <Carousel images={Images} />
       </div>
-      <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
+      {/* <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
         <CategoriesRibbon
           active={filCat}
           categories={categories}
           onItemClick={(label) => setFilCat(label)}
         />
-      </div>
-      <div className="flex flex-wrap justify-center mb-4 p-4 gap-2">
-        <div className="relative flex flex-row w-full items-center justify-center">
-          <div className="breadcrumbs text-2xl text-slate-500  font-[iceland]">
-            <ul>
-              <li className="text-bold text-primary-color flex items-center gap-2">
-                START <FontAwesomeIcon fontSize={16} icon={faShoppingCart} />{" "}
-                SHOPPING
-              </li>
-              <li className="text-bold text-secondary-color flex items-center gap-2">
-                STAR <FontAwesomeIcon fontSize={16} icon={faStar} /> DRIPPING
-              </li>
-            </ul>
+      </div> */}
+      <div className="flex flex-wrap w-full px-10  justify-center mb-4 gap-4  font-[iceland]">
+        <div className="min-w-[100%] bg-secondary-color drop-shadow-lg rounded-md p-2">
+          <div
+            className="flex justify-between text-2xl text-slate-500 
+           items-start mb-1   font-[iceland]"
+          >
+            <p className="text-bold text-slate-50">
+              TOP PRODUCTS <FontAwesomeIcon fontSize={16} icon={faStar} />
+            </p>
+            <button className="btn btn-outline bg-primary-color text-white min-h-7 h-7 px-4">See More</button>
           </div>
+          <ProductsView
+            products={products}
+            shopFil={0}
+            categories={filCat}
+            filter={filMall}
+            loading={loading}
+            error={error}
+            showItem={6}
+            sort="top"
+          />
         </div>
-
-        <ProductsView
-          products={products}
-          shopFil={0}
-          categories={filCat}
-          filter={filMall}
-          loading={loading}
-          error={error}
-        />
+        <div className="min-w-[100%] bg-stone-700 drop-shadow-lg rounded-md p-2">
+          <div
+            className="flex justify-between text-2xl text-slate-500 
+           items-start  mb-1 font-[iceland]"
+          >
+            <p className="text-bold text-slate-50">
+              Followed Store <FontAwesomeIcon fontSize={16} icon={faStore} />
+            </p>
+            <button className="btn btn-outline bg-primary-color text-white min-h-7 h-7 px-4">See More</button>
+          </div>
+          <ProductsView
+            products={products}
+            shopFil={0}
+            categories={filCat}
+            filter={filMall}
+            loading={loading}
+            error={error}
+            showItem={6}
+          />
+        </div>
+        <div className="min-w-[100%] p-2">
+          <div
+            className="flex justify-between text-2xl text-slate-500 
+           items-start  mb-2 font-[iceland]"
+          >
+            <p className="text-bold text-secondary-color">
+              For You <FontAwesomeIcon fontSize={16} icon={faShoppingCart} />
+            </p>
+            <button className="btn btn-outline bg-primary-color text-white min-h-7 h-7 px-4">Go to Mall</button>
+          </div>
+          <ProductsView
+            products={products}
+            shopFil={0}
+            categories={filCat}
+            filter={filMall}
+            loading={loading}
+            error={error}
+            showItem={0}
+          />
+        </div>
       </div>
+       
+    
+
+      
     </div>
   );
 }

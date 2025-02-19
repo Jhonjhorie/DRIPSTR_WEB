@@ -37,26 +37,22 @@ function Search() {
   }, [query, products, filMall, filCat]);  // Dependencies: query, products, filter criteria
 
   return (
-    <div className="w-full relative inset-0 bg-slate-300 flex flex-col pt-2">
-      <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-between px-1 lg:px-2 mt-1">
-        <CategoriesRibbon
-          active={filCat}
-          categories={categories}
-          onItemClick={(label) => setFilCat(label)}
-        />
-        <MallRibbon
-          active={filMall}
-          items={MallItems}
-          onItemClick={(index) => setFilMall(index)}
-        />
-      </div>
-
-      <div className="flex flex-col-reverse mt-2 md:mt-12 bg-slate-50 mx-2 rounded-md gap-4 md:flex-row items-center justify-center p-4 ">
+    <div className="w-full  inset-0 items-center justify-start gap-2 h-full p-2 bg-slate-300 flex flex-col font-[iceland]">
+      <div className="flex flex-col-reverse w-[80%]  text-slate-50 bg-secondary-color mx-2 rounded-md gap-4 md:flex-row items-center justify-center p-4 ">
         <h1 className="text-xl font-bold">
           Search Results for "{query}"
         </h1>
       </div>
 
+         <div className="flex flex-col-reverse w-full gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
+        <CategoriesRibbon
+          active={filCat}
+          categories={categories}
+          onItemClick={(label) => setFilCat(label)}
+        />
+      </div> 
+
+      
       <div className="flex flex-wrap justify-center mb-4 mt-0 md:mt-2 p-4 gap-2">
         <ProductsView
           products={filteredProducts}
@@ -64,6 +60,8 @@ function Search() {
           filter={filMall}
           loading={loading}
           error={error}
+            showItem={0}
+            shopFil={0}
         />
       </div>
     </div>
