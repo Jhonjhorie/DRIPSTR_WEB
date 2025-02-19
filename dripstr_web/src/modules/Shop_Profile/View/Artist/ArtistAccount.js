@@ -221,7 +221,7 @@ function ArtistAccount() {
         <ArtistSideBar></ArtistSideBar>
       </div>
       <div className="text-3xl font-bold w-full text-center text-custom-purple p-3">
-        Manage Account
+        MANAGE ACCOUNT
       </div>
       <div className=" h-auto  w-full  px-10 flex justify-center ">
         <div className="w-1/2 h-auto bg-slate-50 relative justify-items-center p-7 shadow-lg rounded-md">
