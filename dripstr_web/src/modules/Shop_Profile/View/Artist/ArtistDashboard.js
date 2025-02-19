@@ -33,8 +33,9 @@ function MerchantDashboard() {
   const [imageOrientations, setImageOrientations] = useState({});
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
   const [imageLoading, setImageLoading] = useState(true);
-  const [artsCounts, setArtsCounts] = useState([]);
+  const [totLikes, setTotalLikesAll] = useState([]);
   const [totalArtsCount, setTotalArtsCount] = useState(0);
+  const [totalFollowers, setTotalFollowersCount] = useState(0);
   const [selectArt, setSelectArt] = useState(null);
   const [selectMessage, setMessage] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -99,63 +100,70 @@ function MerchantDashboard() {
   });
   const fetchUserProfileAndArt = async () => {
     setLoading(true);
-
+  
     try {
+      // Get the current authenticated user
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-
+  
       if (authError) {
         setError(authError.message);
         setLoading(false);
         return;
       }
-
+  
       if (!user) {
         console.log("No user is signed in.");
         setError("No user is signed in.");
         setLoading(false);
         return;
       }
-
+  
       console.log("Current user:", user);
-
+  
       // Fetch artist profile associated with the logged-in user
-      const { data: artists, error: artistError } = await supabase
+      const { data: artist, error: artistError } = await supabase
         .from("artist")
-        .select("id, artist_Name, artist_Bio, art_Type, artist_Image")
+        .select("id, artist_Name, artist_Bio, art_Type, artist_Image, followers_Detail")
         .eq("owner_Id", user.id)
         .single();
-
-      if (artistError || !artists) {
+  
+      if (artistError || !artist) {
         console.log("No artist account found.");
         setError("No artist account found.");
         setLoading(false);
         return;
       }
-
-      setArtistData(artists);
-      setSelectedArtistId(artists.id);
-      console.log("Artist Name:", artists.artist_Name);
-      console.log("Artist ID:", artists.id);
-
+  
+      setArtistData(artist);
+      setSelectedArtistId(artist.id);
+      console.log("Artist Name:", artist.artist_Name);
+      console.log("Artist ID:", artist.id);
+  
+      const totalFollowers = Array.isArray(artist.followers_Detail)
+        ? artist.followers_Detail.length
+        : 0;
+  
+      setTotalFollowersCount(totalFollowers);
+      console.log("Total followers count:", totalFollowers);
+  
       // Fetch only arts linked to this artist
       const { data: arts, error: artsError } = await supabase
         .from("artist_Arts")
         .select("id, art_Name, art_Description, art_Image, likes, comments")
-        .eq("artist_Id", artists.id);
-
+        .eq("artist_Id", artist.id);
+  
       if (artsError) {
         console.error("Error fetching arts:", artsError.message);
         setError("Error fetching arts.");
         setLoading(false);
         return;
       }
-
+  
       setArtistArts(arts);
       setTotalArtsCount(arts.length);
-
       console.log("Total arts count:", arts.length);
     } catch (error) {
       console.error("Error fetching user/shop data:", error.message);
@@ -164,6 +172,8 @@ function MerchantDashboard() {
       setLoading(false);
     }
   };
+  
+  
 
   useEffect(() => {
     fetchUserProfileAndArt();
@@ -330,28 +340,30 @@ function MerchantDashboard() {
     } catch (error) {
       console.error("Error updating likes:", error.message);
     }
+    fetchTotalLikes();
   };
 
   const handleAddComment = async (artId) => {
     if (!newComment.trim()) return;
-  
+
     try {
       // Get current user data
-      const { data: userData, error: userError } = await supabase.auth.getUser();
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
       if (userError) throw new Error("User fetch failed: " + userError.message);
-  
+
       const userId = userData?.user?.id;
       if (!userId) throw new Error("User not logged in");
-  
+
       // Check if the user is an artist
       const { data: artistData, error: artistError } = await supabase
         .from("artist")
         .select("id, artist_Name, artist_Image")
         .eq("id", selectedArtistId) // Get artist details using artist_Id
         .single();
-  
+
       let commentAuthor = {};
-      
+
       if (artistData) {
         // If user is an artist, store artist details
         commentAuthor = {
@@ -367,9 +379,9 @@ function MerchantDashboard() {
           .select("id, full_name, profile_picture")
           .eq("id", userId)
           .single();
-  
+
         if (profileError) throw new Error("Error fetching user profile");
-  
+
         commentAuthor = {
           isArtist: false,
           userId: userProfile.id,
@@ -377,18 +389,19 @@ function MerchantDashboard() {
           userImage: userProfile.profile_picture,
         };
       }
-  
+
       // Fetch existing comments
       const { data: artData, error: fetchError } = await supabase
         .from("artist_Arts")
         .select("comments")
         .eq("id", artId)
         .single();
-  
-      if (fetchError) throw new Error("Error fetching comments: " + fetchError.message);
-  
+
+      if (fetchError)
+        throw new Error("Error fetching comments: " + fetchError.message);
+
       const existingComments = artData?.comments || [];
-  
+
       // Add new comment with correct author details
       const updatedComments = [
         ...existingComments,
@@ -398,29 +411,29 @@ function MerchantDashboard() {
           timestamp: new Date().toISOString(),
         },
       ];
-  
+
       // Update the database
       const { error: updateError } = await supabase
         .from("artist_Arts")
         .update({ comments: updatedComments })
         .eq("id", artId);
-  
-      if (updateError) throw new Error("Error updating comment: " + updateError.message);
-  
+
+      if (updateError)
+        throw new Error("Error updating comment: " + updateError.message);
+
       // Update UI
       setArtistArts((prevArts) =>
         prevArts.map((art) =>
           art.id === artId ? { ...art, comments: updatedComments } : art
         )
       );
-  
+
       setNewComment("");
       setComments(updatedComments);
     } catch (error) {
       console.error(error.message);
     }
   };
-  
 
   const fetchCommentsWithUsers = async (artId) => {
     if (!artId) return;
@@ -492,7 +505,62 @@ function MerchantDashboard() {
       setLoading(false);
     }
   };
-
+  const fetchTotalLikes = async () => {
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+  
+      if (authError) {
+        console.error("Error fetching user:", authError.message);
+        return;
+      }
+  
+      if (!user) {
+        console.log("No user is signed in.");
+        return;
+      }
+  
+      // Fetch artist ID linked to the user
+      const { data: artist, error: artistError } = await supabase
+        .from("artist")
+        .select("id")
+        .eq("owner_Id", user.id)
+        .single();
+  
+      if (artistError || !artist) {
+        console.log("No artist account found.");
+        return;
+      }
+  
+      // Fetch all artworks of the current artist
+      const { data: artworks, error: artsError } = await supabase
+        .from("artist_Arts")
+        .select("likes")
+        .eq("artist_Id", artist.id);
+  
+      if (artsError) {
+        console.error("Error fetching likes:", artsError.message);
+        return;
+      }
+  
+      // Calculate total likes across all artworks
+      const totalLikes = artworks.reduce(
+        (sum, art) => sum + (Array.isArray(art.likes) ? art.likes.length : 0),
+        0
+      );
+  
+      setTotalLikesAll(totalLikes); // Update the state
+      console.log("Total likes across all arts:", totalLikes);
+    } catch (err) {
+      console.error("Unexpected error:", err.message);
+    }
+  };
+  
+  useEffect(() => {
+    fetchTotalLikes();
+  }, []);
   useEffect(() => {
     if (selectArt?.id) {
       fetchCommentsWithUsers(selectArt.id);
@@ -501,7 +569,7 @@ function MerchantDashboard() {
 
   return (
     <div className="h-full w-full bg-slate-300  overflow-hidden  ">
-     <div className="absolute mx-3 right-0 z-20">
+      <div className="absolute mx-3 right-0 z-20">
         <ArtistSideBar />
       </div>
       <div className="w-full h-20  sticky top-0 z-10 bg-violet-600 shadow-md pr-20 px-16 ">
@@ -547,10 +615,23 @@ function MerchantDashboard() {
             </div>
 
             <div className="flex gap-5">
+            <div className="h-full w-20 ">
+                <div className="h-full w-20 justify-items-center ">
+                  <div className="flex align-middle gap-2  justify-center ">
+                    <div className="text-2xl text-slate-100"> {totLikes}</div>
+                    <div className="pt-1">
+                      {" "}
+                      <box-icon  color="white" size="100%" type='solid' name='like'></box-icon>
+                    </div>
+                  </div>
+
+                  <div className="text-slate-50 text-sm">Arts Likes</div>
+                </div>
+              </div>
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
-                    <div className="text-2xl text-slate-100">10</div>
+                    <div className="text-2xl text-slate-100"> {totalFollowers}</div>
                     <div className="pt-1">
                       {" "}
                       <box-icon
@@ -604,8 +685,7 @@ function MerchantDashboard() {
                   <div className="text-slate-50  text-sm">Post Art</div>
                 </div>
               </div>
-              <div
-                onClick={() => navigate("/shop/Artist/ArtistAccount")}
+              <div 
                 className="h-full w-20 duration-300 hover:scale-95 cursor-pointer"
               >
                 <div className="h-full w-20 justify-items-center bg-slate-900 bg-opacity-30 shadow-md rounded-md ">
@@ -628,89 +708,59 @@ function MerchantDashboard() {
         </div>
       </div>
       <div className=" flex w-full h-full bg-slate-300 overflow-hidden">
-      <div className="bg-violet-900 z-10 overflow-y-scroll sticky top-0 max-h-[550px] my-1 rounded-sm w-[350px]">
-  <MessagesArtist />
-</div>
-
-
         <div className="p-2 w-full">
           <div className="bg-slate-300 h-[545px]  z-0 rounded-md w-full overflow-hidden  overflow-y-scroll p-5">
             {artistArts && artistArts.length > 0 ? (
-              <div className="art-gallery h-auto w-auto gap-9 px-5  place-items-center">
+              <div className="columns-2 sm:columns-3 md:columns-4 gap-2 px-4 space-y-2">
                 {artistArts
                   .slice()
                   .reverse()
                   .map((art) => (
                     <div
                       key={art.id}
-                      className="bg-slate-50 relative group   rounded-md w-[60%] mb-5 m-2 p-4 h-auto"
+                      className="relative hover:scale-105 duration-200 bg-white shadow-lg rounded-md overflow-hidden break-inside-avoid"
                     >
-                      <div className="w-full flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                          <div className="h-14 w-14 rounded-full border bg-gradient-to-br from-violet-500 to-fuchsia-500 p-1">
-                            <img
-                              src={artistData.artist_Image}
-                              alt="Shop Logo"
-                              className="drop-shadow-custom h-full w-full object-cover rounded-full"
-                            />
-                          </div>
-                          <div className="-mt-1">
-                            <h1 className="text-[18px] pt-1 font-semibold text-custom-purple">
-                              {artistData.artist_Name}
-                            </h1>
-
-                            <h2 className="text-[13px]  text-custom-purple ">
-                              {artistData.art_Type}
-                            </h2>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 justify-items-center">
-                          <div className="text-xl font-bold text-slate-800">
-                            {" "}
-                            {art.likes?.length || 0}
-                          </div>
-                          <div className="hover:scale-105 duration-200 mt-1 cursor-pointer">
-                            <box-icon
-                              name="heart"
-                              color={
-                                art.likes?.includes(userId) ? "red" : "gray"
-                              }
-                              onClick={() => handleLike(art.id, art.likes)}
-                              className="cursor-pointer"
-                              type="solid"
-                            ></box-icon>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="text-slate-800 font-semibold text-sm px-5 mt-2">
-                        {art.art_Description}
-                      </div>
-
+                      {/* Art Image */}
                       <div
-                        className={`mt-3 overflow-hidden cursor-pointer rounded-md border shadow-md border-custom-purple ${
-                          imageOrientations[art.id] === "landscape"
-                            ? "w-full h-[300px] flex justify-center"
-                            : "w-[300px] h-[400px] mx-auto"
-                        }`}
                         onClick={() => handleSelectArt(art)}
+                        className="cursor-pointer overflow-hidden rounded-md"
                       >
                         <img
                           src={art.art_Image}
-                          alt="Art"
-                          onLoad={(event) => handleImageLoad(event, art.id)}
-                          className="h-full w-full object-contain"
+                          alt={art.art_Name}
+                          className="w-full h-auto object-cover rounded-md"
                         />
                       </div>
 
-                      <div className="bg-custom-purple glass transition-transform duration-300 group-hover:scale-125 flex place-content-center gap-2 right-5 text-slate-50 font-semibold  rounded-md absolute w-auto bottom-5 h-auto p-3">
-                        {" "}
-                        <img
-                          src={drplogo}
-                          alt="Art"
-                          className="h-6 w-6 object-contain drop-shadow-custom"
-                        />
+                      {/* Art Name Badge */}
+                      <div className="absolute bottom-2 left-2 bg-custom-purple text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2">
+                        <img src={drplogo} alt="Logo" className="h-5 w-5" />
                         {art.art_Name}
+                      </div>
+
+                      {/* Like and Actions */}
+                      <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2 gap-2">
+                        <div
+                          className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold"
+                          onClick={() => handleLike(art.id, art.likes)}
+                        >
+                          {art.likes?.length || 0}
+                          <box-icon
+                            name="heart"
+                            type="solid"
+                            color={art.likes?.includes(userId) ? "red" : "gray"}
+                          ></box-icon>
+                        </div>
+                        <div
+                          className="tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500"
+                          data-tip="See complaints"
+                        >
+                          <box-icon
+                            name="shield-x"
+                            type="solid"
+                            color="gold"
+                          ></box-icon>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -837,14 +887,14 @@ function MerchantDashboard() {
       {/* Image Modal */}
       {selectArt && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
+          className="fixed inset-0 overflow-y-scroll bg-black bg-opacity-70 md:flex justify-center items-center z-50"
           onClick={() => {
             setSelectArt(null);
             setComments([]);
           }}
         >
           <div
-            className="relative min-h-[300px] bg-gradient-to-br from-violet-500 to-fuchsia-500 place-content-center justify-items-center p-4 rounded-lg shadow-lg min-w-[300px] max-w-3xl"
+            className="relative md:min-h-[300px] bg-gradient-to-br from-violet-500 to-fuchsia-500 place-content-center justify-items-center p-4 rounded-lg shadow-lg min-w-[300px] max-w-3xl"
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -893,10 +943,15 @@ function MerchantDashboard() {
             onClick={(e) => {
               e.stopPropagation();
             }}
-            className="w-1/3 h-full relative bg-slate-200 px-5"
+            className="w-full md:w-1/3 h-full relative bg-slate-200 px-5"
           >
-            <div className="text-2xl mt-14 text-fuchsia-800 font-bold text-center p-2">
+            <div className="text-2xl mt-5 md:mt-14 text-fuchsia-800 font-bold text-center p-2">
               Comment on {selectArt?.art_Name || "Untitled"}
+            </div>
+            <div className=" h-auto max-h-20 mb-2 overflow-auto scrollbar-hide  py-2 px-5  w-full">
+              <p className="text-gray-900 text-sm ">
+                {selectArt.art_Description}
+              </p>
             </div>
             <div
               onClick={(e) => {
@@ -917,43 +972,43 @@ function MerchantDashboard() {
               ) : Array.isArray(comments) && comments.length > 0 ? (
                 comments.map((cmt, index) => (
                   <div key={index} className="flex items-center gap-3 p-2 mb-2">
-                  <img
-                    src={
-                      cmt.isArtist
-                        ? cmt.artistImage
-                        : cmt.user?.profile_picture || successEmote
-                    }
-                    alt="User"
-                    className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
+                    <img
+                      src={
+                        cmt.isArtist
+                          ? cmt.artistImage
+                          : cmt.user?.profile_picture || successEmote
+                      }
+                      alt="User"
+                      className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
                     ${
                       cmt.isArtist
                         ? "bg-purple-500 border-purple-900 rounded-md drop-shadow-customViolet"
                         : "bg-white"
                     }`}
-                  />
+                    />
 
-                  <div>
-                    <div className="text-sm font-semibold text-gray-800">
-                      {cmt.isArtist
-                        ? cmt.artistName
-                        : cmt.user?.full_name || "Unknown"}
-                    </div>
-                    <span
-                      className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
+                    <div>
+                      <div className="text-sm font-semibold text-gray-800">
+                        {cmt.isArtist
+                          ? cmt.artistName
+                          : cmt.user?.full_name || "Unknown"}
+                      </div>
+                      <span
+                        className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
                     ${
                       cmt.isArtist
                         ? "bg-purple-500 px-2 text-slate-100  rounded-md "
                         : "bg-white text-slate-900 px-1"
                     }`}
-                    >
-                      {cmt.text}
-                    </span>
+                      >
+                        {cmt.text}
+                      </span>
 
-                    <span className="text-xs text-gray-400 ml-2">
-                      {new Date(cmt.timestamp).toLocaleString()}
-                    </span>
+                      <span className="text-xs text-gray-400 ml-2">
+                        {new Date(cmt.timestamp).toLocaleString()}
+                      </span>
+                    </div>
                   </div>
-                </div>
                 ))
               ) : (
                 <div className="w-full h-full place-content-center align-middle justify-center place-items-center">

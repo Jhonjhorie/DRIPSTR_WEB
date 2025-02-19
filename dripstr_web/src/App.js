@@ -50,7 +50,7 @@ function App() {
           )}
 
           {/* Main Content */}
-          <main className={`flex-1 ${isLoggedIn ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-auto`}>
+          <main className={`flex-1 ${isLoggedIn ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-a  uto`}>
             <Routes>
               <Route path="/" element={<HomeController />} />
               <Route path="/guest" element={<GuestHome />} />

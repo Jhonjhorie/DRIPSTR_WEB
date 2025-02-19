@@ -30,7 +30,8 @@ function AristOrders() {
   const [messageContent, setMessageContent] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [artistId, setArtistId] = useState(null);
-
+  const [selectedImage2, setSelectedImage2] = useState(null);
+  const [imageOrientation, setImageOrientation] = useState("landscape");
   useEffect(() => {
     const fetchUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -104,7 +105,6 @@ function AristOrders() {
     setLoading(false);
   };
 
-  // Fetch artist and messages once currentUser is available
   useEffect(() => {
     if (!currentUser) return; // Wait until currentUser is set
 
@@ -129,10 +129,9 @@ function AristOrders() {
       : [];
 
     try {
-      // Make an API call to update the message's status in Supabase
       const { data, error } = await supabase
         .from("artist_Messages")
-        .update({ status: true })
+        .update({ status: true, message_dot: true })
         .eq("id", message.id);
 
       if (error) {
@@ -142,7 +141,9 @@ function AristOrders() {
 
         setMessages((prevMessages) =>
           prevMessages.map((msg) =>
-            msg.id === message.id ? { ...msg, status: true } : msg
+            msg.id === message.id
+              ? { ...msg, status: true, message_dot: true }
+              : msg
           )
         );
 
@@ -249,7 +250,7 @@ function AristOrders() {
       artist_Id: selectedUser.artist_Id,
       text: messageContent,
       send_file: imageUrl,
-      created_at: new Date().toISOString(),
+      timestamp: new Date().toISOString(),
     };
 
     const updatedContent = Array.isArray(selectedUser.messages)
@@ -259,7 +260,7 @@ function AristOrders() {
     try {
       const { data, error } = await supabase
         .from("artist_Messages")
-        .update({ content: updatedContent })
+        .update({ content: updatedContent, message_dot: true })
         .match({ id: selectedUser.id });
 
       if (error) {
@@ -445,40 +446,52 @@ function AristOrders() {
 
                                 {/* Chat Body */}
                                 <div
-                                  className={`chat-body flex flex-col space-y-2 ${
+                                  className={`chat-body flex  flex-col space-y-2 ${
                                     isSenderMessage
-                                      ? "items-end"
-                                      : "items-start"
+                                      ? "items-start"
+                                      : "items-end"
                                   }`}
                                 >
                                   {/* Chat Header */}
                                   <div
-                                    className={`chat-header font-semibold w-full  text-slate-800 flex items-center ${
+                                    className={`chat-header font-semibold w-full justify-between  text-slate-800 flex items-center ${
                                       isSenderMessage
                                         ? "justify-start"
                                         : "justify-end"
                                     }`}
                                   >
-                                    <span className={`text-sm ${isSenderMessage ? "text-start" : "text-left"}`}>
+                                    <span
+                                      className={`text-sm ${
+                                        isSenderMessage
+                                          ? "text-start"
+                                          : "text-left"
+                                      }`}
+                                    >
                                       {isSenderMessage && selectedUser
                                         ? selectedUser.name || "Sender"
                                         : "You"}
+                                    </span>
+                                    <span className="text-xs text-gray-400 ml-2">
+                                      {new Date(
+                                        message.timestamp
+                                      ).toLocaleString()}
                                     </span>
                                   </div>
 
                                   {/* Chat Bubble */}
                                   <div
-                                    className={`chat-bubble shadow-lg px-4 py-2 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg rounded-lg text-sm relative ${
-                                      isSenderMessage
-                                        ? "bg-violet-500 text-white "
-                                        : "bg-gray-300 text-gray-800 "
-                                    }`}
+                                    className={`chat-bubble shadow-lg px-4 py-2 max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg rounded-lg text-sm relative 
+    ${
+      isSenderMessage
+        ? "bg-violet-500 text-white  "
+        : "bg-gray-300 text-gray-800"
+    } 
+    flex flex-col`}
                                   >
                                     <p>
                                       {message.text || "No message content"}
                                     </p>
 
-                                    {/* Attachments */}
                                     {message.send_file && (
                                       <div className="mt-2 w-full max-w-[18rem] sm:max-w-[20rem] lg:max-w-[25rem]">
                                         <img
@@ -591,6 +604,39 @@ function AristOrders() {
               </div>
             )}
           </div>
+          {selectedImage && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+              onClick={() => setSelectedImage(null)}
+            >
+              <div className="relative bg-custom-purple p-2 rounded-md ">
+                <img
+                  src={selectedImage}
+                  alt="Full-size preview"
+                  onLoad={(e) => {
+                    const img = e.target;
+                    // Check natural dimensions to determine orientation
+                    const orientation =
+                      img.naturalWidth > img.naturalHeight
+                        ? "landscape"
+                        : "portrait";
+                    setImageOrientation(orientation);
+                  }}
+                  className={`rounded ${
+                    imageOrientation === "landscape"
+                      ? "max-w-full max-h-[80vh]"
+                      : "max-w-[80vw] max-h-[80vh]"
+                  }`}
+                />
+                <button
+                  onClick={() => setSelectedImage(null)}
+                  className="absolute -top-2 right-0 text-white text-3xl p-2 drop-shadow-lg "
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
