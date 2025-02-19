@@ -46,7 +46,7 @@ useEffect(() => {
       )}
       {/* Hero Section */}
       <div className="flex group flex-col-reverse w-full gap-8 md:gap-0 md:flex-row overflow-hidden items-start justify-center px-1 lg:p-4 bg-slate-300 min-h-[87vh]">
-        <div className="pt-4  w-full">
+        <div className=" w-[80%]">
           <div className="w-full px-2 rounded-md bg-secondary-color  mr-16 my-4 flex flex-col text-white overflow-hidden relative">
             <div className="absolute right-4 overflow-hidden h-32 w-40">
               <img
@@ -68,18 +68,12 @@ useEffect(() => {
                 onClick={handleAuth}
                 className="btn bg-primary-color btn-outline  p-1 h-8 min-h-8 text-white hover:bg-white hover:text-black w-40 drop-shadow-lg font-[iceland] my-2"
               >
-                Login
+                Login/Register
               </button>
             </div>
           </div>
-          <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1">
-            <CategoriesRibbon
-              active={filCat}
-              categories={categories}
-              onItemClick={(label) => setFilCat(label)}
-            />
-          </div>
-          <div className="flex flex-wrap  w-full justify-center mb-4  p-4 gap-2 ">
+         
+          <div className="flex flex-wrap  w-full justify-center mb-4   gap-2 ">
             <div className="relative flex flex-row w-full items-center justify-center">
               <div className="breadcrumbs text-2xl text-slate-500  font-[iceland]">
                 <ul>
@@ -96,11 +90,14 @@ useEffect(() => {
               </div>
             </div>
             <ProductsView
-              products={products}
-              categories={filCat}
-              filter={filMall}
-              loading={loading}
-              error={error}
+                 products={products}
+                        shopFil={0}
+                        categories={filCat}
+                        filter={filMall}
+                        loading={loading}
+                        error={error}
+                        showItem={0}
+                        sort={"top"}
             />
           </div>
         </div>
