@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnglesDown, faAngleDown } from "@fortawesome/free-solid-svg-icons";
-
+import AuthModal from "../../shared/login/Auth";
 // Data
 
 import useProducts from "../Products/hooks/useProducts";
@@ -12,11 +12,12 @@ function LandingPage() {
   const [showAbout, setShowAbout] = useState(true);
   const [showArt, setShowArt] = useState(false);
   const [showMer, setShowMer] = useState(false);
+   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleShow = (action) => {
     if (action === "login") {
-      navigate(`/login`);
+      setIsAuthModalOpen(true)
     } else if (action === "shop") {
       navigate(`/guest`);
     } else if (action === "customer") {
@@ -40,6 +41,12 @@ function LandingPage() {
 
   return (
     <div className="w-full relative inset-0 bg-slate-300 flex flex-col">
+         {isAuthModalOpen && (
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+        />
+      )}
       {/* Hero Section */}
       <div className="flex group flex-col-reverse gap-8 md:gap-0 md:flex-row overflow-hidden items-center justify-center px-1 lg:p-4 bg-slate-50 ">
         <img
@@ -107,7 +114,7 @@ function LandingPage() {
           </button>
         </div>
       </div>
-      <div className="w-full pt-20 bg-slate-50 flex flex-col gap-4 pb-12">
+      <div className="w-full pt-20 px-8 bg-slate-50 flex flex-col gap-4 pb-12">
         {/* Title Section */}
         <div className="text-center ">
           <h2 className="text-4xl font-bold font-[iceland] text-primary-color">
@@ -161,125 +168,230 @@ function LandingPage() {
             />
           </div>
         </div>
-
         {/* About Section */}
         {showAbout && (
-          <div className="z-10">
-            {/* Details Section with Parallax Effect */}
-            <div className="space-y-8 ">
-              <div className="text-center mb-12">
-                <h2 className="text-4xl font-bold font-[iceland] text-primary-color">
-                  Become Customer
-                </h2>
-                <p className="mt-4 text-lg text-slate-600">
-                  Join DRIPSTR and Experience the Future of Shopping:
-                  Personalized Avatars and 3D Fitting for the Perfect Style!
-                </p>
-              </div>
-              {/* Section 1: Browse & Discover Products */}
-              <div className="flex flex-col items-start ">
-                <div className="p-6 glass w-[60%]  text-secondary-color drop-shadow-customViolet  rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Browse & Discover Products
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Explore a wide collection of custom apparel designed by
-                      merchants.
-                    </li>
-                    <li>
-                      Shop for exclusive digital assets created by artists.
-                    </li>
-                    <li>
-                      Use filters and categories to find the perfect design.
-                    </li>
-                  </ul>
-                </div>
-              </div>
+          <div className="z-10 flex flex-col gap-8">
+            <div className="text-center ">
+              <h2 className="text-4xl font-bold font-[iceland] text-primary-color">
+                Become Customer
+              </h2>
+              <p className="mt-2 text-lg text-slate-600">
+                Join DRIPSTR and Experience the Future of Shopping: Personalized
+                Avatars and 3D Fitting for the Perfect Style!
+              </p>
+            </div>
 
-              {/* Section 2: Try Before You Buy */}
-              <div className="flex flex-col items-end ">
-                <div className="p-6 glass w-[60%] text-secondary-color drop-shadow-custom rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Try Before You Buy (Virtual Fitting)
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Create a personalized avatar based on your measurements.
-                    </li>
-                    <li>
-                      Use 3D previews to see how clothes fit and look before
-                      purchasing.
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              {/* Section 3: Customize Your Order */}
-              <div className="flex flex-col items-start ">
-                <div className="p-6 glass w-[80%] text-secondary-color drop-shadow-customViolet rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Customize Your Order (If Available)
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Select sizes, colors, and styles from merchant-offered
-                      options.
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              {/* Section 4: Secure Checkout & Payment */}
-              <div className="flex flex-col items-end ">
-                <div className="p-6 glass w-[40%]  text-secondary-color drop-shadow-custom rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Secure Checkout & Payment
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Add items to your cart and proceed to secure checkout.
-                    </li>
-                    <li>Multiple payment options available for convenience.</li>
-                    <li>Receive order confirmation and tracking details.</li>
-                  </ul>
-                </div>
-              </div>
-              {/* Section 5: Track & Receive Your Order */}
-              <div className="flex flex-col items-start ">
-                <div className="p-6 glass w-[90%] text-secondary-color drop-shadow-customViolet rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Track & Receive Your Order
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>Monitor your order status through your account.</li>
-                    <li>
-                      Get updates on shipping and estimated delivery times.
-                    </li>
-                    <li>Enjoy your customized, perfectly fitted apparel! 🎉</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="flex flex-col items-center ">
-                <div className="flex flex-col gap-2 items-center w-fit ">
-                  <h1 className="text-sm">
-                    Login to start Shopping and Ordering or Enter as a guest
-                  </h1>
-                  <div className="divider my-0">
-                    <FontAwesomeIcon icon={faAngleDown} />
+            {/* Details Section with Parallax Effect */}
+            <div className="flex flex-row-reverse items-end gap-8">
+              <img
+                src={require("@/assets/emote/mascot.png")}
+                alt="No Images Available"
+                className=" drop-shadow-customViolet  z-0 flex h-96 "
+              />
+              <div className="join join-vertical w-full">
+                {/* Accordion Item 1: Browse & Discover Unique Products */}
+                <div className="collapse collapse-arrow join-item border border-base-300">
+                  <input type="radio" name="dripstr-accordion" defaultChecked />
+                  <div className="collapse-title text-xl font-medium">
+                    Browse & Discover Unique Products
                   </div>
-                  <div className="flex flex-row gap-2 items-center justify-center">
+                  <div className="collapse-content">
+                    <p>
+                      Shopping on DRIPSTR begins with exploring a wide
+                      collection of apparel crafted by skilled designers. The
+                      platform features a diverse range of clothing, from trendy
+                      streetwear to high-performance activewear and luxury
+                      fashion pieces.
+                    </p>
+                    <p>
+                      DRIPSTR also fosters a community of artists, allowing them
+                      to showcase their designs, which merchants can bring to
+                      life as custom apparel. Whether you're seeking a bold
+                      statement piece or a timeless classic, DRIPSTR makes
+                      discovering new fashion easy and exciting.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Accordion Item 2: Try Before You Buy with Virtual Fitting */}
+                <div className="collapse collapse-arrow join-item border border-base-300">
+                  <input type="radio" name="dripstr-accordion" />
+                  <div className="collapse-title text-xl font-medium">
+                    Try Before You Buy with Virtual Fitting
+                  </div>
+                  <div className="collapse-content">
+                    <p>
+                      One of DRIPSTR’s standout features is its avatar-based
+                      virtual fitting technology, which allows you to try on
+                      clothes digitally before making a purchase. By entering
+                      your body measurements, the system creates a personalized
+                      3D avatar that closely matches your physique.
+                    </p>
+                    <p>
+                      With real-time 3D visualization, you can rotate, zoom in,
+                      and examine how a garment fits from every angle. This
+                      feature eliminates the uncertainty of online shopping,
+                      helping you make confident purchases while reducing the
+                      need for returns and exchanges.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Accordion Item 3: Customize Your Order to Match Your Style */}
+                <div className="collapse collapse-arrow join-item border border-base-300">
+                  <input type="radio" name="dripstr-accordion" />
+                  <div className="collapse-title text-xl font-medium">
+                    Customize Your Order to Match Your Style
+                  </div>
+                  <div className="collapse-content">
+                    <p>
+                      DRIPSTR gives you the freedom to personalize your orders
+                      based on the options provided by each merchant. You can
+                      choose from different sizes, colors, and styles, ensuring
+                      that your purchase aligns perfectly with your preferences.
+                    </p>
+                    <p>
+                      Some sellers even offer customization services, allowing
+                      you to add unique touches such as personalized prints,
+                      embroidery, or monograms. With these flexible options,
+                      DRIPSTR enables you to express your individuality and
+                      stand out with one-of-a-kind fashion pieces.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Accordion Item 4: Secure Checkout & Multiple Payment Options */}
+                <div className="collapse collapse-arrow join-item border border-base-300">
+                  <input type="radio" name="dripstr-accordion" />
+                  <div className="collapse-title text-xl font-medium">
+                    Secure Checkout & Multiple Payment Options
+                  </div>
+                  <div className="collapse-content">
+                    <p>
+                      Once you’ve found the perfect items, checking out is a
+                      smooth and secure process. Add your selections to the
+                      shopping cart, review your order, and proceed to checkout
+                      with confidence.
+                    </p>
+                    <p>
+                      DRIPSTR supports a variety of secure payment methods,
+                      including digital wallets. After placing your order,
+                      you’ll receive an instant confirmation email containing
+                      your purchase details, expected delivery date, and
+                      tracking information, so you’re always updated on your
+                      order status.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Accordion Item 5: Track & Receive Your Order with Ease */}
+                <div className="collapse collapse-arrow join-item border border-base-300">
+                  <input type="radio" name="dripstr-accordion" />
+                  <div className="collapse-title text-xl font-medium">
+                    Track & Receive Your Order with Ease
+                  </div>
+                  <div className="collapse-content">
+                    <p>
+                      Once your order is placed, you can track its progress in
+                      real time through your account. Stay informed with regular
+                      shipping updates and estimated delivery times, so you know
+                      exactly when to expect your package.
+                    </p>
+                    <p>
+                      DRIPSTR partners with reliable shipping services to ensure
+                      fast and secure delivery. When your order arrives, you can
+                      enjoy a perfectly fitted, high-quality fashion piece that
+                      matches your expectations, thanks to the advanced virtual
+                      fitting and customization options.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Accordion Item 6: Hassle-Free Returns & Exchanges */}
+                <div className="collapse collapse-arrow join-item border border-base-300">
+                  <input type="radio" name="dripstr-accordion" />
+                  <div className="collapse-title text-xl font-medium">
+                    Hassle-Free Returns & Exchanges
+                  </div>
+                  <div className="collapse-content">
+                    <p>
+                      In case you need to make a return or exchange, DRIPSTR
+                      provides a straightforward and transparent process to
+                      ensure customer satisfaction. If an item doesn’t meet your
+                      expectations, you can initiate a return request within the
+                      allowed timeframe.
+                    </p>
+                    <p>
+                      The platform offers guidance on return eligibility,
+                      including conditions such as unworn items and original
+                      packaging requirements. Exchanges are also available for
+                      select products, allowing you to swap sizes or styles
+                      effortlessly.
+                    </p>
+                    <p>
+                      DRIPSTR prioritizes customer experience, ensuring that
+                      returns and exchanges are handled efficiently and fairly.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Accordion Item 7: Stay Connected & Explore the DRIPSTR Community */}
+                <div className="collapse collapse-arrow join-item border border-base-300">
+                  <input type="radio" name="dripstr-accordion" />
+                  <div className="collapse-title text-xl font-medium">
+                    Stay Connected & Explore the DRIPSTR Community
+                  </div>
+                  <div className="collapse-content">
+                    <p>
+                      DRIPSTR isn’t just a shopping platform—it’s a
+                      fashion-forward community where designers, artists, and
+                      customers come together to celebrate creativity and style.
+                      Artists can showcase their unique fashion designs, which
+                      may be produced as real apparel by merchants, giving them
+                      a platform to reach a wider audience.
+                    </p>
+                    <p>
+                      Stay updated with the latest fashion trends, upcoming
+                      collections, and special promotions by following DRIPSTR’s
+                      social media pages and newsletters. Engage with fellow
+                      fashion enthusiasts, participate in exclusive style
+                      challenges, and showcase your customized outfits for a
+                      chance to be featured.
+                    </p>
+                    <p>
+                      With DRIPSTR, shopping becomes more than just a
+                      transaction—it’s an experience that connects you to the
+                      future of digital fashion.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col items-center ">
+              <div className="flex flex-col gap-2 items-center w-fit ">
+                <h1 className="text-sm">
+                  Login to start Shopping and Ordering or Enter as a guest
+                </h1>
+                <div className="divider my-0">
+                  <FontAwesomeIcon icon={faAngleDown} />
+                </div>
+                <div className="flex flex-row gap-2 items-center justify-center">
                   <button
-                    onClick={() => {handleShow('login')}}
+                    onClick={() => {
+                      handleShow("login");
+                    }}
                     className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
                   >
                     Login
                   </button>
                   <button
-                    onClick={() => {handleShow('shop')}}
+                    onClick={() => {
+                      handleShow("shop");
+                    }}
                     className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
                   >
                     Browse as Guest
                   </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -287,96 +399,76 @@ function LandingPage() {
         )}
 
         {showArt && (
-          <div className="z-10">
-            {/* Title Section */}
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold font-[iceland] text-primary-color">
-                Become an Artist
-              </h2>
-              <p className="mt-4 text-lg text-slate-600">
-                Join DRIPSTR and showcase your creativity to the world.
-              </p>
-            </div>
+          <div className="z-10 flex flex-col gap-8">
+  <div className="text-center ">
+    <h2 className="text-4xl font-bold font-[iceland] text-primary-color">
+      Become an Artist
+    </h2>
+    <p className="mt-2 text-lg text-slate-600">
+      Join DRIPSTR and showcase your creativity to the world. Turn your designs into income and collaborate with merchants to bring your art to life!
+    </p>
+  </div>
 
-            {/* Details Section with Randomized Layout */}
-            <div className="space-y-8">
-              {/* Section 1: Sign Up & Set Up Your Portfolio */}
-              <div className="flex flex-col items-start">
-                <div className="p-6 glass w-[70%] text-secondary-color drop-shadow-custom rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Sign Up & Set Up Your Portfolio
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>Register as an artist on DRIPSTR.</li>
-                    <li>
-                      Customize your artist profile with a portfolio showcasing
-                      your work.
-                    </li>
-                  </ul>
-                </div>
-              </div>
+  {/* Details Section with Parallax Effect */}
+  <div className="flex flex-row-reverse items-end gap-8">
+    <img
+      src={require("@/assets/emote/mascot.png")}
+      alt="No Images Available"
+      className="drop-shadow-customViolet z-0 flex h-96"
+    />
+    <div className="join join-vertical w-full">
+      {/* Accordion Item 1: Sign Up & Set Up Your Artist Portfolio */}
+      <div className="collapse collapse-arrow join-item border border-base-300">
+        <input type="radio" name="dripstr-accordion" defaultChecked />
+        <div className="collapse-title text-xl font-medium">
+          Sign Up & Set Up Your Artist Portfolio
+        </div>
+        <div className="collapse-content">
+          <p>
+            Getting started on DRIPSTR is simple. First, register as an artist and create your profile. Your artist portfolio serves as your digital gallery, allowing you to showcase your best work, style, and design expertise.
+          </p>
+          <p>
+            A well-curated portfolio increases your visibility and helps potential clients—whether they are apparel merchants or fellow artists—discover your creative talents. You can customize your profile with a bio, social media links, and a description of your artistic style. This is your space to express your creative identity and make a lasting impression on potential collaborators.
+          </p>
+        </div>
+      </div>
 
-              {/* Section 2: Upload & Monetize Your Designs */}
-              <div className="flex flex-col items-end">
-                <div className="p-6 glass w-[50%] text-secondary-color drop-shadow-customViolet rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Upload & Monetize Your Designs
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>Upload your digital artwork in compatible formats.</li>
-                    <li>Accept commissions via messages.</li>
-                  </ul>
-                </div>
-              </div>
+      {/* Accordion Item 2: Upload & Monetize Your Designs */}
+      <div className="collapse collapse-arrow join-item border border-base-300">
+        <input type="radio" name="dripstr-accordion" />
+        <div className="collapse-title text-xl font-medium">
+          Upload & Monetize Your Designs
+        </div>
+        <div className="collapse-content">
+          <p>
+            Once your profile is set up, you can start uploading your digital artwork in compatible file formats. DRIPSTR provides an easy-to-use interface where you can organize your designs, categorize them, and make them available for merchants and customers to explore.
+          </p>
+          <p>
+            Additionally, DRIPSTR allows artists to accept commissions directly through messages, giving you the flexibility to work on custom projects tailored to a merchant’s specific vision. Whether it’s designing a logo, creating limited-edition prints, or crafting exclusive apparel graphics, commissions offer a great way to expand your creative reach and earnings.
+          </p>
+        </div>
+      </div>
 
-              {/* Section 3: Earn & Build Your Brand */}
-              <div className="flex flex-col items-start">
-                <div className="p-6 glass w-[80%] text-secondary-color drop-shadow-custom rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Earn & Build Your Brand
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>Gain exposure through DRIPSTR’s artist marketplace.</li>
-                    <li>Earn royalties from every commission.</li>
-                    <li>
-                      Connect with merchants looking for unique designs for
-                      their apparel.
-                    </li>
-                  </ul>
-                </div>
-              </div>
+      {/* Accordion Item 3: Earn, Build Your Brand & Grow Your Audience */}
+      <div className="collapse collapse-arrow join-item border border-base-300">
+        <input type="radio" name="dripstr-accordion" />
+        <div className="collapse-title text-xl font-medium">
+          Earn, Build Your Brand & Grow Your Audience
+        </div>
+        <div className="collapse-content">
+          <p>
+            Being an artist on DRIPSTR is more than just selling designs—it’s about building a personal brand and growing a loyal audience. Through the artist marketplace, your work gets exposure to a wide range of buyers, including merchants seeking fresh designs for their clothing lines.
+          </p>
+          <p>
+            You’ll earn from every commission and have the opportunity to establish long-term partnerships with apparel brands. By consistently uploading high-quality artwork and engaging with the community, you can increase your visibility, attract more clients, and elevate your reputation as a top-tier designer on the platform.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-              {/* Section 4: Collaborate with Merchants */}
-              <div className="flex flex-col items-end">
-                <div className="p-6 glass w-[60%] text-secondary-color drop-shadow-customViolet rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Collaborate with Merchants
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Work directly with merchants to create custom designs.
-                    </li>
-                    <li>Expand your network and grow your brand.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Section 5: Showcase Your Creativity */}
-              <div className="flex flex-col items-start">
-                <div className="p-6 glass w-[90%] text-secondary-color drop-shadow-custom rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Showcase Your Creativity
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Display your unique style and creativity to a global
-                      audience.
-                    </li>
-                    <li>Get recognized for your talent and hard work.</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="flex flex-col items-center ">
+  {/* Call-to-Action Section */}
+ <div className="flex flex-col items-center ">
                 <div className="flex flex-col gap-2 items-center w-fit ">
                   <h1 className="text-sm">
                     You must Login/Register First to Become an Artist
@@ -385,147 +477,117 @@ function LandingPage() {
                     <FontAwesomeIcon icon={faAngleDown} />
                   </div>
                   <button
-                    onClick={() => {handleLogin("toArtist")}}
+                    onClick={() => {
+                      handleLogin("toArtist");
+                    }}
                     className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
                   >
                     Login
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
+ 
+</div>
         )}
         {showMer && (
-          <div className="z-10">
-            {/* Title Section */}
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold font-[iceland] text-primary-color">
-                Become a Merchant
-              </h2>
-              <p className="mt-4 text-lg text-slate-600">
-                Join DRIPSTR and grow your business with our integrated
-                e-commerce and 3D design platform.
-              </p>
-            </div>
-
-            {/* Details Section with Randomized Layout */}
-            <div className="space-y-8">
-              {/* Section 1: Sign Up & Set Up Your Store */}
-              <div className="flex flex-col items-end">
-                <div className="p-6 glass w-[60%] text-secondary-color drop-shadow-customViolet rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Sign Up & Set Up Your Store
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>Create a merchant account on DRIPSTR.</li>
-                    <li>
-                      Set up your store profile, including branding,
-                      descriptions, and policies.
-                    </li>
-                    <li>Connect a payment method for seamless transactions.</li>
-                  </ul>
+          <div className="z-10  flex flex-col gap-8">
+          <div className="text-center ">
+            <h2 className="text-4xl font-bold font-[iceland] text-primary-color">
+              Become a Merchant
+            </h2>
+            <p className="mt-2 text-lg text-slate-600">
+              Join DRIPSTR and showcase your unique designs to a global audience. Leverage our integrated e-commerce platform and 3D design tools to grow your fashion business.
+            </p>
+          </div>
+        
+          {/* Details Section with Parallax Effect */}
+          <div className="flex flex-row-reverse items-end gap-8">
+            <img
+              src={require("@/assets/emote/mascot.png")}
+              alt="No Images Available"
+              className="drop-shadow-customViolet z-0 flex h-96"
+            />
+            <div className="join join-vertical w-full">
+              {/* Accordion Item 1: Sign Up & Set Up Your Store */}
+              <div className="collapse collapse-arrow join-item border border-base-300">
+                <input type="radio" name="dripstr-accordion" defaultChecked />
+                <div className="collapse-title text-xl font-medium">
+                  Sign Up & Set Up Your Store
+                </div>
+                <div className="collapse-content">
+                  <p>
+                    Getting started as a merchant on DRIPSTR is quick and straightforward. Simply create a merchant account, set up your store profile, and customize it to match your brand identity.
+                  </p>
+                  <p>
+                    Your store profile allows you to introduce your brand, showcase your design style, and communicate your policies to potential customers. Merchants can also connect a preferred payment method to enable seamless transactions, ensuring a smooth buying experience for shoppers while making it easy to receive payouts.
+                  </p>
                 </div>
               </div>
-
-              {/* Section 2: Upload & Manage Products */}
-              <div className="flex flex-col items-start">
-                <div className="p-6 glass w-[80%] text-secondary-color drop-shadow-custom rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Upload & Manage Products
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Use our 3D design software to create and upload your
-                      apparel designs.
-                    </li>
-                    <li>
-                      Add product details such as pricing, sizes, and
-                      descriptions.
-                    </li>
-                    <li>
-                      Manage inventory, orders, and customer interactions
-                      through the merchant dashboard.
-                    </li>
-                  </ul>
+        
+              {/* Accordion Item 2: Upload & Manage Your Products with Ease */}
+              <div className="collapse collapse-arrow join-item border border-base-300">
+                <input type="radio" name="dripstr-accordion" />
+                <div className="collapse-title text-xl font-medium">
+                  Upload & Manage Your Products with Ease
+                </div>
+                <div className="collapse-content">
+                  <p>
+                    Once your store is set up, you can begin uploading and managing your apparel products using DRIPSTR’s powerful merchant dashboard. Our 3D design software allows you to create realistic apparel mockups, helping customers visualize how your designs will look on different clothing styles.
+                  </p>
+                  <p>
+                    Each product listing includes essential details such as pricing, available sizes, materials, colors, and descriptions, ensuring that buyers have all the information they need to make informed purchases.
+                  </p>
+                  <p>
+                    Through the merchant dashboard, you can easily track inventory, manage orders, and communicate with customers. This centralized system ensures that you have full control over your store operations while providing buyers with a seamless shopping experience.
+                  </p>
                 </div>
               </div>
-
-              {/* Section 3: Sell & Grow Your Business */}
-              <div className="flex flex-col items-end">
-                <div className="p-6 glass w-[70%] text-secondary-color drop-shadow-customViolet rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Sell & Grow Your Business
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Offer exclusive subscriptions to attract more buyers.
-                    </li>
-                    <li>
-                      Track sales performance and customer insights through
-                      analytics.
-                    </li>
-                  </ul>
+        
+              {/* Accordion Item 3: Sell, Promote & Grow Your Business */}
+              <div className="collapse collapse-arrow join-item border border-base-300">
+                <input type="radio" name="dripstr-accordion" />
+                <div className="collapse-title text-xl font-medium">
+                  Sell, Promote & Grow Your Business
                 </div>
-              </div>
-
-              {/* Section 4: Leverage 3D Design Tools */}
-              <div className="flex flex-col items-start">
-                <div className="p-6 glass w-[50%]  text-secondary-color drop-shadow-custom rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Leverage 3D Design Tools
-                  </h3>
+                <div className="collapse-content">
+                  <p>
+                    Once your products are live, you can start selling and expanding your brand presence on DRIPSTR. Our platform provides various tools to help you attract and retain customers, including:
+                  </p>
                   <ul className="list-disc list-inside space-y-2">
-                    <li>
-                      Create realistic 3D previews of your apparel designs.
-                    </li>
-                    <li>
-                      Enhance customer experience with virtual fitting options.
-                    </li>
+                    <li>Exclusive subscriptions that allow buyers to follow and access special offers from your store.</li>
+                    <li>Built-in analytics to track sales performance, customer preferences, and product demand.</li>
+                    <li>Marketing support and promotional opportunities to boost visibility and increase conversions.</li>
                   </ul>
-                </div>
-              </div>
-
-              {/* Section 5: Expand Your Reach */}
-              <div className="flex flex-col items-end">
-                <div className="p-6 glass w-[90%]  text-secondary-color drop-shadow-customViolet rounded-lg shadow-lg">
-                  <h3 className="text-2xl font-bold font-[iceland] mb-4">
-                    Expand Your Reach
-                  </h3>
-                  <ul className="list-disc list-inside space-y-2">
-                    <li>Reach a global audience of fashion enthusiasts.</li>
-                    <li>Collaborate with artists to create unique designs.</li>
-                  </ul>
-                </div>
-              </div>
-              <div className="flex flex-col items-center ">
-                <div className="flex flex-col gap-2 items-center w-fit ">
-                  <h1 className="text-sm">
-                    You must Login/Register First to Become a Merchant
-                  </h1>
-                  <div className="divider my-0">
-                    <FontAwesomeIcon icon={faAngleDown} />
-                  </div>
-                  <button
-                    onClick={() => {handleLogin("toMerchant")}}
-                    className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
-                  >
-                    Login
-                  </button>
+                  <p>
+                    By leveraging these features, you can optimize your sales strategy, engage with your audience, and continuously improve your product offerings. DRIPSTR is designed to empower merchants with the resources they need to build a successful and sustainable online fashion business.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
+        
+          {/* Call-to-Action Section */}
+        <div className="flex flex-col items-center ">
+                        <div className="flex flex-col gap-2 items-center w-fit ">
+                          <h1 className="text-sm">
+                            You must Login/Register First to Become a Merchant
+                          </h1>
+                          <div className="divider my-0">
+                            <FontAwesomeIcon icon={faAngleDown} />
+                          </div>
+                          <button
+                            onClick={() => {
+                              handleLogin("toMerchant");
+                            }}
+                            className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
+                          >
+                            Login
+                          </button>
+                        </div>
+                    
+          </div>
+        </div>
         )}
-        <img
-          src={require("@/assets/emote/success.png")}
-          alt="No Images Available"
-          className=" drop-shadow-customViolet absolute bottom-[35rem] w-80 left-10 z-0  "
-        />
-        <img
-          src={require("@/assets/emote/mascot.png")}
-          alt="No Images Available"
-          className=" drop-shadow-customViolet absolute bottom-8 w-80 right-10 z-0  "
-        />
       </div>
     </div>
   );
