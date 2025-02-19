@@ -41,7 +41,7 @@ const ProductsView = ({
       case 2:
         return;
       case 3:
-        return item.discount != 0 || item.vouchers != null;
+        return item.discount > 0 || null || item.vouchers != null;
       case 4:
         return;
       case 5:
@@ -85,7 +85,7 @@ const ProductsView = ({
 
   if (loading)
     return (
-      <div className="min-h-24 flex-col items-center flex">
+      <div className="min-h-24 flex-col min-w-full items-center flex">
         <img
           src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
@@ -119,7 +119,7 @@ const ProductsView = ({
     );
 
   return (
-    <div className="w-full flex flex-col items-center  min-h-[15rem]">
+    <div className="w-full flex flex-col items-center justify-center  min-h-[15rem]">
       {selectedItem && (
         <dialog
           id="my_modal_4"

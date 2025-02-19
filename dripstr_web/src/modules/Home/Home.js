@@ -8,7 +8,8 @@ import MallRibbon from "../Products/components/MallRibbon";
 import FilterProducts from "../Products/components/FilterProducts";
 import LandingPage from "./Landing";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar, faShoppingCart, faStore } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faShoppingCart, faStore, faTags } from "@fortawesome/free-solid-svg-icons";
+import SectionWrapper from "./components/SectionWrapper";
 
 //Data
 import { MallItems } from "@/constants/mallItems.ts";
@@ -41,70 +42,67 @@ function Home() {
           onItemClick={(label) => setFilCat(label)}
         />
       </div> */}
-      <div className="flex flex-wrap w-full px-10  justify-center mb-4 gap-4  font-[iceland]">
-        <div className="min-w-[100%] bg-secondary-color drop-shadow-lg rounded-md p-2">
-          <div
-            className="flex justify-between text-2xl text-slate-500 
-           items-start mb-1   font-[iceland]"
-          >
-            <p className="text-bold text-slate-50">
-              TOP PRODUCTS <FontAwesomeIcon fontSize={16} icon={faStar} />
-            </p>
-            <button className="btn btn-outline bg-primary-color text-white min-h-7 h-7 px-4">See More</button>
-          </div>
-          <ProductsView
-            products={products}
-            shopFil={0}
-            categories={filCat}
-            filter={filMall}
-            loading={loading}
-            error={error}
-            showItem={6}
-            sort="top"
-          />
-        </div>
-        <div className="min-w-[100%] bg-stone-700 drop-shadow-lg rounded-md p-2">
-          <div
-            className="flex justify-between text-2xl text-slate-500 
-           items-start  mb-1 font-[iceland]"
-          >
-            <p className="text-bold text-slate-50">
-              Followed Store <FontAwesomeIcon fontSize={16} icon={faStore} />
-            </p>
-            <button className="btn btn-outline bg-primary-color text-white min-h-7 h-7 px-4">See More</button>
-          </div>
-          <ProductsView
-            products={products}
-            shopFil={0}
-            categories={filCat}
-            filter={filMall}
-            loading={loading}
-            error={error}
-            showItem={6}
-          />
-        </div>
-        <div className="min-w-[100%] p-2">
-          <div
-            className="flex justify-between text-2xl text-slate-500 
-           items-start  mb-2 font-[iceland]"
-          >
-            <p className="text-bold text-secondary-color">
-              For You <FontAwesomeIcon fontSize={16} icon={faShoppingCart} />
-            </p>
-            <button className="btn btn-outline bg-primary-color text-white min-h-7 h-7 px-4">Go to Mall</button>
-          </div>
-          <ProductsView
-            products={products}
-            shopFil={0}
-            categories={filCat}
-            filter={filMall}
-            loading={loading}
-            error={error}
-            showItem={0}
-          />
-        </div>
-      </div>
-       
+       <div className="flex flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 font-[iceland]">
+
+      <SectionWrapper
+        title="Discounted Products"
+        icon={faTags}
+        buttonText="See More"
+        bgColor="bg-secondary-color"
+         width="w-[45%]"
+      >
+        <ProductsView
+          products={products}
+          shopFil={0}
+          categories={filCat}
+          filter={3}
+          loading={loading}
+          error={error}
+          showItem={3}
+          sort="top"
+         
+        />
+      </SectionWrapper>
+
+      <SectionWrapper
+        title="Followed Store"
+        icon={faStore}
+        buttonText="See More"
+        bgColor="bg-stone-700"
+          width="w-[45%]"
+      >
+        <ProductsView
+          products={products}
+          shopFil={0}
+          categories={filCat}
+          filter={filMall}
+          loading={loading}
+          error={error}
+          showItem={3}
+          sort={"top"}
+        />
+      </SectionWrapper>
+
+      <SectionWrapper
+        title="For You"
+        icon={faShoppingCart}
+        buttonText="Go to Mall"
+        bgColor="bg-transparent"
+        textColor="text-secondary-color"
+      >
+        <ProductsView
+          products={products}
+          shopFil={0}
+          categories={filCat}
+          filter={filMall}
+          loading={loading}
+          error={error}
+          showItem={0}
+          sort={"top"}
+
+        />
+      </SectionWrapper>
+    </div>
     
 
       
