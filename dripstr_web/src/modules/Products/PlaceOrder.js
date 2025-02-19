@@ -7,6 +7,8 @@ import { faLocationDot } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from "@/constants/supabase";
 import SuccessAlert from "./components/alertDialog.js";
 import GcashDialog from "./components/GcashDialog.js";
+import TermsCon from "@/shared/products/termsCon";
+
 
 function PlaceOrder() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -22,6 +24,18 @@ function PlaceOrder() {
   const [selectedPostcode, setSelectedPostcode] = useState("");
   const [shippingFee, setShippingFee] = useState(50);
 
+  const openModalTerms2 = () => {
+    const modal = document.getElementById("my_modal_terms2");
+    if (modal) {
+      modal.showModal();
+    }
+  };
+  const closeModalTerms2 = () => {
+    const modal = document.getElementById("my_modal_terms2");
+    if (modal) {
+      modal.close();
+    }
+  };
   const closeModalGcash = () => {
     document.getElementById("my_modal_gcash").close();
   };
@@ -63,9 +77,7 @@ function PlaceOrder() {
         .eq("acc_id", profile.id)
         .eq("prod_id", item.prod.id)
         .eq("variant->>variant_Name", item.variant.variant_Name)
-        .eq("size->>id", item.size.id)
-        ;
-
+        .eq("size->>id", item.size.id);
       if (error) {
         console.error("Error deleting item from cart:", error.message);
         return { success: false, error: error.message };
@@ -94,13 +106,14 @@ function PlaceOrder() {
 
   const calculateTotals = (items) => {
     const groupedItems = groupItemsByShop(items);
-  
+
     let totalPrice = 0;
     let totalShippingFee = 0;
-  
+
     // Calculate total price and shipping fee
     for (const shopName in groupedItems) {
-      const { items: shopItems, shippingFee: shopShippingFee } = groupedItems[shopName];
+      const { items: shopItems, shippingFee: shopShippingFee } =
+        groupedItems[shopName];
       const shopTotal = shopItems.reduce(
         (sum, item) =>
           sum +
@@ -113,18 +126,19 @@ function PlaceOrder() {
       totalPrice += shopTotal;
       totalShippingFee += shopShippingFee; // Add shipping fee only once per shop
     }
-  
+
     const grandTotal = totalPrice + totalShippingFee;
-  
+
     return { totalPrice, grandTotal, totalShippingFee };
   };
 
-  const { totalPrice, grandTotal, totalShippingFee } = calculateTotals(selectedItems);
+  const { totalPrice, grandTotal, totalShippingFee } =
+    calculateTotals(selectedItems);
 
   const sendOrder = async (image) => {
     try {
       const groupedItems = groupItemsByShop(selectedItems);
-      const transactionId = Date.now(); 
+      const transactionId = Date.now();
 
       const orders = [];
       for (const shopName in groupedItems) {
@@ -155,12 +169,14 @@ function PlaceOrder() {
             shipping_fee: shopShippingFee,
             discount: item.prod.discount || 0,
             final_price:
-              ((item.prod.discount
+              (item.prod.discount
                 ? item.size.price * (1 - item.prod.discount / 100)
-                : item.size.price) * item.qty) + shopShippingFee,
+                : item.size.price) *
+                item.qty +
+              shopShippingFee,
             order_status: "Pending to Admin",
             proof_of_payment: image,
-            shop_transaction_id: transactionId, 
+            shop_transaction_id: transactionId,
           }))
         );
       }
@@ -183,7 +199,7 @@ function PlaceOrder() {
 
         setTimeout(() => {
           setShowAlert(false);
-          navigate(`/`); 
+          navigate(`/`);
         }, 3000);
       }
     } catch (error) {
@@ -193,31 +209,31 @@ function PlaceOrder() {
   };
 
   const handlePlaceOrder = async () => {
-    if(paymentMethod == "COD"){
-await sendOrder();
-    }else if(paymentMethod == "Gcash"){
+    if (paymentMethod == "COD") {
+      await sendOrder();
+    } else if (paymentMethod == "Gcash") {
       document.getElementById("my_modal_gcash").showModal();
     }
   };
 
   return (
     <div className="w-full relative items-start justify-start bg-slate-300 flex flex-col font-[iceland] gap-2 px-2 lg:px-8 h-[100%] py-4">
-       <dialog
-              id="my_modal_gcash"
-              className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
-            >
-              <GcashDialog
-                onClose={closeModalGcash}
-                order={sendOrder}
-                total={grandTotal.toFixed(2)}
-              />
-              <form
-                method="dialog"
-                className="modal-backdrop min-h-full min-w-full absolute "
-              >
-                <button onClick={closeModalGcash}></button>
-              </form>
-            </dialog>
+      <dialog
+        id="my_modal_gcash"
+        className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
+      >
+        <GcashDialog
+          onClose={closeModalGcash}
+          order={sendOrder}
+          total={grandTotal.toFixed(2)}
+        />
+        <form
+          method="dialog"
+          className="modal-backdrop min-h-full min-w-full absolute "
+        >
+          <button onClick={closeModalGcash}></button>
+        </form>
+      </dialog>
       {showAlert && (
         <div className=" w-[95%] absolute pb-16 items-center justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
           <SuccessAlert />{" "}
@@ -235,40 +251,46 @@ await sendOrder();
             <p>{profile?.mobile || "No Contact Number Provided"}</p>
           </div>
           <div className="flex flex-col w-full ml-4 pr-16 text-md">
-      <label className="form-control">
-        <div className="label py-0">
-          <span className="label-text">Address</span>
-        </div>
-        <div className="flex w-full gap-4">
-          {/* Address Dropdown */}
-          <select
-            className="select min-h-[2.5rem] h-[2.5rem] select-bordered w-full line-clamp-1
+            <label className="form-control">
+              <div className="label py-0">
+                <span className="label-text">Address</span>
+              </div>
+              <div className="flex w-full gap-4">
+                {/* Address Dropdown */}
+                <select
+                  className="select min-h-[2.5rem] h-[2.5rem] select-bordered w-full line-clamp-1
                font-semibold text-md"
-            value={selectedAddress}
-            onChange={(e) => {
-              const selected = addresses.find((addr) => addr.id === e.target.value);
-              setSelectedAddress(e.target.value);
-              setSelectedPostcode(selected ? selected.postcode : "");
-            }}
-          >
-            {addresses.map((addr) => (
-              <option key={addr.id} value={addr.id} className="line-clamp-1
-               font-semibold">
-                {addr.address}
-              </option>
-            ))}
-          </select>
+                  value={selectedAddress}
+                  onChange={(e) => {
+                    const selected = addresses.find(
+                      (addr) => addr.id === e.target.value
+                    );
+                    setSelectedAddress(e.target.value);
+                    setSelectedPostcode(selected ? selected.postcode : "");
+                  }}
+                >
+                  {addresses.map((addr) => (
+                    <option
+                      key={addr.id}
+                      value={addr.id}
+                      className="line-clamp-1
+               font-semibold"
+                    >
+                      {addr.address}
+                    </option>
+                  ))}
+                </select>
 
-          <select
-            className="select select-bordered min-h-[2.5rem] h-[2.5rem] w-32"
-            value={selectedPostcode}
-            disabled
-          >
-            <option value={selectedPostcode}>{selectedPostcode}</option>
-          </select>
-        </div>
-      </label>
-    </div>
+                <select
+                  className="select select-bordered min-h-[2.5rem] h-[2.5rem] w-32"
+                  value={selectedPostcode}
+                  disabled
+                >
+                  <option value={selectedPostcode}>{selectedPostcode}</option>
+                </select>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
       <div className="flex flex-col gap-2 w-full">
@@ -415,12 +437,17 @@ await sendOrder();
                 <h1 className="label-text text-xs text-slate-400">
                   Shipping Fee
                 </h1>
-                <h1 className="text-xl font-bold text-end">₱{totalShippingFee}</h1>
+                <h1 className="text-xl font-bold text-end">
+                  ₱{totalShippingFee}
+                </h1>
               </div>{" "}
             </div>
             <p className="label-text text-xs text-slate-700 text-end">
               By clicking <span className="font-bold">Place Order</span>, I
-              state that I have read and understood the terms and conditions
+              state that I have read and understood the{" "}
+              <span onClick={openModalTerms2} className="underline cursor-pointer font-bold">
+                Terms and Conditions
+              </span>
             </p>
           </div>
           <div className="flex flex-col justify-start w-full gap-2 ">
@@ -439,6 +466,19 @@ await sendOrder();
           </div>
         </div>
       </div>
+      <dialog
+              id="my_modal_terms2"
+              className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
+            >
+              <TermsCon onClose={closeModalTerms2} />
+              
+              <form
+                method="dialog"
+                className="modal-backdrop min-h-full min-w-full absolute "
+              >
+                <button onClick={closeModalTerms2}></button>
+              </form>
+            </dialog>
     </div>
   );
 }

@@ -18,7 +18,12 @@ function LandingPage() {
   const handleShow = (action) => {
     if (action === "login") {
       setIsAuthModalOpen(true)
-    } else if (action === "shop") {
+    }else if (action === "loginArtist") {
+      setIsAuthModalOpen(true)
+    }else if (action === "loginMerchant") {
+      setIsAuthModalOpen(true)
+    } 
+    else if (action === "shop") {
       navigate(`/guest`);
     } else if (action === "customer") {
       setShowAbout(true);
@@ -36,7 +41,14 @@ function LandingPage() {
   };
 
   const handleLogin = (action) => {
-    navigate(`/login`, { state: { action } });
+    if (action === "login") {
+      setIsAuthModalOpen(true)
+    }else if (action === "loginArtist") {
+      setIsAuthModalOpen(true)
+    }else if (action === "loginMerchant") {
+      setIsAuthModalOpen(true)
+    } 
+    // navigate(`/login`, { state: { action } });
   };
 
   return (
@@ -478,7 +490,7 @@ function LandingPage() {
                   </div>
                   <button
                     onClick={() => {
-                      handleLogin("toArtist");
+                      handleLogin("loginArtist");
                     }}
                     className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
                   >
@@ -577,7 +589,7 @@ function LandingPage() {
                           </div>
                           <button
                             onClick={() => {
-                              handleLogin("toMerchant");
+                              handleLogin("loginMerchant");
                             }}
                             className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
                           >

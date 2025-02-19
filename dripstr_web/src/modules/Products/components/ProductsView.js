@@ -71,17 +71,26 @@ const ProductsView = ({
   (item) => shopFil === 0 || item.shop_Id === shopFil
 );
 
-  const totalItems = filteredProductsD.length;
-  const remainder = totalItems % numColumns;
-  const placeholdersNeeded = remainder === 0 ? 0 : numColumns - remainder;
+const totalItems = filteredProductsD.length;
+const remainder = totalItems % numColumns;
+const placeholdersNeeded = remainder === 0 ? 0 : numColumns - remainder;
 
-  const dataWithPlaceholders = showItem != 0 ? [
-    ...filteredProductsD,
-    ...Array(placeholdersNeeded).fill({ empty: true }),
-  ].slice(0, showItem) : [
-    ...filteredProductsD,
-    ...Array(placeholdersNeeded).fill({ empty: true }),
+let dataWithPlaceholders;
+
+if (totalItems < 2) {
+  // Ensure we have one real item in the center and placeholders around it
+  dataWithPlaceholders = [
+    { empty: true }, // Placeholder at index 0
+    filteredProductsD[0] || { empty: true }, // Real item at index 1 (or placeholder if none)
+    { empty: true }, // Placeholder at index 2
   ];
+} else {
+  // Normal logic for multiple items
+  dataWithPlaceholders = showItem !== 0
+    ? [...filteredProductsD, ...Array(placeholdersNeeded).fill({ empty: true })].slice(0, showItem)
+    : [...filteredProductsD, ...Array(placeholdersNeeded).fill({ empty: true })];
+}
+
 
   if (loading)
     return (
@@ -128,7 +137,7 @@ const ProductsView = ({
           <BuyConfirm item={selectedItem} onClose={closeModal} />
           <form
             method="dialog"
-            className="modal-backdrop min-h-full min-w-full absolute "
+            className="modal-backdrop min-h-full min-w-full  absolute "
           >
             <button onClick={closeModal}></button>
           </form>
@@ -143,7 +152,7 @@ const ProductsView = ({
             item.empty ? (
               <div
                 key={`placeholder-${index}`}
-                className="flex flex-col mx-1 mb-2 p-2 rounded-md"
+                className="flex flex-col mx-1  max-w-[13.5rem] w-[12.5rem] mb-2 p-2 rounded-md"
                 style={{ visibility: "hidden" }}
               />
             ) : (
@@ -156,13 +165,13 @@ const ProductsView = ({
           )}
         </div>
       ) : (
-        <div className=" items-center justify-center flex flex-col ">
+        <div className=" items-center justify-center min-h-72 flex flex-col ">
           <img
             src={require("@/assets/emote/sad.png")}
             alt="Sad"
             className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
           />
-          <h1 className="top-20 font-[iceland] font-semibold text-3xl p-4 rounded-md drop-shadow-lg">
+          <h1 className="top-20 font-[iceland] font-semibold text-3xl bg-slate-100  p-1 rounded-md drop-shadow-lg">
             No Available Products
           </h1>
         </div>
