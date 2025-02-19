@@ -36,10 +36,10 @@ function App() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
 
   return (
+<Router>
     <NotificationProvider>
       <Toaster />
 
-      <Router>
       <div className="flex flex-col bg-slate-50 h-screen w-screen overflow-x-hidden custom-scrollbar">
           {/* Navbar (Header) */}
           <Header />
@@ -82,9 +82,8 @@ function App() {
             </main>
           </div>
         </div>
-      </Router>
     </NotificationProvider>
-
+</Router>
   );
 }
 
