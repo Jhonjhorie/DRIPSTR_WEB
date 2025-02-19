@@ -4,7 +4,7 @@ import CategoriesRibbon from "../Products/components/CategoriesRibbon";
 import ProductsView from "../Products/components/ProductsView";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faShoppingCart, faBackspace, faBackward, faAngleLeft } from "@fortawesome/free-solid-svg-icons";
 
 // Data
 import { categories } from "@/constants/categories.ts";
@@ -46,8 +46,13 @@ useEffect(() => {
       )}
       {/* Hero Section */}
       <div className="flex group flex-col-reverse w-full gap-8 md:gap-0 md:flex-row overflow-hidden items-start justify-center px-1 lg:p-4 bg-slate-300 min-h-[87vh]">
-        <div className=" w-[80%]">
-          <div className="w-full px-2 rounded-md bg-secondary-color  mr-16 my-4 flex flex-col text-white overflow-hidden relative">
+        <div className=" w-[90%] flex flex-col justify-center items-center">
+          <div className="flex gap-2 justify-center ">
+            <button 
+            onClick={() => (navigate("/"))}
+            className=" w-40 px-2 rounded-md bg-slate-50 flex items-center text-3xl font-bold
+            justify-center"><FontAwesomeIcon icon={faAngleLeft} /></button>
+          <div className="w-[60rem] px-2 rounded-md bg-secondary-color  mr-16 flex flex-col text-white overflow-hidden relative">
             <div className="absolute right-4 overflow-hidden h-32 w-40">
               <img
                 src={require("@/assets/emote/success.png")}
@@ -70,6 +75,7 @@ useEffect(() => {
               >
                 Login/Register
               </button>
+            </div>
             </div>
           </div>
          
