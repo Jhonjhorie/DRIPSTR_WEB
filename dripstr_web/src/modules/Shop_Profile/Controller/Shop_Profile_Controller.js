@@ -14,6 +14,7 @@ import ArtistDashboard from '../View/Artist/ArtistDashboard';
 import ArtistAccount from '../View/Artist/ArtistAccount';
 import ArtistOrders from '../View/Artist/ArtistOrders';
 import ArtistAddArts from '../View/Artist/AddArt';
+import ArtistCommision from '../View/Artist/ArtistCommision';
 import AddItem  from '../View/AddItem';
 import Account from '../View/Account';
 
@@ -36,6 +37,7 @@ const ShopProfileController = () => {
       <Route path="/Artist/ArtistAddArts" element={<ArtistAddArts />} />
       <Route path="/Artist/ArtistAccount" element={<ArtistAccount />} />
       <Route path="/Artist/ArtistOrders" element={<ArtistOrders />} />
+      <Route path="/Artist/ArtistCommision" element={<ArtistCommision />} />
       <Route path="/Account" element={<Account />} />
     </Routes>
   );

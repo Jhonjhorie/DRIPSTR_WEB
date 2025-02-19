@@ -1493,7 +1493,7 @@ function ArtistPage() {
               }}
               className="px-6 py-1 bg-purple-500 text-white rounded-md shadow hover:bg-purple-600 transition-colors duration-150"
             >
-              Pay Commission
+             Start Commission
             </button>
           </div>
 

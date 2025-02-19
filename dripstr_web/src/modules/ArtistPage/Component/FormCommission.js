@@ -17,12 +17,16 @@ function FormCommision() {
   const [deadline, setDeadline] = useState("");
   const [budget, setBudget] = useState("");
   const [receipt, setReceipt] = useState(null);
+  const [Ref, setRef] = useState(null);
   const [loading, setLoading] = useState(false);
   const [artistArts, setArtistArts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [paymentType, setPaymentType] = useState("Pay Full");
+  const [commissions, setCommissions] = useState([]);
+  const [downpaymentAmount, setDownpaymentAmount] = useState("");
+  const [openCommissionQR, setOpenCommissionQR] = useState(false);
+  const [commission, setCommission] = useState(null);
 
-  const userId = currentUser?.id;
   useEffect(() => {
     const fetchUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -35,7 +39,6 @@ function FormCommision() {
 
     fetchUser();
   }, []);
-
   //Fetch artist arts
   useEffect(() => {
     const fetchArtistArts = async () => {
@@ -81,6 +84,26 @@ function FormCommision() {
       .from("art_messages/art_commissions")
       .getPublicUrl(filePath).data.publicUrl;
   };
+  const handleFileUploadRef = async (file) => {
+    if (!file) return null;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `Refference/${fileName}`;
+
+    let { error, data } = await supabase.storage
+      .from("art_messages/art_commissions")
+      .upload(filePath, file);
+
+    if (error) {
+      console.error("File upload error:", error.message);
+      return null;
+    }
+
+    return supabase.storage
+      .from("art_messages/art_commissions")
+      .getPublicUrl(filePath).data.publicUrl;
+  };
 
   // Handle form submission
   const handleSubmit = async (e) => {
@@ -96,10 +119,15 @@ function FormCommision() {
 
     // Upload receipt if present
     let imageUrl = null;
+    let imageUrlRef = null;
     if (receipt) {
       imageUrl = await handleFileUpload(receipt);
     }
-
+    if (Ref) {
+      imageUrl = await handleFileUploadRef(Ref);
+    }
+    const paymentAmount =
+      paymentType === "Downpayment" ? downpaymentAmount : budget;
     const { error } = await supabase.from("art_Commision").insert([
       {
         client_Id: currentUser.id,
@@ -107,10 +135,10 @@ function FormCommision() {
         title,
         description,
         deadline,
-        payment_Type: paymentType,
+        image_Ref: imageUrlRef,
         image: imageUrl,
-        payment: budget,
-        status: "pending",
+        payment: paymentAmount,
+        commission_Status: "pending",
       },
     ]);
 
@@ -124,65 +152,125 @@ function FormCommision() {
       setDeadline("");
       setBudget("");
       setReceipt(null);
+      setRef(null);
     }
 
     setLoading(false);
+    fetchCommission();
   };
+  const fetchCommission = async () => {
+    if (!currentUser?.id || !id) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("art_Commision")
+        .select("*")
+        .eq("client_Id", currentUser.id)
+        .eq("artist_Id", Number(id))
+        .single();
+      if (!error) setCommission(data);
+    } catch (err) {
+      console.error("Unexpected error fetching commissions:", err);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchCommission();
+  }, [currentUser?.id, id]);
 
   return (
     <div className="bg-white relative w-auto h-auto rounded-sm p-2">
-      <div className="w-full text-center h-auto">
-        <h1 className="iceland-regular text-2xl font-bold text-custom-purple">
-          Terms and Conditions
-        </h1>
-      </div>
-      <div className="shadow-inner w-[500px] h-[400px] p-4 overflow-y-auto">
-        {!accepted ? (
-          <div className="flex flex-col gap-4">
-            <p className="text-sm text-gray-900">
-              Please read and accept the terms and conditions before proceeding.
-            </p>
-            <div className="text-sm text-gray-600 h-[250px] overflow-y-auto p-2 border rounded-md bg-gray-100">
-              <p>
-                <strong>1. Scope of Work:</strong> The artist will create
-                artwork based on the client’s specifications. Any major changes
-                after approval may incur additional fees.
+      <div className="   ">
+        {commission?.commission_Status === "pending" ? (
+          <div className="w-[500px] h-[400px]">
+            <h2 className="text-3xl font-bold iceland-regular text-center text-gray-800">
+              Commission Details
+            </h2>
+            <div className="mt-2 text-slate-700">
+              <p className="">
+                {" "}
+                <strong>Title:</strong> {commission.title}
               </p>
               <p>
-                <strong>2. Payment:</strong> Clients must pay the agreed amount
-                either upfront or in installments. Non-payment may result in
-                commission cancellation.
+                <strong>Description:</strong> {commission.description}
               </p>
               <p>
-                <strong>3. Deadlines:</strong> The artist will strive to meet
-                deadlines but may require extensions in unforeseen
-                circumstances.
+                <strong>Deadline:</strong> {commission.deadline}
               </p>
               <p>
-                <strong>4. Revisions:</strong> Clients are allowed a limited
-                number of revisions. Excessive revisions may incur additional
-                costs.
+                <strong>Payment:</strong> ₱{commission.payment}
               </p>
               <p>
-                <strong>5. Usage Rights:</strong> The artist retains copyright
-                unless otherwise agreed upon. Clients may use the artwork for
-                personal use but must negotiate commercial rights separately.
-              </p>
-              <p>
-                <strong>6. Refund Policy:</strong> Refunds are available only
-                before work has started. Partial refunds may be issued based on
-                the completion stage.
+                <strong>Status:</strong> {commission.commission_Status}
               </p>
             </div>
-            <button
-              onClick={() => setAccepted(true)}
-              className="w-full p-2 bg-custom-purple text-white font-bold rounded-md hover:bg-purple-700"
-            >
-              Accept Terms
-            </button>
+      
+              <div className="flex flex-col justify-center items-center">
+              <p className="text-slate-700 text-center"><strong>Reference Image:</strong></p>
+              <div className="flex justify-center">
+                <img src={commission.image} alt="Reference" className="w-auto object-cover h-44 rounded-md" />
+              </div>
+            </div>
+         
+          </div>
+        ) : !accepted ? (
+          <div className="px-4 py-2 w-[500px] h-[400px]">
+            <div className="w-full text-center h-auto">
+              <h1 className="iceland-regular text-2xl font-bold text-custom-purple">
+                Terms and Conditions
+              </h1>
+            </div>
+            <div className="flex flex-col gap-4">
+              <p className="text-sm text-gray-900">
+                Please read and accept the terms and conditions before
+                proceeding.
+              </p>
+              <div className="text-sm text-gray-600 h-[250px] overflow-y-auto p-2 border rounded-md bg-gray-100">
+                <p>
+                  <strong>1. Scope of Work:</strong> The artist will create
+                  artwork based on the client’s specifications. Any major
+                  changes after approval may incur additional fees.
+                </p>
+                <p>
+                  <strong>2. Payment:</strong> Clients must pay the agreed
+                  amount either upfront or in installments. Non-payment may
+                  result in commission cancellation.
+                </p>
+                <p>
+                  <strong>3. Deadlines:</strong> The artist will strive to meet
+                  deadlines but may require extensions in unforeseen
+                  circumstances.
+                </p>
+                <p>
+                  <strong>4. Revisions:</strong> Clients are allowed a limited
+                  number of revisions. Excessive revisions may incur additional
+                  costs.
+                </p>
+                <p>
+                  <strong>5. Usage Rights:</strong> The artist retains copyright
+                  unless otherwise agreed upon. Clients may use the artwork for
+                  personal use but must negotiate commercial rights separately.
+                </p>
+                <p>
+                  <strong>6. Refund Policy:</strong> Refunds are available only
+                  before work has started. Partial refunds may be issued based
+                  on the completion stage.
+                </p>
+              </div>
+              <button
+                onClick={() => setAccepted(true)}
+                className="w-full p-2 bg-custom-purple text-white font-bold rounded-md hover:bg-purple-700"
+              >
+                Accept Terms
+              </button>
+            </div>
           </div>
         ) : (
-          <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          <form
+            className="flex flex-col gap-4 p-4 overflow-hidden overflow-y-scroll w-[500px] h-[500px]"
+            onSubmit={handleSubmit}
+          >
             <label className="text-sm font-semibold text-gray-700">
               Commission Title
               <input
@@ -219,7 +307,7 @@ function FormCommision() {
             </label>
 
             <label className="text-sm font-semibold text-gray-700">
-              Budget (₱)
+              Pay in Full (₱)
               <input
                 type="number"
                 className="w-full p-2 mt-1 bg-slate-300 border rounded-md"
@@ -231,16 +319,14 @@ function FormCommision() {
               />
             </label>
             <label className="text-sm font-semibold text-gray-700">
-              Payment Type
-              <select
-                className="w-full p-2 mt-1 bg-slate-300 border rounded-md"
-                value={paymentType}
-                onChange={(e) => setPaymentType(e.target.value)}
+              Refference Photo
+              <input
+                type="file"
+                className="w-full p-2 mt-1 border rounded-md"
+                onChange={(e) => setRef(e.target.files[0])}
+                accept="image/*"
                 required
-              >
-                <option value="Pay Full">Pay Full</option>
-                <option value="Downpayment">Downpayment</option>
-              </select>
+              />
             </label>
             <div className="flex gap-2">
               <label className="text-sm font-semibold text-gray-700">
