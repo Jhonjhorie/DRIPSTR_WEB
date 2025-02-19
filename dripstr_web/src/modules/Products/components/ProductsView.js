@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import useResponsiveItems from '../../../shared/hooks/useResponsiveItems';
-import ProductModal from './productModal';
-import ProductCard from './productCard';
+import React, { useState } from "react";
+import useResponsiveItems from "../../../shared/hooks/useResponsiveItems";
+import BuyConfirm from "./buyConfirm";
+import ProductCard from "./productCard";
 
-
-
-const ProductsView = ({ products, categories, filter, loading, error }) => {
+const ProductsView = ({
+  products,
+  categories,
+  filter,
+  loading,
+  error,
+  shopFil,
+}) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 4, lg: 6 });
   const numColumns = itemsToShow;
@@ -13,13 +18,16 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
   const openModal = (item) => {
     setSelectedItem(item);
     setTimeout(() => {
-      document.getElementById('my_modal_4').showModal();
+      document.getElementById("my_modal_4").showModal();
     }, 50);
   };
 
   const closeModal = () => {
-    document.getElementById('my_modal_4').close();
-    setSelectedItem(null);
+    const modal = document.getElementById("my_modal_4");
+    if (modal) {
+      modal.close();
+      setSelectedItem(null);
+    }
   };
 
   const filteredProducts = products.filter((item) => {
@@ -44,85 +52,105 @@ const ProductsView = ({ products, categories, filter, loading, error }) => {
   });
 
   const filteredProductsC = filteredProducts.filter(
-    (item) => categories === 'All' || item.item_Category === categories
+    (item) => categories === "All" || item.item_Category === categories
+  );
+  const filteredProductsD = filteredProductsC.filter(
+    (item) => shopFil === 0 || item.shop_Id === shopFil
   );
 
-  const totalItems = filteredProductsC.length;
+  const totalItems = filteredProductsD.length;
   const remainder = totalItems % numColumns;
   const placeholdersNeeded = remainder === 0 ? 0 : numColumns - remainder;
 
   const dataWithPlaceholders = [
-    ...filteredProductsC,
+    ...filteredProductsD,
     ...Array(placeholdersNeeded).fill({ empty: true }),
   ];
-  
-  if (loading) return (
-  <div className='min-h-24'>
-    <img
+
+  if (loading)
+    return (
+      <div className="min-h-24">
+        <img
           src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
           className=" drop-shadow-customViolet animate-pulse"
         />
-  <p>Loading...</p>
-  </div>
-  )
-  ;
-  if(categories == "Choose Categories") return (
-    <div className='min-h-24'>
-    <img
+        <p>Loading...</p>
+      </div>
+    );
+  if (categories == "Choose Categories")
+    return (
+      <div className="min-h-24">
+        <img
           src={require("@/assets/emote/question.png")}
           alt="No Images Available"
           className=" drop-shadow-customViolet animate-bounce"
         />
-  <p>Please Choose a Category</p>
-  </div>
-  )
+        <p>Please Choose a Category</p>
+      </div>
+    );
 
-  if (error) return (<div className='min-h-24'> 
-  <img
+  if (error)
+    return (
+      <div className="min-h-24">
+        <img
           src={require("@/assets/emote/error.png")}
           alt="No Images Available"
           className=" drop-shadow-customViolet "
         />
-  <p>Error: {error}</p>
-  </div>
-);
+        <p>Error: {error}</p>
+      </div>
+    );
 
   return (
     <div className="w-full flex flex-col items-center pb-24 min-h-[22rem]">
       {selectedItem && (
         <dialog
           id="my_modal_4"
-          className="modal modal-bottom sm:modal-middle absolute right-4 sm:right-0"
+          className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
         >
-          <ProductModal item={selectedItem} onClose={closeModal} />
-          <form method="dialog" className="modal-backdrop">
+          <BuyConfirm item={selectedItem} onClose={closeModal} />
+          <form
+            method="dialog"
+            className="modal-backdrop min-h-full min-w-full absolute "
+          >
             <button onClick={closeModal}></button>
           </form>
         </dialog>
       )}
-
-      <div
-        className="grid gap-1 items-center justify-center"
-        style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}
-      >
-        {dataWithPlaceholders.map((item, index) =>
-        
-          item.empty ? (
-            <div
-              key={`placeholder-${index}`}
-              className="flex flex-col mx-1 mb-2 p-2 rounded-md"
-              style={{ visibility: 'hidden' }}
-            />
-          ) : (
-            <ProductCard
-              key={item.id || `product-${index}`}
-              item={item}
-              onClick={() => openModal(item)}
-            />
-          )
-        )}
-      </div>
+      {filteredProductsD.length > 0 ? (
+        <div
+          className="grid gap-1 items-center justify-center"
+          style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}
+        >
+          {dataWithPlaceholders.map((item, index) =>
+            item.empty ? (
+              <div
+                key={`placeholder-${index}`}
+                className="flex flex-col mx-1 mb-2 p-2 rounded-md"
+                style={{ visibility: "hidden" }}
+              />
+            ) : (
+              <ProductCard
+                key={item.id || `product-${index}`}
+                item={item}
+                onClick={() => openModal(item)}
+              />
+            )
+          )}
+        </div>
+      ) : (
+        <div className=" items-center justify-center flex flex-col ">
+          <img
+            src={require("@/assets/emote/sad.png")}
+            alt="Sad"
+            className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
+          />
+          <h1 className="top-20 font-[iceland] font-semibold text-3xl p-4 rounded-md drop-shadow-lg">
+            No Available Products
+          </h1>
+        </div>
+      )}
     </div>
   );
 };

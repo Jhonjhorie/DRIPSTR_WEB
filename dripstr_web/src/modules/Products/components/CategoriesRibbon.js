@@ -20,7 +20,7 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
         const containerWidth = containerRef.current.offsetWidth;
 
         const itemWidth = calculateItemWidth();
-        const gap = 40;
+        const gap = 10;
         const totalItemWidth = itemWidth + gap;
 
        
@@ -58,33 +58,16 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
   return (
     <div
       ref={containerRef}
-      className="relative min-w-[96%] md:min-w-[85%] h-16 md:h-20 justify-center  items-center bg-slate-50 rounded-md shadow-lg px-2 md:px-3 gap-2 md:gap-8 flex overflow-hidden"
+      className="relative w-[96%] md:w-[50%] h-16 md:h-20 justify-center  items-center bg-slate-50 rounded-md shadow-lg pr-2 md:pr-3 gap-2 md:gap-8 flex overflow-hidden pl-0"
     >
        <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md z-20">
               {" "}
             </div>
       {/* Title */}
-      <div className="flex justify-center gap-2 items-end flex-col ">
-        <h1 className="text-sm sm:text-md md:text-3xl  pl-10 duration-300 transition-all font-semibold text-secondary-color p-1 rounded-full"
-       
-        >Categories</h1>
-        <div className="flex justify-center space-x-2">
-          {Array.from({ length: totalScreens }).map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentScreen(index)}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                currentScreen === index
-                  ? "bg-primary-color w-4" // Bar covering 3 dots
-                  : "bg-secondary-color w-2"
-              }`}
-            ></button>
-          ))}
-        </div>
-      </div>
+   
 
       {/* Categories */}
-      <div className="flex items-center w-full">
+      <div className="flex items-center w-full ">
       <div
               onClick={() => onItemClick(categories[0].label)} 
               key={categories[0]}
@@ -92,7 +75,7 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
                 active === categories[0].label
                   ? "opacity-100 border-2 border-primary-color rounded-lg"
                   : "opacity-70 border-secondary-color hover:border-[1px] rounded-none hover:rounded-lg"
-              } hover:opacity-100 mr-4 ml-1 px-1 md:px-4 md:w-28 md:h-20 sm:w-16 sm:h-16 w-16 h-16 flex flex-col items-start justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
+              } hover:opacity-100 mr-4 px-1 md:px-4 md:min-w-20 md:h-20 sm:w-16 sm:h-16 w-16 h-16 flex flex-col items-start justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
             >
               <img
                 src={categories[0].icon}

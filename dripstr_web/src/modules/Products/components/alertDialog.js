@@ -21,7 +21,7 @@ const SuccessAlert = () => {
             <img
         src={require("@/assets/emote/success.png")}
           alt="No Images Available"
-          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
+          className="object-none mb-2 mt-1 w-[180px] drop-shadow-customViolet h-[200px]"
         />
           <span>Your purchase has been confirmed!</span>
           

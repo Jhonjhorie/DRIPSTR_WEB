@@ -1,5 +1,5 @@
 // src/pages/Home.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CategoriesRibbon from "../Products/components/CategoriesRibbon";
 import ProductsView from "../Products/components/ProductsView";
 import { useNavigate } from "react-router-dom";
@@ -9,22 +9,41 @@ import { faStar, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 // Data
 import { categories } from "@/constants/categories.ts";
 import useProducts from "../Products/hooks/useProducts";
+import AuthModal from "@/shared/login/Auth";
+import { supabase } from "../../constants/supabase";
 
 function GuestHome() {
   const [filMall, setFilMall] = useState(0);
-  const [filCat, setFilCat] = useState("Choose Categories");
-  const { products, loading, error } = useProducts();
-
+  const [filCat, setFilCat] = useState("All");
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const { products, loading, error } = useProducts();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    fetchUser();
+  }, []);
 
-  const handleShow = (action) => {
-    if (action === "login") {
-      navigate(`/login`);
-    }
-  };
+    const handleAuth = () => {
+      if (!user) {
+        setIsAuthModalOpen(true); 
+      } else {
+        navigate("/"); 
+      }
+    };
 
   return (
     <div className="w-full relative flex flex-col">
+       {/* Auth Modal */}
+       {isAuthModalOpen && (
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+        />
+      )}
       {/* Hero Section */}
       <div className="flex group flex-col-reverse w-full gap-8 md:gap-0 md:flex-row overflow-hidden items-start justify-center px-1 lg:p-4 bg-slate-300 min-h-[87vh]">
         <div className="pt-4  w-full">
@@ -46,7 +65,7 @@ function GuestHome() {
             </p>
             <div className="flex justify-center z-20">
               <button
-                onClick={() => handleShow("login")}
+                onClick={handleAuth}
                 className="btn bg-primary-color btn-outline  p-1 h-8 min-h-8 text-white hover:bg-white hover:text-black w-40 drop-shadow-lg font-[iceland] my-2"
               >
                 Login

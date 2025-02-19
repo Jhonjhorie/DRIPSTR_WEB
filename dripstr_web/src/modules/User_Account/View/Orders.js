@@ -89,7 +89,7 @@ const Orders = () => {
 
 
           {loading ? (
-            <div className="flex flex-col h-100 align-middle justify-center items-center">
+            <div className="flex flex-col mt-16  align-middle justify-center items-center">
             <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-auto animate-pulse" />
             <span>Loading...</span>
           </div>
@@ -127,7 +127,7 @@ const Orders = () => {
             </div>
           ))
         ) : (
-          <p className="flex flex-col h-dvh align-middle justify-center items-center" >No orders found.</p>
+          <p className="flex flex-col mt-40 align-middle justify-center items-center" >No orders found.</p>
         )}
 
           

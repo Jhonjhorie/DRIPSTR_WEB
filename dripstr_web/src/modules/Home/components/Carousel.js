@@ -34,7 +34,7 @@ const Carousel = () => {
   };
 
   return (
-    <div className="w-[100%] h-96 md:w-[98%] relative rounded-md bg-slate-200 drop-shadow-lg group overflow-hidden">
+    <div className="w-[100%] h-96 md:w-[90%] relative rounded-md bg-slate-200 drop-shadow-lg group overflow-hidden">
       
       {/* Images */}
       <div className="w-full h-full flex transition-transform duration-500 ease-in-out"
@@ -73,8 +73,8 @@ const Carousel = () => {
     
       <img src={require('@/assets/images/others/carouselframe.png')} className='z-10 absolute left-[-2rem] bottom-[0rem] w-[100%] h-[100%] opacity-50 object-cover' />
       <img src={require('@/assets/images/others/carouselframe.png')} className='z-10 absolute right-[-2rem] rotate-180 bottom-[0rem] w-[150%] h-[150%] opacity-10 object-cover' />
-      <img src={require('@/assets/images/others/name.png')} className='z-10 absolute right-2 bottom-[-1rem] lg:bottom-0 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all group-hover:scale-110 w-[15%] h-[50%] object-contain'/>
-      <img src={require('@/assets/images/others/crown.png')} className='-z-20 absolute right-24 md:right-16 lg:right-96 top-16 lg:top-10 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all group-hover:scale-110 w-[15%] h-[50%] object-contain'/>
+      <img src={require('@/assets/images/others/name.png')} className='z-10 absolute right-2 bottom-[-1rem] lg:bottom-0 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all  w-[15%] h-[50%] object-contain'/>
+      <img src={require('@/assets/images/others/crown.png')} className='-z-20 absolute right-24 md:right-16 lg:right-96 top-16 lg:top-10 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all  w-[15%] h-[50%] object-contain'/>
     </div>
   );
 };

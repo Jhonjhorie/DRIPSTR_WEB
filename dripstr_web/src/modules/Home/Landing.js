@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAnglesDown, faAngleDown } from "@fortawesome/free-solid-svg-icons";
-
+import AuthModal from "../../shared/login/Auth";
 // Data
 
 import useProducts from "../Products/hooks/useProducts";
@@ -12,11 +12,12 @@ function LandingPage() {
   const [showAbout, setShowAbout] = useState(true);
   const [showArt, setShowArt] = useState(false);
   const [showMer, setShowMer] = useState(false);
+   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleShow = (action) => {
     if (action === "login") {
-      navigate(`/login`);
+      setIsAuthModalOpen(true)
     } else if (action === "shop") {
       navigate(`/guest`);
     } else if (action === "customer") {
@@ -40,6 +41,12 @@ function LandingPage() {
 
   return (
     <div className="w-full relative inset-0 bg-slate-300 flex flex-col">
+         {isAuthModalOpen && (
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+        />
+      )}
       {/* Hero Section */}
       <div className="flex group flex-col-reverse gap-8 md:gap-0 md:flex-row overflow-hidden items-center justify-center px-1 lg:p-4 bg-slate-50 ">
         <img
