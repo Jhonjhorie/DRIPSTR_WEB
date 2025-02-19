@@ -9,7 +9,7 @@ import qrCode from "@/assets/qr.png";
 import { supabase } from "@/constants/supabase";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
-
+import FormCommision from "../Component/FormCommission";
 const { useState, useEffect } = React;
 
 function ArtistPage() {
@@ -702,23 +702,26 @@ function ArtistPage() {
   };
 
   const fetchMessages = async () => {
-    
+    if (!currentUser?.id || !artist?.id) {
+      console.warn("Skipping fetchMessages: currentUser or artist is undefined");
+      return;
+    }
+  
     const { data, error } = await supabase
       .from("artist_Messages")
       .select("content, status, message_dot")
-      .eq("sender_Id", currentUser?.id)
-      .eq("artist_Id", artist?.id)
+      .eq("sender_Id", currentUser.id)
+      .eq("artist_Id", artist.id)
       .maybeSingle();
-
+  
     if (error) {
       console.error("Error fetching messages:", error.message);
     } else if (data) {
-   
       setMessages(data.content || []);
       setMessageStatus(data.message_dot);
     }
   };
-
+  
   const handleUploadImage = async () => {
     if (!imageFile) return null;
 
@@ -1593,21 +1596,14 @@ function ArtistPage() {
       {commisionQR && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
-          onClick={() => {
-            setCommissionQR(false);
-          }}
         >
-          <div className="relative bg-custom-purple h-80 w-80 p-2 rounded-md ">
-            <img
-              src={qrCode}
-              alt="Success Emote"
-              className="object-contain h-full w-full rounded-lg p-1 drop-shadow-customViolet"
-            />
+          <div className="relative bg-custom-purple h-auto w-auto p-2 rounded-md ">
+           <FormCommision/>
             <button
               onClick={() => {
                 setCommissionQR(false);
               }}
-              className="absolute -top-2 right-0  text-3xl p-2 drop-shadow-lg "
+              className="absolute text-custom-purple -top-2 right-0  text-3xl p-2 drop-shadow-lg "
             >
               &times;
             </button>
