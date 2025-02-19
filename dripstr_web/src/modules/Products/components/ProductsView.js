@@ -10,6 +10,8 @@ const ProductsView = ({
   loading,
   error,
   shopFil,
+  showItem,
+  sort
 }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 4, lg: 6 });
@@ -39,7 +41,7 @@ const ProductsView = ({
       case 2:
         return;
       case 3:
-        return item.discount != 0 || item.vouchers != null;
+        return item.discount > 0 || null || item.vouchers != null;
       case 4:
         return;
       case 5:
@@ -54,22 +56,36 @@ const ProductsView = ({
   const filteredProductsC = filteredProducts.filter(
     (item) => categories === "All" || item.item_Category === categories
   );
-  const filteredProductsD = filteredProductsC.filter(
+
+  const filteredProductsD = sort == "top" ? filteredProductsC.filter(
     (item) => shopFil === 0 || item.shop_Id === shopFil
-  );
+).sort((a, b) => {
+    const weightRating = 0.6; 
+    const weightOrders = 0.4; 
+
+    const scoreA = (a.item_Rating * weightRating) + (a.item_Orders * weightOrders); 
+    const scoreB = (b.item_Rating  * weightRating) + (b.item_Orders * weightOrders);
+
+    return scoreB - scoreA; 
+}): filteredProductsC.filter(
+  (item) => shopFil === 0 || item.shop_Id === shopFil
+);
 
   const totalItems = filteredProductsD.length;
   const remainder = totalItems % numColumns;
   const placeholdersNeeded = remainder === 0 ? 0 : numColumns - remainder;
 
-  const dataWithPlaceholders = [
+  const dataWithPlaceholders = showItem != 0 ? [
+    ...filteredProductsD,
+    ...Array(placeholdersNeeded).fill({ empty: true }),
+  ].slice(0, showItem) : [
     ...filteredProductsD,
     ...Array(placeholdersNeeded).fill({ empty: true }),
   ];
 
   if (loading)
     return (
-      <div className="min-h-24">
+      <div className="min-h-24 flex-col min-w-full items-center flex">
         <img
           src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
@@ -103,7 +119,7 @@ const ProductsView = ({
     );
 
   return (
-    <div className="w-full flex flex-col items-center pb-24 min-h-[22rem]">
+    <div className="w-full flex flex-col items-center justify-center  min-h-[15rem]">
       {selectedItem && (
         <dialog
           id="my_modal_4"

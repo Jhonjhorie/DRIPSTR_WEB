@@ -140,7 +140,7 @@ const BuyConfirm = ({ item, onClose }) => {
     );
   } else {
     return (
-      <div className=" font-sans w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg overflow-hidden">
+      <div className="  font-[iceland]  w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg overflow-hidden">
         {mascot ? (
           <div className="flex flex-col items-center justify-center h-full w-full">
             <img
