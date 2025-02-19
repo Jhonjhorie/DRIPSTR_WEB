@@ -95,6 +95,7 @@ const Dashboard = () => {
     }
   };
 
+  const username = localStorage.getItem("username");
 
 
 
@@ -127,7 +128,10 @@ const Dashboard = () => {
     <div className="flex flex-row min-h-screen">
       <Sidebar />
       <div className="flex flex-col w-full p-4">
+        <div className="flex flex-row justify-between mb-4">
         <h1 className="text-white font-extrabold text-4xl mb-4">Dashboard</h1>
+        <h1 className="text-white font-extrabold text-4xl mb-4">Welcome, {username}! </h1>
+        </div>
         {/* User Statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statisticsData.map((stat, index) => (
