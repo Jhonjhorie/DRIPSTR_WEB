@@ -82,6 +82,7 @@ function Home() {
           buttonText="See More"
           bgColor="bg-secondary-color"
           width="w-[45%]"
+          filter={3}
         >
           <ProductsView
             products={products}
@@ -92,6 +93,7 @@ function Home() {
             error={error}
             showItem={3}
             sort="top"
+            isSmall={true}
           />
         </SectionWrapper>
 

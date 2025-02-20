@@ -4,17 +4,22 @@ import CategoriesRibbon from "./components/CategoriesRibbon";
 import MallRibbon from "./components/MallRibbon";
 import ProductsView from "./components/ProductsView";
 import useProducts from "./hooks/useProducts";
+import SectionWrapper from "../Home/components/SectionWrapper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 
 // Data
 import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from "@/constants/categories.ts";
 import { searchProducts } from "@/utils/searchProducts";
 
-function Mall(filter) {
+function Mall() {
   const { products, loading, error } = useProducts();
   const location = useLocation();
   const [filCat, setFilCat] = useState(categories[0].label); 
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const filter = location.state?.filterM || 0;
+const title = location.state?.title || "Dripstr";
+const icon = location.state?.icon || "faShoppingCart";
 
 
   return (
@@ -27,19 +32,25 @@ function Mall(filter) {
           onItemClick={(label) => setFilCat(label)}
         />
       </div> 
-
-      
-      <div className="flex flex-wrap justify-center mb-4 mt-0 md:mt-2 p-4 gap-2">
-        <ProductsView
-          products={filteredProducts}
-          categories={filCat}
-          filter={filter}
-          loading={loading}
-          error={error}
-            showItem={0}
+    
+      <div className="flex flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 font-[iceland]">
+        <SectionWrapper
+          title={title}
+          icon={icon}
+          textColor="text-secondary-color"
+        >
+          <ProductsView
+            products={products}
             shopFil={0}
-        />
-      </div>
+            categories={filCat}
+            filter={filter}
+            loading={loading}
+            error={error}
+            showItem={0}
+            sort="top"
+          />
+        </SectionWrapper>
+        </div>
     </div>
   );
 }

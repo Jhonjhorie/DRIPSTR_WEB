@@ -13,6 +13,7 @@ import ArtistController from "./modules/ArtistPage/Controller/Artists_Controller
 import ProductController from "./modules/Products/Products_Controller";
 import Search from "./modules/Products/Search";
 import GuestHome from "./modules/Home/GuestHome";
+import Mall from "./modules/Products/Mall";
 
 //Data
 import useUserProfile from "@/shared/mulletCheck";
@@ -72,6 +73,7 @@ function App() {
               <Route path="/account/*" element={<UserAccountController />} />
               <Route path="/notification" element={<Notifications />} />
               <Route path="/reminder" element={<Reminder/>}/>
+              <Route path="/mall" element={<Mall />} />
             </Routes>
           </main>
         </div>

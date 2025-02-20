@@ -11,7 +11,8 @@ const ProductsView = ({
   error,
   shopFil,
   showItem,
-  sort
+  sort,
+  isSmall
 }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 4, lg: 6 });
@@ -77,19 +78,21 @@ const placeholdersNeeded = remainder === 0 ? 0 : numColumns - remainder;
 
 let dataWithPlaceholders;
 
-if (totalItems < 2) {
-  // Ensure we have one real item in the center and placeholders around it
+
+if (isSmall & totalItems < 2) {
+  
   dataWithPlaceholders = [
-    { empty: true }, // Placeholder at index 0
-    filteredProductsD[0] || { empty: true }, // Real item at index 1 (or placeholder if none)
-    { empty: true }, // Placeholder at index 2
+    { empty: true }, 
+    filteredProductsD[0] || { empty: true }, 
+    { empty: true }, 
   ];
 } else {
-  // Normal logic for multiple items
+  
   dataWithPlaceholders = showItem !== 0
     ? [...filteredProductsD, ...Array(placeholdersNeeded).fill({ empty: true })].slice(0, showItem)
     : [...filteredProductsD, ...Array(placeholdersNeeded).fill({ empty: true })];
 }
+
 
 
   if (loading)
