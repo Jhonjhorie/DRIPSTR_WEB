@@ -135,7 +135,7 @@ function ArtistSB() {
             className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
-              Orders
+              Messages
             </a>
             <box-icon name="basket" type="solid" color="#4D077C"></box-icon>
           </li>

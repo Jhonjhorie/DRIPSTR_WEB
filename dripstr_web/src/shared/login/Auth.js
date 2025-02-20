@@ -8,7 +8,7 @@ import { supabase } from "../../constants/supabase";
 import { useNavigate } from "react-router-dom";  
 import useUserProfile from "@/shared/mulletCheck.js";
 import addToCart from "@/modules/Products/hooks/useAddtoCart.js";
-import AlertDialog from "../../modules/Products/components/alertDialog2";
+import SuccessModal from './components/SuccessModal';
 
 const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const [isSignIn, setIsSignIn] = useState(true);
@@ -17,6 +17,8 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const [profile, setProfile] = useState(null);
  
   const navigate = useNavigate();  
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
   
   const [signInData, setSignInData] = useState({ email: "", password: "" });
   const [signUpData, setSignUpData] = useState({
@@ -248,6 +250,10 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
         </div>
         
       )}
+       <SuccessModal 
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+       />
     </>
   );
 };
