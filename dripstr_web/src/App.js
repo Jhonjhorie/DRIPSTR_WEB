@@ -10,9 +10,8 @@ import ShopController from "./modules/Shop_Profile/Controller/Shop_Profile_Contr
 import UserAccountController from "./modules/User_Account/Controller/User_Account_Controller";
 import ProductsController from "./modules/Products/Products_Controller";
 import ArtistController from "./modules/ArtistPage/Controller/Artists_Controller";
-import Product from "./modules/Products/Product";
+import ProductController from "./modules/Products/Products_Controller";
 import Search from "./modules/Products/Search";
-import PlaceOrder from "./modules/Products/PlaceOrder";
 import GuestHome from "./modules/Home/GuestHome";
 
 //Data

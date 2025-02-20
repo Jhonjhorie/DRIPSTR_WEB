@@ -119,7 +119,7 @@ const BuyConfirm = ({ item, onClose }) => {
       setTimeout(() => {
         setMascot(false);
         onClose();
-      }, 3000);
+      }, 2000);
     } else {
       setActionLog("cart");
       setLoginDialog(true);

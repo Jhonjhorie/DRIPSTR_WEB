@@ -11,6 +11,7 @@ const ProductController = () => {
        <Route path="/*" element={<Product />} />
        <Route path="/merchant-shop/*" element={<ShopPage />} />
        <Route path="/placeOrder/*" element={<PlaceOrder />} />
+       <Route path="/mall/*" element={<PlaceOrder />} />
      </Routes>
   );
 };
