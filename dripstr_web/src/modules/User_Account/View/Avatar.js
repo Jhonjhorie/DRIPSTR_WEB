@@ -334,7 +334,7 @@ const CharacterCustomization = () => {
           <Part key={`shorts-${gender}-${selectedBodyType}`} url={getShortsURL()} position={[0, 0, 0]} />
         )}
       </group>
-      <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
+      <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} minDistance={100} maxDistance={300} />
     </Canvas>
   </div>
 </div>

@@ -19,35 +19,42 @@ import GuestHome from "./modules/Home/GuestHome";
 import useUserProfile from "@/shared/mulletCheck";
 
 // Shared Components
-import Header from "./shared/Header";
-import Sidebar from "./shared/SideBar";
-import Notifications from "./modules/Notification/Notification_Controller";
-import Reminder from "./modules/Messaging/View/Reminder";
-import ProductController from "./modules/Products/Products_Controller";
+import Header from './shared/Header';
+import Sidebar from './shared/SideBar';
+import Notifications from './modules/Notification/Notification_Controller';
+import Reminder from './modules/Messaging/View/Reminder';
+
+// tangina mo notification
+import { NotificationProvider } from './utils/NotificationContext';
+import { Toaster } from 'react-hot-toast';
+
 
 // Shared Component
 function App() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
 
   return (
-    <Router>
-      <div className="flex flex-col bg-slate-50 h-screen w-screen overflow-x-hidden custom-scrollbar">
-        {/* Navbar (Header) */}
-      
+    <NotificationProvider>
+      <Toaster />
+
+      <Router>
+        <div className="flex flex-col bg-slate-50 h-screen w-screen overflow-x-hidden custom-scrollbar">
+          {/* Navbar (Header) */}
+        
         <Header />
 
-        {/* Main Layout */}
-        <div className="flex flex-1 flex-col sm:flex-row">
-          {/* Sidebar */}
-          {isLoggedIn && (
+          {/* Main Layout */}
+          <div className="flex flex-1 flex-col sm:flex-row">
+            {/* Sidebar */}
+            {isLoggedIn && (
             <div className="hidden sm:block">
-              <Sidebar />
-            </div>
-          )}
+                <Sidebar />
+              </div>
+            )}
           {isLoggedIn && (
-            <div className="block sm:hidden fixed bottom-0 w-full z-50">
-              <Sidebar />
-            </div>
+              <div className="block sm:hidden fixed bottom-0 w-full z-50">
+                <Sidebar />
+              </div>
           )}
 
           {/* Main Content */}
@@ -65,12 +72,13 @@ function App() {
               <Route path="/shop/*" element={<ShopController />} />
               <Route path="/account/*" element={<UserAccountController />} />
               <Route path="/notification" element={<Notifications />} />
-              <Route path="/reminder" element={<Reminder />} />
+              <Route path="/reminder" element={<Reminder/>}/>
             </Routes>
           </main>
         </div>
       </div>
     </Router>
+    </NotificationProvider>
   );
 }
 
