@@ -217,20 +217,28 @@ const Merchants = () => {
                         <h2 className="text-xl font-semibold mb-2 text-white">Accepted Merchants</h2>
                         <ul>
                             {merchants.map((merchant, index) => (
-                                <li key={merchant.id} className="border p-2 rounded shadow-sm flex mb-4">
-                                    <div className='flex gap-4'>
-                                        <div className='justify-start'>
-                                            <img src={merchant.shop_image} alt={merchant.shop_name} className="w-20 h-30 object-cover rounded-md mr-1" />
+                                <li key={merchant.id} className="border p-4 rounded-lg shadow-md flex mb-4 bg-gray-800">
+                                    <div className="flex gap-4 w-full">
+                                        {/* Image with improved sizing */}
+                                        <div className="flex-shrink-0">
+                                            <img
+                                                src={merchant.shop_image}
+                                                alt={merchant.shop_name}
+                                                className="w-24 h-24 object-cover rounded-md"
+                                            />
                                         </div>
-                                        <div className='flex flex-col'>
-                                            <p className='text-white'><strong>Shop Name:</strong> {merchant.shop_name}</p>
-                                            <p className='text-white'><strong>Description:</strong> {merchant.description}</p>
-                                            <p className='text-white'><strong>Address:</strong> {merchant.address}</p>
-                                            <p className='text-white'><strong>Contact:</strong> {merchant.contact_number}</p>
+
+                                        {/* Merchant Info */}
+                                        <div className="flex flex-col w-full">
+                                            <p className="text-white text-sm"><strong>Shop Name:</strong> {merchant.shop_name}</p>
+                                            <p className="text-white text-sm"><strong>Description:</strong> {merchant.description}</p>
+                                            <p className="text-white text-sm"><strong>Address:</strong> {merchant.address}</p>
+                                            <p className="text-white text-sm"><strong>Contact:</strong> {merchant.contact_number}</p>
                                         </div>
                                     </div>
                                 </li>
                             ))}
+
                         </ul>
                     </div>
                 )}

@@ -10,48 +10,55 @@ import ShopController from "./modules/Shop_Profile/Controller/Shop_Profile_Contr
 import UserAccountController from "./modules/User_Account/Controller/User_Account_Controller";
 import ProductsController from "./modules/Products/Products_Controller";
 import ArtistController from "./modules/ArtistPage/Controller/Artists_Controller";
-import Product from "./modules/Products/Product";
+import ProductController from "./modules/Products/Products_Controller";
 import Search from "./modules/Products/Search";
-import PlaceOrder from "./modules/Products/PlaceOrder";
 import GuestHome from "./modules/Home/GuestHome";
+import Mall from "./modules/Products/Mall";
 
 //Data
 import useUserProfile from "@/shared/mulletCheck";
 
 // Shared Components
-import Header from "./shared/Header";
-import Sidebar from "./shared/SideBar";
-import Notifications from "./modules/Notification/Notification_Controller";
-import Reminder from "./modules/Messaging/View/Reminder";
-import ProductController from "./modules/Products/Products_Controller";
+import Header from './shared/Header';
+import Sidebar from './shared/SideBar';
+import Notifications from './modules/Notification/Notification_Controller';
+import Reminder from './modules/Messaging/View/Reminder';
+
+// tangina mo notification
+import { NotificationProvider } from './utils/NotificationContext';
+import { Toaster } from 'react-hot-toast';
+
 
 // Shared Component
 function App() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
 
   return (
-    <Router>
-      <div className="flex flex-col bg-slate-50 h-screen w-screen overflow-x-hidden custom-scrollbar">
-        {/* Navbar (Header) */}
-      
+    <NotificationProvider>
+      <Toaster />
+
+      <Router>
+        <div className="flex flex-col bg-slate-50 h-screen w-screen overflow-x-hidden custom-scrollbar">
+          {/* Navbar (Header) */}
+        
         <Header />
 
-        {/* Main Layout */}
-        <div className="flex flex-1 flex-col sm:flex-row">
-          {/* Sidebar */}
-          {isLoggedIn && (
+          {/* Main Layout */}
+          <div className="flex flex-1 flex-col sm:flex-row">
+            {/* Sidebar */}
+            {isLoggedIn && (
             <div className="hidden sm:block">
-              <Sidebar />
-            </div>
-          )}
+                <Sidebar />
+              </div>
+            )}
           {isLoggedIn && (
-            <div className="block sm:hidden fixed bottom-0 w-full z-50">
-              <Sidebar />
-            </div>
+              <div className="block sm:hidden fixed bottom-0 w-full z-50">
+                <Sidebar />
+              </div>
           )}
 
           {/* Main Content */}
-          <main className={`flex-1 ${isLoggedIn ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-a  uto`}>
+          <main className={`flex-1 ${isLoggedIn ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-auto`}>
             <Routes>
               <Route path="/" element={<HomeController />} />
               <Route path="/guest" element={<GuestHome />} />
@@ -65,12 +72,14 @@ function App() {
               <Route path="/shop/*" element={<ShopController />} />
               <Route path="/account/*" element={<UserAccountController />} />
               <Route path="/notification" element={<Notifications />} />
-              <Route path="/reminder" element={<Reminder />} />
+              <Route path="/reminder" element={<Reminder/>}/>
+              <Route path="/mall" element={<Mall />} />
             </Routes>
           </main>
         </div>
       </div>
     </Router>
+    </NotificationProvider>
   );
 }
 

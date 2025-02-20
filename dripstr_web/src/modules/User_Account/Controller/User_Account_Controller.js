@@ -14,6 +14,7 @@ import SetupShop from '../../Shop_Profile/View/Login';
 import Avatar from '../View/Avatar';  
 import CharacterCreation from '../View/CharacterCreation';  
 import Try from '../View/RPMCreateAvatar';
+import NotificationDemo from '../View/trynotif';
  
 const UserController = () => {
   return (
@@ -32,6 +33,7 @@ const UserController = () => {
       <Route path="/CC" element={<CharacterCreation />} />
       <Route path="/Try" element={<Try />} />
       <Route path="/avatar" element={<Avatar />} />
+      <Route path="/trynotif" element={<NotificationDemo />} />
 
     </Routes>
   );

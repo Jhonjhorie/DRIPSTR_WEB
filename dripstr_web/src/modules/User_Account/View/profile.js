@@ -148,9 +148,9 @@ const UserProfile = () => {
                     </div>
                   </div>
                   <div className="align-middle justify-center">
-                    <Link to="../Cc">
-                      <button className="text-blue-600 font-medium">
-                        Create Avatar
+                    <Link to="../Avatar">
+                      <button className="text-blue-600 font-medium hover:underline hover:text-blue-800">
+                        See Avatar
                       </button>
                     </Link>
                   </div>

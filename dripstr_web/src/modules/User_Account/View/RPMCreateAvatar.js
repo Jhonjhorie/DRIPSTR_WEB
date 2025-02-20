@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
@@ -36,48 +37,7 @@ const CharacterCustomization = () => {
   const [selectedBodyType, setSelectedBodyType] = useState("Average");
   const [selectedHair, setSelectedHair] = useState(null);
   const [skincolor, setSkinColor] = useState("#f5c9a6");
-  const [haircolor, setHairColor] = useState("#000000");
-
-  useEffect(() => {
-    const fetchAvatar = async () => {
-      try {
-        const { data: session, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          console.error("Session Error:", sessionError);
-          return;
-        }
-
-        const account_ID = session?.session?.user?.id;
-        if (!account_ID) {
-          console.error("User not authenticated.");
-          return;
-        }
-
-        const { data: avatarData, error: avatarError } = await supabase
-          .from("avatars")
-          .select("*")
-          .eq("account_id", account_ID)
-          .single();
-
-        if (avatarError || !avatarData) {
-          console.warn("Redirecting to create page as no avatar exists.");
-          window.location.href = "/account/cc";
-          return;
-        }
-
-        setGender(avatarData.gender);
-        setSelectedBodyType(avatarData.bodytype);
-        setSelectedHair(avatarData.hair);
-        setSkinColor(avatarData.skincolor);
-        setHairColor(avatarData.haircolor);
-
-      } catch (error) {
-        console.error("Unexpected Error:", error);
-      }
-    };
-
-    fetchAvatar();
-  }, []);
+  const [haircolor, setHairColor] = useState("#000000");    
 
   const getTShirtURL = () => {
     return tshirURLs[gender][selectedBodyType] || null;
@@ -89,7 +49,6 @@ const CharacterCustomization = () => {
 
   return (
     <div className="p-4 flex min-h-screen bg-slate-200">
-      <Sidebar />
 
       <div className="p-4 flex-1">
         <div className="grid md:grid-cols-1">

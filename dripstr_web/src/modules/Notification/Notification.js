@@ -1,34 +1,30 @@
-// src/pages/Home.js
-import React,{useState} from "react";
-import CategoriesRibbon from "../Products/components/CategoriesRibbon";
-import ProductsView from "../Products/components/ProductsView";
-import MallRibbon from "../Products/components/MallRibbon";
-import FilterProducts from '../Products/components/FilterProducts';
+import React from 'react';
+import { useNotification } from '../../utils/NotificationContext';
+import NotificationItem from './components/NotificationItem';
 
+const Notification = () => {
+  const { notifications } = useNotification();
 
-//Data
-import { MallItems } from "@/constants/mallItems.ts";
-import { categories } from '@/constants/categories.ts';
-import { currUser, Images } from "@/constants/sampleData";
-import useProducts from "../Products/hooks/useProducts";
-
-
-
-function Notification() {
-  
   return (
-    <div className=" w-full relative inset-0 bg-slate-300 flex flex-col ">
-      <div className="flex flex-col-reverse gap-4 md:flex-row items-center p-4 h-[39%] lg:h-[38%]">
-        
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-bold">Notifications</h2>
       </div>
-      <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-between px-1 lg:px-2 mt-1 ">
-       
-      </div>
-      <div className="flex flex-wrap justify-center mb-4 mt-0 md:mt-5  p-4 gap-2">
       
+      <div className="space-y-4">
+        {notifications.length === 0 ? (
+          <p className="text-gray-500 text-center py-8">No notifications</p>
+        ) : (
+          notifications.map((notification) => (
+            <NotificationItem
+              key={notification.id}
+              notification={notification}
+            />
+          ))
+        )}
       </div>
     </div>
   );
-}
+};
 
 export default Notification;
