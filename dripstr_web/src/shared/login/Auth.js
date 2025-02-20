@@ -92,9 +92,10 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
         }
   
         setTimeout(() => {
-          setShowAlert(false);
+       
           navigate("/");
           window.location.reload();
+          setShowAlert(false);
         }, 3000);
       } else if (actionLog === "placeOrder") {
         const solo = true;
@@ -117,9 +118,10 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
         navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
       }else{
         setTimeout(() => {
-          setShowAlert(false);
+       
           navigate("/");
           window.location.reload();
+          setShowAlert(false);
         }, 3000);
        
       }
