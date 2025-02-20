@@ -8,7 +8,7 @@ import HomeController from "./modules/Home/Home_Controller";
 import OrderController from "./modules/Order/Controller/Order_Controller";
 import ShopController from "./modules/Shop_Profile/Controller/Shop_Profile_Controller";
 import UserAccountController from "./modules/User_Account/Controller/User_Account_Controller";
-import ProductsController from "./modules/Products/Products_Controller";
+
 import ArtistController from "./modules/ArtistPage/Controller/Artists_Controller";
 import ProductController from "./modules/Products/Products_Controller";
 import Search from "./modules/Products/Search";
@@ -62,7 +62,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomeController />} />
               <Route path="/guest" element={<GuestHome />} />
-              <Route path="/mall/*" element={<ProductsController />} />
+          
               <Route path="/arts/*" element={<ArtistController />} />
               <Route path="/product/*" element={<ProductController />} />
               <Route path="/search" element={<Search />} />
