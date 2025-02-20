@@ -7,12 +7,13 @@ import Sidebar from "./Shared/Sidebar";
 function Admins() {
     const [fetchedAdmins, setFetchedAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [sortOrder, setSortOrder] = useState('ascending'); // Tracks sort order
 
     // Modal states
     const [showModal, setShowModal] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedAdminId, setSelectedAdminId] = useState(null);
-    
+
     // Form state
     const [adminUsername, setAdminUsername] = useState("");
     const [adminPassword, setAdminPassword] = useState("");
@@ -93,13 +94,13 @@ function Admins() {
 
     const handleDeleteAdmin = async (id) => {
         if (!window.confirm("Are you sure you want to delete this admin?")) return;
-    
+
         setLoading(true);
         const { error } = await supabase
             .from("admins")
             .delete()
             .eq("id", id);
-    
+
         if (error) {
             console.error("❌ Error deleting admin:", error.message);
         } else {
@@ -108,26 +109,54 @@ function Admins() {
         }
         setLoading(false);
     };
-    
+
+    const handleSortChange = (event) => {
+        const selectedSortOrder = event.target.value; // Get the selected sort order
+        setSortOrder(selectedSortOrder); // Update the sort order state
+
+        const sortedAdmins = [...fetchedAdmins].sort((a, b) => {
+            // Sort based on the selected order
+            return selectedSortOrder === 'ascending'
+                ? a.id - b.id
+                : b.id - a.id;
+        });
+
+        setFetchedAdmins(sortedAdmins); // Update the admins with the sorted list
+    };
 
     return (
         <div className="flex flex-row h-screen">
             <Sidebar />
             <div className="bg-slate-900 p-6 rounded-3xl shadow-lg w-full h-full">
                 <h2 className="text-white text-2xl font-bold mb-4">Admins</h2>
-                <button 
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4" 
-                    onClick={handleAddAdmin}
-                >
-                    Add Admin
-                </button>
+                <div className="flex justify-between">
+                    <button
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-4"
+                        onClick={handleAddAdmin}
+                    >
+                        Add Admin
+                    </button>
+                    <div className="flex items-center space-x-2">
+                        <label htmlFor="sortOrder" className="text-lg font-medium text-white">Sort by Admin ID:</label>
+                        <select
+                            id="sortOrder"
+                            value={sortOrder}
+                            onChange={handleSortChange}
+                            className="bg-blue-500 text-white font-bold rounded py-2 "
+                        >
+                            <option value="ascending">Ascending</option>
+                            <option value="descending">Descending</option>
+                        </select>
+                    </div>
 
+                </div>
                 {loading ? (
                     <p className="text-white text-center">Loading admins...</p>
                 ) : (
                     <table className="w-full text-white border border-gray-600 bg-gray-800">
                         <thead>
                             <tr className="bg-gray-700">
+                                <th className="p-2 border border-gray-500">Username</th>
                                 <th className="p-2 border border-gray-500">Username</th>
                                 <th className="p-2 border border-gray-500">Password</th>
                                 <th className="p-2 border border-gray-500">Actions</th>
@@ -137,11 +166,12 @@ function Admins() {
                             {fetchedAdmins.length > 0 ? (
                                 fetchedAdmins.map((admin) => (
                                     <tr key={admin.id} className="text-center border-b border-gray-600">
+                                        <td className="p-2 border border-gray-500">{admin.id}</td>
                                         <td className="p-2 border border-gray-500">{admin.username}</td>
                                         <td className="p-2 border border-gray-500">{admin.password}</td>
                                         <td className="p-2 border-gray-500 flex justify-center gap-4">
-                                            <button 
-                                                className="text-blue-400 hover:text-blue-600" 
+                                            <button
+                                                className="text-blue-400 hover:text-blue-600"
                                                 onClick={() => handleEditAdmin(admin)}
                                             >
                                                 <FontAwesomeIcon icon={faEdit} />
@@ -182,7 +212,7 @@ function Admins() {
                             />
                             <h1 className="text-white text-md font-bol mb-1">Password</h1>
                             <input
-                                type="text"
+                                type="password"
                                 placeholder="Password"
                                 value={adminPassword}
                                 onChange={(e) => setAdminPassword(e.target.value)}

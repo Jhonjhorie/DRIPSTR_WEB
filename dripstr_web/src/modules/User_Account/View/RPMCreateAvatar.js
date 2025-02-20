@@ -1,35 +1,35 @@
+
 import React, { useState, useEffect, useMemo } from "react";
-import { Canvas, useLoader } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader";
-import { TextureLoader } from "three";
 import Sidebar from "../components/Sidebar";
+import { supabase } from "../../../constants/supabase";
 import { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs } from "../../../constants/avatarConfig";
+import { TextureLoader } from "three";
 
-function Part({ url, position, color, textureUrl, isObj = false }) {
-  console.log("Texture URL:", textureUrl); // Debugging: Check the textureUrl value
+function Part({ url, position, color, textureUrl }) {
+  const gltf = useGLTF(url);
+  const clonedScene = useMemo(() => SkeletonUtils.clone(gltf.scene), [gltf.scene]);
 
-  const objScene = useLoader(OBJLoader, isObj ? url : null); // Load OBJ file if isObj is true
-  const { scene: gltfScene } = useGLTF(isObj ? null : url); // Load GLTF file if isObj is false
-  const scene = useMemo(() => (isObj ? objScene : SkeletonUtils.clone(gltfScene)), [isObj, objScene, gltfScene]);
-
-  // Load texture only if textureUrl is provided
-  const texture = useLoader(TextureLoader, textureUrl || "");
-
-  useEffect(() => {
-    if (!scene || !texture) return;
-
-    scene.traverse((node) => {
+  useMemo(() => {
+    clonedScene.traverse((node) => {
       if (node.isMesh) {
         node.material = node.material.clone();
-        node.material.map = texture;
-        node.material.needsUpdate = true;
+        if (color) {
+          node.material.color.set(color);
+        }
+        if (textureUrl) {
+          const texture = new TextureLoader().load(textureUrl);
+          texture.flipY = false; // Ensure the texture is not flipped (if needed)
+          node.material.map = texture;
+          node.material.needsUpdate = true;
+        }
       }
     });
-  }, [scene, texture]);
+  }, [clonedScene, color, textureUrl]);
 
-  return <primitive object={scene} position={position} />;
+  return <primitive object={clonedScene} position={position} />;
 }
 
 const CharacterCustomization = () => {
@@ -37,25 +37,19 @@ const CharacterCustomization = () => {
   const [selectedBodyType, setSelectedBodyType] = useState("Average");
   const [selectedHair, setSelectedHair] = useState(null);
   const [skincolor, setSkinColor] = useState("#f5c9a6");
-  const [haircolor, setHairColor] = useState("#000000");
+  const [haircolor, setHairColor] = useState("#000000");    
 
-  const getTShirtURL = useMemo(() => tshirURLs[gender][selectedBodyType] || null, [gender, selectedBodyType]);
-  const getShortsURL = useMemo(() => shortsURLs[gender][selectedBodyType] || null, [gender, selectedBodyType]);
+  const getTShirtURL = () => {
+    return tshirURLs[gender][selectedBodyType] || null;
+  };
+
+  const getShortsURL = () => {
+    return shortsURLs[gender][selectedBodyType] || null;
+  };
 
   return (
     <div className="p-4 flex min-h-screen bg-slate-200">
-      <Sidebar
-        gender={gender}
-        setGender={setGender}
-        selectedBodyType={selectedBodyType}
-        setSelectedBodyType={setSelectedBodyType}
-        selectedHair={selectedHair}
-        setSelectedHair={setSelectedHair}
-        skincolor={skincolor}
-        setSkinColor={setSkinColor}
-        haircolor={haircolor}
-        setHairColor={setHairColor}
-      />
+
       <div className="p-4 flex-1">
         <div className="grid md:grid-cols-1">
           <div className="flex-1 h-[500px] rounded-lg shadow-lg bg-gray-100">
@@ -71,19 +65,12 @@ const CharacterCustomization = () => {
                   <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={haircolor} />
                 )}
                 <Part url={bodyTypeURLs[gender][selectedBodyType]} position={[0, 0, 0]} color={skincolor} />
-                {getTShirtURL && (
-                  <Part url={getTShirtURL} position={[0, 0, 0]} textureUrl="/3d/uvmap/tshirtUV.png" />
+                {getTShirtURL() && (
+                  <Part url={getTShirtURL()} position={[0, 0, 0]} textureUrl="/3d/uvmap/TexturedMESH.png" />
                 )}
-                {getShortsURL && <Part url={getShortsURL} position={[0, 0, 0]} />}
+                {getShortsURL() && <Part url={getShortsURL()} position={[0, 0, 0]} />}
               </group>
-              <OrbitControls
-                target={[0, 110, 0]}
-                minPolarAngle={Math.PI / 4}
-                maxPolarAngle={Math.PI / 1.5}
-                enablePan={true}
-                enableZoom={true}
-                enableRotate={true}
-              />
+              <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
             </Canvas>
           </div>
         </div>

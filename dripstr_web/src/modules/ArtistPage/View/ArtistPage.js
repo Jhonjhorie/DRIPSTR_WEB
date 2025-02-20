@@ -45,6 +45,7 @@ function ArtistPage() {
   const [showAlertYO, setShowAlertYO] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageOrientation, setImageOrientation] = useState("landscape");
+  const [messageStatus, setMessageStatus] = useState(false);
 
   const handleFollow = async () => {
     if (!artist || !currentUser) return;
@@ -638,6 +639,7 @@ function ArtistPage() {
       text: messageContent,
       timestamp: new Date().toISOString(),
       send_file: imageUrl, // Store image URL inside the message JSON
+      status: false,
     };
 
     // Check if a conversation already exists for this sender and artist
@@ -661,7 +663,7 @@ function ArtistPage() {
 
       // Update the conversation record with the new content.
       // When creating a new conversation, we also set what_for to the selected option.
-      const updatePayload = { content: updatedContent };
+      const updatePayload = { content: updatedContent, status: false };
       if (!existingConversation.what_for && selectedOption) {
         updatePayload.what_for = selectedOption;
       }
@@ -682,7 +684,7 @@ function ArtistPage() {
         artist_Name: artist?.artist_Name,
         artist_Image: artist?.artist_Image,
         content: [newMsg],
-
+        status: false,
       };
 
       const { data, error } = await supabase
@@ -700,10 +702,10 @@ function ArtistPage() {
   };
 
   const fetchMessages = async () => {
-    // Replace the query with your own logic to fetch messages for the conversation
+    
     const { data, error } = await supabase
       .from("artist_Messages")
-      .select("content")
+      .select("content, status, message_dot")
       .eq("sender_Id", currentUser?.id)
       .eq("artist_Id", artist?.id)
       .maybeSingle();
@@ -711,8 +713,9 @@ function ArtistPage() {
     if (error) {
       console.error("Error fetching messages:", error.message);
     } else if (data) {
-      // Assume that the content field is an array of message objects
+   
       setMessages(data.content || []);
+      setMessageStatus(data.message_dot);
     }
   };
 
@@ -752,7 +755,9 @@ function ArtistPage() {
       fetchMessages();
     }
   }, [messageModal]);
-
+  useEffect(() => {
+    fetchMessages();
+  }, [currentUser?.id, artist?.id]);
   countArtists();
 
   if (!artist)
@@ -794,26 +799,39 @@ function ArtistPage() {
               </h1>
             </div>
             <div className="flex gap-2">
-              <div
-                onClick={() => {
-                  if (currentUser?.id === artist?.owner_Id) {
-                    setShowAlertYO(true);
-                    setTimeout(() => {
-                      setShowAlertYO(false);
-                    }, 3000);
-                  } else {
-                    setMessageModal(true);
-                  }
-                }}
-                className="flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
-              >
-                Message{" "}
-                <box-icon
-                  name="message-dots"
-                  type="solid"
-                  color="white"
-                ></box-icon>
-              </div>
+            <div
+        onClick={async () => {
+          if (currentUser?.id === artist?.owner_Id) {
+            setShowAlertYO(true);
+            setTimeout(() => {
+              setShowAlertYO(false);
+            }, 3000);
+          } else {
+            setMessageModal(true);
+
+            // Update message status in Supabase (mark as read)
+            const { error } = await supabase
+              .from("artist_Messages")
+              .update({ message_dot: false })
+              .eq("sender_Id", currentUser?.id)
+              .eq("artist_Id", artist?.id);
+
+            if (error) {
+              console.error("Error updating message status:", error.message);
+            } else {
+              setMessageStatus(false); // Hide red dot locally
+            }
+          }
+        }}
+        className="relative flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
+      >
+        Message
+        <box-icon name="message-dots" type="solid" color="white"></box-icon>
+
+        {messageStatus && (
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+        )}
+      </div>
 
               <button
                 onClick={isFollowing ? handleUnfollow : handleFollow}
@@ -924,7 +942,7 @@ function ArtistPage() {
         </div>
       </div>
       {/* Artist Arts */}
-      <div className="h-auto p-2 md:px-10 w-full bg-slate-300 ">
+      <div className="h-auto p-2 pb-10 md:px-10 w-full bg-slate-300 ">
         <div className="columns-2 sm:columns-3 md:columns-4 gap-2 px-4 space-y-2">
           {artistArts.length > 0 ? (
             artistArts.map((art) => (
@@ -1085,14 +1103,14 @@ function ArtistPage() {
 
       {selectArt && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
+          className="fixed inset-0 overflow-y-scroll bg-black bg-opacity-70 md:flex justify-center items-center z-50"
           onClick={() => {
             setSelectArt(null);
             setComments([]);
           }}
         >
           <div
-            className="relative min-h-[300px] bg-gradient-to-br from-violet-500 to-fuchsia-500 place-content-center justify-items-center p-4 rounded-lg shadow-lg min-w-[300px] max-w-3xl"
+            className="relative md:min-h-[300px] bg-gradient-to-br from-violet-500 to-fuchsia-500 place-content-center justify-items-center p-4 rounded-lg shadow-lg min-w-[300px] max-w-3xl"
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -1137,13 +1155,14 @@ function ArtistPage() {
               </div>
             </div>
           </div>
+          {/* Art Comments */}
           <div
             onClick={(e) => {
               e.stopPropagation();
             }}
-            className="w-1/3 h-full relative bg-slate-200 px-5"
+            className="w-full md:w-1/3 h-full relative bg-slate-200 px-5"
           >
-            <div className="text-2xl mt-5 text-fuchsia-800 font-bold text-center p-2">
+            <div className="text-2xl mt-2 md:mt-5 text-fuchsia-800 font-bold text-center p-2">
               Comment on {selectArt?.art_Name || "Untitled"}
             </div>
             <div className="text-sm text-slate-900 font-bold ">
@@ -1427,7 +1446,7 @@ function ArtistPage() {
                       </time>
                     </div>
                     <div
-                      className={`chat-bubble ${
+                      className={`chat-bubble cursor-pointer ${
                         isCurrentUser
                           ? "bg-white text-black"
                           : "bg-violet-500 text-white"
@@ -1585,9 +1604,9 @@ function ArtistPage() {
               className="object-contain h-full w-full rounded-lg p-1 drop-shadow-customViolet"
             />
             <button
-                onClick={() => {
-                  setCommissionQR(false);
-                }}
+              onClick={() => {
+                setCommissionQR(false);
+              }}
               className="absolute -top-2 right-0  text-3xl p-2 drop-shadow-lg "
             >
               &times;

@@ -7,14 +7,17 @@ import Google from "../Assets/google.png";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { supabase } from "../../../constants/supabase";
 import { useNavigate } from "react-router-dom";
+import SuccessModal from '../components/SuccessModal';
 
 const AuthScreen = () => {
   const [isSignIn, setIsSignIn] = useState(true); // State to toggle between Sign In and Sign Up
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false); // State for modal visibility
   const [signInData, setSignInData] = useState({
     email: "",
     password: "",
   });
+  const [loggedInUserId, setLoggedInUserId] = useState(null);
 
   const [signUpData, setSignUpData] = useState({
     fullName: "",
@@ -79,9 +82,12 @@ const AuthScreen = () => {
     if (error) {
       alert(`Sign In Error: ${error.message} please check your email and confirm`);
     } else {
-      alert("Sign In successful!");
-      // Check if the user has an avatar and redirect accordingly
-      checkAvatarAndRedirect(data.user.id);
+      setLoggedInUserId(data.user.id); // Store the user ID
+      setIsSuccessModalOpen(true); // Show success modal
+      setTimeout(() => {
+        setIsSuccessModalOpen(false);
+        checkAvatarAndRedirect(data.user.id);
+      }, 2000); // Auto close after 2 seconds
     }
   };
 
@@ -201,10 +207,9 @@ const AuthScreen = () => {
   };
 
   return (
-    <div
-      className="hero min-h-screen bg-cover bg-center flex items-center justify-center"
-      style={{ backgroundImage: `url(${loginBg})` }}
-    >
+    <div className="hero min-h-screen bg-cover bg-center flex items-center justify-center"
+      style={{ backgroundImage: `url(${loginBg})` }}>
+
       <div className="relative bg-white shadow-2xl rounded-lg overflow-hidden lg:w-3/4 w-full h-[600px]">
         <div className={`absolute inset-0 flex transition-transform duration-500`}>
           {/* Sign In Section */}
@@ -400,6 +405,18 @@ const AuthScreen = () => {
           <img src={logo} alt="Logo" className="w-32 mx-auto" />
         </div>
       </div>
+
+
+      {/* Success Modal */}
+      <SuccessModal 
+        isOpen={isSuccessModalOpen} 
+        onClose={() => {
+          setIsSuccessModalOpen(false);
+          if (loggedInUserId) {
+            checkAvatarAndRedirect(loggedInUserId);
+          }
+        }} 
+      />
 
       {/* Forgot Password Modal */}
       {isForgotPasswordOpen && (

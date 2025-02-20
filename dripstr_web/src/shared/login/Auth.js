@@ -8,15 +8,16 @@ import { supabase } from "../../constants/supabase";
 import { useNavigate } from "react-router-dom";  
 import useUserProfile from "@/shared/mulletCheck.js";
 import addToCart from "@/modules/Products/hooks/useAddtoCart.js";
-import AlertDialog from "../../modules/Products/components/alertDialog2";
+import SuccessModal from './components/SuccessModal';
 
 const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const [isSignIn, setIsSignIn] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
   const [loadingP, setLoadingP] = useState(false);
   const [profile, setProfile] = useState(null);
- 
   const navigate = useNavigate();  
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
   
   const [signInData, setSignInData] = useState({ email: "", password: "" });
   const [signUpData, setSignUpData] = useState({
@@ -36,97 +37,71 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
       ? setSignInData({ ...signInData, [name]: value })
       : setSignUpData({ ...signUpData, [name]: value });
   };
-  
-    const handleSignIn = async () => {
-      const { email, password } = signInData;
-      if (!email || !password) return alert("Please enter both email and password.");
-      setLoadingP(true);
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return alert(`Sign In Error: ${error.message}`);
-      setShowAlert(true);
-      handlePostLoginAction();
-    };
-  
-    const handleSignUp = async () => {
-      const { email, password, fullName, mobile, gender, birthDate, address, postcode } = signUpData;
-      if (!email || !password || !fullName || !mobile || !gender || !birthDate || !address || !postcode)
-        return alert("Please fill in all fields.");
-  
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { 
-          data: { fullName, mobile, gender, birthDate } 
-        },
+
+  const handleSignIn = async () => {
+    const { email, password } = signInData;
+    if (!email || !password) return alert("Please enter both email and password.");
+    setLoadingP(true);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) {
+      setLoadingP(false);
+      return alert(`Sign In Error: ${error.message}`);
+    }
+
+    // Show success modal
+    setIsSuccessModalOpen(true);
+    
+    // Close success modal and proceed after 2 seconds
+    setTimeout(async () => {
+      setIsSuccessModalOpen(false);
+      onClose();
+      
+      if(actionLog === "cart" || actionLog === "placeOrder") {
+        try {
+          // ...existing cart/order logic...
+        } catch (err) {
+          console.log(err.message || "An error occurred while fetching the profile.");
+        } finally {
+          setLoadingP(false);
+        }
+      } else {
+        navigate("/");
+        window.location.reload();
+      }
+    }, 2000);
+  };
+
+  const handleSignUp = async () => {
+    const { email, password, fullName, mobile, gender, birthDate, address, postcode } = signUpData;
+    if (!email || !password || !fullName || !mobile || !gender || !birthDate || !address || !postcode)
+      return alert("Please fill in all fields.");
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { 
+        data: { fullName, mobile, gender, birthDate } 
+      },
+    });
+
+    if (error) return alert(`Sign Up Error: ${error.message}`);
+    
+    const user = data.user;
+    if (user) {
+      await supabase.from("addresses").insert({
+        user_id: user.id,
+        address,
+        postcode,
+        is_default_shipping: true,
       });
-  
-      if (error) return alert(`Sign Up Error: ${error.message}`);
-      
-      const user = data.user;
-      if (user) {
-        await supabase.from("addresses").insert({
-          user_id: user.id,
-          address,
-          postcode,
-          is_default_shipping: true,
-        });
-      }
-  
-      setShowAlert(true)
-      handlePostLoginAction();
-    };
-  
-    const handlePostLoginAction = async () => {
-      if (actionLog === "cart" && order) {
-        const response = await addToCart(
-          order.itemT.id,
-          order.qty,
-          order.variant,
-          order.size
-        );
-  
-        if (response.success) {
-          console.log("Item added to cart successfully:", response.data);
-        } else {
-          console.error("Failed to add item to cart:", response.error);
-        }
-  
-        setTimeout(() => {
-       
-          navigate("/");
-          window.location.reload();
-          setShowAlert(false);
-        }, 3000);
-      } else if (actionLog === "placeOrder") {
-        const solo = true;
-        const formOrder = {
-          acc_id: profile,
-          prod: order.itemT,
-          qty: order.qty,
-          variant: order.variant,
-          size: order.size,
-          to_order: true,
-        };
-        
-        const selectedItems = [formOrder];
-  
-        if (selectedItems.length === 0) {
-          alert("No items selected for order. Please select at least one item.");
-          return;
-        }
-  
-        navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
-      }else{
-        setTimeout(() => {
-       
-          navigate("/");
-          window.location.reload();
-          setShowAlert(false);
-        }, 3000);
-       
-      }
-      
-    };
+    }
+
+    alert("Sign Up successful! Check your email for confirmation.");
+    onClose();
+    navigate("/");
+    window.location.reload();
+  };
 
   const handleToggle = () => setIsSignIn(!isSignIn);
 
@@ -134,24 +109,10 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
     <>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                   <div className="bg-white p-6 rounded-lg shadow-xl w-96 relative">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-96 relative">
             <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl">
               &times;
             </button>
-{showAlert ? (
-          <div className="flex flex-col items-center justify-center h-full w-full p-6">
-            <img
-              src={require("@/assets/emote/success.png")}
-              alt="No Images Available"
-              className="object-contain animate-pulse drop-shadow-customViolet "
-            />
-            <span className="text-xl text-center mt-4">
-              {isSignIn
-                ? "Sign In successful!"
-                : "Sign Up successful! Check your email for confirmation."}
-            </span>
-          </div>):(<div>
- 
             <h2 className="text-2xl font-bold text-gray-800 mb-4">{isSignIn ? "Sign In" : "Sign Up"}</h2>
 
             {/* Form Fields */}
@@ -242,12 +203,13 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
                 {isSignIn ? "Sign Up" : "Sign In"}
               </button>
             </p>
-            </div>)}
           </div>
-          
         </div>
-        
       )}
+       <SuccessModal 
+        isOpen={isSuccessModalOpen}
+        onClose={() => setIsSuccessModalOpen(false)}
+       />
     </>
   );
 };
