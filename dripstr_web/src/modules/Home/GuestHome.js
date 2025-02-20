@@ -15,10 +15,12 @@ import { supabase } from "../../constants/supabase";
 function GuestHome() {
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState("All");
+  
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const { products, loading, error } = useProducts();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
 useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -30,13 +32,14 @@ useEffect(() => {
     const handleAuth = () => {
       if (!user) {
         setIsAuthModalOpen(true); 
+        
       } else {
         navigate("/"); 
       }
     };
 
   return (
-    <div className="w-full relative flex flex-col">
+    <div className="w-full relative flex flex-col font-[iceland]">
        {/* Auth Modal */}
        {isAuthModalOpen && (
         <AuthModal

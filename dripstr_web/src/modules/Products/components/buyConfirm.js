@@ -64,31 +64,6 @@ const BuyConfirm = ({ item, onClose }) => {
     navigate(`/product/merchant-shop/${item.shop.shop_Name}`, { state: { shop: item.shop } });
   };
 
-  const onConfirm = () => {
-    if (isLoggedIn) {
-      const solo = true;
-      const formOrder = {
-        acc_id: profile,
-        prod: item,
-        qty: quantity,
-        variant: selectedColor,
-        size: selectedSize,
-        to_order: true,
-      };
-
-      const selectedItems = [formOrder];
-
-      if (selectedItems.length === 0) {
-        alert("No items selected for order. Please select at least one item.");
-        return;
-      }
-
-      navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
-    } else {
-      setActionLog("placeOrder");
-      setLoginDialog(true);
-    }
-  };
 
   const closeModalRep = () => {
     document.getElementById("my_modal_report").close();
@@ -121,7 +96,33 @@ const BuyConfirm = ({ item, onClose }) => {
         onClose();
       }, 2000);
     } else {
+      setLoginDialog(true);
       setActionLog("cart");
+    }
+  };
+
+  const onConfirm = () => {
+    if (isLoggedIn) {
+      const solo = true;
+      const formOrder = {
+        acc_id: profile,
+        prod: item,
+        qty: quantity,
+        variant: selectedColor,
+        size: selectedSize,
+        to_order: true,
+      };
+
+      const selectedItems = [formOrder];
+
+      if (selectedItems.length === 0) {
+        alert("No items selected for order. Please select at least one item.");
+        return;
+      }
+
+      navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
+    } else {
+      setActionLog("placeOrder");
       setLoginDialog(true);
     }
   };
@@ -339,19 +340,19 @@ const BuyConfirm = ({ item, onClose }) => {
             </div>
 
             {loginDialog && (
-              <AuthModal
-                isOpen={loginDialog}
-                onClose={() => setLoginDialog(false)}
-                action={actionLog}
-                order={{
-                  itemT: item,
-                  qty: quantity,
-                  variant: selectedColor,
-                  size: selectedSize,
-                  to_order: true,
-                }}
-              />
-            )}
+      <AuthModal
+        isOpen={loginDialog}
+        onClose={() => setLoginDialog(false)}
+        action={actionLog}
+        order={{
+          itemT: item,
+          qty: quantity,
+          variant: selectedColor,
+          size: selectedSize,
+          to_order: true,
+        }}
+      />
+    )}
 
             <dialog
               id="my_modal_report"
