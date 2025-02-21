@@ -555,8 +555,8 @@ function Artists() {
               </div>
 
               {/* Art Name Badge */}
-              <div className="absolute bottom-2 left-2 bg-custom-purple text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2">
-                <img src={drplogo} alt="Logo" className="h-5 w-5" />
+              <div className="absolute glass bottom-2 left-2 bg-custom-purple text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2">
+                <img src={art.artists?.artist_Image } alt="Logo" className="h-7 w-7 rounded-md" />
                 {art.art_Name}
               </div>
               <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2  gap-2">
