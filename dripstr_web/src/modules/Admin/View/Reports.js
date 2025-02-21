@@ -150,7 +150,8 @@ function Reports() {
   };
 
   const deleteReport = async (reportId) => {
-    const { data, error } = await supabase
+    if (selectedTab === "Arts") {
+      const { data, error } = await supabase
       .from("reported_Art")
       .delete()
       .eq("id", reportId);
@@ -162,6 +163,21 @@ function Reports() {
         prevReports.filter((report) => report.id !== reportId)
       );
       closeModal();
+    }}
+    else{
+      const { data, error } = await supabase
+      .from("reported_Chinese")
+      .delete()
+      .eq("id", reportId);
+
+    if (error) {
+      console.error("❌ Error deleting report:", error.message);
+    } else {
+      setProductReports((prevReports) =>
+        prevReports.filter((report) => report.id !== reportId)
+      );
+      closeModal();
+    }
     }
   };
 
