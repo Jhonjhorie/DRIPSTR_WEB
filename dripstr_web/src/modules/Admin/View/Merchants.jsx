@@ -21,7 +21,7 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('shop')
-                    .select('shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved')
+                    .select('shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, owner_Id')
                     .is('is_Approved', true);
 
                 if (error) throw error;

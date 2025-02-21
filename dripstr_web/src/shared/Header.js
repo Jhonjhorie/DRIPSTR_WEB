@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ReactComponent as Logo } from '../assets/images/BlackLongLogo.svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { faSearch, faShoppingCart, faMessage, faUser } from '@fortawesome/free-solid-svg-icons';
 import ChatMessages from '../modules/Messaging/View/Messaging';
 import Cart from '../modules/Products/Cart';
@@ -16,7 +16,8 @@ const Header = () => {
   const drawerCheckboxRef = useRef(null);
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
+  const location = useLocation();
+  
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -50,6 +51,9 @@ const Header = () => {
     }
   };
 
+  if (location.pathname.startsWith('/admin')) {
+    return null; // Don't render anything if the route is "/admin/*"
+  }
   return (
     <div className="flex items-center gap-2 h-16 sm:h-20 px-4 sm:px-8 md:px-16 py-4 sm:py-8 md:py-12 bg-slate-50 sticky top-0 z-30">
       {/* Website Name */}
