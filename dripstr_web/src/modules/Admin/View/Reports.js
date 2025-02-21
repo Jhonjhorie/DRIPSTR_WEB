@@ -10,8 +10,30 @@ function Reports() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState(null);
-
   const [selectedTab, setSelectedTab] = useState("Products");
+  const [productReports, setProductReports] = useState([]);
+
+  const fetchProductReports = async () => {
+    setLoading(true);
+
+    const { data: reports, error: reportError } = await supabase
+      .from("reported_Chinese")
+      .select("id, created_at, prod_Id(item_Variant, shop_Name), prod_Name, reason, action");
+
+    if (reportError) {
+      console.error("❌ Error fetching reports:", reportError.message);
+      setLoading(false);
+      return;
+    }
+
+    setProductReports(reports);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    fetchProductReports();
+  }, []);
+
 
   const fetchReports = async () => {
     setLoading(true);
@@ -91,7 +113,8 @@ function Reports() {
   };
 
   const updateReportAction = async (reportId, action) => {
-    const { data, error } = await supabase
+    if (selectedTab === "Arts") {
+      const { data, error } = await supabase
       .from("reported_Art")
       .update({ action })
       .eq("id", reportId);
@@ -106,6 +129,24 @@ function Reports() {
       );
       closeModal();
     }
+    }else{
+      const { data, error } = await supabase
+      .from("reported_Chinese")
+      .update({ action })
+      .eq("id", reportId);
+
+    if (error) {
+      console.error("❌ Error updating report action:", error.message);
+    } else {
+      setProductReports((prevReports) =>
+        prevReports.map((report) =>
+          report.id === reportId ? { ...report, action } : report
+        )
+      );
+      closeModal();
+    }
+    }
+
   };
 
   const deleteReport = async (reportId) => {
@@ -127,9 +168,9 @@ function Reports() {
   const handleActionClick = (action) => {
     if (modalContent && modalContent.type === "action") {
       if (action === "Dismiss") {
-        deleteReport(modalContent.content.id); 
+        deleteReport(modalContent.content.id);
       } else {
-        updateReportAction(modalContent.content.id, action); 
+        updateReportAction(modalContent.content.id, action);
       }
     }
   };
@@ -178,7 +219,53 @@ function Reports() {
         {/* Tab Content */}
         {selectedTab === "Products" && (
           <div>
-            <p className="text-white">Content for Products will go here.</p>
+            {loading ? (
+              <p className="text-white text-center">Loading reports...</p>
+            ) : (
+              <table className="w-full table-fixed text-white border border-gray-600 bg-gray-800">
+                <thead>
+                  <tr className="bg-gray-700">
+                    <th className="p-2 border border-gray-500">ID</th>
+                    <th className="p-2 border border-gray-500">Report Date</th>
+                    <th className="p-2 border border-gray-500">Image</th>
+                    <th className="p-2 border border-gray-500">Product Name</th>
+                    <th className="p-2 border border-gray-500">Merchant Name</th>
+                    <th className="p-2 border border-gray-500">Reason</th>
+                    <th className="p-2 border border-gray-500">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productReports && productReports.length > 0 ? (
+                    productReports.map((report) => (
+                      <tr key={report.id} className="text-center border-b border-gray-600">
+                        <td className="p-2 border border-gray-500">{report.id}</td>
+                        <td className="p-2 border border-gray-500">{formatDate(report.created_at)}</td>
+                        <td className="p-2 border border-gray-500">
+                          {report.prod_Id?.item_Variant[0].imagePath ? (
+                            <img
+                              src={report.prod_Id?.item_Variant[0].imagePath}
+                              alt="Art"
+                              className="cursor-pointer h-16 w-16 object-cover mx-auto"
+                              onClick={() => openImageModal(report.prod_Id?.item_Variant[0].imagePath)}
+                            />
+                          ) : (
+                            <span>No Image</span>
+                          )}
+                        </td>
+                        <td className="p-2 border border-gray-500">{report.prod_Name || "No Name"}</td>
+                        <td className="p-2 border border-gray-500">{report.prod_Id?.shop_Name || "No Name"}</td>
+                        <td className="p-2 border border-gray-500">{report.reason}</td>
+                        <td className="p-2 border border-gray-500 cursor-pointer hover:text-blue-500 underline" onClick={() => openActionModal(report)}>{report.action}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="7" className="text-center p-2">No Reports found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         )}
 
