@@ -1,351 +1,261 @@
 import React from "react";
 import SideBar from "../Component/Sidebars";
-import streetBG from "../../../assets/streetbg.png";
-import starBG from "../../../assets/starDrp.png";
-import sBG from "../../../assets/bgdrip.png";
-import sample1 from "../../../assets/images/samples/2.png";
-import cust1 from "../../../assets/shop/erica.jpg";
-import cust2 from "../../../assets/shop/sample2.jpg";
-import cust3 from "../../../assets/shop/nevercry.jpg";
-import drp from "../../../assets/DrpTxt.png";
 import "../Component/Style.css";
-import logo from "../../../assets/shop/shoplogo.jpg";
-import sample3 from "../../../assets/images/samples/5.png";
-import sample2 from "../../../assets/images/samples/10.png";
-
-const { useState } = React;
-const CustnameData = [
-  {
-    id: 1,
-    photo: cust1,
-    order: sample2,
-    name: "Erina Mae",
-    message: "Just order an Item.",
-    status: "sent",
-    orderRating: "to rate",
-    timeSent: "2m ago",
-    reply: " Thank you for purchasing on our store.",
-    follow: "Followers",
-  },
-  {
-    id: 2,
-    photo: cust2,
-    order: sample3,
-    name: "Paolo",
-    message: "Just order an Item.",
-    status: "read",
-    timeSent: "1h ago",
-    orderRating: "4",
-    follow: "Followers",
-    message2: "The product is good<3",
-    reply: " Thank you for purchasing on our store.",
-  },
-  {
-    id: 3,
-    photo: cust3,
-    order: sample1,
-    name: "Queen",
-    message: "Just order an Item.",
-    status: "sent",
-    timeSent: "1m ago",
-    orderRating: "to rate",
-    reply: " Thank you for purchasing on our store.",
-    follow: "Customer",
-  },
-];
-
+import logo from "../../../assets/shop/logoBlack.png";
+import { supabase } from "../../../constants/supabase";
+import "boxicons";
+import { blockInvalidChar } from "../Hooks/ValidNumberInput";
+const { useState, useEffect } = React;
 function MerchantWallet() {
- 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [shopData, setShopData] = useState([]);
+  const [showForm, setShowForm] = useState(false); 
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    bankName: "",
+    accountNumber: "",
+    govID: null,
+    profilePhoto: null,
+  });
+
+  const fetchUserProfileAndShop = async () => {
+    setLoading(true);
+
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError) {
+        setError(authError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (user) {
+        console.log("Current user:", user);
+
+        const { data: shops, error: shopError } = await supabase
+          .from("shop")
+          .select(
+            "shop_name, id, address, description, contact_number, shop_image, shop_BusinessPermit, has_Wallet"
+          )
+          .eq("owner_Id", user.id);
+
+        if (shopError) {
+          throw shopError;
+        }
+setShopData(shops);
+      } else {
+        console.log("No user is signed in.");
+        setError("No user is signed in.");
+      }
+    } catch (error) {
+      console.error("Error fetching user/shop data:", error.message);
+      setError("An error occurred while fetching user/shop data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchUserProfileAndShop();
+  }, []); // Run once on mount
+
+  // Simulate wallet creation
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    setFormData({ ...formData, [name]: files[0] });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!shopData || !shopData.id) {
+      setError("Shop data is missing. Please refresh the page and try again.");
+      return;
+    }
+  
+    setLoading(true);
+  
+    try {
+      let walletID;
+      let isUnique = false;
+
+      while (!isUnique) {
+        walletID = Math.floor(100000000 + Math.random() * 900000000);
+  
+        const { data: existingWallet } = await supabase
+          .from("merchant_Wallet")
+          .select("id")
+          .eq("id", walletID);
+  
+        if (!existingWallet || existingWallet.length === 0) {
+          isUnique = true;
+        }
+      }
+      // Upload files 
+      // to Supabase storage
+      const uploadFile = async (file, path) => {
+        const { data, error } = await supabase.storage
+          .from("wallet_docs") 
+          .upload(`${path}/${file.name}`, file);
+  
+        if (error) throw error;
+        return data.path;
+      };
+  
+      const govIDPath = formData.govID
+        ? await uploadFile(formData.govID, "gov_ids")
+        : null;
+      const profilePhotoPath = formData.profilePhoto
+        ? await uploadFile(formData.profilePhoto, "profile_photos")
+        : null;
+  
+      // Step 1: Update shop table
+      const { error: shopError } = await supabase
+        .from("shop")
+        .update({
+          has_Wallet: true,
+        })
+        .eq("id", shopData.id);
+  
+      if (shopError) throw shopError;
+  
+      // Step 2: Insert into merchant_Wallet table
+      const { error: walletError } = await supabase
+        .from("merchant_Wallet")
+        .insert([
+          {
+            id: walletID,
+            merchant_Id: shopData.id, 
+            E_wallet: formData.bankName, 
+            number: formData.accountNumber,
+            owner_Name: formData.fullName,
+            valid_ID: govIDPath,
+            owner_Photo: profilePhotoPath,
+            revenue: "0", 
+          },
+        ]);
+  
+      if (walletError) throw walletError;
+  
+      // Refresh data
+      fetchUserProfileAndShop();
+      setShowForm(false); // Hide form after submission
+    } catch (err) {
+      console.error("Error creating wallet:", err.message);
+      setError("Failed to create wallet.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+
 
   return (
-    <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar ">
+    <div className="h-full w-full bg-slate-300 md:px-20 p-2 ">
       <div className="absolute mx-3 right-0 z-20">
         <SideBar />
       </div>
-
-      <div className="w-full  h-full bg-slate-300 md:px-10 lg:px-16">
-        <div className="w-full  h-full bg-slate-100 flex">
-          <div className="w-2/5  bg-gradient-to-br from-violet-500 to-fuchsia-500 p-1 h-full shadow-black">
-            <div className="text-2xl font-semibold p-2 py-5 text-white flex place-items-center justify-between">
-              <label>Messages</label>
-              <box-icon
-                type="solid"
-                color="#4D077C"
-                name="message-square-dots"
-              ></box-icon>
-            </div>
-            <div className="h-[500px] overflow-hidden overflow-y-scroll rounded-md  bg-slate-100 bg-opacity-40 glass shadow-black w-full shadow-inner pt-2 pl-2">
-              {sortedData.map((user) => (
-                <div
-                  onClick={() => handleChatClick(user)}
-                  key={user.id}
-                  className={`relative hover:scale-95 duration-300 cursor-pointer h-auto mb-1 w-full flex gap-2 p-1 rounded-md shadow-md ${
-                    user.status === "sent" ? "bg-[#563A9C] glass" : "bg-white"
-                  }`}
-                >
-                  <div
-                    className={`h-12 w-12 ${
-                      user.status === "sent"
-                        ? "border-[2px]  border-primary-color rounded-full"
-                        : "border-[2px]  border-slate-400 rounded-full"
-                    }`}
-                  >
-                    <img
-                      src={user.photo}
-                      alt={`Profile picture of ${user.name}`}
-                      className=" h-full w-full object-cover rounded-full"
-                      sizes="100%"
-                    />
-                  </div>
-                  <div>
-                    <div
-                      className={`font-semibold ${
-                        user.status === "sent"
-                          ? "text-white"
-                          : "text-slate-700 "
-                      }`}
-                    >
-                      {" "}
-                      {user.name}{" "}
-                    </div>
-                    <div
-                      className={`text-sm ${
-                        user.status === "sent"
-                          ? "text-white"
-                          : "text-slate-700 "
-                      }`}
-                    >
-                      {" "}
-                      {user.message}{" "}
-                    </div>
-                  </div>
-                  <div className="absolute top-1 text-sm  right-2">
-                    {" "}
-                    {user.timeSent}{" "}
-                  </div>
-                </div>
-              ))}
-            </div>
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-red-500">{error}</p>
+      ) : shopData?.has_Wallet ? (
+        // Show Wallet
+        <div className="h-full w-full">
+          <div className="text-2xl flex font-semibold place-items-center justify-between">
+            <label className="text-3xl text-custom-purple font-bold">YOUR WALLET</label>
           </div>
-          <div className="w-full relative place-content-center bg-gradient-to-bl from-violet-500 to-fuchsia-500 h-full">
-            <div className=" absolute z-10 top-0 right-0">
-              <img
-                src={streetBG}
-                className="drop-shadow-customWhite h-full w-full object-cover rounded-full"
-                sizes="100%"
-              />
+          <div className="bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[200px] w-[350px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white">
+            {/* Wallet Icon and Name */}
+            <div className="absolute bottom-2 right-2">
+              <img src={"/path-to-logo.png"} className="h-20 w-20 blur-sm" />
             </div>
-            <div className=" absolute z-0 bottom-0 left-0">
-              <img
-                src={starBG}
-                className="drop-shadow-customWhite  h-full w-full object-cover rounded-full"
-                sizes="100%"
-              />
+            <div className="flex justify-between items-center">
+            <box-icon type='solid' name='wallet'></box-icon>
+              <span className="text-lg font-semibold">Dripstr Wallet</span>
             </div>
-            <div className=" top-32 z-0 absolute">
-              <img
-                src={drp}
-                className="drop-shadow-customWhite  h-full w-full object-cover rounded-full"
-                sizes="100%"
-              />
+
+            {/* Balance */}
+            <div>
+              <p className="text-sm">Your Balance</p>
+              <p className="text-2xl font-bold">₱5,250.75</p>
             </div>
-            {/*
-                <div className=' top-0 z-0 w-full h-full absolute'>
-                    <img
-                        src={sBG}
-                        className="  h-full w-full object-fill"
-                        sizes="100%"
-                    />
-                </div>*/}
-            {selectedUser && (
-              <div
-                className={`w-full relative z-10 bg-violet-100 h-full flex ${
-                  isClosing ? "fade-out" : "fade-in"
-                }`}
-              >
-                <div className="w-full h-auto">
-                  <div className="bg-white relative z-10 shadow-sm shadow-slate-400 w-full h-auto p-2 px-5 py-3 flex place-items-center justify-between gap-2">
-                    <div className="flex gap-2 place-items-center">
-                      <div className="h-12 w-12 border-[2px]  border-primary-color rounded-full">
-                        <img
-                          src={selectedUser.photo}
-                          className=" h-full w-full object-cover rounded-full"
-                          sizes="100%"
-                        />
-                      </div>
-                      <label className="text-slate-800 font-semibold">
-                        {" "}
-                        {selectedUser.name}{" "}
-                      </label>
-                    </div>
-                    <div
-                      onClick={handleCloseChat}
-                      className="hover:scale-95 duration-300 cursor-pointer rounded-md p-1 justify-center flex"
-                    >
-                      <box-icon name="message-square-x" color="#000"></box-icon>
-                    </div>
-                  </div>
 
-                  <div className="h-[500px] w-full bg-white overflow-y-scroll custom-scrollbar p-2 overflow-hidden">
-                    {/* Messages will show here */}
-
-                    {selectedUser.message && (
-                      <div className="chat chat-start">
-                        <div className="mb-1 ml-14">
-                          <div className="chat-header text-slate-800">
-                            {selectedUser.name}
-                          </div>
-                          {selectedUser.order && (
-                            <div
-                              className="h-24 w-24 bg-slate-100 shadow-md shadow-slate-600 rounded-md border-[1px] border-primary-color
-                                             "
-                            >
-                              <img
-                                src={selectedUser.order}
-                                alt="Order Photo"
-                                className="object-cover p-1 h-full w-full"
-                              />
-                            </div>
-                          )}
-                        </div>{" "}
-                        <br />
-                        <div className="flex gap-2">
-                          <div className="chat-image avatar">
-                            <div className="w-10 mb-5 rounded-full">
-                              <img
-                                alt="Customer Profile"
-                                src={selectedUser.photo}
-                              />
-                            </div>
-                          </div>
-                          <div className="w-80 ml-2  ">
-                            <div className="chat-bubble">
-                              {selectedUser.message}
-                            </div>
-                            <div className="chat-footer opacity-50">
-                              sent 10:30pm
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {/* Shop response */}
-                    {selectedUser.reply && (
-                      <div className="chat chat-end">
-                        <div className="chat-image avatar">
-                          <div className="w-10 rounded-full border-2 border-primary-color">
-                            <img alt="Shop Profile" src={shopData.photo} />
-                          </div>
-                        </div>
-                        <div className="chat-header text-slate-800">
-                          {shopData.name}
-                        </div>
-                        <div className="chat-bubble bg-custom-purple text-slate-200">
-                          {selectedUser.reply}
-                        </div>
-                        <div className="chat-footer opacity-50">
-                          Seen at 12:46
-                        </div>
-                      </div>
-                    )}
-
-                    {selectedUser.message2 && (
-                      <div className="chat chat-start">
-                        <div className="chat-image avatar">
-                          <div className="w-10 rounded-full">
-                            <img
-                              alt="Customer Profile"
-                              src={selectedUser.photo}
-                            />
-                          </div>
-                        </div>
-                        <div className="chat-header text-slate-800">
-                          {selectedUser.name}
-                        </div>
-                        <div className="chat-bubble">
-                          {selectedUser.message2}
-                        </div>
-                        <div className="chat-footer opacity-50">
-                          sent 10:36pm
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="h-auto w-full flex gap-2 p-1 border-t-2 border-slate-400 bg-slate-100">
-                    <textarea
-                      placeholder="Type your message here..."
-                      type="text"
-                      className="bg-slate-100 w-5/6 h-14 border-custom-purple border-[0.5px] shadow-inner shadow-slate-400 rounded-md text-slate-800 p-2"
-                    ></textarea>
-                    <button className=" iceland-regular text-xl text-slate-800 shadow shadow-black glass rounded-md duration-300 place-items-center flex gap-2 px-5 hover:bg-slate-400 hover:scale-95 ">
-                      <box-icon
-                        color="#000"
-                        type="solid"
-                        name="send"
-                      ></box-icon>
-                      SENT
-                    </button>
-                  </div>
-                </div>
-                <div className="w-2/5 h-full bg-gradient-to-br from-violet-500 to-fuchsia-500 shadow-md shadow-slate-500 ">
-                  <div className="w-full h-auto p-2 place-items-center ">
-                    <div className="bg-slate-100 mt-16 w-32 h-32 rounded-full border-[2px]  border-slate-800 ">
-                      <img
-                        src={selectedUser.photo}
-                        alt="Shop Logo"
-                        className="drop-shadow-custom object-cover rounded-full h-full w-full"
-                      />
-                    </div>
-                    <div className="mt-2 text-white font-semibold text-xl">
-                      {selectedUser.name}
-                    </div>
-                    <div className="mt-2 text-white font-semibold text-sm">
-                      {selectedUser.follow}
-                    </div>
-                    <div className="border-t-2 border-slate-600 w-full mt-5"></div>
-                    <div className="w-full">
-                      <div className="text-slate-200"> Recent Rating: </div>
-                      <div className="h-[300px] w-full pl-2 pt-2 bg-slate-200 rounded-md shadow-inner shadow-black overflow-hidden overflow-y-scroll">
-                        <div className="bg-sky-50 h-auto p-2 place-items-center shadow-md w-full rounded-sm hover:bg-primary-color duration-300 flex gap-2">
-                          <div className="bg-slate-300 h-14 w-14 rounded-md ">
-                            <img
-                              className="object-cover h-full w-full"
-                              src={selectedUser.order}
-                            />
-                          </div>
-                          {selectedUser.orderRating && (
-                            <div className="text-slate-800 place-items-center flex gap-2">
-                              Rating:
-                              <span
-                                className={`${
-                                  selectedUser.orderRating === "to rate"
-                                    ? "text-slate-800"
-                                    : "text-yellow-500"
-                                } text-sm`}
-                              >
-                                {selectedUser.orderRating}
-                              </span>
-                              <box-icon
-                                type="solid"
-                                color={
-                                  selectedUser.orderRating === "to rate"
-                                    ? "#FFFFFF"
-                                    : "#EB8317"
-                                }
-                                name="star"
-                              ></box-icon>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Card Number */}
+            <div className="text-sm tracking-widest opacity-80">**** **** **** 1234</div>
           </div>
         </div>
-      </div>
+      ) : showForm ? (
+        // Show Wallet Creation Form
+        <div className="bg-white shadow-md shadow-slate-400 p-6 rounded-md w-full max-w-md mx-auto">
+          <h2 className="text-2xl font-semibold mb-4 text-center text-custom-purple ">Enter E-Wallet Details</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              placeholder="Full Name"
+              className="w-full p-2 border bg-slate-300 rounded-sm text-slate-800"
+              required
+            />
+            <input
+              type="text"
+              name="bankName"
+              value={formData.bankName}
+              onChange={handleInputChange}
+              placeholder="Bank Name"
+              className="w-full p-2 border bg-slate-300 rounded-sm text-slate-800"
+              required
+            />
+            <input
+              type="number"
+              name="accountNumber"
+              value={formData.accountNumber}
+              onChange={handleInputChange}
+              onKeyDown={blockInvalidChar}
+              placeholder="Account Number"
+              className="w-full p-2 border bg-slate-300 rounded-sm text-slate-800"
+              required
+            />
+            <label className="block text-slate-800">
+              Government ID:
+              <input type="file" name="govID" onChange={handleFileChange} className="w-full p-2 border rounded" required />
+            </label>
+            <label className="block text-slate-800">
+              Photo of the Holder:
+              <input type="file" name="profilePhoto" onChange={handleFileChange} className="w-full p-2 border rounded" required />
+            </label>
+            <button
+              type="submit"
+              className="w-full bg-custom-purple glass text-white font-bold text-white py-2 rounded hover:bg-primary-color transition"
+            >
+              Submit
+            </button>
+          </form>
+        </div>
+      ) : (
+        // Show "Create Wallet" Button
+        <div className="flex flex-col items-center justify-center h-full">
+          <p className="text-xl font-bold text-gray-700">Create Your Wallet</p>
+          <button
+            onClick={() => setShowForm(true)}
+            className="mt-4 bg-custom-purple glass text-white font-bold px-6 py-2 rounded-md shadow-md hover:bg-indigo-700 transition"
+          >
+            Create Wallet
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -208,7 +208,7 @@ function SideBar() {
             ></box-icon>
           </li>
           <li
-            onClick={() => navigate("/shop/Shop_profile")}
+            onClick={() => navigate("/shop/MerchantWallet")}
             className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
