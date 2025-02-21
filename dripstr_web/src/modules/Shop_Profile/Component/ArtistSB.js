@@ -98,7 +98,7 @@ function ArtistSB() {
       >
         <ul className=" mt-16  md:mt-24 p-2">
           <div className="h-24 w-full rounded-md bg-slate-900">
-            <div className="bg-slate-100 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-md border-[3px]  border-slate-800 ">
+            <div className="bg-slate-100 h-28 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-md border-[3px]  border-slate-800 ">
               <img
                 src={artistData.artist_Image}
                 alt="Shop Logo"

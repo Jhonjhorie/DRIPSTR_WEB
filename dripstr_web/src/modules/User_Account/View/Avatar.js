@@ -157,8 +157,10 @@ const CharacterCustomization = () => {
   };
 
   return (
-<div className="p-4 flex min-h-screen bg-slate-200">
-  <Sidebar />
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">  
+      <Sidebar />
+      </div>
 
   <div className="p-4 flex-1">
     <div className="flex flex-row gap-4">
@@ -299,7 +301,7 @@ const CharacterCustomization = () => {
       </div>
 
       {/* Right Panel: 3D Canvas */}
-      <div className="flex-1 h-[500px] rounded-lg shadow-lg flex-1 bg-gray-100">
+      <div className="flex-1 h-[500px] rounded-lg shadow-lg bg-gray-100">
         <div className="relative flex flex-1 w-full h-full">
 
           {/* Darkened Background Image */}
@@ -332,13 +334,13 @@ const CharacterCustomization = () => {
           <Part key={`shorts-${gender}-${selectedBodyType}`} url={getShortsURL()} position={[0, 0, 0]} />
         )}
       </group>
-      <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
+      <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} minDistance={100} maxDistance={300} />
     </Canvas>
   </div>
 </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end mt-4 space-x-2 p-4">
+        <div className="flex justify-end space-x-2 p-4">
           {isEditing ? (
             <>
               <button

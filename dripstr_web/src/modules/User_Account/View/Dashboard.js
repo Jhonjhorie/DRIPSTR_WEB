@@ -10,14 +10,15 @@ const Account = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-
   useEffect(() => {
     fetchProfile();
     fetchAddresses();
   }, []);
 
   const fetchProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (user) {
       let { data, error } = await supabase
@@ -32,7 +33,9 @@ const Account = () => {
   };
 
   const fetchAddresses = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (user) {
       let { data, error } = await supabase
@@ -47,153 +50,144 @@ const Account = () => {
   };
 
   return (
-    <div className="p-4 bg-slate-200 min-h-screen flex flex-row">
-
-    <Sidebar />
-    <div className="p-4 px-9 flex-1 ">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold text-gray-800">Manage My Account</h1>
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+      <div className="sticky h-full ">
+        <Sidebar />
       </div>
 
-      {/* Profile Section */}
-      <div className="flex flex-row gap-4 justify-between mb-6">
-        {/* Personal Profile */}
-        <div className="bg-gray-100 p-4 flex-1 rounded-lg shadow">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Personal Profile</h2>
-            <Link to="/account/profile" className="text-indigo-600">
-              Edit Profile
-            </Link>
-          </div>
-
-                  {loading ? (
-          <div className="flex flex-col justify-center items-center">
-            <img src="/emote/hmmm.png" alt="Loading..." className="w-20 h-20" />
-            <label>Loading...</label>
-          </div>
-        ) : (
-          <>
-          <div className="flex items-center gap-4">
-            <img
-              src={profile?.profile_picture || "/default-avatar.png"}
-              alt="Profile"
-              className="w-24 h-24 rounded-full border-2 border-gray-300 mr-2 cursor-pointer"
-              onClick={() => setIsModalOpen(true)}
-              /> 
-
-            <div>
-                <p className="text-gray-600">{profile?.full_name || "N/A"}</p>
-                <p className="text-gray-600">{profile?.email || "N/A"}</p>
-                <p className="text-gray-600">Mobile: {profile?.mobile || "N/A"}</p>
-            </div>
-          </div>
-          <div className="mt-4 text-right">
-            <button className="btn btn-primary">Edit Avatar</button>
-          </div>
-          </>
-        )}
-        </div>
-
-          {/* Address Book Section */}
-          <div className="bg-gray-100 p-4 flex-1 rounded-lg shadow">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">Address Book</h2>
-              <Link to="/account/address" className="text-indigo-600">Edit</Link>
-            </div>
-            {loading ? (
-          <div className="flex flex-col justify-center items-center">
-            <img src="/emote/hmmm.png" alt="Loading..." className="w-20 h-20" />
-            <label>Loading...</label>
-          </div>
-        ) : (
-            <div className="grid grid-cols-2 gap-4">
-            {addresses.length > 0 ? (
-              addresses
-                .filter((address) => address.is_default_shipping) // Filter for the default shipping address
-                .map((address, index) => (
-                  <div key={index}>
-                    <h3 className="font-semibold text-gray-600">
-                      Default Shipping Address
-                    </h3>
-                    <p className="text-gray-600">{address.address}</p>
-                    <p className="text-gray-600">Postcode: {address.postcode}</p>
-                  </div>
-                ))
-            ) : (
-              <p className="text-gray-600">No addresses found.</p>
-            )}
-            </div>       
-           )}
-
-          </div>
-
-
-        </div>
-
-      {/* Recent Orders Section */}
-      <div className="bg-gray-100 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Orders</h2>
-        <div className="overflow-x-auto">
+      <div className="flex-1 p-4 px-9">
+        <h1 className="text-xl font-bold text-gray-800 mb-4">
+          Manage My Account
+        </h1>
         {loading ? (
-          <div className="flex flex-col justify-center items-center">
+          <div className="flex mt-36 flex-col h-100 justify-center items-center">
             <img src="/emote/hmmm.png" alt="Loading..." className="w-25 h-25" />
             <label>Loading...</label>
           </div>
         ) : (
-          <table className="table table-auto w-full">
-            <thead>
-              <tr className="bg-gray-200">
-                <th>Order #</th>
-                <th>Placed On</th>
-                <th>Items</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="hover">
-                <td>12345</td>
-                <td>2024-10-30</td>
-                <td>
-                  <img
-                    src="https://via.placeholder.com/50"
-                    alt="Item"
-                    className="w-10 h-10 rounded-full"
-                  />
-                </td>
-                <td>$50.00</td>
-              </tr>
-              <tr className="hover">
-                <td>67890</td>
-                <td>2024-11-01</td>
-                <td>
-                  <img
-                    src="https://via.placeholder.com/50"
-                    alt="Item"
-                    className="w-10 h-10 rounded-full"
-                  />
-                </td>
-                <td>$75.00</td>
-              </tr>
-            </tbody>
-          </table>
-                     )}
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 relative rounded-lg shadow-md">
+                <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Personal Profile
+                  </h2>
+                  <Link
+                    to="/account/profile"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Edit Profile
+                  </Link>
+                </div>
 
-        </div>
+                <div className="flex items-center gap-4">
+                  <img
+                    src={profile?.profile_picture || "/default-avatar.png"}
+                    alt="Profile"
+                    className="w-20 h-20 rounded-full border-2 border-gray-300 cursor-pointer"
+                    onClick={() => setIsModalOpen(true)}
+                  />
+                  <div>
+                    <p className="text-gray-700 font-medium">
+                      {profile?.full_name || "N/A"}
+                    </p>
+                    <p className="text-gray-600">{profile?.email || "N/A"}</p>
+                    <p className="text-gray-600">
+                      Mobile: {profile?.mobile || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg relative shadow-md">
+                <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-lg font-semibold text-gray-800">
+                    Address Book
+                  </h2>
+                  <Link
+                    to="/account/address"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Edit
+                  </Link>
+                </div>
+                {addresses.length > 0 ? (
+                  addresses
+                    .filter((a) => a.is_default_shipping)
+                    .map((address, index) => (
+                      <div key={index} className="text-gray-700">
+                        <p className="font-semibold">
+                          Default Shipping Address
+                        </p>
+                        <p>{address.address}</p>
+                        <p>Postcode: {address.postcode}</p>
+                      </div>
+                    ))
+                ) : (
+                  <p className="text-gray-600">No addresses found.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-white relative p-6 rounded-lg shadow-md mt-6">
+              <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-2 rounded-t-md">
+                {" "}
+              </div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                Recent Orders
+              </h2>
+
+              <table className="w-full border-collapse border">
+                <thead>
+                  <tr className="bg-custom-purple glass text-left text-gray-100">
+                    <th className="px-2 py-1 ">Order #</th>
+                    <th className="px-2 py-1 ">Placed On</th>
+                    <th className="px-2 py-1 ">Items</th>
+                    <th className="px-2 py-1 ">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="hover:bg-gray-100">
+                    <td className="px-2 ">12345</td>
+                    <td className="px-2 ">2024-10-30</td>
+                    <td className="px-2 ">
+                      <img
+                        src="https://via.placeholder.com/50"
+                        alt="Item"
+                        className="w-10 h-10 rounded"
+                      />
+                    </td>
+                    <td className="px-2 ">50.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Modal */}
+        {isModalOpen && (
+          <ProfilePictureUploadModal
+            isOpen={isModalOpen}
+            onClose={(newImageUrl) => {
+              if (newImageUrl)
+                setProfile((prev) => ({
+                  ...prev,
+                  profile_picture: newImageUrl,
+                }));
+              setIsModalOpen(false);
+            }}
+            userId={profile.id}
+            currentImage={profile.profile_picture}
+          />
+        )}
       </div>
-    </div>
-          {/* Modal for Upload */}
-          {isModalOpen && (
-        <ProfilePictureUploadModal
-          isOpen={isModalOpen}
-          onClose={(newImageUrl) => {
-            if (newImageUrl) setProfile((prev) => ({ ...prev, profile_picture: newImageUrl }));
-            setIsModalOpen(false);
-          }}
-          userId={profile.id}
-          currentImage={profile.profile_picture}
-        />
-      )}
     </div>
   );
 };

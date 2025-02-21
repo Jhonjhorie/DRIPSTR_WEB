@@ -72,8 +72,8 @@ function PlaceOrder() {
         total_price: item.size.price * item.qty,
         payment_method: paymentMethod,
         payment_stamp: new Date().toISOString(), // Current timestamp
-        order_variation: item.variant.variant_Name,
-        order_size: item.size.size,
+        order_variation: item.variant,
+        order_size: item.size,
         shipping_addr: profile?.address || "No address provided",
         shipping_method: shippingMethod,
         shipping_fee: shippingFee,

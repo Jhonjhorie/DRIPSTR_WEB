@@ -1,17 +1,27 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const LoginFirst = () => {
-  
+const LoginFirst = (item, action, onClose) => {
+const navigate = useNavigate();
+
+const handleBtn = () => {
+
+}
+
   return (
     <div className="flex flex-col  rounded-md justify-center -top-20 relative items-center py-4 modal-box  bg-slate-300 gap-4 z-40">
+        <img
+          src={require("@/assets/emote/success.png")}
+          alt="No Images Available"
+          className=" drop-shadow-customViolet "
+        />
       <h1>Guests can only View Products, Please Log in or Sign Up First</h1>
-      <Link
-        to="/login"
+      <button
+        onClick={handleBtn}
         className="btn btn-sm btn-outline btn-primary  "
       >
         Log In
-      </Link>
+      </button>
     </div>
   );
 };
