@@ -45,7 +45,7 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('merchantRegistration')
-                    .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved')
+                    .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, profiles(full_name)')
                     .is('is_Approved', null);
 
                 if (error) throw error;
@@ -166,6 +166,7 @@ const Merchants = () => {
                                     <div key={merchant.id} className="border rounded-lg shadow-lg p-4 relative w-full md:w-1/2 lg:w-1/3">
                                         <img src={merchant.shop_image} alt={merchant.shop_name} className="w-full h-40 object-cover rounded-md" />
                                         <h2 className="text-xl font-semibold mb-2">{merchant.shop_name}</h2>
+                                        <h2 className="text-xl font-semibold mb-2">{merchant.profiles?.full_name || 'No Name'}</h2>
                                         <p className="text-gray-700 mb-1">{merchant.description}</p>
                                         <p className="text-gray-500 mb-1">{merchant.address}</p>
                                         <p className="text-gray-500 mb-4">Contact: {merchant.contact_number}</p>
