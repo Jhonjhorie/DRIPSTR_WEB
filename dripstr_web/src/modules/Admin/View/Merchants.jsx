@@ -3,7 +3,7 @@ import { supabase } from "../../../constants/supabase";
 import Sidebar from './Shared/Sidebar';
 import { faChevronCircleDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import Pagination from './Components/Pagination';
 const Merchants = () => {
     const [register, setRegister] = useState([]);
     const [acceptedMerchants, setAcceptedMerchants] = useState([]);
@@ -15,6 +15,7 @@ const Merchants = () => {
     const [successAdd, setSuccessAdd] = useState('');
     const [successDecline, setSuccessDecline] = useState('');
     const [search, setSearch] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Fetch accepted merchants (Auto-refresh every 5 seconds)
     useEffect(() => {
@@ -139,9 +140,23 @@ const Merchants = () => {
     const filteredMerchants = merchants.filter(merchant =>
         merchant.shop_name.toLowerCase().includes(search.toLowerCase()) ||
         merchant.owner_Id?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-        merchant.description.toLowerCase().includes(search.toLowerCase())
+        merchant.description.toLowerCase().includes(search.toLowerCase()) ||
+        merchant.address.toLowerCase().includes(search.toLowerCase()) ||
+        String(merchant.contact_number).toLowerCase().includes(search.toLowerCase())
     );
 
+    // Calculate the start and end index for the current page
+    const merchantsPerPage = 3;
+    const indexOfLastMerchant = currentPage * merchantsPerPage;
+    const indexOfFirstMerchant = indexOfLastMerchant - merchantsPerPage;
+
+    // Slice the filtered merchants for the current page
+    const merchantsToDisplay = filteredMerchants.slice(indexOfFirstMerchant, indexOfLastMerchant);
+
+    //Page Change
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+    };
 
     return (
         <div className="flex">
@@ -235,9 +250,11 @@ const Merchants = () => {
 
                 {status === 'merchants' && (
                     <div>
-                        <h2 className="text-xl font-semibold mb-2 text-white">Accepted Merchants</h2>
+                        <div className='flex justify-between'>
+                            <h2 className="text-xl font-semibold mb-2 text-white">Accepted Merchants: ({merchants.length})</h2>
+                        </div>
                         <ul>
-                            {filteredMerchants.map((merchant) => (
+                            {merchantsToDisplay.map((merchant) => (
                                 <li key={merchant.id} className="border p-4 rounded-lg shadow-md flex mb-4 bg-gray-800">
                                     <div className="flex gap-4 w-full">
                                         {/* Image with improved sizing */}
@@ -255,12 +272,19 @@ const Merchants = () => {
                                             <p className="text-white text-sm"><strong>Name:</strong> {merchant.owner_Id?.full_name || 'No Name'}</p>
                                             <p className="text-white text-sm"><strong>Description:</strong> {merchant.description}</p>
                                             <p className="text-white text-sm"><strong>Address:</strong> {merchant.address}</p>
-                                            <p className="text-white text-sm"><strong>Contact:</strong> {merchant.contact_number}</p>
+                                            <p className="text-white text-sm"><strong>Contact:</strong> +63{merchant.contact_number}</p>
                                         </div>
                                     </div>
                                 </li>
                             ))}
                         </ul>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={filteredMerchants.length}
+                            itemsPerPage={merchantsPerPage}
+                            onPageChange={handlePageChange}
+                            className ='fixed'
+                        />
                     </div>
                 )}
 
