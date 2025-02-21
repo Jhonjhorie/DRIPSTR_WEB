@@ -12,6 +12,7 @@ import hmmEmote from "../../../../src/assets/emote/hmmm.png";
 function Login() {
   const navigate = useNavigate();
   const [shopName, setShopName] = useState("");
+  const [fullName, setfullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [shopDescription, setShopDescription] = useState("");
   const [shopAddress, setShopAddress] = useState("");
@@ -26,6 +27,7 @@ function Login() {
   const [showAlertEX, setShowAlertEX] = React.useState(false); // AlertImage
   const [showAlertEY, setShowAlertEY] = React.useState(false); // AlertIDmissing
   const [showImage, setshowImage] = React.useState(false); //Show image modal
+  const [showImage2, setshowImage2] = React.useState(false); //Show image modal
   const [showFile, setshowFile] = React.useState(false); //Show File modal
   const [selectedImage, setSelectedImage] = useState(null); // show to the modal div
   const [selectedImageID, setSelectedImageID] = useState(null); // show to the modal div
@@ -43,6 +45,7 @@ function Login() {
   const [hasCreatedAccount, setHasCreatedAccount] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingFetch, setLoadingFetch] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const fetchUserProfile = async () => {
     setLoading(false);
@@ -110,6 +113,7 @@ function Login() {
   };
   // Handle input change
   const handleShopNameChange = (e) => setShopName(e.target.value);
+  const handlefullNameChange = (e) => setfullName(e.target.value);
   const handleShopAddressChange = (e) => setShopAddress(e.target.value);
   const handleShopDescriptionChange = (e) => setShopDescription(e.target.value);
 
@@ -128,7 +132,13 @@ function Login() {
       setTimeout(() => setShowAlert(false), 3000);
       return;
     }
-
+    if (!fullName.trim()) {
+      console.error("Shop name is required");
+      setIsSubmitting(false);
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+      return;
+    }
     if (!phoneNumber.trim()) {
       console.error("Phone Number is required");
       setIsSubmitting(false);
@@ -208,9 +218,11 @@ function Login() {
         const uniqueImageName = `shop_profile/${Date.now()}-${Math.random()
           .toString(36)
           .substring(2, 10)}-${imageFile.name}`;
+
         const uniqueImageNameID = `valid_ID/${Date.now()}-${Math.random()
-            .toString(36)
-            .substring(2, 10)}-${imageFileID.name}`;
+          .toString(36)
+          .substring(2, 10)}-${imageFileID.name}`;
+
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
           .upload(uniqueImageName, imageFile);
@@ -219,15 +231,6 @@ function Login() {
           console.error("Error uploading image:", uploadError.message);
           return;
         }
-        const { dataID, error: uploadErrorID } = await supabase.storage
-          .from("shop_profile")
-          .upload(uniqueImageNameID, imageFileID);
-
-        if (uploadErrorID) {
-          console.error("Error uploading image:", uploadErrorID.message);
-          return;
-        }
-
 
         let uploadedImageUrl = null;
         if (data?.path) {
@@ -241,18 +244,28 @@ function Login() {
           uploadedImageUrl = publicUrlData.publicUrl;
           console.log("Image uploaded successfully:", uploadedImageUrl);
         }
+
+        const { data: dataID, error: uploadErrorID } = await supabase.storage
+          .from("shop_profile")
+          .upload(uniqueImageNameID, imageFileID);
+
+        if (uploadErrorID) {
+          console.error("Error uploading ID image:", uploadErrorID.message);
+          setIsSubmitting(false);
+          return;
+        }
+
+        console.log("ID Image uploaded successfully to storage:", dataID);
+
         let uploadedImageUrlId = null;
-          if (dataID?.path) {
-            const { data: publicUrlData, error: urlError } = supabase.storage
+        if (dataID?.path) {
+          const { data } = supabase.storage
             .from("shop_profile")
             .getPublicUrl(dataID.path);
-          if (urlError) {
-            console.error("Error fetching image URL:", urlError.message);
-            return;
-          }
-          uploadedImageUrlId = publicUrlData.publicUrl;
-          console.log("Image uploaded successfully:", uploadedImageUrlId);
+          uploadedImageUrlId = data.publicUrl;
+          console.log("ID Image URL (validID):", uploadedImageUrlId);
         }
+
         // Upload PDF file
         let uploadedPdfUrl = null;
         if (pdfFile) {
@@ -303,8 +316,9 @@ function Login() {
                 id: userId,
                 is_Approved: null,
                 shop_image: uploadedImageUrl || null,
-                id_Image: uploadedImageUrlId || null,
                 shop_BusinessPermit: uploadedPdfUrl || null,
+                validID: uploadedImageUrlId || null,
+                full_Name: fullName,
               },
             ])
             .single();
@@ -333,6 +347,7 @@ function Login() {
           );
 
           // Reset form fields after successful insertion
+          setfullName("");
           setShopName("");
           setPhoneNumber("");
           setShopDescription("");
@@ -447,7 +462,13 @@ function Login() {
       alert("Please select an image");
     }
   };
-
+  const handleOpenImageID = () => {
+    if (selectedImageID) {
+      setshowImage2(true);
+    } else {
+      alert("Please select an image");
+    }
+  };
   //Open Modal for Viewing Pdf File
   const handleOpenFile = () => {
     if (selectedFile) {
@@ -460,6 +481,7 @@ function Login() {
   //MODAL FOR IMAGES
   const handleCloseModal = () => {
     setshowImage(false);
+    setshowImage2(false);
     setshowFile(false);
   };
   const handleCloseTandC = () => {
@@ -483,7 +505,7 @@ function Login() {
     if (file) {
       setImageFileID(file);
       setSelectedImageID(URL.createObjectURL(file));
-      console.log("Selected file:", file);
+      console.log("Selected file ID:", file);
     }
   };
   //define file input
@@ -495,6 +517,56 @@ function Login() {
       setSelectedFile(file);
     } else {
       alert("Please select a valid file (PDF document)");
+    }
+  };
+  useEffect(() => {
+    const checkAcceptedTerms = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("accept_Terms")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching terms:", error);
+        return;
+      }
+
+      if (data?.accept_Terms) {
+        setAcceptedTerms(true);
+        setTermsandCondition(false);
+      }
+    };
+
+    checkAcceptedTerms();
+  }, []);
+
+  const handleAcceptTerms = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("User not authenticated!");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ accept_Terms: true })
+      .eq("id", user.id);
+
+    if (error) {
+      console.error("Error updating terms:", error);
+      alert("Failed to accept terms. Please try again.");
+    } else {
+      alert("Terms accepted successfully!");
+      handleCloseTandC();
     }
   };
   return (
@@ -647,6 +719,21 @@ function Login() {
                     <label className="form-control w-full">
                       <div className="label">
                         <span className="label-text text-slate-800 font-semibold">
+                          Type Your Full Name
+                        </span>
+                      </div>
+                      <input
+                        id="fullName"
+                        value={fullName}
+                        onChange={handlefullNameChange}
+                        type="text"
+                        placeholder="Type here"
+                        className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
+                      />
+                    </label>
+                    <label className="form-control w-full mt-1">
+                      <div className="label">
+                        <span className="label-text text-slate-800 font-semibold">
                           What is your SHOP name?
                         </span>
                       </div>
@@ -659,10 +746,10 @@ function Login() {
                         className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
                       />
                     </label>
-                    <label className="form-control w-full max-w-xs mt-2">
+                    <label className="form-control w-full max-w-xs mt-1">
                       <div className="label">
                         <span className="label-text text-slate-800 font-semibold">
-                          What is your SHOP contact number?
+                          Your G-cash Number?
                         </span>
                       </div>
                       <input
@@ -718,7 +805,7 @@ function Login() {
                     </div>
                   </div>
 
-                  <div className="h-auto w-full flex mt-2 justify-center gap-2">
+                  <div className="h-auto w-full flex  justify-center gap-2">
                     <input
                       type="file"
                       accept="image/*"
@@ -727,7 +814,7 @@ function Login() {
                       className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
                     />
                     <div
-                      onClick={handleOpenImage}
+                      onClick={handleOpenImageID}
                       className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
                     >
                       <box-icon
@@ -737,29 +824,32 @@ function Login() {
                       ></box-icon>
                     </div>
                   </div>
-                  <label className="label-text font-semibold ml-2 text-slate-800">
-                    Upload shop LOGO
-                  </label>
-                  <div className="h-auto w-full flex mt-2 justify-center gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      placeholder={fileName || "Choose a file..."}
-                      className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
-                    />
-                    <div
-                      onClick={handleOpenImage}
-                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
-                    >
-                      <box-icon
-                        type="solid"
-                        name="image-alt"
-                        color="#FFFFFF"
-                      ></box-icon>
+                  <div className="w-auto mt-2">
+                    <label className="label-text font-semibold ml-2  text-slate-800">
+                      Upload shop LOGO
+                    </label>
+                    <div className="h-auto w-full flex mt-2 justify-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        placeholder={fileName || "Choose a file..."}
+                        className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
+                      />
+                      <div
+                        onClick={handleOpenImage}
+                        className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                      >
+                        <box-icon
+                          type="solid"
+                          name="image-alt"
+                          color="#FFFFFF"
+                        ></box-icon>
+                      </div>
                     </div>
                   </div>
-                  <div className="">
+
+                  <div className="mt-2">
                     <label className="label-text font-semibold ml-2 text-slate-800">
                       Upload business permit
                     </label>
@@ -1208,6 +1298,32 @@ function Login() {
           </div>
         </div>
       )}
+      {showImage2 && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
+          <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
+            {/*Image goes here*/}
+            <div className=" h-[350px] w-[350px] border-custom-purple border-2 bg-slate-600 rounded-md  place-items-center   ">
+              {selectedImageID ? (
+                <img
+                  src={selectedImageID}
+                  alt="Uploaded shop photo"
+                  className="w-full h-full object-cover rounded-sm"
+                />
+              ) : (
+                <p className="text-white">Please select an image</p>
+              )}{" "}
+            </div>
+            <div className="flex justify-between  w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded  hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {showFile && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
           <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
@@ -1495,18 +1611,29 @@ function Login() {
                 </div>
 
                 <div className="mt-6 justify-center gap-2 flex">
-                  <button
-                    onClick={() => navigate("/account/shop-setup")}
-                    className="bg-gray-600 text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
-                  >
-                    Decline Terms
-                  </button>
-                  <button
-                    onClick={handleCloseTandC}
-                    className="bg-primary-color text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
-                  >
-                    Accept Terms
-                  </button>
+                  {acceptedTerms ? (
+                    <button
+                      onClick={handleCloseTandC}
+                      className="bg-gray-600 text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-5 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => navigate("/account/shop-setup")}
+                        className="bg-gray-600 text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                      >
+                        Decline Terms
+                      </button>
+                      <button
+                        onClick={handleAcceptTerms}
+                        className="bg-primary-color text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                      >
+                        Accept Terms
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
