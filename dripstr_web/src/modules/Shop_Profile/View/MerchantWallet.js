@@ -38,18 +38,23 @@ function MerchantWallet() {
 
       if (user) {
         console.log("Current user:", user);
+        setCurrentUser(user); // Store user in state
 
-        const { data: shops, error: shopError } = await supabase
+        const { data: shop, error: shopError } = await supabase
           .from("shop")
           .select(
             "shop_name, id, address, description, contact_number, shop_image, shop_BusinessPermit"
           )
-          .eq("owner_Id", user.id);
+          .eq("owner_Id", user.id)
+          .single(); // Assuming a user has only one shop
 
         if (shopError) {
           throw shopError;
         }
-        setShopData(shops);
+
+        console.log("Fetched shop data:", shop);
+        setShopData(shop);
+        setMerchantId(shop.id);
       } else {
         console.log("No user is signed in.");
         setError("No user is signed in.");
@@ -61,9 +66,10 @@ function MerchantWallet() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchUserProfileAndShop();
-  }, []); // Run once on mount
+  }, []);
 
   useEffect(() => {
     const fetchWalletData = async () => {
@@ -200,6 +206,237 @@ function MerchantWallet() {
   const [openScan, setOpenscan] = useState(false);
   const [activeTabSubs, setActiveTabSubs] = useState("Def");
   const [inquiryText, setInquiryText] = useState("");
+
+  //payment subscription
+  const [currentUser, setCurrentUser] = useState(null);
+  const [merchantId, setMerchantId] = useState(null);
+  const [walletNote, setWalletNote] = useState("");
+  const [gcashAmount, setGcashAmount] = useState("");
+  const [gcashProof, setGcashProof] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
+  const [subscriptionExpiry, setSubscriptionExpiry] = useState(null);
+  const [showPendingModal, setShowPendingModal] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const handleSubmitWalletSubscription = async () => {
+    if (!currentUser || !merchantId) {
+      setError("User or shop ID not found.");
+      console.error("User or shop ID not found:", currentUser, merchantId);
+      console.log("Alert: User or shop ID not found.");
+      alert("User or shop ID not found.");
+      return;
+    }
+    console.log("Submitting subscription:", currentUser, merchantId);
+    setLoading(true);
+    try {
+      const subscriptionAmount = 500;
+      const reason = walletNote;
+
+      // Fetch current wallet balance
+      const { data: wallet, error: walletError } = await supabase
+        .from("merchant_Wallet")
+        .select("revenue")
+        .eq("owner_ID", currentUser.id)
+        .single();
+      if (walletError || !wallet) {
+        throw new Error("Failed to retrieve wallet balance.");
+      }
+      const currentBalance = parseFloat(wallet.revenue || "0");
+      if (currentBalance < subscriptionAmount) {
+        throw new Error("Insufficient wallet balance.");
+      }
+
+      // Deduct subscription fee from wallet
+      const newBalance = currentBalance - subscriptionAmount;
+      const { error: updateWalletError } = await supabase
+        .from("merchant_Wallet")
+        .update({ revenue: newBalance.toString() })
+        .eq("owner_ID", currentUser.id);
+      if (updateWalletError) {
+        throw updateWalletError;
+      }
+
+      // Insert subscription record for Wallet payment
+      const { error: subscriptionError } = await supabase
+        .from("merchant_Subscription")
+        .insert([
+          {
+            user_Id: currentUser.id,
+            merchant_Id: merchantId,
+            payment: "Dripstr Wallet",
+            reason: reason,
+            status: "Completed",
+          },
+        ]);
+      if (subscriptionError) {
+        throw subscriptionError;
+      }
+      const { error: updateShopError } = await supabase
+        .from("shop")
+        .update({ is_Premium: true })
+        .eq("id", merchantId);
+      if (updateShopError) {
+        throw updateShopError;
+      }
+      // Log cashout transaction
+      const { error: cashoutError } = await supabase
+        .from("merchant_Cashout")
+        .insert([
+          {
+            full_Name: currentUser.full_Name,
+            owner_Id: currentUser.id,
+            qty: subscriptionAmount,
+            reason: "Subscription",
+            status: "Completed",
+            subscription: "Dripstr Monthly Merchant Boost Plan",
+            subs_HM: "500",
+          },
+        ]);
+      if (cashoutError) {
+        throw cashoutError;
+      }
+
+      console.log("Alert: Subscription successful via Wallet!");
+      alert("Subscription successful via Wallet!");
+    } catch (err) {
+      console.error("Wallet Subscription error:", err.message);
+      console.log("Alert error:", err.message);
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // GCash Subscription Submission
+  const handleSubmitGcashSubscription = async () => {
+    if (!currentUser || !merchantId) {
+      setError("User or shop ID not found.");
+      return;
+    }
+    setLoading(true);
+    try {
+      // For GCash, the user enters an amount and uploads a proof of payment.
+      const amount = gcashAmount; // from state
+      if (!amount) {
+        throw new Error("Please enter an amount.");
+      }
+      if (!gcashProof) {
+        throw new Error("Please upload proof of payment.");
+      }
+
+      // Upload proof of payment file to Supabase Storage
+      const filePath = `proofs/${currentUser.id}_${Date.now()}_${
+        gcashProof.name
+      }`;
+      const { data, error: uploadError } = await supabase.storage
+        .from("wallet_docs")
+        .upload(filePath, gcashProof);
+
+      if (uploadError) {
+        console.error("Upload error details:", uploadError);
+        throw new Error(
+          "Failed to upload proof of payment: " + uploadError.message
+        );
+      }
+
+      const proofURL = data.path;
+
+      // Insert subscription record for GCash payment
+      const { error: subscriptionError } = await supabase
+        .from("merchant_Subscription")
+        .insert([
+          {
+            user_Id: currentUser.id,
+            merchant_Id: merchantId,
+            payment: "GCash",
+            screenshot: proofURL,
+            reason: "",
+            status: "Pending",
+          },
+        ]);
+      if (subscriptionError) {
+        throw subscriptionError;
+      }
+      const { error: updateShopError } = await supabase
+        .from("shop")
+        .update({ is_Premium: false })
+        .eq("id", merchantId);
+      if (updateShopError) {
+        throw updateShopError;
+      }
+
+      alert("Subscription request sent via GCash!");
+    } catch (err) {
+      console.error("GCash Subscription error:", err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkSubscriptionStatus = async () => {
+    if (!currentUser) return;
+    setLoading(true);
+    try {
+      const { data: subscriptions, error } = await supabase
+        .from("merchant_Subscription")
+        .select("*")
+        .eq("user_Id", currentUser.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (error) throw error;
+
+      if (subscriptions && subscriptions.length > 0) {
+        const latestSub = subscriptions[0];
+
+        if (latestSub.status === "Pending") {
+          setIsPending(true);
+          setIsPremium(false);
+          setSubscriptionExpiry(null);
+          console.log("Subscription pending: waiting for admin approval.");
+        } else {
+          const subscriptionDate = new Date(latestSub.created_at);
+          const now = new Date();
+          const diffInMs = now - subscriptionDate;
+          const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+          if (diffInDays < 30) {
+            setIsPremium(true);
+            setIsPending(false);
+            // Calculate expiry date as subscription date plus 30 days
+            const expiry = new Date(
+              subscriptionDate.getTime() + 30 * 24 * 60 * 60 * 1000
+            );
+            setSubscriptionExpiry(expiry);
+            console.log("User is currently premium. Expires on:", expiry);
+          } else {
+            setIsPremium(false);
+            setSubscriptionExpiry(null);
+            setIsPending(false);
+            alert("Your subscription has expired. Please subscribe again.");
+          }
+        }
+      } else {
+        // No subscription record exists
+        setIsPremium(false);
+        setSubscriptionExpiry(null);
+        setIsPending(false);
+        console.log("No subscription found. User is not premium.");
+      }
+    } catch (err) {
+      console.error("Error checking subscription status:", err.message);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Call checkSubscriptionStatus when currentUser is set
+  useEffect(() => {
+    if (currentUser) {
+      checkSubscriptionStatus();
+    }
+  }, [currentUser]);
+
   return (
     <div className="h-full w-full bg-slate-300 md:px-20 p-2 ">
       <div className="absolute mx-3 right-0 z-20">
@@ -603,48 +840,151 @@ function MerchantWallet() {
             {/* Content*/}
             <div className="bg-slate-200 py-4 rounded-sm p-2">
               {/* Success Emote */}
-              {activeTabSubs === "Def" && (
-                <div>
-                  <div className="flex justify-center p-5">
-                    <img
-                      src={successEmote}
-                      alt="Success Emote"
-                      className="object-contain rounded-lg p-1 drop-shadow-customViolet w-24"
-                    />
-                  </div>
-                  {/* Benefits Section */}
-                  <div className=" text-slate-800 space-y-3">
-                    <p className="text-lg font-semibold text-center">
-                      🚀 Why Subscribe?
-                    </p>
-                    <ul className="text-sm space-y-2 list-disc list-inside">
-                      <li>
-                        <strong>Increased Visibility:</strong> Your products get
-                        featured for better exposure.
-                      </li>
-                      <li>
-                        <strong>Exclusive Promotions:</strong> Access to special
-                        discounts and marketing campaigns.
-                      </li>
-                      <li>
-                        <strong>Priority Support:</strong> Get faster customer
-                        assistance whenever you need it.
-                      </li>
-                      <li>
-                        <strong>Advanced Analytics:</strong> Gain insights on
-                        sales trends and customer behavior.
-                      </li>
-                      <li>
-                        <strong>More Sales Opportunities:</strong> Stand out
-                        from competitors with premium placements.
-                      </li>
-                    </ul>
-                  </div>
+              {isPending ? (
+                <div className="p-4 bg-yellow-100 rounded-md shadow-md">
+                  <h2 className="text-2xl font-bold text-slate-800">
+                    Your subscription is pending!
+                  </h2>
+                  <p className="text-slate-700">
+                    Your subscription request is awaiting admin approval. Please
+                    wait.
+                  </p>
                 </div>
+              ) : isPremium ? (
+                <div className="p-4 bg-green-100 rounded-md shadow-md">
+                  <h2 className="text-2xl font-bold text-slate-800">
+                    You're already Premium!
+                  </h2>
+                  <p className="text-slate-700">
+                    Your subscription is active until{" "}
+                    {subscriptionExpiry
+                      ? subscriptionExpiry.toLocaleDateString()
+                      : "[DATE]"}
+                    .
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {activeTabSubs === "Def" && (
+                    <div>
+                      <div className="flex justify-center p-5">
+                        <img
+                          src={successEmote}
+                          alt="Success Emote"
+                          className="object-contain rounded-lg p-1 drop-shadow-customViolet w-24"
+                        />
+                      </div>
+                      {/* Benefits Section */}
+                      <div className=" text-slate-800 space-y-3">
+                        <p className="text-lg font-semibold text-center">
+                          🚀 Why Subscribe?
+                        </p>
+                        <ul className="text-sm space-y-2 list-disc list-inside">
+                          <li>
+                            <strong>Increased Visibility:</strong> Your products
+                            get featured for better exposure.
+                          </li>
+                          <li>
+                            <strong>Exclusive Promotions:</strong> Access to
+                            special discounts and marketing campaigns.
+                          </li>
+                          <li>
+                            <strong>Priority Support:</strong> Get faster
+                            customer assistance whenever you need it.
+                          </li>
+                          <li>
+                            <strong>Advanced Analytics:</strong> Gain insights
+                            on sales trends and customer behavior.
+                          </li>
+                          <li>
+                            <strong>More Sales Opportunities:</strong> Stand out
+                            from competitors with premium placements.
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                  {activeTabSubs === "Wallet" && (
+                    <div className="flex-grow relative place-self-center bg-white w-2/3 px-6 p-4 rounded-lg shadow-md">
+                      <div className="text-slate-900">
+                        <div className="flex justify-items-center gap-2">
+                          <div>
+                            <h3 className="text-lg text-center font-bold mb-2 text-slate-800">
+                              Pay via Dripstr Wallet
+                            </h3>
+                          </div>
+                          <div className="w-auto h-auto">
+                            <box-icon name="wallet" type="solid"></box-icon>
+                          </div>
+                        </div>
+                        <p className="text-start text-slate-800 font-semibold">
+                          Subscription Fee: ₱500
+                        </p>
+                        <label className="text-sm text-slate-800">
+                          Type note for Dripstr (Optional):
+                        </label>
+                        <textarea
+                          placeholder="Note for Dripstr"
+                          value={walletNote}
+                          onChange={(e) => setWalletNote(e.target.value)}
+                          className="w-full p-2 border text-slate-800 rounded-md bg-slate-300"
+                        ></textarea>
+                        <button
+                          onClick={handleSubmitWalletSubscription}
+                          className="mt-3 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-full"
+                        >
+                          Submit Payment
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeTabSubs === "Gcash" && (
+                    <div className="flex-grow relative place-self-center bg-white w-2/3 px-6 p-4 rounded-lg shadow-md">
+                      <div className="text-slate-900">
+                        <div className="flex justify-items-center gap-2">
+                          <div>
+                            <h3 className="text-lg text-center font-bold mb-2 text-slate-800">
+                              Pay via Gcash
+                            </h3>
+                          </div>
+                          <div
+                            onClick={() => setOpenscan(true)}
+                            data-tip="Scan here"
+                            className="tooltip-right tooltip w-auto h-auto cursor-pointer"
+                          >
+                            <box-icon name="qr" color="black"></box-icon>
+                          </div>
+                        </div>
+                        <label className="text-sm text-slate-800">
+                          Type the Amount:
+                        </label>
+                        <p className="text-start text-slate-800 font-semibold">
+                          Subscription Fee: ₱500
+                        </p>
+                        <label className="text-sm text-slate-800">
+                          Proof of payment:
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setGcashProof(e.target.files[0])}
+                          className="w-full p-2 border text-slate-800 bg-slate-300 rounded-md mb-2"
+                        />
+                        <button
+                          onClick={handleSubmitGcashSubscription}
+                          className="mt-3 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-full"
+                        >
+                          Submit Payment
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               {activeTabSubs === "Wallet" && (
-                <div className="flex-grow relative  place-self-center bg-white w-2/3 px-6  p-4 rounded-lg shadow-md ">
+                <div className="flex-grow relative place-self-center bg-white w-2/3 px-6 p-4 rounded-lg shadow-md">
                   <div className="text-slate-900">
                     <div className="flex justify-items-center gap-2">
                       <div>
@@ -652,29 +992,24 @@ function MerchantWallet() {
                           Pay via Dripstr Wallet
                         </h3>
                       </div>
-                      <div
-                        className="w-auto h-auto "
-                      >
+                      <div className="w-auto h-auto">
                         <box-icon name="wallet" type="solid"></box-icon>
                       </div>
                     </div>
-                    <label className=" text-sm text-slate-800">
-                      Type the Amount:
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="Enter Amount"
-                      className="w-full p-2 border text-slate-800 bg-slate-300 rounded-md mb-2"
-                    />
-                    <label className=" text-sm text-slate-800">
-                      Type note for Dripstr:
+                    <p className="text-start text-slate-800 font-semibold">
+                      Subscription Fee: ₱500
+                    </p>
+                    <label className="text-sm text-slate-800">
+                      Type note for Dripstr (Optional):
                     </label>
                     <textarea
                       placeholder="Note for Dripstr"
+                      value={walletNote}
+                      onChange={(e) => setWalletNote(e.target.value)}
                       className="w-full p-2 border text-slate-800 rounded-md bg-slate-300"
                     ></textarea>
                     <button
-                      onClick={handleSubmitCashoutcONF}
+                      onClick={handleSubmitWalletSubscription}
                       className="mt-3 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-full"
                     >
                       Submit Payment
@@ -682,8 +1017,10 @@ function MerchantWallet() {
                   </div>
                 </div>
               )}
+
+              {/* GCash UI */}
               {activeTabSubs === "Gcash" && (
-                <div className="flex-grow relative  place-self-center bg-white w-2/3  px-6  p-4 rounded-lg shadow-md ">
+                <div className="flex-grow relative place-self-center bg-white w-2/3 px-6 p-4 rounded-lg shadow-md">
                   <div className="text-slate-900">
                     <div className="flex justify-items-center gap-2">
                       <div>
@@ -692,36 +1029,30 @@ function MerchantWallet() {
                         </h3>
                       </div>
                       <div
-                         onClick={() => {
-                          setOpenscan(true);
-                        }}
+                        onClick={() => setOpenscan(true)}
                         data-tip="Scan here"
-                        className="tooltip-right tooltip w-auto h-auto cursor-help "
+                        className="tooltip-right tooltip w-auto h-auto cursor-pointer"
                       >
-                        {" "}
-                        <box-icon name="qr" color="black"></box-icon>{" "}
+                        <box-icon name="qr" color="black"></box-icon>
                       </div>
                     </div>
-
-                    <label className=" text-sm text-slate-800">
+                    <label className="text-sm text-slate-800">
                       Type the Amount:
                     </label>
-                    <input
-                      type="number"
-                      placeholder="Enter Amount"
-                      className="w-full p-2 border text-slate-800 bg-slate-300 rounded-md mb-2"
-                    />
-                    <label className=" text-sm text-slate-800">
+                    <p className="text-start text-slate-800 font-semibold">
+                      Subscription Fee: ₱500
+                    </p>
+                    <label className="text-sm text-slate-800">
                       Proof of payment:
                     </label>
                     <input
                       type="file"
                       accept="image/*"
-                      placeholder="Enter Amount"
+                      onChange={(e) => setGcashProof(e.target.files[0])}
                       className="w-full p-2 border text-slate-800 bg-slate-300 rounded-md mb-2"
                     />
                     <button
-                      onClick={handleSubmitCashoutcONF}
+                      onClick={handleSubmitGcashSubscription}
                       className="mt-3 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-full"
                     >
                       Submit Payment
@@ -736,23 +1067,34 @@ function MerchantWallet() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setActiveTabSubs("Wallet")}
-                  className="bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold hover:bg-primary-color transition duration-300"
+                  disabled={isPending || isPremium}
+                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
+                    isPending || isPremium
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-primary-color"
+                  }`}
                 >
                   Pay via Dripstr Wallet
                 </button>
                 <button
                   onClick={() => setActiveTabSubs("Gcash")}
-                  className="bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold hover:bg-blue-700 transition duration-300"
+                  disabled={isPending || isPremium}
+                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
+                    isPending || isPremium
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-blue-700"
+                  }`}
                 >
                   Pay via Gcash
                 </button>
               </div>
 
               <button
-                onClick={() =>
-                  setShowSubscription(false) || setActiveTabSubs("Def")
-                }
-                className="bg-red-500 px-4 py-2 text-white rounded-sm font-semibold hover:bg-red-600 transition duration-300"
+                onClick={() => {
+                  setShowSubscription(false);
+                  setActiveTabSubs("Def");
+                }}
+                className="bg-red-500 px-4 py-2 text-white rounded-sm font-semibold transition duration-300 hover:bg-red-600"
               >
                 Close
               </button>
