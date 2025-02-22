@@ -16,7 +16,7 @@ import useCarts from "../hooks/useCart.js";
 import AlertDialog from "./alertDialog2.js";
 import ReportDialog from "./reportModal.js";
 
-const BuyConfirm = ({ item, onClose }) => {
+const BuyConfirm = ({ item, onClose}) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [loginDialog, setLoginDialog] = useState(false);
   const [actionLog, setActionLog] = useState("");
@@ -41,7 +41,7 @@ const BuyConfirm = ({ item, onClose }) => {
   const handleDecrement = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   };
-
+  
   const handleInputChange = (e) => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value) && value > 0) {
@@ -96,8 +96,8 @@ const BuyConfirm = ({ item, onClose }) => {
         onClose();
       }, 2000);
     } else {
-      setLoginDialog(true);
-      setActionLog("cart");
+      setLoginDialog(true)
+
     }
   };
 
@@ -122,8 +122,8 @@ const BuyConfirm = ({ item, onClose }) => {
 
       navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
     } else {
-      setActionLog("placeOrder");
-      setLoginDialog(true);
+      setLoginDialog(true)
+
     }
   };
   if (loadingP) {
@@ -141,7 +141,7 @@ const BuyConfirm = ({ item, onClose }) => {
     );
   } else {
     return (
-      <div className="  font-[iceland]  w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg overflow-hidden">
+      <div className="  font-[iceland]  w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg z-50 overflow-hidden">
         {mascot ? (
           <div className="flex flex-col items-center justify-center h-full w-full">
             <img
@@ -343,14 +343,7 @@ const BuyConfirm = ({ item, onClose }) => {
       <AuthModal
         isOpen={loginDialog}
         onClose={() => setLoginDialog(false)}
-        action={actionLog}
-        order={{
-          itemT: item,
-          qty: quantity,
-          variant: selectedColor,
-          size: selectedSize,
-          to_order: true,
-        }}
+        item={(item)}
       />
     )}
 

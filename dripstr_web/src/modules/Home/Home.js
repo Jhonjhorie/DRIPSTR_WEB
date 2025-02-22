@@ -68,13 +68,6 @@ function Home() {
       <div className="flex  gap-4 md:flex-row justify-center items-center p-4 h-[49%] lg:h-[48%]">
         <Carousel images={Images} />
       </div>
-      {/* <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
-        <CategoriesRibbon
-          active={filCat}
-          categories={categories}
-          onItemClick={(label) => setFilCat(label)}
-        />
-      </div> */}
       <div className="flex flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 font-[iceland]">
         <SectionWrapper
           title="Discounted Products"
@@ -171,6 +164,7 @@ function Home() {
           <button onClick={closeModalFaq}></button>
         </form>
       </dialog>
+      
     </div>
   );
 }
