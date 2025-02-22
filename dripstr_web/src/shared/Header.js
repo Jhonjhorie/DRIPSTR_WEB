@@ -146,7 +146,7 @@ const Header = () => {
               className="text-black hover:text-[--primary-color]"
             />
           ) : (
-            <span className=" text-[--primary-color] hover:text-gray-300 hover:underline ">Login/SignIn</span>
+            <span className=" text-[--primary-color] hover:text-gray-300 hover:underline ">Login/SignUp</span>
           )}
         </button>
       </div>

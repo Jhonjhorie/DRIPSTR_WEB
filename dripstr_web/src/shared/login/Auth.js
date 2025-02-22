@@ -113,7 +113,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
             <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl">
               &times;
             </button>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">{isSignIn ? "Sign In" : "Sign Up"}</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">{isSignIn ? "Login" : "Sign Up"}</h2>
 
             {/* Form Fields */}
             <div className="form-control w-full">
@@ -194,13 +194,13 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
               className="btn btn-primary w-full bg-purple-600 hover:bg-purple-700 border-none mt-4"
               onClick={isSignIn ? handleSignIn : handleSignUp}
             >
-              {isSignIn ? "Sign In" : "Sign Up"}
+              {isSignIn ? "Login" : "Sign Up"}
             </button>
 
             <p className="mt-4 text-gray-600 text-center">
               {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
               <button onClick={handleToggle} className="text-purple-500 hover:underline font-medium">
-                {isSignIn ? "Sign Up" : "Sign In"}
+                {isSignIn ? "Login" : "Sign In"}
               </button>
             </p>
           </div>
