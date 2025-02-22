@@ -199,7 +199,7 @@ function SideBar() {
             className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
-              Shop Preview
+              Merchant Preview
             </a>
             <box-icon
               type="solid"
@@ -207,17 +207,16 @@ function SideBar() {
               color="#4D077C"
             ></box-icon>
           </li>
+          <li
+            onClick={() => navigate("/shop/MerchantWallet")}
+            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+          >
+            <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
+              Merchant Wallet
+            </a>
+            <box-icon type='solid' color="#4D077C" name='wallet'></box-icon>
+          </li>
         </ul>
-        <div className="flex gap-2 absolute bottom-14  md:bottom-2  justify-end ">
-          <button className="btn px-2 mx-2 ">
-            Messages
-            <div className="badge">+99</div>
-          </button>
-          <button className="btn">
-            Inbox
-            <div className="badge badge-secondary">+99</div>
-          </button>
-        </div>
       </div>
     </div>
   );

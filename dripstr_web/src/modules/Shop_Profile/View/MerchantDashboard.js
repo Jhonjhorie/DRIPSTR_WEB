@@ -50,22 +50,22 @@ function MerchantDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [shopRating, setShopRating] = useState(0);
- 
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-  
+
       try {
         // Fetch the current user
-        const { data: userData, error: authError } = await supabase.auth.getUser ();
-  
+        const { data: userData, error: authError } = await supabase.auth.getUser();
+
         if (authError) {
           console.error("Authentication error:", authError.message);
           setError(authError.message);
           setLoading(false);
           return;
         }
-  
+
         const user = userData.user;
         if (!user) {
           console.log("No user is signed in");
@@ -73,33 +73,33 @@ function MerchantDashboard() {
           setLoading(false);
           return;
         }
-  
+
         console.log("Current user:", user);
-  
+
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
           .from("shop")
           .select("id, shop_name, shop_Rating")
           .eq("owner_Id", user.id);
-  
+
         if (shopError) {
           console.error("Error fetching shops:", shopError.message);
           setError(shopError.message);
         } else if (shops && shops.length > 0) {
           setShopData(shops);
           console.log("Fetched shops:", shops);
-  
+
           // Calculate and set the average shop rating
           const averageRating =
             shops.reduce((acc, shop) => acc + (shop.shop_Rating || 0), 0) /
             shops.length;
           setShopRating(averageRating || 0);
-  
+
           // Fetch all products for the shops
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
             .select("shop_Id");
-  
+
           if (productError) {
             console.error("Error fetching products:", productError.message);
             setError(productError.message);
@@ -109,14 +109,14 @@ function MerchantDashboard() {
               shopId: shop.id,
               productCount: products.filter(product => product.shop_Id === shop.id).length,
             }));
-  
+
             console.log("Product counts by shop:", productCountByShop);
             setProductCounts(productCountByShop);
-  
-        
+
+
             const totalProductCount = productCountByShop.reduce((acc, shop) => acc + shop.productCount, 0);
             console.log("Total product count:", totalProductCount);
-            setTotalProductCount(totalProductCount); 
+            setTotalProductCount(totalProductCount);
           }
         } else {
           console.log("No shops found for the user");
@@ -129,17 +129,17 @@ function MerchantDashboard() {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []); // Run once on mount
-  
+
   return (
-    <div className="h-full w-full bg-slate-300 overflow-y-scroll custom-scrollbar  ">
+    <div className="h-full w-full bg-slate-300 pb-5 ">
       <div className="absolute mx-3 right-0 z-10">
         <SideBar />
       </div>
       {/* 1st Container -- Logo Shop -- Notification */}
-      <div  className="h-auto w-full md:flex gap-2  place-items-center p-2 align-middle ">
+      <div className="h-auto w-full md:flex gap-2  place-items-center p-2 align-middle ">
         <div className=" h-full w-full p-2  md:pl-10">
           <div className=" text-3xl md:text-5xl font-bold text-custom-purple md:pl-5 mb-5 flex justify-start">
             Dashboard
@@ -237,21 +237,21 @@ function MerchantDashboard() {
         </div>
         <div className="bg-custom-purple glass rounded-md md:h-[200px] h-[170px] w-[70%] sm:w-[50%] md:w-[35%] lg:w-[25%] md:mr-12 lg:mr-16  p-2 mb-2 md:mb-0 ">
           <div className="bg-slate-100 h-full w-auto rounded-md">
-          
-              <div className="text-slate-900 font-semibold text-2xl md:text-5xl pt-[25%]  text-center">
-                {" "}
-                {shopRating}{" "}
-                <box-icon
-                  type="solid"
-                  size="30px"
-                  color="#F09319"
-                  name="star"
-                ></box-icon>{" "}
-                <br />
-                <div className="text-slate-800 text-xl"> SHOP RATING </div>
-              </div>
-        
-           
+
+            <div className="text-slate-900 font-semibold text-2xl md:text-5xl pt-[25%]  text-center">
+              {" "}
+              {shopRating}{" "}
+              <box-icon
+                type="solid"
+                size="30px"
+                color="#F09319"
+                name="star"
+              ></box-icon>{" "}
+              <br />
+              <div className="text-slate-800 text-xl"> SHOP RATING </div>
+            </div>
+
+
           </div>
         </div>
       </div>
@@ -401,7 +401,7 @@ function MerchantDashboard() {
               Manage product
             </div>
           </div>
-          <div
+        <div
             onClick={() => navigate("/shop/MerchantVouchers")}
             className="bg-slate-100 h-10 w-48 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
@@ -429,7 +429,7 @@ function MerchantDashboard() {
             </div>
           </div>
         </div>
-        <div className="bg-custom-purple rounded-md shadow-md h-full w-full lg:w-[35%] hover:scale-95 hover:duration-300 cursor-pointer p-2 place-items-center flex justify-center ">
+        <div className="bg-custom-purple rounded-md duration-300 shadow-md h-full w-full lg:w-[35%] hover:scale-95 cursor-pointer p-2 place-items-center flex justify-center ">
           <div className="iceland-regular text-slate-200">
             Create Design with
           </div>

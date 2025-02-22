@@ -12,6 +12,7 @@ import hmmEmote from "../../../../src/assets/emote/hmmm.png";
 function Login() {
   const navigate = useNavigate();
   const [shopName, setShopName] = useState("");
+  const [fullName, setfullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [shopDescription, setShopDescription] = useState("");
   const [shopAddress, setShopAddress] = useState("");
@@ -22,15 +23,21 @@ function Login() {
   const [showAlert5, setShowAlert5] = React.useState(false); // AlertAddress
   const [showAlert6, setShowAlert6] = React.useState(false); // AlertImageMissing
   const [showAlert7, setShowAlert7] = React.useState(false); // AlertFileMissing
+  const [showAlert8, setShowAlert8] = React.useState(false); // AlertIDmissing
+  const [showAlertEX, setShowAlertEX] = React.useState(false); // AlertImage
+  const [showAlertEY, setShowAlertEY] = React.useState(false); // AlertIDmissing
   const [showImage, setshowImage] = React.useState(false); //Show image modal
+  const [showImage2, setshowImage2] = React.useState(false); //Show image modal
   const [showFile, setshowFile] = React.useState(false); //Show File modal
   const [selectedImage, setSelectedImage] = useState(null); // show to the modal div
+  const [selectedImageID, setSelectedImageID] = useState(null); // show to the modal div
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [user, setUser] = useState(null);
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
-  const [TermsandCondition, setTermsandCondition] = React.useState(false); // Alert Success
+  const [TermsandCondition, setTermsandCondition] = React.useState(true); // Alert Terms and Conditions
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
+  const [imageFileID, setImageFileID] = useState(null); // State to hold the image fileid
   const [pdfFile, setPdfFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -38,6 +45,7 @@ function Login() {
   const [hasCreatedAccount, setHasCreatedAccount] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingFetch, setLoadingFetch] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const fetchUserProfile = async () => {
     setLoading(false);
@@ -105,6 +113,7 @@ function Login() {
   };
   // Handle input change
   const handleShopNameChange = (e) => setShopName(e.target.value);
+  const handlefullNameChange = (e) => setfullName(e.target.value);
   const handleShopAddressChange = (e) => setShopAddress(e.target.value);
   const handleShopDescriptionChange = (e) => setShopDescription(e.target.value);
 
@@ -123,7 +132,13 @@ function Login() {
       setTimeout(() => setShowAlert(false), 3000);
       return;
     }
-
+    if (!fullName.trim()) {
+      console.error("Shop name is required");
+      setIsSubmitting(false);
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+      return;
+    }
     if (!phoneNumber.trim()) {
       console.error("Phone Number is required");
       setIsSubmitting(false);
@@ -163,6 +178,13 @@ function Login() {
       setTimeout(() => setShowAlert6(false), 3000);
       return;
     }
+    if (!selectedImageID) {
+      console.error("ID is required");
+      setIsSubmitting(false);
+      setShowAlert8(true);
+      setTimeout(() => setShowAlert8(false), 3000);
+      return;
+    }
 
     if (!selectedFile) {
       console.error("Shop File is required");
@@ -175,16 +197,16 @@ function Login() {
     if (imageFile.size > maxImageSize) {
       console.error("Image size exceeds the 2MB limit.");
       setIsSubmitting(false);
-      setShowAlert6(true);
-      setTimeout(() => setShowAlert6(false), 3000);
+      setShowAlertEY(true);
+      setTimeout(() => setShowAlertEY(false), 3000);
       return;
     }
 
     if (pdfFile.size > maxPdfSize) {
       console.error("PDF file size exceeds the 5MB limit.");
       setIsSubmitting(false);
-      setShowAlert7(true);
-      setTimeout(() => setShowAlert7(false), 3000);
+      setShowAlertEX(true);
+      setTimeout(() => setShowAlertEX(false), 3000);
       return;
     }
 
@@ -192,11 +214,15 @@ function Login() {
     reader.onload = (e) => {
       const image = new Image();
       image.onload = async () => {
-
         // Upload image to Supabase if everything is valid
         const uniqueImageName = `shop_profile/${Date.now()}-${Math.random()
           .toString(36)
           .substring(2, 10)}-${imageFile.name}`;
+
+        const uniqueImageNameID = `valid_ID/${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 10)}-${imageFileID.name}`;
+
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
           .upload(uniqueImageName, imageFile);
@@ -217,6 +243,27 @@ function Login() {
           }
           uploadedImageUrl = publicUrlData.publicUrl;
           console.log("Image uploaded successfully:", uploadedImageUrl);
+        }
+
+        const { data: dataID, error: uploadErrorID } = await supabase.storage
+          .from("shop_profile")
+          .upload(uniqueImageNameID, imageFileID);
+
+        if (uploadErrorID) {
+          console.error("Error uploading ID image:", uploadErrorID.message);
+          setIsSubmitting(false);
+          return;
+        }
+
+        console.log("ID Image uploaded successfully to storage:", dataID);
+
+        let uploadedImageUrlId = null;
+        if (dataID?.path) {
+          const { data } = supabase.storage
+            .from("shop_profile")
+            .getPublicUrl(dataID.path);
+          uploadedImageUrlId = data.publicUrl;
+          console.log("ID Image URL (validID):", uploadedImageUrlId);
         }
 
         // Upload PDF file
@@ -270,6 +317,8 @@ function Login() {
                 is_Approved: null,
                 shop_image: uploadedImageUrl || null,
                 shop_BusinessPermit: uploadedPdfUrl || null,
+                validID: uploadedImageUrlId || null,
+                full_Name: fullName,
               },
             ])
             .single();
@@ -298,11 +347,13 @@ function Login() {
           );
 
           // Reset form fields after successful insertion
+          setfullName("");
           setShopName("");
           setPhoneNumber("");
           setShopDescription("");
           setShopAddress("");
           setImageFile(null);
+          setImageFileID(null);
           setPdfFile(null);
           setShowAlertSuccess(true);
           setIsSubmitting(false);
@@ -411,7 +462,13 @@ function Login() {
       alert("Please select an image");
     }
   };
-
+  const handleOpenImageID = () => {
+    if (selectedImageID) {
+      setshowImage2(true);
+    } else {
+      alert("Please select an image");
+    }
+  };
   //Open Modal for Viewing Pdf File
   const handleOpenFile = () => {
     if (selectedFile) {
@@ -424,6 +481,7 @@ function Login() {
   //MODAL FOR IMAGES
   const handleCloseModal = () => {
     setshowImage(false);
+    setshowImage2(false);
     setshowFile(false);
   };
   const handleCloseTandC = () => {
@@ -441,7 +499,15 @@ function Login() {
       console.log("Selected file:", file);
     }
   };
-
+  //define Image
+  const handleFileChangeImage = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImageFileID(file);
+      setSelectedImageID(URL.createObjectURL(file));
+      console.log("Selected file ID:", file);
+    }
+  };
   //define file input
   const handleFileChange2 = (event) => {
     const file = event.target.files[0];
@@ -451,6 +517,56 @@ function Login() {
       setSelectedFile(file);
     } else {
       alert("Please select a valid file (PDF document)");
+    }
+  };
+  useEffect(() => {
+    const checkAcceptedTerms = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("accept_Terms")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching terms:", error);
+        return;
+      }
+
+      if (data?.accept_Terms) {
+        setAcceptedTerms(true);
+        setTermsandCondition(false);
+      }
+    };
+
+    checkAcceptedTerms();
+  }, []);
+
+  const handleAcceptTerms = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("User not authenticated!");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ accept_Terms: true })
+      .eq("id", user.id);
+
+    if (error) {
+      console.error("Error updating terms:", error);
+      alert("Failed to accept terms. Please try again.");
+    } else {
+      alert("Terms accepted successfully!");
+      handleCloseTandC();
     }
   };
   return (
@@ -581,7 +697,7 @@ function Login() {
             </div>
           ) : null
         ) : (
-          <div className="h-auto w-full lg:w-[55%] bg-white shadow-lg rounded-lg p-3 px-7 overflow-hidden">
+          <div className="h-auto w-full lg:w-[55%] mb-16 md:mb-0 mt-5 md:mt-0 bg-white shadow-lg rounded-lg p-3 px-7 overflow-hidden">
             <div className="flex md:gap-2 md:justify-start justify-center">
               <box-icon
                 name="store"
@@ -603,6 +719,21 @@ function Login() {
                     <label className="form-control w-full">
                       <div className="label">
                         <span className="label-text text-slate-800 font-semibold">
+                          Type Your Full Name
+                        </span>
+                      </div>
+                      <input
+                        id="fullName"
+                        value={fullName}
+                        onChange={handlefullNameChange}
+                        type="text"
+                        placeholder="Type here"
+                        className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
+                      />
+                    </label>
+                    <label className="form-control w-full mt-1">
+                      <div className="label">
+                        <span className="label-text text-slate-800 font-semibold">
                           What is your SHOP name?
                         </span>
                       </div>
@@ -615,10 +746,10 @@ function Login() {
                         className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
                       />
                     </label>
-                    <label className="form-control w-full max-w-xs mt-2">
+                    <label className="form-control w-full max-w-xs mt-1">
                       <div className="label">
                         <span className="label-text text-slate-800 font-semibold">
-                          What is your SHOP contact number?
+                          Your G-cash Number?
                         </span>
                       </div>
                       <input
@@ -638,19 +769,52 @@ function Login() {
                   </div>
                 </div>
                 <div className="w-full md:w-1/2 h-full rounded-md justify-center mt-1 p-2">
-                  <label className="label-text font-semibold ml-2 text-slate-800">
-                    Upload shop photo
-                  </label>
-                  <div className="h-auto w-full flex mt-2 justify-center gap-2">
+                  <div className="flex gap-2 ">
+                    <div>
+                      <label className="label-text font-semibold ml-2 text-slate-800">
+                        Upload Valid ID
+                      </label>
+                    </div>
+                    <div className="relative">
+                      <div className="group cursor-help inline-block">
+                        <box-icon
+                          color="#5B21B6"
+                          name="info-circle"
+                          type="solid"
+                          className="hover:scale-105 duration-100"
+                        ></box-icon>
+
+                        {/* Tooltip - Only appears when hovering the icon */}
+                        <div className="absolute left-1/2 -translate-x-1/2 top-8 w-64 p-2 bg-gray-900 text-white text-sm rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                          <p className="font-semibold">
+                            Valid IDs for Merchants:
+                          </p>
+                          <ul className="list-disc list-inside">
+                            <li>Passport</li>
+                            <li>Driver’s License</li>
+                            <li>SSS ID</li>
+                            <li>UMID</li>
+                            <li>PhilHealth ID</li>
+                            <li>PRC ID</li>
+                            <li>Postal ID</li>
+                            <li>Voter’s ID</li>
+                            <li>National ID</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-auto w-full flex  justify-center gap-2">
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={handleFileChange}
+                      onChange={handleFileChangeImage}
                       placeholder={fileName || "Choose a file..."}
                       className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
                     />
                     <div
-                      onClick={handleOpenImage}
+                      onClick={handleOpenImageID}
                       className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
                     >
                       <box-icon
@@ -660,7 +824,32 @@ function Login() {
                       ></box-icon>
                     </div>
                   </div>
-                  <div className="mt-4">
+                  <div className="w-auto mt-2">
+                    <label className="label-text font-semibold ml-2  text-slate-800">
+                      Upload shop LOGO
+                    </label>
+                    <div className="h-auto w-full flex mt-2 justify-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        placeholder={fileName || "Choose a file..."}
+                        className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
+                      />
+                      <div
+                        onClick={handleOpenImage}
+                        className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                      >
+                        <box-icon
+                          type="solid"
+                          name="image-alt"
+                          color="#FFFFFF"
+                        ></box-icon>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-2">
                     <label className="label-text font-semibold ml-2 text-slate-800">
                       Upload business permit
                     </label>
@@ -750,7 +939,11 @@ function Login() {
             </form>
           </div>
         )}
-        <div onClick={ShowTandC} data-tip="Read Merchant Terms and Condition" className=" tooltip-left tooltip bg-slate-50 hover:scale-95 duration-200 cursor-pointer rounded-full shadow-md  absolute right-7 bottom-7">
+        <div
+          onClick={ShowTandC}
+          data-tip="Read Merchant Terms and Condition"
+          className=" tooltip-left tooltip bg-slate-50 hover:scale-95 duration-200 cursor-pointer rounded-full shadow-md  fixed right-7 bottom-14 md:bottom-7"
+        >
           <img
             src={questionEmote}
             alt="Success Emote"
@@ -983,6 +1176,102 @@ function Login() {
           </div>
         </div>
       )}
+      {showAlert8 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Merchant ID is Required!</span>
+          </div>
+        </div>
+      )}
+      {showAlertEX && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>PDF file size exceeds the 5MB limit.</span>
+          </div>
+        </div>
+      )}
+      {showAlertEY && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Image size exceeds the 2MB limit.</span>
+          </div>
+        </div>
+      )}
       {showImage && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
           <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
@@ -991,6 +1280,32 @@ function Login() {
               {selectedImage ? (
                 <img
                   src={selectedImage}
+                  alt="Uploaded shop photo"
+                  className="w-full h-full object-cover rounded-sm"
+                />
+              ) : (
+                <p className="text-white">Please select an image</p>
+              )}{" "}
+            </div>
+            <div className="flex justify-between  w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded  hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showImage2 && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
+          <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
+            {/*Image goes here*/}
+            <div className=" h-[350px] w-[350px] border-custom-purple border-2 bg-slate-600 rounded-md  place-items-center   ">
+              {selectedImageID ? (
+                <img
+                  src={selectedImageID}
                   alt="Uploaded shop photo"
                   className="w-full h-full object-cover rounded-sm"
                 />
@@ -1066,19 +1381,19 @@ function Login() {
         </div>
       )}
       {TermsandCondition && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white w-auto p-5   justify-items-center rounded-md shadow-md relative">
+        <div className="fixed inset-0 md:p-0 p-2 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white w-full overflow-hidden h-[400px] md:h-auto  md:w-auto p-5   justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
             </div>
 
             <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
-              Terms And Condition
+              Read Terms And Condition
             </h2>
 
-            <div className="bg-gradient-to-r top-0 left-0 from-violet-500 to-fuchsia-500 rounded-md text-slate-800 shadow-inner shadow-slate-600 h-[400px] w-[800px] overflow-y-scroll p-4 space-y-4">
+            <div className="bg-gradient-to-r top-0 overflow-hidden h-full left-0 from-violet-500 to-fuchsia-500 rounded-md text-slate-800 shadow-inner shadow-slate-600 md:h-[400px] md:w-[800px] overflow-y-scroll p-2 space-y-4">
               <div className="bg-gray-200 p-6 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
-                <h1 className="text-3xl font-bold text-center text-gray-900 mb-6 border-b pb-3">
+                <h1 className="text-xl md:text-3xl font-bold text-center text-gray-900 mb-6 border-b pb-3">
                   MERCHANT’S TERMS AND CONDITIONS OF USE
                 </h1>
 
@@ -1295,13 +1610,30 @@ function Login() {
                   </section>
                 </div>
 
-                <div className="mt-6 text-center">
-                  <button
-                    onClick={handleCloseTandC}
-                    className="bg-primary-color m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
-                  >
-                    Accept Terms
-                  </button>
+                <div className="mt-6 justify-center gap-2 flex">
+                  {acceptedTerms ? (
+                    <button
+                      onClick={handleCloseTandC}
+                      className="bg-gray-600 text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-5 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => navigate("/account/shop-setup")}
+                        className="bg-gray-600 text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                      >
+                        Decline Terms
+                      </button>
+                      <button
+                        onClick={handleAcceptTerms}
+                        className="bg-primary-color text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                      >
+                        Accept Terms
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

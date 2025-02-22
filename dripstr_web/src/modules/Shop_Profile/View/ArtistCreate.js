@@ -25,9 +25,12 @@ function ArtistCreate() {
   const [showAlert7, setShowAlert7] = React.useState(false); // AlertImageMissing
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
   const [loading, setLoading] = useState(false);
+  const [TermsandConditionArtist, setTermsandConditionArtist] =
+    React.useState(true); // Alert TANDC
 
   const handleArtistNameChange = (e) => setArtistName(e.target.value);
-  const handleArtistDescriptionChange = (e) => setArtistDescription(e.target.value);
+  const handleArtistDescriptionChange = (e) =>
+    setArtistDescription(e.target.value);
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
   };
@@ -198,7 +201,12 @@ function ArtistCreate() {
     }, 1000);
     navigate("/shop/Artist/ArtistDashboard");
   };
-
+  const handleCloseTandC = () => {
+    setTermsandConditionArtist(false);
+  };
+  const ShowTandC = () => {
+    setTermsandConditionArtist(true);
+  };
   return (
     <div className="h-full w-full">
       <div className="h-full w-full lg:flex justify-center items-center bg-slate-300 p-1  ">
@@ -207,7 +215,7 @@ function ArtistCreate() {
         {/* FIRST CONTAINER */}
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6"
+          className="w-full max-w-3xl bg-white mb-16 md:mb-0 mt-5 md:mt-0 shadow-lg rounded-lg p-6"
         >
           <div className=" h-auto  w-full md:px-10 -mt-2 overflow-hidden ">
             <div className="flex w-full md:gap-2 md:justify-start justify-center mt-5 md:mt-0  ">
@@ -346,11 +354,11 @@ function ArtistCreate() {
               ></textarea>
             </label>
           </div>
-          <div className="w-full h-auto justify-end flex m-2 mb-14 md:mb-0">
+          <div className="w-full h-auto justify-start flex m-2 mb-14 md:mb-0">
             {loading ? (
               <div className="text-center place-content-center px-5 mr-14 glass rounded-md bg-custom-purple">
                 <span className="loading loading-dots loading-lg bg-slate-100"></span>
-              </div>  
+              </div>
             ) : (
               <button
                 type="submit"
@@ -359,6 +367,17 @@ function ArtistCreate() {
                 SUBMIT
               </button>
             )}
+            <div
+              onClick={ShowTandC}
+              data-tip="Read Merchant Terms and Condition"
+              className=" tooltip-left tooltip bg-slate-50 hover:scale-95 duration-200 cursor-pointer rounded-full shadow-md fixed right-7 bottom-14 md:bottom-7"
+            >
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain h-16 w-16 rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
           </div>
         </form>
       </div>
@@ -609,6 +628,278 @@ function ArtistCreate() {
               className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
             >
               Okay!
+            </div>
+          </div>
+        </div>
+      )}
+      {TermsandConditionArtist && (
+        <div className="fixed inset-0 md:p-0 p-2 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white w-full overflow-hidden h-[400px] md:h-auto  md:w-auto p-5   justify-items-center rounded-md shadow-md relative">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
+
+            <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+              Read Terms And Agreement
+            </h2>
+
+            <div className="bg-gradient-to-r top-0 overflow-hidden h-full left-0 from-violet-500 to-fuchsia-500 rounded-md text-slate-800 shadow-inner shadow-slate-600 md:h-[400px] md:w-[800px] overflow-y-scroll p-2 space-y-4">
+              <div className="bg-gray-200 p-6 rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+                <h1 className="text-xl md:text-3xl font-bold text-center text-gray-900 mb-6 border-b pb-3">
+                  ARTIST’S TERMS AND AGREEMENT OF USE
+                </h1>
+
+                <div className="space-y-6 text-gray-700">
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      1. DEFINITIONS
+                    </h2>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>
+                        <strong>Artist:</strong> Any individual or entity that
+                        uploads and sells digital artwork or accepts commissions
+                        via the DRIPSTR platform.
+                      </li>
+                      <li>
+                        <strong>Platform:</strong> DRIPSTR, the integrated
+                        e-commerce and design software system for 3D apparel
+                        creation, virtual shopping experiences, and digital
+                        artwork sales.
+                      </li>
+                      <li>
+                        <strong>Products:</strong> Any digital artwork, 3D
+                        apparel designs, or related digital content uploaded by
+                        Artists onto the DRIPSTR platform.
+                      </li>
+                      <li>
+                        <strong>Agreement:</strong> These Terms and Conditions,
+                        which govern the Artist’s use of the DRIPSTR platform.
+                      </li>
+                      <li>
+                        <strong>Customer:</strong> Any individual or business
+                        purchasing Products or commissioning artwork through the
+                        DRIPSTR platform.
+                      </li>
+                    </ul>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      2. AGREEMENT
+                    </h2>
+                    <p>
+                      These Terms and Conditions (referred to as "Agreement")
+                      apply to all services and functionality provided by
+                      DRIPSTR to the Artist, including the uploading of digital
+                      artwork, storefront management, and commission requests
+                      via chat.
+                    </p>
+                    <p>
+                      By using the DRIPSTR platform, Artists agree to comply
+                      with all terms laid out herein, as well as any additional
+                      guidelines issued by DRIPSTR from time to time.
+                    </p>
+                    <p>
+                      DRIPSTR reserves the right to modify these Terms at any
+                      time. Changes will take effect immediately upon posting to
+                      the platform. Artists are responsible for reviewing the
+                      Terms regularly.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      3. ARTIST REGISTRATION AND VERIFICATION
+                    </h2>
+                    <p>
+                      Upon registration, Artists must provide valid and accurate
+                      personal or business documentation, including but not
+                      limited to:
+                    </p>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>A valid Government-Issued ID</li>
+                      <li>Portfolio or sample artwork for verification</li>
+                      <li>Payment details for commission earnings</li>
+                    </ul>
+                    <p>
+                      These documents will be used for verification purposes.
+                      Failure to provide them may result in denied access to
+                      artist functionalities on the DRIPSTR platform.
+                    </p>
+                    <p>
+                      DRIPSTR reserves the right to suspend or terminate
+                      accounts that fail to comply with the verification process
+                      or provide fraudulent information.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      4. ARTIST RESPONSIBILITIES
+                    </h2>
+                    <p>
+                      Artists are responsible for uploading accurate and
+                      original digital artwork to the platform. They must ensure
+                      they have legal rights to sell any uploaded Products.
+                    </p>
+                    <p>
+                      Artists may accept commissions via the platform’s chat
+                      feature and must ensure clear communication with Customers
+                      regarding project scope, pricing, and deadlines.
+                    </p>
+                    <p>
+                      Artists must not upload fraudulent or misleading content
+                      or violate applicable laws.
+                    </p>
+                    <p>
+                      Artists are expected to actively manage their storefronts,
+                      update artwork regularly, and engage with Customers
+                      professionally.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      5. PAYMENT AND REVENUE SHARING
+                    </h2>
+                    <p>
+                      The platform will charge a 1% share on each commissioned
+                      transaction, which may be updated from time to time by
+                      DRIPSTR.
+                    </p>
+                    <p>
+                      Payments to Artists will be processed through DRIPSTR’s
+                      integrated payment system and distributed within 30 days
+                      following the successful completion of a commission sale.
+                    </p>
+                    <p>
+                      <strong>Wallet & Cash-Out:</strong>
+                    </p>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>
+                        Artists will have a wallet where their commission
+                        earnings will be reflected.
+                      </li>
+                      <li>
+                        To withdraw funds, artists must submit a cash-out
+                        request to DRIPSTR, subject to review and processing.
+                      </li>
+                    </ul>
+                    <p>
+                      <strong>Advertisement Services:</strong>
+                    </p>
+                    <ul className="list-disc list-inside pl-4">
+                      <li>
+                        Artists may promote their artwork or storefront via
+                        DRIPSTR’s internal Advertisement System.
+                      </li>
+                      <li>
+                        Advertisement costs will be billed separately and vary
+                        based on type, duration, and scope.
+                      </li>
+                      <li>
+                        DRIPSTR reserves the right to provide different
+                        advertisement packages, including featured listings and
+                        targeted promotions.
+                      </li>
+                    </ul>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      6. COMMISSION PROCESS AND DEADLINE
+                    </h2>
+                    <p>
+                      Artists may accept commissions through the platform’s chat
+                      feature and must provide clear terms regarding the scope,
+                      pricing, and deadline of commissioned work.
+                    </p>
+                    <p>
+                      Artists are responsible for ensuring timely completion of
+                      commissioned work.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      7. LIABILITY AND WARRANTIES
+                    </h2>
+                    <p>
+                      DRIPSTR makes no warranties regarding the performance or
+                      accuracy of the platform.
+                    </p>
+                    <p>
+                      DRIPSTR will not be liable for indirect, incidental, or
+                      consequential damages resulting from platform use.
+                    </p>
+                    <p>
+                      Artists are solely responsible for any claims or disputes
+                      arising from their artwork.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      8. TERMINATION OF SERVICE
+                    </h2>
+                    <p>
+                      DRIPSTR reserves the right to suspend or terminate an
+                      Artist’s access to the platform for violating these Terms
+                      or causing harm to DRIPSTR.
+                    </p>
+                    <p>
+                      Artists may terminate their use of the platform at any
+                      time but remain responsible for any obligations before the
+                      termination date.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      9. INTELLECTUAL PROPERTY
+                    </h2>
+                    <p>
+                      All intellectual property rights related to the DRIPSTR
+                      platform remain the exclusive property of DRIPSTR.
+                    </p>
+                    <p>
+                      Artists retain the intellectual property rights to their
+                      uploaded artwork but grant DRIPSTR a non-exclusive,
+                      royalty-free license to use, display, and promote their
+                      work.
+                    </p>
+                  </section>
+
+                  <section className="border-l-4 border-blue-500 pl-4">
+                    <h2 className="text-xl font-semibold text-gray-800">
+                      10. GOVERNING LAW
+                    </h2>
+                    <p>
+                      These Terms and Conditions are governed by the laws of the
+                      jurisdiction in which DRIPSTR operates.
+                    </p>
+                    <p>
+                      Any disputes arising from these Terms will be resolved in
+                      accordance with the legal procedures of this jurisdiction.
+                    </p>
+                  </section>
+                </div>
+
+                <div className="mt-6 justify-center gap-2 flex">
+                  <button
+                    onClick={() => navigate("/account/shop-setup")}
+                    className="bg-gray-600 glass text-sm shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                  >
+                    Decline Terms
+                  </button>
+                  <button
+                    onClick={handleCloseTandC}
+                    className="bg-primary-color text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                  >
+                    Accept Terms
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
