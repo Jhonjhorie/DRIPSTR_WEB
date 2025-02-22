@@ -3,12 +3,15 @@ import SideBar from "../Component/Sidebars";
 import "../Component/Style.css";
 import logo from "../../../assets/shop/logoBlack.png";
 import { supabase } from "../../../constants/supabase";
+import Subscription from "../Component/MerchantWallet";
 import "boxicons";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 import questionEmote from "../../../../src/assets/emote/question.png";
 import successEmote from "../../../../src/assets/emote/success.png";
 import sadEmote from "../../../../src/assets/emote/error.png";
 import hmmEmote from "../../../../src/assets/emote/hmmm.png";
+import qrCode from "@/assets/qr.png";
+
 const { useState, useEffect } = React;
 function MerchantWallet() {
   const [loading, setLoading] = useState(false);
@@ -192,6 +195,10 @@ function MerchantWallet() {
     fetchTransactions();
   }, []);
 
+  //subscribe
+  const [showAlertSubscription, setShowSubscription] = useState(false);
+  const [openScan, setOpenscan] = useState(false);
+  const [activeTabSubs, setActiveTabSubs] = useState("Def");
   const [inquiryText, setInquiryText] = useState("");
   return (
     <div className="h-full w-full bg-slate-300 md:px-20 p-2 ">
@@ -263,6 +270,25 @@ function MerchantWallet() {
               Cashout Information
             </button>
           </div>
+          <div className="w-full mt-5">
+            <div
+              onClick={() => setShowSubscription(true)}
+              className="justify-end flex w-auto relative"
+            >
+              <h1
+                className="cursor-pointer w-auto glass bg-red-600 text-white font-semibold shadow-red-400 shadow-md p-2 rounded-md hover:scale-95 duration-200
+      animate-none hover:animate-[shake_1s_ease-in-out_infinite]  flex items-center gap-2"
+              >
+                SUBSCRIPTION
+                <box-icon
+                  type="solid"
+                  name="crown"
+                  size="md"
+                  color="gold "
+                ></box-icon>
+              </h1>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -270,7 +296,7 @@ function MerchantWallet() {
       <div className="w-full h-auto  justify-items-center">
         {/* Content Display */}
         {activeTab === "cashout" && (
-          <div className="flex-grow relative bg-white w-1/2  p-4 rounded-lg shadow-md mt-4">
+          <div className="flex-grow relative bg-white w-1/2 px-6  p-4 rounded-lg shadow-md mt-4">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
             </div>
@@ -357,7 +383,9 @@ function MerchantWallet() {
             {/* Info Display */}
             <div className="h-[300px] w-full shadow-inner shadow-slate-400 rounded-md overflow-y-auto bg-slate-300 p-4">
               {inquiryText ? (
-                <p className="whitespace-pre-line text-slate-700">{inquiryText}</p>
+                <p className="whitespace-pre-line text-slate-700">
+                  {inquiryText}
+                </p>
               ) : (
                 <p className="text-gray-500 text-center">Select an inquiry</p>
               )}
@@ -560,6 +588,193 @@ function MerchantWallet() {
             </svg>
             <span>Minimum cashout amount is ₱100</span>
           </div>
+        </div>
+      )}
+      {showAlertSubscription && (
+        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-5 w-[600px] rounded-md shadow-md relative">
+            {/* Gradient Header Line */}
+            <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
+
+            {/* Title */}
+            <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900">
+              Subscribe to Dripstr's Monthly Merchant Boost Plan!
+            </h2>
+            {/* Content*/}
+            <div className="bg-slate-200 py-4 rounded-sm p-2">
+              {/* Success Emote */}
+              {activeTabSubs === "Def" && (
+                <div>
+                  <div className="flex justify-center p-5">
+                    <img
+                      src={successEmote}
+                      alt="Success Emote"
+                      className="object-contain rounded-lg p-1 drop-shadow-customViolet w-24"
+                    />
+                  </div>
+                  {/* Benefits Section */}
+                  <div className=" text-slate-800 space-y-3">
+                    <p className="text-lg font-semibold text-center">
+                      🚀 Why Subscribe?
+                    </p>
+                    <ul className="text-sm space-y-2 list-disc list-inside">
+                      <li>
+                        <strong>Increased Visibility:</strong> Your products get
+                        featured for better exposure.
+                      </li>
+                      <li>
+                        <strong>Exclusive Promotions:</strong> Access to special
+                        discounts and marketing campaigns.
+                      </li>
+                      <li>
+                        <strong>Priority Support:</strong> Get faster customer
+                        assistance whenever you need it.
+                      </li>
+                      <li>
+                        <strong>Advanced Analytics:</strong> Gain insights on
+                        sales trends and customer behavior.
+                      </li>
+                      <li>
+                        <strong>More Sales Opportunities:</strong> Stand out
+                        from competitors with premium placements.
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+
+              {activeTabSubs === "Wallet" && (
+                <div className="flex-grow relative  place-self-center bg-white w-2/3 px-6  p-4 rounded-lg shadow-md ">
+                  <div className="text-slate-900">
+                    <div className="flex justify-items-center gap-2">
+                      <div>
+                        <h3 className="text-lg text-center font-bold mb-2 text-slate-800">
+                          Pay via Dripstr Wallet
+                        </h3>
+                      </div>
+                      <div
+                        className="w-auto h-auto "
+                      >
+                        <box-icon name="wallet" type="solid"></box-icon>
+                      </div>
+                    </div>
+                    <label className=" text-sm text-slate-800">
+                      Type the Amount:
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Enter Amount"
+                      className="w-full p-2 border text-slate-800 bg-slate-300 rounded-md mb-2"
+                    />
+                    <label className=" text-sm text-slate-800">
+                      Type note for Dripstr:
+                    </label>
+                    <textarea
+                      placeholder="Note for Dripstr"
+                      className="w-full p-2 border text-slate-800 rounded-md bg-slate-300"
+                    ></textarea>
+                    <button
+                      onClick={handleSubmitCashoutcONF}
+                      className="mt-3 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-full"
+                    >
+                      Submit Payment
+                    </button>
+                  </div>
+                </div>
+              )}
+              {activeTabSubs === "Gcash" && (
+                <div className="flex-grow relative  place-self-center bg-white w-2/3  px-6  p-4 rounded-lg shadow-md ">
+                  <div className="text-slate-900">
+                    <div className="flex justify-items-center gap-2">
+                      <div>
+                        <h3 className="text-lg text-center font-bold mb-2 text-slate-800">
+                          Pay via Gcash
+                        </h3>
+                      </div>
+                      <div
+                         onClick={() => {
+                          setOpenscan(true);
+                        }}
+                        data-tip="Scan here"
+                        className="tooltip-right tooltip w-auto h-auto cursor-help "
+                      >
+                        {" "}
+                        <box-icon name="qr" color="black"></box-icon>{" "}
+                      </div>
+                    </div>
+
+                    <label className=" text-sm text-slate-800">
+                      Type the Amount:
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Enter Amount"
+                      className="w-full p-2 border text-slate-800 bg-slate-300 rounded-md mb-2"
+                    />
+                    <label className=" text-sm text-slate-800">
+                      Proof of payment:
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      placeholder="Enter Amount"
+                      className="w-full p-2 border text-slate-800 bg-slate-300 rounded-md mb-2"
+                    />
+                    <button
+                      onClick={handleSubmitCashoutcONF}
+                      className="mt-3 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-full"
+                    >
+                      Submit Payment
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-between gap-3 mt-5">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setActiveTabSubs("Wallet")}
+                  className="bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold hover:bg-primary-color transition duration-300"
+                >
+                  Pay via Dripstr Wallet
+                </button>
+                <button
+                  onClick={() => setActiveTabSubs("Gcash")}
+                  className="bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold hover:bg-blue-700 transition duration-300"
+                >
+                  Pay via Gcash
+                </button>
+              </div>
+
+              <button
+                onClick={() =>
+                  setShowSubscription(false) || setActiveTabSubs("Def")
+                }
+                className="bg-red-500 px-4 py-2 text-white rounded-sm font-semibold hover:bg-red-600 transition duration-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+          {openScan && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+              <div className="relative bg-custom-purple h-auto w-auto p-2 rounded-md ">
+                <div className="h-80 w-80">
+                  <img src={qrCode}></img>
+                </div>
+                <button
+                  onClick={() => {
+                    setOpenscan(false);
+                  }}
+                  className="absolute -top-2 right-0 text-custom-purple text-3xl p-2 drop-shadow-lg "
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
