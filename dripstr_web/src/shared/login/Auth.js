@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from 'axios';
 import "daisyui/dist/full.css";
 import logo from "./auth/logoBlack.png";
 import Fb from "./auth/facebook.png";
@@ -9,6 +10,11 @@ import { useNavigate } from "react-router-dom";
 import useUserProfile from "@/shared/mulletCheck.js";
 import addToCart from "@/modules/Products/hooks/useAddtoCart.js";
 import SuccessModal from './components/SuccessModal';
+import { useAddressFields } from './hooks/useAddressFields';
+import ForgotPasswordModal from './components/ForgotPasswordModal';
+
+const modalTransitionClass = "transition-all duration-300 ease-in-out";
+const formTransitionClass = "transition-all duration-500 ease-in-out transform";
 
 const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const [isSignIn, setIsSignIn] = useState(true);
@@ -17,18 +23,31 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const [profile, setProfile] = useState(null);
   const navigate = useNavigate();  
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
-  
-  const [signInData, setSignInData] = useState({ email: "", password: "" });
+  const {
+    addressData: { regions, provinces, cities, barangays },
+    selected,
+    loading,
+    handleRegionChange,
+    handleProvinceChange,
+    handleCityChange,
+    setSelected
+  } = useAddressFields(isOpen, isSignIn);
+
+  const [signInData, setSignInData] = useState({ 
+    email: "", 
+    password: "" 
+  });
+
   const [signUpData, setSignUpData] = useState({
     email: "",
     password: "",
     fullName: "",
     mobile: "",
     gender: "",
-    sbirthDate: "",
-    address: "",
-    potcode: "",
+    birthDate: "",
+    postcode: "",
   });
 
   const handleInputChange = (e, form) => {
@@ -72,144 +91,272 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
     }, 2000);
   };
 
+
   const handleSignUp = async () => {
-    const { email, password, fullName, mobile, gender, birthDate, address, postcode } = signUpData;
-    if (!email || !password || !fullName || !mobile || !gender || !birthDate || !address || !postcode)
-      return alert("Please fill in all fields.");
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { 
-        data: { fullName, mobile, gender, birthDate } 
-      },
-    });
+    try {
+      const { email, password, fullName, mobile, gender, birthDate, postcode } = signUpData;
+      
+      if (!email || !password || !fullName || !mobile || !gender || !birthDate || !postcode || 
+          !selected.region || !selected.province || !selected.city || !selected.barangay) {
+        return alert("Please fill in all fields.");
+      }
 
-    if (error) return alert(`Sign Up Error: ${error.message}`);
-    
-    const user = data.user;
-    if (user) {
-      await supabase.from("addresses").insert({
-        user_id: user.id,
-        address,
-        postcode,
-        is_default_shipping: true,
+      const fullAddress = `${selected.barangay}, ${selected.city}, ${selected.province}, ${selected.region}`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { 
+          data: { fullName, mobile, gender, birthDate } 
+        },
       });
-    }
 
-    alert("Sign Up successful! Check your email for confirmation.");
-    onClose();
-    navigate("/");
-    window.location.reload();
+      if (error) throw new Error(error.message);
+      
+      const user = data.user;
+      if (!user) throw new Error("User creation failed");
+
+      const { error: addressError } = await supabase
+        .from("addresses")
+        .insert({
+          user_id: user.id,
+          address: fullAddress,
+          full_address: fullAddress,
+          region: selected.region,
+          province: selected.province,
+          city: selected.city,
+          barangay: selected.barangay,
+          postcode,
+          is_default_shipping: true
+        });
+
+      if (addressError) throw new Error(addressError.message);
+
+      setIsSuccessModalOpen(true);
+      setTimeout(() => {
+        setIsSuccessModalOpen(false);
+        onClose();
+        navigate("/login");
+      }, 2000);
+
+    } catch (error) {
+      console.error('Signup error:', error);
+      alert(`Sign Up Error: ${error.message}`);
+    }
   };
 
   const handleToggle = () => setIsSignIn(!isSignIn);
 
+  useEffect(() => {
+    console.log('Address Data:', { regions, provinces, cities, barangays });
+    console.log('Selected:', selected);
+    console.log('Loading:', loading);
+  }, [regions, provinces, cities, barangays, selected, loading]);
+  
   return (
     <>
       {isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-96 relative">
+          <div className={`bg-white p-6 rounded-lg shadow-xl relative ${modalTransitionClass} ${
+            isSignIn ? 'w-[400px]' : 'w-[800px]'
+          }`}>
             <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl">
               &times;
             </button>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">{isSignIn ? "Login" : "Sign Up"}</h2>
+
+            <h2 className={`text-2xl font-bold text-gray-800 mb-4 ${formTransitionClass}`}>
+              {isSignIn ? "Login" : "Sign Up"}
+            </h2>
 
             {/* Form Fields */}
-            <div className="form-control w-full">
-            {!isSignIn && (
-                <>
-                  <input
-                    type="text"
-                    name="fullName"
-                    placeholder="Full Name"
-                    className="input input-bordered bg-gray-100 w-full mb-4"
-                    value={signUpData.fullName}
-                    onChange={(e) => handleInputChange(e, "signUp")}
-                  />
-                  <input
-                    type="text"
-                    name="mobile"
-                    placeholder="Mobile Number"
-                    className="input input-bordered bg-gray-100 w-full mb-4"
-                    value={signUpData.mobile}
-                    onChange={(e) => handleInputChange(e, "signUp")}
-                  />
-                  <select
-                    name="gender"
-                    className="select select-bordered bg-gray-100 w-full mb-4"
-                    value={signUpData.gender}
-                    onChange={(e) => handleInputChange(e, "signUp")}
-                  >
-                    <option value="" disabled>Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                  </select>
-                  <input
-                    type="date"
-                    name="birthDate"
-                    className="input input-bordered bg-gray-100 w-full mb-4"
-                    value={signUpData.birthDate}
-                    onChange={(e) => handleInputChange(e, "signUp")}
-                  />
-                  <input
-                    type="text"
-                    name="address"
-                    placeholder="Address"
-                    className="input input-bordered bg-gray-100 w-full mb-4"
-                    value={signUpData.address}
-                    onChange={(e) => handleInputChange(e, "signUp")}
-                  />
-                  <input
-                    type="text"
-                    name="postcode"
-                    placeholder="Postcode"
-                    className="input input-bordered bg-gray-100 w-full mb-4"
-                    value={signUpData.postcode}
-                    onChange={(e) => handleInputChange(e, "signUp")}
-                  />
-                </>
-              )}
+            <div className={`form-control w-full ${formTransitionClass}`}>
+              {!isSignIn ? (
+                <div className="flex gap-6 opacity-100 transition-opacity duration-500">
+                  {/* Left Column - Personal Information */}
+                  <div className="flex-1 space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Personal Information</h3>
+                    <input
+                      type="text"
+                      name="fullName"
+                      placeholder="Full Name"
+                      className="input input-bordered bg-gray-100 w-full"
+                      value={signUpData.fullName}
+                      onChange={(e) => handleInputChange(e, "signUp")}
+                    />
+                    <input
+                      type="text"
+                      name="mobile"
+                      placeholder="Mobile Number"
+                      className="input input-bordered bg-gray-100 w-full"
+                      value={signUpData.mobile}
+                      onChange={(e) => handleInputChange(e, "signUp")}
+                    />
+                    <select
+                      name="gender"
+                      className="select select-bordered bg-gray-100 w-full"
+                      value={signUpData.gender}
+                      onChange={(e) => handleInputChange(e, "signUp")}
+                    >
+                      <option value="" disabled>Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                    <input
+                      type="date"
+                      name="birthDate"
+                      className="input input-bordered bg-gray-100 w-full"
+                      value={signUpData.birthDate}
+                      onChange={(e) => handleInputChange(e, "signUp")}
+                    />
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Email"
+                      className="input input-bordered bg-gray-100 w-full"
+                      value={signUpData.email}
+                      onChange={(e) => handleInputChange(e, "signUp")}
+                    />
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                      className="input input-bordered bg-gray-100 w-full"
+                      value={signUpData.password}
+                      onChange={(e) => handleInputChange(e, "signUp")}
+                    />
+                  </div>
 
-              
-              <input
-                type="email"
-                name="email"
-                placeholder="Email"
-                className="input input-bordered bg-gray-100 w-full mb-4"
-                value={isSignIn ? signInData.email : signUpData.email}
-                onChange={(e) => handleInputChange(e, isSignIn ? "signIn" : "signUp")}
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="input input-bordered bg-gray-100 w-full mb-4"
-                value={isSignIn ? signInData.password : signUpData.password}
-                onChange={(e) => handleInputChange(e, isSignIn ? "signIn" : "signUp")}
-              />
+                  {/* Right Column - Address Information */}
+                  <div className="flex-1 space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Address Information</h3>
+                    <select
+                      name="region"
+                      className="select select-bordered bg-gray-100 w-full"
+                      value={selected.region}
+                      onChange={(e) => handleRegionChange(e.target.value)}
+                      disabled={loading.regions}
+                    >
+                      <option value="">
+                        {loading.regions ? 'Loading regions...' : 'Select Region'}
+                      </option>
+                      {regions.map(region => (
+                        <option key={region.code} value={region.code}>
+                          {region.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      name="city"
+                      className="select select-bordered bg-gray-100 w-full"
+                      value={selected.city}
+                      onChange={(e) => handleCityChange(e.target.value)}
+                      disabled={!selected.region || loading.cities}
+                    >
+                      <option value="">
+                        {loading.cities ? 'Loading cities...' : 'Select City/Municipality'}
+                      </option>
+                      {cities.map(city => (
+                        <option key={city.code} value={city.code}>
+                          {city.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      name="barangay"
+                      className="select select-bordered bg-gray-100 w-full"
+                      value={selected.barangay}
+                      onChange={(e) => setSelected(prev => ({ ...prev, barangay: e.target.value }))}
+                      disabled={!selected.city || loading.barangays}
+                    >
+                      <option value="">
+                        {loading.barangays ? 'Loading barangays...' : 'Select Barangay'}
+                      </option>
+                      {barangays.map(barangay => (
+                        <option key={barangay.code} value={barangay.code}>
+                          {barangay.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <input
+                      type="text"
+                      name="exactLocation"
+                      placeholder="Street, Block, Building, Floor, etc."
+                      className="input input-bordered bg-gray-100 w-full"
+                      value={selected.exactLocation}
+                      onChange={(e) => setSelected(prev => ({ ...prev, exactLocation: e.target.value }))}
+                    />
+
+                    <input
+                      type="text"
+                      name="postcode"
+                      placeholder="Postcode"
+                      className="input input-bordered bg-gray-100 w-full"
+                      value={signUpData.postcode}
+                      onChange={(e) => handleInputChange(e, "signUp")}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center space-y-4 opacity-100 transition-opacity duration-500">
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className="input input-bordered bg-gray-100 w-full mb-4"
+                    value={signInData.email}
+                    onChange={(e) => handleInputChange(e, "signIn")}
+                  />
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    className="input input-bordered bg-gray-100 w-full mb-4"
+                    value={signInData.password}
+                    onChange={(e) => handleInputChange(e, "signIn")}
+                  />
+                  
+                  {/* Add Forgot Password link */}
+                  <button
+                    onClick={() => setIsForgotPasswordOpen(true)}
+                    className="text-sm text-purple-600 hover:text-purple-700 self-end"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+              )}
             </div>
 
+            {/* Button and toggle section remains at the bottom */}
             <button 
-              className="btn btn-primary w-full bg-purple-600 hover:bg-purple-700 border-none mt-4"
+              className={`btn btn-primary w-full bg-purple-600 hover:bg-purple-700 border-none mt-6 ${formTransitionClass}`}
               onClick={isSignIn ? handleSignIn : handleSignUp}
             >
               {isSignIn ? "Login" : "Sign Up"}
             </button>
 
-            <p className="mt-4 text-gray-600 text-center">
+            <p className={`mt-4 text-gray-600 text-center ${formTransitionClass}`}>
               {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
-              <button onClick={handleToggle} className="text-purple-500 hover:underline font-medium">
-                {isSignIn ? "Login" : "Sign In"}
+              <button onClick={handleToggle} className="text-purple-500 hover:underline font-medium transition-colors duration-300">
+                {isSignIn ? "Sign Up" : "Login"}
               </button>
             </p>
           </div>
         </div>
       )}
-       <SuccessModal 
+
+      {/* Add Forgot Password Modal */}
+      <ForgotPasswordModal 
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+      />
+
+      <SuccessModal 
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
-       />
+      />
     </>
   );
 };

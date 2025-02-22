@@ -29,7 +29,9 @@ import { NotificationProvider } from './utils/NotificationContext';
 import { Toaster } from 'react-hot-toast';
 
 
-// Shared Component
+// Tangina mo Password
+import ResetPassword from './shared/login/ResetPassword';
+
 function App() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
 
@@ -74,6 +76,7 @@ function App() {
               <Route path="/notification" element={<Notifications />} />
               <Route path="/reminder" element={<Reminder/>}/>
               <Route path="/mall" element={<Mall />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
             </Routes>
           </main>
         </div>
