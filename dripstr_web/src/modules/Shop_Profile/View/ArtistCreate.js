@@ -10,13 +10,17 @@ import "boxicons";
 function ArtistCreate() {
   const navigate = useNavigate();
   const [artistName, setArtistName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [artistDescription, setArtistDescription] = useState("");
   const [fileName, setFileName] = useState("");
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
+  const [imageFileID, setImageFileID] = useState(null); // State to hold the image file
   const [selectedImage, setSelectedImage] = useState(null); // show to the modal div
+  const [selectedImageID, setSelectedImageID] = useState(null); // show to the modal div
   const [selectedCategory, setSelectedCategory] = useState("");
   const [showAlert, setShowAlert] = React.useState(false); // AlertShopname
+  const [showAlertFL, setShowAlertFL] = React.useState(false); // AlertShopname
   const [showAlert2, setShowAlert2] = React.useState(false); // AlertContact
   const [showAlert3, setShowAlert3] = React.useState(false); // AlertDescription
   const [showAlert4, setShowAlert4] = React.useState(false); // Alert11digits
@@ -25,15 +29,13 @@ function ArtistCreate() {
   const [showAlert7, setShowAlert7] = React.useState(false); // AlertImageMissing
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
   const [loading, setLoading] = useState(false);
+  const [AcceptedTermsArtist, setAcceptedTermsArtist] = useState(false);
   const [TermsandConditionArtist, setTermsandConditionArtist] =
-    React.useState(true); // Alert TANDC
-
+    React.useState(false); // Alert TANDC
   const handleArtistNameChange = (e) => setArtistName(e.target.value);
+  const handleFullNameChange = (e) => setFullName(e.target.value);
   const handleArtistDescriptionChange = (e) =>
     setArtistDescription(e.target.value);
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-  };
 
   const phonedigit = (e) => {
     let value = e.target.value;
@@ -48,11 +50,28 @@ function ArtistCreate() {
       console.log("Selected file:", file);
     }
   };
+  const handleFileChangeID = (event) => {
+    const file = event.target.files[0]; // Get the selected file
+    if (file) {
+      setImageFileID(file); // Store the file in state
+      setSelectedImageID(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload on form submit
     setLoading(true);
     //handles alerts on missing inputs
     //handles alerts on missing inputs
+    if (!fullName.trim()) {
+      console.error("Full name is required");
+      setShowAlertFL(true);
+      setTimeout(() => {
+        setShowAlertFL(false);
+      }, 3000);
+      setLoading(false);
+      return; // Do not proceed if the field is empty
+    }
     if (!artistName.trim()) {
       console.error("Shop name is required");
       setShowAlert(true);
@@ -121,27 +140,64 @@ function ArtistCreate() {
 
     if (imageFile) {
       try {
-        // Upload the image to Supabase storage
+        const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, ""); 
+        const uniqueFileName = `artist_profile/${timestamp}_${imageFile.name}`;
+    
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
-          .upload(`artist_profile/${imageFile.name}`, imageFile);
-
+          .upload(uniqueFileName, imageFile);
+    
         if (uploadError) {
           console.error("Error uploading image:", uploadError.message);
           return;
         }
+    
         if (data?.path) {
           const { data: publicUrlData, error: urlError } = supabase.storage
             .from("shop_profile")
             .getPublicUrl(data.path);
-
+    
           if (urlError) {
             console.error("Error fetching image URL:", urlError.message);
             return;
           }
-
+    
           uploadedImageUrl = publicUrlData.publicUrl;
           console.log("Image uploaded successfully:", uploadedImageUrl);
+        }
+      } catch (err) {
+        console.error("Unexpected error while uploading image:", err);
+        return;
+      }
+    }
+    let uploadedImageUrlId = null;
+
+    if (imageFileID) {
+      try {
+        const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, ""); 
+        const uniqueFileName = `valid_ID/${timestamp}_${imageFile.name}`;
+    
+        const { data, error: uploadError } = await supabase.storage
+          .from("shop_profile")
+          .upload(uniqueFileName, imageFile);
+    
+        if (uploadError) {
+          console.error("Error uploading image:", uploadError.message);
+          return;
+        }
+    
+        if (data?.path) {
+          const { data: publicUrlData, error: urlError } = supabase.storage
+            .from("shop_profile")
+            .getPublicUrl(data.path);
+    
+          if (urlError) {
+            console.error("Error fetching image URL:", urlError.message);
+            return;
+          }
+    
+          uploadedImageUrlId = publicUrlData.publicUrl;
+          console.log("Image uploaded successfully:", uploadedImageUrlId);
         }
       } catch (err) {
         console.error("Unexpected error while uploading image:", err);
@@ -156,12 +212,14 @@ function ArtistCreate() {
         .from("artist")
         .insert([
           {
+            full_Name: fullName,
             artist_Name: artistName,
             contact_number: phoneNumber,
             art_Type: selectedCategory,
             artist_Bio: artistDescription,
-            owner_Id: userId, // Set the owner_id to the current user's ID
+            owner_Id: userId,
             artist_Image: uploadedImageUrl || null,
+            valid_ID: uploadedImageUrlId || null,
           },
         ])
         .single();
@@ -185,10 +243,12 @@ function ArtistCreate() {
       }
 
       // Reset form fields after successful insertion
+      setFullName("");
       setArtistName("");
       setPhoneNumber("");
       setArtistDescription("");
       setImageFile(null);
+      setImageFileID(null);
     } catch (err) {
       console.error("Unexpected error:", err);
     } finally {
@@ -207,11 +267,87 @@ function ArtistCreate() {
   const ShowTandC = () => {
     setTermsandConditionArtist(true);
   };
+
+  useEffect(() => {
+    const checkAcceptedTerms = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+  
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("acceptTerms_Artist")
+        .eq("id", user.id)
+        .single();
+  
+      if (error) {
+        console.error("Error fetching terms:", error);
+        return;
+      }
+  
+      if (data?.acceptTerms_Artist) {
+        setAcceptedTermsArtist(true);
+        setTermsandConditionArtist(false);
+      } else {
+        setTermsandConditionArtist(true);
+      }
+    };
+  
+    checkAcceptedTerms();
+  }, []);
+  
+
+  const handleAcceptTerms = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("User not authenticated!");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ acceptTerms_Artist: true })
+      .eq("id", user.id);
+
+    if (error) {
+      console.error("Error updating terms:", error);
+      alert("Failed to accept terms. Please try again.");
+    } else {
+      alert("Terms accepted successfully!");
+      handleCloseTandC();
+    }
+  };
+
+  const [customCategory, setCustomCategory] = useState("");
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const categories = [
+    "Street Art/Graffiti",
+    "Digital Art",
+    "Comic/Cartoon Art",
+    "Anime/Manga",
+    "Chibi Style",
+    "Cubism",
+    "Realism",
+    "Others",
+  ];
+
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    if (category === "Others") {
+      setShowCustomInput(true);
+      setCustomCategory("");
+    } else {
+      setShowCustomInput(false);
+    }
+  };
+
   return (
     <div className="h-full w-full">
       <div className="h-full w-full lg:flex justify-center items-center bg-slate-300 p-1  ">
-        {/* SECOND CONTAINER */}
-
         {/* FIRST CONTAINER */}
         <form
           onSubmit={handleSubmit}
@@ -239,6 +375,21 @@ function ArtistCreate() {
                   <label className="form-control w-full">
                     <div className="label">
                       <span className="label-text text-slate-800 font-semibold">
+                        What is your Fullname?
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      id="fullName"
+                      value={fullName}
+                      onChange={handleFullNameChange}
+                      placeholder="Type here"
+                      className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
+                    />
+                  </label>
+                  <label className="form-control w-full">
+                    <div className="label">
+                      <span className="label-text text-slate-800 font-semibold">
                         What is your Artist Name?
                       </span>
                     </div>
@@ -251,10 +402,10 @@ function ArtistCreate() {
                       className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
                     />
                   </label>
-                  <label className="form-control w-full max-w-xs mt-2">
+                  <label className="form-control w-full max-w-xs mt-1">
                     <div className="label">
                       <span className="label-text text-slate-800 font-semibold">
-                        What is your contact number?
+                        What is your Gcash number?
                       </span>
                     </div>
                     <input
@@ -271,68 +422,108 @@ function ArtistCreate() {
                       Phone number should be 11 digits.
                     </span>
                   </div>
-
-                  <label className="form-control w-full max-w-xs ">
-                    <div className="label">
-                      <span className="label-text font-semibold text-slate-800">
-                        What is your Art Style?
-                      </span>
-                    </div>
-                    <div className="dropdown dropdown-top w-full">
-                      <div
-                        tabIndex={0}
-                        role="button"
-                        className="bg-custom-purple glass hover:scale-95 duration-300 rounded-md text-center text-slate-100 p-2 mt-2 w-full"
-                      >
-                        {selectedCategory || "Choose a Category"}
-                      </div>
-                      <ul
-                        tabIndex={0}
-                        className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
-                      >
-                        {[
-                          "Street Art/Graffiti",
-                          "Digital Art",
-                          "Comic/Cartoon Art",
-                          "Anime/Manga",
-                          "Chibi Style",
-                          "Cubism",
-                          "Realism",
-                          "Others",
-                        ].map((category) => (
-                          <li key={category}>
-                            <a onClick={() => handleCategorySelect(category)}>
-                              {category}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </label>
                 </div>
               </div>
 
-              <div className="w-full md:w-1/2 h-full rounded-md  place-items-center justify-center p-2">
-                <div className="bg-slate-100 w-72 h-52 flex items-center justify-center mt-5 border-violet-950 border-2 rounded-md">
-                  {/* SHOP LOGO GOES HERE */}
-                  {selectedImage ? (
-                    <img
-                      src={selectedImage}
-                      alt="Uploaded shop photo"
-                      className="w-full h-full object-cover rounded-sm"
-                    />
-                  ) : (
-                    <div className=" w-full text-4xl text-custom-purple place-content-center text-center h-full">
-                      <i className="fa-solid fa-image"></i>
+              <div className="w-full md:w-1/2 h-full rounded-md -mt-7  place-items-center justify-center p-2">
+                <label className="form-control w-full max-w-xs">
+                  <div className="label">
+                    <span className="label-text font-semibold text-slate-800">
+                      What is your Art Style?
+                    </span>
+                  </div>
+
+                  {/* Dropdown */}
+                  <div className="dropdown dropdown-bottom w-full">
+                    <div
+                      tabIndex={0}
+                      role="button"
+                      className="bg-custom-purple glass hover:scale-95 duration-300 rounded-md text-center text-slate-100 p-2  w-full"
+                    >
+                      {selectedCategory || "Choose a Category"}
                     </div>
+                    <ul
+                      tabIndex={0}
+                      className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
+                    >
+                      {categories.map((category) => (
+                        <li key={category}>
+                          <a onClick={() => handleCategorySelect(category)}>
+                            {category}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Custom Input for "Others" */}
+                  {showCustomInput && (
+                    <input
+                      type="text"
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      placeholder="Enter your art style"
+                      className="mt-2 p-2 border bg-slate-50 text-slate-900 border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-primary-color"
+                    />
                   )}
-                  {""}
+                </label>
+
+
+
+                <div className="label mt-1 w-full">
+                  <span className="label-text text-slate-800 font-semibold">
+                    Select your Artist Photo
+                  </span>
                 </div>
-                <div className="h-auto w-full flex mt-6 justify-center ">
+                <div className="h-auto w-full flex justify-center ">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
+                    placeholder={fileName || "Choose a file..."}
+                    className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
+                  />
+                </div>
+                <div className="flex w-full gap-2 mt-3">
+                  <div className=" flex-start">
+                    <label className="label-text w-full  font-semibold ml-2 text-slate-800">
+                      Upload Valid ID
+                    </label>
+                  </div>
+                  <div className="relative">
+                    <div className="group cursor-help inline-block">
+                      <box-icon
+                        color="#5B21B6"
+                        name="info-circle"
+                        type="solid"
+                        className="hover:scale-105 duration-100"
+                      ></box-icon>
+
+                      {/* Tooltip - Only appears when hovering the icon */}
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-64 p-2 bg-gray-900 text-white text-sm rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                        <p className="font-semibold">
+                          Valid IDs for Artist:
+                        </p>
+                        <ul className="list-disc list-inside">
+                          <li>Passport</li>
+                          <li>Driver’s License</li>
+                          <li>SSS ID</li>
+                          <li>UMID</li>
+                          <li>PhilHealth ID</li>
+                          <li>PRC ID</li>
+                          <li>Postal ID</li>
+                          <li>Voter’s ID</li>
+                          <li>National ID</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="h-auto w-full flex  justify-center ">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChangeID}
                     placeholder={fileName || "Choose a file..."}
                     className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
                   />
@@ -362,7 +553,7 @@ function ArtistCreate() {
             ) : (
               <button
                 type="submit"
-                className="btn glass bg-custom-purple   mr-[8%] iceland-regular tracking-wide text-lg text-white "
+                className="btn glass bg-custom-purple   ml-[6%] iceland-regular tracking-wide text-lg text-white "
               >
                 SUBMIT
               </button>
@@ -410,6 +601,38 @@ function ArtistCreate() {
               />
             </svg>
             <span>Shop name is required!</span>
+          </div>
+        </div>
+      )}
+      {showAlertFL && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Your Fullname is required!</span>
           </div>
         </div>
       )}
@@ -886,18 +1109,29 @@ function ArtistCreate() {
                 </div>
 
                 <div className="mt-6 justify-center gap-2 flex">
-                  <button
-                    onClick={() => navigate("/account/shop-setup")}
-                    className="bg-gray-600 glass text-sm shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
-                  >
-                    Decline Terms
-                  </button>
-                  <button
-                    onClick={handleCloseTandC}
-                    className="bg-primary-color text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
-                  >
-                    Accept Terms
-                  </button>
+                  {AcceptedTermsArtist ? (
+                    <button
+                      onClick={handleCloseTandC}
+                      className="bg-gray-600 text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-5 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => navigate("/account/shop-setup")}
+                        className="bg-gray-600 text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                      >
+                        Decline Terms
+                      </button>
+                      <button
+                        onClick={handleAcceptTerms}
+                        className="bg-primary-color text-sm glass shadow-md shadow-slate-700 m-2 p-2 px-3 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                      >
+                        Accept Terms
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
