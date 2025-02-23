@@ -38,7 +38,7 @@ function MerchantWallet() {
 
       if (user) {
         console.log("Current user:", user);
-        setCurrentUser(user); // Store user in state
+        setCurrentUser(user);
 
         const { data: shop, error: shopError } = await supabase
           .from("shop")
@@ -46,7 +46,7 @@ function MerchantWallet() {
             "shop_name, id, address, description, contact_number, shop_image, shop_BusinessPermit"
           )
           .eq("owner_Id", user.id)
-          .single(); // Assuming a user has only one shop
+          .single();
 
         if (shopError) {
           throw shopError;
@@ -447,7 +447,11 @@ function MerchantWallet() {
       </div>
       <div className="flex gap-2 w-full h-auto">
         <div className="w-1/3  h-full flex flex-col items-center">
-          <div className="bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white">
+          <div
+            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${
+              isPremium ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]" : ""
+            }`}
+          >
             {/* Wallet Icon and Name */}
             <div className="absolute bottom-2 right-2">
               <img src={logo} className="h-20 w-20 blur-sm" />

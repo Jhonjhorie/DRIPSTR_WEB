@@ -50,7 +50,7 @@ function MerchantDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [shopRating, setShopRating] = useState(0);
-
+  const [walletrevenue, setWalletData] = useState(0);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -122,6 +122,23 @@ function MerchantDashboard() {
           console.log("No shops found for the user");
           setError("No shops found for the user");
         }
+        // for wallet
+        const { data: wallet, error: walletError } = await supabase
+        .from("merchant_Wallet")
+        .select("revenue")
+        .eq("owner_ID", user.id)
+        .single();
+       
+      if (walletError) {
+        console.error("Error fetching wallet:", walletError.message);
+        setError(walletError.message);
+      } else {
+        console.log("User's wallet:", wallet);
+        setWalletData(wallet || { revenue: "0.00" });
+         
+        
+      }
+
       } catch (err) {
         console.error("Unexpected error:", err.message);
         setError("An unexpected error occurred. Please try again.");
@@ -132,7 +149,13 @@ function MerchantDashboard() {
 
     fetchData();
   }, []); // Run once on mount
-
+  const formatRevenue = (revenue) => {
+    const amount = parseFloat(revenue) || 0;
+  
+    return amount >= 1000
+      ? (amount / 1000).toFixed(1).replace(".0", "") + "k"
+      : amount.toLocaleString("en-PH", { minimumFractionDigits: 2 });
+  };
   return (
     <div className="h-full w-full bg-slate-300 pb-5 ">
       <div className="absolute mx-3 right-0 z-10">
@@ -212,7 +235,9 @@ function MerchantDashboard() {
                 ></box-icon>
               </div>
             </div>
-            <div className="bg-[#F09319] glass rounded-md h-20 md:h-28 w-40 md:w-44 p-1">
+            <div
+             onClick={() => navigate("/shop/MerchantWallet")}
+            className="bg-[#F09319] hover:scale-95 duration-200 hover:bg-yellow-500 cursor-pointer glass rounded-md h-20 md:h-28 w-40 md:w-44 p-1">
               <div className="text-white text-xl iceland-regular">
                 {" "}
                 TOT INCOME{" "}
@@ -222,7 +247,7 @@ function MerchantDashboard() {
                 style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}
               >
                 {" "}
-                500k{" "}
+                <span className="text-3xl">₱</span>{formatRevenue(walletrevenue?.revenue || "0.00")}
               </div>
               <div className="absolute bottom-0 right-0 blur-[2px] -z-10">
                 <box-icon
