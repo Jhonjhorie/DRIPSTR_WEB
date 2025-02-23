@@ -15,7 +15,7 @@ import Avatar from '../View/Avatar';
 import CharacterCreation from '../View/CharacterCreation';  
 import Try from '../View/RPMCreateAvatar';
 import NotificationDemo from '../View/trynotif';
- 
+  
 const UserController = () => {
   return (
     <Routes>

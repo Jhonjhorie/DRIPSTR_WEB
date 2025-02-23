@@ -15,6 +15,7 @@ const Orders = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const tabs = ["All", "To Pay", "To Ship", "To Receive", "Completed", "Refund"];
 
@@ -35,6 +36,12 @@ const Orders = () => {
       ).length
     };
     return counts;
+  };
+
+  const handlePayment = (order) => {
+    // TODO: Implement payment logic
+    console.log('Processing payment for order:', order);
+    // Navigate to payment page or show payment modal
   };
 
   const getFilteredOrders = () => {
@@ -196,9 +203,23 @@ const Orders = () => {
                       </div>
                       <div className="flex gap-2">
                         {!order.isPaid && (
-                          <button className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700">
-                            Pay Now
-                          </button>
+                          <>
+                            <button 
+                              className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
+                              onClick={() => handlePayment(order)}
+                            >
+                              Pay Now
+                            </button>
+                            <button 
+                              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setShowCancelModal(true);
+                              }}
+                            >
+                              Cancel Order
+                            </button>
+                          </>
                         )}
                         {order.isPaid && 
                           order.order_status === "Delivered" && 
@@ -211,6 +232,18 @@ const Orders = () => {
                             }}
                           >
                             Request Refund
+                          </button>
+                        )}
+                        {order.isPaid && 
+                          order.order_status === "Processing" && (
+                          <button 
+                            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowCancelModal(true);
+                            }}
+                          >
+                            Cancel Order
                           </button>
                         )}
                       </div>
@@ -237,6 +270,16 @@ const Orders = () => {
           order={selectedOrder}
         />
       )}
+      {showCancelModal && (
+        <CancelOrderModal
+          isOpen={showCancelModal}
+          onClose={() => {
+            setShowCancelModal(false);
+            setSelectedOrder(null);
+          }}
+          order={selectedOrder}
+        />
+      )}
     </div>
   );
 };
@@ -245,8 +288,40 @@ const RefundModal = ({ isOpen, onClose, order }) => {
   const [refundReason, setRefundReason] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
-  if (!isOpen) return null;
+  const handleImageUpload = async (e) => {
+    try {
+      setUploading(true);
+      const files = Array.from(e.target.files);
+      const uploadPromises = files.map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `refund-images/${order.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('refunds')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('refunds')
+          .getPublicUrl(filePath);
+
+        return publicUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setImages(prev => [...prev, ...uploadedUrls]);
+    } catch (error) {
+      setError('Error uploading images. Please try again.');
+      console.error('Error:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSubmitRefund = async () => {
     if (!refundReason.trim()) {
@@ -263,13 +338,14 @@ const RefundModal = ({ isOpen, onClose, order }) => {
         .update({
           order_status: 'Refund Requested',
           refund_reason: refundReason,
-          refund_requested_at: new Date().toISOString()
+          refund_requested_at: new Date().toISOString(),
+          refund_status: 'Pending',
+          refund_images: images
         })
         .eq('id', order.id);
 
       if (supabaseError) throw supabaseError;
       
-      setRefundReason('');
       onClose();
       window.location.reload();
     } catch (error) {
@@ -282,7 +358,7 @@ const RefundModal = ({ isOpen, onClose, order }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-xl w-[500px]">
+      <div className="bg-white p-6 rounded-lg shadow-xl w-[500px] max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">Request Refund</h2>
         <p className="text-gray-600 mb-4">Order #{order.id}</p>
         
@@ -298,6 +374,39 @@ const RefundModal = ({ isOpen, onClose, order }) => {
           disabled={isSubmitting}
         />
 
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Upload Images (Optional)
+          </label>
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={isSubmitting || uploading}
+            className="block w-full text-sm text-gray-500
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-full file:border-0
+              file:text-sm file:font-semibold
+              file:bg-purple-50 file:text-purple-700
+              hover:file:bg-purple-100"
+          />
+          {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
+          
+          {images.length > 0 && (
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {images.map((url, index) => (
+                <img 
+                  key={index} 
+                  src={url} 
+                  alt={`Refund evidence ${index + 1}`}
+                  className="w-full h-24 object-cover rounded-lg"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="flex justify-end gap-2">
           <button
             className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
@@ -309,9 +418,87 @@ const RefundModal = ({ isOpen, onClose, order }) => {
           <button
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
             onClick={handleSubmitRefund}
-            disabled={!refundReason.trim() || isSubmitting}
+            disabled={!refundReason.trim() || isSubmitting || uploading}
           >
             {isSubmitting ? 'Submitting...' : 'Submit Request'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CancelOrderModal = ({ isOpen, onClose, order }) => {
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!reason.trim()) {
+      setError('Please provide a reason for cancellation');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const { error: supabaseError } = await supabase
+        .from('orders')
+        .update({
+          order_status: 'Cancelled',
+          cancellation_reason: reason,
+          cancellation_requested_at: new Date().toISOString(),
+          cancellation_status: 'Approved'
+        })
+        .eq('id', order.id);
+
+      if (supabaseError) throw supabaseError;
+      
+      onClose();
+      window.location.reload();
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      setError('Failed to cancel order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl w-[500px]">
+        <h2 className="text-xl font-bold mb-4">Cancel Order</h2>
+        <p className="text-gray-600 mb-4">Order #{order.id}</p>
+        
+        {error && (
+          <p className="text-red-600 text-sm mb-4">{error}</p>
+        )}
+
+        <textarea
+          className="w-full h-32 p-2 border rounded-lg mb-4"
+          placeholder="Please explain why you want to cancel this order..."
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          disabled={isSubmitting}
+        />
+
+        <div className="flex justify-end gap-2">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Back
+          </button>
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            onClick={handleSubmit}
+            disabled={!reason.trim() || isSubmitting}
+          >
+            {isSubmitting ? 'Processing...' : 'Cancel Order'}
           </button>
         </div>
       </div>

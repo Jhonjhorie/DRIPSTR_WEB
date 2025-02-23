@@ -29,30 +29,56 @@ function CameraController({ view }) {
   useEffect(() => {
     switch (view) {
       case 'upper':
+        // Pan camera upward to focus on upper body
         gsap.to(camera.position, {
           x: 0,
-          y: 150,
-          z: 100,
-          duration: 1
+          y: 160,
+          z: 150,
+          duration: 0.8,
+          ease: "power2.inOut"
+        });
+        gsap.to(camera.lookAt, {
+          x: 0,
+          y: 140, // Look up at head/chest area
+          z: 0,
+          duration: 0.8,
+          ease: "power2.inOut"
         });
         break;
       case 'lower':
+        // Pan camera downward to focus on lower body
         gsap.to(camera.position, {
           x: 0,
-          y: 50,
-          z: 100,
-          duration: 1
+          y: 40,
+          z: 150,
+          duration: 0.8,
+          ease: "power2.inOut"
+        });
+        gsap.to(camera.lookAt, {
+          x: 0,
+          y: 20, // Look down at legs area
+          z: 0,
+          duration: 0.8,
+          ease: "power2.inOut"
         });
         break;
       case 'full':
+      default:
+        // Reset to full body view
         gsap.to(camera.position, {
           x: 0,
           y: 100,
           z: 200,
-          duration: 1
+          duration: 0.8,
+          ease: "power2.inOut"
         });
-        break;
-      default:
+        gsap.to(camera.lookAt, {
+          x: 0,
+          y: 80,
+          z: 0,
+          duration: 0.8,
+          ease: "power2.inOut"
+        });
         break;
     }
   }, [view, camera]);
@@ -409,11 +435,16 @@ const CharacterCustomization = () => {
         )}
       </group>
       <OrbitControls 
-        target={[0, 110, 0]} 
-        minPolarAngle={Math.PI / 2} 
-        maxPolarAngle={Math.PI / 2} 
-        minDistance={100} 
-        maxDistance={300} 
+        target={[0, 80, 0]}           // Adjust default target height
+        minPolarAngle={0}             // Allow full vertical rotation
+        maxPolarAngle={Math.PI}       // Allow full vertical rotation
+        minDistance={80}              // Minimum zoom distance
+        maxDistance={300}             // Maximum zoom distance
+        enablePan={true}              // Enable panning
+        panSpeed={0.5}                // Adjust pan sensitivity
+        rotateSpeed={0.5}             // Adjust rotation sensitivity
+        enableDamping={true}          // Smooth camera movements
+        dampingFactor={0.05}          // Adjust smoothing strength
       />
     </Canvas>
   </div>
