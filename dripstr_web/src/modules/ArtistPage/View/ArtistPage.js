@@ -724,10 +724,11 @@ function ArtistPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       fetchMessages();
-    }, 3000); // Fetch messages every 3 seconds
+    }, 3000); 
   
-    return () => clearInterval(interval); // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, [currentUser?.id, artist?.id]); 
+  
   const handleUploadImage = async () => {
     if (!imageFile) return null;
 

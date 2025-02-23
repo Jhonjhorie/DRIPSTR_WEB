@@ -45,23 +45,23 @@ function ArtistCreate() {
   const handleFileChange = (event) => {
     const file = event.target.files[0]; // Get the selected file
     if (file) {
-      setImageFile(file); // Store the file in state
+      setImageFile(file); 
       setSelectedImage(URL.createObjectURL(file));
       console.log("Selected file:", file);
     }
   };
   const handleFileChangeID = (event) => {
-    const file = event.target.files[0]; // Get the selected file
+    const file = event.target.files[0];
     if (file) {
-      setImageFileID(file); // Store the file in state
+      setImageFileID(file);
       setSelectedImageID(URL.createObjectURL(file));
       console.log("Selected file:", file);
     }
   };
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent page reload on form submit
+    e.preventDefault(); 
     setLoading(true);
-    //handles alerts on missing inputs
+ 
     //handles alerts on missing inputs
     if (!fullName.trim()) {
       console.error("Full name is required");
@@ -70,7 +70,7 @@ function ArtistCreate() {
         setShowAlertFL(false);
       }, 3000);
       setLoading(false);
-      return; // Do not proceed if the field is empty
+      return;
     }
     if (!artistName.trim()) {
       console.error("Shop name is required");
@@ -79,7 +79,7 @@ function ArtistCreate() {
         setShowAlert(false);
       }, 3000);
       setLoading(false);
-      return; // Do not proceed if the field is empty
+      return;
     }
     if (!selectedCategory.trim()) {
       console.error("Shop name is required");
@@ -88,7 +88,7 @@ function ArtistCreate() {
         setShowAlert7(false);
       }, 3000);
       setLoading(false);
-      return; // Do not proceed if the field is empty
+      return;
     }
     if (!phoneNumber.trim()) {
       console.error("Phone Number is required");
@@ -97,7 +97,7 @@ function ArtistCreate() {
         setShowAlert2(false);
       }, 3000);
       setLoading(false);
-      return; // Do not proceed if the phone number is empty
+      return; 
     }
     if (phoneNumber.length !== 11) {
       console.error("Phone Number must be 11 digits");
@@ -106,7 +106,7 @@ function ArtistCreate() {
         setShowAlert4(false);
       }, 3000);
       setLoading(false);
-      return; // Ensure phone number is exactly 11 digits
+      return; 
     }
     if (!artistDescription.trim()) {
       console.error("Shop Description is required");
@@ -115,7 +115,7 @@ function ArtistCreate() {
         setShowAlert5(false);
       }, 3000);
       setLoading(false);
-      return; // Do not proceed if the field is empty
+      return; 
     }
     if (!selectedImage) {
       console.error("Shop Image is required");
@@ -124,9 +124,9 @@ function ArtistCreate() {
         setShowAlert6(false);
       }, 3000);
       setLoading(false);
-      return; // Do not proceed if the field is empty
+      return; 
     }
-    //define current user credit
+
     const {
       data: { user },
       error: userError,
@@ -228,9 +228,32 @@ function ArtistCreate() {
         console.error("Error inserting shop data:", shopError.message);
         return;
       }
-
-      setShowAlertSuccess(true);
       console.log("Artist page created successfully:", shopData);
+
+
+      const { data: walletData, error: walletError } = await supabase
+      .from("artist_Wallet")
+      .insert([
+        {
+          number: phoneNumber,
+          owner_Name: fullName,
+          revenue: "0",
+          valid_ID: uploadedImageUrlId || null,
+          owner_ID: userId, 
+        },
+      ]);
+
+    if (walletError) {
+      console.error(
+        "Error inserting into merchant_Wallet:",
+        walletError.message
+      );
+      return;
+    }
+
+    console.log("Merchant Wallet created successfully:", walletData);
+      setShowAlertSuccess(true);
+
 
       const { error: updateError } = await supabase
         .from("profiles")

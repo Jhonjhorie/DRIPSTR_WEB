@@ -143,7 +143,7 @@ function Artists() {
       const topArtistsList = sortedArtists.map(([id, likes], index) => {
         const artist = artists.find((a) => a.id === parseInt(id, 10));
         return {
-          id: parseInt(id, 10), 
+          id: parseInt(id, 10),
           name: artist?.artist_Name || "Unknown",
           type: artist?.art_Type || "Not set",
           color: colors[index],
@@ -182,7 +182,7 @@ function Artists() {
         art_Description, 
         likes, 
         artist_Id,
-        artists:artist_Id (id, artist_Name, artist_Image) 
+        artists:artist_Id (id, artist_Name, artist_Image, is_Premium) 
       `);
 
       if (error) throw error;
@@ -462,18 +462,18 @@ function Artists() {
 
         {topArtists.map((artist, index) => (
           <div
-          onClick={() => {
-            console.log("Selected Artist Data:", artist);
-            // Use artist.id if available, otherwise try artist.artist_Id
-            const artistId = artist.id;
-            if (artistId) {
-              navigate(`/arts/ArtistPage/${artistId}`);
-            } else {
-              console.error(
-                "Artist ID is undefined! Check if the correct ID property exists in your data."
-              );
-            }
-          }}
+            onClick={() => {
+              console.log("Selected Artist Data:", artist);
+              // Use artist.id if available, otherwise try artist.artist_Id
+              const artistId = artist.id;
+              if (artistId) {
+                navigate(`/arts/ArtistPage/${artistId}`);
+              } else {
+                console.error(
+                  "Artist ID is undefined! Check if the correct ID property exists in your data."
+                );
+              }
+            }}
             key={index}
             style={{
               backgroundColor: "rgba(0, 0, 0, 0.3)",
@@ -535,77 +535,174 @@ function Artists() {
             <span className="loading loading-spinner loading-lg"></span>
           </div>
         )}
+        <div className="px-4 mb-20 space-y-6">
+          {/* Artist that avail premium priority HAHA */}
+          <div className="columns-2 sm:columns-3 mb-2 md:columns-4 gap-2 space-y-2">
+            {artistData
+              .filter((art) => art.artists?.is_Premium)
+              .map((art) => (
+                <div
+                  key={art.id}
+                  className="relative p-1 hover:scale-105 hover:drop-shadow-customViolet duration-200  bg-gradient-to-r from-yellow-500 to-fuchsia-500 shadow-lg rounded-md overflow-hidden break-inside-avoid"
+                >
+                  <div></div>
+                  {/* Art Image */}
+                  <div
+                    onClick={() => handleSelectArt(art)}
+                    className="cursor-pointer overflow-hidden rounded-md"
+                  >
+                    <img
+                      src={art.art_Image}
+                      alt="Art"
+                      className="w-full h-auto object-cover rounded-md"
+                    />
+                  </div>
 
-        <div className="columns-2 sm:columns-3 md:columns-4 mb-20 gap-2 px-4 space-y-2">
-          {artistData.map((art) => (
-            <div
-              key={art.id}
-              className="relative hover:scale-105 hover:drop-shadow-customViolet  duration-200 bg-white shadow-lg rounded-md overflow-hidden break-inside-avoid"
-            >
-              {/* Art Image */}
+                  {/* Art Name Badge */}
+                  <div className="absolute glass bottom-2 left-2  bg-gradient-to-r from-yellow-500 to-fuchsia-500 text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2">
+                    <img
+                      src={art.artists?.artist_Image}
+                      alt="Logo"
+                      className="h-7 w-7 rounded-md"
+                    />
+                    {art.art_Name}
+                  </div>
+                  <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2  gap-2">
+                    <div className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold">
+                      {art.likes?.length || 0}
+                      <box-icon
+                        name="heart"
+                        color={art.likes?.includes(userId) ? "red" : "gray"}
+                        onClick={() => handleLike(art.id, art.likes)}
+                        className="cursor-pointer "
+                        type="solid"
+                      ></box-icon>
+                    </div>
+                    <div
+                      onClick={() => {
+                        console.log("Selected Art Data:", art);
+                        console.log("Artist Data:", art.artist);
+
+                        if (art.artists && art.artists.id) {
+                          navigate(`/arts/ArtistPage/${art.artists.id}`);
+                        } else {
+                          console.error(
+                            "Artist ID is undefined! Check if artist_Id exists in your database."
+                          );
+                        }
+                      }}
+                      data-tip="Visit Artist"
+                      className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm  text-slate-800 "
+                    >
+                      <box-icon
+                        type="solid"
+                        name="user-pin"
+                        color="blue"
+                      ></box-icon>
+                    </div>
+                    <div
+                      onClick={() => handleSelectArtReport(art)}
+                      data-tip="Report this Post"
+                      className=" tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
+                    >
+                      <box-icon
+                        name="shield-x"
+                        type="solid"
+                        color="gold"
+                      ></box-icon>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+ {/* Art Not premium*/}
+          <div className="columns-2 sm:columns-3 md:columns-4 mb-20 gap-2 space-y-2">
+            {artistData.map((art) => (
               <div
-                onClick={() => handleSelectArt(art)}
-                className="cursor-pointer overflow-hidden rounded-md"
+                key={art.id}
+                className={`relative hover:scale-105 hover:drop-shadow-customViolet  duration-200  shadow-lg rounded-md overflow-hidden break-inside-avoid ${
+                  art.artists?.is_Premium
+                    ? "bg-gradient-to-r from-yellow-500 p-1 to-fuchsia-500 "
+                    : "bg-custom-purple"
+                }`}
+       
               >
-                <img
-                  src={art.art_Image}
-                  alt="Art"
-                  className="w-full h-auto object-cover rounded-md"
-                />
-              </div>
-
-              {/* Art Name Badge */}
-              <div className="absolute glass bottom-2 left-2 bg-custom-purple text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2">
-                <img src={art.artists?.artist_Image } alt="Logo" className="h-7 w-7 rounded-md" />
-                {art.art_Name}
-              </div>
-              <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2  gap-2">
-                <div className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold">
-                  {art.likes?.length || 0}
-                  <box-icon
-                    name="heart"
-                    color={art.likes?.includes(userId) ? "red" : "gray"}
-                    onClick={() => handleLike(art.id, art.likes)}
-                    className="cursor-pointer "
-                    type="solid"
-                  ></box-icon>
-                </div>
+                {/* Art Image */}
                 <div
-                  onClick={() => {
-                    console.log("Selected Art Data:", art);
-                    console.log("Artist Data:", art.artist);
-
-                    if (art.artists && art.artists.id) {
-                      navigate(`/arts/ArtistPage/${art.artists.id}`);
-                    } else {
-                      console.error(
-                        "Artist ID is undefined! Check if artist_Id exists in your database."
-                      );
-                    }
-                  }}
-                  data-tip="Visit Artist"
-                  className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm  text-slate-800 "
+                  onClick={() => handleSelectArt(art)}
+                  className="cursor-pointer overflow-hidden rounded-md"
                 >
-                  <box-icon
-                    type="solid"
-                    name="user-pin"
-                    color="blue"
-                  ></box-icon>
+                  <img
+                    src={art.art_Image}
+                    alt="Art"
+                    className="w-full h-auto object-cover rounded-md"
+                  />
                 </div>
+
+                {/* Art Name Badge */}
                 <div
-                  onClick={() => handleSelectArtReport(art)}
-                  data-tip="Report this Post"
-                  className=" tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
+                  className={`absolute glass bottom-2 left-2 ${
+                    art.artists?.is_Premium
+                      ? " bg-gradient-to-r from-yellow-500 to-fuchsia-500"
+                      : "bg-custom-purple"
+                  } text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2`}
                 >
-                  <box-icon
-                    name="shield-x"
-                    type="solid"
-                    color="gold"
-                  ></box-icon>
+                  <img
+                    src={art.artists?.artist_Image}
+                    alt="Logo"
+                    className="h-7 w-7 rounded-md"
+                  />
+                  {art.art_Name}
+                </div>
+
+                <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2  gap-2">
+                  <div className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold">
+                    {art.likes?.length || 0}
+                    <box-icon
+                      name="heart"
+                      color={art.likes?.includes(userId) ? "red" : "gray"}
+                      onClick={() => handleLike(art.id, art.likes)}
+                      className="cursor-pointer "
+                      type="solid"
+                    ></box-icon>
+                  </div>
+                  <div
+                    onClick={() => {
+                      console.log("Selected Art Data:", art);
+                      console.log("Artist Data:", art.artist);
+
+                      if (art.artists && art.artists.id) {
+                        navigate(`/arts/ArtistPage/${art.artists.id}`);
+                      } else {
+                        console.error(
+                          "Artist ID is undefined! Check if artist_Id exists in your database."
+                        );
+                      }
+                    }}
+                    data-tip="Visit Artist"
+                    className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm  text-slate-800 "
+                  >
+                    <box-icon
+                      type="solid"
+                      name="user-pin"
+                      color="blue"
+                    ></box-icon>
+                  </div>
+                  <div
+                    onClick={() => handleSelectArtReport(art)}
+                    data-tip="Report this Post"
+                    className=" tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
+                  >
+                    <box-icon
+                      name="shield-x"
+                      type="solid"
+                      color="gold"
+                    ></box-icon>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -892,16 +989,18 @@ function Artists() {
             className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
           >
             <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6 shrink-0 stroke-current"
-    fill="none"
-    viewBox="0 0 24 24">
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth="2"
-      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
             <span> Art Reported "{selectArt2?.art_Name || "Untitled"}"</span>
           </div>
         </div>
