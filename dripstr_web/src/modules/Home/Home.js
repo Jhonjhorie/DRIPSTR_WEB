@@ -82,7 +82,7 @@ function Home() {
       <div className="flex  gap-4 md:flex-row justify-center items-center p-4 h-[49%] lg:h-[48%]">
         <Carousel images={Images} />
       </div>
-      <div className="flex  gap-4 md:flex-row  justify-center items-center p-4 ">
+      <div className="flex  gap-4 md:flex-row w-full justify-center items-center p-4 ">
         {isLoggedIn &&  <VoucherStream profile={profile}/> }
      
       </div>
