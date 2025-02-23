@@ -15,7 +15,7 @@ import Mall from "./modules/Products/Mall";
 
 //Data
 import useUserProfile from "@/shared/mulletCheck";
-
+import AboutUs from "./modules/Home/AboutUs";
 
 // Shared Components
 import Header from './shared/Header';
@@ -60,6 +60,7 @@ function App() {
           <main className={`flex-1 ${isLoggedIn ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-auto`}>
             <Routes>
               <Route path="/" element={<HomeController />} />
+                    <Route path="/about" element={<AboutUs />} />
               <Route path="/guest" element={<GuestHome />} />
               <Route path="/arts/*" element={<ArtistController />} />
               <Route path="/product/*" element={<ProductController />} />
