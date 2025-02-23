@@ -16,6 +16,19 @@ import ForgotPasswordModal from './components/ForgotPasswordModal';
 const modalTransitionClass = "transition-all duration-300 ease-in-out";
 const formTransitionClass = "transition-all duration-500 ease-in-out transform";
 
+const validatePhilippinePhone = (phone) => {
+  // Remove any non-digit characters
+  const cleanPhone = phone.replace(/\D/g, '');
+  
+  // Check if it starts with +63 or 0 and has 10-11 digits
+  const pattern = /^(09|\+639)\d{9}$/;
+  
+  return {
+    isValid: pattern.test(cleanPhone),
+    formattedNumber: cleanPhone.startsWith('0') ? cleanPhone : `0${cleanPhone.slice(2)}`
+  };
+};
+
 const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const [isSignIn, setIsSignIn] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
@@ -24,6 +37,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const navigate = useNavigate();  
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [validationErrors, setValidationErrors] = useState({});
 
   const {
     addressData: { regions, provinces, cities, barangays },
@@ -52,6 +66,37 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
 
   const handleInputChange = (e, form) => {
     const { name, value } = e.target;
+    
+    if (form === "signUp" && name === "mobile") {
+      // Only allow numbers and + symbol
+      const sanitizedValue = value.replace(/[^\d+]/g, '');
+      
+      // Validate phone number
+      const { isValid, formattedNumber } = validatePhilippinePhone(sanitizedValue);
+      
+      // Update the input field
+      setSignUpData(prev => ({
+        ...prev,
+        [name]: sanitizedValue,
+        mobileValid: isValid
+      }));
+      
+      // Show validation message
+      if (value && !isValid) {
+        setValidationErrors(prev => ({
+          ...prev,
+          mobile: "Please enter a valid Philippine mobile number (e.g., 09123456789 or +639123456789)"
+        }));
+      } else {
+        setValidationErrors(prev => ({
+          ...prev,
+          mobile: null
+        }));
+      }
+      return;
+    }
+  
+    // Handle other inputs normally
     form === "signIn"
       ? setSignInData({ ...signInData, [name]: value })
       : setSignUpData({ ...signUpData, [name]: value });
@@ -96,8 +141,14 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
     try {
       const { email, password, fullName, mobile, gender, birthDate, postcode } = signUpData;
       
+      // Check if mobile is valid
+      const { isValid, formattedNumber } = validatePhilippinePhone(mobile);
+      if (!isValid) {
+        throw new Error("Please enter a valid Philippine mobile number");
+      }
+
       if (!email || !password || !fullName || !mobile || !gender || !birthDate || !postcode || 
-          !selected.region || !selected.province || !selected.city || !selected.barangay) {
+          !selected.region || !selected.city || !selected.barangay) {
         return alert("Please fill in all fields.");
       }
 
@@ -183,14 +234,6 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
                       value={signUpData.fullName}
                       onChange={(e) => handleInputChange(e, "signUp")}
                     />
-                    <input
-                      type="text"
-                      name="mobile"
-                      placeholder="Mobile Number"
-                      className="input input-bordered bg-gray-100 w-full"
-                      value={signUpData.mobile}
-                      onChange={(e) => handleInputChange(e, "signUp")}
-                    />
                     <select
                       name="gender"
                       className="select select-bordered bg-gray-100 w-full"
@@ -228,7 +271,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
 
                   {/* Right Column - Address Information */}
                   <div className="flex-1 space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Address Information</h3>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Set up delivery Information</h3>
                     <select
                       name="region"
                       className="select select-bordered bg-gray-100 w-full"
@@ -297,6 +340,29 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
                       value={signUpData.postcode}
                       onChange={(e) => handleInputChange(e, "signUp")}
                     />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="mobile"
+                        placeholder="Mobile Number (e.g., 09123456789)"
+                        className={`input input-bordered bg-gray-100 w-full ${
+                          validationErrors.mobile ? 'border-red-500' : ''
+                        }`}
+                        value={signUpData.mobile}
+                        onChange={(e) => handleInputChange(e, "signUp")}
+                        maxLength="13"
+                      />
+                      {validationErrors.mobile && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {validationErrors.mobile}
+                        </p>
+                      )}
+                      {signUpData.mobileValid && (
+                        <span className="absolute right-3 top-3 text-green-500">
+                          <i className="fas fa-check-circle"></i>
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
               ) : (

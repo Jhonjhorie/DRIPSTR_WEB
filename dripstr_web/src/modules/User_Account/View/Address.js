@@ -52,6 +52,7 @@ const Address = () => {
       fetchAddresses();
     }
   }, [userId]);
+
   const fetchUser = async () => {
     setLoading(true);
     const { data: { user }, error } = await supabase.auth.getUser();
@@ -181,11 +182,11 @@ const Address = () => {
   // Update the address modal JSX
   const addressModal = (isEdit = false) => (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-[500px]">
-        <h2 className="text-center font-bold text-lg mb-4">
+      <div className="bg-white py-2 px-6 rounded-lg shadow-lg w-[500px]">
+        <h2 className="text-center font-bold text-lg ">
           {isEdit ? 'Edit Address' : 'Add New Address'}
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-2">
           <div className="flex flex-col">
             <label className="text-sm font-medium text-gray-700">Region</label>
             <select
@@ -272,7 +273,7 @@ const Address = () => {
           </div>
         </div>
 
-        <div className="flex justify-end mt-6 gap-2">
+        <div className="flex justify-end mt-2 gap-2">
           <button
             className="btn btn-primary"
             onClick={isEdit ? updateAddress : addAddress}
