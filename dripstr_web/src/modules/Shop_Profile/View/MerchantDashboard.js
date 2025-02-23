@@ -154,7 +154,7 @@ function MerchantDashboard() {
   
     return amount >= 1000
       ? (amount / 1000).toFixed(1).replace(".0", "") + "k"
-      : amount.toLocaleString("en-PH", { minimumFractionDigits: 2 });
+      : amount.toLocaleString("en-PH", { minimumFractionDigits: "" });
   };
   return (
     <div className="h-full w-full bg-slate-300 pb-5 ">
