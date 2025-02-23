@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
 import { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs } from "../../../constants/avatarConfig";
+import { gsap } from "gsap";
 
 function Part({ url, position, color }) {
   const gltf = useGLTF(url);
@@ -22,6 +23,43 @@ function Part({ url, position, color }) {
   return <primitive object={clonedScene} position={position} />;
 }
 
+function CameraController({ view }) {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    switch (view) {
+      case 'upper':
+        gsap.to(camera.position, {
+          x: 0,
+          y: 150,
+          z: 100,
+          duration: 1
+        });
+        break;
+      case 'lower':
+        gsap.to(camera.position, {
+          x: 0,
+          y: 50,
+          z: 100,
+          duration: 1
+        });
+        break;
+      case 'full':
+        gsap.to(camera.position, {
+          x: 0,
+          y: 100,
+          z: 200,
+          duration: 1
+        });
+        break;
+      default:
+        break;
+    }
+  }, [view, camera]);
+
+  return null;
+}
+
 const CharacterCustomization = () => {
   const [gender, setGender] = useState("Boy");
   const [selectedBodyType, setSelectedBodyType] = useState("Average");
@@ -31,6 +69,7 @@ const CharacterCustomization = () => {
   const [name, setName] = useState("");
   const [originalAvatar, setOriginalAvatar] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [cameraView, setCameraView] = useState('full');
 
   useEffect(() => {
     const fetchAvatar = async () => {
@@ -318,10 +357,45 @@ const CharacterCustomization = () => {
 
   {/* 3D Canvas (Ensuring it Renders Properly) */}
   <div className="relative w-full h-full">
+    {/* Camera Control Buttons */}
+    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 flex gap-2">
+      <button
+        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+          cameraView === 'full' 
+            ? 'bg-purple-600 text-white' 
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        }`}
+        onClick={() => setCameraView('full')}
+      >
+        Full Body
+      </button>
+      <button
+        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+          cameraView === 'upper' 
+            ? 'bg-purple-600 text-white' 
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        }`}
+        onClick={() => setCameraView('upper')}
+      >
+        Upper Body
+      </button>
+      <button
+        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+          cameraView === 'lower' 
+            ? 'bg-purple-600 text-white' 
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+        }`}
+        onClick={() => setCameraView('lower')}
+      >
+        Lower Body
+      </button>
+    </div>
+
     <Canvas camera={{ position: [0, 100, 200] }}>
       <ambientLight intensity={0.8} />
       <hemisphereLight intensity={1} />
       <directionalLight intensity={1.2} position={[0, 0, 1]} />
+      <CameraController view={cameraView} />
       <group>
         {selectedHair && hairURLs[selectedHair] && (
           <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={haircolor} />
@@ -334,7 +408,13 @@ const CharacterCustomization = () => {
           <Part key={`shorts-${gender}-${selectedBodyType}`} url={getShortsURL()} position={[0, 0, 0]} />
         )}
       </group>
-      <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} minDistance={100} maxDistance={300} />
+      <OrbitControls 
+        target={[0, 110, 0]} 
+        minPolarAngle={Math.PI / 2} 
+        maxPolarAngle={Math.PI / 2} 
+        minDistance={100} 
+        maxDistance={300} 
+      />
     </Canvas>
   </div>
 </div>

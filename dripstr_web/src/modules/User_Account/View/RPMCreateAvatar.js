@@ -5,7 +5,7 @@ import { TextureLoader, RepeatWrapping, NearestFilter } from "three";
 import { SkeletonUtils } from "three-stdlib";
 
 const TShirtPreview = ({ textureUrl }) => {
-  const gltf = useGLTF("/3d/uvmap/average.glb"); // Update with the correct model path
+  const gltf = useGLTF("/3d/uvmap/untitled.glb"); // Update with the correct model path
   const clonedScene = useMemo(() => SkeletonUtils.clone(gltf.scene), [gltf.scene]);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ const TShirtTexturePreview = () => {
     <Canvas camera={{ position: [0, 100, 200] }}>
           <ambientLight intensity={0.8} />
           <directionalLight intensity={1} position={[1, 1, 1]} />
-          <TShirtPreview textureUrl="/3d/uvmap/TShirt_for_Genesis.png" />
+          <TShirtPreview textureUrl="/3d/uvmap/Tshirt_for_Genesis.png" />
           <OrbitControls />
         </Canvas>
       </div>
