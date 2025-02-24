@@ -312,9 +312,8 @@ function ArtistWallet() {
         throw new Error("Please upload proof of payment.");
       }
 
-      const filePath = `proofsarts/${currentUser.id}_${Date.now()}_${
-        gcashProof.name
-      }`;
+      const filePath = `proofsarts/${currentUser.id}_${Date.now()}_${gcashProof.name
+        }`;
       const { data, error: uploadError } = await supabase.storage
         .from("wallet_docs")
         .upload(filePath, gcashProof);
@@ -403,7 +402,7 @@ function ArtistWallet() {
     try {
       const { data: subscriptions, error } = await supabase
         .from("artist_Subscription")
-        .select("*")
+        .select("subs_Enddate, status, artist_Id")
         .eq("user_Id", currentUser.id)
         .order("created_at", { ascending: false })
         .limit(1);
@@ -434,8 +433,9 @@ function ArtistWallet() {
 
         // Get expiration date
         const expirationDate = latestSub.subs_Enddate
-          ? new Date(latestSub.subs_Enddate)
+          ? new Date(new Date(latestSub.subs_Enddate).setHours(24, 59, 59, 999))
           : null;
+
         const now = new Date();
 
         if (expirationDate) {
@@ -545,7 +545,7 @@ function ArtistWallet() {
         return;
       }
       console.log("Artist is no longer premium.");
-
+      fetchTransactions();
       console.log("Cashout record inserted successfully.");
     } catch (err) {
       console.error("Error handling subscription expiration:", err.message);
@@ -570,11 +570,10 @@ function ArtistWallet() {
       <div className="flex gap-2 w-full h-auto">
         <div className="w-1/3  h-full flex flex-col items-center">
           <div
-            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${
-              isPremium
+            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${isPremium
                 ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]"
                 : ""
-            }`}
+              }`}
           >
             {/* Wallet Icon and Name */}
             <div className="absolute bottom-2 right-2">
@@ -715,13 +714,12 @@ function ArtistWallet() {
                       ₱{transaction.qty} - {transaction.reason}
                     </span>
                     <span
-                      className={`text-sm font-semibold ${
-                        transaction.status === "Pending"
+                      className={`text-sm font-semibold ${transaction.status === "Pending"
                           ? "text-yellow-500"
                           : transaction.status === "Subscription Expired"
-                          ? "text-red-500"
-                          : "text-green-600"
-                      }`}
+                            ? "text-red-500"
+                            : "text-green-600"
+                        }`}
                     >
                       {transaction.status}
                     </span>
@@ -1180,22 +1178,20 @@ function ArtistWallet() {
                 <button
                   onClick={() => setActiveTabSubs("Wallet")}
                   disabled={isPending || isPremium}
-                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
-                    isPending || isPremium
+                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-primary-color"
-                  }`}
+                    }`}
                 >
                   Pay via Dripstr Wallet
                 </button>
                 <button
                   onClick={() => setActiveTabSubs("Gcash")}
                   disabled={isPending || isPremium}
-                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
-                    isPending || isPremium
+                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-blue-700"
-                  }`}
+                    }`}
                 >
                   Pay via Gcash
                 </button>

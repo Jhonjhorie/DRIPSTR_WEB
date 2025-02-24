@@ -622,7 +622,7 @@ function Artists() {
                 key={art.id}
                 className={`relative hover:scale-105 hover:drop-shadow-customViolet  duration-200  shadow-lg rounded-md overflow-hidden break-inside-avoid ${
                   art.artists?.is_Premium
-                    ? "bg-gradient-to-r from-yellow-500 p-1 to-fuchsia-500 "
+                    ? "bg-gradient-to-r from-yellow-500 p-1.5 to-fuchsia-500 "
                     : "bg-custom-purple"
                 }`}
        
