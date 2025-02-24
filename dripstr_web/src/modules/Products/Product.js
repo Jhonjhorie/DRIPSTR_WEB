@@ -13,6 +13,7 @@ import useCarts from "./hooks/useCart.js";
 import ReportDialog from "./components/reportModal.js";
 import AlertDialog from "./components/alertDialog2.js";
 import AuthModal from "../../shared/login/Auth.js";
+import WishlistButton from "./components/subcomponents/WishlistButton.js";
 
 function Product() {
   const location = useLocation();
@@ -204,9 +205,7 @@ function Product() {
                 {isLoggedIn &&
                 <div className="flex gap-2">
                  
-                  <button className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
-                    <FontAwesomeIcon icon={faHeart} />
-                  </button>
+                 <WishlistButton profile={profile} item={item} isLoggedIn={isLoggedIn} />
                   <button 
                   onClick={mulletReport}
                   className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">

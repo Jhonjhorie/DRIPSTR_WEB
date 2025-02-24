@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/constants/supabase"; 
+import AlertDialog from "../../Products/components/alertDialog2";
 
 const VoucherStream = ({ profile }) => {
   const [vouchers, setVouchers] = useState([]); 
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState(null); 
   const [claimedVouchers, setClaimedVouchers] = useState([]);
+    const [showAlert, setShowAlert] = useState(false);
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -124,8 +127,12 @@ const VoucherStream = ({ profile }) => {
         setClaimedVouchers(claimedData);
       };
 
-      fetchData();
-      alert("Voucher claimed successfully!");
+      setShowAlert(true);
+      setTimeout(() => {
+        setShowAlert(false);
+        fetchData();
+      }, 3000);
+      
     } catch (error) {
       alert(`Error claiming voucher: ${error.message}`);
     } finally {
@@ -138,6 +145,11 @@ const VoucherStream = ({ profile }) => {
 
   return (
     <div className="w-[90%] rounded-md flex gap-2 text-secondary-color font-[iceland] relative overflow-x-auto custom-scrollbar">
+             {showAlert && (
+                <div className=" w-[95%] absolute -top-60 justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
+                  <AlertDialog emote={require("@/assets/emote/success.png")} text={"Voucher claimed successfully! please use it before expiration date"} />
+                </div>
+              )}
       {vouchers.map((voucher) => {
         const isClaimed = claimedVouchers.some(
           (cv) => cv.voucher_id === voucher.id && cv.isClaim

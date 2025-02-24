@@ -10,11 +10,11 @@ import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
 import ItemOptions from "./itemOptions.js";
 import useUserProfile from "@/shared/mulletCheck.js";
-import LoginFirst from "@/shared/mulletFirst";
 import AuthModal from "@/shared/login/Auth.js";
 import useCarts from "../hooks/useCart.js";
 import AlertDialog from "./alertDialog2.js";
 import ReportDialog from "./reportModal.js";
+import WishlistButton from "./subcomponents/WishlistButton.js";
 
 const BuyConfirm = ({ item, onClose}) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -203,11 +203,7 @@ const BuyConfirm = ({ item, onClose}) => {
                       </div>
                     </div>
                     <div className="flex justify-end gap-1 items-center">
-                      {isLoggedIn && (
-                        <button class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
-                          <FontAwesomeIcon icon={faHeart} />
-                        </button>
-                      )}
+                    <WishlistButton profile={profile} item={item} isLoggedIn={isLoggedIn} />
                       {isLoggedIn && (
                         <button
                           onClick={mulletReport}

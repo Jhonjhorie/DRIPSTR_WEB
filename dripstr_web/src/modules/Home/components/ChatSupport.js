@@ -85,15 +85,14 @@ const ChatSupport = ({ onClose, profile }) => {
   };
 
   const handleStartOver = () => {
-    setCurrentQuestion(null); // Reset to show initial questions
+    setCurrentQuestion(null); 
   };
 
   const formatTime = (timestamp) => {
-    const date = new Date(timestamp); // Parse the timestamp
-    const hours = date.getHours(); // Get hours (0-23)
-    const minutes = date.getMinutes(); // Get minutes (0-59)
+    const date = new Date(timestamp); 
+    const hours = date.getHours(); 
+    const minutes = date.getMinutes(); 
 
-    // Format hours and minutes to always be two digits
     const formattedHours = String(hours).padStart(2, "0");
     const formattedMinutes = String(minutes).padStart(2, "0");
 
