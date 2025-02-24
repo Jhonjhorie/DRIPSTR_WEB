@@ -5,7 +5,7 @@ import React from "react";
 
 const Contact = ({ onClose }) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed flex items-center justify-center  bg-opacity-50 z-50">
       <div className="font-sans sm:w-full max-w-[30.40rem] h-[17rem] bg-slate-50 rounded-lg shadow-lg mx-4 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-white">

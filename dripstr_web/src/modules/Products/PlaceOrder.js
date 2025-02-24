@@ -45,7 +45,7 @@ function PlaceOrder() {
       try {
         const { data, error } = await supabase
           .from("addresses")
-          .select("id, address, postcode, is_default_shipping")
+          .select("id, address, postcode, is_default_shipping, full_address")
           .eq("user_id", profile.id);
 
         if (error) throw error;
@@ -263,7 +263,7 @@ function PlaceOrder() {
                   value={selectedAddress.full_address}
                   onChange={(e) => {
                     const selected = addresses.find(
-                      (addr) => addr.id === e.target.value
+                      (addr) => addr.full_address === e.target.value
                     );
                     setSelectedAddress(e.target.value);
                     setSelectedPostcode(selected ? selected.postcode : "");
@@ -272,7 +272,7 @@ function PlaceOrder() {
                   {addresses.map((addr) => (
                     <option
                       key={addr.id}
-                      value={addr.id}
+                      value={addr.full_address}
                       className="line-clamp-1
                font-semibold"
                     >
