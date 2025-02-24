@@ -288,6 +288,8 @@ function ArtistWallet() {
       setTimeout(() => setShowSubs(false), 3000);
       setShowSubscription(false);
       fetchTransactions();
+      fetchUserProfileAndArtist();
+      checkSubscriptionStatus();
     } catch (err) {
       console.error("Wallet Subscription error:", err.message);
       alert(err.message);
@@ -546,6 +548,8 @@ function ArtistWallet() {
       }
       console.log("Artist is no longer premium.");
       fetchTransactions();
+      fetchUserProfileAndArtist();
+      checkSubscriptionStatus();
       console.log("Cashout record inserted successfully.");
     } catch (err) {
       console.error("Error handling subscription expiration:", err.message);

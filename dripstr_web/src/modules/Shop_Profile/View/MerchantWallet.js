@@ -71,37 +71,36 @@ function MerchantWallet() {
     fetchUserProfileAndShop();
   }, []);
 
-  useEffect(() => {
-    const fetchWalletData = async () => {
-      setLoading(true);
+  const fetchWalletData = async () => {
+    setLoading(true);
 
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-      if (authError || !user) {
-        console.error("Error fetching user:", authError?.message);
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("merchant_Wallet")
-        .select("revenue, owner_Name, owner_ID, number, valid_ID")
-        .eq("owner_ID", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching wallet:", error.message);
-        setLoading(false);
-        return;
-      }
-
-      setWalletData(data);
+    if (authError || !user) {
+      console.error("Error fetching user:", authError?.message);
       setLoading(false);
-    };
+      return;
+    }
 
+    const { data, error } = await supabase
+      .from("merchant_Wallet")
+      .select("revenue, owner_Name, owner_ID, number, valid_ID")
+      .eq("owner_ID", user.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching wallet:", error.message);
+      setLoading(false);
+      return;
+    }
+
+    setWalletData(data);
+    setLoading(false);
+  };
+  useEffect(() => {
     fetchWalletData();
   }, []);
 
@@ -217,6 +216,9 @@ function MerchantWallet() {
   const [subscriptionExpiry, setSubscriptionExpiry] = useState(null);
   const [showPendingModal, setShowPendingModal] = useState(false);
   const [isPending, setIsPending] = useState(false);
+  const [hasShownExpirationAlert, setHasShownExpirationAlert] = useState(false);
+  const [showAlertExpiredSubs, setIsModalOpenExpired] = useState(false); //Expired CONFIRMATION
+  const [showAlertSuccessSubs, setShowSubs] = useState(false);
   const handleSubmitWalletSubscription = async () => {
     if (!currentUser || !merchantId) {
       setError("User or shop ID not found.");
@@ -254,7 +256,13 @@ function MerchantWallet() {
       if (updateWalletError) {
         throw updateWalletError;
       }
-
+      //for expiration date of yhe subs
+      const currentDate = new Date();
+      const expirationDate = new Date();
+      expirationDate.setDate(currentDate.getDate() + 30);
+      const formattedExpirationDate = expirationDate
+        .toISOString()
+        .split("T")[0];
       // Insert subscription record for Wallet payment
       const { error: subscriptionError } = await supabase
         .from("merchant_Subscription")
@@ -265,6 +273,7 @@ function MerchantWallet() {
             payment: "Dripstr Wallet",
             reason: reason,
             status: "Completed",
+            subs_Enddate: formattedExpirationDate,
           },
         ]);
       if (subscriptionError) {
@@ -294,9 +303,15 @@ function MerchantWallet() {
       if (cashoutError) {
         throw cashoutError;
       }
-
+      checkSubscriptionStatus();
+      fetchTransactions();
+      fetchUserProfileAndShop();
+      fetchWalletData();
+      setShowSubs(true);
+      setTimeout(() => setShowSubs(false), 3000);
+      setShowSubscription(false);
       console.log("Alert: Subscription successful via Wallet!");
-      alert("Subscription successful via Wallet!");
+
     } catch (err) {
       console.error("Wallet Subscription error:", err.message);
       console.log("Alert error:", err.message);
@@ -324,9 +339,8 @@ function MerchantWallet() {
       }
 
       // Upload proof of payment file to Supabase Storage
-      const filePath = `proofs/${currentUser.id}_${Date.now()}_${
-        gcashProof.name
-      }`;
+      const filePath = `proofs/${currentUser.id}_${Date.now()}_${gcashProof.name
+        }`;
       const { data, error: uploadError } = await supabase.storage
         .from("wallet_docs")
         .upload(filePath, gcashProof);
@@ -372,17 +386,84 @@ function MerchantWallet() {
       setLoading(false);
     }
   };
+  // Function to handle subscription expiration when closing the modal
+  const handleSubscriptionExpiration = async (artistId) => {
+    try {
+      // Validate that artistId is a valid number/string
+      if (!artistId || typeof artistId !== "number") {
+        console.error("Invalid artistId:", artistId);
+        return;
+      }
+      // Insert cashout record
+      const { error: cashoutError } = await supabase
+        .from("merchant_Cashout")
+        .insert([
+          {
+            full_Name: currentUser.full_Name || "Unknown Merchant",
+            owner_Id: currentUser.id,
+            qty: "250",
+            reason: "Subscription",
+            status: "Subscription Expired",
+            subscription: "Dripstr Monthly Merchant Boost Plan",
+            subs_HM: "500",
+          },
+        ]);
 
+      if (cashoutError) {
+        console.error("Failed to insert cashout record:", cashoutError.message);
+        return;
+      }
+      // Close the modal permanently
+      setIsModalOpenExpired(false);
+
+      // Update subscription status in the database
+      const { error } = await supabase
+        .from("merchant_Subscription")
+        .update({ status: "Expired" })
+        .eq("user_Id", currentUser.id)
+        .in("status", ["Completed", "Expire"]);
+
+      if (error) {
+        console.error("Failed to update subscription status:", error.message);
+        return;
+      }
+      console.log("Subscription status updated to Expired.");
+
+      // Update artist to non-premium
+      console.log("Updating Merchant premium status for merchantId:", merchantId);
+      const { error: artistError } = await supabase
+        .from("shop")
+        .update({ is_Premium: false })
+        .eq("id", merchantId);
+
+      if (artistError) {
+        console.error(
+          "Failed to update artist premium status:",
+          artistError.message
+        );
+        return;
+      }
+      console.log("Artist is no longer premium.");
+      fetchTransactions();
+      checkSubscriptionStatus();
+      fetchUserProfileAndShop();
+      console.log("Cashout record inserted successfully.");
+    } catch (err) {
+      console.error("Error handling subscription expiration:", err.message);
+    }
+  };
   const checkSubscriptionStatus = async () => {
     if (!currentUser) return;
     setLoading(true);
+
     try {
       const { data: subscriptions, error } = await supabase
         .from("merchant_Subscription")
-        .select("*")
+        .select("subs_Enddate, status, merchant_Id")
         .eq("user_Id", currentUser.id)
         .order("created_at", { ascending: false })
         .limit(1);
+
       if (error) throw error;
 
       if (subscriptions && subscriptions.length > 0) {
@@ -393,30 +474,63 @@ function MerchantWallet() {
           setIsPremium(false);
           setSubscriptionExpiry(null);
           console.log("Subscription pending: waiting for admin approval.");
-        } else {
-          const subscriptionDate = new Date(latestSub.created_at);
-          const now = new Date();
-          const diffInMs = now - subscriptionDate;
-          const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+          return;
+        }
 
-          if (diffInDays < 30) {
-            setIsPremium(true);
-            setIsPending(false);
-            // Calculate expiry date as subscription date plus 30 days
-            const expiry = new Date(
-              subscriptionDate.getTime() + 30 * 24 * 60 * 60 * 1000
-            );
-            setSubscriptionExpiry(expiry);
-            console.log("User is currently premium. Expires on:", expiry);
-          } else {
-            setIsPremium(false);
+        // If already expired, do not show the modal
+        if (latestSub.status === "Expired") {
+          setIsPremium(false);
+          setSubscriptionExpiry(null);
+          setIsPending(false);
+          console.log(
+            "Subscription is already expired. No modal will be shown."
+          );
+          return;
+        }
+
+        // Get expiration date
+        const expirationDate = latestSub.subs_Enddate
+          ? new Date(new Date(latestSub.subs_Enddate).setHours(24, 59, 59, 999))
+          : null;
+
+        const now = new Date();
+
+        if (expirationDate) {
+          console.log(
+            "Subscription expires on:",
+            expirationDate.toDateString()
+          );
+
+          if (now >= expirationDate) {
+            // Show modal only if it hasn’t been shown before
+            if (!hasShownExpirationAlert) {
+              setHasShownExpirationAlert(true);
+              setIsModalOpenExpired(true);
+            }
+
             setSubscriptionExpiry(null);
             setIsPending(false);
-            alert("Your subscription has expired. Please subscribe again.");
+
+            // Pass artist_Id to handleSubscriptionExpiration
+            return latestSub.merchant_Id;
+          } else {
+            // Subscription is still valid
+            setIsPremium(true);
+            setIsPending(false);
+            setSubscriptionExpiry(expirationDate);
+            console.log(
+              "User is currently premium. Expires on:",
+              expirationDate
+            );
           }
+        } else {
+          console.log("No expiration date found in subscription data.");
+          setIsPremium(false);
+          setSubscriptionExpiry(null);
+          setIsPending(false);
         }
       } else {
-        // No subscription record exists
+        // No subscription found
         setIsPremium(false);
         setSubscriptionExpiry(null);
         setIsPending(false);
@@ -448,9 +562,8 @@ function MerchantWallet() {
       <div className="flex gap-2 w-full h-auto">
         <div className="w-1/3  h-full flex flex-col items-center">
           <div
-            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${
-              isPremium ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]" : ""
-            }`}
+            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${isPremium ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]" : ""
+              }`}
           >
             {/* Wallet Icon and Name */}
             <div className="absolute bottom-2 right-2">
@@ -475,7 +588,7 @@ function MerchantWallet() {
 
             {/* Card Number */}
             <div className="text-sm tracking-widest opacity-80">
-              0{walletData?.number || "**** **** **** 1234"}
+              0{walletData?.number || "**** **** ****"}
             </div>
           </div>
         </div>
@@ -592,11 +705,12 @@ function MerchantWallet() {
                       ₱{transaction.qty} - {transaction.reason}
                     </span>
                     <span
-                      className={`text-sm font-semibold ${
-                        transaction.status === "Pending"
-                          ? "text-yellow-500"
+                      className={`text-sm font-semibold ${transaction.status === "Pending"
+                        ? "text-yellow-500"
+                        : transaction.status === "Subscription Expired"
+                          ? "text-red-500"
                           : "text-green-600"
-                      }`}
+                        }`}
                     >
                       {transaction.status}
                     </span>
@@ -995,22 +1109,20 @@ function MerchantWallet() {
                 <button
                   onClick={() => setActiveTabSubs("Wallet")}
                   disabled={isPending || isPremium}
-                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
-                    isPending || isPremium
+                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-primary-color"
-                  }`}
+                    }`}
                 >
                   Pay via Dripstr Wallet
                 </button>
                 <button
                   onClick={() => setActiveTabSubs("Gcash")}
                   disabled={isPending || isPremium}
-                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
-                    isPending || isPremium
+                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-blue-700"
-                  }`}
+                    }`}
                 >
                   Pay via Gcash
                 </button>
@@ -1046,6 +1158,68 @@ function MerchantWallet() {
           )}
         </div>
       )}
+      {showAlertExpiredSubs && (
+        <div className="fixed  inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white relative p-6 rounded-lg shadow-lg w-1/3">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
+              {" "}
+            </div>
+            <div className="mt-2 justify-center flex ">
+              <img
+                src={sadEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+            <h3 className="text-lg text-center font-semibold text-slate-900 mb-4">
+              Your Subscription has Expired!
+            </h3>
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => handleSubscriptionExpiration(merchantId)}
+                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
+              >
+                Okay
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+       {showAlertSuccessSubs && (
+              <div className="md:bottom-5  w-auto px-10 bottom-10 z-30 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+                <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+                  <div className="mt-10 ">
+                    <img
+                      src={successEmote}
+                      alt="Success Emote"
+                      className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                    />
+                  </div>
+                </div>
+                <div
+                  role="alert"
+                  className="alert bg-yellow-600 glass shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 shrink-0 stroke-current"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span>Successfully Avail SUBSCRIPTION!</span>
+                </div>
+              </div>
+            )}
+      
+      
     </div>
   );
 }
