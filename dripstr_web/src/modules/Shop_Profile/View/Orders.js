@@ -222,17 +222,17 @@ function Orders({ shopOwnerId }) {
 
   return (
     <div className="h-full w-full bg-slate-300 p-2 ">
-      <div className="absolute mx-3 right-0 z-10">
+      <div className="absolute mx-3 right-0 z-20">
         <SideBar />
       </div>
       <div className=" text-2xl md:text-3xl text-custom-purple font-bold md:px-56 p-4">
         {" "}
         SHOP ORDERS{" "}
       </div>
-      <div className="w-full h-5/6 relative place-items-center ">
-        <div className="w-full relative md:w-3/4 rounded-md shadow-md mb-20 md:mb-0 lg:w-2/3 h-full bg-slate-100 p-2">
+      <div className="w-full h-auto  place-items-center ">
+        <div className="w-full md:w-3/4  rounded-md shadow-md mb-20 md:mb-0 lg:w-3/4 h-[550px] bg-slate-100 p-2">
           <div className="w-full oveflow-hidden overflow-y-scroll custom-scrollbar relative h-full bg-slate-200 rounded-sm">
-            <div className="w-full sticky top-0 h-auto pt-2 glass bg-custom-purple rounded-t-md">
+            <div className="w-full z-10 sticky top-0 h-auto pt-2 glass bg-custom-purple rounded-t-md">
               <ul className="flex justify-around place-items-center  text-slate-300 cursor-pointer">
                 <li
                   className={activeTab === "new-orders" ? "active-tab" : ""}
@@ -482,131 +482,7 @@ function Orders({ shopOwnerId }) {
         </div>
       </div>
 
-      {/* TO PAY */}
-      {isModalOpen && selectedOrder && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75">
-          <div className="bg-white rounded-lg  w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
-              {" "}
-            </div>
-            <div className="p-4">
-              <h2 className="font-medium text-slate-800 py-2">
-                <span className="font-bold text-[20px] md:text-2xl">
-                  Order Information
-                </span>
-                <div className="text-SM font-semibold text-slate-950">
-                  Transaction ID: {selectedOrder.transaction_id}
-                </div>
-              </h2>
-
-              {/* Order Details */}
-              <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-                <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                  <img
-                    src={logo}
-                    alt={selectedOrder?.variantName || "No Variant"}
-                    className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                    sizes="100%"
-                  />
-                </div>
-                <div className="w-1/3 h-full bg-slate-100">
-                  <img
-                    src={selectedOrder.variantImg || sample1}
-                    alt={selectedOrder.variantName || "N/A"}
-                    className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                    sizes="100%"
-                  />
-                </div>
-                <div className="w-full md:w-2/3 h-auto p-2 relative">
-                  <div className="flex w-full justify-between place-items-center">
-                    <div className="text-custom-purple text-sm font-semibold">
-                      Variant:{" "}
-                      <span className="text-sm text-slate-800">
-                        {selectedOrder.variantName || "N/A"}
-                      </span>
-                    </div>
-
-                    <div className="text-xl font-semibold text-slate-950">
-                      ID: {selectedOrder.id}
-                    </div>
-                  </div>
-
-                  <a className="text-sm text-custom-purple font-semibold">
-                    Name:{" "}
-                    <span className="text-slate-900">
-                      {selectedOrder.buyerName || "N/A"}
-                    </span>
-                  </a>
-                  <br />
-                  <a className="text-sm text-custom-purple font-semibold">
-                    Address:{" "}
-                    <span className="text-slate-900">
-                      {selectedOrder.buyerAddress || "N/A"}
-                    </span>
-                  </a>
-                  <br />
-                  <a className="text-sm text-custom-purple font-semibold">
-                    Phone number:{" "}
-                    <span className="text-slate-900">
-                      {selectedOrder.buyerPhone || "N/A"}
-                    </span>
-                  </a>
-
-                  <div className="text-custom-purple text-sm font-semibold">
-                    Size:{" "}
-                    <span className="text-sm text-slate-800">
-                      {selectedOrder.size}
-                    </span>
-                  </div>
-                  <div className="text-custom-purple text-sm font-semibold">
-                    Vouchers:{" "}
-                    <span className="text-sm text-slate-800">
-                      {selectedOrder.voucher || "None"}
-                    </span>
-                  </div>
-                  <div className="text-custom-purple text-sm font-semibold">
-                    Item Price:{" "}
-                    <span className="text-sm text-slate-800">
-                      ₱{selectedOrder.price}
-                    </span>
-                  </div>
-                  <div className="text-custom-purple text-sm font-semibold">
-                    Delivery fee:{" "}
-                    <span className="text-sm text-slate-800">
-                      ₱{selectedOrder.shipping || "N/A"}
-                    </span>
-                  </div>
-
-                  <div className="text-xl font-semibold bg-slate-50 px-2 glass rounded-md right-2 text-slate-900 bottom-0 absolute">
-                    PRICE:{" "}
-                    <span className="text-yellow-500 text-3xl">
-                      ₱
-                      {selectedOrder.final_price ||
-                        selectedOrder.total_price + selectedOrder.shipping_fee}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Buttons */}
-              <div className="flex justify-between w-full">
-                <button
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                  onClick={handleCloseModal}
-                >
-                  Close
-                </button>
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-                  onClick={handleCloseModal}
-                >
-                  Prepare
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+   
 
       {/* TO DELIVER */}
       {isModalOpen2 && (

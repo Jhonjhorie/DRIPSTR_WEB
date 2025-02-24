@@ -626,10 +626,11 @@ function MerchantWallet() {
           </div>
           <div className="w-full mt-5">
             <div
-              onClick={() => setShowSubscription(true)}
+            
               className="justify-end flex w-auto relative"
             >
               <h1
+                onClick={() => setShowSubscription(true)}
                 className="cursor-pointer w-auto glass bg-red-600 text-white font-semibold shadow-red-400 shadow-md p-2 rounded-md hover:scale-95 duration-200
       animate-none hover:animate-[shake_1s_ease-in-out_infinite]  flex items-center gap-2"
               >
