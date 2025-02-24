@@ -18,7 +18,8 @@ const ChatSupport = ({ onClose, profile }) => {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [messages, currentQuestion]);
 
@@ -75,7 +76,8 @@ const ChatSupport = ({ onClose, profile }) => {
       setCurrentQuestion(response);
     } else {
       const defaultMessage = {
-        message: "I'm sorry, I didn't understand that. Can you please rephrase?",
+        message:
+          "I'm sorry, I didn't understand that. Can you please rephrase?",
         is_bot: true,
       };
       await saveMessage(defaultMessage.message, true);
@@ -100,31 +102,59 @@ const ChatSupport = ({ onClose, profile }) => {
   };
 
   const renderMessages = () => {
-    return messages.map((msg, index) => {
-      const formattedTime = formatTime(msg.created_at); // Format the timestamp
+    if (messages.length > 0) {
+      return messages.map((msg, index) => {
+        const formattedTime = formatTime(msg.created_at); // Format the timestamp
 
-      return (
-        <div key={index} className={`chat ${msg.is_bot ? "chat-start" : "chat-end"}`}>
-          {msg.is_bot && (
-            <div className="chat-image avatar">
-              <div className="w-10 rounded-full">
-                <img
-                  alt="DripCat"
-                  src={require("@/assets/emote/success.png")}
-                />
+        return (
+          <div
+            key={index}
+            className={`chat ${msg.is_bot ? "chat-start" : "chat-end"}`}
+          >
+            {msg.is_bot && (
+              <div className="chat-image avatar">
+                <div className="w-10 rounded-full">
+                  <img
+                    alt="DripCat"
+                    src={require("@/assets/emote/success.png")}
+                      className="object-contain"
+                  />
+                </div>
               </div>
+            )}
+            <div className="chat-header">
+              {msg.is_bot ? "DripCat" : "You"}
+              <time className="text-xs opacity-50 ml-2">{formattedTime}</time>
             </div>
-          )}
-          <div className="chat-header">
-            {msg.is_bot ? "DripCat" : "You"}
-            <time className="text-xs opacity-50 ml-2">{formattedTime}</time>
+            <div
+              className={`chat-bubble ${
+                msg.is_bot
+                  ? "bg-primary-color text-white"
+                  : "bg-secondary-color text-white"
+              }`}
+            >
+              {msg.message}
+            </div>
           </div>
-          <div className={`chat-bubble ${msg.is_bot ? "bg-primary-color text-white" : "bg-secondary-color text-white"}`}>
-            {msg.message}
-          </div>
+        );
+      });
+    } else {
+      return (
+        <div
+       
+          className='flex h-full w-full items-center justify-center text-3xl font-bold flex-col gap-4'
+        >
+            <div className="h-40 w-40  rounded-full">
+                  <img
+                    alt="DripCat"
+                    src={require("@/assets/emote/success.png")}
+                    className="object-contain "
+                  />
+                </div>
+            Need Support? DripCat is Here
         </div>
       );
-    });
+    }
   };
 
   const renderSuggestedQuestions = () => {
@@ -156,8 +186,8 @@ const ChatSupport = ({ onClose, profile }) => {
   };
 
   return (
-    <div className="fixed flex items-center justify-center  bg-opacity-50 z-50">
-      <div className="font-sans sm:w-full max-w-[60.40rem] h-[40rem] bg-slate-50 rounded-lg shadow-lg mx-4 flex flex-col overflow-hidden">
+    <div className="fixed flex items-center justify-center  bg-opacity-50 z-50 font-[iceland]">
+      <div className=" sm:w-full max-w-[60.40rem] h-[40rem] bg-slate-50 rounded-lg shadow-lg mx-4 flex flex-col overflow-hidden">
         <div className="flex justify-between items-center p-2 border-b border-gray-200 bg-white">
           <div className="flex flex-col items-center justify-center h-6 w-6">
             <img
