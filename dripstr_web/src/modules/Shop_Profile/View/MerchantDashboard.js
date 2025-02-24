@@ -11,16 +11,6 @@ import PrintSales from "../Component/PrintSales";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import React, { useState, useEffect } from "react";
-const data = [
-  { label: "T-Shirt Alucard", value: 400 },
-  { label: "Ben Brief", value: 300 },
-  { label: "Bini Shirt", value: 300 },
-  { label: "Bini Maloi", value: 20 },
-  { label: "Xdinary Heroes", value: 278 },
-  { label: "Guitar Sticker", value: 189 },
-];
-
-
 
 function MerchantDashboard() {
   const navigate = useNavigate();
@@ -36,18 +26,19 @@ function MerchantDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-  
+
       try {
         // Fetch the current user
-        const { data: userData, error: authError } = await supabase.auth.getUser();
-  
+        const { data: userData, error: authError } =
+          await supabase.auth.getUser();
+
         if (authError) {
           console.error("Authentication error:", authError.message);
           setError(authError.message);
           setLoading(false);
           return;
         }
-  
+
         const user = userData.user;
         if (!user) {
           console.log("No user is signed in");
@@ -55,38 +46,38 @@ function MerchantDashboard() {
           setLoading(false);
           return;
         }
-  
+
         console.log("Current user:", user);
-  
+
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
           .from("shop")
           .select("id, shop_name, shop_Rating")
           .eq("owner_Id", user.id);
-  
+
         if (shopError) {
           console.error("Error fetching shops:", shopError.message);
           setError(shopError.message);
           setLoading(false);
           return;
         }
-  
+
         if (!shops || shops.length === 0) {
           console.log("No shops found for the user");
           setError("No shops found for the user");
           setLoading(false);
           return;
         }
-  
+
         setShopData(shops);
         console.log("Fetched shops:", shops);
-  
+
         // Calculate and set the average shop rating
         const averageRating =
           shops.reduce((acc, shop) => acc + (shop.shop_Rating || 0), 0) /
           shops.length;
         setShopRating(averageRating || 0);
-  
+
         // Fetch all products for the shops
         const { data: products, error: productError } = await supabase
           .from("shop_Product")
@@ -95,16 +86,16 @@ function MerchantDashboard() {
             "shop_Id",
             shops.map((shop) => shop.id)
           );
-  
+
         if (productError) {
           console.error("Error fetching products:", productError.message);
           setError(productError.message);
           setLoading(false);
           return;
         }
-  
+
         console.log("Fetched products:", products);
-  
+
         // Count products by shop
         const productCountByShop = shops.map((shop) => ({
           shopId: shop.id,
@@ -112,20 +103,20 @@ function MerchantDashboard() {
             (product) => product.shop_Id === shop.id
           ).length,
         }));
-  
+
         console.log("Product counts by shop:", productCountByShop);
         setProductCounts(productCountByShop);
-  
+
         const totalProductCount = productCountByShop.reduce(
           (acc, shop) => acc + shop.productCount,
           0
         );
         console.log("Total product count:", totalProductCount);
         setTotalProductCount(totalProductCount);
-  
+
         let totalOrders = 0;
         let monthlyOrders = {};
-  
+
         // Fetch total orders based on products
         if (products.length > 0) {
           const { data: orders, error: orderError } = await supabase
@@ -135,62 +126,86 @@ function MerchantDashboard() {
               "prod_num",
               products.map((product) => product.id)
             );
-        
+
           if (orderError) {
             console.error("Error fetching orders:", orderError.message);
             setError(orderError.message);
           } else {
             console.log("Fetched orders:", orders);
             totalOrders = orders.length;
-        
+
             // Step 1: Get all unique years from the dataset
             let years = new Set();
             orders.forEach((order) => {
               const orderYear = new Date(order.date_of_order).getFullYear();
               years.add(orderYear);
             });
-        
+
             // Step 2: Initialize all months for each year
             let monthlyOrders = {};
             let allMonths = [];
-        
+
             years.forEach((year) => {
               for (let i = 0; i < 12; i++) {
                 const month = new Date(year, i);
-                const monthLabel = `${month.getFullYear()}-${month.toLocaleString("en-US", { month: "short" })}`;
+                const monthLabel = `${month.getFullYear()}-${month.toLocaleString(
+                  "en-US",
+                  { month: "short" }
+                )}`;
                 monthlyOrders[monthLabel] = 0;
                 allMonths.push(monthLabel);
               }
             });
-        
+
             // Step 3: Fill monthly order counts
             orders.forEach((order) => {
               const date = new Date(order.date_of_order);
-              const monthLabel = `${date.getFullYear()}-${date.toLocaleString("en-US", { month: "short" })}`;
-        
+              const monthLabel = `${date.getFullYear()}-${date.toLocaleString(
+                "en-US",
+                { month: "short" }
+              )}`;
+
               if (monthlyOrders.hasOwnProperty(monthLabel)) {
                 monthlyOrders[monthLabel]++;
               }
             });
-        
+
             // Step 4: Sort months correctly
             const sortedMonths = allMonths.sort((a, b) => {
               const [yearA, monthA] = a.split("-");
               const [yearB, monthB] = b.split("-");
-        
-              const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-              return yearA - yearB || monthNames.indexOf(monthA) - monthNames.indexOf(monthB);
+
+              const monthNames = [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+              ];
+              return (
+                yearA - yearB ||
+                monthNames.indexOf(monthA) - monthNames.indexOf(monthB)
+              );
             });
-        
+
             // Step 5: Convert to arrays for the chart
-            const monthlyOrderCounts = sortedMonths.map((month) => monthlyOrders[month]);
-        
+            const monthlyOrderCounts = sortedMonths.map(
+              (month) => monthlyOrders[month]
+            );
+
             // Step 6: Set states
             setTotalOrderCount(totalOrders);
-            setPData(monthlyOrderCounts); 
+            setPData(monthlyOrderCounts);
             setMonthlyOrderLabels(sortedMonths);
             setMonthlyOrderData(monthlyOrderCounts);
-        
+
             console.log("Final Monthly Orders:", monthlyOrders);
             console.log("Sorted Months:", sortedMonths);
             console.log("Monthly Order Data:", monthlyOrderCounts);
@@ -200,18 +215,14 @@ function MerchantDashboard() {
           setTotalOrderCount(0);
           setPData([]);
         }
-         
-        
-        
-        
-  
+
         // Fetch wallet data
         const { data: wallet, error: walletError } = await supabase
           .from("merchant_Wallet")
           .select("revenue")
           .eq("owner_ID", user.id)
           .single();
-  
+
         if (walletError) {
           console.error("Error fetching wallet:", walletError.message);
           setError(walletError.message);
@@ -226,10 +237,10 @@ function MerchantDashboard() {
         setLoading(false);
       }
     };
-  
+
     fetchData();
   }, []); // Run once on mount
-  
+
   const [walletrevenue, setWalletData] = useState(0);
   const formatRevenue = (revenue) => {
     const amount = parseFloat(revenue) || 0;
@@ -237,7 +248,6 @@ function MerchantDashboard() {
     return amount >= 1000
       ? (amount / 1000).toFixed(1).replace(".0", "") + "k"
       : amount.toLocaleString("en-PH", { minimumFractionDigits: "" });
-     
   };
 
   const [pData, setPData] = useState([0]); // Orders data
@@ -245,117 +255,241 @@ function MerchantDashboard() {
   const [rData, setRData] = useState([0]); // Return items data
   const [xLabels, setXLabels] = useState(["Orders"]); // X-axis labels
 
-
   const [totalIncome, setTotalIncome] = useState(0);
 
   useEffect(() => {
     const fetchIncome = async () => {
       try {
-        const { data: userData, error: authError } = await supabase.auth.getUser();
+        const { data: userData, error: authError } =
+          await supabase.auth.getUser();
         if (authError) {
           console.error("Authentication error:", authError.message);
           return;
         }
-  
+
         const user = userData.user;
         if (!user) {
           console.log("No user is signed in");
           return;
         }
-  
+
         const { data: shops, error: shopError } = await supabase
           .from("shop")
           .select("id")
           .eq("owner_Id", user.id);
-  
+
         if (shopError || !shops || shops.length === 0) {
-          console.error("Error fetching shops:", shopError?.message || "No shops found");
+          console.error(
+            "Error fetching shops:",
+            shopError?.message || "No shops found"
+          );
           return;
         }
-  
+
         const { data: products, error: productError } = await supabase
           .from("shop_Product")
           .select("id")
-          .in("shop_Id", shops.map((shop) => shop.id));
-  
+          .in(
+            "shop_Id",
+            shops.map((shop) => shop.id)
+          );
+
         if (productError || !products || products.length === 0) {
-          console.error("Error fetching products:", productError?.message || "No products found");
+          console.error(
+            "Error fetching products:",
+            productError?.message || "No products found"
+          );
           return;
         }
-  
+
         const { data: incomeData, error: incomeError } = await supabase
           .from("orders")
           .select("total_price, date_of_order")
-          .in("prod_num", products.map((product) => product.id))
+          .in(
+            "prod_num",
+            products.map((product) => product.id)
+          )
           .eq("order_status", "Delivered");
-  
+
         if (incomeError) {
           console.error("Error fetching income:", incomeError.message);
           return;
         }
-  
+
         if (!incomeData || incomeData.length === 0) {
           console.log("No delivered orders found");
           setUData([]); // Reset chart data
           return;
         }
-  
+
         // Step 1: Get all unique years from the dataset
         let years = new Set();
         incomeData.forEach((order) => {
           const orderYear = new Date(order.date_of_order).getFullYear();
           years.add(orderYear);
         });
-  
+
         // Step 2: Initialize all months for each year
         let monthlyIncome = {};
         let allMonths = [];
-  
+
         years.forEach((year) => {
           for (let i = 0; i < 12; i++) {
             const month = new Date(year, i);
-            const monthLabel = `${month.getFullYear()}-${month.toLocaleString("en-US", { month: "short" })}`;
+            const monthLabel = `${month.getFullYear()}-${month.toLocaleString(
+              "en-US",
+              { month: "short" }
+            )}`;
             monthlyIncome[monthLabel] = 0;
             allMonths.push(monthLabel);
           }
         });
-  
+
         // Step 3: Fill monthly income data
         incomeData.forEach((order) => {
           const date = new Date(order.date_of_order);
-          const monthLabel = `${date.getFullYear()}-${date.toLocaleString("en-US", { month: "short" })}`;
+          const monthLabel = `${date.getFullYear()}-${date.toLocaleString(
+            "en-US",
+            { month: "short" }
+          )}`;
           if (monthlyIncome.hasOwnProperty(monthLabel)) {
-            monthlyIncome[monthLabel] += (order.total_price || 0) * 0.99; // Deduct 1%
+            monthlyIncome[monthLabel] += (order.total_price || 0) * 0.97; // Deduct 1%
           }
         });
-  
+
         // Step 4: Sort months correctly
         const sortedMonths = allMonths.sort((a, b) => {
           const [yearA, monthA] = a.split("-");
           const [yearB, monthB] = b.split("-");
-          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-          return yearA - yearB || monthNames.indexOf(monthA) - monthNames.indexOf(monthB);
+          const monthNames = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec",
+          ];
+          return (
+            yearA - yearB ||
+            monthNames.indexOf(monthA) - monthNames.indexOf(monthB)
+          );
         });
-  
+
         // Step 5: Convert to arrays for the chart
-        const monthlyIncomeData = sortedMonths.map((month) => monthlyIncome[month]);
-  
+        const monthlyIncomeData = sortedMonths.map(
+          (month) => monthlyIncome[month]
+        );
+
         // Step 6: Update states
         setUData(monthlyIncomeData);
         setMonthlyOrderLabels(sortedMonths);
-  
+
         console.log("Monthly Income Data:", monthlyIncomeData);
       } catch (err) {
         console.error("Unexpected error:", err.message);
       }
     };
-  
+
     fetchIncome();
   }, []);
-  
-  
-  
 
+  const [topProduct, setTopProduct] = useState(null);
+  const [chartData, setChartData] = useState([]);
+
+  useEffect(() => {
+    const fetchTopSellingProducts = async () => {
+      try {
+        const { data: userData, error: authError } =
+          await supabase.auth.getUser();
+        if (authError) {
+          console.error("Authentication error:", authError.message);
+          return;
+        }
+
+        const user = userData.user;
+        if (!user) {
+          console.log("No user is signed in");
+          return;
+        }
+
+        // Fetch the shop ID of the authenticated user
+        const { data: shops, error: shopError } = await supabase
+          .from("shop")
+          .select("id")
+          .eq("owner_Id", user.id);
+
+        if (shopError || !shops || shops.length === 0) {
+          console.error(
+            "Error fetching shops:",
+            shopError?.message || "No shops found"
+          );
+          return;
+        }
+
+        const shopId = shops[0].id; // Assuming the user has only one shop
+
+        // Fetch completed orders for the user's shop
+        const { data: orders, error: ordersError } = await supabase
+          .from("orders")
+          .select("prod_num")
+          .eq("order_status", "Delivered");
+
+        if (ordersError) throw ordersError;
+
+        if (!orders || orders.length === 0) {
+          console.log("No completed orders found.");
+          setChartData([]);
+          return;
+        }
+
+        // Count occurrences of each product
+        const productCount = {};
+        orders.forEach((order) => {
+          productCount[order.prod_num] =
+            (productCount[order.prod_num] || 0) + 1;
+        });
+
+        const productIds = Object.keys(productCount);
+        if (productIds.length === 0) {
+          setChartData([]);
+          return;
+        }
+
+        // Fetch product names and sort by order count in descending order
+        const { data: products, error: productError } = await supabase
+          .from("shop_Product")
+          .select("id, item_Name")
+          .in("id", productIds)
+          .eq("shop_Id", shopId);
+
+        if (productError) throw productError;
+
+        // Map product names to order counts
+        const sortedProducts = products
+          .map((product) => ({
+            id: product.id,
+            name: product.item_Name,
+            value: productCount[product.id] || 0,
+          }))
+          .sort((a, b) => b.value - a.value);
+
+        console.log("Top Selling Products:", sortedProducts);
+
+        // Update chart data
+        setChartData(sortedProducts);
+      } catch (err) {
+        console.error("Error fetching top-selling products:", err);
+      }
+    };
+
+    fetchTopSellingProducts();
+  }, []);
 
   return (
     <div className="h-full w-full bg-slate-300 pb-5 ">
@@ -486,7 +620,7 @@ function MerchantDashboard() {
         <div className="w-full md:w-[65%] lg:w-[78%] h-[400px] rounded-md lg:flex gap-3">
           <div></div>
           {/* Bar chart */}
-          <div className="lg:w-[60%] md:[80%] mb-2 w-auto bg-slate-200 glass shadow-md p-1.5 rounded-md h-[70%] md:h-[75%]">
+          <div className="lg:w-[65%] md:[80%] mb-2 w-auto bg-slate-200 glass shadow-md p-1.5 rounded-md h-[70%] md:h-[75%]">
             <div className="w-full bg-slate-50 h-full rounded-md place-items-center">
               <BarChart
                 series={[
@@ -516,95 +650,72 @@ function MerchantDashboard() {
             </div>
           </div>
           {/* Pie chart for most sell product */}
-          <div className="lg:w-[40%] w-full h-[75%] p-1.5 shadow-md mt-2 sm:mt-0 rounded-md bg-slate-200 ">
+          <div className="lg:w-[35%] w-full h-[75%] p-1.5 shadow-md mt-2 sm:mt-0 rounded-md bg-slate-200 ">
             <div className="flex justify-between w-full">
               <div className="text-slate-800 ">Top-seller</div>
               <box-icon type="solid" name="star" color="#F09319"></box-icon>
             </div>
 
             <div className="bg-slate-100 h-auto w-full flex rounded-md place-content-center place-items-center">
-              <PieChart
-                width={500}
-                height={265}
-                series={[
-                  {
-                    data: data,
-                    innerRadius: 30,
-                    outerRadius: 110,
-                    paddingAngle: 5,
-                    cornerRadius: 4,
-                    startAngle: -45,
-                    endAngle: 225,
-                    cx: 150,
-                    cy: 150,
-                  },
-                ]}
-              />
-            </div>
+  {chartData.length > 0 ? (
+    <div className="-pt-2">
+      <PieChart
+        width={300}
+        height={265}
+        series={[
+          {
+            data: chartData.map((item) => ({
+              id: item.id,
+              value: item.value,
+              label: item.name, 
+            })),
+            innerRadius: 30,
+            outerRadius: 110,
+            paddingAngle: 5,
+            cornerRadius: 4,
+            startAngle: -45,
+            endAngle: 225,
+            cx: 150,
+            cy: 150,
+          },
+        ]}
+      />
+    </div>
+  ) : (
+    <div className="text-slate-500">No top-selling products</div>
+  )}
+</div>;
           </div>
         </div>
         {/* Notificatoin div */}
-        <div className="w-full md:w-[35%] shadow-md lg:w-[22%] h-[380px] mb-24 sm:mb-0 md:h-[610px] mt-52 md:mt-0 lg:h-[300px] bg-slate-400 glass rounded-md p-1.5">
+        <div className="w-full md:w-[35%] shadow-md lg:w-[30%] h-[380px] mb-24 sm:mb-0 md:h-[610px] mt-52 md:mt-0 lg:h-[300px] bg-slate-400 glass rounded-md p-1.5">
           <div className="flex justify-between align-middle">
-            <div className="text-slate-800 text-xl">Notification</div>
+            <div className="text-slate-800 text-xl">Top Selling</div>
             <div>
               <box-icon type="solid" name="bell" color="#563A9C"></box-icon>
             </div>
           </div>
 
-          <div className="h-[92%] md:h-[95%] lg:h-[90%] rounded-sm w-full  bg-slate-100 overflow-y-scroll custom-scrollbar p-1">
-            {/* Sample Order Notif */}
-            <div className="w-full h-12 hover:bg-primary-color cursor-pointer bg-slate-400  hover:duration-200 glass mb-1 flex rounded-sm p-1">
-              <div className="rounded-md bg-white h-full w-10">
-                <img
-                  src={girl}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="">
-                <div className=" text-slate-900 pl-2"> Erica mae </div>
-                <div className=" text-slate-800 text-sm pl-2 -mt-1">
-                  {" "}
-                  Just order an item.{" "}
-                </div>
-              </div>
-            </div>
-            <div className="w-full h-12  hover:bg-primary-color cursor-pointer bg-slate-400 hover:duration-200 glass  mb-1 flex rounded-sm p-1">
-              <div className="rounded-md bg-white h-full w-10">
-                <img
-                  src={boy}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="">
-                <div className=" text-slate-900 pl-2"> Paolo </div>
-                <div className=" text-slate-800 text-sm pl-2 -mt-1">
-                  {" "}
-                  Just order an item.{" "}
-                </div>
-              </div>
-            </div>
-            <div className="w-full h-12 hover:bg-primary-color cursor-pointer bg-violet-950 hover:duration-200 glass  mb-1 flex rounded-sm p-1">
-              <div className="rounded-md bg-primary-color h-full w-10">
-                <img
-                  src={drip}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="">
-                <div className=" text-slate-100 pl-2"> Dripstr </div>
-                <div className=" text-slate-300 text-sm pl-2 -mt-1">
-                  {" "}
-                  New Updates...{" "}
-                </div>
-              </div>
-            </div>
+          <div className="mt-3 bg-white shadow-md rounded-md p-2">
+            <ul>
+              {chartData.length > 0 ? (
+                chartData.map((item, index) => (
+                  <li
+                    key={item.id}
+                    className="flex justify-between text-slate-700 border-b py-2"
+                  >
+                    <span>
+                      {index + 1}. {item.name}
+                    </span>
+                    <span className="font-semibold text-slate-900">
+                      {item.value} sold
+                    </span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-slate-500">No data available</li>
+              )}
+            </ul>
           </div>
         </div>
       </div>
