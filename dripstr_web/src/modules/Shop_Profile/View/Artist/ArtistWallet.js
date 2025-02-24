@@ -77,37 +77,37 @@ function ArtistWallet() {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    const fetchWalletData = async () => {
-      setLoading(true);
 
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
+  const fetchWalletData = async () => {
+    setLoading(true);
 
-      if (authError || !user) {
-        console.error("Error fetching user:", authError?.message);
-        setLoading(false);
-        return;
-      }
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-      const { data, error } = await supabase
-        .from("artist_Wallet")
-        .select("revenue, owner_Name, owner_ID, number, valid_ID")
-        .eq("owner_ID", user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching wallet:", error.message);
-        setLoading(false);
-        return;
-      }
-
-      setWalletData(data);
+    if (authError || !user) {
+      console.error("Error fetching user:", authError?.message);
       setLoading(false);
-    };
+      return;
+    }
 
+    const { data, error } = await supabase
+      .from("artist_Wallet")
+      .select("revenue, owner_Name, owner_ID, number, valid_ID")
+      .eq("owner_ID", user.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching wallet:", error.message);
+      setLoading(false);
+      return;
+    }
+
+    setWalletData(data);
+    setLoading(false);
+  };
+  useEffect(() => {
     fetchWalletData();
   }, []);
 
@@ -288,6 +288,7 @@ function ArtistWallet() {
       setTimeout(() => setShowSubs(false), 3000);
       setShowSubscription(false);
       fetchTransactions();
+      fetchWalletData();
       fetchUserProfileAndArtist();
       checkSubscriptionStatus();
     } catch (err) {
@@ -575,8 +576,8 @@ function ArtistWallet() {
         <div className="w-1/3  h-full flex flex-col items-center">
           <div
             className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${isPremium
-                ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]"
-                : ""
+              ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]"
+              : ""
               }`}
           >
             {/* Wallet Icon and Name */}
@@ -719,10 +720,10 @@ function ArtistWallet() {
                     </span>
                     <span
                       className={`text-sm font-semibold ${transaction.status === "Pending"
-                          ? "text-yellow-500"
-                          : transaction.status === "Subscription Expired"
-                            ? "text-red-500"
-                            : "text-green-600"
+                        ? "text-yellow-500"
+                        : transaction.status === "Subscription Expired"
+                          ? "text-red-500"
+                          : "text-green-600"
                         }`}
                     >
                       {transaction.status}
@@ -1183,8 +1184,8 @@ function ArtistWallet() {
                   onClick={() => setActiveTabSubs("Wallet")}
                   disabled={isPending || isPremium}
                   className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-primary-color"
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-primary-color"
                     }`}
                 >
                   Pay via Dripstr Wallet
@@ -1193,8 +1194,8 @@ function ArtistWallet() {
                   onClick={() => setActiveTabSubs("Gcash")}
                   disabled={isPending || isPremium}
                   className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-blue-700"
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-blue-700"
                     }`}
                 >
                   Pay via Gcash

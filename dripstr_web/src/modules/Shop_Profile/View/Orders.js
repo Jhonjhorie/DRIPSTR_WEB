@@ -225,10 +225,10 @@ function Orders({ shopOwnerId }) {
         {" "}
         SHOP ORDERS{" "}
       </div>
-      <div className="w-full h-5/6  place-items-center ">
-        <div className="w-full md:w-3/4 rounded-md shadow-md mb-20 md:mb-0 lg:w-2/3 h-full bg-slate-100 p-2">
-          <div className="w-full h-[470px] bg-slate-200 rounded-sm">
-            <div className="w-full pt-2 glass bg-custom-purple rounded-t-md">
+      <div className="w-full h-5/6 relative place-items-center ">
+        <div className="w-full relative md:w-3/4 rounded-md shadow-md mb-20 md:mb-0 lg:w-2/3 h-full bg-slate-100 p-2">
+          <div className="w-full oveflow-hidden overflow-y-scroll custom-scrollbar relative h-full bg-slate-200 rounded-sm">
+            <div className="w-full sticky top-0 h-auto pt-2 glass bg-custom-purple rounded-t-md">
               <ul className="flex justify-around place-items-center  text-slate-300 cursor-pointer">
                 <li
                   className={activeTab === "new-orders" ? "active-tab" : ""}
@@ -262,7 +262,7 @@ function Orders({ shopOwnerId }) {
                 </li>
               </ul>
             </div>
-            <div className="w-full h-full custom-scrollbar bg-slate-200 p-4 overflow-y-scroll">
+            <div className="w-full h-full bg-slate-200 p-4 ">
               {activeTab === "new-orders" && (
                 <div>
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
