@@ -13,6 +13,7 @@ import {
   faFileContract,
   faQuestion,
   faContactCard,
+  faHeadset,
 } from "@fortawesome/free-solid-svg-icons";
 import SectionWrapper from "./components/SectionWrapper";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +30,7 @@ import LoadingMullet from "@/shared/Loading";
 import TermsCon from "@/shared/products/termsCon";
 import FaQCom from "../../shared/products/faqCom";
 import VoucherStream from "./components/VoucherStream";
+import ChatSupport from "./components/ChatSupport";
 
 function Home() {
   const [filMall, setFilMall] = useState(0);
@@ -75,6 +77,20 @@ function Home() {
     if (modal) {
       modal.close();
     }
+    
+  };
+  const openModalChatBot = () => {
+    const modal = document.getElementById("my_modal_Chatbot");
+    if (modal) {
+    modal.showModal();
+    }
+  };
+  const closeModalChatBot = () => {
+    const modal = document.getElementById("my_modal_Chatbot");
+    if (modal) {
+      modal.close();
+    }
+    
   };
 
   return (
@@ -158,6 +174,12 @@ function Home() {
       >
         <FontAwesomeIcon icon={faQuestion} />
       </button>
+      <button
+        onClick={openModalChatBot}
+        class="flex-none flex fixed bottom-40 right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
+      >
+        <FontAwesomeIcon icon={faHeadset} />
+      </button>
       <dialog
         id="my_modal_terms"
         className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
@@ -192,6 +214,18 @@ function Home() {
           className="modal-backdrop min-h-full min-w-full absolute "
         >
           <button onClick={closeModalCont}></button>
+        </form>
+      </dialog>
+      <dialog
+        id="my_modal_Chatbot"
+        className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
+      >
+        <ChatSupport onClose={closeModalChatBot} profile={profile} />
+        <form
+          method="dialog"
+          className="modal-backdrop min-h-full min-w-full absolute "
+        >
+          <button onClick={closeModalChatBot}></button>
         </form>
       </dialog>
       <footer class="footer bg-secondary-color text-neutral-content items-center p-2 ">
