@@ -1,25 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/constants/supabase"; // Adjust the import path as needed
+import { supabase } from "@/constants/supabase"; 
 
 const VoucherStream = ({ profile }) => {
-  const [vouchers, setVouchers] = useState([]); // State to store fetched vouchers
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const [claimedVouchers, setClaimedVouchers] = useState([]); // State to store claimed vouchers
+  const [vouchers, setVouchers] = useState([]); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState(null); 
+  const [claimedVouchers, setClaimedVouchers] = useState([]);
 
-  // Fetch vouchers and claimed vouchers from Supabase
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch all vouchers
+
         const { data: voucherData, error: voucherError } = await supabase
           .from("vouchers")
           .select("*")
           .order("id", { ascending: false });
 
         if (voucherError) throw voucherError;
-
-        // Fetch claimed vouchers for the current user
         const { data: claimedData, error: claimedError } = await supabase
           .from("customer_vouchers")
           .select("voucher_id, isClaim, isUsed")
@@ -59,14 +56,14 @@ const VoucherStream = ({ profile }) => {
     }
   }, [profile]);
 
-  // Handle claiming a voucher
+
   const handleClaimVoucher = async (voucherId) => {
     if (!profile?.id) {
       alert("You must be logged in to claim a voucher.");
       return;
     }
 
-    // Check if the voucher is already claimed by the user
+    
     const isAlreadyClaimed = claimedVouchers.some(
       (cv) => cv.voucher_id === voucherId && cv.isClaim
     );
@@ -90,7 +87,7 @@ const VoucherStream = ({ profile }) => {
 
       if (error) throw error;
 
-      // Refresh the component after claiming
+     
       setLoading(true);
       const fetchData = async () => {
         const { data: voucherData, error: voucherError } = await supabase
@@ -145,37 +142,32 @@ const VoucherStream = ({ profile }) => {
         const isClaimed = claimedVouchers.some(
           (cv) => cv.voucher_id === voucher.id && cv.isClaim
         );
+        const isProd = voucher.voucher_type == 'Product'
 
         return (
           <div
             key={voucher.id}
-            className={`${isClaimed ? 'bg-secondary-color' : 'bg-slate-50'}  flex flex-none gap-2 items-center rounded-md drop-shadow-sm overflow-hidden p-2 border-primary-color border-t-2 h-14 w-80 mb-2`}
+            className={`${isClaimed ? 'bg-secondary-color' : 'bg-slate-50'}  flex flex-none gap-2 items-center rounded-md drop-shadow-sm overflow-hidden p-2 ${isProd ? 'border-primary-color': 'border-green-700'} border-t-2 h-14 w-64 mb-2`}
           >
-            <figure>
-              <img
-                src={isClaimed ? require("@/assets/logoWhite.png") : require("@/assets/logoBlack.png")}
-                alt="Logo"
-                className="drop-shadow-customViolet h-10"
-              />
-            </figure>
-            <div className={`absolute opacity-20   text-primary-color font-bold text-7xl left-14 -top-2 z-0 drop-shadow-customViolet`}>
+          
+            <div className={`absolute opacity-20 w-[60%]  ${isProd ? 'text-primary-color ': 'text-green-700'} font-bold text-7xl left-14 -top-2 z-0 drop-shadow-customViolet`}>
               <p>{voucher.voucher_type}</p>
             </div>
             <div className={`flex justify-between gap-1 w-full items-center ${isClaimed ? 'text-slate-300' : 'text-secondary-color'} p-0`}>
               <div className="w-full flex flex-col justify-start">
-                <h2 className="text-3xl font-bold">{voucher.voucher_name}</h2>
+                <h2 className="text-xl font-bold">{voucher.voucher_name}</h2>
                 <p className="text-xs text-slate-500">
-                  Exp Date: {voucher.expiration}
+                  Exp: {voucher.expiration}
                 </p>
               </div>
-              <div className="flex flex-col items-end">
+              <div className="flex flex-col w-[40%] items-end">
                 <p className="text-xs text-slate-500">
                   Min: ₱{voucher.condition}
                 </p>
                 <h3 className="text-2xl font-bold">₱{voucher.discount}</h3>
               </div>
               <div className="justify-end z-50">
-                {isClaimed ? <button className="p-2 font-bold cursor-not-allowed rounded-md bg-primary-color text-white">Claimed</button>:<button
+                {isClaimed ? <button className={`p-2 font-bold cursor-not-allowed rounded-md ${isProd ? 'bg-primary-color' :'bg-green-700' } text-white`}>Claimed</button>:<button
                   className={`btn duration-300 transition-all ${
                     isClaimed
                       ? "bg-gray-800 text-slate-50 cursor-not-allowed"

@@ -54,10 +54,10 @@ function PlaceOrder() {
           setAddresses(data);
           const defaultAddress = data.find((addr) => addr.is_default_shipping);
           if (defaultAddress) {
-            setSelectedAddress(defaultAddress.id);
+            setSelectedAddress(defaultAddress);
             setSelectedPostcode(defaultAddress.postcode);
           } else {
-            setSelectedAddress(data[0].id);
+            setSelectedAddress(data[0]);
             setSelectedPostcode(data[0].postcode);
           }
         }
@@ -163,7 +163,7 @@ function PlaceOrder() {
             payment_stamp: new Date().toISOString(),
             order_variation: item.variant,
             order_size: item.size,
-            shipping_addr: selectedAddress || "No address provided",
+            shipping_addr: selectedAddress.full_address || "No address provided",
             shipping_postcode: selectedPostcode || "No postcode provided",
             shipping_method: shippingMethod,
             shipping_fee: shopShippingFee,
@@ -260,7 +260,7 @@ function PlaceOrder() {
                 <select
                   className="select min-h-[2.5rem] h-[2.5rem] select-bordered w-full line-clamp-1
                font-semibold text-md"
-                  value={selectedAddress}
+                  value={selectedAddress.full_address}
                   onChange={(e) => {
                     const selected = addresses.find(
                       (addr) => addr.id === e.target.value
@@ -276,7 +276,7 @@ function PlaceOrder() {
                       className="line-clamp-1
                font-semibold"
                     >
-                      {addr.address}
+                      {addr.full_address}
                     </option>
                   ))}
                 </select>
