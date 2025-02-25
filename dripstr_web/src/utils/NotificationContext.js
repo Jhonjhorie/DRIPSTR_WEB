@@ -4,6 +4,32 @@ import toast from 'react-hot-toast';
 
 const NotificationContext = createContext();
 
+const notificationTypes = {
+  ORDER: {
+    PLACED: 'ORDER_PLACED',
+    CONFIRMED: 'ORDER_CONFIRMED',
+    SHIPPED: 'ORDER_SHIPPED',
+    DELIVERED: 'ORDER_DELIVERED',
+    CANCELLED: 'ORDER_CANCELLED',
+    REFUND_REQUESTED: 'REFUND_REQUESTED',
+    REFUND_APPROVED: 'REFUND_APPROVED'
+  },
+  PRODUCT: {
+    ADDED_TO_CART: 'PRODUCT_ADDED_TO_CART',
+    LOW_STOCK: 'LOW_STOCK',
+    BACK_IN_STOCK: 'BACK_IN_STOCK'
+  },
+  VOUCHER: {
+    RECEIVED: 'VOUCHER_RECEIVED',
+    EXPIRING: 'VOUCHER_EXPIRING',
+    USED: 'VOUCHER_USED'
+  },
+  SHOP: {
+    NEW_FOLLOWER: 'NEW_FOLLOWER',
+    NEW_MESSAGE: 'NEW_MESSAGE',
+    PROMOTION_STARTED: 'PROMOTION_STARTED'
+  }
+};
 const notificationReducer = (state, action) => {
   switch (action.type) {
     case 'SET_NOTIFICATIONS':
