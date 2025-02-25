@@ -4,6 +4,7 @@ import "../Component/Style.css";
 import logo from "../../../assets/shop/logoBlack.png";
 import sample1 from "../../../assets/images/samples/5.png";
 import { supabase } from "@/constants/supabase";
+import OrderCard from "../Component/OrderCard";
 
 function Orders({ shopOwnerId }) {
   const [activeTab, setActiveTab] = useState("new-orders");
@@ -12,31 +13,10 @@ function Orders({ shopOwnerId }) {
   const [isModalOpen3, setIsModalOpen3] = useState(false);
   const [isModalOpen4, setIsModalOpen4] = useState(false);
   const [isModalOpen5, setIsModalOpen5] = useState(false);
-  const [orders, setOrders] = useState([]);
   const [shopId, setShopId] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const handleOpenModal = (order) => {
-    if (!order) return;
-
-    setSelectedOrder({
-      id: order.id,
-      transaction_id: order.transaction_id,
-      buyerName: order.buyerName || "N/A",
-      buyerAddress: order.buyerAddress || "N/A",
-      buyerPhone: order.buyerPhone || "N/A",
-      variantImg: order.order_variation?.imagePath || "",
-      variantName: order.order_variation?.variant_Name || "Unknown Variant",
-      size: order.order_size?.size || "Unknown Size",
-      price: order.order_size?.price || 0,
-      total_price: order.total_price,
-      shipping: order.shipping || 0,
-      final_price: order.total_price + (order.shipping || 0),
-    });
-
-    setIsModalOpen(true);
-  };
 
   const handlePrepare = () => {
     setIsModalOpen2(true);
@@ -63,7 +43,8 @@ function Orders({ shopOwnerId }) {
     const fetchUserProfileAndShop = async () => {
       try {
         // Get current authenticated user
-        const { data: userData, error: authError } = await supabase.auth.getUser();
+        const { data: userData, error: authError } =
+          await supabase.auth.getUser();
         if (authError) {
           console.error("Auth Error:", authError.message);
           return;
@@ -95,7 +76,10 @@ function Orders({ shopOwnerId }) {
           if (productError) throw productError;
 
           // Console log only the product IDs
-          console.log("Product IDs:", products.map((p) => p.id));
+          console.log(
+            "Product IDs:",
+            products.map((p) => p.id)
+          );
         } else {
           console.error("No shop found for the current user.");
         }
@@ -108,117 +92,142 @@ function Orders({ shopOwnerId }) {
   }, []);
 
 
-  useEffect(() => {
-    const fetchOrdersForMerchant = async () => {
-      try {
-        // Get authenticated user
-        const { data: userData, error: authError } = await supabase.auth.getUser();
-        if (authError) {
-          console.error("Auth Error:", authError.message);
-          return;
-        }
 
-        const user = userData?.user;
-        if (!user) {
-          console.error("No user is signed in.");
-          return;
-        }
-
-        // Fetch the shop owned by the merchant
-        const { data: shops, error: shopError } = await supabase
-          .from("shop")
-          .select("id")
-          .eq("owner_Id", user.id);
-
-        if (shopError) throw shopError;
-        if (!shops || shops.length === 0) {
-          console.error("No shop found for this user.");
-          return;
-        }
-
-        const shopId = shops[0].id;
-
-        // Fetch product IDs from the shop
-        const { data: products, error: productError } = await supabase
-          .from("shop_Product")
-          .select("id, item_Name")
-          .eq("shop_Id", shopId);
-
-        if (productError) throw productError;
-        if (!products || products.length === 0) {
-          console.error("No products found for this shop.");
-          return;
-        }
-
-        const productIds = products.map((p) => p.id); // Extract product IDs
-
-        // Fetch orders with buyer details by joining the profiles table
-        const { data: ordersData, error: orderError } = await supabase
-          .from("orders")
-          .select(`
-            id, 
-            transaction_id, 
-            order_status, 
-            prod_num, 
-            quantity, 
-            total_price, 
-            final_price, 
-            shipping_fee, 
-            acc_num, order_variation, order_size, 
-            profiles:acc_num (full_name, mobile, profile_picture, address)
-          `)
-          .in("prod_num", productIds)
-          .eq("order_status", "To pay");
-
-
-        // Enrich order data with product names
-        const enrichedOrders = ordersData.map((order) => {
-
-
-          const variant =
-            typeof order.order_variation === "string"
-              ? JSON.parse(order.order_variation)
-              : order.order_variation;
-
-          const sizeDetails =
-            typeof order.order_size === "string"
-              ? JSON.parse(order.order_size)
-              : order.order_size;
-
-          const product = products.find((p) => p.id === order.prod_num);
-          return {
-            ...order,
-            variantImg: variant?.imagePath || null,
-            variantName: variant?.variant_Name || "N/A",
-            size: sizeDetails?.size || "N/A",
-            price: sizeDetails?.price || null,
-            buyerPhone: order.profiles?.mobile,
-            productName: product ? product.item_Name : "Unknown Product",
-            buyerName: order.profiles?.full_name || "Unknown Buyer",
-            buyerProfilePic: order.profiles?.profile_picture || "default_avatar.jpg",
-            buyerAddress: order.profiles?.address || "Address not set",
-          };
-        });
-
-        setOrders(enrichedOrders);
-      } catch (error) {
-        console.error("Error fetching orders:", error.message);
+  //setting order status
+  const [orders, setOrders] = useState({
+    newOrders: [],
+    preparing: [],
+    shipped: [],
+    completed: [],
+  });
+  const fetchOrdersForMerchant = async () => {
+    try {
+      const { data: userData, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error("Auth Error:", authError.message);
+        return;
       }
-    };
 
+      const user = userData?.user;
+      if (!user) {
+        console.error("No user is signed in.");
+        return;
+      }
 
+      // Fetch the shop owned by the merchant
+      const { data: shops, error: shopError } = await supabase
+        .from("shop")
+        .select("id")
+        .eq("owner_Id", user.id);
+
+      if (shopError) throw shopError;
+      if (!shops || shops.length === 0) {
+        console.error("No shop found for this user.");
+        return;
+      }
+
+      const shopId = shops[0].id;
+
+      // Fetch product IDs from the shop
+      const { data: products, error: productError } = await supabase
+        .from("shop_Product")
+        .select("id, item_Name")
+        .eq("shop_Id", shopId);
+
+      if (productError) throw productError;
+      if (!products || products.length === 0) {
+        console.error("No products found for this shop.");
+        return;
+      }
+
+      const productIds = products.map((p) => p.id);
+
+      // Fetch orders with buyer details
+      const { data: ordersData, error: orderError } = await supabase
+        .from("orders")
+        .select(
+          `
+          id, 
+          transaction_id, 
+          order_status, 
+          prod_num, 
+          quantity, 
+          total_price, 
+          final_price, 
+          shipping_fee, 
+          acc_num, 
+          order_variation, 
+          order_size, 
+          profiles:acc_num (full_name, mobile, profile_picture, address)
+          `
+        )
+        .in("prod_num", productIds);
+
+      if (orderError) throw orderError;
+
+      // Process orders and categorize them by status
+      const categorizedOrders = {
+        newOrders: [],
+        preparing: [],
+        shipped: [],
+        completed: [],
+      };
+
+      ordersData.forEach((order) => {
+        const variant =
+          typeof order.order_variation === "string"
+            ? JSON.parse(order.order_variation)
+            : order.order_variation;
+
+        const sizeDetails =
+          typeof order.order_size === "string"
+            ? JSON.parse(order.order_size)
+            : order.order_size;
+
+        const product = products.find((p) => p.id === order.prod_num);
+
+        const enrichedOrder = {
+          ...order,
+          variantImg: variant?.imagePath || null,
+          variantName: variant?.variant_Name || "N/A",
+          size: sizeDetails?.size || "N/A",
+          price: sizeDetails?.price || null,
+          buyerPhone: order.profiles?.mobile,
+          productName: product ? product.item_Name : "Unknown Product",
+          buyerName: order.profiles?.full_name || "Unknown Buyer",
+          buyerProfilePic: order.profiles?.profile_picture || "default_avatar.jpg",
+          buyerAddress: order.profiles?.address || "Address not set",
+        };
+
+        if (order.order_status === "To pay") {
+          categorizedOrders.newOrders.push(enrichedOrder);
+        } else if (order.order_status === "To ship") {
+          categorizedOrders.preparing.push(enrichedOrder);
+        } else if (order.order_status === "Shipped") {
+          categorizedOrders.shipped.push(enrichedOrder);
+        } else if (order.order_status === "Completed") {
+          categorizedOrders.completed.push(enrichedOrder);
+        }
+      });
+
+      setOrders(categorizedOrders);
+    } catch (error) {
+      console.error("Error fetching orders:", error.message);
+    }
+  };
+
+  const refreshOrders = () => {
+    fetchOrdersForMerchant();
+  };
+
+  // Fetch orders when the component mounts
+  useEffect(() => {
     fetchOrdersForMerchant();
   }, []);
-
-
-
-
 
   const Name = "Jane Doe";
   const Address = "54 Barangay Bagong Silangyatas, Quezon City ";
   const Phone = "09295374051";
-
-
 
   return (
     <div className="h-full w-full bg-slate-300 p-2 ">
@@ -272,217 +281,64 @@ function Orders({ shopOwnerId }) {
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
                     New Orders
                   </h2>
-
-                  {error && <p className="text-red-500">{error}</p>}
-
-                  {/* Orders List */}
-                  {orders.length > 0 ? (
-                    orders.map((order) => (
-                      <div key={order.id} className="border relative rounded-lg p-4 r shadow-md bg-white mb-4">
-                        <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
-                          {" "}
-                        </div>
-                        <h2 className="text-lg font-bold text-slate-900">Order #{order.id}</h2>
-                        <div className="w-full flex gap-2">
-
-                          {/* Product Details */}
-                          <div className="w-full h-auto">
-                            <div className="flex gap-4 mt-3">
-                              <div className="p-1 rounded-md shadow-slate-500 shadow-md h-36 w-40 bg-slate-800 glass   ">
-                                <img
-                                  src={order.variantImg || "placeholder.jpg"}
-                                  alt={order.variantName || "Product Image"}
-                                  className="h-full bg-slate-900 w-full object-cover rounded-md"
-                                />
-                              </div>
-
-                              <div className="w-full h-auto ">
-                                <p className="text-sm text-custom-purple">
-                                  Product: <span className="font-medium">{order.productName}</span>
-                                </p>
-                                <p className="text-sm text-slate-700">
-                                  Transaction ID: <span className="font-medium">{order.transaction_id}</span>
-                                </p>
-                                <p className="text-sm text-slate-700">
-                                  Buyer: <span className="font-medium">{order.buyerName || "N/A"}</span>
-                                </p>
-                                <p className="text-sm text-slate-700">
-                                  Address: <span className="font-medium">{order.buyerAddress || "N/A"}</span>
-                                </p>
-                                <p className="text-sm text-slate-700">
-                                  Phone: <span className="font-medium">{order.buyerPhone || "N/A"}</span>
-                                </p>
-
-                              </div>
-                            </div>
-
-                          </div>
-
-                          <div className="w-1/2 pt-3 relative h-auto">
-                            <p className="text-sm text-slate-700">
-                              Variant: <span className="font-medium">{order.variantName || "N/A"}</span>
-                            </p>
-                            <p className="text-sm text-slate-700">
-                              Size: <span className="font-medium">{order.size}</span>
-                            </p>
-                            <p className="text-sm text-slate-700">
-                              Quantity: <span className="font-medium">{order.quantity}</span>
-                            </p>
-                            <p className="text-sm text-slate-700">
-                              Price: <span className="font-medium">₱{order.total_price}</span>
-                            </p>
-                            <p className="text-sm text-slate-700">
-                              Shipping Fee: <span className="font-medium">₱{order.shipping_fee || "N/A"}</span>
-                            </p>
-
-                            <p className="text-2xl font-semibold absolute bottom-0 right-0 text-yellow-600">
-                              Total: ₱{order.final_price || order.total_price + order.shipping_fee}
-                            </p>
-                          </div>
-                        </div>
-
-
-
-
-
-                        {/* Buttons */}
-                        <div className="flex justify-end mt-4">
-
-                          <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
-                            Prepare Order
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-center text-gray-600">No orders found.</p>
-                  )}
-
+                  {orders.newOrders.map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      refreshOrders={fetchOrdersForMerchant} 
+                    />
+                  ))}
                 </div>
               )}
 
               {activeTab === "preparing" && (
                 <div>
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    Prepare Order
+                    Preparing Orders
                   </h2>
-                  <div className=" flex font-semibold justify-between px-2 text-slate-800">
-                    <li className="list-none">Order Id</li>
-                    <li className="list-none">Name</li>
-                    <li className="list-none pr-4">Action</li>
-                  </div>
-                  <div className="p-2 text-slate-900 h-12 shadow-sm w-full bg-slate-100 flex justify-between gap-2">
-                    <div className="h-full w-20 place-items-center justify-center flex">
-                      {" "}
-                      10{" "}
-                    </div>
-                    <div className="h-full w-full place-items-center flex justify-center ">
-                      {" "}
-                      Viscount Black{" "}
-                    </div>
-                    <div
-                      onClick={handlePrepare}
-                      className=" h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
-                                    hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex "
-                    >
-                      View
-                    </div>
-                  </div>
+                  {orders.preparing.map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      refreshOrders={refreshOrders}
+                    />
+                  ))}
                 </div>
               )}
-              {activeTab === "to-deliver" && (
+
+              {activeTab === "shipped" && (
                 <div>
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    To Deliver
+                    Shipped Orders
                   </h2>
-                  <div className=" flex font-semibold justify-between px-2 text-slate-800">
-                    <li className="list-none">Order Id</li>
-                    <li className="list-none">Name</li>
-                    <li className="list-none pr-4">Action</li>
-                  </div>
-                  <div className="p-2 text-slate-900 h-12 shadow-sm w-full bg-slate-100 flex justify-between gap-2">
-                    <div className="h-full w-20 place-items-center justify-center flex">
-                      {" "}
-                      10{" "}
-                    </div>
-                    <div className="h-full w-full place-items-center flex justify-center ">
-                      {" "}
-                      Viscount Black{" "}
-                    </div>
-                    <div
-                      onClick={handleDeliver}
-                      className=" h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
-                                    hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex "
-                    >
-                      View
-                    </div>
-                  </div>
+                  {orders.shipped.map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      refreshOrders={fetchOrdersForMerchant}
+                    />
+                  ))}
                 </div>
               )}
-              {activeTab === "cancelled" && (
-                <div>
-                  <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    Cancelled Orders
-                  </h2>
-                  <div className=" flex font-semibold justify-between px-2 text-slate-800">
-                    <li className="list-none">Order Id</li>
-                    <li className="list-none">Name</li>
-                    <li className="list-none pr-4">Action</li>
-                  </div>
-                  <div className="p-2 text-slate-900 h-12 shadow-sm w-full bg-red-500 flex justify-between gap-2">
-                    <div className="h-full w-20 place-items-center justify-center flex">
-                      {" "}
-                      10{" "}
-                    </div>
-                    <div className="h-full w-full place-items-center flex justify-center ">
-                      {" "}
-                      Viscount Black{" "}
-                    </div>
-                    <div
-                      onClick={handleCancelled}
-                      className=" h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
-                                    hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex "
-                    >
-                      View
-                    </div>
-                  </div>
-                </div>
-              )}
+
               {activeTab === "completed" && (
                 <div>
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
                     Completed Orders
                   </h2>
-                  <div className=" flex font-semibold justify-between px-2 text-slate-800">
-                    <li className="list-none">Order Id</li>
-                    <li className="list-none">Name</li>
-                    <li className="list-none pr-4">Action</li>
-                  </div>
-                  <div className="p-2 text-slate-900 h-12 shadow-sm w-full bg-green-500 flex justify-between gap-2">
-                    <div className="h-full w-20 place-items-center justify-center flex">
-                      {" "}
-                      10{" "}
-                    </div>
-                    <div className="h-full w-full place-items-center flex justify-center ">
-                      {" "}
-                      Viscount Black{" "}
-                    </div>
-                    <div
-                      onClick={handleCompleted}
-                      className=" h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
-                                    hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex "
-                    >
-                      View
-                    </div>
-                  </div>
+                  {orders.completed.map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      refreshOrders={fetchOrdersForMerchant}
+                    />
+                  ))}
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
-
-   
 
       {/* TO DELIVER */}
       {isModalOpen2 && (
