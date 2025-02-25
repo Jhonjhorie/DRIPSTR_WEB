@@ -17,7 +17,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const tabs = ["All", "To Ship", "To Receive", "Completed", "Refund"];
+  const tabs = ["All", "To Ship", "To Receive", "Verifying", "Completed", "Cancelled", "Refund"];
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,7 +27,9 @@ const Orders = () => {
     const counts = {
       "To Ship": orders.filter(order => order.order_status === "Processing").length,
       "To Receive": orders.filter(order => order.order_status === "Shipped").length,
+      "Verifying": orders.filter(order => order.approve_Admin === "Pending").length,
       "Completed": orders.filter(order => order.order_status === "Delivered").length,
+      "Cancelled": orders.filter(order => order.order_status === "Cancelled").length,
       "Refund": orders.filter(order => 
         order.order_status === "Refund Requested" || 
         order.order_status === "Refund Approved" || 
@@ -60,8 +62,12 @@ const Orders = () => {
         return filtered.filter(order => order.order_status === "Processing");
       case "To Receive":
         return filtered.filter(order => order.order_status === "Shipped");
+      case "Verifying":
+        return filtered.filter(order => order.approve_Admin === "Pending");
       case "Completed":
         return filtered.filter(order => order.order_status === "Delivered");
+      case "Cancelled":
+        return filtered.filter(order => order.order_status === "Cancelled");
       case "Refund":
         return filtered.filter(order => order.order_status === "Refund Requested" || order.order_status === "Refund Approved" || order.order_status === "Refund Rejected");
       default:
@@ -103,6 +109,20 @@ const Orders = () => {
     switch (status) {
       case 'Pending Admin':
         return 'Pending';
+      case 'Cancelled':
+        return 'Cancelled';
+      case 'Processing':
+        return 'To Ship';
+      case 'Shipped':
+        return 'To Receive';
+      case 'Delivered':
+        return 'Completed';
+      case 'Refund Requested':
+        return 'Refund Requested';
+      case 'Refund Approved':
+        return 'Refund Approved';
+      case 'Refund Rejected':
+        return 'Refund Rejected';
       default:
         return status;
     }
@@ -113,13 +133,14 @@ const Orders = () => {
   }
 
   return (
-    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
+    <div className="p-4 bg-slate-200 flex flex-row h-screen overflow-hidden">
       <div className="sticky h-full">
         <Sidebar />
       </div>
 
-      <div className="px-5 flex-1 flex flex-col">
-        <div className="p-4 bg-slate-200 flex-1">
+      <div className="px-5 flex-1 flex flex-col h-full">
+        {/* Fixed Header Section */}
+        <div className="flex-none">
           <h1 className="text-xl font-bold text-gray-800 mb-6">My Orders</h1>
           
           {/* Navigation Tabs */}
@@ -153,8 +174,10 @@ const Orders = () => {
               className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:border-purple-500"
             />
           </div>
+        </div>
 
-          {/* Orders List */}
+        {/* Scrollable Orders List */}
+        <div className="flex-1 overflow-y-auto pr-2">
           {loading ? (
             <div className="flex flex-col mt-16 align-middle justify-center items-center">
               <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-auto animate-pulse" />
@@ -169,18 +192,21 @@ const Orders = () => {
                   </h2>
                   <div className="flex flex-col items-end">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      order.order_status === "Cancelled" ? "bg-gray-100 text-gray-800" :
+                      order.approve_Admin === "Pending" ? "bg-purple-100 text-purple-800" :
                       order.order_status === "Processing" ? "bg-yellow-100 text-yellow-800" :
                       order.order_status === "Shipped" ? "bg-blue-100 text-blue-800" :
                       order.order_status === "Refund Requested" ? "bg-orange-100 text-orange-800" :
                       order.order_status === "Refund Approved" ? "bg-green-100 text-green-800" :
                       order.order_status === "Refund Rejected" ? "bg-red-100 text-red-800" :
-                      order.order_status === "Cancelled" ? "bg-gray-100 text-gray-800" :
-                      order.order_status === "Pending Admin" ? "bg-yellow-100 text-yellow-800" :
                       "bg-green-100 text-green-800"
                     }`}>
-                      {order.payment_method === "COD" ? 
-                        `${getStatusDisplay(order.order_status)} (COD)` : 
-                        `${getStatusDisplay(order.order_status)} (${order.payment_method})`}
+                      {order.order_status === "Cancelled" ? 
+                        "Cancelled" : 
+                        order.approve_Admin === "Pending" ? 
+                          "Verifying Payment" : 
+                          `${getStatusDisplay(order.order_status)}${order.payment_method ? ` (${order.payment_method})` : ''}`
+                      }
                     </span>
                     <span className="text-sm text-gray-500 mt-1">
                       {new Date(order.date_of_order).toLocaleDateString()}

@@ -19,9 +19,7 @@ const FollowedStores = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      console.log('Current user ID:', user.id); // Debug log
-
-      // Fetch all artists and filter locally
+      // Fetch artists with followers that match current user
       const { data: artists, error: artistError } = await supabase
         .from('artist')
         .select(`
@@ -31,32 +29,15 @@ const FollowedStores = () => {
           art_Type,
           artist_Image,
           followers_Detail
-        `);
+        `)
+        .contains('followers_Detail', [{ id: user.id }]);
 
       if (artistError) throw artistError;
 
-      // Filter artists where current user is in followers_Detail
-      const followedArtistsList = artists?.filter(artist => {
-        console.log('Checking artist:', artist.artist_Name);
-        console.log('followers_Detail:', artist.followers_Detail);
-        
-        if (!artist.followers_Detail) {
-          console.log('No followers_Detail');
-          return false;
-        }
-        
-        const isFollowing = artist.followers_Detail.some(follower => {
-          console.log('Checking follower:', follower);
-          return typeof follower === 'object' && follower.id === user.id;
-        });
-        
-        console.log('Is following:', isFollowing);
-        return isFollowing;
-      }) || [];
+      // Set followed artists directly
+      setFollowedArtists(artists || []);
 
-      console.log('Filtered artists:', followedArtistsList); // Debug log
-
-      // Fetch followed merchants
+      // Fetch followed merchants (existing code remains the same)
       const { data: merchantFollowers, error: merchantError } = await supabase
         .from('merchant_Followers')
         .select(`
@@ -74,7 +55,6 @@ const FollowedStores = () => {
 
       if (merchantError) throw merchantError;
 
-      setFollowedArtists(followedArtistsList);
       setFollowedMerchants(merchantFollowers?.map(f => f.shop) || []);
     } catch (error) {
       console.error('Error:', error);

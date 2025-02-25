@@ -9,10 +9,12 @@ const Account = () => {
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [recentOrders, setRecentOrders] = useState([]);
 
   useEffect(() => {
     fetchProfile();
     fetchAddresses();
+    fetchRecentOrders();
   }, []);
 
   const fetchProfile = async () => {
@@ -41,12 +43,45 @@ const Account = () => {
       let { data, error } = await supabase
         .from("addresses")
         .select("*")
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .eq("is_default_shipping", true)
+        .limit(1);
 
-      if (error) console.error("Error fetching addresses:", error);
-      else setAddresses(data);
+      if (error) {
+        console.error("Error fetching addresses:", error);
+      } else {
+        setAddresses(data || []);
+      }
     }
     setLoading(false);
+  };
+
+  const fetchRecentOrders = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      let { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_variation,
+          order_size,
+          shop_Product:prod_num (
+            item_Name
+          )
+        `)
+        .eq('acc_num', user.id)
+        .order('date_of_order', { ascending: false })
+        .limit(5);
+
+      if (error) {
+        console.error("Error fetching orders:", error);
+      } else {
+        setRecentOrders(data || []);
+      }
+    }
   };
 
   return (
@@ -118,19 +153,25 @@ const Account = () => {
                   </Link>
                 </div>
                 {addresses.length > 0 ? (
-                  addresses
-                    .filter((a) => a.is_default_shipping)
-                    .map((address, index) => (
-                      <div key={index} className="text-gray-700">
-                        <p className="font-semibold">
-                          Default Shipping Address
-                        </p>
-                        <p>{address.address}</p>
-                        <p>Postcode: {address.postcode}</p>
-                      </div>
-                    ))
+                  <div className="text-gray-700">
+                    <p className="font-semibold mb-2">Default Shipping Address</p>
+                    <p className="text-sm mb-1">{addresses[0].full_address}</p>
+                    <div className="flex gap-2 text-sm text-gray-600">
+                      <p>{addresses[0].region},</p>
+                      <p>{addresses[0].city}</p>
+                      <p>{addresses[0].postcode}</p>
+                    </div>
+                  </div>
                 ) : (
-                  <p className="text-gray-600">No addresses found.</p>
+                  <div className="text-gray-600 flex flex-col items-center py-4">
+                    <p className="mb-2">No default address set</p>
+                    <Link
+                      to="/account/address"
+                      className="text-blue-600 hover:underline text-sm"
+                    >
+                      Add an address
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>
@@ -139,34 +180,66 @@ const Account = () => {
               <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-2 rounded-t-md">
                 {" "}
               </div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Recent Orders
-              </h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-800">Recent Orders</h2>
+                <Link
+                  to="/account/orders"
+                  className="text-blue-600 hover:underline text-sm"
+                >
+                  View All Orders
+                </Link>
+              </div>
 
-              <table className="w-full border-collapse border">
-                <thead>
-                  <tr className="bg-custom-purple glass text-left text-gray-100">
-                    <th className="px-2 py-1 ">Order #</th>
-                    <th className="px-2 py-1 ">Placed On</th>
-                    <th className="px-2 py-1 ">Items</th>
-                    <th className="px-2 py-1 ">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="hover:bg-gray-100">
-                    <td className="px-2 ">12345</td>
-                    <td className="px-2 ">2024-10-30</td>
-                    <td className="px-2 ">
-                      <img
-                        src="https://via.placeholder.com/50"
-                        alt="Item"
-                        className="w-10 h-10 rounded"
-                      />
-                    </td>
-                    <td className="px-2 ">50.00</td>
-                  </tr>
-                </tbody>
-              </table>
+              {recentOrders.length > 0 ? (
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-custom-purple text-left text-gray-100">
+                      <th className="px-4 py-2 rounded-tl-lg">Order #</th>
+                      <th className="px-4 py-2">Placed On</th>
+                      <th className="px-4 py-2">Items</th>
+                      <th className="px-4 py-2 rounded-tr-lg">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentOrders.map((order) => (
+                      <tr key={order.id} className="hover:bg-gray-50 border-b">
+                        <td className="px-4 py-3">#{order.id}</td>
+                        <td className="px-4 py-3">
+                          {new Date(order.date_of_order).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={order.order_variation?.imagePath || "/placeholder.png"}
+                              alt={order.shop_Product?.item_Name}
+                              className="w-10 h-10 rounded object-cover"
+                            />
+                            <span className="text-sm text-gray-600">
+                              {order.shop_Product?.item_Name || "Product"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="font-medium">₱{order.final_price}</span>
+                          <span className="text-xs text-gray-500 ml-1">
+                            ({order.quantity} items)
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No orders yet</p>
+                  <Link
+                    to="/shop"
+                    className="text-blue-600 hover:underline text-sm block mt-2"
+                  >
+                    Start shopping
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         )}
