@@ -19,25 +19,42 @@ const FollowedStores = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Fetch followed artists
-      const { data: artistFollowers, error: artistError } = await supabase
-        .from('artist_followers')
+      console.log('Current user ID:', user.id); // Debug log
+
+      // Fetch all artists and filter locally
+      const { data: artists, error: artistError } = await supabase
+        .from('artist')
         .select(`
           id,
-          created_at,
-          name,
-          artist_name,
-          artist:artist_name (
-            id,
-            artist_Name,
-            artist_Bio,
-            art_Type,
-            artist_Image
-          )
-        `)
-        .eq('name', user.id);
+          artist_Name,
+          artist_Bio,
+          art_Type,
+          artist_Image,
+          followers_Detail
+        `);
 
       if (artistError) throw artistError;
+
+      // Filter artists where current user is in followers_Detail
+      const followedArtistsList = artists?.filter(artist => {
+        console.log('Checking artist:', artist.artist_Name);
+        console.log('followers_Detail:', artist.followers_Detail);
+        
+        if (!artist.followers_Detail) {
+          console.log('No followers_Detail');
+          return false;
+        }
+        
+        const isFollowing = artist.followers_Detail.some(follower => {
+          console.log('Checking follower:', follower);
+          return typeof follower === 'object' && follower.id === user.id;
+        });
+        
+        console.log('Is following:', isFollowing);
+        return isFollowing;
+      }) || [];
+
+      console.log('Filtered artists:', followedArtistsList); // Debug log
 
       // Fetch followed merchants
       const { data: merchantFollowers, error: merchantError } = await supabase
@@ -57,7 +74,7 @@ const FollowedStores = () => {
 
       if (merchantError) throw merchantError;
 
-      setFollowedArtists(artistFollowers?.map(f => f.artist) || []);
+      setFollowedArtists(followedArtistsList);
       setFollowedMerchants(merchantFollowers?.map(f => f.shop) || []);
     } catch (error) {
       console.error('Error:', error);
@@ -72,15 +89,26 @@ const FollowedStores = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { error } = await supabase
-        .from('artist_followers')
-        .delete()
-        .match({ 
-          name: user.id,
-          artist_name: artistId 
-        });
+      // First get the current followers_Detail
+      const { data: artist, error: fetchError } = await supabase
+        .from('artist')
+        .select('followers_Detail')
+        .eq('id', artistId)
+        .single();
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
+
+      // Filter out the current user from followers_Detail
+      const updatedFollowers = (artist.followers_Detail || [])
+        .filter(follower => follower.id !== user.id);
+
+      // Update the artist record
+      const { error: updateError } = await supabase
+        .from('artist')
+        .update({ followers_Detail: updatedFollowers })
+        .eq('id', artistId);
+
+      if (updateError) throw updateError;
       
       // Update local state
       setFollowedArtists(prev => prev.filter(artist => artist.id !== artistId));

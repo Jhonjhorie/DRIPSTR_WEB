@@ -17,7 +17,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const tabs = ["All", "To Pay", "To Ship", "To Receive", "Completed", "Refund"];
+  const tabs = ["All", "To Ship", "To Receive", "Completed", "Refund"];
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,8 +25,7 @@ const Orders = () => {
 
   const getOrderCounts = () => {
     const counts = {
-      "To Pay": orders.filter(order => !order.isPaid).length,
-      "To Ship": orders.filter(order => order.isPaid && order.order_status === "Processing").length,
+      "To Ship": orders.filter(order => order.order_status === "Processing").length,
       "To Receive": orders.filter(order => order.order_status === "Shipped").length,
       "Completed": orders.filter(order => order.order_status === "Delivered").length,
       "Refund": orders.filter(order => 
@@ -57,10 +56,8 @@ const Orders = () => {
   
     // Filter by tab
     switch (selectedTab) {
-      case "To Pay":
-        return filtered.filter(order => !order.isPaid);
       case "To Ship":
-        return filtered.filter(order => order.isPaid && order.order_status === "Processing");
+        return filtered.filter(order => order.order_status === "Processing");
       case "To Receive":
         return filtered.filter(order => order.order_status === "Shipped");
       case "Completed":
@@ -102,6 +99,14 @@ const Orders = () => {
     }
   }, [profile]); // Add profile as a dependency
 
+  const getStatusDisplay = (status) => {
+    switch (status) {
+      case 'Pending Admin':
+        return 'Pending';
+      default:
+        return status;
+    }
+  };
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -164,15 +169,18 @@ const Orders = () => {
                   </h2>
                   <div className="flex flex-col items-end">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      !order.isPaid ? "bg-red-100 text-red-800" :
                       order.order_status === "Processing" ? "bg-yellow-100 text-yellow-800" :
                       order.order_status === "Shipped" ? "bg-blue-100 text-blue-800" :
                       order.order_status === "Refund Requested" ? "bg-orange-100 text-orange-800" :
                       order.order_status === "Refund Approved" ? "bg-green-100 text-green-800" :
                       order.order_status === "Refund Rejected" ? "bg-red-100 text-red-800" :
+                      order.order_status === "Cancelled" ? "bg-gray-100 text-gray-800" :
+                      order.order_status === "Pending Admin" ? "bg-yellow-100 text-yellow-800" :
                       "bg-green-100 text-green-800"
                     }`}>
-                      {!order.isPaid ? "To Pay" : order.order_status}
+                      {order.payment_method === "COD" ? 
+                        `${getStatusDisplay(order.order_status)} (COD)` : 
+                        `${getStatusDisplay(order.order_status)} (${order.payment_method})`}
                     </span>
                     <span className="text-sm text-gray-500 mt-1">
                       {new Date(order.date_of_order).toLocaleDateString()}
@@ -198,31 +206,29 @@ const Orders = () => {
                     </p>
                     <div className="flex justify-between items-center mt-2">
                       <div>
-                        <p className="text-gray-500 text-sm">Payment: {order.payment_method}</p>
-                        <p className="text-purple-600 font-bold">Total: ₱{order.final_price}</p>
+                        <p className="text-gray-500 text-sm">
+                          Payment: {order.payment_method}
+                          {order.payment_method !== 'COD' && order.isPaid && 
+                            <span className="ml-2 text-green-600">(Paid)</span>
+                          }
+                        </p>
+                        <p className="text-purple-600 font-bold">
+                          Total: ₱{order.final_price}
+                        </p>
                       </div>
                       <div className="flex gap-2">
-                        {!order.isPaid && (
-                          <>
-                            <button 
-                              className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"
-                              onClick={() => handlePayment(order)}
-                            >
-                              Pay Now
-                            </button>
-                            <button 
-                              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                              onClick={() => {
-                                setSelectedOrder(order);
-                                setShowCancelModal(true);
-                              }}
-                            >
-                              Cancel Order
-                            </button>
-                          </>
+                        {order.order_status === "Processing" && (
+                          <button 
+                            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                            onClick={() => {
+                              setSelectedOrder(order);
+                              setShowCancelModal(true);
+                            }}
+                          >
+                            Cancel Order
+                          </button>
                         )}
-                        {order.isPaid && 
-                          order.order_status === "Delivered" && 
+                        {order.order_status === "Delivered" && 
                           !order.order_status.includes("Refund") && ( // Add this check
                           <button 
                             className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
@@ -232,18 +238,6 @@ const Orders = () => {
                             }}
                           >
                             Request Refund
-                          </button>
-                        )}
-                        {order.isPaid && 
-                          order.order_status === "Processing" && (
-                          <button 
-                            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
-                            onClick={() => {
-                              setSelectedOrder(order);
-                              setShowCancelModal(true);
-                            }}
-                          >
-                            Cancel Order
                           </button>
                         )}
                       </div>
@@ -291,18 +285,52 @@ const RefundModal = ({ isOpen, onClose, order }) => {
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
 
+  const validateFile = (file) => {
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Only JPG, PNG and WEBP images are allowed');
+    }
+    
+    if (file.size > maxSize) {
+      throw new Error('File size must be less than 5MB');
+    }
+  };
+
   const handleImageUpload = async (e) => {
     try {
       setUploading(true);
+      setError('');
+      
       const files = Array.from(e.target.files);
+      
+      // Validate number of files
+      if (files.length > 5) {
+        throw new Error('Maximum 5 images allowed');
+      }
+      
+      // Validate all files first
+      files.forEach(validateFile);
+
       const uploadPromises = files.map(async (file) => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `refund-images/${order.id}/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        // Compress image before upload if needed
+        let fileToUpload = file;
+        if (file.size > 1024 * 1024) { // If larger than 1MB
+          // Add image compression logic here if needed
+        }
+
+        const { error: uploadError, data } = await supabase.storage
           .from('refunds')
-          .upload(filePath, file);
+          .upload(filePath, fileToUpload, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type
+          });
 
         if (uploadError) throw uploadError;
 
@@ -314,12 +342,36 @@ const RefundModal = ({ isOpen, onClose, order }) => {
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
-      setImages(prev => [...prev, ...uploadedUrls]);
+      
+      // Limit total number of images
+      const newImages = [...images, ...uploadedUrls].slice(0, 5);
+      setImages(newImages);
+      
     } catch (error) {
-      setError('Error uploading images. Please try again.');
-      console.error('Error:', error);
+      console.error('Upload error:', error);
+      setError(error.message || 'Error uploading images. Please try again.');
     } finally {
       setUploading(false);
+      // Reset file input
+      e.target.value = '';
+    }
+  };
+
+  const handleRemoveImage = async (urlToRemove, index) => {
+    try {
+      // Extract path from URL
+      const path = urlToRemove.split('/').slice(-2).join('/');
+      
+      const { error } = await supabase.storage
+        .from('refunds')
+        .remove([`refund-images/${path}`]);
+
+      if (error) throw error;
+
+      setImages(prev => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Error removing image:', error);
+      setError('Failed to remove image. Please try again.');
     }
   };
 
@@ -376,35 +428,48 @@ const RefundModal = ({ isOpen, onClose, order }) => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Upload Images (Optional)
+            Upload Images (Optional - Max 5 images, 5MB each)
           </label>
           <input
             type="file"
             multiple
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             onChange={handleImageUpload}
-            disabled={isSubmitting || uploading}
+            disabled={isSubmitting || uploading || images.length >= 5}
             className="block w-full text-sm text-gray-500
               file:mr-4 file:py-2 file:px-4
               file:rounded-full file:border-0
               file:text-sm file:font-semibold
               file:bg-purple-50 file:text-purple-700
-              hover:file:bg-purple-100"
+              hover:file:bg-purple-100
+              disabled:opacity-50"
           />
           {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
           
           {images.length > 0 && (
             <div className="mt-2 grid grid-cols-3 gap-2">
               {images.map((url, index) => (
-                <img 
-                  key={index} 
-                  src={url} 
-                  alt={`Refund evidence ${index + 1}`}
-                  className="w-full h-24 object-cover rounded-lg"
-                />
+                <div key={index} className="relative group">
+                  <img 
+                    src={url} 
+                    alt={`Refund evidence ${index + 1}`}
+                    className="w-full h-24 object-cover rounded-lg"
+                  />
+                  <button
+                    onClick={() => handleRemoveImage(url, index)}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1
+                      opacity-0 group-hover:opacity-100 transition-opacity"
+                    disabled={isSubmitting}
+                  >
+                    ×
+                  </button>
+                </div>
               ))}
             </div>
           )}
+          <p className="text-xs text-gray-500 mt-1">
+            {images.length}/5 images uploaded
+          </p>
         </div>
 
         <div className="flex justify-end gap-2">
