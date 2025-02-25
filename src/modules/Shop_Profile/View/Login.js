@@ -33,9 +33,8 @@ function Login() {
   const [selectedImageID, setSelectedImageID] = useState(null); // show to the modal div
   const [fileName, setFileName] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
-  const [user, setUser] = useState(null);
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
-  const [TermsandCondition, setTermsandCondition] = React.useState(true); // Alert Terms and Conditions
+  const [TermsandCondition, setTermsandCondition] = React.useState(false); // Alert Terms and Conditions
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
   const [imageFileID, setImageFileID] = useState(null); // State to hold the image fileid
   const [pdfFile, setPdfFile] = useState(null);
@@ -330,7 +329,29 @@ function Login() {
           }
 
           console.log("Shop created successfully:", shopData);
+          // Insert into merchant_Wallet table
+          const { data: walletData, error: walletError } = await supabase
+            .from("merchant_Wallet")
+            .insert([
+              {
+                number: phoneNumber,
+                owner_Name: fullName,
+                revenue: "0",
+                valid_ID: uploadedImageUrlId || null,
+                owner_ID: userId, 
+              },
+            ]);
 
+          if (walletError) {
+            console.error(
+              "Error inserting into merchant_Wallet:",
+              walletError.message
+            );
+            setIsSubmitting(false);
+            return;
+          }
+
+          console.log("Merchant Wallet created successfully:", walletData);
           const { error: updateError } = await supabase
             .from("profiles")
             .update({ isMerchant: false })
@@ -368,44 +389,44 @@ function Login() {
     reader.readAsDataURL(imageFile);
   };
 
-  const handleSetisMerchant = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    const handleSetisMerchant = async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (!user || userError) {
-      console.error("No user found");
-      return;
-    }
-
-    const userId = user.id;
-
-    try {
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ isMerchant: true })
-        .eq("id", userId);
-
-      if (updateError) {
-        console.error("Error updating user profile:", updateError.message);
-        setIsSubmitting(false);
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (!user || userError) {
+        console.error("No user found");
         return;
       }
 
-      console.log(
-        "User profile updated with merchant_id and ismerchant = true"
-      );
-      navigate("/shop/MerchantDashboard");
-      window.location.reload();
-    } catch (err) {
-      console.error("Unexpected error:", err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      const userId = user.id;
+
+      try {
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ isMerchant: true })
+          .eq("id", userId);
+
+        if (updateError) {
+          console.error("Error updating user profile:", updateError.message);
+          setIsSubmitting(false);
+          return;
+        }
+
+        console.log(
+          "User profile updated with merchant_id and ismerchant = true"
+        );
+        navigate("/shop/MerchantDashboard");
+        window.location.reload();
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
   const handleRedo = async (shopId) => {
     if (!shopId) {
       console.error("No shop ID provided");
@@ -540,6 +561,8 @@ function Login() {
       if (data?.accept_Terms) {
         setAcceptedTerms(true);
         setTermsandCondition(false);
+      } else {
+        setTermsandCondition(true); // Show modal if terms are NOT accepted
       }
     };
 
@@ -594,7 +617,7 @@ function Login() {
               </h2>
             </div>
           </div>
-        ) : hasCreatedAccount ? ( // Only show merchant status if the account is created
+        ) : hasCreatedAccount ? (
           isStat === "approved" ? (
             <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
               <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
@@ -646,7 +669,8 @@ function Login() {
                 </div>
 
                 <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
-                  Wait for the Admin Approval
+                  Please wait for admin approval. The verification process may
+                  take 1-7 days.
                 </h2>
                 <button
                   onClick={handleClickFetch}
@@ -1358,7 +1382,7 @@ function Login() {
             </div>
 
             <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
-              Merchant Account Created Successfully
+              Merchant Account Created.
             </h2>
             <div className="p-5">
               <img

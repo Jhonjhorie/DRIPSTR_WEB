@@ -590,7 +590,7 @@ function Products() {
   };
 
   return (
-    <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
+    <div className="h-full w-full  bg-slate-300 px-2 md:px-10 lg:px-20 ">
       <div className="absolute mx-3 right-0 z-10">
         <SideBar />
       </div>
