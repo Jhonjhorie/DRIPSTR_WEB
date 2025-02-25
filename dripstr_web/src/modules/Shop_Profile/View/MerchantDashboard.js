@@ -480,7 +480,7 @@ function MerchantDashboard() {
               id: product.id,
               label: product.item_Name,
               value: productCount[product.id] || 0,
-              image: firstVariant ? firstVariant.imagePath : null, // ✅ Get the first image
+              image: firstVariant ? firstVariant.imagePath : null, 
             };
           })
           .sort((a, b) => b.value - a.value);
