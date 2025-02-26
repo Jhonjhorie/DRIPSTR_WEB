@@ -91,18 +91,18 @@ function Orders({ shopOwnerId }) {
     fetchUserProfileAndShop();
   }, []);
 
-
-
   //setting order status
   const [orders, setOrders] = useState({
     newOrders: [],
     preparing: [],
     shipped: [],
+    cancelled: [],
     completed: [],
   });
   const fetchOrdersForMerchant = async () => {
     try {
-      const { data: userData, error: authError } = await supabase.auth.getUser();
+      const { data: userData, error: authError } =
+        await supabase.auth.getUser();
       if (authError) {
         console.error("Auth Error:", authError.message);
         return;
@@ -170,6 +170,7 @@ function Orders({ shopOwnerId }) {
         newOrders: [],
         preparing: [],
         shipped: [],
+        cancelled: [],
         completed: [],
       };
 
@@ -195,7 +196,8 @@ function Orders({ shopOwnerId }) {
           buyerPhone: order.profiles?.mobile,
           productName: product ? product.item_Name : "Unknown Product",
           buyerName: order.profiles?.full_name || "Unknown Buyer",
-          buyerProfilePic: order.profiles?.profile_picture || "default_avatar.jpg",
+          buyerProfilePic:
+            order.profiles?.profile_picture || "default_avatar.jpg",
           buyerAddress: order.profiles?.address || "Address not set",
         };
 
@@ -205,7 +207,9 @@ function Orders({ shopOwnerId }) {
           categorizedOrders.preparing.push(enrichedOrder);
         } else if (order.order_status === "Shipped") {
           categorizedOrders.shipped.push(enrichedOrder);
-        } else if (order.order_status === "Completed") {
+        } else if (order.order_status === "Cancelled") {
+          categorizedOrders.cancelled.push(enrichedOrder);
+        } else if (order.order_status === "Delivered") {
           categorizedOrders.completed.push(enrichedOrder);
         }
       });
@@ -256,8 +260,8 @@ function Orders({ shopOwnerId }) {
                   <span className="text-sm md:text-lg">Preparing</span>
                 </li>
                 <li
-                  className={activeTab === "to-deliver" ? "active-tab" : ""}
-                  onClick={() => setActiveTab("to-deliver")}
+                  className={activeTab === "shipped" ? "active-tab" : ""}
+                  onClick={() => setActiveTab("shipped")}
                 >
                   <span className="text-sm md:text-lg">To Deliver</span>
                 </li>
@@ -285,7 +289,7 @@ function Orders({ shopOwnerId }) {
                     <OrderCard
                       key={order.id}
                       order={order}
-                      refreshOrders={fetchOrdersForMerchant} 
+                      refreshOrders={fetchOrdersForMerchant}
                     />
                   ))}
                 </div>
@@ -309,18 +313,31 @@ function Orders({ shopOwnerId }) {
               {activeTab === "shipped" && (
                 <div>
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    Shipped Orders
+                    On transit Orders
                   </h2>
                   {orders.shipped.map((order) => (
                     <OrderCard
                       key={order.id}
                       order={order}
-                      refreshOrders={fetchOrdersForMerchant}
+                      refreshOrders={refreshOrders}
                     />
                   ))}
                 </div>
               )}
-
+              {activeTab === "cancelled" && (
+                <div>
+                  <h2 className="text-xl text-custom-purple font-bold mb-4">
+                    Cancelled Orders
+                  </h2>
+                  {orders.cancelled.map((order) => (
+                    <OrderCard
+                      key={order.id}
+                      order={order}
+                      refreshOrders={refreshOrders}
+                    />
+                  ))}
+                </div>
+              )}
               {activeTab === "completed" && (
                 <div>
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
@@ -330,7 +347,7 @@ function Orders({ shopOwnerId }) {
                     <OrderCard
                       key={order.id}
                       order={order}
-                      refreshOrders={fetchOrdersForMerchant}
+                      refreshOrders={refreshOrders}
                     />
                   ))}
                 </div>
