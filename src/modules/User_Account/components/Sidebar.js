@@ -23,9 +23,9 @@ const navItems = [
   { label: "My Address Book", path: "/account/address", icon: faLocation },
  // { label: "My Payment Options", path: "/account/payment", icon: faCreditCard },
   { label: "My Order", path: "/account/orders", icon: faReceipt },
-  { label: "Followed Creators", path: "/account/wishlist", icon: faHeart },
+  //{ label: "Followed Creators", path: "/account/wishlist", icon: faHeart },
   { label: "Set up Shop", path: "/account/shop-setup", icon: faStore },
-  { label: "Avatar", path: "/account/avatar", icon: faUserCircle },
+  //{ label: "Avatar", path: "/account/avatar", icon: faUserCircle },
 ];
 
 const AccountLayout = () => {
