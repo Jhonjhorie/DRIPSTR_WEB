@@ -10,54 +10,64 @@ const VoucherStream = ({ profile }) => {
     const [showAlert, setShowAlert] = useState(false);
   
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-
-        const { data: voucherData, error: voucherError } = await supabase
-          .from("vouchers")
-          .select("*")
-          .order("id", { ascending: false });
-
-        if (voucherError) throw voucherError;
-        const { data: claimedData, error: claimedError } = await supabase
-          .from("customer_vouchers")
-          .select("voucher_id, isClaim, isUsed")
-          .eq("acc_id", profile?.id);
-
-        if (claimedError) throw claimedError;
-
-        // Filter out vouchers that are claimed and used
-        const validVouchers = voucherData.filter((voucher) => {
-          const claimedVoucher = claimedData.find(
-            (cv) => cv.voucher_id === voucher.id
-          );
-          return !claimedVoucher || !(claimedVoucher.isClaim && claimedVoucher.isUsed);
-        });
-
-        // Sort vouchers: claimed but not used at the end
-        const sortedVouchers = validVouchers.sort((a, b) => {
-          const aClaimed = claimedData.find((cv) => cv.voucher_id === a.id);
-          const bClaimed = claimedData.find((cv) => cv.voucher_id === b.id);
-
-          if (aClaimed?.isClaim && !aClaimed?.isUsed) return 1; // Move claimed but not used to the end
-          if (bClaimed?.isClaim && !bClaimed?.isUsed) return -1;
-          return 0;
-        });
-
-        setVouchers(sortedVouchers);
-        setClaimedVouchers(claimedData);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); 
+    
+          const { data: voucherData, error: voucherError } = await supabase
+            .from("vouchers")
+            .select("*")
+            .order("id", { ascending: false });
+    
+          if (voucherError) throw voucherError;
+    
+          const { data: claimedData, error: claimedError } = await supabase
+            .from("customer_vouchers")
+            .select("voucher_id, isClaim, isUsed")
+            .eq("acc_id", profile?.id)
+            .eq("isUsed", false)
+            .eq("isClaim", true);
+    
+          if (claimedError) throw claimedError;
+    
+          const validVouchers = voucherData.filter((voucher) => {
+            const expirationDate = new Date(voucher.expiration);
+            expirationDate.setHours(23, 59, 59, 999); 
+    
+            const claimedVoucher = claimedData.find(
+              (cv) => cv.voucher_id === voucher.id
+            );
+    
+            return (
+              expirationDate >= today && 
+              (!claimedVoucher || !(claimedVoucher.isClaim && claimedVoucher.isUsed))
+            );
+          });
+    
+          const sortedVouchers = validVouchers.sort((a, b) => {
+            const aClaimed = claimedData.find((cv) => cv.voucher_id === a.id);
+            const bClaimed = claimedData.find((cv) => cv.voucher_id === b.id);
+    
+            if (aClaimed?.isClaim && !aClaimed?.isUsed) return 1;
+            if (bClaimed?.isClaim && !bClaimed?.isUsed) return -1;
+            return 0;
+          });
+    
+          setVouchers(sortedVouchers);
+          setClaimedVouchers(claimedData);
+        } catch (error) {
+          setError(error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      if (profile?.id) {
+        fetchData();
       }
-    };
-
-    if (profile?.id) {
-      fetchData();
-    }
-  }, [profile]);
+    }, [profile]);    
 
 
   const handleClaimVoucher = async (voucherId) => {
@@ -126,11 +136,11 @@ const VoucherStream = ({ profile }) => {
         setVouchers(sortedVouchers);
         setClaimedVouchers(claimedData);
       };
-
+      fetchData();
       setShowAlert(true);
+      
       setTimeout(() => {
         setShowAlert(false);
-        fetchData();
       }, 3000);
       
     } catch (error) {

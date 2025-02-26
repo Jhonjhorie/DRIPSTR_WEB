@@ -8,7 +8,7 @@ import { supabase } from "@/constants/supabase";
 import SuccessAlert from "./components/alertDialog.js";
 import GcashDialog from "./components/GcashDialog.js";
 import TermsCon from "@/shared/products/termsCon";
-
+import ApplyVoucher from "./components/ApplyVoucher.js";
 
 function PlaceOrder() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -16,13 +16,17 @@ function PlaceOrder() {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedItems = location.state?.selectedItems;
-  const solo = location.state?.solo;
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [shippingMethod, setShippingMethod] = useState("Standard");
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedPostcode, setSelectedPostcode] = useState("");
   const [shippingFee, setShippingFee] = useState(50);
+  const [selectedVouchers, setSelectedVouchers] = useState([]);
+
+  const handleSelectedVouchers = (vouchers) => {
+    setSelectedVouchers(vouchers);
+  };
 
   const openModalTerms2 = () => {
     const modal = document.getElementById("my_modal_terms2");
@@ -96,7 +100,7 @@ function PlaceOrder() {
       if (!grouped[shopName]) {
         grouped[shopName] = {
           items: [],
-          shippingFee: shippingFee, // Apply shipping fee only once per shop
+          shippingFee: shippingFee,
         };
       }
       grouped[shopName].items.push(item);
@@ -108,9 +112,9 @@ function PlaceOrder() {
     const groupedItems = groupItemsByShop(items);
 
     let totalPrice = 0;
+    let totalDiscountPrice = 0;
     let totalShippingFee = 0;
 
-    // Calculate total price and shipping fee
     for (const shopName in groupedItems) {
       const { items: shopItems, shippingFee: shopShippingFee } =
         groupedItems[shopName];
@@ -124,15 +128,26 @@ function PlaceOrder() {
         0
       );
       totalPrice += shopTotal;
-      totalShippingFee += shopShippingFee; // Add shipping fee only once per shop
+      totalShippingFee += shopShippingFee; 
     }
 
-    const grandTotal = totalPrice + totalShippingFee;
+    const shippingVoucher = selectedVouchers.find(v => v.voucher_type == "Shipping");
+    const totalDiscount = selectedVouchers
+      .filter(v => v.voucher_type !== "Shipping") 
+      .reduce((sum, v) => sum + v.discount, 0);
+  
+    if (shippingVoucher) {
+      totalShippingFee = Math.max(0, totalShippingFee - shippingVoucher.discount);
+    }
+  
+    totalDiscountPrice = Math.max(0, totalPrice - totalDiscount);
+  
+    const grandTotal = totalDiscountPrice + totalShippingFee;
 
-    return { totalPrice, grandTotal, totalShippingFee };
+    return { totalPrice, grandTotal, totalShippingFee, totalDiscountPrice };
   };
 
-  const { totalPrice, grandTotal, totalShippingFee } =
+  const { totalPrice, grandTotal, totalShippingFee, totalDiscountPrice } =
     calculateTotals(selectedItems);
 
   const sendOrder = async (image) => {
@@ -163,7 +178,8 @@ function PlaceOrder() {
             payment_stamp: new Date().toISOString(),
             order_variation: item.variant,
             order_size: item.size,
-            shipping_addr: selectedAddress.full_address || "No address provided",
+            shipping_addr:
+              selectedAddress.full_address || "No address provided",
             shipping_postcode: selectedPostcode || "No postcode provided",
             shipping_method: shippingMethod,
             shipping_fee: shopShippingFee,
@@ -214,6 +230,20 @@ function PlaceOrder() {
     } else if (paymentMethod == "Gcash") {
       document.getElementById("my_modal_gcash").showModal();
     }
+  };
+
+  const openModalVoucher = () => {
+    const modal = document.getElementById("my_modal_Voucher");
+    if (modal) {
+    modal.showModal();
+    }
+  };
+  const closeModalVoucher = () => {
+    const modal = document.getElementById("my_modal_Voucher");
+    if (modal) {
+      modal.close();
+    }
+    
   };
 
   return (
@@ -362,8 +392,8 @@ function PlaceOrder() {
         </div>
       </div>
 
-      <div className="flex flex-row w-full justify-between items-start font-[iceland]">
-        <div className="flex flex-col gap-4 bg-slate-50 p-4 border-t-primary-color border-t-2 rounded-md h-40 w-[25%]">
+      <div className="flex flex-row w-full justify-between gap-2 items-start font-[iceland]">
+        <div className="flex flex-col gap-4 bg-slate-50 p-4 border-t-primary-color border-t-2 rounded-md h-40 w-[20%]">
           <h1 className="font-bold text-xl">Payment Method:</h1>
           <div className="flex flex-col gap-4">
             <label className="flex items-center gap-2">
@@ -392,7 +422,7 @@ function PlaceOrder() {
         </div>
 
         {/* Shipping Details */}
-        <div className="flex flex-col gap-4 bg-slate-50 p-4 border-t-primary-color border-t-2 rounded-md h-40 w-[30%]">
+        <div className="flex flex-col gap-4 bg-slate-50 p-4 border-t-primary-color border-t-2 rounded-md h-40 w-[20%]">
           <h1 className="font-bold text-xl">Shipping Details:</h1>
           <div className="flex flex-row gap-5">
             <label className="form-control w-full max-w-xs">
@@ -408,7 +438,7 @@ function PlaceOrder() {
                 <option value="Express">Express</option>
               </select>
             </label>
-            <label className="form-control w-full max-w-xs">
+            <label className="form-control w-[6rem]">
               <div className="label">
                 <span className="label-text">Shipping Fee</span>
               </div>
@@ -422,6 +452,61 @@ function PlaceOrder() {
             </label>
           </div>
         </div>
+
+        {/* Voucher Details */}
+        <div className="flex flex-col gap-1 bg-slate-50 p-4 border-t-primary-color border-t-2 rounded-md h-40 w-[20%]">
+          <div className="flex justify-between ">
+            <h1 className="font-bold text-xl">Vouchers:</h1>
+            <button className="btn min-h-7 h-7 bg-primary-color text-slate-50 hover:text-primary-color"
+            onClick={openModalVoucher}
+            >
+              USE
+            </button>
+          </div>
+       
+          <div className="overflow-y-auto custom-scrollbar items-center justify-center flex flex-col gap-2">
+
+          {selectedVouchers.length > 0 ? selectedVouchers.map((voucher) => {
+     
+            const isClaimed = voucher.isClaimed;
+            const isProd = voucher.voucher_type === "Product";
+
+            return (
+              <div
+                key={voucher.id}
+                className={`${
+                   isClaimed ? "bg-secondary-color" : "bg-slate-50"
+                } flex flex-col gap-1 items-center rounded-md drop-shadow-sm overflow-hidden p-1 px-2 ${
+                  isProd ? "border-primary-color" : "border-green-700"
+                } border-t-2 h-10 w-56`}
+              >
+                <div
+                  className={`absolute opacity-20 w-[60%] ${
+                    isProd ? "text-primary-color" : "text-green-700"
+                  } font-bold text-7xl left-14 -top-2 z-0 drop-shadow-customViolet`}
+                >
+                  <p>{voucher.voucher_type}</p>
+                </div>
+                <div
+                  className={`flex justify-between gap-1 w-full items-center ${
+                     isClaimed ? "text-slate-300" : "text-secondary-color"
+                  } p-0`}
+                >
+            
+                    <h2 className="text-xl font-bold">{voucher.voucher_name}</h2>
+              
+           
+                    <h3 className="text-2xl font-bold">₱{voucher.discount}</h3>
+                
+                 
+                </div>
+              </div>
+            );
+          }): <p className="font-bold">No Vouchers used</p>}
+        </div>
+          
+        </div>
+
         <div className="flex flex-row items-center w-[40%] h-40  justify-center gap-2">
           <div className="flex flex-col justify-end gap-4 items-end px-2">
             <div className="flex justify-end gap-4 items-end">
@@ -430,7 +515,7 @@ function PlaceOrder() {
                   Total Price
                 </h1>
                 <h1 className="text-xl font-bold text-end">
-                  ₱{totalPrice.toFixed(2)}
+                  ₱{totalDiscountPrice.toFixed(2)}
                 </h1>
               </div>{" "}
               <div>
@@ -445,7 +530,10 @@ function PlaceOrder() {
             <p className="label-text text-xs text-slate-700 text-end">
               By clicking <span className="font-bold">Place Order</span>, I
               state that I have read and understood the{" "}
-              <span onClick={openModalTerms2} className="underline cursor-pointer font-bold">
+              <span
+                onClick={openModalTerms2}
+                className="underline cursor-pointer font-bold"
+              >
                 Terms and Conditions
               </span>
             </p>
@@ -461,24 +549,38 @@ function PlaceOrder() {
               className="h-12 px-6 w-full font-semibold rounded-md bg-primary-color border-secondary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
               onClick={handlePlaceOrder}
             >
+              
               Place Order
             </button>
           </div>
         </div>
       </div>
       <dialog
-              id="my_modal_terms2"
-              className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
-            >
-              <TermsCon onClose={closeModalTerms2} />
-              
-              <form
-                method="dialog"
-                className="modal-backdrop min-h-full min-w-full absolute "
-              >
-                <button onClick={closeModalTerms2}></button>
-              </form>
-            </dialog>
+        id="my_modal_terms2"
+        className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
+      >
+        <TermsCon onClose={closeModalTerms2} />
+
+        <form
+          method="dialog"
+          className="modal-backdrop min-h-full min-w-full absolute "
+        >
+          <button onClick={closeModalTerms2}></button>
+        </form>
+      </dialog>
+      <dialog
+        id="my_modal_Voucher"
+        className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
+      >
+        <ApplyVoucher profile={profile} onClose={closeModalVoucher} price={totalPrice} onSelectVouchers={handleSelectedVouchers} />
+
+        <form
+          method="dialog"
+          className="modal-backdrop min-h-full min-w-full absolute "
+        >
+          <button onClick={closeModalVoucher}></button>
+        </form>
+      </dialog>
     </div>
   );
 }
