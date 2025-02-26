@@ -19,6 +19,7 @@ function Artists() {
   const [likes, setLikes] = useState({});
   const [userId, setUserId] = useState(null);
   const [topArtists, setTopArtists] = useState([]);
+  const [topArtistsMobile, setTopArtistsMobile] = useState([]);
   const [selectArt, setSelectArt] = useState(null);
   const [selectMessage, setMessage] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -28,13 +29,6 @@ function Artists() {
   const [reportReason, setReportReason] = useState("");
   const [otherReason, setOtherReason] = useState("");
 
-  const handleImageLoad = (event, artId) => {
-    const { naturalWidth, naturalHeight } = event.target;
-    setImageOrientations((prev) => ({
-      ...prev,
-      [artId]: naturalWidth > naturalHeight ? "landscape" : "portrait",
-    }));
-  };
   const handleSelectArt = async (art) => {
     if (!art) {
       console.error("Selected art is null!");
@@ -155,6 +149,11 @@ function Artists() {
       });
 
       setTopArtists([topArtistsList[1], topArtistsList[0], topArtistsList[2]]);
+      setTopArtistsMobile([
+        topArtistsList[0],
+        topArtistsList[1],
+        topArtistsList[2],
+      ]);
     } catch (err) {
       console.error("Unexpected error:", err.message);
     }
@@ -236,7 +235,6 @@ function Artists() {
       const userId = userData?.user?.id;
       if (!userId) throw new Error("User not logged in");
 
-      // Fetch the user's full_name and profile_picture from 'profiles' table
       const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("full_name, profile_picture")
@@ -246,7 +244,7 @@ function Artists() {
       if (profileError)
         throw new Error("User profile fetch failed: " + profileError.message);
 
-      // Optimistically update UI with fetched profile data
+      //update UI with fetched profile data
       const newCommentObj = {
         userId,
         text: newComment,
@@ -416,7 +414,7 @@ function Artists() {
       <h1 className="text-center pt-5 text-5xl text-slate-50  bg-violet-500 font-extrabold  iceland-regular">
         DRIPSTR TOP ARTIST
       </h1>
-      <div className="w-full place-content-center py-16 gap-10 bg-slate-200 relative h-auto flex">
+      <div className="w-full place-content-center py-5 md:py-16 gap-10 bg-slate-200 relative h-auto flex">
         <div className="absolute w-full h-full bg-gradient-to-b  from-violet-500 to-fuchsia-500 inset-0 overflow-hidden">
           {Array.from({ length: 50 }).map((_, index) => {
             const randomX = Math.random() * 100;
@@ -450,13 +448,13 @@ function Artists() {
         <img
           src={drplogo}
           alt="Artist"
-          className="h-80  blur-sm w-80  rounded-md absolute bottom-2 right-2"
+          className="h-80  blur-sm w-80  rounded-md absolute top-14 md:bottom-2 right-2"
         />
         <div className="">
           <img
             src={drplogo}
             alt="Artist"
-            className="h-80  blur-sm w-80 -scale-x-100 rounded-md absolute bottom-2 left-2"
+            className="h-80  blur-sm w-80 -scale-x-100 rounded-md top-14 absolute md:bottom-2 left-2"
           />
         </div>
 
@@ -464,7 +462,7 @@ function Artists() {
           <div
             onClick={() => {
               console.log("Selected Artist Data:", artist);
-              // Use artist.id if available, otherwise try artist.artist_Id
+              // all artist id
               const artistId = artist.id;
               if (artistId) {
                 navigate(`/arts/ArtistPage/${artistId}`);
@@ -479,7 +477,7 @@ function Artists() {
               backgroundColor: "rgba(0, 0, 0, 0.3)",
               backdropFilter: "blur(100px)",
             }}
-            className={`w-[150px] cursor-pointer group hover:scale-105 duration-150 h-[300px] rounded-sm relative ${
+            className={`w-[150px] md:block hidden cursor-pointer group hover:scale-105 duration-150 h-[300px] rounded-sm relative ${
               colorClasses[artist.color] || "bg-gray-400"
             } ${artist.mt}`}
           >
@@ -524,6 +522,56 @@ function Artists() {
           </div>
         ))}
       </div>
+      {topArtistsMobile.map((artist, index) => (
+        <div
+          key={index}
+          className="w-full h-auto bg-gradient-to-b  from-fuchsia-500 to-fuchsia-500 md:hidden block p-2"
+        >
+          <div className="w-full relative h-32 flex border-2 border-slate-900 shadow-white shadow-md rounded-md ">
+            <div className="absolute z-20 px-3.5 bg-yellow-600  top-10 left-[21%]  text-2xl text-slate-100 font-semibold iceland-regular  shadow-md border-slate-900 border-2 = rounded-full p-1">
+              {artist.tag}
+            </div>
+            <div
+              onClick={() => {
+                console.log("Selected Artist Data:", artist);
+                // all artist id
+                const artistId = artist.id;
+                if (artistId) {
+                  navigate(`/arts/ArtistPage/${artistId}`);
+                } else {
+                  console.error(
+                    "Artist ID is undefined! Check if the correct ID property exists in your data."
+                  );
+                }
+              }}
+              className="w-3/12 cursor-pointer  bg-slate-900 h-full border-r-2 border-slate-900"
+            >
+              <img
+                alt="top2"
+                src={artist.image}
+                className="rounded-sm object-cover w-full h-full"
+              />
+            </div>
+            <div className="w-3/4 bg-gradient-to-r flex from-violet-500 to-fuchsia-900 h-full ">
+              <div className="text-slate-900 w-1/2 p-10 text-2xl  font-bold">
+                {artist.name}
+              </div>
+              <div className=" w-1/2 h-full">
+                <div className="w-full">
+                  <div className="text-2xl text-center mt-2">❤️</div>
+
+                  <div className="text-xs mt-2  text-slate-900 bg-gray-400 flex justify-center place-self-center bg-opacity-50 shadow-md rounded-full px-4 p-1 font-semibold">
+                    {artist.likes} Likes
+                  </div>
+                  <div className="text-sm mt-2  text-center text-slate-100   rounded-full px-5 p-1 font-bold">
+                    {artist.type}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
       <div className="bg-gradient-to-b  from-fuchsia-500 to-slate-300 h-40">
         <div className="text-slate-800 text-5xl font-bold iceland-regular text-center w-full p-5 ">
           DRIPSTR GALLERY
@@ -615,7 +663,7 @@ function Artists() {
                 </div>
               ))}
           </div>
- {/* Art Not premium*/}
+          {/* Art Not premium*/}
           <div className="columns-2 sm:columns-3 md:columns-4 mb-20 gap-2 space-y-2">
             {artistData.map((art) => (
               <div
@@ -625,7 +673,6 @@ function Artists() {
                     ? "bg-gradient-to-r from-yellow-500 p-1.5 to-fuchsia-500 "
                     : "bg-custom-purple"
                 }`}
-       
               >
                 {/* Art Image */}
                 <div

@@ -784,7 +784,7 @@ function ArtistPage() {
 
   return (
     <div className="h-full w-full relative bg-slate-300  ">
-      <div className="absolute top-5 left-5">
+      <div className="absolute z-10 top-5 left-5">
         <button
           onClick={() => navigate("/arts/Artists")}
           className="hover:scale-90 duration-300"

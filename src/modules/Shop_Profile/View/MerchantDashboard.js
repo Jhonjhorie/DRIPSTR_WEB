@@ -17,6 +17,7 @@ function MerchantDashboard() {
   const [shopData, setShopData] = useState(null);
   const [productCounts, setProductCounts] = useState([]); // Initialize with an empty array
   const [totalProductCount, setTotalProductCount] = useState(0); // Initialize with 0
+  const [followersCouunt, setTotalFollowers] = useState(0); // Initialize with 0
   const [totalOrderCount, setTotalOrderCount] = useState(0); // Initialize with 0
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -216,6 +217,24 @@ function MerchantDashboard() {
           setPData([]);
         }
 
+        //shop followers
+        const { data: followers, error: followerError } = await supabase
+          .from("merchant_Followers")
+          .select("id")
+          .in(
+            "shop_id",
+            shops.map((shop) => shop.id)
+          );
+
+        if (followerError) {
+          console.error("Error fetching followers:", followerError.message);
+          setError(followerError.message);
+        } else {
+          const totalFollowers = followers.length;
+          console.log("Total Followers:", totalFollowers);
+          setTotalFollowers(totalFollowers);
+        }
+
         // Fetch wallet data
         const { data: wallet, error: walletError } = await supabase
           .from("merchant_Wallet")
@@ -353,7 +372,7 @@ function MerchantDashboard() {
             { month: "short" }
           )}`;
           if (monthlyIncome.hasOwnProperty(monthLabel)) {
-            monthlyIncome[monthLabel] += (order.total_price || 0) * 0.97; // Deduct 1%
+            monthlyIncome[monthLabel] += (order.total_price || 0) * 0.97; // Deduct 3%
           }
         });
 
@@ -480,7 +499,7 @@ function MerchantDashboard() {
               id: product.id,
               label: product.item_Name,
               value: productCount[product.id] || 0,
-              image: firstVariant ? firstVariant.imagePath : null, 
+              image: firstVariant ? firstVariant.imagePath : null,
             };
           })
           .sort((a, b) => b.value - a.value);
@@ -564,7 +583,7 @@ function MerchantDashboard() {
                 style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}
               >
                 {" "}
-                1,5k{" "}
+                {followersCouunt}{" "}
               </div>
               <div className="absolute bottom-0 right-0 blur-[2px] -z-10">
                 <box-icon
@@ -622,7 +641,7 @@ function MerchantDashboard() {
       </div>
 
       {/* 2nd Container */}
-      <div className="w-full lg:h-[325px]  p-2 lg:px-16 gap-3  md:flex  ">
+      <div className="w-full lg:h-[325px] mb-24 md:mb-0 p-2 lg:px-16 gap-3  md:flex  ">
         <div className="w-full md:w-[65%] lg:w-[78%] h-[400px] rounded-md lg:flex gap-3">
           {/* Bar chart */}
           <div className=" md:w-full mb-2 w-auto bg-slate-200 glass shadow-md p-1.5 rounded-md h-[70%] md:h-[75%]">
@@ -656,7 +675,7 @@ function MerchantDashboard() {
           </div>
         </div>
         {/* Notificatoin div */}
-        <div className="w-full md:w-[35%] -mt-24 shadow-md lg:w-[30%] h-[380px]  sm:mb-0 md:h-[610px] md:mt-0 lg:h-[300px] bg-slate-400 glass rounded-md p-1.5">
+        <div className="w-full md:w-[35%] -mt-24 shadow-md lg:w-[30%] h-[300px]  sm:mb-0 md:mt-0 lg:h-[300px] bg-slate-400 glass rounded-md p-1.5">
           <div className="flex justify-between align-middle">
             <div className="text-slate-800 text-xl">Top Selling</div>
             <div>
