@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
 import { v4 as uuidv4 } from "uuid";
+import { useAddressFields } from '../../../shared/login/hooks/useAddressFields';
 
 const Address = () => {
+  // Existing states
   const [addresses, setAddresses] = useState([]);
   const [defaultAddress, setDefaultAddress] = useState(null);
-  const [newAddress, setNewAddress] = useState("");
-  const [postcode, setPostcode] = useState("");
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -15,8 +15,34 @@ const Address = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
-  const [editAddress, setEditAddress] = useState("");
-  const [editPostcode, setEditPostcode] = useState("");
+
+  // New states for address fields
+  const [newAddressData, setNewAddressData] = useState({
+    region: '',
+    city: '',
+    barangay: '',
+    exact_location: '',
+    postcode: ''
+  });
+
+  const [editAddressData, setEditAddressData] = useState({
+    region: '',
+    city: '',
+    barangay: '',
+    exact_location: '',
+    postcode: ''
+  });
+
+  // Use the existing address fields hook
+  const {
+    addressData,
+    selected,
+    loading: addressLoading,
+    handleRegionChange,
+    handleCityChange,
+    handleExactLocationChange,
+    setSelected
+  } = useAddressFields(true, false);
 
   useEffect(() => {
     fetchUser();
@@ -45,40 +71,69 @@ const Address = () => {
     }
     setLoading(false);
   };
+
+  // Modified addAddress function
   const addAddress = async () => {
-    if (!userId || !newAddress.trim() || !postcode.trim()) return;
+    if (!userId || !newAddressData.exact_location || !newAddressData.postcode) return;
     setLoading(true);
-    const { error } = await supabase.from("addresses").insert([
-      { id: uuidv4(), address: newAddress, postcode, user_id: userId, is_default_shipping: false },
-    ]);
+
+    // Get the names from the selected options
+    const selectedRegion = addressData.regions.find(r => r.code === selected.region)?.name;
+    const selectedCity = addressData.cities.find(c => c.code === selected.city)?.name;
+    const selectedBarangay = addressData.barangays.find(b => b.code === selected.barangay)?.name;
+
+    const fullAddress = `${selectedBarangay}, ${selectedCity}, ${selectedRegion}`;
+    
+    const { error } = await supabase.from("addresses").insert([{
+      id: uuidv4(),
+      user_id: userId,
+      region: selectedRegion,
+      city: selectedCity,
+      barangay: selectedBarangay,
+      exact_location: newAddressData.exact_location,
+      postcode: newAddressData.postcode,
+      full_address: `${newAddressData.exact_location}, ${fullAddress}`,
+      is_default_shipping: false
+    }]);
+
     if (error) {
       console.error("Error adding address:", error);
     } else {
-      setNewAddress("");
-      setPostcode("");
+      setNewAddressData({
+        region: '',
+        city: '',
+        barangay: '',
+        exact_location: '',
+        postcode: ''
+      });
       fetchAddresses();
     }
 
     setLoading(false);
-    setShowAddModal(false)
+    setShowAddModal(false);
   };
-  const confirmDeleteAddress = (id) => {
-    setAddressToDelete(id);
-    setShowDeleteModal(true);
-  };
-  const openEditModal = (address) => {
-    setEditAddressId(address.id);
-    setEditAddress(address.address);
-    setEditPostcode(address.postcode);
-    setShowEditModal(true);
-  };
+
+  // Modified updateAddress function
   const updateAddress = async () => {
-    if (!editAddressId || !editAddress.trim() || !editPostcode.trim()) return;
+    if (!editAddressId) return;
     setLoading(true);
+
+    // Get the names from the selected options
+    const selectedRegion = addressData.regions.find(r => r.code === selected.region)?.name;
+    const selectedCity = addressData.cities.find(c => c.code === selected.city)?.name;
+    const selectedBarangay = addressData.barangays.find(b => b.code === selected.barangay)?.name;
+
+    const fullAddress = `${selectedBarangay}, ${selectedCity}, ${selectedRegion}`;
+
     const { error } = await supabase.from("addresses").update({
-      address: editAddress,
-      postcode: editPostcode
+      region: selectedRegion,
+      city: selectedCity,
+      barangay: selectedBarangay,
+      exact_location: editAddressData.exact_location,
+      postcode: editAddressData.postcode,
+      full_address: `${editAddressData.exact_location}, ${fullAddress}`
     }).eq("id", editAddressId);
+
     if (error) {
       console.error("Error updating address:", error);
     } else {
@@ -86,6 +141,22 @@ const Address = () => {
       setShowEditModal(false);
     }
     setLoading(false);
+  };
+
+  const confirmDeleteAddress = (id) => {
+    setAddressToDelete(id);
+    setShowDeleteModal(true);
+  };
+  const openEditModal = (address) => {
+    setEditAddressId(address.id);
+    setEditAddressData({
+      region: address.region,
+      city: address.city,
+      barangay: address.barangay,
+      exact_location: address.exact_location,
+      postcode: address.postcode
+    });
+    setShowEditModal(true);
   };
   const deleteAddress = async () => {
     if (!addressToDelete) return;
@@ -106,6 +177,118 @@ const Address = () => {
     fetchAddresses();
     setLoading(false);
   };
+
+  // Update the address modal JSX
+  const addressModal = (isEdit = false) => (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+      <div className="bg-white py-2 px-6 rounded-lg shadow-lg w-[500px]">
+        <h2 className="text-center font-bold text-lg ">
+          {isEdit ? 'Edit Address' : 'Add New Address'}
+        </h2>
+        <div className="space-y-2">
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700">Region</label>
+            <select
+              className="mt-1 select select-bordered bg-gray-100 w-full"
+              value={selected.region}
+              onChange={(e) => handleRegionChange(e.target.value)}
+              disabled={addressLoading.regions}
+            >
+              <option value="">Select Region</option>
+              {addressData.regions.map(region => (
+                <option key={region.code} value={region.code}>
+                  {region.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700">City/Municipality</label>
+            <select
+              className="mt-1 select select-bordered bg-gray-100 w-full"
+              value={selected.city}
+              onChange={(e) => handleCityChange(e.target.value)}
+              disabled={!selected.region || addressLoading.cities}
+            >
+              <option value="">Select City</option>
+              {addressData.cities.map(city => (
+                <option key={city.code} value={city.code}>
+                  {city.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700">Barangay</label>
+            <select
+              className="mt-1 select select-bordered bg-gray-100 w-full"
+              value={selected.barangay}
+              onChange={(e) => setSelected(prev => ({ ...prev, barangay: e.target.value }))}
+              disabled={!selected.city || addressLoading.barangays}
+            >
+              <option value="">Select Barangay</option>
+              {addressData.barangays.map(barangay => (
+                <option key={barangay.code} value={barangay.code}>
+                  {barangay.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700">Exact Location</label>
+            <input
+              type="text"
+              placeholder="Street, Building, Floor, etc."
+              className="mt-1 input input-bordered bg-gray-100 w-full"
+              value={isEdit ? editAddressData.exact_location : newAddressData.exact_location}
+              onChange={(e) => {
+                if (isEdit) {
+                  setEditAddressData(prev => ({ ...prev, exact_location: e.target.value }));
+                } else {
+                  setNewAddressData(prev => ({ ...prev, exact_location: e.target.value }));
+                }
+              }}
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-sm font-medium text-gray-700">Postcode</label>
+            <input
+              type="text"
+              placeholder="Enter Postcode"
+              className="mt-1 input input-bordered bg-gray-100 w-full"
+              value={isEdit ? editAddressData.postcode : newAddressData.postcode}
+              onChange={(e) => {
+                if (isEdit) {
+                  setEditAddressData(prev => ({ ...prev, postcode: e.target.value }));
+                } else {
+                  setNewAddressData(prev => ({ ...prev, postcode: e.target.value }));
+                }
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end mt-2 gap-2">
+          <button
+            className="btn btn-primary"
+            onClick={isEdit ? updateAddress : addAddress}
+          >
+            {isEdit ? 'Update' : 'Add'} Address
+          </button>
+          <button
+            className="btn"
+            onClick={() => isEdit ? setShowEditModal(false) : setShowAddModal(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
@@ -139,16 +322,20 @@ const Address = () => {
           ) : defaultAddress ? (
 
             
-            <table className="w-full  border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
-              <thead className=" shadow-md bg-custom-purple glass rounded-lg text-gray-200 border-1">
+            <table className="w-full border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
+              <thead className="shadow-md bg-custom-purple glass rounded-lg text-gray-200 border-1">
                 <tr>
-                  <th className="px-3 py-2">Address</th>
+                  <th className="px-3 py-2">Full Address</th>
+                  <th className="px-3 py-2">Region</th>
+                  <th className="px-3 py-2">City</th>
                   <th className="px-3 py-2">Postcode</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="px-3 py-2">{defaultAddress.address}</td>
+                  <td className="px-3 py-2">{defaultAddress.full_address}</td>
+                  <td className="px-3 py-2">{defaultAddress.region}</td>
+                  <td className="px-3 py-2">{defaultAddress.city}</td>
                   <td className="px-3 py-2">{defaultAddress.postcode}</td>
                 </tr>
               </tbody>
@@ -173,15 +360,19 @@ const Address = () => {
           <table className="w-full   border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
             <thead className="border border-solid bg-gray-600 rounded-lg text-gray-200 border-1 border-gray-300">
               <tr>
-                <th className="px-4 py-2">Address</th>
+                <th className="px-4 py-2">Full Address</th>
+                <th className="px-4 py-2">Region</th>
+                <th className="px-4 py-2">City</th>
                 <th className="px-4 py-2">Postcode</th>
-                <th className="px-4 py-2 text-center">Action</th>
+                <th className="px-4 py-2 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {addresses.map((address) => (
                 <tr key={address.id} className="border-b">
-                  <td className="px-4 py-2">{address.address}</td>
+                  <td className="px-4 py-2">{address.full_address}</td>
+                  <td className="px-4 py-2">{address.region}</td>
+                  <td className="px-4 py-2">{address.city}</td>
                   <td className="px-4 py-2">{address.postcode}</td>
                   <td className="px-4 py-2 text-center">
                     <button className=" mr-3 hover:text-green-500" onClick={() => setDefaultAddressHandler(address.id)}> Set Default </button> 
@@ -195,68 +386,10 @@ const Address = () => {
         )}          </div>
 
 
-          {showAddModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-center font-bold text-lg">Add Address</h2>
-                <div className="flex flex-col mt-4">
-                  <label>Address</label>
-                  <input
-                    type="text"
-                    placeholder="Enter Address"
-                    className="border rounded-lg text-black p-2 bg-white"
-                    value={newAddress}
-                    onChange={(e) => setNewAddress(e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col mt-2">
-                  <label>Post Code</label>
-                  <input
-                    type="text"
-                    placeholder="Enter Postcode"
-                    className="border rounded-lg text-black p-2 bg-white"
-                    value={postcode}
-                    onChange={(e) => setPostcode(e.target.value)}
-                  />
-                </div>
-                <div className="flex justify-end mt-4">
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg" onClick={addAddress}>Add Address</button>
-                  <button className="bg-gray-300 px-4 py-2 rounded-lg mr-2" onClick={() => setShowAddModal(false)}>Cancel</button>
-                </div>
-              </div>
-            </div>
-          )}
+          {showAddModal && addressModal()}
 
 
-          {showEditModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-center font-bold text-lg">Edit Address</h2>
-                <div className="flex flex-col mt-4">
-                  <label>Address</label>
-                  <input
-                    type="text"
-                    className="border rounded-lg text-black p-2 bg-white"
-                    value={editAddress}
-                    onChange={(e) => setEditAddress(e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col mt-2">
-                  <label>Post Code</label>
-                  <input
-                    type="text"
-                    className="border rounded-lg text-black p-2 bg-white"
-                    value={editPostcode}
-                    onChange={(e) => setEditPostcode(e.target.value)}
-                  />
-                </div>
-                <div className="flex justify-end mt-4">
-                  <button className="bg-blue-500 text-white px-4 py-2 rounded-lg" onClick={updateAddress}>Update</button>
-                  <button className="bg-gray-300 px-4 py-2 rounded-lg ml-2" onClick={() => setShowEditModal(false)}>Cancel</button>
-                </div>
-              </div>
-            </div>
-          )}
+          {showEditModal && addressModal(true)}
 
 
           {showDeleteModal && (

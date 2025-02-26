@@ -404,12 +404,22 @@ function MerchantDashboard() {
 
       // Add new comment with correct author details
       const updatedComments = [
-        ...existingComments,
+        ...existingComments.map(comment => ({
+          isArtist: comment.isArtist ?? false,
+          artistId: comment.artistId ?? null,
+          artistName: comment.artistName ?? null,
+          artistImage: comment.artistImage ?? null,
+          userId: comment.userId ?? null,
+          userName: comment.userName ?? null,
+          userImage: comment.userImage ?? null,
+          text: comment.text,
+          timestamp: comment.timestamp
+        })),
         {
           ...commentAuthor,
           text: newComment,
           timestamp: new Date().toISOString(),
-        },
+        }
       ];
 
       // Update the database
@@ -429,10 +439,12 @@ function MerchantDashboard() {
       );
 
       setNewComment("");
-      setComments(updatedComments);
+      await fetchCommentsWithUsers(artId);  
+
     } catch (error) {
       console.error(error.message);
     }
+    
   };
 
   const fetchCommentsWithUsers = async (artId) => {
@@ -685,24 +697,7 @@ function MerchantDashboard() {
                   <div className="text-slate-50  text-sm">Post Art</div>
                 </div>
               </div>
-              <div 
-                className="h-full w-20 duration-300 hover:scale-95 cursor-pointer"
-              >
-                <div className="h-full w-20 justify-items-center bg-slate-900 bg-opacity-30 shadow-md rounded-md ">
-                  <div className="flex align-middle gap-2  justify-center ">
-                    <div className="pt-1">
-                      {" "}
-                      <box-icon
-                        color="white"
-                        type="solid"
-                        name="user-pin"
-                      ></box-icon>
-                    </div>
-                  </div>
-
-                  <div className="text-slate-50  text-sm">Account</div>
-                </div>
-              </div>
+             
             </div>
           </div>
         </div>

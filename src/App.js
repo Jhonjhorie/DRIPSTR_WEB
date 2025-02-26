@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 
 // Controllers
 import AdminController from "./modules/Admin/Controller/Admin_Controller";
@@ -7,6 +7,7 @@ import LoginController from "./modules/Login/Controller/Login_Controller";
 import HomeController from "./modules/Home/Home_Controller";
 import OrderController from "./modules/Order/Controller/Order_Controller";
 import ShopController from "./modules/Shop_Profile/Controller/Shop_Profile_Controller";
+import ProductController from "./modules/Products/Products_Controller"
 import UserAccountController from "./modules/User_Account/Controller/User_Account_Controller";
 import ArtistController from "./modules/ArtistPage/Controller/Artists_Controller";
 import Search from "./modules/Products/Search";
@@ -22,14 +23,15 @@ import Header from './shared/Header';
 import Sidebar from './shared/SideBar';
 import Notifications from './modules/Notification/Notification_Controller';
 import Reminder from './modules/Messaging/View/Reminder';
-import ProductController from "./modules/Products/Products_Controller";
 
 // tangina mo notification
 import { NotificationProvider } from './utils/NotificationContext';
 import { Toaster } from 'react-hot-toast';
 
 
-// Shared Component
+// Tangina mo Password
+import ResetPassword from './shared/login/ResetPassword';
+
 function App() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
 
@@ -73,6 +75,7 @@ function App() {
               <Route path="/notification" element={<Notifications />} />
               <Route path="/reminder" element={<Reminder/>}/>
               <Route path="/mall" element={<Mall />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
             </Routes>
           </main>
         </div>

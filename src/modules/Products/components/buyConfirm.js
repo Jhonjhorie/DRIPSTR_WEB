@@ -5,6 +5,7 @@ import {
   faTriangleExclamation,
   faHeart,
   faX,
+  faCube, // Replace faThreeDPointSphere with faCube
 } from "@fortawesome/free-solid-svg-icons";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
@@ -15,6 +16,7 @@ import useCarts from "../hooks/useCart.js";
 import AlertDialog from "./alertDialog2.js";
 import ReportDialog from "./reportModal.js";
 import WishlistButton from "./subcomponents/WishlistButton.js";
+import Product3DViewer from './Product3DViewer';
 
 const BuyConfirm = ({ item, onClose}) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -33,6 +35,7 @@ const BuyConfirm = ({ item, onClose}) => {
   const [selectedSize, setSelectedSize] = useState(
     item?.item_Variant[0]?.sizes[0] || ""
   );
+  const [show3DView, setShow3DView] = useState(false);
 
   const handleIncrement = () => {
     setQuantity((prev) => prev + 1);
@@ -122,8 +125,9 @@ const BuyConfirm = ({ item, onClose}) => {
 
       navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
     } else {
-      setLoginDialog(true)
 
+      setActionLog("placeOrder");
+      setLoginDialog(true);
     }
   };
   if (loadingP) {
@@ -154,19 +158,62 @@ const BuyConfirm = ({ item, onClose}) => {
         ) : (
           <div className="flex">
             <div className="flex-none w-80 relative items-center flex justify-center">
-              <img
-                src={
-                  selectedColor.imagePath != null || ""
-                    ? imagePreview
-                    : require("@/assets/emote/success.png")
-                }
-                alt={selectedColor.variant_Name}
-                className={`h-full w-full ${
-                  selectedColor.imagePath != null || ""
-                    ? "object-contain"
-                    : "object-none"
-                }`}
-              />
+              <div className="relative group">
+                {show3DView ? (
+                  <div className="w-full h-[400px] relative"> {/* Add fixed height container */}
+                    <Product3DViewer 
+                      category={item.item_Category} 
+                      onClose={() => setShow3DView(false)}
+                      className="w-full h-full"  
+                      selectedColor={selectedColor}
+                    />
+                    {/* button for 3D view */}
+                    <button
+                      onClick={() => setShow3DView(false)}
+                      className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 
+                        rounded-full shadow-lg transform transition-all duration-300 
+                        hover:scale-110 z-10 border border-slate-400 hover:border-slate-800"
+                      title="Close 3D View"
+                    >
+                      <FontAwesomeIcon 
+                        icon={faX}
+                        className="text-slate-400 hover:text-slate-800 text-lg" 
+                      />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <img
+                      src={
+                        selectedColor.imagePath != null || ""
+                          ? imagePreview
+                          : require("@/assets/emote/success.png")
+                      }
+                      alt={selectedColor.variant_Name}
+                      className={`h-full w-full ${
+                        selectedColor.imagePath != null || ""
+                          ? "object-contain"
+                          : "object-none"
+                      }`}
+                    />
+                    {item.is3D && (
+                      <button
+                        onClick={() => setShow3DView(true)}
+                        className="absolute bottom-4 right-4 bg-white/90 hover:bg-white p-2 
+                          rounded-full shadow-lg transform transition-all duration-300 
+                          hover:scale-110 opacity-0 group-hover:opacity-100 
+                          border border-slate-400 hover:border-slate-800"
+                        title="View 3D Model"
+                      >
+                        <FontAwesomeIcon 
+                          icon={faCube} // Use faCube instead of faThreeDPointSphere
+                          className="text-slate-400 hover:text-slate-800 text-lg"
+                        />
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap h-full bg-slate-200 w-full">
               <div className="flex flex-col justify-start   h-full w-full p-4 ">

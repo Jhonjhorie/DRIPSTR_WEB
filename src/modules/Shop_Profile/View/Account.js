@@ -5,6 +5,7 @@ import { supabase } from "../../../constants/supabase";
 import successEmote from "../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../src/assets/emote/question.png";
 import hmmmEmote from "../../../../src/assets/emote/hmmm.png";
+import MerchantWallet from "../Component/MerchantWallet"
 import {
   blockInvalidChar,
   validateMinLength2,

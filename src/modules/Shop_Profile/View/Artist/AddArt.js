@@ -178,7 +178,7 @@ function ArtistAddArts() {
           MANAGE ARTS
         </h1>
         <div className=" w-full h-auto px-16  ">
-          <div className=" bg-slate-100 shadow-md  flex flex-wrap gap-5 place-items-center rounded-md overflow-hidden overflow-y-scroll p-4 h-[500px] w-full">
+          <div className=" bg-slate-100 shadow-inner shadow-slate-500 flex flex-wrap gap-5 place-items-center rounded-md overflow-hidden overflow-y-scroll p-4 h-[500px] w-full">
             {artistArts.map((art) => (
               <div
                 key={art.id}

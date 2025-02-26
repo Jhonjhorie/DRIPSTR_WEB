@@ -1058,8 +1058,8 @@ function Products() {
               </div>
             </div>
 
-            <div className="h-full bg-white w-full p-2 flex gap-2">
-              <div className=" w-4/12 h-auto">
+            <div className="h-full bg-white w-full relative p-2 flex gap-2">
+              <div className=" w-4/12 h-full relative">
                 <div className="w-full h-[200px] rounded-sm bg-slate-100 p-2 shadow-inner shadow-custom-purple mb-2">
                   <img
                     src={selectedItem.firstVariant.imagePath}
@@ -1067,7 +1067,7 @@ function Products() {
                     className="h-full w-full object-cover rounded-md"
                   />
                 </div>
-                <div className=" w-auto h-auto p-2 rounded-sm ">
+                <div className=" w-auto h-auto relative p-2 rounded-sm ">
                   {selectedItem.is_Post === false ? (
                     <div
                       onClick={handlePostItem}
@@ -1093,14 +1093,15 @@ function Products() {
                   >
                     REMOVE
                   </div>
-                  <div
+               
+                </div>
+                <div
                     onClick={handleCloseModal}
-                    className="bg-custom-purple p-1 justify-center flex iceland-regular rounded-sm glass 
-                  hover:scale-95 duration-300 cursor-pointer mt-10 md:mt-32 text-black font-semibold hover:bg-primary-color"
+                    className="bg-custom-purple w-full bottom-2 p-1 justify-center flex iceland-regular rounded-sm glass 
+                  hover:scale-95 duration-300 cursor-pointer absolute text-black font-semibold hover:bg-primary-color"
                   >
                     CLOSE
                   </div>
-                </div>
               </div>
               <div className="bg-slate-900 w-full h-full overflow-hidden relative overflow-y-scroll custom-scrollbar">
                 <div className=" w-full bg-white h-auto px-2 ">

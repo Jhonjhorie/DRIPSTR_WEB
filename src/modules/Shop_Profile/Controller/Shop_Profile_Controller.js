@@ -9,11 +9,13 @@ import MerchantProducts from '../View/Products';
 import MerchantOrders from '../View/Orders';
 import Shop_profile from '../View/Shop_profile';
 import MerchantMessages from '../View/Messages';
+import MerchantWallet from '../View/MerchantWallet';
 import MerchantVouchers from '../View/Vouchers';
 import ArtistDashboard from '../View/Artist/ArtistDashboard';
 import ArtistAccount from '../View/Artist/ArtistAccount';
 import ArtistOrders from '../View/Artist/ArtistOrders';
 import ArtistAddArts from '../View/Artist/AddArt';
+import ArtistCommision from '../View/Artist/ArtistCommision';
 import AddItem  from '../View/AddItem';
 import Account from '../View/Account';
 
@@ -31,11 +33,13 @@ const ShopProfileController = () => {
       <Route path="/MerchantOrders" element={<MerchantOrders />} />
       <Route path="/Shop_profile" element={<Shop_profile />} />
       <Route path="/MerchantVouchers" element={<MerchantVouchers />} />
+      <Route path="/MerchantWallet" element={<MerchantWallet />} />
       <Route path="/AddItem" element={<AddItem />} />
       <Route path="/Artist/ArtistDashboard" element={<ArtistDashboard />} />
       <Route path="/Artist/ArtistAddArts" element={<ArtistAddArts />} />
       <Route path="/Artist/ArtistAccount" element={<ArtistAccount />} />
       <Route path="/Artist/ArtistOrders" element={<ArtistOrders />} />
+      <Route path="/Artist/ArtistCommision" element={<ArtistCommision />} />
       <Route path="/Account" element={<Account />} />
     </Routes>
   );

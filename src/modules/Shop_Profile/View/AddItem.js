@@ -24,10 +24,14 @@ const AddItem = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategoryYN, setSelectedCategoryVouchYN] = useState("");
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
+  };
+  const handleCategorySelectYN = (categoryyn) => {
+    setSelectedCategoryVouchYN(categoryyn);
   };
   //Get the user Shop Data
   const [formData, setFormData] = useState({
@@ -142,7 +146,8 @@ const AddItem = () => {
         !itemTitle ||
         !itemDescription ||
         !selectedShopId ||
-        !selectedCategory
+        !selectedCategory ||
+        !selectedCategoryYN
       ) {
         console.log("Please fill in all required fields.");
         setShowAlert3(true);
@@ -229,6 +234,7 @@ const AddItem = () => {
           item_Description: itemDescription,
           item_Tags: tags,
           item_Category: selectedCategory,
+          apply_Vouch: selectedCategoryYN,
           item_Rating: 0,
           item_Orders: 0,
           is_Post: false,
@@ -249,13 +255,14 @@ const AddItem = () => {
         tag3: "",
       });
       setSelectedCategory("");
+      setSelectedCategoryVouchYN("");
       setVariants([]);
     } catch (error) {
       console.error("Error adding product:", error.message);
       alert("Failed to add product.");
     } finally {
       setLoading(false);
-    }
+    } 
   };
   const closeConfirmAdd = () => {
     setTimeout(() => {
@@ -328,7 +335,7 @@ const AddItem = () => {
     setVariantToDeleteName(name);
   };
   return (
-    <div className="h-full w-full bg-slate-300 overflow-y-scroll custom-scrollbar  ">
+    <div className="h-full w-full bg-slate-300  ">
       <div className="absolute mx-3 right-0 z-10">
         <SideBar></SideBar>
       </div>
@@ -403,6 +410,35 @@ const AddItem = () => {
                       <li key={category}>
                         <a onClick={() => handleCategorySelect(category)}>
                           {category}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <label className="text-slate-950  font-semibold mr-2 text-[15px]">
+                Voucher Applicable?
+              </label>
+               <div className="">
+                <div className="dropdown dropdown-top w-full">
+                  <div
+                    tabIndex={0}
+                    role="button"
+                    className="bg-custom-purple glass hover:scale-95 duration-300 rounded-md text-center text-slate-100 p-2 mt-2 w-full"
+                  >
+                    {selectedCategoryYN || "Yes or No?"}
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
+                  >
+                    {[
+                      "Yes",
+                      "No",
+                    ].map((categoryyn) => (
+                      <li key={categoryyn}>
+                        <a onClick={() => handleCategorySelectYN(categoryyn)}>
+                          {categoryyn}
                         </a>
                       </li>
                     ))}

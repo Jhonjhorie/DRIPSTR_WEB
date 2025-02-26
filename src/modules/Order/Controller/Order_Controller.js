@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Cart from '../View/Cart';
-import Order from '../View/Order.JS';
+import Order from '../View/Order';
 
 const CartController = () => {
   return (

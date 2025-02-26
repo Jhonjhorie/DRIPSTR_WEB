@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { supabase } from "../constants/supabase";
 import {
@@ -19,6 +19,7 @@ const SideBar = () => {
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     // Fetch the current user profile and check if they are a merchant or artist
@@ -62,6 +63,10 @@ const SideBar = () => {
       setActiveName("Account");
     }
   };
+
+  if (location.pathname.startsWith('/admin')) {
+    return null; // Don't render anything if the route is "/admin/*"
+  }
 
   const mainSideBar = [
     { label: "Home", path: "/", icon: faHome },

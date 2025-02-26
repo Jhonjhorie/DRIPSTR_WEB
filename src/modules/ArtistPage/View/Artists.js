@@ -536,11 +536,11 @@ function Artists() {
           </div>
         )}
 
-        <div className="columns-2 sm:columns-3 md:columns-4  gap-2 px-4 space-y-2">
+        <div className="columns-2 sm:columns-3 md:columns-4 mb-20 gap-2 px-4 space-y-2">
           {artistData.map((art) => (
             <div
               key={art.id}
-              className="relative hover:scale-105 duration-200 bg-white shadow-lg rounded-md overflow-hidden break-inside-avoid"
+              className="relative hover:scale-105 hover:drop-shadow-customViolet  duration-200 bg-white shadow-lg rounded-md overflow-hidden break-inside-avoid"
             >
               {/* Art Image */}
               <div
@@ -555,8 +555,8 @@ function Artists() {
               </div>
 
               {/* Art Name Badge */}
-              <div className="absolute bottom-2 left-2 bg-custom-purple text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2">
-                <img src={drplogo} alt="Logo" className="h-5 w-5" />
+              <div className="absolute glass bottom-2 left-2 bg-custom-purple text-white text-sm font-semibold px-3 py-1 rounded-md flex items-center gap-2">
+                <img src={art.artists?.artist_Image } alt="Logo" className="h-7 w-7 rounded-md" />
                 {art.art_Name}
               </div>
               <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2  gap-2">
@@ -611,7 +611,7 @@ function Artists() {
 
       {selectArt && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-70 overflow-y-scroll md:flex justify-center items-center z-50"
           onClick={() => {
             setSelectArt(null);
             setComments([]);
@@ -681,7 +681,7 @@ function Artists() {
             onClick={(e) => {
               e.stopPropagation();
             }}
-            className="w-1/3 h-full relative bg-slate-200 px-5"
+            className="w-full md:w-1/3 h-full relative bg-slate-200 px-5"
           >
             <div className="text-2xl mt-5 text-fuchsia-800 font-bold text-center p-2">
               Comment on {selectArt?.art_Name || "Untitled"}
