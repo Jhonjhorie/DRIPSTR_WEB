@@ -175,7 +175,7 @@ const ApplyVoucher = ({ profile, onClose, onSelectVouchers, price }) => {
           </button>
         </div>
         <div className="overflow-y-auto custom-scrollbar">
-          {vouchers.map((voucher) => {
+          {vouchers.length > 0 ? vouchers.map((voucher) => {
             const isSelected = selectedVouchers.some(
               (v) => v.id === voucher.id
             );
@@ -236,8 +236,17 @@ const ApplyVoucher = ({ profile, onClose, onSelectVouchers, price }) => {
                   </div>
                 </div>
               </div>
-            );
-          })}
+            ); 
+          }): <div className="font-semibold text-base items-center flex justify-center h-full p-5 flex-col w-full">
+               <div className=" z-50 bg-slate-200 rounded-l-lg">
+                      <img
+                        src={require("@/assets/emote/hmmm.png")}
+            
+                        className={`h-full w-full  object-contain`}
+                      />
+                    </div>
+            No Vouchers Available
+            </div>}
         </div>
       </div>
     </div>
