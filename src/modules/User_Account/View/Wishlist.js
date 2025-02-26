@@ -18,8 +18,8 @@ const FollowedStores = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-
-      // Fetch artists with followers that match current user
+  
+      // Fetch artists with followers that match the current user
       const { data: artists, error: artistError } = await supabase
         .from('artist')
         .select(`
@@ -31,13 +31,13 @@ const FollowedStores = () => {
           followers_Detail
         `)
         .contains('followers_Detail', [{ id: user.id }]);
-
+  
       if (artistError) throw artistError;
-
+  
       // Set followed artists directly
       setFollowedArtists(artists || []);
-
-      // Fetch followed merchants (existing code remains the same)
+  
+      // Fetch followed merchants
       const { data: merchantFollowers, error: merchantError } = await supabase
         .from('merchant_Followers')
         .select(`
@@ -52,9 +52,9 @@ const FollowedStores = () => {
           )
         `)
         .eq('acc_id', user.id);
-
+  
       if (merchantError) throw merchantError;
-
+  
       setFollowedMerchants(merchantFollowers?.map(f => f.shop) || []);
     } catch (error) {
       console.error('Error:', error);
