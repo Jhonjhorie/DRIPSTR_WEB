@@ -138,8 +138,8 @@ function Sidebar() {
                 ></path>
               </svg>
             }
-            label="Payouts"
-            to="/admin/payout"
+            label="Cashout"
+            to="/admin/cashout"
           />
           <SidebarItem
             icon={

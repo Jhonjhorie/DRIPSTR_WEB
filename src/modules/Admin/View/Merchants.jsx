@@ -4,6 +4,7 @@ import Sidebar from './Shared/Sidebar';
 import { faChevronCircleDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Pagination from './Components/Pagination';
+
 const Merchants = () => {
     const [register, setRegister] = useState([]);
     const [acceptedMerchants, setAcceptedMerchants] = useState([]);
