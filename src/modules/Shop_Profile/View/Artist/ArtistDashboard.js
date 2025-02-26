@@ -189,37 +189,7 @@ function MerchantDashboard() {
       }, 3000);
       return;
     }
-    // Check image size
-    const minWidth = 300;
-    const minHeight = 300;
 
-    const checkImageSize = (file) => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            if (img.width < minWidth || img.height < minHeight) {
-              setShowAlertSize(true);
-              setTimeout(() => {
-                setShowAlertSize(false);
-              }, 3000);
-            } else {
-              resolve();
-            }
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    };
-
-    try {
-      await checkImageSize(imageFile);
-    } catch (error) {
-      alert(error);
-      return;
-    }
 
     setLoading(true);
 
@@ -810,7 +780,7 @@ function MerchantDashboard() {
                     </div>
                     <div className="mt-2">
                       <label className=" text-slate-800  text-sm font-semibold">
-                        Name:
+                        Description:
                       </label>{" "}
                       <br />
                       <textarea

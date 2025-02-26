@@ -13,7 +13,7 @@ import sample2 from "@/assets/images/samples/10.png";
 import hmmmEmote from "@/assets/emote/hmmm.png";
 import { supabase } from "@/constants/supabase";
 
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 
 function AristOrders() {
   const [selectedUser, setSelectedUser] = React.useState(null);
@@ -106,7 +106,7 @@ function AristOrders() {
   };
 
   useEffect(() => {
-    if (!currentUser) return; // Wait until currentUser is set
+    if (!currentUser) return;
 
     const getArtistAndMessages = async () => {
       const artistDetails = await fetchArtistDetails(currentUser.id);
@@ -118,6 +118,35 @@ function AristOrders() {
 
     getArtistAndMessages();
   }, [currentUser]);
+
+  const chatContainerRef = useRef(null);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const handleLoadMessages = async () => {
+    if (!artist) {
+      console.error("Artist data is missing.");
+      return;
+    }
+
+    setIsFetching(true);
+    setLoading(true);
+
+    try {
+      await fetchMessages(artist.id);
+
+      setTimeout(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop =
+            chatContainerRef.current.scrollHeight;
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+
+    setIsFetching(false);
+    setLoading(false);
+  };
 
   if (loading) return <div>Loading...</div>;
 
@@ -410,7 +439,10 @@ function AristOrders() {
                   </div>
 
                   {/* Set fixed height for the chat area */}
-                  <div className="h-[65vh] w-full bg-white overflow-y-scroll custom-scrollbar p-4">
+                  <div
+                    ref={chatContainerRef}
+                    className="h-[65vh] w-full bg-white overflow-y-scroll custom-scrollbar p-4"
+                  >
                     {selectedUser && selectedUser.messages ? (
                       <>
                         {selectedUser.messages.length > 0 ? (
@@ -514,6 +546,22 @@ function AristOrders() {
                             No messages yet.
                           </p>
                         )}
+                        <div className="w-full h-auto">
+                          <div className="justify-center text-center text-sm">
+                            {!isFetching ? (
+                              <h1
+                                onClick={handleLoadMessages}
+                                className="cursor-pointer text-custom-purple"
+                              >
+                                Click to Load new message
+                              </h1>
+                            ) : null}
+
+                            {isFetching && (
+                              <span className="loading bg-blue-600 rounded-md loading-dots loading-xs"></span>
+                            )}
+                          </div>
+                        </div>
                       </>
                     ) : (
                       <p className="text-center text-gray-500">
@@ -606,31 +654,26 @@ function AristOrders() {
           </div>
           {selectedImage && (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4"
               onClick={() => setSelectedImage(null)}
             >
-              <div className="relative bg-custom-purple p-2 rounded-md ">
+              <div className="relative p-2 bg-custom-purple">
                 <img
                   src={selectedImage}
                   alt="Full-size preview"
                   onLoad={(e) => {
                     const img = e.target;
-                    // Check natural dimensions to determine orientation
-                    const orientation =
+                    setImageOrientation(
                       img.naturalWidth > img.naturalHeight
                         ? "landscape"
-                        : "portrait";
-                    setImageOrientation(orientation);
+                        : "portrait"
+                    );
                   }}
-                  className={`rounded ${
-                    imageOrientation === "landscape"
-                      ? "max-w-full max-h-[80vh]"
-                      : "max-w-[80vw] max-h-[80vh]"
-                  }`}
+                  className="rounded shadow-lg object-contain max-w-[90vw] max-h-[90vh]"
                 />
                 <button
                   onClick={() => setSelectedImage(null)}
-                  className="absolute -top-2 right-0 text-white text-3xl p-2 drop-shadow-lg "
+                  className="absolute top-2 right-2 text-white text-3xl p-2 drop-shadow-lg bg-black bg-opacity-50 rounded-full"
                 >
                   &times;
                 </button>
