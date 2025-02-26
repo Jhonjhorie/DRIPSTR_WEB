@@ -94,6 +94,51 @@ function Payout() {
         }
     };
 
+
+    const handleApproveArtist = async (item) => {
+        try {
+            const currentRevenue = item.wallet_Id?.revenue ?? 0;
+            const newRevenue = currentRevenue - item.qty;
+
+            if (item.wallet_Id?.id) {
+                const { error: walletError } = await supabase
+                    .from('artist_Wallet')
+                    .update({ revenue: newRevenue })
+                    .eq('id', item.wallet_Id.id);
+
+                if (walletError) {
+                    throw walletError;
+                }
+            } else {
+                console.warn('No linked wallet found for this cashout. Skipping wallet update.');
+            }
+
+            const { error: cashoutError } = await supabase
+                .from('artist_Cashout')
+                .update({ status: 'Success' })
+                .eq('id', item.id);
+
+            if (cashoutError) {
+                throw cashoutError;
+            }
+
+            // Show success modal
+            setShowSuccessModal(true);
+
+            // Refresh data
+            await fetchArtistCashout();
+
+            // Hide modal after 1.5 seconds
+            setTimeout(() => {
+                setShowSuccessModal(false);
+            }, 1500);
+
+            console.log('Cashout approved successfully');
+        } catch (error) {
+            console.error('Error approving cashout:', error.message);
+        }
+    };
+
     return (
         <div className='flex flex-row'>
             <Sidebar />
@@ -194,7 +239,7 @@ function Payout() {
                                             <FontAwesomeIcon
                                                 icon={faCircleCheck}
                                                 className='text-green-500 text-3xl cursor-pointer hover:text-green-600'
-                                                onClick={() => handleApprove(item)}
+                                                onClick={() => handleApproveArtist(item)}
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -235,7 +280,7 @@ function Payout() {
 
             {/* Success Modal */}
             {showSuccessModal && (
-                <div className="fixed bottom-4 right-4 z-50">
+                <div className="fixed bottom-4 right-10 z-50">
                     <div className="bg-green-500 text-white p-4 rounded-lg shadow-lg animate-fade-in-out">
                         <p className="text-lg font-semibold">Cashout Success</p>
                     </div>
