@@ -11,74 +11,87 @@ const ApplyVoucher = ({ profile, onClose, onSelectVouchers, price }) => {
   const [selectedVouchers, setSelectedVouchers] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data: cusVoucherData, error: cusVoucherError } = await supabase
-          .from("customer_vouchers")
-          .select("*,vouch:voucher_id (id, voucher_name, voucher_type, discount, expiration, condition)")
-          .eq("acc_id", profile?.id)
-          .eq("isUsed", false)
-          .eq("isClaim", true)
-          .order("id", { ascending: false });
-
-        if (cusVoucherError) throw cusVoucherError;
-
-        const { data: voucherData, error: voucherError } = await supabase
-          .from("vouchers")
-          .select("*")
-          .order("id", { ascending: false });
-
-        if (voucherError) throw voucherError;
-
-        const today = new Date().toISOString().split("T")[0];
-
-        const validVouchers = cusVoucherData.filter((cv) => {
-          const expirationDate = cv.vouch.expiration;
-          return expirationDate >= today;
-        });
-
-        const combinedVouchers = [
-          ...validVouchers.map((cv) => ({ ...cv.vouch, isClaimed: true })),
-          ...voucherData
-            .filter((voucher) => !cusVoucherData.some((cv) => cv.voucher_id === voucher.id))
-            .map((voucher) => ({ ...voucher, isClaimed: false })),
-        ];
-
-        const defaultSelectedVouchers = validVouchers
-          .map((cv) => ({ ...cv.vouch, isClaimed: true }))
-          .filter((voucher) => price >= voucher.condition)
-          .reduce((acc, voucher) => {
-            if (!acc.some((v) => v.voucher_type === voucher.voucher_type)) {
-              acc.push(voucher);
-            }
-            return acc;
-          }, []);
-
-        setVouchers(combinedVouchers);
-        setSelectedVouchers(defaultSelectedVouchers);
-
-        if (onSelectVouchers) {
-          onSelectVouchers(defaultSelectedVouchers);
-        }
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+  
+      // Fetch claimed vouchers by the user
+      const { data: cusVoucherData, error: cusVoucherError } = await supabase
+        .from("customer_vouchers")
+        .select("*, vouch:voucher_id (id, voucher_name, voucher_type, discount, expiration, condition)")
+        .eq("acc_id", profile?.id)
+        .order("id", { ascending: false });
+  
+      if (cusVoucherError) throw cusVoucherError;
+  
+      // Fetch all vouchers excluding those already claimed by the user
+      const { data: voucherData, error: voucherError } = await supabase
+        .from("vouchers")
+        .select("*")
+        .not("id", "in", `(${cusVoucherData.map((cv) => cv.voucher_id).join(",")})`)
+        .order("id", { ascending: false });
+  
+      if (voucherError) throw voucherError;
+  
+      // Filter valid vouchers (not expired and not already claimed and used)
+      const validVouchers = cusVoucherData.filter((cv) => {
+        const expirationDate = new Date(cv.vouch.expiration);
+        expirationDate.setHours(23, 59, 59, 999);
+        return expirationDate >= today && cv.isClaim === true && cv.isUsed === false;
+      });
+  
+      // Combine claimed and unclaimed vouchers
+      const combinedVouchers = [
+        ...validVouchers.map((cv) => ({ ...cv.vouch, isClaimed: cv.isClaim })),
+        ...voucherData.map((voucher) => ({ ...voucher, isClaimed: false })),
+      ];
+  
+      // Sort vouchers: claimed vouchers first, then unclaimed
+      const sortedVouchers = combinedVouchers.sort((a, b) => {
+        if (a.isClaimed && !b.isClaimed) return -1;
+        if (!a.isClaimed && b.isClaimed) return 1;
+        return 0;
+      });
+  
+      // Set default selected vouchers based on conditions
+      const defaultSelectedVouchers = validVouchers
+        .map((cv) => ({ ...cv.vouch, isClaimed: true }))
+        .filter((voucher) => price >= voucher.condition)
+        .reduce((acc, voucher) => {
+          if (!acc.some((v) => v.voucher_type === voucher.voucher_type)) {
+            acc.push(voucher);
+          }
+          return acc;
+        }, []);
+  
+      setVouchers(sortedVouchers);
+      setSelectedVouchers(defaultSelectedVouchers);
+  
+      if (onSelectVouchers) {
+        onSelectVouchers(defaultSelectedVouchers);
       }
-    };
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+  
     if (profile?.id) {
       fetchData();
     }
   }, [profile]);
+  
 
   const handleClaimVoucher = async (voucherId) => {
     if (!profile?.id) {
       alert("You must be logged in to claim a voucher.");
       return;
     }
-
+  
     try {
       const { data, error } = await supabase
         .from("customer_vouchers")
@@ -90,39 +103,13 @@ const ApplyVoucher = ({ profile, onClose, onSelectVouchers, price }) => {
             isUsed: false,
           },
         ]);
-
+  
       if (error) throw error;
-
+  
       setLoading(true);
-      const fetchData = async () => {
-        const { data: cusVoucherData, error: cusVoucherError } = await supabase
-          .from("customer_vouchers")
-          .select("*,vouch:voucher_id (id, voucher_name, voucher_type, discount, expiration, condition)")
-          .eq("acc_id", profile?.id)
-          .eq("isUsed", false)
-          .eq("isClaim", true)
-          .order("id", { ascending: false });
 
-        if (cusVoucherError) throw cusVoucherError;
-
-        const { data: voucherData, error: voucherError } = await supabase
-          .from("vouchers")
-          .select("*")
-          .order("id", { ascending: false });
-
-        if (voucherError) throw voucherError;
-
-        const combinedVouchers = [
-          ...cusVoucherData.map((cv) => ({ ...cv.vouch, isClaimed: true })),
-          ...voucherData.filter(
-            (voucher) =>
-              !cusVoucherData.some((cv) => cv.voucher_id === voucher.id)
-          ).map((voucher) => ({ ...voucher, isClaimed: false })),
-        ];
-
-        setVouchers(combinedVouchers);
-      };
-      fetchData();
+      await fetchData();
+  
     } catch (error) {
       alert(`Error claiming voucher: ${error.message}`);
     } finally {

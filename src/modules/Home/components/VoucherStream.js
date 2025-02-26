@@ -15,13 +15,24 @@ const VoucherStream = ({ profile }) => {
         try {
           const today = new Date();
           today.setHours(0, 0, 0, 0); 
-    
-          const { data: voucherData, error: voucherError } = await supabase
-            .from("vouchers")
-            .select("*")
-            .order("id", { ascending: false });
-    
-          if (voucherError) throw voucherError;
+          const { data: claimed2, error: claimed2Error } = await supabase
+      .from("customer_vouchers")
+      .select("voucher_id, isClaim, isUsed")
+      .eq("acc_id", profile?.id)
+      .eq("isUsed", true)
+      .eq("isClaim", true);
+
+    if (claimed2Error) throw claimed2Error;
+
+    // Fetch all vouchers excluding those already claimed and used by the user
+    const { data: voucherData, error: voucherError } = await supabase
+      .from("vouchers")
+      .select("*")
+      .not("id", "in", `(${claimed2.map((cv) => cv.voucher_id).join(",")})`)
+      .order("id", { ascending: false });
+
+    if (voucherError) throw voucherError;
+
     
           const { data: claimedData, error: claimedError } = await supabase
             .from("customer_vouchers")
@@ -211,3 +222,4 @@ const VoucherStream = ({ profile }) => {
 };
 
 export default VoucherStream;
+
