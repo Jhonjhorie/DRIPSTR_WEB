@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@heroicons/react": "^2.2.0",
-    "daisyui": "^4.12.14",
-    "react-datepicker": "^7.5.0"
-  }
-}
