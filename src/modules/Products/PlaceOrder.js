@@ -45,7 +45,7 @@ function PlaceOrder() {
       try {
         const { data, error } = await supabase
           .from("addresses")
-          .select("id, address, postcode, is_default_shipping")
+          .select("id, address, postcode, is_default_shipping, full_address")
           .eq("user_id", profile.id);
 
         if (error) throw error;
@@ -54,10 +54,10 @@ function PlaceOrder() {
           setAddresses(data);
           const defaultAddress = data.find((addr) => addr.is_default_shipping);
           if (defaultAddress) {
-            setSelectedAddress(defaultAddress.id);
+            setSelectedAddress(defaultAddress);
             setSelectedPostcode(defaultAddress.postcode);
           } else {
-            setSelectedAddress(data[0].id);
+            setSelectedAddress(data[0]);
             setSelectedPostcode(data[0].postcode);
           }
         }
@@ -163,7 +163,7 @@ function PlaceOrder() {
             payment_stamp: new Date().toISOString(),
             order_variation: item.variant,
             order_size: item.size,
-            shipping_addr: selectedAddress || "No address provided",
+            shipping_addr: selectedAddress.full_address || "No address provided",
             shipping_postcode: selectedPostcode || "No postcode provided",
             shipping_method: shippingMethod,
             shipping_fee: shopShippingFee,
@@ -260,10 +260,10 @@ function PlaceOrder() {
                 <select
                   className="select min-h-[2.5rem] h-[2.5rem] select-bordered w-full line-clamp-1
                font-semibold text-md"
-                  value={selectedAddress}
+                  value={selectedAddress.full_address}
                   onChange={(e) => {
                     const selected = addresses.find(
-                      (addr) => addr.id === e.target.value
+                      (addr) => addr.full_address === e.target.value
                     );
                     setSelectedAddress(e.target.value);
                     setSelectedPostcode(selected ? selected.postcode : "");
@@ -272,11 +272,11 @@ function PlaceOrder() {
                   {addresses.map((addr) => (
                     <option
                       key={addr.id}
-                      value={addr.id}
+                      value={addr.full_address}
                       className="line-clamp-1
                font-semibold"
                     >
-                      {addr.address}
+                      {addr.full_address}
                     </option>
                   ))}
                 </select>

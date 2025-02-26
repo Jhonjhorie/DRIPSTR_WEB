@@ -8,6 +8,7 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
   const [reason, setReason] = useState(null);
   const isProd = type === "product";
   const isShop = type === "shop";
+  const [isOpen, setIsOpen] = useState(false);
 
   // Reasons for reporting a product
   const productReasons = [
@@ -151,24 +152,34 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
                   <label className="block text-lg font-medium text-slate-700 mb-2">
                     Reason for Reporting
                   </label>
-                  <div className="dropdown dropdown-hover w-full">
+                  <div className="dropdown w-full">
                     <div
                       tabIndex={0}
                       role="button"
                       className="btn btn-outline w-full text-left"
+                      onClick={() => setIsOpen(!isOpen)}
                     >
                       {reason || "Select a reason"}
                     </div>
-                    <ul
-                      tabIndex={0}
-                      className="dropdown-content menu bg-base-100 rounded-box z-[1] w-full shadow "
-                    >
-                      {reasons.map((r, index) => (
-                        <li key={index}>
-                          <a onClick={() => setReason(r)}>{r}</a>
-                        </li>
-                      ))}
-                    </ul>
+                    {isOpen && (
+                      <ul
+                        tabIndex={0}
+                        className="dropdown-content menu bg-base-100 rounded-box z-[1] w-full shadow"
+                      >
+                        {reasons.map((r, index) => (
+                          <li key={index}>
+                            <a
+                              onClick={() => {
+                                setReason(r);
+                                setIsOpen(false);
+                              }}
+                            >
+                              {r}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
               </div>
