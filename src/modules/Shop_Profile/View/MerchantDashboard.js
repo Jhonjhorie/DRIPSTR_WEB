@@ -464,7 +464,7 @@ function MerchantDashboard() {
         // Fetch product names and sort by order count in descending order
         const { data: products, error: productError } = await supabase
           .from("shop_Product")
-          .select("id, item_Name")
+          .select("id, item_Name, item_Variant")
           .in("id", productIds)
           .eq("shop_Id", shopId);
 
@@ -472,11 +472,17 @@ function MerchantDashboard() {
 
         // Map product names to order counts
         const sortedProducts = products
-          .map((product) => ({
-            id: product.id,
-            name: product.item_Name,
-            value: productCount[product.id] || 0,
-          }))
+          .map((product) => {
+            const variants = product.item_Variant || []; // Ensure it's an array
+            const firstVariant = variants.length > 0 ? variants[0] : null;
+
+            return {
+              id: product.id,
+              label: product.item_Name,
+              value: productCount[product.id] || 0,
+              image: firstVariant ? firstVariant.imagePath : null, 
+            };
+          })
           .sort((a, b) => b.value - a.value);
 
         console.log("Top Selling Products:", sortedProducts);
@@ -618,9 +624,8 @@ function MerchantDashboard() {
       {/* 2nd Container */}
       <div className="w-full lg:h-[325px]  p-2 lg:px-16 gap-3  md:flex  ">
         <div className="w-full md:w-[65%] lg:w-[78%] h-[400px] rounded-md lg:flex gap-3">
-          <div></div>
           {/* Bar chart */}
-          <div className="lg:w-[65%] md:[80%] mb-2 w-auto bg-slate-200 glass shadow-md p-1.5 rounded-md h-[70%] md:h-[75%]">
+          <div className=" md:w-full mb-2 w-auto bg-slate-200 glass shadow-md p-1.5 rounded-md h-[70%] md:h-[75%]">
             <div className="w-full bg-slate-50 h-full rounded-md place-items-center">
               <BarChart
                 series={[
@@ -649,50 +654,15 @@ function MerchantDashboard() {
               />
             </div>
           </div>
-          {/* Pie chart for most sell product */}
-          <div className="lg:w-[35%] w-full h-[75%] p-1.5 shadow-md mt-2 sm:mt-0 rounded-md bg-slate-200 ">
-            <div className="flex justify-between w-full">
-              <div className="text-slate-800 ">Top-seller</div>
-              <box-icon type="solid" name="star" color="#F09319"></box-icon>
-            </div>
-
-            <div className="bg-slate-100 h-auto w-full flex rounded-md place-content-center place-items-center">
-  {chartData.length > 0 ? (
-    <div className="-pt-2">
-      <PieChart
-        width={300}
-        height={265}
-        series={[
-          {
-            data: chartData.map((item) => ({
-              id: item.id,
-              value: item.value,
-              label: item.name, 
-            })),
-            innerRadius: 30,
-            outerRadius: 110,
-            paddingAngle: 5,
-            cornerRadius: 4,
-            startAngle: -45,
-            endAngle: 225,
-            cx: 150,
-            cy: 150,
-          },
-        ]}
-      />
-    </div>
-  ) : (
-    <div className="text-slate-500">No top-selling products</div>
-  )}
-</div>;
-          </div>
         </div>
         {/* Notificatoin div */}
-        <div className="w-full md:w-[35%] shadow-md lg:w-[30%] h-[380px] mb-24 sm:mb-0 md:h-[610px] mt-52 md:mt-0 lg:h-[300px] bg-slate-400 glass rounded-md p-1.5">
+        <div className="w-full md:w-[35%] -mt-24 shadow-md lg:w-[30%] h-[380px]  sm:mb-0 md:h-[610px] md:mt-0 lg:h-[300px] bg-slate-400 glass rounded-md p-1.5">
           <div className="flex justify-between align-middle">
             <div className="text-slate-800 text-xl">Top Selling</div>
             <div>
-              <box-icon type="solid" name="bell" color="#563A9C"></box-icon>
+              <box-icon type="solid" name="star" color="gold">
+                {" "}
+              </box-icon>
             </div>
           </div>
 
@@ -702,18 +672,35 @@ function MerchantDashboard() {
                 chartData.map((item, index) => (
                   <li
                     key={item.id}
-                    className="flex justify-between text-slate-700 border-b py-2"
+                    className="flex items-center justify-between text-slate-700 border-b py-2 gap-3"
                   >
-                    <span>
-                      {index + 1}. {item.name}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      {item.image ? (
+                        <img
+                          src={item.image}
+                          alt={item.label}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-200 flex items-center justify-center text-xs text-gray-500 rounded">
+                          No Image
+                        </div>
+                      )}
+
+                      <span className="text-sm">
+                        {index + 1}. {item.label}
+                      </span>
+                    </div>
+
                     <span className="font-semibold text-slate-900">
                       {item.value} sold
                     </span>
                   </li>
                 ))
               ) : (
-                <li className="text-slate-500">No data available</li>
+                <li className="text-slate-500 text-center py-2">
+                  No data available
+                </li>
               )}
             </ul>
           </div>
