@@ -11,7 +11,7 @@ function Payout() {
         const fetchMerchantCashout = async () => {
             const { data, error } = await supabase
                 .from('merchant_Cashout')
-                .select('id, created_at, full_Name, owner_Id(mobile), qty, reason, status')
+                .select('id, created_at, full_Name, owner_Id(mobile), qty, reason, status, revenue(revenue)')
                 .eq('status', 'Pending');
             if (error) {
                 console.error("Error fetching cashout:", error);
@@ -71,7 +71,12 @@ function Payout() {
                                                     {item.owner_Id?.mobile || 'None'}
                                                 </p>
                                                 <p className="text-black">
-                                                    <span className="font-medium">Amount:</span>
+                                                    <span className="font-medium">Wallet Amount:</span>
+                                                    {' '}
+                                                    P{item.revenue?.revenue}.00
+                                                </p>
+                                                <p className="text-black">
+                                                    <span className="font-medium">Cashout Amoutnt:</span>
                                                     {' '}
                                                     P{item.qty}.00
                                                 </p>
