@@ -60,6 +60,11 @@ const Header = () => {
     drawerCheckboxRef.current.checked = true; // Open the cart drawer
   };
 
+  const handleHomeClick = () => {
+    setSearchQuery(""); // Reset the search query
+    navigate("/"); // Navigate to the home page
+  };
+
   if (location.pathname.startsWith('/admin')) {
     return null; // Don't render anything if the route is "/admin/*"
   }
@@ -67,7 +72,7 @@ const Header = () => {
     <div className="flex items-center gap-2 h-16 sm:h-20 px-4 sm:px-8 md:px-16 py-4 sm:py-8 md:py-12 bg-slate-50 sticky top-0 z-30">
       <div className="hidden sm:flex">
         <Link to="/">
-          <button>
+          <button onClick={handleHomeClick}>
             <Logo className="h-8 w-24 sm:h-10 sm:w-32 md:h-12 md:w-36 lg:h-16 lg:w-52" />
           </button>
         </Link>
