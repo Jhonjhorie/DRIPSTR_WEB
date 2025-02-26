@@ -76,7 +76,7 @@ function Payout() {
                                                     P{item.revenue?.revenue}.00
                                                 </p>
                                                 <p className="text-black">
-                                                    <span className="font-medium">Cashout Amoutnt:</span>
+                                                    <span className="font-medium">Cashout Amount:</span>
                                                     {' '}
                                                     P{item.qty}.00
                                                 </p>
