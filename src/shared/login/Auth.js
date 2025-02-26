@@ -38,6 +38,10 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const [showPassword, setShowPassword] = useState({
+    signIn: false,
+    signUp: false
+  });
 
   const {
     addressData: { regions, provinces, cities, barangays },
@@ -141,12 +145,13 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
     try {
       const { email, password, fullName, mobile, gender, birthDate, postcode } = signUpData;
       
-      // Check if mobile is valid
+      // Validate phone number
       const { isValid, formattedNumber } = validatePhilippinePhone(mobile);
       if (!isValid) {
         throw new Error("Please enter a valid Philippine mobile number");
       }
 
+      // Validate all required fields
       if (!email || !password || !fullName || !mobile || !gender || !birthDate || !postcode || 
           !selected.region || !selected.city || !selected.barangay) {
         return alert("Please fill in all fields.");
@@ -154,6 +159,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
 
       const fullAddress = `${selected.barangay}, ${selected.city}, ${selected.province}, ${selected.region}`;
       
+      // Step 1: Create auth user
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -167,6 +173,21 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
       const user = data.user;
       if (!user) throw new Error("User creation failed");
 
+      // Step 2: Create profile
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .insert({
+          id: user.id,
+          full_name: fullName,
+          email: email,
+          mobile: formattedNumber,
+          gender: gender,
+          birthday: birthDate
+        });
+
+      if (profileError) throw new Error(`Profile creation failed: ${profileError.message}`);
+
+      // Step 3: Create address only after profile is created
       const { error: addressError } = await supabase
         .from("addresses")
         .insert({
@@ -181,13 +202,13 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
           is_default_shipping: true
         });
 
-      if (addressError) throw new Error(addressError.message);
+      if (addressError) throw new Error(`Address creation failed: ${addressError.message}`);
 
       setIsSuccessModalOpen(true);
       setTimeout(() => {
         setIsSuccessModalOpen(false);
         onClose();
-        navigate("/login");
+        navigate("/");
       }, 2000);
 
     } catch (error) {
@@ -216,7 +237,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
             </button>
 
             <h2 className={`text-2xl font-bold text-gray-800 mb-4 ${formTransitionClass}`}>
-              {isSignIn ? "Login" : "Sign Up"}
+              {isSignIn ? "Login" : "Register"}
             </h2>
 
             {/* Form Fields */}
@@ -243,6 +264,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
                       <option value="" disabled>Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
+                      <option value="Other">Other</option>
                     </select>
                     <input
                       type="date"
@@ -259,14 +281,23 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
                       value={signUpData.email}
                       onChange={(e) => handleInputChange(e, "signUp")}
                     />
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="Password"
-                      className="input input-bordered bg-gray-100 w-full"
-                      value={signUpData.password}
-                      onChange={(e) => handleInputChange(e, "signUp")}
-                    />
+                    <div className="relative">
+                      <input
+                        type={showPassword.signUp ? "text" : "password"}
+                        name="password"
+                        placeholder="Password"
+                        className="input input-bordered bg-gray-100 w-full"
+                        value={signUpData.password}
+                        onChange={(e) => handleInputChange(e, "signUp")}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                        onClick={() => setShowPassword(prev => ({...prev, signUp: !prev.signUp}))}
+                      >
+                        <i className={`fas ${showPassword.signUp ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                      </button>
+                    </div>
                   </div>
 
                   {/* Right Column - Address Information */}
@@ -366,32 +397,42 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center space-y-4 opacity-100 transition-opacity duration-500">
+              <div className="flex flex-col items-center space-y-4 opacity-100 transition-opacity duration-500 w-full">
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  className="input input-bordered bg-gray-100 w-full mb-4"
+                  value={signInData.email}
+                  onChange={(e) => handleInputChange(e, "signIn")}
+                />
+                <div className="relative w-full">
                   <input
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className="input input-bordered bg-gray-100 w-full mb-4"
-                    value={signInData.email}
-                    onChange={(e) => handleInputChange(e, "signIn")}
-                  />
-                  <input
-                    type="password"
+                    type={showPassword.signIn ? "text" : "password"}
                     name="password"
                     placeholder="Password"
-                    className="input input-bordered bg-gray-100 w-full mb-4"
+                    className="input input-bordered bg-gray-100 w-full pr-10" // Added pr-10 to prevent text overlap
                     value={signInData.password}
                     onChange={(e) => handleInputChange(e, "signIn")}
                   />
-                  
-                  {/* Add Forgot Password link */}
                   <button
-                    onClick={() => setIsForgotPasswordOpen(true)}
-                    className="text-sm text-purple-600 hover:text-purple-700 self-end"
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 flex items-center justify-center w-10 h-10"
+                    onClick={() => setShowPassword((prev) => ({ ...prev, signIn: !prev.signIn }))}
                   >
-                    Forgot Password?
+                    <i className={`fas ${showPassword.signIn ? "fa-eye-slash" : "fa-eye"}`}></i>
                   </button>
                 </div>
+
+                {/* Forgot Password Link */}
+                <button
+                  onClick={() => setIsForgotPasswordOpen(true)}
+                  className="text-sm text-purple-600 hover:text-purple-700 self-end"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
               )}
             </div>
 
@@ -400,13 +441,13 @@ const AuthModal = ({ isOpen, onClose, actionLog, order }) => {
               className={`btn btn-primary w-full bg-purple-600 hover:bg-purple-700 border-none mt-6 ${formTransitionClass}`}
               onClick={isSignIn ? handleSignIn : handleSignUp}
             >
-              {isSignIn ? "Login" : "Sign Up"}
+              {isSignIn ? "Login" : "Register"}
             </button>
 
             <p className={`mt-4 text-gray-600 text-center ${formTransitionClass}`}>
               {isSignIn ? "Don't have an account?" : "Already have an account?"}{" "}
               <button onClick={handleToggle} className="text-purple-500 hover:underline font-medium transition-colors duration-300">
-                {isSignIn ? "Sign Up" : "Login"}
+                {isSignIn ? "Register" : "Login"}
               </button>
             </p>
           </div>

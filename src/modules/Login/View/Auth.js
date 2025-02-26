@@ -18,6 +18,10 @@ const AuthScreen = () => {
     password: "",
   });
   const [loggedInUserId, setLoggedInUserId] = useState(null);
+  const [showPassword, setShowPassword] = useState({
+    signIn: false,
+    signUp: false
+  });
 
   const [signUpData, setSignUpData] = useState({
     fullName: "",
@@ -92,14 +96,14 @@ const AuthScreen = () => {
   };
 
   const handleSignUp = async () => {
-    const { email, password, fullName, birthDate, gender, contactNumber, address } = signUpData;
-  
+    const { email, password, fullName, birthDate, gender, contactNumber, address, postcode } = signUpData;
+
     // Validate all fields
     if (!email || !password || !fullName || !birthDate || !gender || !contactNumber || !address) {
       alert("Please fill in all the fields.");
       return;
     }
-  
+
     try {
       // Step 1: Sign up the user using Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -107,23 +111,22 @@ const AuthScreen = () => {
         password,
         options: {
           data: {
-            full_name: fullName, // Store full name in auth.users metadata
+            full_name: fullName,
           },
         },
       });
-  
+
       if (authError) {
         throw new Error(`Sign Up Error: ${authError.message}`);
       }
-  
-      const userId = authData.user?.id; // Get the user ID from the auth response
-  
+
+      const userId = authData.user?.id;
       if (!userId) {
         throw new Error("User ID not found after sign-up.");
       }
-  
-      // Step 2: Insert profile data into the `profiles` table
-      const { error: profileError } = await supabase
+
+      // Step 2: Insert profile data and explicitly wait for completion
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .insert([
           {
@@ -134,32 +137,40 @@ const AuthScreen = () => {
             mobile: contactNumber,
             birthday: birthDate,
           },
-        ]);
-  
+        ])
+        .select();
+
       if (profileError) {
         throw new Error(`Profile Insert Error: ${profileError.message}`);
       }
-  
-      // Step 3: Insert address data into the `addresses` table
+
+      // Verify profile was created successfully
+      if (!profileData || profileData.length === 0) {
+        throw new Error("Profile creation failed - no data returned");
+      }
+
+      // Step 3: Only proceed with address insertion after confirming profile creation
       const { error: addressError } = await supabase
         .from("addresses")
         .insert([
           {
             user_id: userId,
             address: address,
-            postcode: "", // Add postcode if required
-            is_default_shipping: true, // Set as default shipping address
+            postcode: postcode || "",
+            is_default_shipping: true,
           },
         ]);
-  
+
       if (addressError) {
         throw new Error(`Address Insert Error: ${addressError.message}`);
       }
-  
-      // Success
+
+      // Success - show message and navigate
       alert("Sign Up successful! Please check your email for confirmation.");
-      navigate("/Login");
+      navigate("/");
+
     } catch (error) {
+      console.error("Signup error:", error);
       alert(error.message);
     }
   };
@@ -227,14 +238,23 @@ const AuthScreen = () => {
                 value={signInData.email}
                 onChange={(e) => handleInputChange(e, "signIn")}
               />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                className="input input-bordered bg-gray-100 w-full mb-2"
-                value={signInData.password}
-                onChange={(e) => handleInputChange(e, "signIn")}
-              />
+              <div className="relative">
+                <input
+                  type={showPassword.signIn ? "text" : "password"}
+                  name="password"
+                  placeholder="Password"
+                  className="input input-bordered bg-gray-100 w-full mb-4"
+                  value={signInData.password}
+                  onChange={(e) => handleInputChange(e, "signIn")}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  onClick={() => setShowPassword(prev => ({...prev, signIn: !prev.signIn}))}
+                >
+                  <i className={`fas ${showPassword.signIn ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                </button>
+              </div>
               <div className="text-right w-full">
                 <button
                   onClick={handleForgotPassword}
@@ -301,14 +321,23 @@ const AuthScreen = () => {
                   value={signUpData.email}
                   onChange={(e) => handleInputChange(e, "signUp")}
                 />
-                <input
-                  type="password"
-                  name="password"
-                  placeholder="Password"
-                  className="input input-bordered bg-gray-100 w-full"
-                  value={signUpData.password}
-                  onChange={(e) => handleInputChange(e, "signUp")}
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword.signUp ? "text" : "password"}
+                    name="password"
+                    placeholder="Password"
+                    className="input input-bordered bg-gray-100 w-full"
+                    value={signUpData.password}
+                    onChange={(e) => handleInputChange(e, "signUp")}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                    onClick={() => setShowPassword(prev => ({...prev, signUp: !prev.signUp}))}
+                  >
+                    <i className={`fas ${showPassword.signUp ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                  </button>
+                </div>
               </div>
 
               {/* Column 2 */}
