@@ -21,7 +21,6 @@ function MerchantDashboard() {
   const [error, setError] = useState(null);
   const [artistData, setArtistData] = useState([]);
   const [showAddArt, setShowSelectedArts] = React.useState(false); // Alert Success
-  const [adName, setAdName] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [imageSrcArt, setImageSrcArt] = useState("");
   const [imageSrcArts, setImageSrcArts] = useState(null);
