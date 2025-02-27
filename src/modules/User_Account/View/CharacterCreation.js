@@ -140,7 +140,7 @@ const CharacterCustomization = () => {
               <h1 className="text-xl font-bold text-gray-800">Create Character</h1>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-gray-700 font-semibold mb-2">Name</label>
               <input
                 type="text"
@@ -148,7 +148,7 @@ const CharacterCustomization = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-            </div>
+            </div> */}
             <label className="block text-gray-700 font-semibold mb-2">Gender</label>
             <select
               className="w-full p-2 border rounded bg-white"
