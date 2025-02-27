@@ -28,6 +28,82 @@ function Artists() {
   const [selectArt2, setSelectArt2] = useState(null);
   const [reportReason, setReportReason] = useState("");
   const [otherReason, setOtherReason] = useState("");
+  const [limit, setLimit] = useState(15);
+  const [hasMore, setHasMore] = useState(true);
+  const [artworks, setArtworks] = useState([]);
+  useEffect(() => {
+    const fetchUserAndArtworks = async () => {
+      try {
+        setLoading(true);
+
+        const { data: userData, error: userError } =
+          await supabase.auth.getUser();
+
+        if (userError) {
+          console.error("Error fetching user:", userError.message);
+          return;
+        }
+
+        if (userData?.user) {
+          setUserId(userData.user.id);
+        }
+
+        await fetchArtworks(limit);
+      } catch (error) {
+        console.error("Unexpected error:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserAndArtworks();
+  }, []);
+
+  const fetchArtworks = async (newLimit = 15) => {
+    setLoading(true);
+    try {
+      const { data: arts, error } = await supabase
+        .from("artist_Arts")
+        .select(
+          `
+          id, 
+          art_Name, 
+          art_Image, 
+          art_Description, 
+          likes, 
+          artist_Id,
+          artists:artist_Id (id, artist_Name, artist_Image, is_Premium) 
+        `
+        )
+        .order("id", { ascending: false })
+        .limit(newLimit);
+
+      if (error) throw error;
+
+      if (arts.length < newLimit) {
+        setHasMore(false);
+      }
+
+      setArtworks(arts);
+    } catch (error) {
+      console.error("Error fetching artworks:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load More Function
+  const loadMore = () => {
+    if (!hasMore) return;
+    const newLimit = limit + 10;
+    setLimit(newLimit);
+    fetchArtworks(newLimit);
+  };
+
+  // Fetch artworks on mount
+  useEffect(() => {
+    fetchArtworks();
+  }, []);
 
   const handleSelectArt = async (art) => {
     if (!art) {
@@ -66,29 +142,6 @@ function Artists() {
     setSelectArt2(art2);
     setReport(true);
   };
-  useEffect(() => {
-    const fetchUserAndArtworks = async () => {
-      try {
-        const { data: userData, error: userError } =
-          await supabase.auth.getUser();
-
-        if (userError) {
-          console.error("Error fetching user:", userError.message);
-          return;
-        }
-
-        if (userData?.user) {
-          setUserId(userData.user.id);
-        }
-
-        await fetchArtworks();
-      } catch (error) {
-        console.error("Unexpected error:", error.message);
-      }
-    };
-
-    fetchUserAndArtworks();
-  }, []);
 
   const fetchLikesData = async () => {
     try {
@@ -172,25 +225,7 @@ function Artists() {
     "teal-400": "bg-teal-400",
     "indigo-400": "bg-indigo-400",
   };
-  const fetchArtworks = async () => {
-    try {
-      const { data: arts, error } = await supabase.from("artist_Arts").select(`
-        id, 
-        art_Name, 
-        art_Image, 
-        art_Description, 
-        likes, 
-        artist_Id,
-        artists:artist_Id (id, artist_Name, artist_Image, is_Premium) 
-      `);
 
-      if (error) throw error;
-
-      setArtistData(arts);
-    } catch (error) {
-      console.error("Error fetching artworks:", error.message);
-    }
-  };
   const handleLike = async (artId, currentLikes) => {
     try {
       const { data: userData, error: authError } =
@@ -665,10 +700,10 @@ function Artists() {
           </div>
           {/* Art Not premium*/}
           <div className="columns-2 sm:columns-3 md:columns-4 mb-20 gap-2 space-y-2">
-            {artistData.map((art) => (
+            {artworks.map((art) => (
               <div
                 key={art.id}
-                className={`relative hover:scale-105 hover:drop-shadow-customViolet  duration-200  shadow-lg rounded-md overflow-hidden break-inside-avoid ${
+                className={`relative hover:scale-105 hover:drop-shadow-customViolet duration-200 shadow-lg rounded-md overflow-hidden break-inside-avoid ${
                   art.artists?.is_Premium
                     ? "bg-gradient-to-r from-yellow-500 p-1.5 to-fuchsia-500 "
                     : "bg-custom-purple"
@@ -702,22 +737,23 @@ function Artists() {
                   {art.art_Name}
                 </div>
 
-                <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2  gap-2">
+                {/* Action Buttons */}
+                <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2 gap-2">
                   <div className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold">
                     {art.likes?.length || 0}
                     <box-icon
                       name="heart"
                       color={art.likes?.includes(userId) ? "red" : "gray"}
                       onClick={() => handleLike(art.id, art.likes)}
-                      className="cursor-pointer "
+                      className="cursor-pointer"
                       type="solid"
                     ></box-icon>
                   </div>
+
+                  {/* Visit Artist */}
                   <div
                     onClick={() => {
                       console.log("Selected Art Data:", art);
-                      console.log("Artist Data:", art.artist);
-
                       if (art.artists && art.artists.id) {
                         navigate(`/arts/ArtistPage/${art.artists.id}`);
                       } else {
@@ -727,7 +763,7 @@ function Artists() {
                       }
                     }}
                     data-tip="Visit Artist"
-                    className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm  text-slate-800 "
+                    className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm text-slate-800"
                   >
                     <box-icon
                       type="solid"
@@ -735,10 +771,12 @@ function Artists() {
                       color="blue"
                     ></box-icon>
                   </div>
+
+                  {/* Report Post */}
                   <div
                     onClick={() => handleSelectArtReport(art)}
                     data-tip="Report this Post"
-                    className=" tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
+                    className="tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500"
                   >
                     <box-icon
                       name="shield-x"
@@ -750,6 +788,26 @@ function Artists() {
               </div>
             ))}
           </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div>
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={loadMore}
+                  disabled={loading}
+                  className="px-4 py-2 bg-custom-purple text-white rounded-md hover:bg-primary-color glass transition flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <span className="loading loading-dots loading-md"></span>
+                  ) : (
+                    "Load More"
+                  )}
+                </button>
+              </div>
+              <div className="">{/* Make this a smoke like effect   */}</div>
+            </div>
+          )}
         </div>
       </div>
 
