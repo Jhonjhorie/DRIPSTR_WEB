@@ -26,8 +26,8 @@ const CharacterCustomization = () => {
   const [gender, setGender] = useState("Boy");
   const [selectedBodyType, setSelectedBodyType] = useState("Average");
   const [selectedHair, setSelectedHair] = useState(null);
-  const [skinColor, setSkinColor] = useState("#f5c9a6");
-  const [hairColor, setHairColor] = useState("#000000");
+  const [skincolor, setSkinColor] = useState("#f5c9a6");
+  const [haircolor, setHairColor] = useState("#000000");
   const [name, setName] = useState("");
 
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ const CharacterCustomization = () => {
       }
 
       // Validate required fields
-      if (!name || !selectedHair) {
+      if ( !selectedHair) {
         alert("Please complete all required fields before saving.");
         return;
       }
@@ -68,13 +68,12 @@ const CharacterCustomization = () => {
       // Prepare character data
       const characterData = {
         gender,
-        bodyType: selectedBodyType,
+        bodytype: selectedBodyType,
         hair: selectedHair,
-        skinColor,
-        hairColor,
+        skincolor,
+        haircolor,
         account_id: account_ID,
-        name,
-      };
+       };
 
       // Insert into Supabase database
       const { data, error } = await supabase.from("avatars").insert([characterData]);
@@ -110,9 +109,9 @@ const CharacterCustomization = () => {
               <directionalLight intensity={1.2} position={[0, 0, 1]} />
               <group>
                 {selectedHair && hairURLs[selectedHair] && (
-                  <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={hairColor} />
+                  <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={haircolor} />
                 )}
-                <Part url={currentBody} position={[0, 0, 0]} color={skinColor} />
+                <Part url={currentBody} position={[0, 0, 0]} color={skincolor} />
               </group>
              <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
             </Canvas>
@@ -140,7 +139,7 @@ const CharacterCustomization = () => {
               <h1 className="text-xl font-bold text-gray-800">Create Character</h1>
             </div>
 
-            <div>
+            {/* <div>
               <label className="block text-gray-700 font-semibold mb-2">Name</label>
               <input
                 type="text"
@@ -148,7 +147,7 @@ const CharacterCustomization = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-            </div>
+            </div> */}
             <label className="block text-gray-700 font-semibold mb-2">Gender</label>
             <select
               className="w-full p-2 border rounded bg-white"
@@ -181,7 +180,7 @@ const CharacterCustomization = () => {
                 <button
                   key={option.color}
                   className={`w-10 h-10 border-2 ${
-                    skinColor === option.color ? "border-blue-500" : "border-gray-300"
+                    skincolor === option.color ? "border-blue-500" : "border-gray-300"
                   }`}
                   style={{ backgroundColor: option.color }}
                   onClick={() => setSkinColor(option.color)}
@@ -204,7 +203,7 @@ const CharacterCustomization = () => {
             <input
               type="color"
               className="w-20 h-10 p-1 border rounded"
-              value={hairColor}
+              value={haircolor}
               onChange={(e) => setHairColor(e.target.value)}
             />
           </div>

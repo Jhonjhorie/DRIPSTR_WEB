@@ -7,7 +7,7 @@ const bodyTypeURLs = {
       Muscular: "/3d/avatars/guyz/Muscular.glb",
       PlusSize: "/3d/avatars/guyz/PlusSize.glb",
       Petite: "/3d/avatars/guyz/Thin.glb",
-      Dagul: "/3d/avatars/guyz/Dagul.glb",
+     // Dagul: "/3d/avatars/guyz/Dagul.glb",
     },
     Girl: {
       Average: "/3d/avatars/gurlz/Average.glb",
@@ -27,8 +27,10 @@ const bodyTypeURLs = {
 
   const tshirURLs = {
     Boy:{
-      Average: "/3d/wears/guyz/tshirts/Average_Tshirt.glb",
-      //Average: "/3d/uvmap/average.glb",
+      //Average: "/3d/wears/guyz/tshirts/Average_Tshirt.glb",
+      Average: "/3d/uvmap/average.glb",
+      //Average: "/3d/uvmap/untitled.glb",
+
       Muscular: "/3d/wears/guyz/tshirts/Muscular_Tshirt.glb",
       Petite: "/3d/wears/guyz/tshirts/Petite_Tshirt.glb",
       PlusSize: "/3d/wears/guyz/tshirts/PlusSize_Tshirt.glb",

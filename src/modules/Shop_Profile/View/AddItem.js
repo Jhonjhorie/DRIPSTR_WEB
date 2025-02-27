@@ -27,6 +27,8 @@ const AddItem = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategoryYN, setSelectedCategoryVouchYN] = useState("");
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
+  const [is3DEnabled, setIs3DEnabled] = useState(false);
+  const [textureFile, setTextureFile] = useState(null);
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -200,6 +202,25 @@ const AddItem = () => {
         return;
       }
 
+      // Handle texture upload if 3D is enabled
+      let texturePath = null;
+      if (is3DEnabled && textureFile) {
+        const textureFileName = `texture_${Date.now()}_${textureFile.name}`;
+        const { data: textureData, error: textureError } = await supabase.storage
+          .from('textures') // Create this bucket in Supabase
+          .upload(textureFileName, textureFile);
+
+        if (textureError) {
+          throw new Error(`Texture Upload Error: ${textureError.message}`);
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from('textures')
+          .getPublicUrl(textureFileName);
+
+        texturePath = publicUrlData.publicUrl;
+      }
+
       // Upload images for all variants
       const updatedVariants = await Promise.all(
         variants.map(async (variant) => {
@@ -252,6 +273,8 @@ const AddItem = () => {
           shop_Id: selectedShopId,
           shop_Name: shopData?.shop_name || "Unknown Shop",
           item_Variant: formattedVariants,
+          is3D: is3DEnabled,
+          texture_3D: texturePath
         },
       ]);
 
@@ -412,6 +435,9 @@ const AddItem = () => {
                     {[
                       "Top",
                       "Bottom",
+                      "Tshirt",
+                      "Longsleeves",
+                      "Sando",
                       "Tumbler",
                       "Mug",
                       "Shoes",
@@ -491,6 +517,39 @@ const AddItem = () => {
                     onChange={handleChange}
                   ></input>{" "}
                 </div>
+              </div>
+              <div className="mt-2">
+                <label className="text-slate-950 font-semibold mr-2 text-[15px]">
+                  Enable 3D Preview:
+                </label>
+                <div className="form-control">
+                  <label className="label cursor-pointer">
+                    <span className="label-text text-slate-800">Add 3D Texture</span>
+                    <input 
+                      type="checkbox" 
+                      className="toggle toggle-primary" 
+                      checked={is3DEnabled}
+                      onChange={(e) => setIs3DEnabled(e.target.checked)}
+                    />
+                  </label>
+                </div>
+
+                {is3DEnabled && (
+                  <div className="mt-2">
+                    <label className="text-slate-950 font-semibold mr-2 text-[15px]">
+                      Upload Texture File (PNG):
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/png"
+                      className="bg-custom-purple text-white p-1.5 w-full mt-2 shadow-md rounded-md"
+                      onChange={(e) => setTextureFile(e.target.files[0])}
+                    />
+                    <p className="text-xs text-slate-600 mt-1">
+                      *Upload a PNG texture file for 3D preview
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
             <div className="w-full h-full md:-mt-0 -mt-10 p-2 ">

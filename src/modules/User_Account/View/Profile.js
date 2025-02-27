@@ -121,7 +121,7 @@ const UserProfile = () => {
                     <img
                       src={profile.profile_picture || "/default-avatar.png"}
                       alt="Profile"
-                      className="w-24 h-24 rounded-full border-2 border-gray-300 mr-2 cursor-pointer"
+                      className="w-24 h-24 rounded-full border-2 object-cover border-gray-300 mr-2 cursor-pointer"
                       onClick={() => setIsModalOpen(true)}
                     />
                     <div>
