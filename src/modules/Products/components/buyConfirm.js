@@ -17,6 +17,7 @@ import AlertDialog from "./alertDialog2.js";
 import ReportDialog from "./reportModal.js";
 import WishlistButton from "./subcomponents/WishlistButton.js";
 import Product3DViewer from './Product3DViewer';
+import ClosetButton from './subcomponents/ClosetButton';
 
 const BuyConfirm = ({ item, onClose}) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -173,6 +174,7 @@ const BuyConfirm = ({ item, onClose}) => {
                       onClose={() => setShow3DView(false)}
                       className="w-full h-full"  
                       selectedColor={selectedColor}
+                      productData={item} // Pass the entire item object
                     />
                     {/* button for 3D view */}
                     <button
@@ -258,6 +260,12 @@ const BuyConfirm = ({ item, onClose}) => {
                     </div>
                     <div className="flex justify-end gap-1 items-center">
                     <WishlistButton profile={profile} item={item} isLoggedIn={isLoggedIn} />
+                    <ClosetButton 
+                      profile={profile} 
+                      item={item} 
+                      isLoggedIn={isLoggedIn} 
+                      selectedColor={selectedColor}
+                    />
                       {isLoggedIn && (
                         <button
                           onClick={mulletReport}

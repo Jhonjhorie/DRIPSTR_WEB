@@ -15,6 +15,7 @@ const AddItem = () => {
   const [showAlert3, setShowAlert3] = React.useState(false); // Alert Required fields
   const [showAlert4, setShowAlert4] = React.useState(false); // Alert Image per Variant
   const [showAlert5, setShowAlert5] = React.useState(false); // Alert Name per Variant
+  const [showAlertsize, setShowAlertsize] = React.useState(false); // Alert Name per Variant
   const [showAlert6, setShowAlert6] = React.useState(false); // Alert When no variant is added
   const [showModalDelete, setShowModalDelete] = React.useState(false); // Modal for Delete Variant Information
   const [variantToDelete, setVariantToDelete] = useState(null);
@@ -26,6 +27,8 @@ const AddItem = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategoryYN, setSelectedCategoryVouchYN] = useState("");
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
+  const [is3DEnabled, setIs3DEnabled] = useState(false);
+  const [textureFile, setTextureFile] = useState(null);
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
@@ -170,6 +173,7 @@ const AddItem = () => {
       // Validate that all variants have a selected image
       const hasMissingImages = variants.some((variant) => !variant.image);
       const hasMissingName = variants.some((variant) => !variant.name);
+      const hasMissingSize = variants.some((variant) => !variant.info || variant.info.length === 0);
       if (hasMissingName) {
         console.log("Please ensure that each variant has a Name.");
         setShowAlert5(true);
@@ -188,6 +192,34 @@ const AddItem = () => {
         setLoading(false);
         return;
       }
+      if (hasMissingSize) {
+        console.log("Please ensure that each variant has a sizes.");
+        setShowAlertsize(true);
+        setTimeout(() => {
+          setShowAlertsize(false);
+        }, 3000);
+        setLoading(false);
+        return;
+      }
+
+      // Handle texture upload if 3D is enabled
+      let texturePath = null;
+      if (is3DEnabled && textureFile) {
+        const textureFileName = `texture_${Date.now()}_${textureFile.name}`;
+        const { data: textureData, error: textureError } = await supabase.storage
+          .from('textures') // Create this bucket in Supabase
+          .upload(textureFileName, textureFile);
+
+        if (textureError) {
+          throw new Error(`Texture Upload Error: ${textureError.message}`);
+        }
+
+        const { data: publicUrlData } = supabase.storage
+          .from('textures')
+          .getPublicUrl(textureFileName);
+
+        texturePath = publicUrlData.publicUrl;
+      }
 
       // Upload images for all variants
       const updatedVariants = await Promise.all(
@@ -201,8 +233,8 @@ const AddItem = () => {
             if (error) throw error;
 
             const { data: publicUrlData } = supabase.storage
-            .from("product")
-            .getPublicUrl(filePath);
+              .from("product")
+              .getPublicUrl(filePath);
 
             return {
               ...variant,
@@ -210,7 +242,7 @@ const AddItem = () => {
               imagePath: publicUrlData.publicUrl,
             };
           }
-          return variant; //
+          return variant;
         })
       );
 
@@ -241,6 +273,8 @@ const AddItem = () => {
           shop_Id: selectedShopId,
           shop_Name: shopData?.shop_name || "Unknown Shop",
           item_Variant: formattedVariants,
+          is3D: is3DEnabled,
+          texture_3D: texturePath
         },
       ]);
 
@@ -262,13 +296,13 @@ const AddItem = () => {
       alert("Failed to add product.");
     } finally {
       setLoading(false);
-    } 
+    }
   };
   const closeConfirmAdd = () => {
     setTimeout(() => {
       setShowAlertSuccess(false);
     }, 1000);
-  }
+  };
   const removeVariant = () => {
     if (variantToDelete !== null) {
       const newVariants = variants.filter((_, i) => i !== variantToDelete);
@@ -401,6 +435,9 @@ const AddItem = () => {
                     {[
                       "Top",
                       "Bottom",
+                      "Tshirt",
+                      "Longsleeves",
+                      "Sando",
                       "Tumbler",
                       "Mug",
                       "Shoes",
@@ -419,7 +456,7 @@ const AddItem = () => {
               <label className="text-slate-950  font-semibold mr-2 text-[15px]">
                 Voucher Applicable?
               </label>
-               <div className="">
+              <div className="">
                 <div className="dropdown dropdown-top w-full">
                   <div
                     tabIndex={0}
@@ -432,10 +469,7 @@ const AddItem = () => {
                     tabIndex={0}
                     className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
                   >
-                    {[
-                      "Yes",
-                      "No",
-                    ].map((categoryyn) => (
+                    {["Yes", "No"].map((categoryyn) => (
                       <li key={categoryyn}>
                         <a onClick={() => handleCategorySelectYN(categoryyn)}>
                           {categoryyn}
@@ -484,6 +518,39 @@ const AddItem = () => {
                   ></input>{" "}
                 </div>
               </div>
+              <div className="mt-2">
+                <label className="text-slate-950 font-semibold mr-2 text-[15px]">
+                  Enable 3D Preview:
+                </label>
+                <div className="form-control">
+                  <label className="label cursor-pointer">
+                    <span className="label-text text-slate-800">Add 3D Texture</span>
+                    <input 
+                      type="checkbox" 
+                      className="toggle toggle-primary" 
+                      checked={is3DEnabled}
+                      onChange={(e) => setIs3DEnabled(e.target.checked)}
+                    />
+                  </label>
+                </div>
+
+                {is3DEnabled && (
+                  <div className="mt-2">
+                    <label className="text-slate-950 font-semibold mr-2 text-[15px]">
+                      Upload Texture File (PNG):
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/png"
+                      className="bg-custom-purple text-white p-1.5 w-full mt-2 shadow-md rounded-md"
+                      onChange={(e) => setTextureFile(e.target.files[0])}
+                    />
+                    <p className="text-xs text-slate-600 mt-1">
+                      *Upload a PNG texture file for 3D preview
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="w-full h-full md:-mt-0 -mt-10 p-2 ">
               <div
@@ -502,8 +569,12 @@ const AddItem = () => {
                         className="object-contain rounded-lg p-1 drop-shadow-customViolet"
                       />
                     </div>
-                    <div className="-ml-7    ">  <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">Add Variants</h1></div>
-                  
+                    <div className="-ml-7    ">
+                      {" "}
+                      <h1 className="text-2xl text-custom-purple iceland-regular font-extrabold">
+                        Add Variants
+                      </h1>
+                    </div>
                   </div>
                 )}
                 {variants.map((variant, index) => (
@@ -684,7 +755,7 @@ const AddItem = () => {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   ></path>
                 </svg>
-                <span className="text-sm md:text-[15px]">
+                <span className="text-sm text-white md:text-[15px]">
                   You reach the maximum variant per Item!
                 </span>
               </div>
@@ -710,7 +781,7 @@ const AddItem = () => {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   ></path>
                 </svg>
-                <span className="text-sm md:text-[15px]">
+                <span className="text-sm text-white md:text-[15px]">
                   You reach the maximum input for Variant Information!
                 </span>
               </div>
@@ -736,7 +807,7 @@ const AddItem = () => {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   ></path>
                 </svg>
-                <span className="text-sm md:text-[15px]">
+                <span className="text-sm text-white md:text-[15px]">
                   Required field is empty!
                 </span>
               </div>
@@ -762,7 +833,7 @@ const AddItem = () => {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   ></path>
                 </svg>
-                <span className="text-sm md:text-[15px]">
+                <span className="text-sm text-white md:text-[15px]">
                   Variants Image are Missing!
                 </span>
               </div>
@@ -788,8 +859,34 @@ const AddItem = () => {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   ></path>
                 </svg>
-                <span className="text-sm md:text-[15px]">
+                <span className="text-sm text-white md:text-[15px]">
                   Variants Name are Missing!
+                </span>
+              </div>
+            </div>
+          )}
+          {/* Image sizes variant */}
+          {showAlertsize && (
+            <div className="md:bottom-5  w-auto px-10 bottom-16 z-10 right-0   h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+              <div
+                role="alert"
+                className="alert  bg-custom-purple shadow-md flex items-center p-4  font-semibold rounded-md"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span className="text-sm text-white md:text-[15px]">
+                  Variants Sizes Information are Missing!
                 </span>
               </div>
             </div>
@@ -814,7 +911,7 @@ const AddItem = () => {
                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   ></path>
                 </svg>
-                <span className="text-sm md:text-[15px]">
+                <span className="text-sm text-white md:text-[15px]">
                   Please Input Atleast 1 Variant.
                 </span>
               </div>
@@ -866,9 +963,10 @@ const AddItem = () => {
                 <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
                   Item Successfully Added
                 </h2>
-                <div 
-                onClick={closeConfirmAdd}
-                className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer">
+                <div
+                  onClick={closeConfirmAdd}
+                  className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                >
                   Okay!
                 </div>
               </div>

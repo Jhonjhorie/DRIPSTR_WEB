@@ -1,27 +1,38 @@
 import React from "react";
-import SideBar from "../Component/Sidebars";
-import "../Component/Style.css";
-import logo from "../../../assets/shop/logoBlack.png";
-import { supabase } from "../../../constants/supabase";
-import Subscription from "../Component/MerchantWallet";
-import "boxicons";
-import { blockInvalidChar } from "../Hooks/ValidNumberInput";
-import questionEmote from "../../../../src/assets/emote/question.png";
-import successEmote from "../../../../src/assets/emote/success.png";
-import sadEmote from "../../../../src/assets/emote/error.png";
-import hmmEmote from "../../../../src/assets/emote/hmmm.png";
+import SideBar from "../../Component/ArtistSB";
+import logo from "../../../../assets/shop/logoBlack.png";
+import { supabase } from "@/constants/supabase";
+import questionEmote from "../../../../../src/assets/emote/question.png";
+import successEmote from "../../../../../src/assets/emote/success.png";
+import sadEmote from "../../../../../src/assets/emote/error.png";
+import hmmEmote from "../../../../../src/assets/emote/hmmm.png";
 import qrCode from "@/assets/qr.png";
 
 const { useState, useEffect } = React;
-function MerchantWallet() {
+function ArtistWallet() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [shopData, setShopData] = useState([]);
   const [walletData, setWalletData] = useState(null);
   const [activeTab, setActiveTab] = useState("history");
   const [modalOpen, setModalOpen] = useState(false);
-
-  const fetchUserProfileAndShop = async () => {
+  const [amount, setAmount] = useState("");
+  const [reason, setReason] = useState("");
+  const [message, setMessage] = useState("");
+  const [isModalOpenCO, setIsModalOpenCO] = useState(false); //CASHOUT CONFIRMATION
+  const [showAlertSuccessSubs, setShowSubs] = useState(false); //CASHOUT CONFIRMATION
+  const [showAlertBL, setIsModalOpenBL] = useState(false); //CASHOUT CONFIRMATION
+  const [showAlertExpiredSubs, setIsModalOpenExpired] = useState(false); //CASHOUT CONFIRMATION
+  const [showAlertBLSUBS, setIsModalOpenBLSUBS] = useState(false); //CASHOUT CONFIRMATION
+  const [showAlertSend, setIsModalOpenSend] = useState(false); //CASHOUT CONFIRMATION
+  const [showAlertMin, setIsModalOpenMin] = useState(false); //CASHOUT CONFIRMATION
+  const [currentUser, setCurrentUser] = useState(null);
+  const [artistData, setArtistData] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
+  const [showAlertSubscription, setShowSubscription] = useState(false);
+  const [activeTabSubs, setActiveTabSubs] = useState("Def");
+  const [inquiryText, setInquiryText] = useState("");
+  const fetchUserProfileAndArtist = async () => {
     setLoading(true);
 
     try {
@@ -40,36 +51,32 @@ function MerchantWallet() {
         console.log("Current user:", user);
         setCurrentUser(user);
 
-        const { data: shop, error: shopError } = await supabase
-          .from("shop")
+        const { data: artist, error: artistError } = await supabase
+          .from("artist")
           .select(
-            "shop_name, id, address, description, contact_number, shop_image, shop_BusinessPermit"
+            "id, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id, followers_Detail, full_Name, valid_ID"
           )
           .eq("owner_Id", user.id)
           .single();
 
-        if (shopError) {
-          throw shopError;
+        if (artistError) {
+          throw artistError;
         }
 
-        console.log("Fetched shop data:", shop);
-        setShopData(shop);
-        setMerchantId(shop.id);
+        console.log("Fetched artist data:", artist);
+        setArtistData(artist);
+        setArtistId(artist.id);
       } else {
         console.log("No user is signed in.");
         setError("No user is signed in.");
       }
     } catch (error) {
-      console.error("Error fetching user/shop data:", error.message);
-      setError("An error occurred while fetching user/shop data.");
+      console.error("Error fetching user/artist data:", error.message);
+      setError("An error occurred while fetching user/artist data.");
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchUserProfileAndShop();
-  }, []);
 
   const fetchWalletData = async () => {
     setLoading(true);
@@ -86,7 +93,7 @@ function MerchantWallet() {
     }
 
     const { data, error } = await supabase
-      .from("merchant_Wallet")
+      .from("artist_Wallet")
       .select("revenue, owner_Name, owner_ID, number, valid_ID")
       .eq("owner_ID", user.id)
       .single();
@@ -104,14 +111,10 @@ function MerchantWallet() {
     fetchWalletData();
   }, []);
 
-  //cashout magkakasama variable ko hiwalay ko muna
-  const [amount, setAmount] = useState("");
-  const [reason, setReason] = useState("");
-  const [message, setMessage] = useState("");
-  const [isModalOpenCO, setIsModalOpenCO] = useState(false); //CASHOUT CONFIRMATION
-  const [showAlertBL, setIsModalOpenBL] = useState(false); //CASHOUT CONFIRMATION
-  const [showAlertSend, setIsModalOpenSend] = useState(false); //CASHOUT CONFIRMATION
-  const [showAlertMin, setIsModalOpenMin] = useState(false); //CASHOUT CONFIRMATION
+  useEffect(() => {
+    fetchUserProfileAndArtist();
+  }, []);
+
   const handleSubmitCashout = async () => {
     if (!amount || !reason) {
       setMessage("Please enter both amount and reason.");
@@ -119,7 +122,7 @@ function MerchantWallet() {
     }
 
     setLoading(true);
-    const { error } = await supabase.from("merchant_Cashout").insert([
+    const { error } = await supabase.from("artist_Cashout").insert([
       {
         full_Name: walletData.owner_Name,
         owner_Id: walletData.owner_ID,
@@ -141,6 +144,7 @@ function MerchantWallet() {
     }
     setLoading(false);
   };
+
   const handleSubmitCashoutcONF = async () => {
     if (!amount || !reason) {
       setMessage("Please enter both amount and reason.");
@@ -161,98 +165,67 @@ function MerchantWallet() {
       setTimeout(() => setIsModalOpenBL(false), 3000);
       return;
     }
-    setIsModalOpenCO(true); // Open confirmation modal before submitting
+    setIsModalOpenCO(true);
   };
 
-  //transaction history
-  const [transactions, setTransactions] = useState([]);
-  const fetchTransactions = async () => {
-    setLoading(true);
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      console.error("Error fetching user:", authError?.message);
-      setLoading(false);
-      return;
-    }
-
-    const { data, error } = await supabase
-      .from("merchant_Cashout")
-      .select("id, created_at, qty, reason, status")
-      .eq("owner_Id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching transactions:", error.message);
-      setLoading(false);
-      return;
-    }
-
-    setTransactions(data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchTransactions();
-  }, []);
-
-  //subscribe
-  const [showAlertSubscription, setShowSubscription] = useState(false);
-  const [openScan, setOpenscan] = useState(false);
-  const [activeTabSubs, setActiveTabSubs] = useState("Def");
-  const [inquiryText, setInquiryText] = useState("");
-
-  //payment subscription
-  const [currentUser, setCurrentUser] = useState(null);
-  const [merchantId, setMerchantId] = useState(null);
+  const [artistId, setArtistId] = useState(null);
   const [walletNote, setWalletNote] = useState("");
   const [gcashAmount, setGcashAmount] = useState("");
   const [gcashProof, setGcashProof] = useState(null);
-  const [isPremium, setIsPremium] = useState(false);
   const [subscriptionExpiry, setSubscriptionExpiry] = useState(null);
   const [showPendingModal, setShowPendingModal] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const [hasShownExpirationAlert, setHasShownExpirationAlert] = useState(false);
-  const [showAlertExpiredSubs, setIsModalOpenExpired] = useState(false); //Expired CONFIRMATION
-  const [showAlertSuccessSubs, setShowSubs] = useState(false);
+  const [openScan, setOpenscan2] = useState(false);
+
   const handleSubmitWalletSubscription = async () => {
-    if (!currentUser || !merchantId) {
+    if (!currentUser || !artistId) {
       setError("User or shop ID not found.");
-      console.error("User or shop ID not found:", currentUser, merchantId);
-      console.log("Alert: User or shop ID not found.");
+      console.error("User or shop ID not found:", currentUser, artistId);
       alert("User or shop ID not found.");
       return;
     }
-    console.log("Submitting subscription:", currentUser, merchantId);
+    console.log("Submitting subscription:", currentUser, artistId);
     setLoading(true);
+
     try {
-      const subscriptionAmount = 500;
+      const subscriptionAmount = 250;
       const reason = walletNote;
 
       // Fetch current wallet balance
       const { data: wallet, error: walletError } = await supabase
-        .from("merchant_Wallet")
+        .from("artist_Wallet")
         .select("revenue")
         .eq("owner_ID", currentUser.id)
         .single();
+
       if (walletError || !wallet) {
         throw new Error("Failed to retrieve wallet balance.");
       }
+
       const currentBalance = parseFloat(wallet.revenue || "0");
+
+      // Alert if balance is below 250
+      if (currentBalance < 250) {
+        setIsModalOpenBLSUBS(true);
+        setTimeout(() => setIsModalOpenBLSUBS(false), 3000);
+        setLoading(false);
+        return;
+      }
+
       if (currentBalance < subscriptionAmount) {
-        throw new Error("Insufficient wallet balance.");
+        setIsModalOpenBLSUBS(true);
+        setTimeout(() => setIsModalOpenBLSUBS(false), 3000);
+        setLoading(false);
+        return;
       }
 
       // Deduct subscription fee from wallet
       const newBalance = currentBalance - subscriptionAmount;
       const { error: updateWalletError } = await supabase
-        .from("merchant_Wallet")
+        .from("artist_Wallet")
         .update({ revenue: newBalance.toString() })
         .eq("owner_ID", currentUser.id);
+
       if (updateWalletError) {
         throw updateWalletError;
       }
@@ -265,30 +238,35 @@ function MerchantWallet() {
         .split("T")[0];
       // Insert subscription record for Wallet payment
       const { error: subscriptionError } = await supabase
-        .from("merchant_Subscription")
+        .from("artist_Subscription")
         .insert([
           {
             user_Id: currentUser.id,
-            merchant_Id: merchantId,
+            artist_Id: artistId,
             payment: "Dripstr Wallet",
             reason: reason,
             status: "Completed",
             subs_Enddate: formattedExpirationDate,
           },
         ]);
+
       if (subscriptionError) {
         throw subscriptionError;
       }
+
+      // Update artist to premium
       const { error: updateShopError } = await supabase
-        .from("shop")
+        .from("artist")
         .update({ is_Premium: true })
-        .eq("id", merchantId);
+        .eq("id", artistId);
+
       if (updateShopError) {
         throw updateShopError;
       }
+
       // Log cashout transaction
       const { error: cashoutError } = await supabase
-        .from("merchant_Cashout")
+        .from("artist_Cashout")
         .insert([
           {
             full_Name: currentUser.full_Name,
@@ -297,40 +275,39 @@ function MerchantWallet() {
             reason: "Subscription",
             status: "Completed",
             subscription: "Dripstr Monthly Merchant Boost Plan",
-            subs_HM: "500",
+            subs_HM: "200",
           },
         ]);
+
       if (cashoutError) {
         throw cashoutError;
       }
-      checkSubscriptionStatus();
-      fetchTransactions();
-      fetchUserProfileAndShop();
-      fetchWalletData();
+
+      console.log("Alert: Subscription successful via Wallet!");
       setShowSubs(true);
       setTimeout(() => setShowSubs(false), 3000);
       setShowSubscription(false);
-      console.log("Alert: Subscription successful via Wallet!");
-
+      fetchTransactions();
+      fetchWalletData();
+      fetchUserProfileAndArtist();
+      checkSubscriptionStatus();
     } catch (err) {
       console.error("Wallet Subscription error:", err.message);
-      console.log("Alert error:", err.message);
       alert(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // GCash Subscription Submission
   const handleSubmitGcashSubscription = async () => {
-    if (!currentUser || !merchantId) {
+    if (!currentUser || !artistId) {
       setError("User or shop ID not found.");
       return;
     }
     setLoading(true);
     try {
       // For GCash, the user enters an amount and uploads a proof of payment.
-      const amount = gcashAmount; // from state
+      const amount = gcashAmount;
       if (!amount) {
         throw new Error("Please enter an amount.");
       }
@@ -338,8 +315,7 @@ function MerchantWallet() {
         throw new Error("Please upload proof of payment.");
       }
 
-      // Upload proof of payment file to Supabase Storage
-      const filePath = `proofs/${currentUser.id}_${Date.now()}_${gcashProof.name
+      const filePath = `proofsarts/${currentUser.id}_${Date.now()}_${gcashProof.name
         }`;
       const { data, error: uploadError } = await supabase.storage
         .from("wallet_docs")
@@ -356,11 +332,11 @@ function MerchantWallet() {
 
       // Insert subscription record for GCash payment
       const { error: subscriptionError } = await supabase
-        .from("merchant_Subscription")
+        .from("artist_Subscription")
         .insert([
           {
             user_Id: currentUser.id,
-            merchant_Id: merchantId,
+            artist_Id: artistId,
             payment: "GCash",
             screenshot: proofURL,
             reason: "",
@@ -371,9 +347,9 @@ function MerchantWallet() {
         throw subscriptionError;
       }
       const { error: updateShopError } = await supabase
-        .from("shop")
+        .from("artist")
         .update({ is_Premium: false })
-        .eq("id", merchantId);
+        .eq("id", artistId);
       if (updateShopError) {
         throw updateShopError;
       }
@@ -386,80 +362,50 @@ function MerchantWallet() {
       setLoading(false);
     }
   };
-  // Function to handle subscription expiration when closing the modal
-  const handleSubscriptionExpiration = async (artistId) => {
-    try {
-      // Validate that artistId is a valid number/string
-      if (!artistId || typeof artistId !== "number") {
-        console.error("Invalid artistId:", artistId);
-        return;
-      }
-      // Insert cashout record
-      const { error: cashoutError } = await supabase
-        .from("merchant_Cashout")
-        .insert([
-          {
-            full_Name: currentUser.full_Name || "Unknown Merchant",
-            owner_Id: currentUser.id,
-            qty: "250",
-            reason: "Subscription",
-            status: "Subscription Expired",
-            subscription: "Dripstr Monthly Merchant Boost Plan",
-            subs_HM: "500",
-          },
-        ]);
+  const [transactions, setTransactions] = useState([]);
+  const [hasShownExpirationAlert, setHasShownExpirationAlert] = useState(false);
+  const fetchTransactions = async () => {
+    setLoading(true);
 
-      if (cashoutError) {
-        console.error("Failed to insert cashout record:", cashoutError.message);
-        return;
-      }
-      // Close the modal permanently
-      setIsModalOpenExpired(false);
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-      // Update subscription status in the database
-      const { error } = await supabase
-        .from("merchant_Subscription")
-        .update({ status: "Expired" })
-        .eq("user_Id", currentUser.id)
-        .in("status", ["Completed", "Expire"]);
-
-      if (error) {
-        console.error("Failed to update subscription status:", error.message);
-        return;
-      }
-      console.log("Subscription status updated to Expired.");
-
-      // Update artist to non-premium
-      console.log("Updating Merchant premium status for merchantId:", merchantId);
-      const { error: artistError } = await supabase
-        .from("shop")
-        .update({ is_Premium: false })
-        .eq("id", merchantId);
-
-      if (artistError) {
-        console.error(
-          "Failed to update artist premium status:",
-          artistError.message
-        );
-        return;
-      }
-      console.log("Artist is no longer premium.");
-      fetchTransactions();
-      checkSubscriptionStatus();
-      fetchUserProfileAndShop();
-      console.log("Cashout record inserted successfully.");
-    } catch (err) {
-      console.error("Error handling subscription expiration:", err.message);
+    if (authError || !user) {
+      console.error("Error fetching user:", authError?.message);
+      setLoading(false);
+      return;
     }
+
+    const { data, error } = await supabase
+      .from("artist_Cashout")
+      .select("id, created_at, qty, reason, status")
+      .eq("owner_Id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching transactions:", error.message);
+      setLoading(false);
+      return;
+    }
+
+    setTransactions(data);
+    setLoading(false);
   };
+  useEffect(() => {
+    console.log("Fetching transactions...");
+    fetchTransactions();
+  }, []);
+
   const checkSubscriptionStatus = async () => {
     if (!currentUser) return;
     setLoading(true);
 
     try {
       const { data: subscriptions, error } = await supabase
-        .from("merchant_Subscription")
-        .select("subs_Enddate, status, merchant_Id")
+        .from("artist_Subscription")
+        .select("subs_Enddate, status, artist_Id")
         .eq("user_Id", currentUser.id)
         .order("created_at", { ascending: false })
         .limit(1);
@@ -512,7 +458,7 @@ function MerchantWallet() {
             setIsPending(false);
 
             // Pass artist_Id to handleSubscriptionExpiration
-            return latestSub.merchant_Id;
+            return latestSub.artist_Id;
           } else {
             // Subscription is still valid
             setIsPremium(true);
@@ -544,6 +490,73 @@ function MerchantWallet() {
     }
   };
 
+  // Function to handle subscription expiration when closing the modal
+  const handleSubscriptionExpiration = async (artistId) => {
+    try {
+      // Validate that artistId is a valid number/string
+      if (!artistId || typeof artistId !== "number") {
+        console.error("Invalid artistId:", artistId);
+        return;
+      }
+      // Insert cashout record
+      const { error: cashoutError } = await supabase
+        .from("artist_Cashout")
+        .insert([
+          {
+            full_Name: currentUser.full_Name || "Unknown Artist",
+            owner_Id: currentUser.id,
+            qty: "250",
+            reason: "Subscription",
+            status: "Subscription Expired",
+            subscription: "Dripstr Monthly Merchant Boost Plan",
+            subs_HM: "250",
+          },
+        ]);
+
+      if (cashoutError) {
+        console.error("Failed to insert cashout record:", cashoutError.message);
+        return;
+      }
+      // Close the modal permanently
+      setIsModalOpenExpired(false);
+
+      // Update subscription status in the database
+      const { error } = await supabase
+        .from("artist_Subscription")
+        .update({ status: "Expired" })
+        .eq("user_Id", currentUser.id)
+        .in("status", ["Completed", "Expire"]);
+
+      if (error) {
+        console.error("Failed to update subscription status:", error.message);
+        return;
+      }
+      console.log("Subscription status updated to Expired.");
+
+      // Update artist to non-premium
+      console.log("Updating artist premium status for artistId:", artistId);
+      const { error: artistError } = await supabase
+        .from("artist")
+        .update({ is_Premium: false })
+        .eq("id", artistId);
+
+      if (artistError) {
+        console.error(
+          "Failed to update artist premium status:",
+          artistError.message
+        );
+        return;
+      }
+      console.log("Artist is no longer premium.");
+      fetchTransactions();
+      fetchUserProfileAndArtist();
+      checkSubscriptionStatus();
+      console.log("Cashout record inserted successfully.");
+    } catch (err) {
+      console.error("Error handling subscription expiration:", err.message);
+    }
+  };
+
   // Call checkSubscriptionStatus when currentUser is set
   useEffect(() => {
     if (currentUser) {
@@ -557,12 +570,14 @@ function MerchantWallet() {
         <SideBar />
       </div>
       <div className="text-3xl text-custom-purple font-bold py-4">
-        <h1>Your Merchant Wallet</h1>
+        <h1>Your Artist Wallet</h1>
       </div>
       <div className="flex gap-2 w-full h-auto">
         <div className="w-1/3  h-full flex flex-col items-center">
           <div
-            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${isPremium ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]" : ""
+            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${isPremium
+              ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]"
+              : ""
               }`}
           >
             {/* Wallet Icon and Name */}
@@ -626,11 +641,10 @@ function MerchantWallet() {
           </div>
           <div className="w-full mt-5">
             <div
-            
+              onClick={() => setShowSubscription(true)}
               className="justify-end flex w-auto relative"
             >
               <h1
-                onClick={() => setShowSubscription(true)}
                 className="cursor-pointer w-auto glass bg-red-600 text-white font-semibold shadow-red-400 shadow-md p-2 rounded-md hover:scale-95 duration-200
       animate-none hover:animate-[shake_1s_ease-in-out_infinite]  flex items-center gap-2"
               >
@@ -646,7 +660,6 @@ function MerchantWallet() {
           </div>
         </div>
       </div>
-
       <div className=" w-full border-b-2 border-slate-400 shadow-lg h-1 mt-2 "></div>
       <div className="w-full h-auto  justify-items-center">
         {/* Content Display */}
@@ -851,7 +864,7 @@ function MerchantWallet() {
         </div>
       )}
       {showAlertBL && (
-        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-30 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
@@ -879,6 +892,66 @@ function MerchantWallet() {
               />
             </svg>
             <span>Your Current Balance is Low!</span>
+          </div>
+        </div>
+      )}
+      {showAlertSuccessSubs && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-30 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={sadEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-yellow-600 glass shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Successfully Avail SUBSCRIPTION!</span>
+          </div>
+        </div>
+      )}
+      {showAlertExpiredSubs && (
+        <div className="fixed  inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white relative p-6 rounded-lg shadow-lg w-1/3">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
+              {" "}
+            </div>
+            <div className="mt-2 justify-center flex ">
+              <img
+                src={sadEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+            <h3 className="text-lg text-center font-semibold text-slate-900 mb-4">
+              Your Subscription has Expired!
+            </h3>
+
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => handleSubscriptionExpiration(artistId)}
+                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
+              >
+                Okay
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -947,17 +1020,17 @@ function MerchantWallet() {
         </div>
       )}
       {showAlertSubscription && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-5 w-[600px] rounded-md shadow-md relative">
             {/* Gradient Header Line */}
             <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
 
             {/* Title */}
             <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900">
-              Subscribe to Dripstr's Monthly Merchant Boost Plan!
+              Subscribe to Dripstr's Monthly Artist Boost Plan!
             </h2>
             {/* Content*/}
-            <div className="bg-slate-200 py-4 rounded-sm p-2">
+            <div className="bg-slate-200 py-2 rounded-sm p-2">
               {/* Success Emote */}
               {isPending ? (
                 <div className="p-4 bg-yellow-100 rounded-md shadow-md">
@@ -986,7 +1059,7 @@ function MerchantWallet() {
                 <>
                   {activeTabSubs === "Def" && (
                     <div>
-                      <div className="flex justify-center p-5">
+                      <div className="flex justify-center">
                         <img
                           src={successEmote}
                           alt="Success Emote"
@@ -994,30 +1067,34 @@ function MerchantWallet() {
                         />
                       </div>
                       {/* Benefits Section */}
-                      <div className=" text-slate-800 space-y-3">
+                      <div className="text-slate-800 space-y-3">
                         <p className="text-lg font-semibold text-center">
-                          🚀 Why Subscribe?
+                          🚀 Why Boost Your Art?
                         </p>
                         <ul className="text-sm space-y-2 list-disc list-inside">
                           <li>
-                            <strong>Increased Visibility:</strong> Your products
-                            get featured for better exposure.
+                            <strong>Eye-Catching Border:</strong> Your artwork
+                            gets a distinct border to stand out and grab
+                            attention.
                           </li>
                           <li>
-                            <strong>Exclusive Promotions:</strong> Access to
-                            special discounts and marketing campaigns.
+                            <strong>Priority Placement:</strong> Your art
+                            appears at the top of Dripstr's page for maximum
+                            visibility.
                           </li>
                           <li>
-                            <strong>Priority Support:</strong> Get faster
-                            customer assistance whenever you need it.
+                            <strong>Increased Exposure:</strong> More potential
+                            clients will discover your work, leading to higher
+                            engagement.
                           </li>
                           <li>
-                            <strong>Advanced Analytics:</strong> Gain insights
-                            on sales trends and customer behavior.
+                            <strong>Enhanced Recognition:</strong> Get noticed
+                            faster with a premium display that differentiates
+                            you from others.
                           </li>
                           <li>
-                            <strong>More Sales Opportunities:</strong> Stand out
-                            from competitors with premium placements.
+                            <strong>More Sales Opportunities:</strong> Gain a
+                            competitive edge with improved reach and visibility.
                           </li>
                         </ul>
                       </div>
@@ -1037,7 +1114,7 @@ function MerchantWallet() {
                           </div>
                         </div>
                         <p className="text-start text-slate-800 font-semibold">
-                          Subscription Fee: ₱500
+                          Subscription Fee: ₱250
                         </p>
                         <label className="text-sm text-slate-800">
                           Type note for Dripstr (Optional):
@@ -1068,18 +1145,15 @@ function MerchantWallet() {
                             </h3>
                           </div>
                           <div
-                            onClick={() => setOpenscan(true)}
+                            onClick={() => setOpenscan2(true)}
                             data-tip="Scan here"
                             className="tooltip-right tooltip w-auto h-auto cursor-pointer"
                           >
                             <box-icon name="qr" color="black"></box-icon>
                           </div>
                         </div>
-                        <label className="text-sm text-slate-800">
-                          Type the Amount:
-                        </label>
                         <p className="text-start text-slate-800 font-semibold">
-                          Subscription Fee: ₱500
+                          Subscription Fee: ₱250
                         </p>
                         <label className="text-sm text-slate-800">
                           Proof of payment:
@@ -1101,7 +1175,6 @@ function MerchantWallet() {
                   )}
                 </>
               )}
-
             </div>
 
             {/* Action Buttons */}
@@ -1111,8 +1184,8 @@ function MerchantWallet() {
                   onClick={() => setActiveTabSubs("Wallet")}
                   disabled={isPending || isPremium}
                   className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-primary-color"
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-primary-color"
                     }`}
                 >
                   Pay via Dripstr Wallet
@@ -1121,8 +1194,8 @@ function MerchantWallet() {
                   onClick={() => setActiveTabSubs("Gcash")}
                   disabled={isPending || isPremium}
                   className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
-                      ? "opacity-50 cursor-not-allowed"
-                      : "hover:bg-blue-700"
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-blue-700"
                     }`}
                 >
                   Pay via Gcash
@@ -1148,7 +1221,7 @@ function MerchantWallet() {
                 </div>
                 <button
                   onClick={() => {
-                    setOpenscan(false);
+                    setOpenscan2(false);
                   }}
                   className="absolute -top-2 right-0 text-custom-purple text-3xl p-2 drop-shadow-lg "
                 >
@@ -1157,72 +1230,42 @@ function MerchantWallet() {
               </div>
             </div>
           )}
-        </div>
-      )}
-      {showAlertExpiredSubs && (
-        <div className="fixed  inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white relative p-6 rounded-lg shadow-lg w-1/3">
-            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
-              {" "}
-            </div>
-            <div className="mt-2 justify-center flex ">
-              <img
-                src={sadEmote}
-                alt="Success Emote"
-                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-              />
-            </div>
-            <h3 className="text-lg text-center font-semibold text-slate-900 mb-4">
-              Your Subscription has Expired!
-            </h3>
-
-            <div className="flex justify-center gap-4">
-              <button
-                onClick={() => handleSubscriptionExpiration(merchantId)}
-                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
-              >
-                Okay
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-       {showAlertSuccessSubs && (
-              <div className="md:bottom-5  w-auto px-10 bottom-10 z-30 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-                <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
-                  <div className="mt-10 ">
-                    <img
-                      src={successEmote}
-                      alt="Success Emote"
-                      className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-                    />
-                  </div>
-                </div>
-                <div
-                  role="alert"
-                  className="alert bg-yellow-600 glass shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 shrink-0 stroke-current"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Successfully Avail SUBSCRIPTION!</span>
+          {showAlertBLSUBS && (
+            <div className="md:bottom-5  w-auto px-10 bottom-10 z-30 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+              <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+                <div className="mt-10 ">
+                  <img
+                    src={sadEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                  />
                 </div>
               </div>
-            )}
-      
-      
+              <div
+                role="alert"
+                className="alert bg-yellow-600 shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 shrink-0 stroke-current"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <span>Your Current Balance is Low!</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
-export default MerchantWallet;
+export default ArtistWallet;

@@ -721,6 +721,13 @@ function ArtistPage() {
       setMessageStatus(data.message_dot);
     }
   };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchMessages();
+    }, 3000); 
+  
+    return () => clearInterval(interval);
+  }, [currentUser?.id, artist?.id]); 
   
   const handleUploadImage = async () => {
     if (!imageFile) return null;

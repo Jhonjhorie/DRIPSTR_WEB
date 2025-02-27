@@ -6,7 +6,7 @@ import { supabase } from "../../../constants/supabase";
 import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 import sadEmote from "../../../../src/assets/emote/sad.png";
 import successEmote from "../../../../src/assets/emote/success.png";
-
+import questionEmote from "../../../../src/assets/emote/question.png";
 const { useState, useEffect } = React;
 
 function Products() {
@@ -15,9 +15,13 @@ function Products() {
   const [isModalOpenItems, setIsModalOpenItem] = useState(false); //Modal for Items
   const [isModalOpenAds, setIsModalOpenAds] = useState(false); //Modal for ads
   const [isModalImage, setIsModalOpenImage] = useState(false); //View Image
+  const [adAdsAlert, setAdAdsAlert] = useState(false);
   const [imageSrc, setImageSrc] = React.useState("");
   const [showAlert, setShowAlert] = React.useState(false); // Alert
+  const [showAlertAd, setShowAlertAD] = React.useState(false); // Alert
   const [showAlertUnpost, setShowAlertUnpost] = React.useState(false); // Alert Unpost
+  const [showAlertdelAD, setShowAlertDelad] = React.useState(false); // Alert Unpost
+  const [showAlertDelConAd, setShowAlertDelConad] = React.useState(false); // Alert Unpost
   const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete Item
   const [showAlert2, setShowAlert2] = React.useState(false); // Alert Confirm Post
   const [showAlertEditDone, setShowAlertEditDone] = React.useState(false); // Alert
@@ -41,7 +45,9 @@ function Products() {
   const [imageSrcAd, setImageSrcAd] = useState("");
   const [imageSrcAds, setImageSrcAds] = useState(null);
   const [selectedShopId, setSelectedShopId] = useState(null);
-
+  const [selectedAd, setSelectedAd] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  //mali ako huhu pinagsamasama ko mga to di ko matrack minsan kong anong modal, alert, etc yung may kulang HAHAHAHHUHU
   const fetchUserProfileAndShop = async () => {
     setLoading(true);
 
@@ -386,17 +392,17 @@ function Products() {
         .delete()
         .eq("prod_id", selectedItem.id);
 
-      if (cartError) throw cartError; 
+      if (cartError) throw cartError;
 
       const { error: ordersError } = await supabase
         .from("orders")
         .delete()
         .eq("prod_num", selectedItem.id);
 
-      if (ordersError) throw ordersError; 
+      if (ordersError) throw ordersError;
 
       const { error } = await supabase
-        .from("shop_Product") 
+        .from("shop_Product")
         .delete()
         .eq("id", selectedItem.id);
 
@@ -420,10 +426,19 @@ function Products() {
   const handleCloseModal = async () => {
     // Close all modals and reset data
     setIsModalOpenItem(false);
-    setIsModalOpenAds(false);
     setViewPost(false);
     setSelectedItem(null);
-
+    // Fetch updated shop and product details
+    await fetchUserProfileAndShop();
+  };
+  const handleCloseModalAD = async () => {
+    // Close all modals and reset data
+    setIsModalOpenAds(false);
+    setImageSrcAd(null);
+    setImageSrcAds(null);
+    setImageFile(null);
+    setAdName("");
+    document.getElementById("imageInput").value = "";
     // Fetch updated shop and product details
     await fetchUserProfileAndShop();
   };
@@ -483,11 +498,51 @@ function Products() {
       item_Variant: updatedVariants,
     });
   };
+  const handleDeleteAd = async () => {
+    if (!selectedAd) return;
 
+    try {
+      const { data: shopData, error: fetchError } = await supabase
+        .from("shop")
+        .select("shop_Ads")
+        .eq("id", selectedShopId)
+        .single();
+  
+      if (fetchError) {
+        console.error("Error fetching shop ads:", fetchError);
+        alert("Failed to fetch shop ads.");
+        return;
+      }
+  
+      const updatedAds = shopData.shop_Ads.filter((ad) => ad.id !== selectedAd.id);
+
+      const { error: updateError } = await supabase
+        .from("shop")
+        .update({ shop_Ads: updatedAds })
+        .eq("id", selectedShopId);
+  
+      if (updateError) {
+        console.error("Error deleting ad:", updateError);
+        alert("Failed to delete the ad.");
+        return;
+      }
+  
+      setIsViewModalOpen(false);
+      await fetchUserProfileAndShop();
+  
+      setShowAlertDelad(true);
+      setTimeout(() => setShowAlertDelad(false), 3000);
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred.");
+    }
+  };
+  
   //Shops ads images
   const handleAddAd = async () => {
     if (!imageSrcAd || !adName) {
-      alert("Please provide both the ad name and marketing visual.");
+      setShowAlertAD(true);
+      setTimeout(() => setShowAlertAD(false), 3000);
       return;
     }
 
@@ -530,7 +585,7 @@ function Products() {
         return;
       }
 
-      const imageUrl = publicUrlData?.publicUrl; // Get the public URL
+      const imageUrl = publicUrlData?.publicUrl;
 
       if (!imageUrl) {
         alert("Failed to get image URL.");
@@ -556,8 +611,16 @@ function Products() {
         console.error("Error adding ad:", updateError.message);
         alert("Failed to add ad.");
       } else {
-        alert("Ad successfully added!");
+        setAdAdsAlert(true);
+        setTimeout(() => setAdAdsAlert(false), 3000);
+
+        setImageSrcAd(null);
+        setImageSrcAds(null);
+        setImageFile(null);
+        setAdName("");
+        document.getElementById("imageInput").value = "";
         handleCloseModal();
+        setIsModalOpenAds(false);
       }
     } catch (error) {
       console.error("Unexpected error:", error);
@@ -571,6 +634,10 @@ function Products() {
     //ADS
     setIsModalOpenAds(true);
   };
+  const handleViewAd = (ad) => {
+    setSelectedAd(ad);
+    setIsViewModalOpen(true);
+  };
   //Ads image appear in the div
   const handleImagePick = (event) => {
     const file = event.target.files[0];
@@ -582,6 +649,7 @@ function Products() {
       setImageSrcAds(URL.createObjectURL(file)); // Show preview
     } else {
       setImageSrcAd("");
+      setImageSrcAds(null);
     }
   };
   const cancelImage = () => {
@@ -590,7 +658,7 @@ function Products() {
   };
 
   return (
-    <div className="h-full w-full overflow-y-scroll bg-slate-300 px-2 md:px-10 lg:px-20 custom-scrollbar">
+    <div className="h-full w-full  bg-slate-300 px-2 md:px-10 lg:px-20 ">
       <div className="absolute mx-3 right-0 z-10">
         <SideBar />
       </div>
@@ -814,6 +882,7 @@ function Products() {
                           {ad.ad_Name || "No Name"}
                         </div>
                         <div
+                          onClick={() => handleViewAd(ad)}
                           className="h-full w-24 bg-slate-500 place-content-center items-center rounded-md font-semibold
             hover:text-white hover:bg-custom-purple glass duration-300 cursor-pointer hover:scale-95 flex"
                         >
@@ -850,7 +919,10 @@ function Products() {
       {/* Add Advertisement Modal */}
       {isModalOpenAds && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 h-auto w-full md:w-3/4 pt-2 lg:w-1/2 m-2 md:m-0 auto">
+          <div className="bg-white relative rounded-md p-5 h-auto w-full md:w-3/4 pt-2 lg:w-1/2 m-2 md:m-0 auto">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
+              {" "}
+            </div>
             <div className="font-medium text-slate-800 py-2 w-full flex justify-between place-items-center  ">
               <span className="font-bold text-[20px] md:text-2xl">
                 Add Shop Advertisement Photo
@@ -913,21 +985,27 @@ function Products() {
             <div className="flex justify-between w-full">
               <button
                 className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
+                onClick={handleCloseModalAD}
               >
                 Close
               </button>
               <button
-                className="bg-green-500  text-white px-4 py-2 rounded hover:bg-green-700"
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center justify-center gap-2"
                 onClick={handleAddAd}
+                disabled={loading}
               >
-                Add
+                {loading ? (
+                  <>
+                    <span className="loading loading-dots loading-sm"></span>
+                  </>
+                ) : (
+                  "Add"
+                )}
               </button>
             </div>
           </div>
         </div>
       )}
-
       {/* ALLERTS */}
       {showAlert && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
@@ -958,6 +1036,39 @@ function Products() {
               />
             </svg>
             <span>Item Posted in the Shop</span>
+          </div>
+        </div>
+      )}
+      {showAlertAd && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain h-40 w-40 rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-info shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-900 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+
+            <span>Please Complete all the Field!</span>
           </div>
         </div>
       )}
@@ -1006,7 +1117,7 @@ function Products() {
           </div>
           <div
             role="alert"
-            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-900 text-slate-50 font-semibold rounded-md"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1025,7 +1136,6 @@ function Products() {
           </div>
         </div>
       )}
-
       {/* EDIT, VIEW, POST, REMOVE ITEM */}
       {selectedItem && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
@@ -1093,15 +1203,14 @@ function Products() {
                   >
                     REMOVE
                   </div>
-               
                 </div>
                 <div
-                    onClick={handleCloseModal}
-                    className="bg-custom-purple w-full bottom-2 p-1 justify-center flex iceland-regular rounded-sm glass 
+                  onClick={handleCloseModal}
+                  className="bg-custom-purple w-full bottom-2 p-1 justify-center flex iceland-regular rounded-sm glass 
                   hover:scale-95 duration-300 cursor-pointer absolute text-black font-semibold hover:bg-primary-color"
-                  >
-                    CLOSE
-                  </div>
+                >
+                  CLOSE
+                </div>
               </div>
               <div className="bg-slate-900 w-full h-full overflow-hidden relative overflow-y-scroll custom-scrollbar">
                 <div className=" w-full bg-white h-auto px-2 ">
@@ -1492,7 +1601,6 @@ function Products() {
           )}
         </div>
       )}
-
       {isModalImage && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
           <div className="bg-white relative rounded-lg p-5 h-auto w-full md:w-3/12  m-2 md:m-0 auto">
@@ -1533,6 +1641,99 @@ function Products() {
           </div>
         </div>
       )}
+      {adAdsAlert && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Advertisement photo is Added in the Shop.</span>
+          </div>
+        </div>
+      )}
+      {isViewModalOpen && selectedAd && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75">
+          <div className="bg-white rounded-lg p-5 w-full max-w-md shadow-lg relative">
+          <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
+            <h2 className="text-xl font-bold text-custom-purple mb-3">
+              {selectedAd.ad_Name}
+            </h2>
+            <div className="w-full h-64 flex justify-center items-center bg-slate-200 rounded-md">
+              <img
+                src={selectedAd.ad_Image}
+                alt={selectedAd.ad_Name || "Advertisement"}
+                className="w-full h-full object-contain rounded-md shadow-md"
+              />
+            </div>
+            <div className="flex justify-between mt-2">
+              <button  onClick={() => setIsViewModalOpen(false)} className="duration-200  bg-custom-purple glass hover:bg-primary-color text-white  px-2 py-1 rounded">
+                Close
+              </button>
+
+              <button onClick={handleDeleteAd} className="duration-200  hover:bg-red-700 glass text-white bg-red-500 px-2 py-1 rounded">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAlertdelAD && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+          <div className="mt-10 ">
+            <img
+              src={successEmote}
+              alt="Success Emote"
+              className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+            />
+          </div>
+        </div>
+        <div
+          role="alert"
+          className="alert alert-success shadow-md flex items-center p-4 bg-red-600 text-slate-50 font-semibold rounded-md"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 shrink-0 stroke-current mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>Advertisement is Successfully Deleted.</span>
+        </div>
+      </div>
+      )}
+  
     </div>
   );
 }
