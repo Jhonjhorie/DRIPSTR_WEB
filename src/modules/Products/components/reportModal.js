@@ -8,6 +8,7 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
   const [reason, setReason] = useState(null);
   const isProd = type === "product";
   const isShop = type === "shop";
+  const isTicket = type === "admin";
   const [isOpen, setIsOpen] = useState(false);
 
   // Reasons for reporting a product
@@ -31,7 +32,16 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
     "Other",
   ];
 
-  const reasons = isProd ? productReasons : isShop ? shopReasons : [];
+  // Reasons for reporting a ticket
+  const ticketReasons = [
+    "Technical Issue",
+    "Billing Problem",
+    "Feature Request",
+    "Bug Report",
+    "Other",
+  ];
+
+  const reasons = isProd ? productReasons : isShop ? shopReasons : isTicket ? ticketReasons : [];
 
   const onConfirm = async () => {
     if (!reason) {
@@ -97,27 +107,57 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
         console.error("Unexpected error:", err);
         return { success: false, error: err.message };
       }
+    } else if (isTicket) {
+      try {
+        const { data, error } = await supabase.from("reported_Tickets").insert([
+          {
+            acc_id: accId,
+            ticket_Title: "Ticket/Feedback",
+            reason: reason,
+            action: "Pending Review",
+          },
+        ]);
+
+        if (error) {
+          console.error("Error reporting Ticket:", error.message);
+          return { success: false, error: error.message };
+        }
+
+        setMascotR(true);
+
+        setTimeout(() => {
+          setMascotR(false);
+          onClose();
+        }, 3000);
+
+        return { success: true, data };
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        return { success: false, error: err.message };
+      }
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="font-sans sm:w-full max-w-[60.40rem] h-[27rem] bg-slate-50 rounded-lg shadow-lg  mx-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[99]">
+      <div className="font-sans sm:w-full max-w-[60.40rem] h-[27rem] bg-slate-50 rounded-lg shadow-lg mx-4">
         {mascotR ? (
           <div className="flex flex-col items-center justify-center h-full w-full p-6">
             <img
               src={require("@/assets/emote/success.png")}
               alt="No Images Available"
-              className="object-contain animate-pulse drop-shadow-customViolet "
+              className="object-contain animate-pulse drop-shadow-customViolet"
             />
             <span className="text-xl text-center mt-4">
               {isProd
                 ? "Item reported successfully, Thank you for your Feedback!"
-                : "Shop reported successfully, Thank you for your Feedback!"}
+                : isShop
+                ? "Shop reported successfully, Thank you for your Feedback!"
+                : "Ticket reported successfully, Thank you for your Feedback!"}
             </span>
           </div>
         ) : (
-          <div className="flex flex-col md:flex-row h-full ">
+          <div className="flex flex-col md:flex-row h-full">
             <div className="flex-col w-full md:w-80 relative items-center flex justify-center p-6">
               <img
                 src={require("@/assets/emote/error.png")}
@@ -130,11 +170,15 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
               </p>
             </div>
             <div className="flex flex-wrap h-full bg-slate-200 w-full p-6 pb-12 justify-between">
-              <div className="flex flex-col justify-start h-full w-full ">
+              <div className="flex flex-col justify-start h-full w-full">
                 <div className="flex justify-between items-start">
-                  <div className="flex items-start ">
+                  <div className="flex items-start">
                     <p className="text-2xl text-slate-500 font-medium">
-                      {isProd ? "Report Product:" : "Report Shop:"}
+                      {isProd
+                        ? "Report Product:"
+                        : isShop
+                        ? "Report Shop:"
+                        : "Report Ticket:"}
                     </p>
                   </div>
                   <button
@@ -145,7 +189,11 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
                   </button>
                 </div>
                 <h1 className="text-3xl font-semibold text-slate-900 mt-4">
-                  {isProd ? item.item_Name : item.shop_name}?
+                  {isProd
+                    ? item?.item_Name || "Unknown Product"
+                    : isShop
+                    ? item?.shop_name || "Unknown Shop"
+                    : item?.title || "Unknown Ticket"}
                 </h1>
 
                 <div className="mt-3">
@@ -183,7 +231,7 @@ const ReportDialog = ({ item, onClose, type, accId }) => {
                   </div>
                 </div>
               </div>
-              <div className="w-full flex justify-end ">
+              <div className="w-full flex justify-end">
                 <button
                   onClick={onConfirm}
                   className="w-full md:w-auto h-10 px-6 font-semibold rounded-md bg-secondary-color border-primary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"

@@ -69,11 +69,18 @@ const BuyConfirm = ({ item, onClose}) => {
 
 
   const closeModalRep = () => {
-    document.getElementById("my_modal_report").close();
+    const modal =  document.getElementById("my_modal_report");
+    if (modal) {
+    modal.close();
+    }
+
   };
 
   const mulletReport = () => {
-    document.getElementById("my_modal_report").showModal();
+    const modal =  document.getElementById("my_modal_report");
+    if (modal) {
+      modal.showModal();
+    }
   };
 
   const handleAddToCart = async () => {

@@ -40,6 +40,36 @@ function PlaceOrder() {
     }
   };
 
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("addresses")
+          .select("id, address, postcode, is_default_shipping, full_address")
+          .eq("user_id", profile.id);
+
+        if (error) throw error;
+
+        if (data.length > 0) {
+          setAddresses(data);
+          const defaultAddress = data.find((addr) => addr.is_default_shipping);
+          if (defaultAddress) {
+            setSelectedAddress(defaultAddress);
+            setSelectedPostcode(defaultAddress.postcode);
+          } else {
+            setSelectedAddress(data[0]);
+            setSelectedPostcode(data[0].postcode);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching addresses:", err.message);
+      }
+    };
+
+    fetchAddresses();
+  }, [profile]);
+
+
   const calculateEstimatedDelivery = () => {
     const today = new Date();
     const start = addDays(today, 5);

@@ -3,14 +3,15 @@ import { faX } from "@fortawesome/free-solid-svg-icons";
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/constants/supabase";
 import chatSupportData from "@/constants/chatSupportData.json";
+import ReportDialog from "../../Products/components/reportModal";
 
 const ChatSupport = ({ onClose, profile }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [isBotTyping, setIsBotTyping] = useState(false); // Track bot typing state
+  const [isBotTyping, setIsBotTyping] = useState(false); 
   const chatContainerRef = useRef(null);
-  const inputRef = useRef(null); // Ref for the input field
+  const inputRef = useRef(null); 
 
   useEffect(() => {
     if (profile?.id) {
@@ -31,6 +32,18 @@ const ChatSupport = ({ onClose, profile }) => {
       inputRef.current.focus();
     }
   }, []);
+
+  const closeModalHelp = () => {
+    const modal =  document.getElementById("my_modal_Help");
+    if (modal) {
+    modal.close()}
+  };
+
+  const openModalHelp = () => {
+    const modal =  document.getElementById("my_modal_Help");
+    if (modal) {
+      modal.showModal()};
+  };
 
   const fetchChatHistory = async () => {
     const { data, error } = await supabase
@@ -246,8 +259,11 @@ const ChatSupport = ({ onClose, profile }) => {
           )}
         </div>
 
-        <div className="p-4 bg-gray-200">
+        <div className="p-4 bg-gray-200 flex items-end justify-between">
           <div className="flex flex-wrap">{renderSuggestedQuestions()}</div>
+          <button 
+          onClick={() => {openModalHelp()}}
+          className="btn btn-outline btn-sm m-1">Help/Submit Ticket</button>
         </div>
 
         <div className="p-4 border-t border-gray-200 bg-white">
@@ -270,6 +286,22 @@ const ChatSupport = ({ onClose, profile }) => {
           </div>
         </div>
       </div>
+      <dialog
+              id="my_modal_Help"
+              className="modal modal-bottom sm:modal-middle absolute z-[80] right-4 sm:right-0"
+            >
+              <ReportDialog
+                onClose={closeModalHelp}
+                accId={profile.id}
+                type={"admin"}
+              />
+              <form
+                method="dialog"
+                className="modal-backdrop min-h-full min-w-full absolute "
+              >
+                <button onClick={closeModalHelp}></button>
+              </form>
+            </dialog>
     </div>
   );
 };
