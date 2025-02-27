@@ -122,7 +122,7 @@ function PlaceOrder() {
         0
       );
 
-      totalPrice = shopTotal;
+      totalPrice += shopTotal;
       if (isFirstShop && productVouchers.length > 0) {
         const productDiscount = productVouchers.reduce(
           (sum, v) => sum + v.discount,
@@ -407,7 +407,7 @@ function PlaceOrder() {
                         />
                       </div>
                       <div>
-                        <h1 className="text-3xl font-semibold">
+                        <h1 className="text-2xl font-semibold">
                           {item.prod.item_Name}
                         </h1>
                         <h1 className="text-md mt-1">

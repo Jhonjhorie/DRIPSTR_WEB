@@ -6,7 +6,7 @@ import React from "react";
 const Contact = ({ onClose }) => {
   return (
     <div className="fixed flex items-center justify-center  bg-opacity-50 z-50">
-      <div className="font-sans sm:w-full max-w-[30.40rem] h-[17rem] bg-slate-50 rounded-lg shadow-lg mx-4 flex flex-col overflow-hidden">
+      <div className="font-sans sm:w-full max-w-[30.40rem]  h-[17rem] bg-slate-50 rounded-lg shadow-lg mx-4 flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b border-gray-200 bg-white">
           <div className="flex flex-col items-center justify-center h-6 w-6">
@@ -26,7 +26,7 @@ const Contact = ({ onClose }) => {
             <FontAwesomeIcon icon={faX} />
           </button>
         </div>
-        <div className=" overflow-y-auto p-6 justify-between px-10 text-semibold font-[iceland] text-lg   custom-scrollbar flex text-gray-700">
+        <div className=" overflow-y-auto p-6 justify-between px-10 text-semibold font-[iceland] text-lg gap-10  custom-scrollbar flex text-gray-700">
           <div className="mt-4 ">
             <h1 className="text-lg font-semibold">Contact Information</h1>
             <p className="flex items-center mt-4">
@@ -40,7 +40,7 @@ const Contact = ({ onClose }) => {
           <div className="mt-4  ">
             <h1 className="text-lg font-semibold ">Social</h1>
             <div className="mt-4 flex gap-6 items-center flex-col">
-            <a href="https://www.facebook.com/profile.php?id=100077049286014" className="cursor-pointer">
+            <a href="https://www.facebook.com/profile.php?id=100077049286014" className="cursor-pointer hover:scale-125 duration-300 transition-al">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -51,7 +51,7 @@ const Contact = ({ onClose }) => {
                   <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
                 </svg>
               </a>
-              <a href="https://x.com/?mx=2" className="cursor-pointer">
+              <a href="https://x.com/?mx=2" className="cursor-pointer hover:scale-125 duration-300 transition-all">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"

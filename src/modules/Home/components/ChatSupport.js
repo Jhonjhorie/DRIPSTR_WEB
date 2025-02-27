@@ -8,7 +8,9 @@ const ChatSupport = ({ onClose, profile }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [isBotTyping, setIsBotTyping] = useState(false); // Track bot typing state
   const chatContainerRef = useRef(null);
+  const inputRef = useRef(null); // Ref for the input field
 
   useEffect(() => {
     if (profile?.id) {
@@ -21,7 +23,14 @@ const ChatSupport = ({ onClose, profile }) => {
       chatContainerRef.current.scrollTop =
         chatContainerRef.current.scrollHeight;
     }
-  }, [messages, currentQuestion]);
+  }, [messages, currentQuestion, isBotTyping]);
+
+  useEffect(() => {
+    // Focus on the input field when the component mounts
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   const fetchChatHistory = async () => {
     const { data, error } = await supabase
@@ -59,51 +68,63 @@ const ChatSupport = ({ onClose, profile }) => {
     await saveMessage(input, false);
     setInput("");
 
-    let response = null;
-    if (currentQuestion) {
-      response = currentQuestion.followUp?.find(
-        (q) => q.question.toLowerCase() === input.toLowerCase()
-      );
-    } else {
-      response = chatSupportData?.find(
-        (q) => q.question.toLowerCase() === input.toLowerCase()
-      );
+    // Focus on the input field after sending a message
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
 
-    if (response) {
-      const botMessage = { message: response.answer, is_bot: true };
-      await saveMessage(response.answer, true);
-      setCurrentQuestion(response);
-    } else {
-      const defaultMessage = {
-        message:
-          "I'm sorry, I didn't understand that. Can you please rephrase?",
-        is_bot: true,
-      };
-      await saveMessage(defaultMessage.message, true);
-    }
+    // Simulate bot typing
+    setIsBotTyping(true);
+
+    setTimeout(async () => {
+      let response = null;
+      if (currentQuestion) {
+        response = currentQuestion.followUp?.find(
+          (q) => q.question.toLowerCase() === input.toLowerCase()
+        );
+      } else {
+        response = chatSupportData?.find(
+          (q) => q.question.toLowerCase() === input.toLowerCase()
+        );
+      }
+
+      if (response) {
+        const botMessage = { message: response.answer, is_bot: true };
+        await saveMessage(response.answer, true);
+        setCurrentQuestion(response);
+      } else {
+        const defaultMessage = {
+          message:
+            "I'm sorry, I didn't understand that. Can you please rephrase?",
+          is_bot: true,
+        };
+        await saveMessage(defaultMessage.message, true);
+      }
+
+      
+      setIsBotTyping(false);
+    }, 3000); 
   };
 
   const handleStartOver = () => {
-    setCurrentQuestion(null); 
+    setCurrentQuestion(null);
   };
 
   const formatTime = (timestamp) => {
-    const date = new Date(timestamp); 
-    const hours = date.getHours(); 
-    const minutes = date.getMinutes(); 
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
 
     const formattedHours = String(hours).padStart(2, "0");
     const formattedMinutes = String(minutes).padStart(2, "0");
 
-    // Return time in HH:MM format
     return `${formattedHours}:${formattedMinutes}`;
   };
 
   const renderMessages = () => {
     if (messages.length > 0) {
       return messages.map((msg, index) => {
-        const formattedTime = formatTime(msg.created_at); // Format the timestamp
+        const formattedTime = formatTime(msg.created_at);
 
         return (
           <div
@@ -116,7 +137,7 @@ const ChatSupport = ({ onClose, profile }) => {
                   <img
                     alt="DripCat"
                     src={require("@/assets/emote/success.png")}
-                      className="object-contain"
+                    className="object-contain"
                   />
                 </div>
               </div>
@@ -139,18 +160,15 @@ const ChatSupport = ({ onClose, profile }) => {
       });
     } else {
       return (
-        <div
-       
-          className='flex h-full w-full items-center justify-center text-3xl font-bold flex-col gap-4'
-        >
-            <div className="h-40 w-40  rounded-full">
-                  <img
-                    alt="DripCat"
-                    src={require("@/assets/emote/success.png")}
-                    className="object-contain "
-                  />
-                </div>
-            Need Support? DripCat is Here
+        <div className="flex h-full w-full items-center justify-center text-3xl font-bold flex-col gap-4">
+          <div className="h-40 w-40 rounded-full">
+            <img
+              alt="DripCat"
+              src={require("@/assets/emote/success.png")}
+              className="object-contain"
+            />
+          </div>
+          Need Support? DripCat is Here
         </div>
       );
     }
@@ -158,8 +176,8 @@ const ChatSupport = ({ onClose, profile }) => {
 
   const renderSuggestedQuestions = () => {
     const questions = currentQuestion
-      ? currentQuestion.followUp || [] // Fallback to an empty array if followUp is undefined
-      : chatSupportData || []; // Fallback to an empty array if chatSupportData is undefined
+      ? currentQuestion.followUp || []
+      : chatSupportData || [];
 
     return (
       <>
@@ -172,7 +190,7 @@ const ChatSupport = ({ onClose, profile }) => {
             {q.question}
           </button>
         ))}
-        {currentQuestion && ( // Show "Start Over" only if there's a current question
+        {currentQuestion && (
           <button
             onClick={handleStartOver}
             className="btn btn-outline btn-sm m-1"
@@ -185,8 +203,8 @@ const ChatSupport = ({ onClose, profile }) => {
   };
 
   return (
-    <div className="fixed flex items-center justify-center  bg-opacity-50 z-50 font-[iceland]">
-      <div className=" sm:w-full max-w-[60.40rem] h-[40rem] bg-slate-50 rounded-lg shadow-lg mx-4 flex flex-col overflow-hidden">
+    <div className="fixed flex items-center justify-center bg-opacity-50 z-50 font-[iceland]">
+      <div className="sm:w-full max-w-[60.40rem] h-[40rem] bg-slate-50 rounded-lg shadow-lg mx-4 flex flex-col overflow-hidden">
         <div className="flex justify-between items-center p-2 border-b border-gray-200 bg-white">
           <div className="flex flex-col items-center justify-center h-6 w-6">
             <img
@@ -209,6 +227,23 @@ const ChatSupport = ({ onClose, profile }) => {
           className="flex-1 overflow-y-auto custom_scrollbar p-4 bg-gray-100"
         >
           {renderMessages()}
+          {isBotTyping && (
+            <div className="chat chat-start">
+              <div className="chat-image avatar">
+                <div className="w-10 rounded-full">
+                  <img
+                    alt="DripCat"
+                    src={require("@/assets/emote/success.png")}
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+              <div className="chat-header">DripCat</div>
+              <div className="chat-bubble bg-primary-color p-2 text-white">
+                <Typing />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="p-4 bg-gray-200">
@@ -224,6 +259,7 @@ const ChatSupport = ({ onClose, profile }) => {
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
               placeholder="Type your message..."
               className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-color"
+              ref={inputRef} // Ref for the input field
             />
             <button
               onClick={handleSendMessage}
@@ -239,3 +275,11 @@ const ChatSupport = ({ onClose, profile }) => {
 };
 
 export default ChatSupport;
+
+const Typing = () => (
+  <div className="flex items-center h-6 space-x-1">
+    <div className="w-2 h-2 drop-shadow-md bg-white rounded-full animate-bounce transition-all"></div>
+    <div className="w-2 h-2 drop-shadow-md bg-white rounded-full animate-bounce transition-all delay-300"></div>
+    <div className="w-2 h-2 drop-shadow-md bg-white rounded-full animate-bounce transition-all delay-500"></div>
+  </div>
+);
