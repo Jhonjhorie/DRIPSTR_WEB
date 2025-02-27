@@ -135,12 +135,12 @@ const Header = () => {
             <Cart closeDrawer={closeDrawer} cartItems2={cartItems} setCartItems={setCartItems} />
           </div>
         </div>
-        <button onClick={toggleChat} aria-label="Open chat">
+        {/*<button onClick={toggleChat} aria-label="Open chat">
           <FontAwesomeIcon
             icon={faMessage}
             className="indicator text-black hover:text-[--primary-color]"
           />
-        </button> 
+        </button> */}
         <button onClick={handleAuth} aria-label="User account">
           {user ? (
             <FontAwesomeIcon

@@ -11,14 +11,14 @@ import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
 import ItemOptions from "./itemOptions.js";
 import useUserProfile from "@/shared/mulletCheck.js";
-import LoginFirst from "@/shared/mulletFirst";
 import AuthModal from "@/shared/login/Auth.js";
 import useCarts from "../hooks/useCart.js";
 import AlertDialog from "./alertDialog2.js";
 import ReportDialog from "./reportModal.js";
+import WishlistButton from "./subcomponents/WishlistButton.js";
 import Product3DViewer from './Product3DViewer';
 
-const BuyConfirm = ({ item, onClose }) => {
+const BuyConfirm = ({ item, onClose}) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [loginDialog, setLoginDialog] = useState(false);
   const [actionLog, setActionLog] = useState("");
@@ -44,7 +44,7 @@ const BuyConfirm = ({ item, onClose }) => {
   const handleDecrement = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   };
-
+  
   const handleInputChange = (e) => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value) && value > 0) {
@@ -99,8 +99,8 @@ const BuyConfirm = ({ item, onClose }) => {
         onClose();
       }, 2000);
     } else {
-      setLoginDialog(true);
-      setActionLog("cart");
+      setLoginDialog(true)
+
     }
   };
 
@@ -125,6 +125,7 @@ const BuyConfirm = ({ item, onClose }) => {
 
       navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
     } else {
+
       setActionLog("placeOrder");
       setLoginDialog(true);
     }
@@ -144,7 +145,7 @@ const BuyConfirm = ({ item, onClose }) => {
     );
   } else {
     return (
-      <div className="  font-[iceland]  w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg overflow-hidden">
+      <div className="  font-[iceland]  w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg z-50 overflow-hidden">
         {mascot ? (
           <div className="flex flex-col items-center justify-center h-full w-full">
             <img
@@ -249,11 +250,7 @@ const BuyConfirm = ({ item, onClose }) => {
                       </div>
                     </div>
                     <div className="flex justify-end gap-1 items-center">
-                      {isLoggedIn && (
-                        <button class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
-                          <FontAwesomeIcon icon={faHeart} />
-                        </button>
-                      )}
+                    <WishlistButton profile={profile} item={item} isLoggedIn={isLoggedIn} />
                       {isLoggedIn && (
                         <button
                           onClick={mulletReport}
@@ -389,14 +386,7 @@ const BuyConfirm = ({ item, onClose }) => {
       <AuthModal
         isOpen={loginDialog}
         onClose={() => setLoginDialog(false)}
-        action={actionLog}
-        order={{
-          itemT: item,
-          qty: quantity,
-          variant: selectedColor,
-          size: selectedSize,
-          to_order: true,
-        }}
+        item={(item)}
       />
     )}
 

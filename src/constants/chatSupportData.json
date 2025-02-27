@@ -1,0 +1,179 @@
+[
+    {
+      "id": 1,
+      "question": "What is DRIPSTR?",
+      "answer": "DRIPSTR is an integrated e-commerce and design software system for 3D apparel creation and virtual shopping experiences. It allows customers to shop for unique fashion items, try them on virtually, and customize their orders.",
+      "followUp": [
+        {
+          "id": 2,
+          "question": "How does DRIPSTR work for customers?",
+          "answer": "Customers can browse unique products, try them on using a 3D avatar, customize their orders, and securely checkout. They can also track their orders and enjoy hassle-free returns.",
+          "followUp": [
+            {
+              "id": 3,
+              "question": "How do I try on clothes virtually?",
+              "answer": "You can create a personalized 3D avatar by entering your body measurements. The system allows you to visualize how clothes fit from every angle before purchasing."
+            },
+            {
+              "id": 4,
+              "question": "What payment methods does DRIPSTR accept?",
+              "answer": "DRIPSTR accepts GCash and Cash on Delivery (COD). Payments are processed securely, and you’ll receive an order confirmation immediately."
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "question": "How does DRIPSTR work for artists?",
+          "answer": "Artists can upload their designs, set up a portfolio, and monetize their work. They can also accept commissions and collaborate with merchants to bring their designs to life.",
+          "followUp": [
+            {
+              "id": 6,
+              "question": "How do I upload my designs?",
+              "answer": "After signing up as an artist, you can upload your designs in compatible file formats through your artist dashboard. Organize and categorize your work to make it easy for merchants to discover."
+            },
+            {
+              "id": 7,
+              "question": "How do I earn as an artist?",
+              "answer": "You earn from commissions and sales of your designs. DRIPSTR also provides opportunities to collaborate with merchants and grow your audience."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "question": "How do I report a product issue?",
+      "answer": "If you encounter an issue with a product (e.g., wrong item, damaged goods, or incorrect size), you can report it through your order history. Provide details and upload photos for faster resolution.",
+      "followUp": [
+        {
+          "id": 9,
+          "question": "What details should I include in my report?",
+          "answer": "Include your order number, product name, issue description, and clear photos of the problem. This helps us resolve your issue quickly."
+        },
+        {
+          "id": 10,
+          "question": "How long does it take to resolve a product issue?",
+          "answer": "Most issues are resolved within 3-5 business days. You’ll receive updates via email or through your DRIPSTR account."
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "question": "How do I report a bug or technical issue?",
+      "answer": "If you encounter a bug or technical issue, go to the 'Help' section and submit a bug report. Describe the issue, include screenshots if possible, and provide steps to reproduce the problem.",
+      "followUp": [
+        {
+          "id": 12,
+          "question": "What information should I include in a bug report?",
+          "answer": "Include your device type, browser/OS version, a description of the issue, and steps to reproduce it. Screenshots or screen recordings are highly helpful."
+        },
+        {
+          "id": 13,
+          "question": "How long does it take to fix a bug?",
+          "answer": "The time to fix a bug depends on its complexity. Critical issues are prioritized and resolved within 1-2 business days, while minor issues may take longer."
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "question": "How do I get help with my account?",
+      "answer": "If you need help with your account (e.g., login issues, password reset, or account settings), visit the 'Help' section or contact DRIPSTR support directly.",
+      "followUp": [
+        {
+          "id": 15,
+          "question": "How do I reset my password?",
+          "answer": "Click 'Forgot Password' on the login page, enter your email, and follow the instructions sent to your inbox to reset your password."
+        },
+        {
+          "id": 16,
+          "question": "What if I can’t access my email?",
+          "answer": "If you can’t access your email, contact DRIPSTR support with your account details (e.g., username, phone number) for further assistance."
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "question": "How do I track my order?",
+      "answer": "You can track your order by logging into your DRIPSTR account and visiting the 'Order History' section. You’ll see the current status and estimated delivery date.",
+      "followUp": [
+        {
+          "id": 18,
+          "question": "What if my order status hasn’t updated?",
+          "answer": "If your order status hasn’t updated for several days, contact DRIPSTR support with your order number for assistance."
+        },
+        {
+          "id": 19,
+          "question": "Can I change my shipping address after placing an order?",
+          "answer": "You can change your shipping address only if the order hasn’t been shipped. Contact DRIPSTR support immediately to request the change."
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "question": "How do I request a refund?",
+      "answer": "To request a refund, go to the 'Order History' section, select the order, and submit a refund request. Provide a reason and upload photos if applicable.",
+      "followUp": [
+        {
+          "id": 21,
+          "question": "What is the refund policy?",
+          "answer": "Refunds are processed for eligible items within 7-10 business days. Items must be unworn, in their original packaging, and returned within the specified timeframe."
+        },
+        {
+          "id": 22,
+          "question": "How long does it take to receive a refund?",
+          "answer": "Refunds are processed within 7-10 business days after the merchant receives the returned item. You’ll receive a confirmation email once the refund is issued."
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "question": "How do I contact DRIPSTR support?",
+      "answer": "You can contact DRIPSTR support through the 'Help' section on the platform. Provide your query or issue, and our team will assist you promptly.",
+      "followUp": [
+        {
+          "id": 24,
+          "question": "What are DRIPSTR’s support hours?",
+          "answer": "DRIPSTR support is available 24/7 via email and live chat. Phone support is available from 9 AM to 6 PM (GMT+8)."
+        },
+        {
+          "id": 25,
+          "question": "How do I escalate an issue?",
+          "answer": "If your issue isn’t resolved, you can escalate it by contacting support and requesting a supervisor. Provide your case number for faster processing."
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "question": "How do I report a seller or merchant?",
+      "answer": "If you have an issue with a seller (e.g., fraudulent activity, poor service, or policy violations), you can report them through the 'Help' section. Provide details and evidence to support your claim.",
+      "followUp": [
+        {
+          "id": 27,
+          "question": "What happens after I report a seller?",
+          "answer": "DRIPSTR will investigate the issue and take appropriate action, which may include warning the seller, suspending their account, or removing their store."
+        },
+        {
+          "id": 28,
+          "question": "Can I remain anonymous when reporting a seller?",
+          "answer": "Yes, your identity will remain confidential when reporting a seller. DRIPSTR prioritizes user privacy and security."
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "question": "How do I provide feedback or suggestions?",
+      "answer": "You can submit feedback or suggestions through the 'Help' section or email support@dripstr.com. We value your input and use it to improve our platform.",
+      "followUp": [
+        {
+          "id": 30,
+          "question": "Will I receive a response to my feedback?",
+          "answer": "While we may not respond to every submission, we review all feedback and use it to enhance the DRIPSTR experience."
+        },
+        {
+          "id": 31,
+          "question": "Can I suggest new features?",
+          "answer": "Yes, we welcome feature suggestions! Submit your ideas through the 'Help' section, and our team will consider them for future updates."
+        }
+      ]
+    }
+  ]

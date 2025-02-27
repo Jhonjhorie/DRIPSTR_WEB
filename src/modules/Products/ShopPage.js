@@ -15,6 +15,7 @@ import ProductsView from "./components/ProductsView.js";
 import { categories } from "@/constants/categories.ts";
 import useProducts from "./hooks/useProducts";
 import useUserProfile from "@/shared/mulletCheck";
+import MerchantFollow from "./components/subcomponents/MerchantFollow.js";
 
 function ShopPage() {
   const location = useLocation();
@@ -48,7 +49,7 @@ function ShopPage() {
   }
 
   return (
-    <div className="w-full relative inset-0  items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 py-4">
+    <div className="w-full font-[iceland] relative inset-0  items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 py-4">
       <dialog
         id="my_modal_reportS"
         className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
@@ -109,9 +110,7 @@ function ShopPage() {
               </div>
               {isLoggedIn && (
                 <div className="flex gap-2 min-h-[12.5rem] items-start ">
-                  <button className="flex-none flex items-center justify-center px-2 gap-1 h-10 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 font-[iceland] hover:border-slate-800">
-                    <FontAwesomeIcon icon={faHeart} /> Follow
-                  </button>
+                <MerchantFollow profile={profile} shop={shop} isLoggedIn={isLoggedIn} />
                   <button
                     onClick={mulletReport}
                     className="flex-none flex items-center justify-center  h-10 px-2 gap-1 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border font-[iceland] border-slate-400 hover:border-slate-800"

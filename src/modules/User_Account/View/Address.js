@@ -52,7 +52,6 @@ const Address = () => {
       fetchAddresses();
     }
   }, [userId]);
-
   const fetchUser = async () => {
     setLoading(true);
     const { data: { user }, error } = await supabase.auth.getUser();

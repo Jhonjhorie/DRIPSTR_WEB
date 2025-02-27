@@ -1,11 +1,8 @@
 // src/pages/Home.js
 import React, { useState } from "react";
 import Carousel from "./components/Carousel";
-import NameCard from "./components/nameCard";
-import CategoriesRibbon from "../Products/components/CategoriesRibbon";
+
 import ProductsView from "../Products/components/ProductsView";
-import MallRibbon from "../Products/components/MallRibbon";
-import FilterProducts from "../Products/components/FilterProducts";
 import LandingPage from "./Landing";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -15,8 +12,12 @@ import {
   faTags,
   faFileContract,
   faQuestion,
+  faContactCard,
+  faHeadset,
 } from "@fortawesome/free-solid-svg-icons";
 import SectionWrapper from "./components/SectionWrapper";
+import { useNavigate } from "react-router-dom";
+import Contact from "@/shared/products/Contact";
 
 //Data
 import { MallItems } from "@/constants/mallItems.ts";
@@ -28,12 +29,15 @@ import InvitationCard from "./components/invitationCard";
 import LoadingMullet from "@/shared/Loading";
 import TermsCon from "@/shared/products/termsCon";
 import FaQCom from "../../shared/products/faqCom";
+import VoucherStream from "./components/VoucherStream";
+import ChatSupport from "./components/ChatSupport";
 
 function Home() {
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState(categories[0].label);
   const { products, loading, error } = useProducts();
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
+  const navigate = useNavigate();
 
   if (loadingP) return <LoadingMullet />;
 
@@ -62,19 +66,42 @@ function Home() {
       modal.close();
     }
   };
+  const openModalCont = () => {
+    const modal = document.getElementById("my_modal_Cont");
+    if (modal) {
+    modal.showModal();
+    }
+  };
+  const closeModalCont = () => {
+    const modal = document.getElementById("my_modal_Cont");
+    if (modal) {
+      modal.close();
+    }
+    
+  };
+  const openModalChatBot = () => {
+    const modal = document.getElementById("my_modal_Chatbot");
+    if (modal) {
+    modal.showModal();
+    }
+  };
+  const closeModalChatBot = () => {
+    const modal = document.getElementById("my_modal_Chatbot");
+    if (modal) {
+      modal.close();
+    }
+    
+  };
 
   return (
-    <div className=" w-full relative inset-0 bg-slate-300 flex flex-col ">
+    <div className=" w-full relative inset-0 bg-slate-300 flex flex-col">
       <div className="flex  gap-4 md:flex-row justify-center items-center p-4 h-[49%] lg:h-[48%]">
         <Carousel images={Images} />
       </div>
-      {/* <div className="flex flex-col-reverse gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
-        <CategoriesRibbon
-          active={filCat}
-          categories={categories}
-          onItemClick={(label) => setFilCat(label)}
-        />
-      </div> */}
+      <div className="flex  gap-4 md:flex-row w-full justify-center items-center p-4 ">
+        {isLoggedIn &&  <VoucherStream profile={profile}/> }
+     
+      </div>
       <div className="flex flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 font-[iceland]">
         <SectionWrapper
           title="Discounted Products"
@@ -137,15 +164,21 @@ function Home() {
       </div>
       <button
         onClick={openModalTerms}
-        class="flex-none flex fixed bottom-2 right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
+        class="flex-none flex fixed bottom-16 right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
       >
         <FontAwesomeIcon icon={faFileContract} />
       </button>
       <button
         onClick={openModalFaq}
-        class="flex-none flex fixed bottom-12 right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
+        class="flex-none flex fixed bottom-28 right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
       >
         <FontAwesomeIcon icon={faQuestion} />
+      </button>
+      <button
+        onClick={openModalChatBot}
+        class="flex-none flex fixed bottom-40 right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
+      >
+        <FontAwesomeIcon icon={faHeadset} />
       </button>
       <dialog
         id="my_modal_terms"
@@ -171,6 +204,52 @@ function Home() {
           <button onClick={closeModalFaq}></button>
         </form>
       </dialog>
+      <dialog
+        id="my_modal_Cont"
+        className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
+      >
+        <Contact onClose={closeModalCont} />
+        <form
+          method="dialog"
+          className="modal-backdrop min-h-full min-w-full absolute "
+        >
+          <button onClick={closeModalCont}></button>
+        </form>
+      </dialog>
+      <dialog
+        id="my_modal_Chatbot"
+        className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
+      >
+        <ChatSupport onClose={closeModalChatBot} profile={profile} />
+        <form
+          method="dialog"
+          className="modal-backdrop min-h-full min-w-full absolute "
+        >
+          <button onClick={closeModalChatBot}></button>
+        </form>
+      </dialog>
+      <footer class="footer bg-secondary-color text-neutral-content items-center p-2 ">
+  <aside class="grid-flow-col items-center">
+  <img
+                src={require("@/assets/logoWhite.png")}
+                alt="No Images Available"
+                className=" h-6  "
+              />
+    <p className="text-sm">Copyright © {new Date().getFullYear()} - All right reserved</p>
+  </aside>
+  <nav class="grid-flow-col gap-4 md:place-self-center place-items-center md:justify-self-end">
+        <button className="hover:underline font-semibold" onClick={() => {navigate("/About")}}>
+      About Us
+    </button>
+    <button
+        onClick={openModalCont}
+        class="flex-none flex items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
+      >
+        <FontAwesomeIcon icon={faContactCard} />
+      </button>
+    
+  </nav>
+</footer>
     </div>
   );
 }

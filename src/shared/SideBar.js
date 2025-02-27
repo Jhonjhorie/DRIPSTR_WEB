@@ -71,7 +71,7 @@ const SideBar = () => {
   const mainSideBar = [
     { label: "Home", path: "/", icon: faHome },
     { label: "Arts", path: "/arts/Artists", icon: faPalette },
-    { label: "Notification", path: "/notification", icon: faBell },
+    //{ label: "Notification", path: "/notification", icon: faBell },
     ...(isMerchant ? [{ label: "Shop", path: "/shop/MerchantDashboard", icon: faStore }] : []),
     ...(isArtist ? [{ label: "Artist", path: "/shop/Artist/ArtistDashboard", icon: faPaintBrush }] : []),
     { label: user ? "Account" : "Login/SignIn", path: user ? "/account" : "#", icon: faUser, onClick: handleAccountClick, },

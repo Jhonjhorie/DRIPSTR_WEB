@@ -7,16 +7,16 @@ import LoginController from "./modules/Login/Controller/Login_Controller";
 import HomeController from "./modules/Home/Home_Controller";
 import OrderController from "./modules/Order/Controller/Order_Controller";
 import ShopController from "./modules/Shop_Profile/Controller/Shop_Profile_Controller";
+import ProductController from "./modules/Products/Products_Controller"
 import UserAccountController from "./modules/User_Account/Controller/User_Account_Controller";
-import ProductsController from "./modules/Products/Products_Controller";
 import ArtistController from "./modules/ArtistPage/Controller/Artists_Controller";
-import ProductController from "./modules/Products/Products_Controller";
 import Search from "./modules/Products/Search";
 import GuestHome from "./modules/Home/GuestHome";
 import Mall from "./modules/Products/Mall";
 
 //Data
 import useUserProfile from "@/shared/mulletCheck";
+import AboutUs from "./modules/Home/AboutUs";
 
 // Shared Components
 import Header from './shared/Header';
@@ -36,14 +36,13 @@ function App() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
 
   return (
+<Router>
     <NotificationProvider>
       <Toaster />
 
-      <Router>
-        <div className="flex flex-col bg-slate-50 h-screen w-screen overflow-x-hidden custom-scrollbar">
+      <div className="flex flex-col bg-slate-50 h-screen w-screen overflow-x-hidden custom-scrollbar">
           {/* Navbar (Header) */}
-        
-        <Header />
+          <Header />
 
           {/* Main Layout */}
           <div className="flex flex-1 flex-col sm:flex-row">
@@ -63,8 +62,8 @@ function App() {
           <main className={`flex-1 ${isLoggedIn ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-auto`}>
             <Routes>
               <Route path="/" element={<HomeController />} />
+                    <Route path="/about" element={<AboutUs />} />
               <Route path="/guest" element={<GuestHome />} />
-              <Route path="/mall/*" element={<ProductsController />} />
               <Route path="/arts/*" element={<ArtistController />} />
               <Route path="/product/*" element={<ProductController />} />
               <Route path="/search" element={<Search />} />
@@ -81,8 +80,9 @@ function App() {
           </main>
         </div>
       </div>
-    </Router>
+   
     </NotificationProvider>
+</Router>
   );
 }
 

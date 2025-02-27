@@ -12,6 +12,8 @@ import addToCart from "./hooks/useAddtoCart.js";
 import useCarts from "./hooks/useCart.js";
 import ReportDialog from "./components/reportModal.js";
 import AlertDialog from "./components/alertDialog2.js";
+import AuthModal from "../../shared/login/Auth.js";
+import WishlistButton from "./components/subcomponents/WishlistButton.js";
 
 function Product() {
   const location = useLocation();
@@ -24,6 +26,7 @@ function Product() {
   const [selectedSize, setSelectedSize] = useState(item?.item_Variant[0]?.sizes[0] || "");
   const [quantity, setQuantity] = useState(1);
   const [currentSlide, setCurrentSlide] = useState(0);
+   const [loginDialog, setLoginDialog] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
 
   const handleSelectedValues = (color, size) => {
@@ -53,26 +56,32 @@ function Product() {
   };
 
   const onConfirm = () => {
-    const solo = true;
-    const formOrder = {
-      acc_id: profile,
-      prod: item,
-      qty: quantity,
-      variant: selectedColor,
-      size: selectedSize,
-      to_order: true,
-    };
+    if (isLoggedIn) {
+      const solo = true;
+      const formOrder = {
+        acc_id: profile,
+        prod: item,
+        qty: quantity,
+        variant: selectedColor,
+        size: selectedSize,
+        to_order: true,
+      };
 
-    const selectedItems = [formOrder];
+      const selectedItems = [formOrder];
 
-    if (selectedItems.length === 0) {
-      alert("No items selected for order. Please select at least one item.");
-      return;
+      if (selectedItems.length === 0) {
+        alert("No items selected for order. Please select at least one item.");
+        return;
+      }
+
+      navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
+    } else {
+      setLoginDialog(true)
+
     }
-
-    navigate(`/placeOrder`, { state: { selectedItems, solo } });
   };
   const handleAddToCart = async () => {
+    if (isLoggedIn) {
     if (!profile || !item) return;
 
     const response = await addToCart(
@@ -92,8 +101,11 @@ function Product() {
     setTimeout(() => {
       setShowAlert(false);
     }, 3000);
-
     fetchDataCart();
+  } else {
+    setLoginDialog(true)
+
+  }
   };
 
   const closeModalRep = () => {
@@ -121,6 +133,14 @@ function Product() {
 
   return (
     <div className="w-full relative pb-16 items-start justify-start bg-slate-300 flex flex-col gap-2 px-2 lg:px-8 py-4">
+         {loginDialog && (
+              <AuthModal
+                isOpen={loginDialog}
+                onClose={() => setLoginDialog(false)}
+                item={(item)}
+              />
+            )}
+          
         <dialog
                       id="my_modal_report"
                       className="modal modal-bottom sm:modal-middle absolute z-[60] right-4 sm:right-0"
@@ -185,9 +205,7 @@ function Product() {
                 {isLoggedIn &&
                 <div className="flex gap-2">
                  
-                  <button className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
-                    <FontAwesomeIcon icon={faHeart} />
-                  </button>
+                 <WishlistButton profile={profile} item={item} isLoggedIn={isLoggedIn} />
                   <button 
                   onClick={mulletReport}
                   className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800">
