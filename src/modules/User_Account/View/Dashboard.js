@@ -122,7 +122,7 @@ const Account = () => {
                   <img
                     src={profile?.profile_picture || "/default-avatar.png"}
                     alt="Profile"
-                    className="w-20 h-20 rounded-full border-2 border-gray-300 cursor-pointer"
+                    className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 cursor-pointer"
                     onClick={() => setIsModalOpen(true)}
                   />
                   <div>

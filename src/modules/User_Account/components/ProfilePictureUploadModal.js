@@ -64,7 +64,7 @@ const ProfilePictureUploadModal = ({ isOpen, onClose, userId, currentImage }) =>
         <h2 className="text-lg font-semibold mb-4">Upload Profile Picture</h2>
 
         <div className="flex flex-col items-center">
-          <img src={preview || "/default-avatar.png"} alt="Preview" className="w-32 h-32 rounded-full border-2 border-gray-300 mb-4" />
+          <img src={preview || "/default-avatar.png"} alt="Preview" className="w-32 h-32 object-cover rounded-full border-2 border-gray-300 mb-4" />
           
           <input type="file" accept="image/*" onChange={handleFileChange} className="mb-4" />
 
