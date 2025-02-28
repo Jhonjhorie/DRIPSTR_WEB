@@ -7,39 +7,24 @@ import * as THREE from 'three';
 import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { supabase } from '../../../constants/supabase';
-import { bodyTypeURLs, tshirURLs, shortsURLs, hairURLs } from '../../../constants/avatarConfig';
+import {  tshirURLs } from '../../../constants/avatarConfig';
 
 const Model = ({ avatarData, productData, color }) => {
   const [error, setError] = useState(null);
 
   // Get correct model paths from avatar config
-  const avatarPath = avatarData?.gender && avatarData?.bodytype ? 
-    bodyTypeURLs[avatarData.gender][avatarData.bodytype] : 
-    bodyTypeURLs.Boy.Average;
+ 
 
   const tshirtPath = avatarData?.gender && avatarData?.bodytype ? 
     tshirURLs[avatarData.gender][avatarData.bodytype] : 
     tshirURLs.Boy.Average;
-
-  const shortsPath = avatarData?.gender && avatarData?.bodytype ? 
-    shortsURLs[avatarData.gender][avatarData.bodytype] : 
-    shortsURLs.Boy.Average;
-
-  const hairPath = avatarData?.hair ? 
-    hairURLs[avatarData.hair] : 
-    hairURLs.Barbers;
-
+ 
+  
   // Load models using GLTF
-  const { scene: avatarGLTF } = useGLTF(avatarPath);
-  const { scene: tshirtGLTF } = useGLTF(tshirtPath);
-  const { scene: shortsGLTF } = useGLTF(shortsPath);
-  const { scene: hairGLTF } = useGLTF(hairPath);
+   const { scene: tshirtGLTF } = useGLTF(tshirtPath); 
 
   // Clone scenes for independent material manipulation
-  const avatarScene = useMemo(() => SkeletonUtils.clone(avatarGLTF), [avatarGLTF]);
-  const tshirtScene = useMemo(() => SkeletonUtils.clone(tshirtGLTF), [tshirtGLTF]);
-  const shortsScene = useMemo(() => SkeletonUtils.clone(shortsGLTF), [shortsGLTF]);
-  const hairScene = useMemo(() => SkeletonUtils.clone(hairGLTF), [hairGLTF]);
+   const tshirtScene = useMemo(() => SkeletonUtils.clone(tshirtGLTF), [tshirtGLTF]);
 
   useEffect(() => {
     // Handle T-shirt texture and material
@@ -62,52 +47,17 @@ const Model = ({ avatarData, productData, color }) => {
       });
     }
 
-    // Handle avatar material
-    avatarScene.traverse((node) => {
-      if (node.isMesh) {
-        node.material = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(avatarData?.skincolor || '#f5c9a6'),
-          roughness: 0.5,
-          metalness: 0.2,
-        });
-      }
-    });
-
-    // Handle hair material
-    hairScene.traverse((node) => {
-      if (node.isMesh) {
-        node.material = new THREE.MeshStandardMaterial({
-          color: new THREE.Color(avatarData?.haircolor || '#000000'),
-          roughness: 0.3,
-          metalness: 0.1,
-        });
-      }
-    });
-
-    // Handle shorts material
-    shortsScene.traverse((node) => {
-      if (node.isMesh) {
-        node.material = new THREE.MeshStandardMaterial({
-          color: new THREE.Color('#000000'),
-          roughness: 0.7,
-          metalness: 0.0,
-        });
-      }
-    });
-  }, [avatarScene, tshirtScene, hairScene, shortsScene, color, productData, avatarData]);
+ 
+ 
+  }, [  tshirtScene, color, productData, avatarData]);
 
   if (error) {
     return <Html center><div className="text-red-500">Error loading model</div></Html>;
   }
 
   return (
-    <group>
-      <primitive object={avatarScene} scale={1} />
-      <primitive object={tshirtScene} scale={1} />
-      <primitive object={shortsScene} scale={1} />
-      <primitive object={hairScene} scale={1} />
-    </group>
-  );
+        <primitive object={tshirtScene} scale={1} />
+   );
 };
 
 // Add Platform component after the Model component
@@ -201,10 +151,10 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
       {/* 3D Canvas */}
       <div className={className}>
         <Canvas 
-          camera={{ position: [0, 100, 200], fov: 75 }}
+          camera={{ position: [0, 200, 200],  }}
+          style={{ width: '100%', height: '100%' }}
           shadows
         > 
-          
           <Suspense fallback={<LoadingSpinner />}>
             {/* Lights */}
             <ambientLight intensity={0.4} />
@@ -224,8 +174,7 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
             />
             
             <group position={[0, 0, 0]}>
-              <Platform />
-              <Model 
+               <Model 
                 avatarData={avatarData}
                 productData={productData}
                 color={getColorValue(selectedColor?.variant_Name)}
@@ -236,16 +185,14 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
           </Suspense>
           
           <OrbitControls 
-            target={[0, 80, 0]}
-            minPolarAngle={0}
-            maxPolarAngle={Math.PI}
-            minDistance={80}
-            maxDistance={300}
+            target={[0,120,0]}
             enablePan={true}
-            panSpeed={0.5}
-            rotateSpeed={0.5}
-            enableDamping={true}
-            dampingFactor={0.05}
+            enableZoom={true}
+            enableRotate={true}
+            autoRotate={true}
+            autoRotateSpeed={2}
+            minDistance={25}
+            maxDistance={100}
           />
         </Canvas>
       </div>

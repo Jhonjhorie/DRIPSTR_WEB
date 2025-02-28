@@ -306,11 +306,9 @@ const Address = () => {
         </div>
 
 
-          <div className="bg-gray-100 relative p-4 rounded-lg shadow">
+          <div className="bg-gray-100   p-4 rounded-lg shadow">
 
-          <div className=" w-full  bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
-              {" "}
-            </div>
+   
             <h3 className="text-l font-bold text-gray-700">Default Address</h3>
 
 
@@ -323,7 +321,7 @@ const Address = () => {
 
             
             <table className="w-full border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
-              <thead className="shadow-md bg-custom-purple glass rounded-lg text-gray-200 border-1">
+              <thead className="shadow-sm  text-gray-500  border-1">
                 <tr>
                   <th className="px-3 py-2">Full Address</th>
                   <th className="px-3 py-2">Region</th>
@@ -345,11 +343,9 @@ const Address = () => {
 
 
           <div className="divider p-2"></div>
-          <div className="bg-gray-100 relative p-4 rounded-lg shadow">
-          <div className=" w-full  bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
-              {" "}
-            </div>
-          <h3 className="text-l font-bold text-gray-800 glass">Addresses</h3>
+          <div className="bg-gray-100   p-4 rounded-lg shadow">
+ 
+          <h3 className="text-l font-bold text-gray-700">Address</h3>
 
           {loading ? (
           <div className="flex flex-col justify-center items-center">
@@ -357,8 +353,8 @@ const Address = () => {
             <label>Loading...</label>
           </div>
         ) : (
-          <table className="w-full   border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
-            <thead className="border border-solid bg-gray-600 rounded-lg text-gray-200 border-1 border-gray-300">
+          <table className="w-full border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
+              <thead className="shadow-sm  text-gray-500  border-1">
               <tr>
                 <th className="px-4 py-2">Full Address</th>
                 <th className="px-4 py-2">Region</th>

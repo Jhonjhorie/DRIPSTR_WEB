@@ -17,7 +17,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
-  const tabs = ["All", "To Ship", "To Receive", "Verifying", "Completed", "Cancelled", "Refund"];
+  const tabs = ["All", "Verifying", "To Ship", "To Receive", "Completed", "Cancelled", "Refund"];
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,11 +39,7 @@ const Orders = () => {
     return counts;
   };
 
-  const handlePayment = (order) => {
-    // TODO: Implement payment logic
-    console.log('Processing payment for order:', order);
-    // Navigate to payment page or show payment modal
-  };
+ 
 
   const getFilteredOrders = () => {
     let filtered = [...orders];
