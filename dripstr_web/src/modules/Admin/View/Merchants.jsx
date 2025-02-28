@@ -11,7 +11,6 @@ const Merchants = () => {
     const [status, setStatus] = useState('pending');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [expandedCards, setExpandedCards] = useState({});
     const [merchants, setMerchants] = useState([]);
     const [successAdd, setSuccessAdd] = useState('');
     const [successDecline, setSuccessDecline] = useState('');
@@ -19,6 +18,8 @@ const Merchants = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedMerchant, setSelectedMerchant] = useState(null);
     const [idModal, setIdModal] = useState(false);
+    const [enlargedImage, setEnlargedImage] = useState(null)
+
     // Fetch accepted merchants (Auto-refresh every 5 seconds)
     useEffect(() => {
         const fetchMerchants = async () => {
@@ -66,14 +67,6 @@ const Merchants = () => {
 
         return () => clearInterval(interval); // Cleanup
     }, []);
-
-    // Open business permit
-    const toggleCard = (id) => {
-        setExpandedCards((prevState) => ({
-            ...prevState,
-            [id]: !prevState[id],  // Toggles only the clicked card
-        }));
-    };
 
     // Accept Merchant Function
     const handleAccept = async (id) => {
@@ -173,6 +166,15 @@ const Merchants = () => {
         setIdModal(false);
         setSelectedMerchant(null);
     };
+
+    const handleImageClick = (imageSrc) => {
+        setEnlargedImage(imageSrc);
+    };
+
+    const closeEnlargedImage = () => {
+        setEnlargedImage(null);
+    };
+
     return (
         <div className="flex">
             <Sidebar />
@@ -262,12 +264,13 @@ const Merchants = () => {
                                 {selectedMerchant.shop_name || 'Unnamed Artist'}'s Identification
                             </h2>
                             <div className="grid grid-cols-3 gap-4 mb-4">
-                            <div className="flex flex-col items-center">
+                                <div className="flex flex-col items-center">
                                     <p className="text-black font-medium mb-2">Business Permit</p>
                                     <img
                                         src={selectedMerchant.shop_BusinessPermit || 'https://via.placeholder.com/150'}
                                         alt={`${selectedMerchant.shop_name || 'Artist'} selfie`}
                                         className="w-24 h-24 object-contain rounded-md"
+                                        onClick={() => handleImageClick(selectedMerchant.shop_BusinessPermit)}
                                     />
                                 </div>
                                 <div className="flex flex-col items-center">
@@ -276,14 +279,16 @@ const Merchants = () => {
                                         src={selectedMerchant.selfie || 'https://via.placeholder.com/150'}
                                         alt={`${selectedMerchant.shop_name || 'Artist'} selfie`}
                                         className="w-24 h-24 object-contain rounded-md"
+                                        onClick={() => handleImageClick(selectedMerchant.selfie)}
                                     />
                                 </div>
                                 <div className="flex flex-col items-center">
                                     <p className="text-black font-medium mb-2">Valid ID</p>
                                     <img
-                                        src={selectedMerchant.validID || 'https://via.placeholder.com/150'}
+                                        src={selectedMerchant.validID || selectedMerchant.valid_id || 'https://via.placeholder.com/150'}
                                         alt={`${selectedMerchant.artist_name || 'Artist'} ID`}
                                         className="w-24 h-24 object-contain rounded-md"
+                                        onClick={() => handleImageClick(selectedMerchant.validID || selectedMerchant.valid_id)}
                                     />
                                 </div>
                                 <div className="flex flex-col items-center">
@@ -292,6 +297,7 @@ const Merchants = () => {
                                         src={selectedMerchant.gcash || 'https://via.placeholder.com/150'}
                                         alt={`${selectedMerchant.artist_name || 'Artist'} GCash`}
                                         className="w-24 h-24 object-contain rounded-md"
+                                        onClick={() => handleImageClick(selectedMerchant.gcash)}
                                     />
                                 </div>
                             </div>
@@ -302,6 +308,25 @@ const Merchants = () => {
                                 Close
                             </button>
                         </div>
+                    </div>
+                )}
+
+                {enlargedImage && (
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60]"
+                        onClick={closeEnlargedImage}
+                    >
+                        <img
+                            src={enlargedImage}
+                            alt="Enlarged view"
+                            className="max-w-[90%] max-h-[90%] object-contain"
+                        />
+                        <button
+                            onClick={closeEnlargedImage}
+                            className="absolute top-4 right-4 text-white text-2xl font-bold bg-gray-800 rounded-full w-10 h-10 flex items-center justify-center"
+                        >
+                            X
+                        </button>
                     </div>
                 )}
 
@@ -336,7 +361,7 @@ const Merchants = () => {
 
                                         {/* Merchant Info */}
                                         <div className="flex flex-col w-full">
-                                            <p className="text-white text-sm"><strong>Shop Name:</strong> {merchant.shop_name}</p>
+                                            <p className="text-white text-sm hover:text-blue-900 hover:underline" onClick={() => handleId(merchant)}><strong>Shop Name:</strong> {merchant.shop_name}</p>
                                             <p className="text-white text-sm"><strong>Name:</strong> {merchant.owner_Id?.full_name || 'No Name'}</p>
                                             <p className="text-white text-sm"><strong>Description:</strong> {merchant.description}</p>
                                             <p className="text-white text-sm"><strong>Address:</strong> {merchant.address}</p>
