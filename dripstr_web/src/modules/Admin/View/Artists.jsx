@@ -15,6 +15,7 @@ function Artists() {
   const [acceptedArtists, setAcceptedArtists] = useState([]);
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
+  const [enlargedImage, setEnlargedImage] = useState(null)
   const itemsPerPage = 4; // Adjust as needed
 
   useEffect(() => {
@@ -118,6 +119,13 @@ function Artists() {
     setSelectedArtist(null);
   };
 
+  const handleImageClick = (imageSrc) => {
+    setEnlargedImage(imageSrc);
+  };
+
+  const closeEnlargedImage = () => {
+    setEnlargedImage(null);
+  };
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -220,6 +228,7 @@ function Artists() {
                     src={selectedArtist.selfie || 'https://via.placeholder.com/150'}
                     alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} selfie`}
                     className="w-24 h-24 object-contain rounded-md"
+                    onClick={() => handleImageClick(selectedArtist.selfie)}
                   />
                 </div>
                 <div className="flex flex-col items-center">
@@ -228,6 +237,7 @@ function Artists() {
                     src={selectedArtist.valid_id || selectedArtist.valid_ID || 'https://via.placeholder.com/150'}
                     alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} ID`}
                     className="w-24 h-24 object-contain rounded-md"
+                    onClick={() => handleImageClick(selectedArtist.valid_id || selectedArtist.valid_ID)}
                   />
                 </div>
                 <div className="flex flex-col items-center">
@@ -236,6 +246,7 @@ function Artists() {
                     src={selectedArtist.gcash || 'https://via.placeholder.com/150'}
                     alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} GCash`}
                     className="w-24 h-24 object-contain rounded-md"
+                    onClick={() => handleImageClick(selectedArtist.gcash)}
                   />
                 </div>
               </div>
@@ -246,6 +257,25 @@ function Artists() {
                 Close
               </button>
             </div>
+          </div>
+        )}
+
+        {enlargedImage && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[60]"
+            onClick={closeEnlargedImage}
+          >
+            <img
+              src={enlargedImage}
+              alt="Enlarged view"
+              className="max-w-[90%] max-h-[90%] object-contain"
+            />
+            <button
+              onClick={closeEnlargedImage}
+              className="absolute top-4 right-4 text-white text-2xl font-bold bg-gray-800 rounded-full w-10 h-10 flex items-center justify-center"
+            >
+              X
+            </button>
           </div>
         )}
 
