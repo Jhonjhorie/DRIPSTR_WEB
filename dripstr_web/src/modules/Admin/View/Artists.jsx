@@ -11,6 +11,7 @@ function Artists() {
     const [error, setError] = useState(null);
     const [idModal, setIdModal] = useState(false);
     const [artists, setArtists] = useState([]);
+    const [acceptedArtists, setAcceptedArtists] = useState([]);
     const [selectedArtist, setSelectedArtist] = useState(null); // New state for selected artist
 
     // Fetch pending artist registrations (Auto-refresh every 5 seconds)
@@ -46,7 +47,7 @@ function Artists() {
             try {
                 const { data, error } = await supabase
                     .from('artist')
-                    .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie')
+                    .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID')
 
                 if (error) throw error;
                 console.log('Fetched Data:', data);
@@ -65,17 +66,49 @@ function Artists() {
         return () => clearInterval(interval);
     }, []);
 
+    
     const handleAccept = async (id) => {
-        console.log('Accepting artist with ID:', id);
         try {
-            const { error } = await supabase
+            const { data: artistData, error: fetchError } = await supabase
+                .from('artist_registration')
+                .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, valid_id')
+                .eq('id', id)
+                .single();
+
+            if (fetchError) throw fetchError;
+
+            await supabase
                 .from('artist_registration')
                 .update({ is_approved: true })
                 .eq('id', id);
-            if (error) throw error;
-            setRegister((prev) => prev.filter((artist) => artist.id !== id));
+
+            await supabase
+                .from('artist')
+                .insert([{
+                    id: artistData.id,
+                    created_at: artistData.created_at,
+                    owner_Id: artistData.acc_id,
+                    artist_Name: artistData.artist_name,
+                    artist_Bio: artistData.description,
+                    art_Type: artistData.art_type,
+                    artist_Image: artistData.artist_profilePic,
+                    contact_number: artistData.mobile_number,
+                    full_Name: artistData.full_name,
+                    selfie: artistData.selfie,
+                    valid_ID: artistData.valid_id,
+                    followers_Detail: null,
+                    is_Premium: null,
+                }]);
+
+            await supabase
+                .from('profiles')
+                .update({ isArtist: true })
+                .eq('id', id);
+
+            setRegister(prev => prev.filter(artist => artist.id !== id));
+            setAcceptedArtists(prev => [...prev, artistData]);
+
         } catch (error) {
-            console.error('Accept Error:', error.message);
             setError(error.message);
         }
     };
@@ -223,51 +256,51 @@ function Artists() {
 
                 {status === 'artists' && (
                     <div>
-{loading ? (
-                <p className="text-white text-center">Loading...</p>
-            ) : error ? (
-                <p className="text-red-500 text-center">{error}</p>
-            ) : (
-                <div className="space-y-6">
-                    {artists.length === 0 ? (
-                        <h1 className="text-center font-bold text-3xl text-white">
-                            No Artists
-                        </h1>
-                    ) : (
-                        artists.map((artist) => (
-                            <div
-                                key={artist.id}
-                                className="flex flex-row border rounded-lg shadow-lg p-4 bg-white w-full items-start gap-4"
-                            >
-                                {/* Picture on the left */}
-                                <img
-                                    src={artist.artist_Image || 'https://via.placeholder.com/150'}
-                                    alt={artist.artist_Name}
-                                    className="w-24 h-24 object-cover rounded-md"
-                                />
-                                {/* Info column on the right */}
-                                <div className="flex flex-col">
-                                    <h2 className="text-xl font-semibold text-black">
-                                        {artist.artist_Name}
-                                    </h2>
-                                    <h3 className="text-md font-medium text-black">
-                                        {artist.full_Name || artist.owner_Id?.full_name || 'Unnamed Artist'}
-                                    </h3>
-                                    <p className="text-black text-sm">
-                                        {new Date(artist.created_at).toLocaleString()}
-                                    </p>
-                                    <p className="text-gray-500">
-                                        Art Type: {artist.art_Type || 'N/A'}
-                                    </p>
-                                    <p className="text-gray-500">
-                                        Contact: {artist.contact_number || 'N/A'}
-                                    </p>
-                                </div>
+                        {loading ? (
+                            <p className="text-white text-center">Loading...</p>
+                        ) : error ? (
+                            <p className="text-red-500 text-center">{error}</p>
+                        ) : (
+                            <div className="space-y-6">
+                                {artists.length === 0 ? (
+                                    <h1 className="text-center font-bold text-3xl text-white">
+                                        No Artists
+                                    </h1>
+                                ) : (
+                                    artists.map((artist) => (
+                                        <div
+                                            key={artist.id}
+                                            className="flex flex-row border rounded-lg shadow-lg p-4 bg-gray-800 w-full items-start gap-4"
+                                        >
+                                            {/* Picture on the left */}
+                                            <img
+                                                src={artist.artist_Image || 'https://via.placeholder.com/150'}
+                                                alt={artist.artist_Name}
+                                                className="w-24 h-24 object-cover rounded-md"
+                                            />
+                                            {/* Info column on the right */}
+                                            <div className="flex flex-col">
+                                                <h2 className="text-xl font-semibold text-white flex flex-row">
+                                                    {artist.artist_Name} {artist.is_Premium && (<div className='bg-yellow-500 p-0 rounded-sm'><p className='text-white'>premiym</p></div>)}
+                                                </h2>
+                                                <h3 className="text-md font-medium text-white">
+                                                    {artist.full_Name || artist.owner_Id?.full_name || 'Unnamed Artist'}
+                                                </h3>
+                                                <p className="text-white text-sm">
+                                                    {new Date(artist.created_at).toLocaleString()}
+                                                </p>
+                                                <p className="text-white">
+                                                    Art Type: {artist.art_Type || 'N/A'}
+                                                </p>
+                                                <p className="text-white">
+                                                    Contact: {artist.contact_number || 'N/A'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
                             </div>
-                        ))
-                    )}
-                </div>
-            )}
+                        )}
                     </div>
                 )}
             </div>
