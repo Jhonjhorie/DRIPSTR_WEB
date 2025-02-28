@@ -21,7 +21,7 @@ function Artists() {
             try {
                 const { data, error } = await supabase
                     .from('artist_registration')
-                    .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic')
+                    .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash')
                     .is('is_approved', null);
 
                 if (error) throw error;
@@ -47,7 +47,7 @@ function Artists() {
             try {
                 const { data, error } = await supabase
                     .from('artist')
-                    .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID')
+                    .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID, gcash')
 
                 if (error) throw error;
                 console.log('Fetched Data:', data);
@@ -237,9 +237,15 @@ function Artists() {
                                     alt={`${selectedArtist.artist_name} selfie`}
                                     className="w-full h-40 object-contain rounded-md"
                                 />
-                                <p className='text-black font-medium'>Valid Id</p>
+                                <p className='text-black font-medium'>Valid ID</p>
                                 <img
                                     src={selectedArtist.valid_id || selectedArtist.valid_ID || 'https://via.placeholder.com/150'}
+                                    alt={`${selectedArtist.artist_name} ID`}
+                                    className="w-full h-40 object-contain rounded-md"
+                                />
+                                <p className='text-black font-medium'>Gcash</p>
+                                <img
+                                    src={selectedArtist.gcash || selectedArtist.gcash || 'https://via.placeholder.com/150'}
                                     alt={`${selectedArtist.artist_name} ID`}
                                     className="w-full h-40 object-contain rounded-md"
                                 />
