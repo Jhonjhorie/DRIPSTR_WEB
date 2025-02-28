@@ -228,7 +228,7 @@ function Artists() {
                     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
                         <div className="bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
                             <h2 className="text-xl font-semibold mb-4 text-black">
-                                {selectedArtist.artist_name}'s Identification
+                                {selectedArtist.artist_name || selectedArtist.artist_Name}'s Identification
                             </h2>
                             <div className="flex flex-col gap-4">
                                 <p className='text-black font-medium'>Selfie</p>
@@ -239,7 +239,7 @@ function Artists() {
                                 />
                                 <p className='text-black font-medium'>Valid Id</p>
                                 <img
-                                    src={selectedArtist.valid_id || 'https://via.placeholder.com/150'}
+                                    src={selectedArtist.valid_id || selectedArtist.valid_ID || 'https://via.placeholder.com/150'}
                                     alt={`${selectedArtist.artist_name} ID`}
                                     className="w-full h-40 object-contain rounded-md"
                                 />
@@ -280,7 +280,7 @@ function Artists() {
                                             />
                                             {/* Info column on the right */}
                                             <div className="flex flex-col">
-                                                <h2 className="text-xl font-semibold text-white flex flex-row">
+                                                <h2 className="text-xl font-semibold text-white flex flex-row hover:text-blue-500 hover:underline cursor-pointer" onClick={() => handleId(artist)}>
                                                     {artist.artist_Name} {artist.is_Premium && (
                                                         <div className="bg-yellow-600 text-white text-xs font-semibold px-1 py-0.5 rounded-sm ml-2 inline-block">
                                                             Premium
