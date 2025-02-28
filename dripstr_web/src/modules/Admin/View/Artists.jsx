@@ -5,16 +5,17 @@ import { faChevronCircleDown } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 function Artists() {
-    const [status, setStatus] = useState('artists');
+    const [status, setStatus] = useState('pending');
     const [register, setRegister] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [expandedCards, setExpandedCards] = useState({});
+    const [idModal, setIdModal] = useState(false);
+    const [selectedArtist, setSelectedArtist] = useState(null); // New state for selected artist
 
     // Fetch pending artist registrations (Auto-refresh every 5 seconds)
     useEffect(() => {
         const fetchArtistRegistration = async () => {
-            setLoading(true); // Reset loading each fetch
+            setLoading(true);
             try {
                 const { data, error } = await supabase
                     .from('artist_registration')
@@ -22,11 +23,10 @@ function Artists() {
                     .is('is_approved', null);
 
                 if (error) throw error;
-
-                console.log('Fetched Data:', data); // Debug: Log raw data
-                setRegister(data || []); // Fallback to empty array if data is null
+                console.log('Fetched Data:', data);
+                setRegister(data || []);
             } catch (error) {
-                console.error('Fetch Error:', error.message); // Debug: Log errors
+                console.error('Fetch Error:', error.message);
                 setError(error.message);
             } finally {
                 setLoading(false);
@@ -34,29 +34,19 @@ function Artists() {
         };
 
         fetchArtistRegistration();
-        const interval = setInterval(fetchArtistRegistration, 60000); // Auto-refresh every 5 seconds
+        const interval = setInterval(fetchArtistRegistration, 60000);
 
-        return () => clearInterval(interval); // Cleanup
+        return () => clearInterval(interval);
     }, []);
 
-    // Toggle card expansion
-    const toggleCard = (id) => {
-        setExpandedCards((prevState) => ({
-            ...prevState,
-            [id]: !prevState[id],
-        }));
-    };
-
-    // Handle Accept/Decline actions (placeholder functions)
     const handleAccept = async (id) => {
-        console.log('Accepting artist with ID:', id); // Debug: Log action
+        console.log('Accepting artist with ID:', id);
         try {
             const { error } = await supabase
                 .from('artist_registration')
                 .update({ is_approved: true })
                 .eq('id', id);
             if (error) throw error;
-            // Refresh data after update
             setRegister((prev) => prev.filter((artist) => artist.id !== id));
         } catch (error) {
             console.error('Accept Error:', error.message);
@@ -65,19 +55,28 @@ function Artists() {
     };
 
     const handleDecline = async (id) => {
-        console.log('Declining artist with ID:', id); // Debug: Log action
+        console.log('Declining artist with ID:', id);
         try {
             const { error } = await supabase
                 .from('artist_registration')
                 .update({ is_approved: false })
                 .eq('id', id);
             if (error) throw error;
-            // Refresh data after update
             setRegister((prev) => prev.filter((artist) => artist.id !== id));
         } catch (error) {
             console.error('Decline Error:', error.message);
             setError(error.message);
         }
+    };
+
+    const handleId = (artist) => {
+        setSelectedArtist(artist); // Store the selected artist
+        setIdModal(true); // Show the modal
+    };
+
+    const closeModal = () => {
+        setIdModal(false);
+        setSelectedArtist(null); // Clear the selected artist
     };
 
     return (
@@ -128,14 +127,20 @@ function Artists() {
                                                 alt={artist.artist_name}
                                                 className="w-full h-40 rounded-md mb-1"
                                             />
-                                            <h2 className="text-xl font-semibold mb-1">{artist.artist_name || 'Unnamed Artist'}</h2>
-                                            <h2 className="text-xl font-semibold mb-2">{artist.full_name || 'No Name'}</h2>
-                                            <h2 className="text-xl font-semibold mb-2">
-                                                Registered at: {new Date(artist.created_at).toLocaleString()}
-                                            </h2>
-                                            <p className="text-gray-700 mb-1">{artist.description || 'No description'}</p>
-                                            <p className="text-gray-500 mb-1">{artist.address || 'No address'}</p>
-                                            <p className="text-gray-500 mb-4">Contact: {artist.mobile_number || 'N/A'}</p>
+                                            <h2 className="text-xl font-semibold text-black">{artist.artist_name || 'Unnamed Artist'}</h2>
+                                            <h2 className="text-md font-semibold text-black">{artist.full_name || 'No Name'}</h2>
+                                            <p className="text-black text-sm mb-2">
+                                                {new Date(artist.created_at).toLocaleString()}
+                                            </p>
+                                            <p className="text-gray-700">{artist.description || 'No description'}</p>
+                                            <p className="text-gray-500">{artist.address || 'No address'}</p>
+                                            <p className="text-gray-500">{artist.mobile_number || 'N/A'}</p>
+                                            <p
+                                                className="text-black underline cursor-pointer hover:text-blue-500 mb-4"
+                                                onClick={() => handleId(artist)} // Pass the full artist object
+                                            >
+                                                Identifications
+                                            </p>
 
                                             <div className="flex justify-center items-center space-x-2">
                                                 <button
@@ -151,47 +156,42 @@ function Artists() {
                                                     Decline
                                                 </button>
                                             </div>
-
-                                            <button onClick={() => toggleCard(artist.id)} className="absolute top-4 right-4">
-                                                <FontAwesomeIcon
-                                                    icon={faChevronCircleDown}
-                                                    className={`transform transition-transform duration-300 ${expandedCards[artist.id] ? 'rotate-180' : ''
-                                                        }`}
-                                                />
-                                            </button>
-
-                                            <div
-                                                className={`transition-all duration-500 ease-in-out ${expandedCards[artist.id] ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                                                    } overflow-hidden mt-4`}
-                                            >
-                                                {artist.shop_BusinessPermit ? (
-                                                    <object
-                                                        data={artist.shop_BusinessPermit}
-                                                        type="application/pdf"
-                                                        width="100%"
-                                                        height="400px"
-                                                    >
-                                                        <p>
-                                                            Your browser does not support PDFs.
-                                                            <a
-                                                                href={artist.shop_BusinessPermit}
-                                                                target="_blank"
-                                                                rel="noopener noreferrer"
-                                                                className="text-blue-500"
-                                                            >
-                                                                Download PDF
-                                                            </a>
-                                                        </p>
-                                                    </object>
-                                                ) : (
-                                                    <p>No Business Permit Uploaded.</p>
-                                                )}
-                                            </div>
                                         </div>
                                     ))
                                 )}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {/* Modal for ID and Selfie */}
+                {idModal && selectedArtist && (
+                    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                        <div className="bg-white p-4 rounded-lg shadow-lg max-w-md w-full">
+                            <h2 className="text-xl font-semibold mb-4 text-black">
+                                {selectedArtist.artist_name}'s Identification
+                            </h2>
+                            <div className="flex flex-col gap-4">
+                                <p className='text-black font-medium'>Selfie</p>
+                                <img
+                                    src={selectedArtist.selfie || 'https://via.placeholder.com/150'}
+                                    alt={`${selectedArtist.artist_name} selfie`}
+                                    className="w-full h-40 object-contain rounded-md"
+                                />
+                                <p className='text-black font-medium'>Valid Id</p>
+                                <img
+                                    src={selectedArtist.valid_id || 'https://via.placeholder.com/150'}
+                                    alt={`${selectedArtist.artist_name} ID`}
+                                    className="w-full h-40 object-contain rounded-md"
+                                />
+                            </div>
+                            <button
+                                onClick={closeModal}
+                                className="mt-4 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
                 )}
             </div>
