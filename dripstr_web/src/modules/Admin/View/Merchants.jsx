@@ -17,14 +17,15 @@ const Merchants = () => {
     const [successDecline, setSuccessDecline] = useState('');
     const [search, setSearch] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-
+    const [selectedMerchant, setSelectedMerchant] = useState(null);
+    const [idModal, setIdModal] = useState(false);
     // Fetch accepted merchants (Auto-refresh every 5 seconds)
     useEffect(() => {
         const fetchMerchants = async () => {
             try {
                 const { data, error } = await supabase
                     .from('shop')
-                    .select('shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, owner_Id(full_name)')
+                    .select('shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, owner_Id(full_name), valid_id, selfie, gcash')
                     .is('is_Approved', true);
 
                 if (error) throw error;
@@ -48,7 +49,7 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('merchantRegistration')
-                    .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, profiles(full_name)')
+                    .select('id(full_name), shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, profiles(full_name), validID, selfie, gcash')
                     .is('is_Approved', null);
 
                 if (error) throw error;
@@ -100,7 +101,11 @@ const Merchants = () => {
                     shop_image: merchantData.shop_image,
                     contact_number: merchantData.contact_number,
                     shop_BusinessPermit: merchantData.shop_BusinessPermit,
+                    valid_id: merchantData.validID,
+                    gcash: merchantData.gcash,
+                    selfie: merchantData.selfie,
                     is_Approved: true
+
                 }]);
 
             await supabase
@@ -159,6 +164,15 @@ const Merchants = () => {
         setCurrentPage(page);
     };
 
+    const handleId = (merchant) => {
+        setSelectedMerchant(merchant);
+        setIdModal(true);
+    };
+
+    const closeModal = () => {
+        setIdModal(false);
+        setSelectedMerchant(null);
+    };
     return (
         <div className="flex">
             <Sidebar />
@@ -188,45 +202,50 @@ const Merchants = () => {
                 {status === 'pending' && (
                     <div>
                         {loading ? (
-                            <p>Loading...</p>
+                            <p className="text-white">Loading...</p>
                         ) : error ? (
                             <p className="text-red-500">{error}</p>
                         ) : (
                             <div className="flex flex-row flex-wrap items-start gap-4 w-auto">
                                 {register.length === 0 ? (
-                                    <h1 className='flex justify-center items-center font-bold text-3xl text-white'>No Pending Merchants</h1>
+                                    <h1 className="flex justify-center items-center font-bold text-3xl text-white">
+                                        No Pending Merchant
+                                    </h1>
                                 ) : (
                                     register.map((merchant) => (
-                                        <div key={merchant.id} className="border rounded-lg shadow-lg p-4 relative w-full md:w-1/2 lg:w-1/3">
-                                            <img src={merchant.shop_image || 'No Image'} alt={merchant.shop_name} className="w-full h-40 object-cover rounded-md" />
-                                            <h2 className="text-xl font-semibold mb-2">{merchant.shop_name}</h2>
-                                            <h2 className="text-xl font-semibold mb-2">{merchant.profiles?.full_name || 'No Name'}</h2>
-                                            <p className="text-gray-700 mb-1">{merchant.description}</p>
-                                            <p className="text-gray-500 mb-1">{merchant.address}</p>
-                                            <p className="text-gray-500 mb-4">Contact: {merchant.contact_number}</p>
-
+                                        <div
+                                            key={merchant.id}
+                                            className="border rounded-lg shadow-lg p-4 relative w-full md:w-1/2 lg:w-1/3 bg-white"
+                                        >
+                                            <img
+                                                src={merchant.shop_image || 'https://via.placeholder.com/150'}
+                                                alt={merchant.merchant_name}
+                                                className="w-full h-40 rounded-md mb-1"
+                                            />
+                                            <h2 className="text-xl font-semibold text-black">{merchant.shop_name || 'Unnamed Artist'}</h2>
+                                            <h2 className="text-md font-semibold text-black">{merchant.full_Name || merchant.id?.full_name || 'No Name'}</h2>
+                                            <p className="text-gray-700">{merchant.description || 'No description'}</p>
+                                            <p className="text-gray-500">{merchant.address || 'No address'}</p>
+                                            <p className="text-gray-500">{merchant.contact_number || 'N/A'}</p>
+                                            <p
+                                                className="text-black underline cursor-pointer hover:text-blue-500 mb-4"
+                                                onClick={() => handleId(merchant)}
+                                            >
+                                                Identifications
+                                            </p>
                                             <div className="flex justify-center items-center space-x-2">
-                                                <button onClick={() => handleAccept(merchant.id)} className="px-4 py-2 bg-green-500 text-white rounded">Accept</button>
-                                                <button onClick={() => handleDecline(merchant.id)} className="px-4 py-2 bg-red-500 text-white rounded">Decline</button>
-                                            </div>
-
-                                            <button onClick={() => toggleCard(merchant.id)} className="absolute top-4 right-4">
-                                                <FontAwesomeIcon
-                                                    icon={faChevronCircleDown}
-                                                    className={`transform transition-transform duration-300 ${expandedCards[merchant.id] ? 'rotate-180' : ''}`}
-                                                />
-                                            </button>
-
-                                            <div className={`transition-all duration-500 ease-in-out ${expandedCards[merchant.id] ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden mt-4`}>
-                                                {merchant.shop_BusinessPermit ? (
-                                                    <object data={merchant.shop_BusinessPermit} type="application/pdf" width="100%" height="400px">
-                                                        <p>Your browser does not support PDFs.
-                                                            <a href={merchant.shop_BusinessPermit} target="_blank" rel="noopener noreferrer" className="text-blue-500">Download PDF</a>
-                                                        </p>
-                                                    </object>
-                                                ) : (
-                                                    <p>No Business Permit Uploaded.</p>
-                                                )}
+                                                <button
+                                                    onClick={() => handleAccept(merchant.id)}
+                                                    className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                                                >
+                                                    Accept
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDecline(merchant.id)}
+                                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                                >
+                                                    Decline
+                                                </button>
                                             </div>
                                         </div>
                                     ))
@@ -236,6 +255,55 @@ const Merchants = () => {
                     </div>
                 )}
 
+                {idModal && selectedMerchant && (
+                    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+                            <h2 className="text-xl font-semibold mb-4 text-black">
+                                {selectedMerchant.shop_name || 'Unnamed Artist'}'s Identification
+                            </h2>
+                            <div className="grid grid-cols-3 gap-4 mb-4">
+                            <div className="flex flex-col items-center">
+                                    <p className="text-black font-medium mb-2">Business Permit</p>
+                                    <img
+                                        src={selectedMerchant.shop_BusinessPermit || 'https://via.placeholder.com/150'}
+                                        alt={`${selectedMerchant.shop_name || 'Artist'} selfie`}
+                                        className="w-24 h-24 object-contain rounded-md"
+                                    />
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <p className="text-black font-medium mb-2">Selfie</p>
+                                    <img
+                                        src={selectedMerchant.selfie || 'https://via.placeholder.com/150'}
+                                        alt={`${selectedMerchant.shop_name || 'Artist'} selfie`}
+                                        className="w-24 h-24 object-contain rounded-md"
+                                    />
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <p className="text-black font-medium mb-2">Valid ID</p>
+                                    <img
+                                        src={selectedMerchant.validID || 'https://via.placeholder.com/150'}
+                                        alt={`${selectedMerchant.artist_name || 'Artist'} ID`}
+                                        className="w-24 h-24 object-contain rounded-md"
+                                    />
+                                </div>
+                                <div className="flex flex-col items-center">
+                                    <p className="text-black font-medium mb-2">GCash</p>
+                                    <img
+                                        src={selectedMerchant.gcash || 'https://via.placeholder.com/150'}
+                                        alt={`${selectedMerchant.artist_name || 'Artist'} GCash`}
+                                        className="w-24 h-24 object-contain rounded-md"
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                onClick={closeModal}
+                                className="w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {successAdd && (
                     <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-md shadow-lg z-50">
@@ -247,7 +315,6 @@ const Merchants = () => {
                         {successDecline}
                     </div>
                 )}
-
 
                 {status === 'merchants' && (
                     <div>
@@ -284,7 +351,7 @@ const Merchants = () => {
                             totalItems={filteredMerchants.length}
                             itemsPerPage={merchantsPerPage}
                             onPageChange={handlePageChange}
-                            className ='fixed'
+                            className='fixed'
                         />
                     </div>
                 )}
