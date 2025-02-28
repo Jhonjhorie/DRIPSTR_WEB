@@ -13,6 +13,7 @@ import Admins from "../View/Admins";
 import Cashout from "../View/Payout";
 import Vouchers from "../View/Vouchers";
 import PrivateRoute from "./PrivateRoute";
+import Artists from "../View/Artists";
 
 const AdminController = () => {
   return (
@@ -32,6 +33,7 @@ const AdminController = () => {
           <Route path="/merchants" element={<Merchants />} />
           <Route path="/reports/:reportNo" element={<ReportDetail />} />
           <Route path="/admins" element={<Admins />} />
+          <Route path="/artists" element={<Artists />} />
           <Route path="/cashout" element={<Cashout />} />
         </Route>
       </Routes>

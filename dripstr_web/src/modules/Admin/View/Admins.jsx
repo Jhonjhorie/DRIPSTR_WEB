@@ -156,7 +156,7 @@ function Admins() {
                     <table className="w-full text-white border border-gray-600 bg-gray-800">
                         <thead>
                             <tr className="bg-gray-700">
-                                <th className="p-2 border border-gray-500">Username</th>
+                                <th className="p-2 border border-gray-500">ID</th>
                                 <th className="p-2 border border-gray-500">Username</th>
                                 <th className="p-2 border border-gray-500">Password</th>
                                 <th className="p-2 border border-gray-500">Actions</th>
