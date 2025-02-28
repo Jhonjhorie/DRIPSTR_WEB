@@ -71,18 +71,18 @@ function LandingPage() {
         <img
           src={require("@/assets/images/home/DrpTxt.png")}
           alt="No Images Available"
-          className="absolute object-contain mb-2 mt-1 w-full z-10 h-[40vw] sm:h-[25vw] max-h-[400px] drop-shadow-customViolet right-0 sm:right-10 group-hover:right-[30rem] md:group-hover:right-80 scale-100 group-hover:scale-50 group-hover:drop-shadow-customWhite transition-all duration-300"
+          className="absolute object-contain mb-2 mt-1 w-full z-10 h-[35vw] sm:h-[25vw] max-h-[400px] drop-shadow-customViolet right-0 sm:right-10 group-hover:right-[30rem] md:group-hover:right-80 scale-100 group-hover:scale-50 group-hover:drop-shadow-customWhite transition-all duration-300"
         />
         <div className="absolute font-[iceland] text-white top-5 sm:top-10 text-xl duration-300 transition-all group-hover:text-3xl tracking-[2rem] text-center">
           <h1>WELCOME</h1>
           <h1>TO</h1>
         </div>
         <div className="absolute right-10 sm:right-40 h-40 w-96 overflow-hidden flex">
-          <p className="font-[iceland] absolute right-[-10rem] w-96 text-white group-hover:right-0 transition-all opacity-0 group-hover:opacity-100 duration-300">
+          <p className="font-[iceland] absolute right-[-10rem] w-96 bg-stone-800 sm:bg-opacity-0 bg-opacity-80 h-40 text-white  group-hover:right-0 transition-all opacity-0 group-hover:opacity-100 duration-300 p-2 rounded-lg">
             <span className="font-bold text-lg text-primary-color">
-              DRIPSTR
-            </span>{" "}
-            provides a unique and immersive online shopping experience by
+              DRIPSTR 
+            </span> {" "}
+             provides a unique and immersive online shopping experience by
             integrating 3D apparel visualization and avatar-based sizing to
             ensure the perfect fit and style. Whether you’re looking for
             custom-designed apparel or exclusive digital assets, DRIPSTR makes
@@ -206,7 +206,7 @@ function LandingPage() {
               <img
                 src={require("@/assets/emote/mascot.png")}
                 alt="No Images Available"
-                className=" drop-shadow-customViolet  z-0 hidden sm:flex h-96 "
+                className=" drop-shadow-customViolet z-0 hidden sm:flex h-96 "
               />
               <div className="join join-vertical w-full">
                 {/* Accordion Item 1: Browse & Discover Unique Products */}
@@ -430,11 +430,11 @@ function LandingPage() {
   </div>
 
   {/* Details Section with Parallax Effect */}
-  <div className="flex flex-row-reverse items-end gap-8">
+  <div className="flex flex-col md:flex-row items-end gap-8">
     <img
       src={require("@/assets/emote/mascot.png")}
       alt="No Images Available"
-      className="drop-shadow-customViolet z-0 flex h-96"
+      className="drop-shadow-customViolet z-0 hidden sm:flex h-96"
     />
     <div className="join join-vertical w-full">
       {/* Accordion Item 1: Sign Up & Set Up Your Artist Portfolio */}
@@ -521,11 +521,11 @@ function LandingPage() {
           </div>
         
           {/* Details Section with Parallax Effect */}
-          <div className="flex flex-row-reverse items-end gap-8">
+          <div className="flex flex-col md:flex-row items-end gap-8">
             <img
               src={require("@/assets/emote/mascot.png")}
               alt="No Images Available"
-              className="drop-shadow-customViolet z-0 flex h-96"
+              className="drop-shadow-customViolet z-0 hidden mb:flex h-96"
             />
             <div className="join join-vertical w-full">
               {/* Accordion Item 1: Sign Up & Set Up Your Store */}

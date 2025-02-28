@@ -5,7 +5,7 @@ import {
   faTriangleExclamation,
   faHeart,
   faX,
-  faCube, // Replace faThreeDPointSphere with faCube
+  faCube,
 } from "@fortawesome/free-solid-svg-icons";
 import RateSymbol from "@/shared/products/rateSymbol";
 import { averageRate } from "../hooks/useRate.ts";
@@ -49,20 +49,17 @@ const BuyConfirm = ({ item, onClose }) => {
   const handleInputChange = (e) => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value) && value > 0) {
-      setQuantity(
-        value > selectedSize.qty ? selectedSize.qty : value
-      );
+      setQuantity(value > selectedSize.qty ? selectedSize.qty : value);
     } else if (e.target.value === "") {
       setQuantity(1);
     }
   };
 
   useEffect(() => {
-    if(quantity > selectedSize.qty) {
-      setQuantity(selectedSize.qty)
+    if (quantity > selectedSize.qty) {
+      setQuantity(selectedSize.qty);
     }
-
-  }, [selectedSize, quantity])
+  }, [selectedSize, quantity]);
 
   const handleSelectedValues = (color, size) => {
     setSelectedColor(color);
@@ -73,6 +70,7 @@ const BuyConfirm = ({ item, onClose }) => {
   const handleProductClick = () => {
     navigate(`/product/${item.item_Name}`, { state: { item } });
   };
+
   const handleShopClick = () => {
     navigate(`/product/merchant-shop/${item.shop.shop_Name}`, {
       state: { shop: item.shop },
@@ -145,52 +143,49 @@ const BuyConfirm = ({ item, onClose }) => {
       setLoginDialog(true);
     }
   };
+
   if (loadingP) {
     return (
-      <div className="w-[60.40rem] rounded-lg relative pb-16 items-center justify-center bg-slate-100 flex flex-col  px-2 lg:px-8 h-[27rem] py-4">
+      <div className="w-full md:w-[60.40rem] rounded-lg relative pb-16 items-center justify-center bg-slate-100 flex flex-col px-2 lg:px-8 h-[27rem] py-4">
         <img
           src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
           className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
         />
-        <h1 className=" font-semibold text-3xl  rounded-md drop-shadow-lg">
+        <h1 className="font-semibold text-2xl md:text-3xl rounded-md drop-shadow-lg">
           Loading
         </h1>
       </div>
     );
   } else {
     return (
-      <div className="   w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg z-50 overflow-hidden">
+      <div className="w-full md:w-[60.40rem] h-full md:h-[27rem] bg-slate-50 rounded-lg shadow-lg z-50 overflow-hidden">
         {mascot ? (
           <div className="flex flex-col items-center justify-center h-full w-full">
             <img
               src={require("@/assets/emote/success.png")}
               alt="No Images Available"
-              className="object-contain animate-bounce  drop-shadow-customViolet "
+              className="object-contain animate-bounce drop-shadow-customViolet"
             />
-            <span className="text-3xl">Item added to cart successfully!</span>
+            <span className="text-2xl md:text-3xl">Item added to cart successfully!</span>
           </div>
         ) : (
-          <div className="flex">
-            <div className="flex-none w-80 relative items-center flex justify-center">
+          <div className="flex flex-col md:flex-row">
+            {/* Image Section */}
+            <div className="w-full flex-none md:w-80 relative items-center flex justify-center">
               <div className="relative group">
                 {show3DView ? (
-                  <div className="w-full h-[400px] relative">
-                    {" "}
-                    {/* Add fixed height container */}
+                  <div className="w-full h-[300px] md:h-[400px] relative">
                     <Product3DViewer
                       category={item.item_Category}
                       onClose={() => setShow3DView(false)}
                       className="w-full h-full"
                       selectedColor={selectedColor}
-                      productData={item} // Pass the entire item object
+                      productData={item}
                     />
-                    {/* button for 3D view */}
                     <button
                       onClick={() => setShow3DView(false)}
-                      className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 
-                        rounded-full shadow-lg transform transition-all duration-300 
-                        hover:scale-110 z-10 border border-slate-400 hover:border-slate-800"
+                      className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110 z-10 border border-slate-400 hover:border-slate-800"
                       title="Close 3D View"
                     >
                       <FontAwesomeIcon
@@ -208,7 +203,7 @@ const BuyConfirm = ({ item, onClose }) => {
                           : require("@/assets/emote/success.png")
                       }
                       alt={selectedColor.variant_Name}
-                      className={`h-full w-full ${
+                      className={`h-[320px] md:h-full w-full ${
                         selectedColor.imagePath != null || ""
                           ? "object-contain"
                           : "object-none"
@@ -217,14 +212,11 @@ const BuyConfirm = ({ item, onClose }) => {
                     {item.is3D && (
                       <button
                         onClick={() => setShow3DView(true)}
-                        className="absolute bottom-4 right-4 bg-white/90 hover:bg-white p-2 
-                          rounded-full shadow-lg transform transition-all duration-300 
-                          hover:scale-110 opacity-0 group-hover:opacity-100 
-                          border border-slate-400 hover:border-slate-800"
+                        className="absolute bottom-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110 opacity-0 group-hover:opacity-100 border border-slate-400 hover:border-slate-800"
                         title="View 3D Model"
                       >
                         <FontAwesomeIcon
-                          icon={faCube} // Use faCube instead of faThreeDPointSphere
+                          icon={faCube}
                           className="text-slate-400 hover:text-slate-800 text-lg"
                         />
                       </button>
@@ -233,27 +225,31 @@ const BuyConfirm = ({ item, onClose }) => {
                 )}
               </div>
             </div>
+
+            {/* Details Section */}
             <div className="flex flex-wrap h-full bg-slate-200 w-full">
-              <div className="flex flex-col justify-start   h-full w-full p-4 ">
-                <div className="flex flex-col   ">
+              <div className="flex flex-col justify-start h-full w-full p-4">
+                <div className="flex flex-col">
                   <div className="flex justify-between">
-                    <div className="flex items-center gap-1 ">
-                      <p className="text-xs text-slate-400 font-medium">
-                        Shop:
-                      </p>
+                    <div className="flex items-center gap-0.5">
+                      <p className="text-xs text-slate-400 font-medium">Shop:</p>
                       <button
                         onClick={handleShopClick}
-                        className=" px-1 text-xs py-0 min-h-6 h-6 rounded-md btn-ghost btn duration-300 transition-all "
+                        className="px-0.5 md:px-1 text-xs py-0 min-h-6 h-6 rounded-md btn-ghost btn duration-300 transition-all w-36"
                       >
-                        {item.shop_Name || "No shop available"}
+                        <p className="truncate">
+                          {item.shop_Name || "No shop available"}
+                        </p>
                       </button>
                     </div>
 
                     <div className="flex justify-end gap-2 items-center">
                       <div className="flex gap-1">
                         <div className="flex gap-1 items-center">
-                          <h2 className="text-xs font-medium ">
-                            {averageRate(item.reviews) != 1 ? `${averageRate(item.reviews)} Reviews` :  `${averageRate(item.reviews)} Review`}
+                          <h2 className="text-xs font-medium">
+                            {averageRate(item.reviews) != 1
+                              ? `${averageRate(item.reviews)} Reviews`
+                              : `${averageRate(item.reviews)} Review`}
                           </h2>
                           <RateSymbol
                             item={averageRate(item.reviews)}
@@ -262,9 +258,7 @@ const BuyConfirm = ({ item, onClose }) => {
                         </div>
                         <h2 className="text-xs font-medium">
                           {item.item_Orders}{" "}
-                          <span className="text-slate-400 font-normal">
-                            Sold
-                          </span>
+                          <span className="text-slate-400 font-normal">Sold</span>
                         </h2>
                       </div>
                     </div>
@@ -283,24 +277,24 @@ const BuyConfirm = ({ item, onClose }) => {
                       {isLoggedIn && (
                         <button
                           onClick={mulletReport}
-                          class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+                          className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
                         >
                           <FontAwesomeIcon icon={faTriangleExclamation} />
                         </button>
                       )}
                       <button
                         onClick={onClose}
-                        class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+                        className="flex-none flex md:relative top-5 right-5 md:top-0 md:right-0 absolute items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
                       >
                         <FontAwesomeIcon icon={faX} />
                       </button>
                     </div>
                   </div>
-                  <h1 className="flex-auto text-2xl font-semibold text-slate-900 truncate">
+                  <h1 className="flex-auto text-xl md:text-2xl font-semibold text-slate-900 truncate">
                     {item.item_Name}
                   </h1>
 
-                  <div className="flex flex-row justify-between py-2  border-b border-slate-400">
+                  <div className="flex flex-row justify-between py-2 border-b border-slate-400">
                     <div className="flex flex-col gap-2">
                       <ItemOptions
                         item={item}
@@ -313,8 +307,8 @@ const BuyConfirm = ({ item, onClose }) => {
                 </div>
 
                 <div>
-                  <div className="justify-start flex flex-col  mb-10">
-                    <div className="flex justify-between gap-5 pl-2 ">
+                  <div className="justify-start flex flex-col mb-5">
+                    <div className="flex flex-row justify-between gap-5 pl-2">
                       <div className="flex items-end justify-center gap-2">
                         <label className="form-control w-20 max-w-xs">
                           <div className="label">
@@ -342,9 +336,9 @@ const BuyConfirm = ({ item, onClose }) => {
                         </button>
                       </div>
                       <div className="items-center flex flex-col justify-center">
-                        <div className="flex  justify-end pl-2">
-                          <p className="text-2xl text-primary-color">₱</p>
-                          <h2 className="text-6xl font-bold text-primary-color">
+                        <div className="flex justify-end pl-2">
+                          <p className="text-xl md:text-2xl text-primary-color">₱</p>
+                          <h2 className="text-4xl md:text-6xl font-bold text-primary-color">
                             {selectedSize
                               ? item?.discount > 0
                                 ? (
@@ -361,24 +355,20 @@ const BuyConfirm = ({ item, onClose }) => {
                         </div>
                         <div className="justify-end flex items-end gap-2 w-full">
                           {item?.vouchers && (
-                            <span className="text-lg font-bold border border-primary-color px-2 ">
+                            <span className="text-base md:text-lg font-bold border border-primary-color px-2">
                               SHOP VOUCHER
                             </span>
                           )}
-                          <div className="flex justify-end items-center gap-2 ">
+                          <div className="flex justify-end items-center gap-2">
                             {item?.discount > 0 && (
-                              <div
-                                className="flex items-center justify-end
-                        "
-                              >
-                                <span className="text-sm text-white bg-primary-color border opacity-80 border-primary-color px-0.5 font-bold">
+                              <div className="flex items-center justify-end">
+                                <span className="text-xs md:text-sm text-white bg-primary-color border opacity-80 border-primary-color px-0.5 font-bold">
                                   {item?.discount}%
                                 </span>
-                                <span className="text-lg text-secondary-color px-1 font-bold opacity-50 line-through ">
+                                <span className="text-base md:text-lg text-secondary-color px-1 font-bold opacity-50 line-through">
                                   ₱
-                                  {(Number(selectedSize?.price) || 0).toFixed(
-                                    2
-                                  ) || "N/A"}
+                                  {(Number(selectedSize?.price) || 0).toFixed(2) ||
+                                    "N/A"}
                                 </span>
                               </div>
                             )}
@@ -387,10 +377,10 @@ const BuyConfirm = ({ item, onClose }) => {
                       </div>
                     </div>
                   </div>
-                  <div className=" justify-end gap-4 items-center flex h-auto ">
+                  <div className="justify-end gap-4 items-center flex h-auto">
                     <button
                       onClick={() => handleProductClick()}
-                      className="h-10 px-6 font-semibold rounded-md bg-transparent border-slate-400 border  text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
+                      className="h-10 px-6 font-semibold rounded-md bg-transparent border-slate-400 border text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
                     >
                       More Detail
                     </button>
@@ -431,7 +421,7 @@ const BuyConfirm = ({ item, onClose }) => {
               />
               <form
                 method="dialog"
-                className="modal-backdrop min-h-full min-w-full absolute "
+                className="modal-backdrop min-h-full min-w-full absolute"
               >
                 <button onClick={closeModalRep}></button>
               </form>
