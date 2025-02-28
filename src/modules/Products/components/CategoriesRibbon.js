@@ -20,7 +20,7 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
         const containerWidth = containerRef.current.offsetWidth;
 
         const itemWidth = calculateItemWidth();
-        const gap = 10;
+        const gap = 8;
         const totalItemWidth = itemWidth + gap;
 
        
@@ -58,7 +58,7 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-[96%] md:w-[50%] h-16 md:h-20 justify-center  items-center bg-slate-50 rounded-md shadow-lg pr-2 md:pr-3 gap-2 md:gap-8 flex overflow-hidden pl-0"
+      className="relative w-[96%] md:w-[56%] h-16 md:h-20 justify-center  items-center bg-slate-50 rounded-md shadow-lg pr-2 md:pr-3 gap-2 md:gap-8 flex overflow-hidden pl-0"
     >
        <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md z-20">
               {" "}

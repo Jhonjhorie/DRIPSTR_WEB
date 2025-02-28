@@ -152,14 +152,14 @@ const ProductsView = ({
       {/* Product Grid */}
       {filteredProductsD.length > 0 ? (
         <div
-          className="grid gap-1 items-center justify-center"
+          className="grid gap-2 items-center justify-center"
           style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}
         >
           {dataWithPlaceholders.map((item, index) =>
             item.empty ? (
               <div
                 key={`placeholder-${index}`}
-                className="flex flex-col mx-1 max-w-[13.5rem] w-[12rem] mb-2 p-2 rounded-md"
+                className="flex flex-col mx-1 max-w-[13rem] w-[11rem] mb-2 p-2 rounded-md"
                 style={{ visibility: "hidden" }}
               />
             ) : (

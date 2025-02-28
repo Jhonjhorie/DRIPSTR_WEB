@@ -34,6 +34,7 @@ import VoucherStream from "./components/VoucherStream";
 import ChatSupport from "./components/ChatSupport";
 import useMediaQueryChecker from "../../shared/hooks/useMediaQueryChecker";
 import useResponsiveItems from "../../shared/hooks/useResponsiveItems";
+import Mall from "../Products/Mall";
 
 function Home() {
   const [filMall, setFilMall] = useState(0);
@@ -106,14 +107,9 @@ function Home() {
         <Carousel images={Images} />
       </div>
       <div className="flex  gap-4 md:flex-row w-full justify-center items-center p-4 ">
-        {isLoggedIn &&  <VoucherStream profile={profile}/> }
-     
+  
       </div>
-      <CategoriesRibbon
-          active={filCat}
-          categories={categories}
-          onItemClick={(label) => setFilCat(label)}
-        />
+     
       <div className="flex flex-col lg:flex-row  flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 ">
         <SectionWrapper
           title="Discounted Products"
@@ -155,7 +151,15 @@ function Home() {
             sort={"top"}
           />
         </SectionWrapper>
-
+        <div className="flex w-[90%] gap-2">
+        {isLoggedIn &&  <VoucherStream profile={profile}/> }
+        <CategoriesRibbon
+          active={filCat}
+          categories={categories}
+          onItemClick={(label) => setFilCat(label)}
+        />
+        </div>
+       
         <SectionWrapper
           title="Recommended For You"
           icon={faShoppingCart}

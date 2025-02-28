@@ -33,7 +33,7 @@ const icon = location.state?.icon || "faShoppingCart";
           onItemClick={(label) => setFilCat(label)}
         />
       </div> 
-      <div className="flex flex-col lg:flex-row  flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 ">
+      <div className="flex flex-col lg:flex-row  flex-wrap w-full  justify-center items-center mb-4 gap-10 ">
         <SectionWrapper
           title={title}
           icon={icon}

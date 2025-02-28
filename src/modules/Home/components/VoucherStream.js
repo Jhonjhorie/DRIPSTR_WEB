@@ -24,7 +24,6 @@ const VoucherStream = ({ profile }) => {
 
     if (claimed2Error) throw claimed2Error;
 
-    // Fetch all vouchers excluding those already claimed and used by the user
     const { data: voucherData, error: voucherError } = await supabase
       .from("vouchers")
       .select("*")
@@ -165,7 +164,7 @@ const VoucherStream = ({ profile }) => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="w-[90%] rounded-md flex gap-2 text-secondary-color font-[iceland] relative overflow-x-auto custom-scrollbar">
+    <div className="w-[40%] flex-1 rounded-md flex gap-2 text-secondary-color font-[iceland] relative overflow-x-auto custom-scrollbar">
              {showAlert && (
                 <div className=" w-[95%] absolute -top-60 justify-center  flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
                   <AlertDialog emote={require("@/assets/emote/success.png")} text={"Voucher claimed successfully! please use it before expiration date"} />
