@@ -18,7 +18,7 @@ const Merchants = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedMerchant, setSelectedMerchant] = useState(null);
     const [idModal, setIdModal] = useState(false);
-    const [enlargedImage, setEnlargedImage] = useState(null)
+    const [enlargedImage, setEnlargedImage] = useState(null);
 
     // Fetch accepted merchants (Auto-refresh every 5 seconds)
     useEffect(() => {
@@ -39,9 +39,8 @@ const Merchants = () => {
         };
 
         fetchMerchants();
-        const interval = setInterval(fetchMerchants, 5000); // Auto-refresh every 5 seconds
-
-        return () => clearInterval(interval); // Cleanup to prevent memory leaks
+        const interval = setInterval(fetchMerchants, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     // Fetch pending merchant registrations (Auto-refresh every 5 seconds)
@@ -50,7 +49,7 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('merchantRegistration')
-                    .select('id(full_name), shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, profiles(full_name), validID, selfie, gcash')
+                    .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, full_Name, validID, selfie, gcash')
                     .is('is_Approved', null);
 
                 if (error) throw error;
@@ -63,9 +62,8 @@ const Merchants = () => {
         };
 
         fetchMerchantRegistration();
-        const interval = setInterval(fetchMerchantRegistration, 5000); // Auto-refresh every 5 seconds
-
-        return () => clearInterval(interval); // Cleanup
+        const interval = setInterval(fetchMerchantRegistration, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     // Accept Merchant Function
@@ -73,7 +71,7 @@ const Merchants = () => {
         try {
             const { data: merchantData, error: fetchError } = await supabase
                 .from('merchantRegistration')
-                .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved')
+                .select('id, shop_name, contact_number, description, address, shop_image, is_Approved, shop_BusinessPermit, validID, selfie, gcash')
                 .eq('id', id)
                 .single();
 
@@ -87,18 +85,21 @@ const Merchants = () => {
             await supabase
                 .from('shop')
                 .insert([{
-                    owner_Id: merchantData.id,
                     shop_name: merchantData.shop_name,
+                    contact_number: merchantData.contact_number,
                     description: merchantData.description,
                     address: merchantData.address,
+                    owner_Id: merchantData.id,
                     shop_image: merchantData.shop_image,
-                    contact_number: merchantData.contact_number,
+                    shop_Vouchers: null,
                     shop_BusinessPermit: merchantData.shop_BusinessPermit,
+                    shop_Rating: null,
+                    is_Approved: true,
+                    shop_Ads: null,
+                    is_Premium: null,
                     valid_id: merchantData.validID,
-                    gcash: merchantData.gcash,
                     selfie: merchantData.selfie,
-                    is_Approved: true
-
+                    gcash: merchantData.gcash
                 }]);
 
             await supabase
@@ -110,7 +111,6 @@ const Merchants = () => {
             setAcceptedMerchants(prev => [...prev, merchantData]);
             setSuccessAdd('Merchant added successfully.');
             setTimeout(() => setSuccessAdd(''), 1500);
-
         } catch (error) {
             setError(error.message);
         }
@@ -135,24 +135,25 @@ const Merchants = () => {
         setSearch(e.target.value);
     };
 
-    // Filter merchants based on the search term
-    const filteredMerchants = merchants.filter(merchant =>
-        merchant.shop_name.toLowerCase().includes(search.toLowerCase()) ||
-        merchant.owner_Id?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-        merchant.description.toLowerCase().includes(search.toLowerCase()) ||
-        merchant.address.toLowerCase().includes(search.toLowerCase()) ||
-        String(merchant.contact_number).toLowerCase().includes(search.toLowerCase())
-    );
+    // Filter merchants based on the search term with null checks
+    const filteredMerchants = merchants.filter(merchant => {
+        const searchLower = search.toLowerCase();
+        return (
+            (merchant.shop_name?.toLowerCase() || '').includes(searchLower) ||
+            (merchant.owner_Id?.full_name?.toLowerCase() || '').includes(searchLower) ||
+            (merchant.description?.toLowerCase() || '').includes(searchLower) ||
+            (merchant.address?.toLowerCase() || '').includes(searchLower) ||
+            (String(merchant.contact_number) || '').toLowerCase().includes(searchLower)
+        );
+    });
 
-    // Calculate the start and end index for the current page
+    // Calculate pagination
     const merchantsPerPage = 3;
     const indexOfLastMerchant = currentPage * merchantsPerPage;
     const indexOfFirstMerchant = indexOfLastMerchant - merchantsPerPage;
-
-    // Slice the filtered merchants for the current page
     const merchantsToDisplay = filteredMerchants.slice(indexOfFirstMerchant, indexOfLastMerchant);
 
-    //Page Change
+    // Page Change
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
@@ -178,7 +179,7 @@ const Merchants = () => {
     return (
         <div className="flex">
             <Sidebar />
-            <div className="flex-1 p-4  bg-slate-900 rounded-lg">
+            <div className="flex-1 p-4 bg-slate-900 rounded-lg">
                 <h1 className="text-2xl font-bold mb-4 text-white">Merchants</h1>
                 <div className="flex space-x-4 mb-4">
                     <button
@@ -350,7 +351,6 @@ const Merchants = () => {
                             {merchantsToDisplay.map((merchant) => (
                                 <li key={merchant.id} className="border p-4 rounded-lg shadow-md flex mb-4 bg-gray-800">
                                     <div className="flex gap-4 w-full">
-                                        {/* Image with improved sizing */}
                                         <div className="flex-shrink-0">
                                             <img
                                                 src={merchant.shop_image || 'No Image'}
@@ -358,8 +358,6 @@ const Merchants = () => {
                                                 className="w-24 h-24 object-cover rounded-md"
                                             />
                                         </div>
-
-                                        {/* Merchant Info */}
                                         <div className="flex flex-col w-full">
                                             <p className="text-white text-sm hover:text-blue-900 hover:underline" onClick={() => handleId(merchant)}><strong>Shop Name:</strong> {merchant.shop_name}</p>
                                             <p className="text-white text-sm"><strong>Name:</strong> {merchant.owner_Id?.full_name || 'No Name'}</p>
@@ -380,7 +378,6 @@ const Merchants = () => {
                         />
                     </div>
                 )}
-
             </div>
         </div>
     );
