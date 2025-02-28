@@ -66,7 +66,7 @@ function Artists() {
         return () => clearInterval(interval);
     }, []);
 
-    
+
     const handleAccept = async (id) => {
         try {
             const { data: artistData, error: fetchError } = await supabase
@@ -281,7 +281,11 @@ function Artists() {
                                             {/* Info column on the right */}
                                             <div className="flex flex-col">
                                                 <h2 className="text-xl font-semibold text-white flex flex-row">
-                                                    {artist.artist_Name} {artist.is_Premium && (<div className='bg-yellow-500 p-0 rounded-sm'><p className='text-white'>premiym</p></div>)}
+                                                    {artist.artist_Name} {artist.is_Premium && (
+                                                        <div className="bg-yellow-600 text-white text-xs font-semibold px-1 py-0.5 rounded-sm ml-2 inline-block">
+                                                            Premium
+                                                        </div>
+                                                    )}
                                                 </h2>
                                                 <h3 className="text-md font-medium text-white">
                                                     {artist.full_Name || artist.owner_Id?.full_name || 'Unnamed Artist'}
