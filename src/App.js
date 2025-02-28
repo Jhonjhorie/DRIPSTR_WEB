@@ -32,6 +32,7 @@ import { Toaster } from 'react-hot-toast';
 // Password Reset
 import ResetPassword from './shared/login/ResetPassword';
 
+import AccountSetup from './modules/Login/View/AccountSetup';
 
 function AppContent() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -80,6 +81,7 @@ function AppContent() {
               <Route path="/reminder" element={<Reminder />} />
               <Route path="/mall" element={<Mall />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/account-setup" element={<AccountSetup />} />
             </Routes>
           </main>
         </div>
