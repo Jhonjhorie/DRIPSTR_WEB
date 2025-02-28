@@ -1,5 +1,5 @@
 // src/pages/Home.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Carousel from "./components/Carousel";
 
 import ProductsView from "../Products/components/ProductsView";
@@ -22,6 +22,7 @@ import Contact from "@/shared/products/Contact";
 //Data
 import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from "@/constants/categories.ts";
+import CategoriesRibbon from "../Products/components/CategoriesRibbon";
 import { Images } from "@/constants/sampleData";
 import useProducts from "../Products/hooks/useProducts";
 import useUserProfile from "@/shared/mulletCheck";
@@ -31,13 +32,19 @@ import TermsCon from "@/shared/products/termsCon";
 import FaQCom from "../../shared/products/faqCom";
 import VoucherStream from "./components/VoucherStream";
 import ChatSupport from "./components/ChatSupport";
+import useMediaQueryChecker from "../../shared/hooks/useMediaQueryChecker";
+import useResponsiveItems from "../../shared/hooks/useResponsiveItems";
 
 function Home() {
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState(categories[0].label);
   const { products, loading, error } = useProducts();
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
+  const [showItem, setShowItem] = useState(3);
   const navigate = useNavigate();
+
+ const itemsToShow = useResponsiveItems({mb: 2, sm: 2, md: 3, lg: 3})
+
 
   if (loadingP) return <LoadingMullet />;
 
@@ -102,13 +109,18 @@ function Home() {
         {isLoggedIn &&  <VoucherStream profile={profile}/> }
      
       </div>
-      <div className="flex flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 font-[iceland]">
+      <CategoriesRibbon
+          active={filCat}
+          categories={categories}
+          onItemClick={(label) => setFilCat(label)}
+        />
+      <div className="flex flex-col lg:flex-row  flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 ">
         <SectionWrapper
           title="Discounted Products"
           icon={faTags}
           buttonText="See More"
           bgColor="bg-secondary-color"
-          width="w-[45%]"
+          width="w-[90%] md:w-[77%] lg:w-[45%]"
           filter={3}
         >
           <ProductsView
@@ -118,7 +130,7 @@ function Home() {
             filter={3}
             loading={loading}
             error={error}
-            showItem={3}
+            showItem={itemsToShow}
             sort="top"
             isSmall={true}
           />
@@ -129,7 +141,8 @@ function Home() {
           icon={faStore}
           buttonText="See More"
           bgColor="bg-stone-700"
-          width="w-[45%]"
+          width="w-[90%] md:w-[77%] lg:w-[45%]"
+        
         >
           <ProductsView
             products={products}
@@ -138,7 +151,7 @@ function Home() {
             filter={filMall}
             loading={loading}
             error={error}
-            showItem={3}
+            showItem={itemsToShow}
             sort={"top"}
           />
         </SectionWrapper>

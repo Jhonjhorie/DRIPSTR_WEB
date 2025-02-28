@@ -126,7 +126,7 @@ const ItemOptions = ({
       </label>
       <div className="ml-2 mt-1 text-xs  text-slate-400
       ">
-        Stocks: <span className="text-slate-800 font-semibold">{size?.qty}</span>
+        Stocks: <span className="text-slate-800 text-sm font-semibold">{size?.qty}</span>
       </div>
     </div>
   );

@@ -4,13 +4,14 @@ import CategoriesRibbon from "../Products/components/CategoriesRibbon";
 import ProductsView from "../Products/components/ProductsView";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faStar, faShoppingCart, faBackspace, faBackward, faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { faStar, faShoppingCart, faAngleLeft } from "@fortawesome/free-solid-svg-icons";
 
 // Data
 import { categories } from "@/constants/categories.ts";
 import useProducts from "../Products/hooks/useProducts";
 import AuthModal from "@/shared/login/Auth";
 import { supabase } from "../../constants/supabase";
+import Mall from "../Products/Mall";
 
 function GuestHome() {
   const [filMall, setFilMall] = useState(0);
@@ -21,7 +22,7 @@ function GuestHome() {
   const { products, loading, error } = useProducts();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
-useEffect(() => {
+  useEffect(() => {
     const fetchUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
@@ -29,87 +30,86 @@ useEffect(() => {
     fetchUser();
   }, []);
 
-    const handleAuth = () => {
-      if (!user) {
-        setIsAuthModalOpen(true); 
-        
-      } else {
-        navigate("/"); 
-      }
-    };
+  const handleAuth = () => {
+    if (!user) {
+      setIsAuthModalOpen(true); 
+    } else {
+      navigate("/"); 
+    }
+  };
 
   return (
-    <div className="w-full relative flex flex-col font-[iceland]">
-       {/* Auth Modal */}
-       {isAuthModalOpen && (
+    <div className="w-full relative flex flex-col ">
+      {/* Auth Modal */}
+      {isAuthModalOpen && (
         <AuthModal
           isOpen={isAuthModalOpen}
           onClose={() => setIsAuthModalOpen(false)}
         />
       )}
       {/* Hero Section */}
-      <div className="flex group flex-col-reverse w-full gap-8 md:gap-0 md:flex-row overflow-hidden items-start justify-center px-1 lg:p-4 bg-slate-300 min-h-[87vh]">
-        <div className=" w-[90%] flex flex-col justify-center items-center">
-          <div className="flex gap-2 justify-center ">
-            <button 
-            onClick={() => (navigate("/"))}
-            className=" w-40 px-2 rounded-md bg-slate-50 flex items-center text-3xl font-bold
-            justify-center"><FontAwesomeIcon icon={faAngleLeft} /></button>
-          <div className="w-[60rem] px-2 rounded-md bg-secondary-color  mr-16 flex flex-col text-white overflow-hidden relative">
-            <div className="absolute right-4 overflow-hidden h-32 w-40">
+      <div className="flex flex-col w-full gap-1 p-2 items-center bg-slate-300 min-h-screen">
+        {/* Back Button and Guest Mode Banner */}
+        <div className="flex flex-row w-full gap-2 lg:ml-16 ">
+        <button 
+            onClick={() => navigate("/")}
+            className="w-12  rounded-md bg-slate-50 flex items-center justify-center text-2xl"
+          >
+            <FontAwesomeIcon icon={faAngleLeft} />
+          </button>
+          <div className="w-full lg:w-[90%]  p-4 rounded-md bg-secondary-color flex flex-col text-white relative overflow-hidden">
+            
+            <div className="absolute right-4 overflow-hidden h-24 w-24">
               <img
                 src={require("@/assets/emote/success.png")}
                 alt="No Images Available"
-                className="drop-shadow-customViolet h-40 -right-4 -top-4 relative opacity-40"
+                className="drop-shadow-customViolet h-24 -right-4 -top-4 relative opacity-40"
               />
             </div>
-            <h1 className="text-2xl font-[iceland] z-20 mt-2">
-              {" "}
-              You are in <span className="font-bold">Guest</span> Mode{" "}
+            <h1 className="text-xl font-[iceland] z-20">
+              You are in <span className="font-bold">Guest</span> Mode
             </h1>
             <p className="text-sm z-20">
-              Guest user can only Browse Items. To add Cart and Place Order you
-              must Log In/Register First.
+              Guest user can only browse items. To add to cart and place orders, you must log in or register first.
             </p>
-            <div className="flex justify-center z-20">
+            <div className="flex justify-center z-20 mt-2">
               <button
                 onClick={handleAuth}
-                className="btn bg-primary-color btn-outline  p-1 h-8 min-h-8 text-white hover:bg-white hover:text-black w-40 drop-shadow-lg font-[iceland] my-2"
+                className="btn bg-primary-color btn-outline p-2 h-10 min-h-10 text-white hover:bg-white hover:text-black w-full max-w-xs drop-shadow-lg "
               >
                 Login/Register
               </button>
             </div>
-            </div>
-          </div>
-         
-          <div className="flex flex-wrap  w-full justify-center mb-4   gap-2 ">
-            <div className="relative flex flex-row w-full items-center justify-center">
-              <div className="breadcrumbs text-2xl text-slate-500  font-[iceland]">
-                <ul>
-                  <li className="text-bold text-primary-color flex items-center gap-2">
-                    START{" "}
-                    <FontAwesomeIcon fontSize={16} icon={faShoppingCart} />{" "}
-                    SHOPPING
-                  </li>
-                  <li className="text-bold text-secondary-color flex items-center gap-2">
-                    STAR <FontAwesomeIcon fontSize={16} icon={faStar} />{" "}
-                    DRIPPING
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <ProductsView
-                 products={products}
-                        shopFil={0}
-                        categories={filCat}
-                        filter={filMall}
-                        loading={loading}
-                        error={error}
-                        showItem={0}
-                        sort={"top"}
-            />
           </div>
         </div>
+
+        {/* Breadcrumbs */}
+        <div className="flex flex-col w-full items-center justify-center">
+          <div className="breadcrumbs text-lg text-slate-500 font-[iceland]">
+            <ul>
+              <li className="font-bold text-primary-color flex items-center gap-2">
+                START <FontAwesomeIcon fontSize={16} icon={faShoppingCart} /> SHOPPING
+              </li>
+              <li className="font-bold text-secondary-color flex items-center gap-2">
+                STAR <FontAwesomeIcon fontSize={16} icon={faStar} /> DRIPPING
+              </li>
+            </ul>
+          </div>
+        </div>
+<Mall title2={"Guest Mall"} />
+        {/* Products View */}
+        {/* <div className="flex flex-col w-full justify-center ">
+          <ProductsView
+            products={products}
+            shopFil={0}
+            categories={filCat}
+            filter={filMall}
+            loading={loading}
+            error={error}
+            showItem={0}
+            sort={"top"}
+          />
+        </div> */}
       </div>
     </div>
   );

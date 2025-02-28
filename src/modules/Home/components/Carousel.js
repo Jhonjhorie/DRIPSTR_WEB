@@ -71,10 +71,10 @@ const Carousel = () => {
       </div>
 
     
-      <img src={require('@/assets/images/others/carouselframe.png')} className='z-10 absolute left-[-2rem] bottom-[0rem] w-[100%] h-[100%] opacity-50 object-cover' />
+      {/* <img src={require('@/assets/images/others/carouselframe.png')} className='z-10 absolute left-[-2rem] bottom-[0rem] w-[100%] h-[100%] opacity-50 object-cover' />
       <img src={require('@/assets/images/others/carouselframe.png')} className='z-10 absolute right-[-2rem] rotate-180 bottom-[0rem] w-[150%] h-[150%] opacity-10 object-cover' />
       <img src={require('@/assets/images/others/name.png')} className='z-10 absolute right-2 bottom-[-1rem] lg:bottom-0 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all  w-[15%] h-[50%] object-contain'/>
-      <img src={require('@/assets/images/others/crown.png')} className='-z-20 absolute right-24 md:right-16 lg:right-96 top-16 lg:top-10 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all  w-[15%] h-[50%] object-contain'/>
+      <img src={require('@/assets/images/others/crown.png')} className='-z-20 absolute right-24 md:right-16 lg:right-96 top-16 lg:top-10 opacity-50 drop-shadow-none group-hover:drop-shadow-lg duration-300 transition-all  w-[15%] h-[50%] object-contain'/> */}
     </div>
   );
 };

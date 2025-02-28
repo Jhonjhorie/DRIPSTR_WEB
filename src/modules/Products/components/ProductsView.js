@@ -159,7 +159,7 @@ const ProductsView = ({
             item.empty ? (
               <div
                 key={`placeholder-${index}`}
-                className="flex flex-col mx-1 max-w-[13.5rem] w-[12.5rem] mb-2 p-2 rounded-md"
+                className="flex flex-col mx-1 max-w-[13.5rem] w-[12rem] mb-2 p-2 rounded-md"
                 style={{ visibility: "hidden" }}
               />
             ) : (
@@ -172,16 +172,14 @@ const ProductsView = ({
           )}
         </div>
       ) : (
-        <div className="items-center justify-center min-h-72 flex flex-col">
-          <img
-            src={require("@/assets/emote/sad.png")}
-            alt="Sad"
-            className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
-          />
-          <h1 className="top-20 font-[iceland] font-semibold text-3xl bg-slate-100 p-1 rounded-md drop-shadow-lg">
-            No Available Products
-          </h1>
-        </div>
+        <div className="min-h-24 flex-col min-w-full items-center flex">
+        <img
+          src={require("@/assets/emote/sad.png")}
+          alt="No Images Available"
+          className="drop-shadow-customViolet animate-pulse"
+        />
+        <p className="text-3xl">No Products Available</p>
+      </div>
       )}
     </div>
   );

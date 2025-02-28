@@ -13,17 +13,18 @@ import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from "@/constants/categories.ts";
 import { searchProducts } from "@/utils/searchProducts";
 
-function Mall() {
+function Mall({title2}) {
   const { products, loading, error } = useProducts();
   const location = useLocation();
   const [filCat, setFilCat] = useState(categories[0].label); 
+  const title = location.state?.title != null ? location.state?.title : title2 != null ? title2 : "Dripstr";
   const filter = location.state?.filterM || 0;
-const title = location.state?.title || "Dripstr";
 const icon = location.state?.icon || "faShoppingCart";
 
 
+
   return (
-    <div className="w-full  inset-0 items-center justify-start gap-2 h-full p-2 bg-slate-300 flex flex-col font-[iceland]">
+    <div className="w-full  inset-0 h-full  bg-slate-300 flex flex-col ">
 
          <div className="flex flex-col-reverse w-full gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
         <CategoriesRibbon
@@ -32,8 +33,7 @@ const icon = location.state?.icon || "faShoppingCart";
           onItemClick={(label) => setFilCat(label)}
         />
       </div> 
-    
-      <div className="flex flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 font-[iceland]">
+      <div className="flex flex-col lg:flex-row  flex-wrap w-full px-10 justify-center items-center mb-4 gap-10 ">
         <SectionWrapper
           title={title}
           icon={icon}

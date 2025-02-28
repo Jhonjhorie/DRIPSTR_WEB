@@ -3,6 +3,8 @@ import { ReactComponent as Logo } from '@/assets/images/BlackLogo.svg';
 import { averageRate } from '../hooks/useRate.ts';
 import RateSymbol from '@/shared/products/rateSymbol';
 import useGetImage from '../hooks/useGetImageUrl.js';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLocationDot } from '@fortawesome/free-solid-svg-icons';
 
 const ProductCard = ({ item, onClick }) => {
   
@@ -39,14 +41,8 @@ const ProductCard = ({ item, onClick }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
-      className="flex flex-col flex-1 max-w-[13.5rem] w-[12.5rem] items-center mx-1 mb-2 rounded-md bg-slate-100 shadow-sm hover:shadow-lg gap-1 hover:scale-105 relative transition-transform duration-300 group"
+      className="flex flex-col flex-1 max-w-[13rem] w-[12rem] items-center mb-2 rounded-sm bg-white shadow-sm hover:shadow-lg hover:border-[1px] border-primary-color hover:scale-105 relative transition-transform duration-300 group"
     >
-       <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md z-20">
-              {" "}
-            </div>
-      {item.str && (
-        <Logo className="absolute top-2 left-2 group-hover:opacity-100 duration-300 transition-all opacity-50 w-7 h-7" />
-      )}
 
       <div className="absolute flex flex-row right-2 top-2 ">
         {item.vouchers && (
@@ -54,54 +50,68 @@ const ProductCard = ({ item, onClick }) => {
             SHOP VOUCHER
           </span>
         )}
-        {item.discount > 0 && (
-          <span className="text-xs text-white bg-primary-color border border-primary-color px-0.5 font-bold">
-            {item.discount}%
-          </span>
-        )}
+      
       </div>
 
       {currentImage ? (
         <img
           src={currentImage}
           alt={item.item_Name}
-          className="object-contain mb-2 mt-1 w-[180px] h-[200px]"
+          className="object-contain  w-[190px] h-[190px]"
         />
       ) : (
         <div>
         <img
         src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
-          className="object-none mb-2 mt-1 w-[180px] h-[200px]"
+          className="object-none  w-[200px] h-[200px]"
         />
                         <p className="font-semibold text-sm absolute bottom-20 left-6">No image provided.</p>
         </div>
       )}
 
-      <div className="w-full flex flex-col px-3 py-2 bg-slate-200 rounded-b-md">
+      <div className="w-full flex flex-col px-2 py-1 gap-1  bg-slate-50  rounded-b-md">
         {item.item_Name && (
-          <p className="text-secondary-color text-md font-medium truncate">
+        <div className='h-10 flex'>
+         
+          <p className="text-secondary-color text-sm line-clamp-2 break-words">
+          {item.texture_3D && (
+              <span className='rounded-sm bg-primary-color text-xs mr-0.5 text-white px-0.5'>Drip3D</span>
+            )}
             {item.item_Name}
           </p>
+          </div>
         )}
-        <div className="flex flex-row justify-between items-center">
-           {item?.item_Variant[0]?.sizes[0]?.price && (
-           <p className="text-primary-color text-md font-medium">
-           ₱{
-             item.discount > 0
-               ? (Number(item?.item_Variant[0]?.sizes[0]?.price) * (1 - item.discount / 100)).toFixed(2)
-               : Number(item?.item_Variant[0]?.sizes[0]?.price).toFixed(2)
-           }
+        <div className="flex flex-col justify-between gap-2">
+          
+           <p className="text-primary-color text-xs  flex items-center">
+          
+           ₱<span className='text-[1.10rem] font-semibold'>{
+            item?.item_Variant[0]?.sizes[0]?.price != null ?  item.discount > 0
+            ? (Number(item?.item_Variant[0]?.sizes[0]?.price) * (1 - item.discount / 100)).toFixed(2)
+            : Number(item?.item_Variant[0]?.sizes[0]?.price).toFixed(2) : (0).toFixed(2)
+           }</span>
+             {item.discount > 0 && (
+          <span className="text-[0.65rem] items-center ml-1 text-primary-color bg-purple-200 px-0.5 ">
+            -{item.discount}%
+          </span>
+        )}
          </p>
-          )} 
-          <div className="flex flex-row items-center gap-0.5">
-            <p className="text-primary-color text-md">
+          
+         <div className="flex flex-row items-center gap-0.5">
+            <p className="text-primary-color text-xs">
               {averageRate(item.reviews)}
             </p>
             <RateSymbol item={averageRate(item.reviews)} size="4" />
-            <span className="text-secondary-color justify-center text-sm">
+            <span className="text-secondary-color justify-center text-xs">
               | {item.item_Orders} sold
             </span>
+          </div>
+          <div className='flex text-slate-400 text-[0.5rem] gap-1 '>
+          <FontAwesomeIcon icon={faLocationDot}/> 
+          <p className=" truncate">
+              {item.shop.address}
+            </p>
           </div>
         
         </div>

@@ -16,10 +16,10 @@ import useCarts from "../hooks/useCart.js";
 import AlertDialog from "./alertDialog2.js";
 import ReportDialog from "./reportModal.js";
 import WishlistButton from "./subcomponents/WishlistButton.js";
-import Product3DViewer from './Product3DViewer';
-import ClosetButton from './subcomponents/ClosetButton';
+import Product3DViewer from "./Product3DViewer";
+import ClosetButton from "./subcomponents/ClosetButton";
 
-const BuyConfirm = ({ item, onClose}) => {
+const BuyConfirm = ({ item, onClose }) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [loginDialog, setLoginDialog] = useState(false);
   const [actionLog, setActionLog] = useState("");
@@ -45,15 +45,24 @@ const BuyConfirm = ({ item, onClose}) => {
   const handleDecrement = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
   };
-  
+
   const handleInputChange = (e) => {
     const value = parseInt(e.target.value, 10);
     if (!isNaN(value) && value > 0) {
-      setQuantity(value);
+      setQuantity(
+        value > selectedSize.qty ? selectedSize.qty : value
+      );
     } else if (e.target.value === "") {
       setQuantity(1);
     }
   };
+
+  useEffect(() => {
+    if(quantity > selectedSize.qty) {
+      setQuantity(selectedSize.qty)
+    }
+
+  }, [selectedSize, quantity])
 
   const handleSelectedValues = (color, size) => {
     setSelectedColor(color);
@@ -65,20 +74,20 @@ const BuyConfirm = ({ item, onClose}) => {
     navigate(`/product/${item.item_Name}`, { state: { item } });
   };
   const handleShopClick = () => {
-    navigate(`/product/merchant-shop/${item.shop.shop_Name}`, { state: { shop: item.shop } });
+    navigate(`/product/merchant-shop/${item.shop.shop_Name}`, {
+      state: { shop: item.shop },
+    });
   };
 
-
   const closeModalRep = () => {
-    const modal =  document.getElementById("my_modal_report");
+    const modal = document.getElementById("my_modal_report");
     if (modal) {
-    modal.close();
+      modal.close();
     }
-
   };
 
   const mulletReport = () => {
-    const modal =  document.getElementById("my_modal_report");
+    const modal = document.getElementById("my_modal_report");
     if (modal) {
       modal.showModal();
     }
@@ -107,8 +116,7 @@ const BuyConfirm = ({ item, onClose}) => {
         onClose();
       }, 2000);
     } else {
-      setLoginDialog(true)
-
+      setLoginDialog(true);
     }
   };
 
@@ -133,7 +141,6 @@ const BuyConfirm = ({ item, onClose}) => {
 
       navigate(`/product/placeOrder`, { state: { selectedItems, solo } });
     } else {
-
       setActionLog("placeOrder");
       setLoginDialog(true);
     }
@@ -146,14 +153,14 @@ const BuyConfirm = ({ item, onClose}) => {
           alt="No Images Available"
           className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
         />
-        <h1 className=" font-[iceland] font-semibold text-3xl  rounded-md drop-shadow-lg">
+        <h1 className=" font-semibold text-3xl  rounded-md drop-shadow-lg">
           Loading
         </h1>
       </div>
     );
   } else {
     return (
-      <div className="  font-[iceland]  w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg z-50 overflow-hidden">
+      <div className="   w-[60.40rem] h-[26.5rem] bg-slate-50 rounded-lg shadow-lg z-50 overflow-hidden">
         {mascot ? (
           <div className="flex flex-col items-center justify-center h-full w-full">
             <img
@@ -168,11 +175,13 @@ const BuyConfirm = ({ item, onClose}) => {
             <div className="flex-none w-80 relative items-center flex justify-center">
               <div className="relative group">
                 {show3DView ? (
-                  <div className="w-full h-[400px] relative"> {/* Add fixed height container */}
-                    <Product3DViewer 
-                      category={item.item_Category} 
+                  <div className="w-full h-[400px] relative">
+                    {" "}
+                    {/* Add fixed height container */}
+                    <Product3DViewer
+                      category={item.item_Category}
                       onClose={() => setShow3DView(false)}
-                      className="w-full h-full"  
+                      className="w-full h-full"
                       selectedColor={selectedColor}
                       productData={item} // Pass the entire item object
                     />
@@ -184,9 +193,9 @@ const BuyConfirm = ({ item, onClose}) => {
                         hover:scale-110 z-10 border border-slate-400 hover:border-slate-800"
                       title="Close 3D View"
                     >
-                      <FontAwesomeIcon 
+                      <FontAwesomeIcon
                         icon={faX}
-                        className="text-slate-400 hover:text-slate-800 text-lg" 
+                        className="text-slate-400 hover:text-slate-800 text-lg"
                       />
                     </button>
                   </div>
@@ -214,7 +223,7 @@ const BuyConfirm = ({ item, onClose}) => {
                           border border-slate-400 hover:border-slate-800"
                         title="View 3D Model"
                       >
-                        <FontAwesomeIcon 
+                        <FontAwesomeIcon
                           icon={faCube} // Use faCube instead of faThreeDPointSphere
                           className="text-slate-400 hover:text-slate-800 text-lg"
                         />
@@ -233,8 +242,9 @@ const BuyConfirm = ({ item, onClose}) => {
                         Shop:
                       </p>
                       <button
-                      onClick={handleShopClick}
-                      className=" px-1 text-xs py-0 min-h-6 h-6 rounded-md btn-ghost btn duration-300 transition-all ">
+                        onClick={handleShopClick}
+                        className=" px-1 text-xs py-0 min-h-6 h-6 rounded-md btn-ghost btn duration-300 transition-all "
+                      >
                         {item.shop_Name || "No shop available"}
                       </button>
                     </div>
@@ -243,7 +253,7 @@ const BuyConfirm = ({ item, onClose}) => {
                       <div className="flex gap-1">
                         <div className="flex gap-1 items-center">
                           <h2 className="text-xs font-medium ">
-                            {averageRate(item.reviews) || "N/A"}
+                            {averageRate(item.reviews) != 1 ? `${averageRate(item.reviews)} Reviews` :  `${averageRate(item.reviews)} Review`}
                           </h2>
                           <RateSymbol
                             item={averageRate(item.reviews)}
@@ -259,13 +269,17 @@ const BuyConfirm = ({ item, onClose}) => {
                       </div>
                     </div>
                     <div className="flex justify-end gap-1 items-center">
-                    <WishlistButton profile={profile} item={item} isLoggedIn={isLoggedIn} />
-                    <ClosetButton 
-                      profile={profile} 
-                      item={item} 
-                      isLoggedIn={isLoggedIn} 
-                      selectedColor={selectedColor}
-                    />
+                      <WishlistButton
+                        profile={profile}
+                        item={item}
+                        isLoggedIn={isLoggedIn}
+                      />
+                      <ClosetButton
+                        profile={profile}
+                        item={item}
+                        isLoggedIn={isLoggedIn}
+                        selectedColor={selectedColor}
+                      />
                       {isLoggedIn && (
                         <button
                           onClick={mulletReport}
@@ -282,7 +296,7 @@ const BuyConfirm = ({ item, onClose}) => {
                       </button>
                     </div>
                   </div>
-                  <h1 className="flex-auto text-3xl font-semibold text-slate-900 line-clamp-1">
+                  <h1 className="flex-auto text-2xl font-semibold text-slate-900 truncate">
                     {item.item_Name}
                   </h1>
 
@@ -302,7 +316,7 @@ const BuyConfirm = ({ item, onClose}) => {
                   <div className="justify-start flex flex-col  mb-10">
                     <div className="flex justify-between gap-5 pl-2 ">
                       <div className="flex items-end justify-center gap-2">
-                        <label className="form-control  w-20 max-w-xs">
+                        <label className="form-control w-20 max-w-xs">
                           <div className="label">
                             <span className="label-text">Quantity:</span>
                           </div>
@@ -398,12 +412,12 @@ const BuyConfirm = ({ item, onClose}) => {
             </div>
 
             {loginDialog && (
-      <AuthModal
-        isOpen={loginDialog}
-        onClose={() => setLoginDialog(false)}
-        item={(item)}
-      />
-    )}
+              <AuthModal
+                isOpen={loginDialog}
+                onClose={() => setLoginDialog(false)}
+                item={item}
+              />
+            )}
 
             <dialog
               id="my_modal_report"
