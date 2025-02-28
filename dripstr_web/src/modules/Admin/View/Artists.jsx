@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Pagination from './Components/Pagination';
 
 function Artists() {
-  const [status, setStatus] = useState('pending');
+  const [status, setStatus] = useState('artists');
   const [register, setRegister] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

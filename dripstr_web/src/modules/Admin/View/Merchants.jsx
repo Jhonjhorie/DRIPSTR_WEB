@@ -8,7 +8,7 @@ import Pagination from './Components/Pagination';
 const Merchants = () => {
     const [register, setRegister] = useState([]);
     const [acceptedMerchants, setAcceptedMerchants] = useState([]);
-    const [status, setStatus] = useState('pending');
+    const [status, setStatus] = useState('merchants');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [merchants, setMerchants] = useState([]);
@@ -26,7 +26,7 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('shop')
-                    .select('shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, owner_Id(full_name), valid_id, selfie, gcash')
+                    .select('shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Premium, is_Approved, owner_Id(full_name), valid_id, selfie, gcash')
                     .is('is_Approved', true);
 
                 if (error) throw error;
@@ -359,7 +359,13 @@ const Merchants = () => {
                                             />
                                         </div>
                                         <div className="flex flex-col w-full">
-                                            <p className="text-white text-sm hover:text-blue-900 hover:underline" onClick={() => handleId(merchant)}><strong>Shop Name:</strong> {merchant.shop_name}</p>
+                                            <p className="text-white text-sm hover:text-blue-900 hover:underline" onClick={() => handleId(merchant)}><strong>Shop Name:</strong> {merchant.shop_name}
+                                            {merchant.is_Premium && (
+                                                    <div className="bg-yellow-600 text-white text-xs font-semibold px-1 py-0.5 rounded-sm ml-2 inline-block">
+                                                        Premium
+                                                    </div>
+                                                )}
+                                            </p>
                                             <p className="text-white text-sm"><strong>Name:</strong> {merchant.owner_Id?.full_name || 'No Name'}</p>
                                             <p className="text-white text-sm"><strong>Description:</strong> {merchant.description}</p>
                                             <p className="text-white text-sm"><strong>Address:</strong> {merchant.address}</p>
