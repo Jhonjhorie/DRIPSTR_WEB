@@ -23,7 +23,7 @@ function Artists() {
       try {
         const { data, error } = await supabase
           .from('artist_registration')
-          .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic')
+          .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash')
           .is('is_approved', null);
         if (error) throw error;
         setRegister(data || []);
@@ -45,7 +45,7 @@ function Artists() {
       try {
         const { data, error } = await supabase
           .from('artist')
-          .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID');
+          .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID, gcash');
         if (error) throw error;
         setArtists(data || []);
       } catch (error) {
@@ -84,6 +84,7 @@ function Artists() {
         valid_ID: artistData.valid_id,
         followers_Detail: null,
         is_Premium: null,
+        gcash: artistData.gcash
       }]);
       await supabase.from('profiles').update({ isArtist: true }).eq('id', id);
 
@@ -273,7 +274,7 @@ function Artists() {
                           className="w-24 h-24 object-cover rounded-md"
                         />
                         <div className="flex flex-col">
-                          <h2 className="text-xl font-semibold text-white">
+                          <h2 className="text-xl font-semibold text-white hover:text-blue-500 cursor-pointer hover:underline" onClick={() => handleId(artist)}>
                             {artist.artist_Name}
                             {artist.is_Premium && (
                               <div className="bg-yellow-600 text-white text-xs font-semibold px-1 py-0.5 rounded-sm ml-2 inline-block">
@@ -281,7 +282,7 @@ function Artists() {
                               </div>
                             )}
                           </h2>
-                          <h3 className="text-md font-medium text-white">
+                          <h3 className="text-md font-medium text-white cursor-pointer">
                             {artist.full_Name || artist.owner_Id?.full_name || 'Unnamed Artist'}
                           </h3>
                           <p className="text-white text-sm">
