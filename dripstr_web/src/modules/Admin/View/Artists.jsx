@@ -10,6 +10,7 @@ function Artists() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [idModal, setIdModal] = useState(false);
+    const [artists, setArtists] = useState([]);
     const [selectedArtist, setSelectedArtist] = useState(null); // New state for selected artist
 
     // Fetch pending artist registrations (Auto-refresh every 5 seconds)
@@ -35,6 +36,31 @@ function Artists() {
 
         fetchArtistRegistration();
         const interval = setInterval(fetchArtistRegistration, 60000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    useEffect(() => {
+        const fetchArtists = async () => {
+            setLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('artist')
+                    .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie')
+
+                if (error) throw error;
+                console.log('Fetched Data:', data);
+                setArtists(data || []);
+            } catch (error) {
+                console.error('Fetch Error:', error.message);
+                setError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchArtists();
+        const interval = setInterval(fetchArtists, 60000);
 
         return () => clearInterval(interval);
     }, []);
@@ -192,6 +218,56 @@ function Artists() {
                                 Close
                             </button>
                         </div>
+                    </div>
+                )}
+
+                {status === 'artists' && (
+                    <div>
+{loading ? (
+                <p className="text-white text-center">Loading...</p>
+            ) : error ? (
+                <p className="text-red-500 text-center">{error}</p>
+            ) : (
+                <div className="space-y-6">
+                    {artists.length === 0 ? (
+                        <h1 className="text-center font-bold text-3xl text-white">
+                            No Artists
+                        </h1>
+                    ) : (
+                        artists.map((artist) => (
+                            <div
+                                key={artist.id}
+                                className="flex flex-row border rounded-lg shadow-lg p-4 bg-white w-full items-start gap-4"
+                            >
+                                {/* Picture on the left */}
+                                <img
+                                    src={artist.artist_Image || 'https://via.placeholder.com/150'}
+                                    alt={artist.artist_Name}
+                                    className="w-24 h-24 object-cover rounded-md"
+                                />
+                                {/* Info column on the right */}
+                                <div className="flex flex-col">
+                                    <h2 className="text-xl font-semibold text-black">
+                                        {artist.artist_Name}
+                                    </h2>
+                                    <h3 className="text-md font-medium text-black">
+                                        {artist.full_Name || artist.owner_Id?.full_name || 'Unnamed Artist'}
+                                    </h3>
+                                    <p className="text-black text-sm">
+                                        {new Date(artist.created_at).toLocaleString()}
+                                    </p>
+                                    <p className="text-gray-500">
+                                        Art Type: {artist.art_Type || 'N/A'}
+                                    </p>
+                                    <p className="text-gray-500">
+                                        Contact: {artist.contact_number || 'N/A'}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            )}
                     </div>
                 )}
             </div>
