@@ -20,7 +20,6 @@ function Login() {
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [shopDescription, setShopDescription] = useState("");
-  const [shopAddress, setShopAddress] = useState("");
   const [showAlert, setShowAlert] = React.useState(false); // AlertShopname
   const [showAlertFL, setShowAlertFL] = React.useState(false); // AlertShopname
   const [showAlert2, setShowAlert2] = React.useState(false); // AlertContact
@@ -61,6 +60,8 @@ function Login() {
 
   const [showAlertGC, setShowAlertGC] = useState(false);
   const [showAlertSF, setShowAlertSF] = useState(false);
+  const [showAlertExname, setShowAlertExname] = useState(false);
+  const [showAlertExnum, setShowAlertExnum] = useState(false);
 
   const fetchUserProfile = async () => {
     setLoading(false);
@@ -138,6 +139,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
     const fullName = `${firstName} ${middleName} ${lastName}`.trim();
     const findRegion =
       regions?.find((r) => r.code === selected.region)?.name ||
@@ -150,6 +152,47 @@ function Login() {
 
     const fullAddress = `${selected.exactLocation}, ${findBarangay}, ${findCity}, ${findRegion}`;
     console.log("Final Full Address:", fullAddress);
+
+    // shop name already exists
+    const { data: existingShopName, error: shopNameError } = await supabase
+      .from("merchantRegistration")
+      .select("id")
+      .eq("shop_name", shopName);
+
+    if (shopNameError) {
+      console.error("Error checking shop name:", shopNameError.message);
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (existingShopName.length > 0) {
+      console.error("Shop Name already exists");
+      setIsSubmitting(false);
+      setShowAlertExname(true);
+      setTimeout(() => setShowAlertExname(false), 3000);
+      return;
+    }
+
+    // phone number already exists
+    const { data: existingPhoneNumber, error: phoneNumberError } =
+      await supabase
+        .from("merchantRegistration")
+        .select("id")
+        .eq("contact_number", phoneNumber);
+
+    if (phoneNumberError) {
+      console.error("Error checking phone number:", phoneNumberError.message);
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (existingPhoneNumber.length > 0) {
+      console.error("Contact Number already exists");
+      setIsSubmitting(false);
+      setShowAlertExnum(true);
+      setTimeout(() => setShowAlertExnum(false), 3000);
+      return;
+    }
 
     if (!firstName.trim() || !lastName.trim()) {
       console.error("fullname is required");
@@ -498,7 +541,6 @@ function Login() {
     setSelected,
   } = useAddressFields(true, false);
 
-  const [errors, setErrors] = useState({});
 
   const handleSetisMerchant = async (e) => {
     e.preventDefault();
@@ -576,15 +618,15 @@ function Login() {
       }
 
       const { error: deleteError2 } = await supabase
-      .from("merchant_Wallet")
-      .delete()
-      .eq("owner_ID", userId);
+        .from("merchant_Wallet")
+        .delete()
+        .eq("owner_ID", userId);
 
-    if (deleteError2) {
-      console.error("Error deleting shop:", deleteError2.message);
-      setIsSubmitting(false);
-      return;
-    }
+      if (deleteError2) {
+        console.error("Error deleting shop:", deleteError2.message);
+        setIsSubmitting(false);
+        return;
+      }
 
       console.log("Shop deleted and user profile updated.");
       fetchUserProfile();
@@ -1360,6 +1402,70 @@ function Login() {
         </div>
       </div>
 
+      {showAlertExname && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Shop Name is already in use. Please try another.</span>
+          </div>
+        </div>
+      )}
+      {showAlertExnum && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Contact Number is already in use. Please try another.</span>
+          </div>
+        </div>
+      )}
       {showAlertFL && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
@@ -1996,6 +2102,70 @@ function Login() {
             </div>
           </div>
         </div>
+      )}
+      {showAlertGC && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+          <div className="mt-10 ">
+            <img
+              src={questionEmote}
+              alt="Success Emote"
+              className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+            />
+          </div>
+        </div>
+        <div
+          role="alert"
+          className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 shrink-0 stroke-current"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>Screenshot of your verified Gcash is Required!</span>
+        </div>
+      </div>
+      )}
+      {showAlertSF && (
+       <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+       <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+         <div className="mt-10 ">
+           <img
+             src={questionEmote}
+             alt="Success Emote"
+             className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+           />
+         </div>
+       </div>
+       <div
+         role="alert"
+         className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+       >
+         <svg
+           xmlns="http://www.w3.org/2000/svg"
+           className="h-6 w-6 shrink-0 stroke-current"
+           fill="none"
+           viewBox="0 0 24 24"
+         >
+           <path
+             strokeLinecap="round"
+             strokeLinejoin="round"
+             strokeWidth="2"
+             d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+           />
+         </svg>
+         <span>Upload your selfie to proceed</span>
+       </div>
+     </div>
       )}
       {showAlertSuccess && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
