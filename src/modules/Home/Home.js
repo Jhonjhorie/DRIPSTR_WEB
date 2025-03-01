@@ -151,7 +151,7 @@ function Home() {
             sort={"top"}
           />
         </SectionWrapper>
-        <div className="flex w-[90%] gap-2">
+        <div className="flex flex-col items-center lg:flex-row w-[90%] gap-2">
         {isLoggedIn &&  <VoucherStream profile={profile}/> }
         <CategoriesRibbon
           active={filCat}
