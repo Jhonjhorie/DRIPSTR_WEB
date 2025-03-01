@@ -8,15 +8,21 @@ import questionEmote from "../../../../src/assets/emote/question.png";
 import successEmote from "../../../../src/assets/emote/success.png";
 import sadEmote from "../../../../src/assets/emote/error.png";
 import hmmEmote from "../../../../src/assets/emote/hmmm.png";
+import { useAddressFields } from "../../../../src/shared/login/hooks/useAddressFields";
+import { setMinutes } from "date-fns";
 
 function Login() {
   const navigate = useNavigate();
   const [shopName, setShopName] = useState("");
-  const [fullName, setfullName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [shopDescription, setShopDescription] = useState("");
   const [shopAddress, setShopAddress] = useState("");
   const [showAlert, setShowAlert] = React.useState(false); // AlertShopname
+  const [showAlertFL, setShowAlertFL] = React.useState(false); // AlertShopname
   const [showAlert2, setShowAlert2] = React.useState(false); // AlertContact
   const [showAlert3, setShowAlert3] = React.useState(false); // AlertDescription
   const [showAlert4, setShowAlert4] = React.useState(false); // Alert11digits
@@ -38,13 +44,23 @@ function Login() {
   const [imageFile, setImageFile] = useState(null); // State to hold the image file
   const [imageFileID, setImageFileID] = useState(null); // State to hold the image fileid
   const [pdfFile, setPdfFile] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadings, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isStat, setStatus] = useState(null);
   const [hasCreatedAccount, setHasCreatedAccount] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadingFetch, setLoadingFetch] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  const [gcashFile, setGcashFile] = useState(null);
+  const [selectedFilegcash, setSelectedFilegcash] = useState(null);
+  const [selfieFile, setSelfieFile] = useState(null);
+  const [selectedFileSS, setSelectedFileSS] = useState(null);
+  const [showgcash, setgcash] = React.useState(false);
+  const [showSS, setSS] = React.useState(false);
+
+  const [showAlertGC, setShowAlertGC] = useState(false);
+  const [showAlertSF, setShowAlertSF] = useState(false);
 
   const fetchUserProfile = async () => {
     setLoading(false);
@@ -94,6 +110,7 @@ function Login() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchUserProfile();
   }, []);
@@ -112,17 +129,35 @@ function Login() {
   };
   // Handle input change
   const handleShopNameChange = (e) => setShopName(e.target.value);
-  const handlefullNameChange = (e) => setfullName(e.target.value);
-  const handleShopAddressChange = (e) => setShopAddress(e.target.value);
   const handleShopDescriptionChange = (e) => setShopDescription(e.target.value);
+  const handleFirstNameChange = (e) => setFirstName(e.target.value);
+  const handleMiddleNameChange = (e) => setMiddleName(e.target.value);
+  const handleLastNameChange = (e) => setLastName(e.target.value);
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const fullName = `${firstName} ${middleName} ${lastName}`.trim();
+    const findRegion =
+      regions?.find((r) => r.code === selected.region)?.name ||
+      "Unknown Region";
+    const findCity =
+      cities?.find((c) => c.code === selected.city)?.name || "Unknown City";
+    const findBarangay =
+      barangays?.find((b) => b.code === selected.barangay)?.name ||
+      "Unknown Barangay";
 
-    const maxImageSize = 2 * 1024 * 1024;
-    const maxPdfSize = 5 * 1024 * 1024;
+    const fullAddress = `${selected.exactLocation}, ${findBarangay}, ${findCity}, ${findRegion}`;
+    console.log("Final Full Address:", fullAddress);
+
+    if (!firstName.trim() || !lastName.trim()) {
+      console.error("fullname is required");
+      setIsSubmitting(false);
+      setShowAlertFL(true);
+      setTimeout(() => setShowAlertFL(false), 3000);
+      return;
+    }
 
     if (!shopName.trim()) {
       console.error("Shop name is required");
@@ -131,13 +166,7 @@ function Login() {
       setTimeout(() => setShowAlert(false), 3000);
       return;
     }
-    if (!fullName.trim()) {
-      console.error("Shop name is required");
-      setIsSubmitting(false);
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
-      return;
-    }
+
     if (!phoneNumber.trim()) {
       console.error("Phone Number is required");
       setIsSubmitting(false);
@@ -161,15 +190,21 @@ function Login() {
       setTimeout(() => setShowAlert5(false), 3000);
       return;
     }
-
-    if (!shopAddress.trim()) {
-      console.error("Shop Address is required");
+    if (!selected.region) {
+      console.error("Region is required");
       setIsSubmitting(false);
-      setShowAlert3(true);
-      setTimeout(() => setShowAlert3(false), 3000);
       return;
     }
-
+    if (!selected.city) {
+      console.error("City/Municipality is required");
+      setIsSubmitting(false);
+      return;
+    }
+    if (!selected.barangay) {
+      console.error("Barangay is required");
+      setIsSubmitting(false);
+      return;
+    }
     if (!selectedImage) {
       console.error("Shop Image is required");
       setIsSubmitting(false);
@@ -177,6 +212,7 @@ function Login() {
       setTimeout(() => setShowAlert6(false), 3000);
       return;
     }
+
     if (!selectedImageID) {
       console.error("ID is required");
       setIsSubmitting(false);
@@ -193,19 +229,19 @@ function Login() {
       return;
     }
 
-    if (imageFile.size > maxImageSize) {
-      console.error("Image size exceeds the 2MB limit.");
+    if (!gcashFile) {
+      console.error("Gcash Screenshot is required");
       setIsSubmitting(false);
-      setShowAlertEY(true);
-      setTimeout(() => setShowAlertEY(false), 3000);
+      setShowAlertGC(true);
+      setTimeout(() => setShowAlertGC(false), 3000);
       return;
     }
 
-    if (pdfFile.size > maxPdfSize) {
-      console.error("PDF file size exceeds the 5MB limit.");
+    if (!selfieFile) {
+      console.error("Selfie is required");
       setIsSubmitting(false);
-      setShowAlertEX(true);
-      setTimeout(() => setShowAlertEX(false), 3000);
+      setShowAlertSF(true);
+      setTimeout(() => setShowAlertSF(false), 3000);
       return;
     }
 
@@ -217,10 +253,6 @@ function Login() {
         const uniqueImageName = `shop_profile/${Date.now()}-${Math.random()
           .toString(36)
           .substring(2, 10)}-${imageFile.name}`;
-
-        const uniqueImageNameID = `valid_ID/${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 10)}-${imageFileID.name}`;
 
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
@@ -243,6 +275,10 @@ function Login() {
           uploadedImageUrl = publicUrlData.publicUrl;
           console.log("Image uploaded successfully:", uploadedImageUrl);
         }
+
+        const uniqueImageNameID = `valid_ID/${Date.now()}-${Math.random()
+          .toString(36)
+          .substring(2, 10)}-${imageFileID.name}`;
 
         const { data: dataID, error: uploadErrorID } = await supabase.storage
           .from("shop_profile")
@@ -292,6 +328,58 @@ function Login() {
             console.log("PDF uploaded successfully:", uploadedPdfUrl);
           }
         }
+        let uploadedGcash = null;
+        if (gcashFile) {
+          const uniquePdfName = `gcash/${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2, 10)}-${gcashFile.name}`;
+          const { data, error: uploadError } = await supabase.storage
+            .from("shop_profile")
+            .upload(uniquePdfName, gcashFile);
+
+          if (uploadError) {
+            console.error("Error uploading PDF:", uploadError.message);
+            return;
+          }
+
+          if (data?.path) {
+            const { data: publicUrlData, error: urlError } = supabase.storage
+              .from("gcash")
+              .getPublicUrl(data.path);
+            if (urlError) {
+              console.error("Error fetching PDF URL:", urlError.message);
+              return;
+            }
+            uploadedGcash = publicUrlData.publicUrl;
+            console.log("PDF uploaded successfully:", uploadedGcash);
+          }
+        }
+        let uploadedSS = null;
+        if (selfieFile) {
+          const uniquePdfName = `selfie/${Date.now()}-${Math.random()
+            .toString(36)
+            .substring(2, 10)}-${selfieFile.name}`;
+          const { data, error: uploadError } = await supabase.storage
+            .from("shop_profile")
+            .upload(uniquePdfName, selfieFile);
+
+          if (uploadError) {
+            console.error("Error uploading PDF:", uploadError.message);
+            return;
+          }
+
+          if (data?.path) {
+            const { data: publicUrlData, error: urlError } = supabase.storage
+              .from("selfie")
+              .getPublicUrl(data.path);
+            if (urlError) {
+              console.error("Error fetching PDF URL:", urlError.message);
+              return;
+            }
+            uploadedSS = publicUrlData.publicUrl;
+            console.log("PDF uploaded successfully:", uploadedSS);
+          }
+        }
 
         const {
           data: { user },
@@ -311,13 +399,15 @@ function Login() {
                 shop_name: shopName,
                 contact_number: phoneNumber,
                 description: shopDescription,
-                address: shopAddress,
+                address: fullAddress,
                 id: userId,
                 is_Approved: null,
                 shop_image: uploadedImageUrl || null,
                 shop_BusinessPermit: uploadedPdfUrl || null,
                 validID: uploadedImageUrlId || null,
                 full_Name: fullName,
+                gcash: uploadedGcash || null,
+                selfie: uploadedSS || null,
               },
             ])
             .single();
@@ -338,7 +428,7 @@ function Login() {
                 owner_Name: fullName,
                 revenue: "0",
                 valid_ID: uploadedImageUrlId || null,
-                owner_ID: userId, 
+                owner_ID: userId,
               },
             ]);
 
@@ -368,14 +458,24 @@ function Login() {
           );
 
           // Reset form fields after successful insertion
-          setfullName("");
+          setSelected({
+            region: "",
+            city: "",
+            barangay: "",
+            exactLocation: "",
+          });
+          setFirstName("");
+          setMiddleName("");
+          setLastName("");
+          setFullName("");
           setShopName("");
           setPhoneNumber("");
           setShopDescription("");
-          setShopAddress("");
           setImageFile(null);
           setImageFileID(null);
           setPdfFile(null);
+          setGcashFile(null);
+          setSelfieFile(null);
           setShowAlertSuccess(true);
           setIsSubmitting(false);
         } catch (err) {
@@ -388,45 +488,58 @@ function Login() {
     };
     reader.readAsDataURL(imageFile);
   };
+  const {
+    addressData: { regions, cities, barangays },
+    selected,
+    loading,
+    handleRegionChange,
+    handleCityChange,
+    handleExactLocationChange,
+    setSelected,
+  } = useAddressFields(true, false);
 
-    const handleSetisMerchant = async (e) => {
-      e.preventDefault();
-      setIsSubmitting(true);
+  const [errors, setErrors] = useState({});
 
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
-      if (!user || userError) {
-        console.error("No user found");
+  const handleSetisMerchant = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (!user || userError) {
+      console.error("No user found");
+      return;
+    }
+
+    const userId = user.id;
+
+    try {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ isMerchant: true })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Error updating user profile:", updateError.message);
+        setIsSubmitting(false);
         return;
       }
 
-      const userId = user.id;
+      console.log(
+        "User profile updated with merchant_id and ismerchant = true"
+      );
+      navigate("/shop/MerchantDashboard");
+      window.location.reload();
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-      try {
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ isMerchant: true })
-          .eq("id", userId);
-
-        if (updateError) {
-          console.error("Error updating user profile:", updateError.message);
-          setIsSubmitting(false);
-          return;
-        }
-
-        console.log(
-          "User profile updated with merchant_id and ismerchant = true"
-        );
-        navigate("/shop/MerchantDashboard");
-        window.location.reload();
-      } catch (err) {
-        console.error("Unexpected error:", err);
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
+  //when decline delete the data both merchantreg and wallet
   const handleRedo = async (shopId) => {
     if (!shopId) {
       console.error("No shop ID provided");
@@ -462,6 +575,17 @@ function Login() {
         return;
       }
 
+      const { error: deleteError2 } = await supabase
+      .from("merchant_Wallet")
+      .delete()
+      .eq("owner_ID", userId);
+
+    if (deleteError2) {
+      console.error("Error deleting shop:", deleteError2.message);
+      setIsSubmitting(false);
+      return;
+    }
+
       console.log("Shop deleted and user profile updated.");
       fetchUserProfile();
     } catch (err) {
@@ -480,14 +604,14 @@ function Login() {
     if (selectedImage) {
       setshowImage(true);
     } else {
-      alert("Please select an image");
+      console.log("Please select a file");
     }
   };
   const handleOpenImageID = () => {
     if (selectedImageID) {
       setshowImage2(true);
     } else {
-      alert("Please select an image");
+      console.log("Please select a file");
     }
   };
   //Open Modal for Viewing Pdf File
@@ -495,7 +619,21 @@ function Login() {
     if (selectedFile) {
       setshowFile(true);
     } else {
-      alert("Please select a file");
+      console.log("Please select a file");
+    }
+  };
+  const handleOpenFilegcash = () => {
+    if (selectedFilegcash) {
+      setgcash(true);
+    } else {
+      console.log("Please select a file");
+    }
+  };
+  const handleOpenFiless = () => {
+    if (selectedFileSS) {
+      setSS(true);
+    } else {
+      console.log("Please select a file");
     }
   };
 
@@ -504,6 +642,8 @@ function Login() {
     setshowImage(false);
     setshowImage2(false);
     setshowFile(false);
+    setgcash(false);
+    setSS(false);
   };
   const handleCloseTandC = () => {
     setTermsandCondition(false);
@@ -511,35 +651,100 @@ function Login() {
   const ShowTandC = () => {
     setTermsandCondition(true);
   };
+
+  const [showAlerTLOGO, setShowAlertLOGO] = React.useState(false); // AlertImageMissing
+  const [showAlertID, setShowAlertID] = React.useState(false); // AlertFileMissing
+  const [showAlertGCASH, setShowAlertGCASH] = React.useState(false); // AlertIDmissing
+  const [showAlertSELFIE, setShowAlertSELFIE] = React.useState(false); // AlertImage
+  const [showAlertBP, setShowAlertBP] = React.useState(false); // AlertIDmissing
   //define image input
+  const maxSize = 2 * 1024 * 1024;
+
+  //LOGO ALERT SIZE
   const handleFileChange = (event) => {
     const file = event.target.files[0];
+
     if (file) {
+      if (file.size > maxSize) {
+        console.error("File size exceeds 2MB limit.");
+        setShowAlertLOGO(true);
+        setTimeout(() => setShowAlertLOGO(false), 3000);
+        event.target.value = "";
+        return;
+      }
+
+      // Only set the file if it meets the size limit
       setImageFile(file);
       setSelectedImage(URL.createObjectURL(file));
       console.log("Selected file:", file);
     }
   };
-  //define Image
+  // ID ALERT SIZE
   const handleFileChangeImage = (event) => {
     const file = event.target.files[0];
     if (file) {
+      if (file.size > maxSize) {
+        setShowAlertID(true);
+        setTimeout(() => setShowAlertID(false), 3000);
+        event.target.value = "";
+        return;
+      }
       setImageFileID(file);
       setSelectedImageID(URL.createObjectURL(file));
       console.log("Selected file ID:", file);
     }
   };
-  //define file input
+
+  // BP ALERT SIZE
   const handleFileChange2 = (event) => {
     const file = event.target.files[0];
-    if (file && file.type === "application/pdf") {
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlertBP(true);
+        setTimeout(() => setShowAlertBP(false), 3000);
+        event.target.value = "";
+        return;
+      }
       setPdfFile(file);
       setFileName(file.name);
-      setSelectedFile(file);
+      setSelectedFile(URL.createObjectURL(file));
     } else {
-      alert("Please select a valid file (PDF document)");
+      alert("Please select a valid PDF document.");
     }
   };
+  //GCASH ALERT SIZE
+  const handleFileChangegcash = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlertGCASH(true);
+        setTimeout(() => setShowAlertGCASH(false), 3000);
+        event.target.value = "";
+        return;
+      }
+      setGcashFile(file);
+      setSelectedFilegcash(URL.createObjectURL(file));
+      console.log("Selected Gcash file:", file);
+    } else {
+      alert("Please select a valid PDF document.");
+    }
+  };
+  //SELFIE ALERT SIZE
+  const handleFileChangess = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlertSELFIE(true);
+        setTimeout(() => setShowAlertSELFIE(false), 3000);
+        event.target.value = "";
+        return;
+      }
+      setSelfieFile(file);
+      setSelectedFileSS(URL.createObjectURL(file));
+      console.log("Selected selfie file:", file);
+    }
+  };
+
   useEffect(() => {
     const checkAcceptedTerms = async () => {
       const {
@@ -597,7 +802,7 @@ function Login() {
       <div className="h-full w-full lg:flex bg-slate-300 p-1 justify-center  ">
         {/* FIRST CONTAINER */}
 
-        {loading ? (
+        {loadings ? (
           <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
             <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
               <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
@@ -721,7 +926,7 @@ function Login() {
             </div>
           ) : null
         ) : (
-          <div className="h-auto w-full lg:w-[55%] mb-16 md:mb-0 mt-5 md:mt-0 bg-white shadow-lg rounded-lg p-3 px-7 overflow-hidden">
+          <div className="h-auto w-full lg:w-[55%] mb-36 md:mb-0 mt-5 md:mt-0 bg-white shadow-lg rounded-lg p-3 md:px-7 overflow-hidden">
             <div className="flex md:gap-2 md:justify-start justify-center">
               <box-icon
                 name="store"
@@ -737,70 +942,255 @@ function Login() {
               Get Started
             </div>
             <form onSubmit={handleSubmit}>
-              <div className="md:flex w-full place-items-center h-[50%] gap-2 lg:gap-5 p-2">
-                <div className="w-full lg:w-1/2 h-full flex items-center justify-center">
-                  <div className="w-full max-w-xs">
-                    <label className="form-control w-full">
-                      <div className="label">
-                        <span className="label-text text-slate-800 font-semibold">
-                          Type Your Full Name
-                        </span>
-                      </div>
-                      <input
-                        id="fullName"
-                        value={fullName}
-                        onChange={handlefullNameChange}
-                        type="text"
-                        placeholder="Type here"
-                        className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
-                      />
-                    </label>
-                    <label className="form-control w-full mt-1">
-                      <div className="label">
-                        <span className="label-text text-slate-800 font-semibold">
-                          What is your SHOP name?
-                        </span>
-                      </div>
-                      <input
-                        id="shopName"
-                        value={shopName}
-                        onChange={handleShopNameChange}
-                        type="text"
-                        placeholder="Type here"
-                        className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
-                      />
-                    </label>
-                    <label className="form-control w-full max-w-xs mt-1">
-                      <div className="label">
-                        <span className="label-text text-slate-800 font-semibold">
-                          Your G-cash Number?
-                        </span>
-                      </div>
-                      <input
-                        type="tel"
-                        id="phoneNumber"
-                        value={phoneNumber}
-                        placeholder="Type here"
-                        onChange={phonedigit}
-                        className="input input-bordered bg-slate-100 text-black border-violet-950 border-[2px] w-full"
-                      />
-                    </label>
+              <div className="label-text text-xl mt-3 font-semibold px-2 text-slate-900">
+                Merchant Information
+              </div>
+              <div className=" w-full place-items-center h-[50%] gap-2 lg:gap-5 p-2">
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full px-3 md:px-5">
                     <div className="label">
-                      <span className="label-text-alt text-slate-700">
-                        Phone number should be 11 digits.
+                      <span className="label-text text-slate-900 font-semibold">
+                        Type you Fullname
                       </span>
+                    </div>
+                    <div className="w-full -mt-2 gap-3 md:flex">
+                      <label className="form-control w-full">
+                        <div className="label">
+                          <span className="label-text-alt px-1 font-medium text-slate-700">
+                            First Name
+                          </span>
+                        </div>
+                        <input
+                          id="firstName"
+                          value={firstName}
+                          onChange={handleFirstNameChange}
+                          type="text"
+                          placeholder="Type here"
+                          className="input  input-bordered text-black rounded text-sm bg-slate-200 border-violet-950 border w-full"
+                        />
+                      </label>
+                      <label className="form-control w-full">
+                        <div className="label">
+                          <span className="label-text-alt px-1 font-medium text-slate-700">
+                            Middle Name
+                          </span>
+                        </div>
+                        <input
+                          id="middleName"
+                          value={middleName}
+                          onChange={handleMiddleNameChange}
+                          type="text"
+                          placeholder="Type here"
+                          className="input input-bordered text-black rounded text-sm bg-slate-200 border-violet-950 border w-full"
+                        />
+                      </label>
+                      <label className="form-control w-full">
+                        <div className="label">
+                          <span className="label-text-alt px-1 font-medium text-slate-700">
+                            Last Name
+                          </span>
+                        </div>
+                        <input
+                          id="lastName"
+                          value={lastName}
+                          onChange={handleLastNameChange}
+                          type="text"
+                          placeholder="Type here"
+                          className="input input-bordered text-black text-sm rounded bg-slate-200 border-violet-950 border w-full"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="w-full md:flex gap-2 mt-2">
+                      <div className="w-full md:w-1/2">
+                        <label className="form-control w-full md:max-w-sm ">
+                          <div className="label">
+                            <span className="label-text text-slate-900 font-semibold">
+                              Type your merchant name
+                            </span>
+                          </div>
+                          <input
+                            id="shopName"
+                            value={shopName}
+                            onChange={handleShopNameChange}
+                            type="text"
+                            placeholder="Type here"
+                            className="input input-bordered rounded text-sm text-black bg-slate-200 border-violet-950 border w-full"
+                          />
+                        </label>
+                      </div>
+                      <div className="w-full md:w-1/2 mt-1">
+                        <label className="label-text font-semibold text-md ml-1  text-slate-900">
+                          Upload merchant Logo
+                        </label>
+                        <div className="h-auto w-full flex mt-2 justify-center gap-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            placeholder={fileName || "Choose a file..."}
+                            className="file-input bg-slate-200 rounded text-sm border-violet-950 border md:max-w-xs bottom-0 file-input-bordered w-full"
+                          />
+                          <div
+                            onClick={handleOpenImage}
+                            className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                          >
+                            <box-icon
+                              type="solid"
+                              name="image-alt"
+                              color="#FFFFFF"
+                            ></box-icon>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="w-full md:w-1/2 h-full rounded-md justify-center mt-1 p-2">
-                  <div className="flex gap-2 ">
-                    <div>
-                      <label className="label-text font-semibold ml-2 text-slate-800">
+                <label className="form-control w-full px-3 md:px-5 mt-4 justify-center items-center md:items-start">
+                  <label className="form-control w-full">
+                    <div className="label">
+                      <span className="label-text font-semibold text-slate-900">
+                        Type your merchant name description
+                      </span>
+                    </div>
+                    <textarea
+                      id="shopDescription"
+                      value={shopDescription}
+                      onChange={handleShopDescriptionChange}
+                      className="w-full textarea h-16 textarea-bordered text-sm rounded text-black bg-slate-200 border-violet-950 border p-1 resize-none"
+                    ></textarea>
+                  </label>
+                  <div className="w-full mt-4">
+                    {/* Region Dropdown */}
+                    <div className="label">
+                      <span className="label-text font-semibold text-slate-900">
+                        Select and type your merchant Address
+                      </span>
+                    </div>
+                    <div className="flex gap-2 w-full  -mt-2">
+                      <div className="w-full">
+                        <label className="block label-text-alt font-medium text-slate-700 p-2">
+                          Region
+                        </label>
+                        <select
+                          name="region"
+                          className="select select-bordered text-black rounded border-violet-950 border bg-gray-100 w-full"
+                          value={selected.region}
+                          onChange={(e) => handleRegionChange(e.target.value)}
+                          disabled={loading.regions}
+                        >
+                          <option value="">
+                            {loading.regions ? "Loading..." : "Select Region"}
+                          </option>
+                          {regions.map((region) => (
+                            <option key={region.code} value={region.code}>
+                              {region.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="w-full">
+                        {/* City Dropdown */}
+                        <label className="block label-text-alt font-medium text-slate-700 p-2">
+                          City/Municipality
+                        </label>
+                        <select
+                          name="city"
+                          className="select select-bordered text-black rounded border-violet-950 border bg-gray-100 w-full"
+                          value={selected.city}
+                          onChange={(e) => handleCityChange(e.target.value)}
+                          disabled={!selected.region || loading.cities}
+                        >
+                          <option value="">
+                            {loading.cities ? "Loading..." : "Select City"}
+                          </option>
+                          {cities.map((city) => (
+                            <option key={city.code} value={city.code}>
+                              {city.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {/* Barangay Dropdown */}
+                      <div className="w-full">
+                        <label className="block label-text-alt font-medium text-slate-700 p-2">
+                          Barangay
+                        </label>
+                        <select
+                          name="barangay"
+                          className="select select-bordered text-black rounded border-violet-950 border bg-gray-100 w-full"
+                          value={selected.barangay}
+                          onChange={(e) =>
+                            setSelected((prev) => ({
+                              ...prev,
+                              barangay: e.target.value,
+                            }))
+                          }
+                          disabled={!selected.city || loading.barangays}
+                        >
+                          <option value="">
+                            {loading.barangays
+                              ? "Loading..."
+                              : "Select Barangay"}
+                          </option>
+                          {barangays.map((barangay) => (
+                            <option key={barangay.code} value={barangay.code}>
+                              {barangay.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Exact Location Input */}
+                    <label className="block mt-3 text-sm font-medium p-2 text-slate-900">
+                      Exact Location
+                    </label>
+                    <input
+                      type="text"
+                      name="exactLocation"
+                      placeholder="Street, Block, Building, Floor, etc."
+                      className="input input-bordered text-sm rounded bg-slate-200  border-violet-950 border text-black w-full"
+                      value={selected.exactLocation}
+                      onChange={(e) =>
+                        handleExactLocationChange(e.target.value)
+                      }
+                    />
+                  </div>
+                </label>
+              </div>
+              <div className="border mt-7  border-slate-300 w-full"></div>
+              <div className="label-text text-xl mt-5 font-semibold px-2 text-slate-900">
+                Wallet Information
+              </div>
+              <div className="w-full h-full rounded-md justify-items-center justify-center mt-3  md:px-7">
+                <label className="form-control w-full max-w-xs mt-1">
+                  <div className="label">
+                    <span className="label-text text-slate-900 font-semibold">
+                      Type your verified number in G-cash
+                    </span>
+                  </div>
+                  <input
+                    type="tel"
+                    id="phoneNumber"
+                    value={phoneNumber}
+                    placeholder="Type here"
+                    onChange={phonedigit}
+                    className="input input-bordered text-black bg-slate-200 rounded border-violet-950 border  w-full"
+                  />
+                  <div className="label">
+                    <span className="label-text-alt text-slate-700">
+                      Phone number should be 11 digits.
+                    </span>
+                  </div>
+                </label>
+                <div className="md:flex gap-2">
+                  <div className="flex flex-col mt-5">
+                    <div className="flex items-center gap-2">
+                      <label className="label-text font-semibold pl-2 text-slate-900">
                         Upload Valid ID
                       </label>
-                    </div>
-                    <div className="relative">
-                      <div className="group cursor-help inline-block">
+                      <div className="relative group cursor-help">
                         <box-icon
                           color="#5B21B6"
                           name="info-circle"
@@ -808,8 +1198,8 @@ function Login() {
                           className="hover:scale-105 duration-100"
                         ></box-icon>
 
-                        {/* Tooltip - Only appears when hovering the icon */}
-                        <div className="absolute left-1/2 -translate-x-1/2 top-8 w-64 p-2 bg-gray-900 text-white text-sm rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                        {/* Tooltip */}
+                        <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-64 p-2 bg-gray-900 text-white text-sm rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                           <p className="font-semibold">
                             Valid IDs for Merchants:
                           </p>
@@ -827,42 +1217,19 @@ function Login() {
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="h-auto w-full flex  justify-center gap-2">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChangeImage}
-                      placeholder={fileName || "Choose a file..."}
-                      className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
-                    />
-                    <div
-                      onClick={handleOpenImageID}
-                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
-                    >
-                      <box-icon
-                        type="solid"
-                        name="image-alt"
-                        color="#FFFFFF"
-                      ></box-icon>
-                    </div>
-                  </div>
-                  <div className="w-auto mt-2">
-                    <label className="label-text font-semibold ml-2  text-slate-800">
-                      Upload shop LOGO
-                    </label>
-                    <div className="h-auto w-full flex mt-2 justify-center gap-2">
+                    {/* File Upload Section */}
+                    <div className="flex items-center gap-2 ">
                       <input
                         type="file"
                         accept="image/*"
-                        onChange={handleFileChange}
+                        onChange={handleFileChangeImage}
                         placeholder={fileName || "Choose a file..."}
-                        className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
+                        className="file-input bg-slate-100 file-input-bordered border-violet-950 border w-full rounded"
                       />
                       <div
-                        onClick={handleOpenImage}
-                        className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                        onClick={handleOpenImageID}
+                        className="p-2 cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
                       >
                         <box-icon
                           type="solid"
@@ -873,16 +1240,64 @@ function Login() {
                     </div>
                   </div>
 
-                  <div className="mt-2">
-                    <label className="label-text font-semibold ml-2 text-slate-800">
+                  <div className="mt-5">
+                    <label className="label-text font-semibold ml-2 text-slate-900">
+                      Screenshot of your verified Gcash
+                    </label>
+                    <div className="h-auto w-full flex mt-1 justify-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChangegcash}
+                        className="file-input bg-slate-100  max-w-xs bottom-0 file-input-bordered rounded border-violet-950 border w-full"
+                      />
+                      <div
+                        onClick={handleOpenFilegcash}
+                        className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                      >
+                        <box-icon
+                          type="solid"
+                          name="image-alt"
+                          color="#FFFFFF"
+                        ></box-icon>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="md:flex gap-2">
+                  <div className="mt-5">
+                    <label className="label-text font-semibold ml-2 text-slate-900">
+                      Upload a selfie of you
+                    </label>
+                    <div className="h-auto w-full flex mt-1 justify-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChangess}
+                        className="file-input bg-slate-100  max-w-xs bottom-0 file-input-bordered rounded border-violet-950 border w-full"
+                      />
+                      <div
+                        onClick={handleOpenFiless}
+                        className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                      >
+                        <box-icon
+                          type="solid"
+                          name="image-alt"
+                          color="#FFFFFF"
+                        ></box-icon>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-5">
+                    <label className="label-text font-semibold ml-2 text-slate-900">
                       Upload business permit
                     </label>
                     <div className="h-auto w-full flex mt-1 justify-center gap-2">
                       <input
                         type="file"
-                        accept=".pdf"
+                        accept="image/*"
                         onChange={handleFileChange2}
-                        className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs bottom-0 file-input-bordered w-full"
+                        className="file-input bg-slate-100  max-w-xs bottom-0 file-input-bordered rounded border-violet-950 border w-full"
                       />
                       <div
                         onClick={handleOpenFile}
@@ -890,48 +1305,17 @@ function Login() {
                       >
                         <box-icon
                           type="solid"
-                          name="file"
+                          name="image-alt"
                           color="#FFFFFF"
                         ></box-icon>
                       </div>
                     </div>
-                    <div className="label">
-                      <span className="label-text-alt text-slate-700">
-                        PDF file format is only accepted.
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
-              <label className="form-control mx-5 -mt-3 flex justify-center items-center md:items-start">
-                <label className="form-control w-full">
-                  <div className="label">
-                    <span className="label-text font-semibold text-slate-800">
-                      Shop description?
-                    </span>
-                  </div>
-                  <textarea
-                    id="shopDescription"
-                    value={shopDescription}
-                    onChange={handleShopDescriptionChange}
-                    className="w-full textarea h-16 textarea-bordered bg-slate-100 text-black border-violet-950 rounded-md border-[2px] p-1 resize-none"
-                  ></textarea>
-                </label>
-                <div className="label">
-                  <span className="label-text font-semibold text-slate-800">
-                    What is your SHOP address?
-                  </span>
-                </div>
-                <textarea
-                  value={shopAddress}
-                  onChange={handleShopAddressChange}
-                  className="textarea resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-16"
-                  placeholder="Type your Shop Address here"
-                ></textarea>
-              </label>
               <button
                 type="submit"
-                className="btn mt-4 ml-2 glass bg-custom-purple mr-5 iceland-regular tracking-wide text-lg text-white flex items-center justify-center"
+                className="btn  justify-center w-full md:w-auto md:justify-center place-self-center mt-10 flex glass bg-custom-purple md:mr-7 md:px-10 iceland-regular tracking-wide text-lg text-white md:items-center "
                 disabled={isSubmitting} // Disable button while loading
               >
                 {isSubmitting ? (
@@ -976,6 +1360,198 @@ function Login() {
         </div>
       </div>
 
+      {showAlertFL && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Fullname is required!</span>
+          </div>
+        </div>
+      )}
+      {showAlerTLOGO && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Logo should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlertID && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>ID should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlertGCASH && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Gcash screenshot should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlertSELFIE && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Selfie photo should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlertBP && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Bussiness Permit should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
       {showAlert && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
@@ -1297,23 +1873,22 @@ function Login() {
         </div>
       )}
       {showImage && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
-          <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
-            {/*Image goes here*/}
-            <div className=" h-[350px] w-[350px] border-custom-purple border-2 bg-slate-600 rounded-md  place-items-center   ">
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
               {selectedImage ? (
                 <img
                   src={selectedImage}
                   alt="Uploaded shop photo"
-                  className="w-full h-full object-cover rounded-sm"
+                  className="max-w-full max-h-full rounded-sm"
                 />
               ) : (
                 <p className="text-white">Please select an image</p>
-              )}{" "}
+              )}
             </div>
-            <div className="flex justify-between  w-full mt-2">
+            <div className="flex justify-between w-full mt-2">
               <button
-                className="bg-red-500 text-white px-4 py-1 rounded  hover:bg-red-700"
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
                 onClick={handleCloseModal}
               >
                 Close
@@ -1323,23 +1898,22 @@ function Login() {
         </div>
       )}
       {showImage2 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
-          <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
-            {/*Image goes here*/}
-            <div className=" h-[350px] w-[350px] border-custom-purple border-2 bg-slate-600 rounded-md  place-items-center   ">
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
               {selectedImageID ? (
                 <img
                   src={selectedImageID}
                   alt="Uploaded shop photo"
-                  className="w-full h-full object-cover rounded-sm"
+                  className="max-w-full max-h-full rounded-sm"
                 />
               ) : (
                 <p className="text-white">Please select an image</p>
-              )}{" "}
+              )}
             </div>
-            <div className="flex justify-between  w-full mt-2">
+            <div className="flex justify-between w-full mt-2">
               <button
-                className="bg-red-500 text-white px-4 py-1 rounded  hover:bg-red-700"
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
                 onClick={handleCloseModal}
               >
                 Close
@@ -1349,23 +1923,72 @@ function Login() {
         </div>
       )}
       {showFile && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50 ">
-          <div className="bg-white rounded-lg p-5 h-auto   lg:w-auto   md:m-0 auto">
-            {/*Image goes here*/}
-            <div className=" h-[450px] w-[400px]  bg-slate-600 rounded-md  place-items-center   ">
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
               {selectedFile ? (
-                <iframe
-                  src={URL.createObjectURL(selectedFile)}
-                  title="Uploaded file"
-                  className="w-full h-full"
-                ></iframe>
+                <img
+                  src={selectedFile}
+                  alt="Uploaded file"
+                  className="max-w-full max-h-full"
+                />
               ) : (
                 <p className="text-white">Please select a file</p>
               )}
             </div>
-            <div className="flex justify-between  w-full mt-2">
+            <div className="flex justify-between w-full mt-2">
               <button
-                className="bg-red-500 text-white px-4 py-1 rounded  hover:bg-red-700"
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showgcash && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
+              {selectedFilegcash ? (
+                <img
+                  src={selectedFilegcash}
+                  alt="Uploaded file"
+                  className="max-w-full max-h-full"
+                />
+              ) : (
+                <p className="text-white">Please select a file</p>
+              )}
+            </div>
+            <div className="flex justify-between w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showSS && (
+        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
+              {selectedFileSS ? (
+                <img
+                  src={selectedFileSS}
+                  alt="Uploaded file"
+                  className="max-w-full max-h-full"
+                />
+              ) : (
+                <p className="text-white">Please select a file</p>
+              )}
+            </div>
+            <div className="flex justify-between w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
                 onClick={handleCloseModal}
               >
                 Close
