@@ -23,11 +23,26 @@ module.exports = {
         'customWhite': '4px 4px 10px rgba(255, 255, 255, 0.5)', 
         'customViolet': '4px 4px 15px rgba(138, 43, 226, 1)',
       },
-      
-      
-      
     },
   },
   plugins: [require("daisyui")],  
+  daisyui: {
+    themes: [
+      {
+        light: {
+          "primary": "#6366f1",
+          "secondary": "#9333ea",
+          "accent": "#c084fc",
+          "neutral": "#2a323c",
+          "base-100": "#ffffff",
+          "base-200": "#f3f4f6",
+          "info": "#3abff8",
+          "success": "#36d399",
+          "warning": "#fbbd23",
+          "error": "#f87272",
+        },
+      },
+    ],
+  },
 }
 

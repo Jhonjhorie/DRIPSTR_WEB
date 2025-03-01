@@ -4,6 +4,7 @@ import { supabase } from '../../../constants/supabase';
 import { useAddressFields } from '../../../shared/login/hooks/useAddressFields';
 import { v4 as uuidv4 } from 'uuid';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { ReactComponent as Logo } from '../../../assets/images/BlackLongLogo.svg'; // Adjust path as needed
 
 const AccountSetup = () => {
   const navigate = useNavigate();
@@ -157,24 +158,24 @@ const AccountSetup = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-800 text-center mb-2">
               Setup Delivery Address
             </h2>
             
             {/* Enhanced input group styling */}
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-2">
               <div className="form-control">
                 <label className="label">
                   <span className="label-text text-gray-700 font-medium">Region</span>
                 </label>
                 <select
-                  className="select select-bordered w-full bg-gray-50 hover:bg-white"
+                  className="select select-primary w-full"
                   value={selected.region}
                   onChange={(e) => handleRegionChange(e.target.value)}
                   disabled={addressLoading.regions}
                   required
                 >
-                  <option value="">Select Region</option>
+                  <option value="" disabled>Select Region</option>
                   {addressFields.regions.map(region => (
                     <option key={region.code} value={region.code}>
                       {region.name}
@@ -188,7 +189,7 @@ const AccountSetup = () => {
                   <span className="label-text text-gray-700 font-medium">City</span>
                 </label>
                 <select
-                  className="select select-bordered w-full bg-gray-50 hover:bg-white"
+                  className="select select-primary w-full"
                   value={selected.city}
                   onChange={(e) => handleCityChange(e.target.value)}
                   disabled={!selected.region || addressLoading.cities}
@@ -208,7 +209,7 @@ const AccountSetup = () => {
                   <span className="label-text text-gray-700 font-medium">Barangay</span>
                 </label>
                 <select
-                  className="select select-bordered w-full bg-gray-50 hover:bg-white"
+                  className="select select-primary w-full"
                   value={selected.barangay}
                   onChange={(e) => setSelected(prev => ({ ...prev, barangay: e.target.value }))}
                   disabled={!selected.city || addressLoading.barangays}
@@ -230,7 +231,7 @@ const AccountSetup = () => {
                 <input
                   type="text"
                   placeholder="House/Unit No., Street Name, Building"
-                  className="input input-bordered w-full bg-gray-50 hover:bg-white"
+                  className="input input-primary w-full"
                   value={addressData.exact_location}
                   onChange={(e) => setAddressData({ ...addressData, exact_location: e.target.value })}
                   required
@@ -244,7 +245,7 @@ const AccountSetup = () => {
                 <input
                   type="text"
                   placeholder="Enter Postcode"
-                  className="input input-bordered w-full bg-gray-50 hover:bg-white"
+                  className="input input-primary w-full"
                   value={addressData.postcode}
                   onChange={(e) => setAddressData({ ...addressData, postcode: e.target.value })}
                   required
@@ -263,51 +264,40 @@ const AccountSetup = () => {
             <div className="space-y-6">
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text text-gray-700 font-medium">Mobile Number</span>
+                  <span className="label-text">Mobile Number</span>
                 </label>
-                <div className="flex flex-col gap-2">
-                  <div className="flex gap-3">
-                    <div className="relative flex-1">
-                      <input
-                        type="tel"
-                        placeholder="Enter mobile number (e.g., 0917 123 4567)"
-                        className={`input input-bordered w-full bg-gray-50 hover:bg-white pl-20 ${
-                          phoneError ? 'input-error' : ''
-                        }`}
-                        value={mobileData.mobile}
-                        onChange={(e) => {
-                          const formatted = formatPhoneNumber(e.target.value);
-                          setMobileData(prev => ({ ...prev, mobile: formatted }));
-                          if (formatted) validatePhoneNumber(formatted);
-                        }}
-                        required
-                      />
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                        +63 |
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-secondary px-6 hover:shadow-md transition-shadow"
-                      onClick={handleSendVerificationCode}
-                      disabled={loading || !mobileData.mobile || phoneError}
-                    >
-                      {loading ? (
-                        <span className="loading loading-spinner loading-sm"></span>
-                      ) : (
-                        <>
-                          <i className="fas fa-paper-plane mr-2"></i>
-                          Send
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  {phoneError && (
-                    <span className="text-error text-sm animate-fadeIn">
-                      {phoneError}
-                    </span>
-                  )}
+                <div className="input-group flex flex-row">
+                  <span className="bg-base-300 px-4 flex items-center">+63</span>
+                  <input
+                    type="tel"
+                    placeholder="917 123 4567"
+                    className={`input input-primary flex-1 ${phoneError ? 'input-error' : ''}`}
+                    value={mobileData.mobile}
+                    onChange={(e) => {
+                      const formatted = formatPhoneNumber(e.target.value);
+                      setMobileData(prev => ({ ...prev, mobile: formatted }));
+                      if (formatted) validatePhoneNumber(formatted);
+                    }}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleSendVerificationCode}
+                    disabled={loading || !mobileData.mobile || phoneError}
+                  >
+                    {loading ? (
+                      <span className="loading loading-spinner loading-sm"></span>
+                    ) : (
+                      <i className="fas fa-paper-plane"></i>
+                    )}
+                  </button>
                 </div>
+                {phoneError && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">{phoneError}</span>
+                  </label>
+                )}
               </div>
 
               {mobileData.sentCode && (
@@ -335,129 +325,67 @@ const AccountSetup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-50 flex items-center justify-center py-12 px-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-[600px] relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-indigo-500"></div>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-100 rounded-full -translate-y-16 translate-x-16 opacity-20"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-100 rounded-full translate-y-16 -translate-x-16 opacity-20"></div>
-
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center mb-12 relative z-10">
-          <div className={`step-item ${currentStep >= 1 ? 'active' : ''}`}>
-            <div className="step-counter">
-              {currentStep > 1 ? (
-                <i className="fas fa-check text-sm"></i>
-              ) : (
-                <span>1</span>
-              )}
-            </div>
-            <p className="text-sm mt-2 font-medium">Delivery Address</p>
-          </div>
-          <div className="step-divider"></div>
-          <div className={`step-item ${currentStep >= 2 ? 'active' : ''}`}>
-            <div className="step-counter">2</div>
-            <p className="text-sm mt-2 font-medium">Mobile Verification</p>
-          </div>
+    <div className="min-h-screen bg-base-200">
+      {/* Header with DaisyUI navbar */}
+      <div className="navbar bg-base-100 shadow-lg">
+        <div className="container mx-auto px-4">
+          <Logo className="h-8 w-24 sm:h-10 sm:w-32 md:h-12 md:w-36 lg:h-16 lg:w-52" alt="Company Logo" />
         </div>
-
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          if (currentStep === 1) {
-            setCurrentStep(2);
-          } else {
-            verifyCode();
-          }
-        }} className="space-y-6 relative z-10">
-          {renderStep()}
-
-          <div className="flex justify-between mt-12 gap-4">
-            {currentStep > 1 && (
-              <button
-                type="button"
-                onClick={() => setCurrentStep(1)}
-                className="btn btn-outline border-2 hover:bg-purple-50 px-8"
-              >
-                <i className="fas fa-arrow-left mr-2"></i>
-                Back
-              </button>
-            )}
-            <button
-              type="submit"
-              className={`btn ${currentStep === 1 ? 'w-full' : 'flex-1'} bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white border-none`}
-              disabled={loading}
-            >
-              {loading ? (
-                <span className="loading loading-spinner loading-sm"></span>
-              ) : currentStep === 1 ? (
-                <>
-                  Next
-                  <i className="fas fa-arrow-right ml-2"></i>
-                </>
-              ) : (
-                <>
-                  Complete Setup
-                  <i className="fas fa-check ml-2"></i>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
       </div>
 
-      <style jsx>{`
-        .step-item {
-          @apply flex flex-col items-center relative;
-        }
-        .step-counter {
-          @apply w-10 h-10 rounded-full flex items-center justify-center border-2 border-gray-200 bg-white text-gray-500 font-semibold transition-all duration-300;
-        }
-        .step-divider {
-          @apply w-24 h-0.5 mx-4 bg-gray-200 transition-all duration-300;
-        }
-        .step-item.active .step-counter {
-          @apply border-purple-600 bg-purple-600 text-white shadow-md shadow-purple-200;
-        }
-        .step-item.active + .step-divider {
-          @apply bg-purple-600;
-        }
-        
-        /* Input field enhancements */
-        .input, .select {
-          @apply transition-all duration-300 shadow-sm focus:ring-2 focus:ring-purple-200;
-        }
-        
-        /* Label animations */
-        label {
-          @apply transition-all duration-300;
-        }
-        
-        .input:focus + label,
-        .select:focus + label {
-          @apply text-purple-600;
-        }
+      {/* Main Content */}
+      <div className="hero min-h-[calc(100vh-4rem)] py-8">
+        <div className="card w-full max-w-2xl bg-base-100 shadow-xl">
+          <div className="card-body relative">
+            {/* Progress indicator using DaisyUI steps */}
+            <ul className="steps steps-horizontal w-full mb-8">
+              <li className={`step ${currentStep >= 1 ? 'step-primary' : ''}`} data-content={currentStep > 1 ? '✓' : '1'}>
+                Delivery Address
+              </li>
+              <li className={`step ${currentStep >= 2 ? 'step-primary' : ''}`} data-content="2">
+                Mobile Verification
+              </li>
+            </ul>
 
-        /* Phone number input animations */
-        .animate-fadeIn {
-          @apply opacity-0;
-          animation: fadeIn 0.3s ease-in-out forwards;
-        }
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (currentStep === 1) {
+                setCurrentStep(2);
+              } else {
+                verifyCode();
+              }
+            }} className="space-y-6">
+              {renderStep()}
 
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .input-error {
-          @apply border-error focus:border-error;
-        }
-      `}</style>
+              <div className="flex justify-between mt-8 gap-4">
+                {currentStep > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    className="btn btn-outline btn-neutral flex-1"
+                  >
+                    <i className="fas fa-arrow-left mr-2"></i>
+                    Back
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className={`btn btn-primary ${currentStep === 1 ? 'w-full' : 'flex-1'}`}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="loading loading-spinner loading-md"></span>
+                  ) : currentStep === 1 ? (
+                    <>Next<i className="fas fa-arrow-right ml-2"></i></>
+                  ) : (
+                    <>Complete Setup<i className="fas fa-check ml-2"></i></>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

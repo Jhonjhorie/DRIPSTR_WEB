@@ -38,8 +38,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
 
   const [signUpData, setSignUpData] = useState({
     email: "",
-    password: "",
-    fullName: "",
+    password: ""
   });
 
   const handleInputChange = (e, form) => {
@@ -75,36 +74,18 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
   };
 
   const handleSignUp = async () => {
-    const { email, password, fullName } = signUpData;
-
-    if (!email || !password || !fullName) {
-      return alert("Please fill in all fields.");
+    const { email, password } = signUpData;
+    
+    if (!email || !password) {
+      return alert("Please fill in email and password.");
     }
-
+  
     setIsLoading(prev => ({ ...prev, signUp: true }));
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { 
-          data: { fullName },
-          emailRedirectTo: `${window.location.origin}/account-setup`,
-          // Add custom email settings
-          emailSettings: {
-            senderName: "DRIPSTR",
-            senderEmail: "noreply@dripstr.com",
-            subject: "Welcome to DRIPSTR - Confirm Your Email",
-            template: "signup",
-            redirectTo: `${window.location.origin}/account-setup`
-          }
-        },
-      });
-
-      if (error) throw error;
-
-      const user = data.user;
-      if (!user) throw new Error("User creation failed");
-
+      const { user, error } = await signUpUser({ email, password });
+  
+      if (error) throw new Error(error);
+  
       setIsGmailModalOpen(true);
     } catch (error) {
       console.error('Signup error:', error);
@@ -130,7 +111,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
         setTimeout(() => {
           setIsSuccessModalOpen(false);
           onClose();
-          navigate("/login");
+          navigate("/set");
         }, 2000);
       }
     }
@@ -154,8 +135,14 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
             <div className={`form-control w-full ${formTransitionClass}`}>
               {!isSignIn ? (
                 <div className="space-y-4">
-                  <input type="text" name="fullName" placeholder="Full Name" className="input input-bordered bg-gray-100 w-full" value={signUpData.fullName} onChange={(e) => handleInputChange(e, "signUp")} />
-                  <input type="email" name="email" placeholder="Email" className="input input-bordered bg-gray-100 w-full" value={signUpData.email} onChange={(e) => handleInputChange(e, "signUp")} />
+                  <input 
+                    type="email" 
+                    name="email" 
+                    placeholder="Email" 
+                    className="input input-bordered bg-gray-100 w-full" 
+                    value={signUpData.email} 
+                    onChange={(e) => handleInputChange(e, "signUp")} 
+                  />
                   <div className="relative">
                     <input
                       type={showPassword.signUp ? "text" : "password"}
@@ -255,3 +242,51 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
 };
 
 export default AuthModal;
+
+export async function signUpUser({ email, password }) {
+  try {
+    // Only handle basic auth signup
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/account-setup`
+      }
+    });
+
+    if (authError) throw authError;
+
+    const user = authData.user;
+    if (!user) throw new Error('User creation failed');
+
+    return { user, error: null };
+
+  } catch (error) {
+    console.error('Error during sign up:', error.message);
+    return { user: null, error: error.message };
+  }
+}
+
+export async function getProfile(userId) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function updateProfile({ userId, updates }) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', userId);
+
+  if (error) throw error;
+  return data;
+}

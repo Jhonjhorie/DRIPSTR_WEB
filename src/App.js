@@ -38,7 +38,10 @@ function AppContent() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const location = useLocation();
 
-  const isJnt = location.pathname === "/jnt" || location.pathname === "/jnt/track" || location.pathname === "/jnt/detailed" ;
+  // Add account-setup to the routes that shouldn't show header/sidebar
+  const isJnt = location.pathname === "/jnt" || location.pathname === "/jnt/track" || location.pathname === "/jnt/detailed";
+  const isAccountSetup = location.pathname === "/account-setup";
+  const hideHeaderAndSidebar = isJnt || isAccountSetup;
 
   return (
     <NotificationProvider>
@@ -46,24 +49,24 @@ function AppContent() {
 
       <div className="flex flex-col bg-slate-50 h-screen w-screen overflow-x-hidden custom-scrollbar">
         {/* Navbar (Header) */}
-        {!isJnt && <Header />}
+        {!hideHeaderAndSidebar && <Header />}
 
         {/* Main Layout */}
         <div className="flex flex-1 flex-col sm:flex-row">
           {/* Sidebar */}
-          {isLoggedIn && !isJnt && (
+          {isLoggedIn && !hideHeaderAndSidebar && (
             <div className="hidden sm:block">
               <Sidebar />
             </div>
           )}
-          {isLoggedIn && !isJnt && (
+          {isLoggedIn && !hideHeaderAndSidebar && (
             <div className="block sm:hidden fixed bottom-0 w-full z-50">
               <Sidebar />
             </div>
           )}
 
           {/* Main Content */}
-          <main className={`flex-1 ${isLoggedIn && !isJnt ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-auto`}>
+          <main className={`flex-1 ${isLoggedIn && !hideHeaderAndSidebar ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-auto`}>
             <Routes>
               <Route path="/" element={<HomeController />} />
               <Route path="/about" element={<AboutUs />} />
