@@ -38,7 +38,8 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
 
   const [signUpData, setSignUpData] = useState({
     email: "",
-    password: ""
+    password: "",
+    fullName: ""  // Add this line
   });
 
   const handleInputChange = (e, form) => {
@@ -74,15 +75,15 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
   };
 
   const handleSignUp = async () => {
-    const { email, password } = signUpData;
+    const { email, password, fullName } = signUpData;
     
-    if (!email || !password) {
-      return alert("Please fill in email and password.");
+    if (!email || !password || !fullName) {  // Add fullName check
+      return alert("Please fill in all fields.");
     }
   
     setIsLoading(prev => ({ ...prev, signUp: true }));
     try {
-      const { user, error } = await signUpUser({ email, password });
+      const { user, error } = await signUpUser({ email, password, fullName });
   
       if (error) throw new Error(error);
   
@@ -135,6 +136,14 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
             <div className={`form-control w-full ${formTransitionClass}`}>
               {!isSignIn ? (
                 <div className="space-y-4">
+                  <input 
+                    type="text" 
+                    name="fullName" 
+                    placeholder="Full Name" 
+                    className="input input-bordered bg-gray-100 w-full" 
+                    value={signUpData.fullName} 
+                    onChange={(e) => handleInputChange(e, "signUp")} 
+                  />
                   <input 
                     type="email" 
                     name="email" 
@@ -243,13 +252,15 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
 
 export default AuthModal;
 
-export async function signUpUser({ email, password }) {
+export async function signUpUser({ email, password, fullName }) {
   try {
-    // Only handle basic auth signup
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        data: {
+          full_name: fullName
+        },
         emailRedirectTo: `${window.location.origin}/account-setup`
       }
     });
@@ -258,6 +269,21 @@ export async function signUpUser({ email, password }) {
 
     const user = authData.user;
     if (!user) throw new Error('User creation failed');
+
+    // Create profile entry
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert([
+        {
+          id: user.id,
+          full_name: fullName,
+          email: email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      ]);
+
+    if (profileError) throw profileError;
 
     return { user, error: null };
 
