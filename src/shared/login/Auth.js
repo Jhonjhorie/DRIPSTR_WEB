@@ -76,11 +76,11 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
 
   const handleSignUp = async () => {
     const { email, password, fullName } = signUpData;
-    
+
     if (!email || !password || !fullName) {
       return alert("Please fill in all fields.");
     }
-  
+
     setIsLoading(prev => ({ ...prev, signUp: true }));
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -88,25 +88,23 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
         password,
         options: { 
           data: { fullName },
-          emailRedirectTo: `${window.location.origin}/account-setup`
+          emailRedirectTo: `${window.location.origin}/account-setup`,
+          // Add custom email settings
+          emailSettings: {
+            senderName: "DRIPSTR",
+            senderEmail: "noreply@dripstr.com",
+            subject: "Welcome to DRIPSTR - Confirm Your Email",
+            template: "signup",
+            redirectTo: `${window.location.origin}/account-setup`
+          }
         },
       });
-  
+
       if (error) throw error;
-      
+
       const user = data.user;
       if (!user) throw new Error("User creation failed");
-  
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          id: user.id,
-          full_name: fullName,
-          email: email
-        });
-  
-      if (profileError) throw new Error(`Profile creation failed: ${profileError.message}`);
-  
+
       setIsGmailModalOpen(true);
     } catch (error) {
       console.error('Signup error:', error);
