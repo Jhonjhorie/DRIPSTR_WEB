@@ -5,7 +5,10 @@ import logo from "../../../assets/shop/logoBlack.png";
 import { supabase } from "../../../constants/supabase";
 import Subscription from "../Component/MerchantWallet";
 import "boxicons";
-import { blockInvalidChar } from "../Hooks/ValidNumberInput";
+import {
+  blockInvalidChar,
+  validateMinLength2,
+} from "../Hooks/ValidNumberInput";
 import questionEmote from "../../../../src/assets/emote/question.png";
 import successEmote from "../../../../src/assets/emote/success.png";
 import sadEmote from "../../../../src/assets/emote/error.png";
@@ -20,7 +23,9 @@ function MerchantWallet() {
   const [walletData, setWalletData] = useState(null);
   const [activeTab, setActiveTab] = useState("history");
   const [modalOpen, setModalOpen] = useState(false);
-
+  const phonedigit = (e) => {
+    validateMinLength2(e, 11);
+  };
   const fetchUserProfileAndShop = async () => {
     setLoading(true);
 
@@ -219,6 +224,8 @@ function MerchantWallet() {
   const [hasShownExpirationAlert, setHasShownExpirationAlert] = useState(false);
   const [showAlertExpiredSubs, setIsModalOpenExpired] = useState(false); //Expired CONFIRMATION
   const [showAlertSuccessSubs, setShowSubs] = useState(false);
+
+
   const handleSubmitWalletSubscription = async () => {
     if (!currentUser || !merchantId) {
       setError("User or shop ID not found.");
@@ -311,7 +318,6 @@ function MerchantWallet() {
       setTimeout(() => setShowSubs(false), 3000);
       setShowSubscription(false);
       console.log("Alert: Subscription successful via Wallet!");
-
     } catch (err) {
       console.error("Wallet Subscription error:", err.message);
       console.log("Alert error:", err.message);
@@ -339,8 +345,9 @@ function MerchantWallet() {
       }
 
       // Upload proof of payment file to Supabase Storage
-      const filePath = `proofs/${currentUser.id}_${Date.now()}_${gcashProof.name
-        }`;
+      const filePath = `proofs/${currentUser.id}_${Date.now()}_${
+        gcashProof.name
+      }`;
       const { data, error: uploadError } = await supabase.storage
         .from("wallet_docs")
         .upload(filePath, gcashProof);
@@ -430,7 +437,10 @@ function MerchantWallet() {
       console.log("Subscription status updated to Expired.");
 
       // Update artist to non-premium
-      console.log("Updating Merchant premium status for merchantId:", merchantId);
+      console.log(
+        "Updating Merchant premium status for merchantId:",
+        merchantId
+      );
       const { error: artistError } = await supabase
         .from("shop")
         .update({ is_Premium: false })
@@ -556,14 +566,17 @@ function MerchantWallet() {
       <div className="absolute mx-3 right-0 z-20">
         <SideBar />
       </div>
-      <div className="text-3xl text-custom-purple font-bold py-4">
-        <h1>Your Merchant Wallet</h1>
+      <div className="text-xl md:ml-0 -ml-2 md:text-3xl font-semibold w-full text-start  text-custom-purple p-3">
+        <h1>MERCHANT WALLET</h1>
       </div>
-      <div className="flex gap-2 w-full h-auto">
-        <div className="w-1/3  h-full flex flex-col items-center">
+      <div className="md:flex  mt-3 md:mt-0 gap-2 w-full h-auto">
+        <div className="md:w-1/3 w-full justify-items-center h-full md:flex flex-col items-center">
           <div
-            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${isPremium ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]" : ""
-              }`}
+            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${
+              isPremium
+                ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]"
+                : ""
+            }`}
           >
             {/* Wallet Icon and Name */}
             <div className="absolute bottom-2 right-2">
@@ -593,45 +606,42 @@ function MerchantWallet() {
           </div>
         </div>
 
-        <div className="w-2/3 h-full p-4 flex flex-col justify-between">
+        <div className="w-full md:w-2/3 h-full p-4 flex flex-col justify-between">
           {/* Header */}
           <div className="">
-            <div className="text-slate-800 text-xl font-semibold">
+            <div className="text-slate-900 md:text-start text-center text-xl font-semibold">
               {" "}
               {walletData?.owner_Name || "Loading"}
             </div>
           </div>
 
           {/* Buttons at the Bottom */}
-          <div className="flex gap-4 mt-2">
+          <div className="flex gap-2 md:gap-4 mt-2">
             <button
               onClick={() => setActiveTab("history")}
-              className="bg-indigo-600 glass hover:bg-indigo-700 text-white px-4 py-2 rounded-lg w-1/3"
+              className="bg-indigo-600 glass text-sm hover:bg-indigo-700 text-white px-4 md:py-2 py-1 rounded-lg w-1/3"
             >
               History
             </button>
             <button
               onClick={() => setActiveTab("cashout")}
-              className="bg-violet-600 glass hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-1/3"
+              className="bg-violet-600 glass text-sm hover:bg-violet-700 text-white px-4 md:py-2 py-1 rounded-lg w-1/3"
             >
               Request Cashout
             </button>
 
             <button
               onClick={() => setActiveTab("inquiry")}
-              className="bg-purple-600 glass hover:bg-purple-700 text-white px-4 py-2 rounded-lg w-1/3"
+              className="bg-purple-600 glass text-sm hover:bg-purple-700 text-white px-4 md:py-2 py-1 rounded-lg w-1/3"
             >
               Cashout Information
             </button>
           </div>
           <div className="w-full mt-5">
-            <div
-            
-              className="justify-end flex w-auto relative"
-            >
+            <div className="justify-end flex w-auto relative">
               <h1
                 onClick={() => setShowSubscription(true)}
-                className="cursor-pointer w-auto glass bg-red-600 text-white font-semibold shadow-red-400 shadow-md p-2 rounded-md hover:scale-95 duration-200
+                className="cursor-pointer w-auto glass bg-red-600 text-sm text-white font-semibold shadow-red-400 shadow-md p-1 md:p-2 rounded-md hover:scale-95 duration-200
       animate-none hover:animate-[shake_1s_ease-in-out_infinite]  flex items-center gap-2"
               >
                 SUBSCRIPTION
@@ -648,10 +658,10 @@ function MerchantWallet() {
       </div>
 
       <div className=" w-full border-b-2 border-slate-400 shadow-lg h-1 mt-2 "></div>
-      <div className="w-full h-auto  justify-items-center">
+      <div className="w-full h-auto  justify-items-center mb-20 md:mb-0">
         {/* Content Display */}
         {activeTab === "cashout" && (
-          <div className="flex-grow relative bg-white w-1/2 px-6  p-4 rounded-lg shadow-md mt-4">
+          <div className="flex-grow relative bg-white w-full md:w-1/2 px-6  p-4 rounded-lg shadow-md mt-4">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
             </div>
@@ -664,13 +674,14 @@ function MerchantWallet() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Enter Amount"
-                className="w-full p-2 border text-slate-800 bg-slate-300 rounded-md mb-2"
+                onInput={phonedigit}
+                className="w-full p-2 border text-sm text-slate-800 bg-slate-300 rounded-md mb-2"
               />
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Reason for Cashout"
-                className="w-full p-2 border text-slate-800 rounded-md bg-slate-300"
+                className="w-full p-2 border text-sm text-slate-800 rounded-md bg-slate-300"
               ></textarea>
               <button
                 onClick={handleSubmitCashoutcONF}
@@ -683,7 +694,7 @@ function MerchantWallet() {
         )}
 
         {activeTab === "history" && (
-          <div className="flex-grow relative bg-white w-1/2 p-4 rounded-lg shadow-md mt-4">
+          <div className="flex-grow relative bg-white w-full md:w-1/2 p-4 rounded-lg shadow-md mt-4">
             <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
             <div className="w-full text-slate-900 relative p-2">
               <h3 className="text-lg font-semibold mb-2">
@@ -706,12 +717,13 @@ function MerchantWallet() {
                       ₱{transaction.qty} - {transaction.reason}
                     </span>
                     <span
-                      className={`text-sm font-semibold ${transaction.status === "Pending"
-                        ? "text-yellow-500"
-                        : transaction.status === "Subscription Expired"
+                      className={`text-sm font-semibold ${
+                        transaction.status === "Pending"
+                          ? "text-yellow-500"
+                          : transaction.status === "Subscription Expired"
                           ? "text-red-500"
                           : "text-green-600"
-                        }`}
+                      }`}
                     >
                       {transaction.status}
                     </span>
@@ -729,7 +741,7 @@ function MerchantWallet() {
         )}
 
         {activeTab === "inquiry" && (
-          <div className="flex-grow relative bg-white w-1/2 p-4 rounded-lg shadow-md mt-4">
+          <div className="flex-grow relative bg-white w-full md:w-1/2 p-4 rounded-lg shadow-md mt-4">
             <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
 
             <h3 className="text-lg font-semibold mb-2 text-custom-purple text-center">
@@ -748,12 +760,13 @@ function MerchantWallet() {
             </div>
 
             {/* Buttons for Quick Inquiry Messages */}
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="mt-3 place-content-center w-full  md:flex flex-wrap gap-2">
               {/* PAYMENT METHODS */}
-              <button
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex-1"
-                onClick={() =>
-                  setInquiryText(`💳 **Accepted Payment Methods**:
+              <div>
+                <button
+                  className="bg-purple-600 w-full hover:bg-purple-700 text-sm text-white px-4 py-2 rounded-lg flex-1 mt-1"
+                  onClick={() =>
+                    setInquiryText(`💳 **Accepted Payment Methods**:
             
 • **Credit/Debit Cards**: Visa, Mastercard, American Express
 • **E-Wallets**: GCash, PayMaya
@@ -762,32 +775,34 @@ function MerchantWallet() {
 
 ✅ **Secure Transactions**: All payments are encrypted & secure.
 📧 **Confirmation**: You'll receive an email once payment is processed.`)
-                }
-              >
-                Payment Methods
-              </button>
-
-              {/* REFUNDS & EXCHANGES */}
-              <button
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex-1"
-                onClick={() =>
-                  setInquiryText(`🔄 **Refund & Exchange Policy**:
+                  }
+                >
+                  Payment Methods
+                </button>
+              </div>
+              <div>
+                {/* REFUNDS & EXCHANGES */}
+                <button
+                  className="bg-purple-600 w-full hover:bg-purple-700 text-sm text-white px-4 py-2 rounded-lg flex-1 mt-1"
+                  onClick={() =>
+                    setInquiryText(`🔄 **Refund & Exchange Policy**:
             
 📆 **Refunds**: Within **7 days** if the item is defective or not as described.
 🔄 **Exchanges**: Within **14 days** for size or color changes.
 📦 **Condition**: Items must be unused with original tags/packaging.
 
 📩 **To request a refund/exchange, email**: support@dripstr.com`)
-                }
-              >
-                Refunds & Exchanges
-              </button>
-
-              {/* SHIPPING TIME */}
-              <button
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex-1"
-                onClick={() =>
-                  setInquiryText(`🚚 **Shipping Time Estimates**:
+                  }
+                >
+                  Refunds & Exchanges
+                </button>
+              </div>
+              <div>
+                {/* SHIPPING TIME */}
+                <button
+                  className="bg-purple-600 w-full hover:bg-purple-700 text-sm text-white px-4 py-2 rounded-lg flex-1 mt-1"
+                  onClick={() =>
+                    setInquiryText(`🚚 **Shipping Time Estimates**:
             
 📍 **Metro Manila**: 2-5 business days
 📍 **Luzon Areas**: 5-7 business days
@@ -795,27 +810,13 @@ function MerchantWallet() {
 🌎 **International Shipping**: 10-20 business days
 
 🔗 **Tracking**: You’ll receive an email with a tracking number when your order ships.`)
-                }
-              >
-                Shipping Time
-              </button>
+                  }
+                >
+                  Shipping Time
+                </button>
+              </div>
 
               {/* STORE LOCATION */}
-              <button
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex-1"
-                onClick={() =>
-                  setInquiryText(`🏬 **Dripstr Store Locations**:
-            
-📌 **Online Store**: We currently operate **online only**.
-📌 **Physical Pop-Up Shops**:
-   • **SM Megamall (Event Booth)** – Last weekend of the month
-   • **Greenbelt 5 (Urban Hype Store)** – Selected Dripstr items available
-
-📲 **Follow us on Instagram**: @dripstr.ph for the latest pop-up updates!`)
-                }
-              >
-                Store Location
-              </button>
             </div>
           </div>
         )}
@@ -1101,7 +1102,6 @@ function MerchantWallet() {
                   )}
                 </>
               )}
-
             </div>
 
             {/* Action Buttons */}
@@ -1110,20 +1110,22 @@ function MerchantWallet() {
                 <button
                   onClick={() => setActiveTabSubs("Wallet")}
                   disabled={isPending || isPremium}
-                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
+                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
+                    isPending || isPremium
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-primary-color"
-                    }`}
+                  }`}
                 >
                   Pay via Dripstr Wallet
                 </button>
                 <button
                   onClick={() => setActiveTabSubs("Gcash")}
                   disabled={isPending || isPremium}
-                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
+                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
+                    isPending || isPremium
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-blue-700"
-                    }`}
+                  }`}
                 >
                   Pay via Gcash
                 </button>
@@ -1187,40 +1189,38 @@ function MerchantWallet() {
           </div>
         </div>
       )}
-       {showAlertSuccessSubs && (
-              <div className="md:bottom-5  w-auto px-10 bottom-10 z-30 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-                <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
-                  <div className="mt-10 ">
-                    <img
-                      src={successEmote}
-                      alt="Success Emote"
-                      className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-                    />
-                  </div>
-                </div>
-                <div
-                  role="alert"
-                  className="alert bg-yellow-600 glass shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-6 w-6 shrink-0 stroke-current"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>Successfully Avail SUBSCRIPTION!</span>
-                </div>
-              </div>
-            )}
-      
-      
+      {showAlertSuccessSubs && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-30 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-yellow-600 glass shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Successfully Avail SUBSCRIPTION!</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

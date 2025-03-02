@@ -347,7 +347,7 @@ function Login() {
         // Upload PDF file
         let uploadedPdfUrl = null;
         if (pdfFile) {
-          const uniquePdfName = `pdfs/${Date.now()}-${Math.random()
+          const uniquePdfName = `${Date.now()}-${Math.random()
             .toString(36)
             .substring(2, 10)}-${pdfFile.name}`;
           const { data, error: uploadError } = await supabase.storage

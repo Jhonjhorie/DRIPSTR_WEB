@@ -84,9 +84,6 @@ function Account() {
     setImageLoading(false);
   };
 
-  const handleIframeLoad = () => {
-    setIframeLoading(false);
-  };
   const handleCloseModalEdit = () => {
     setShowEdit(false);
     setImagePreview(null);
@@ -229,11 +226,11 @@ function Account() {
       <div className="absolute mx-3 right-0 z-10">
         <SideBar />
       </div>
-      <div className="w-full h-full bg-slate-300 md:px-10 lg:px-16 py-2">
-        <div className="text-3xl font-bold w-full text-center text-custom-purple p-3">
+      <div className="w-full h-full bg-slate-300 md:px-10 lg:px-16 md:mb-0 mb-7 py-2">
+        <div className="text-xl mt-10 md:mt-0 md:text-3xl font-semibold w-full text-center text-custom-purple p-3">
           MERCHANT INFORMATION
         </div>
-        <div className="h-auto w-full h-slate-50 px-10 flex justify-center">
+        <div className="h-auto w-full h-slate-50 px-5 md:px-10 flex justify-center">
           <div className="w-full h-full bg-slate-50 relative justify-items-center shadow-lg rounded-md">
             <div className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md"></div>
             <div className="absolute top-2 right-2">
@@ -244,9 +241,9 @@ function Account() {
                 <box-icon color="black" type="solid" name="edit"></box-icon>
               </div>
             </div>
-            <div className="w-auto p-7 h-full flex gap-5">
-              <div className="w-1/3 h-auto">
-                <div className="bg-slate-100 relative h-[250px] w-[320px] border-2 p-1 border-custom-purple rounded-md">
+            <div className="w-auto p-7 h-full md:flex place-items-center md:place-items-start gap-5">
+              <div className="md:w-1/3 w-full h-auto ">
+                <div className="bg-slate-100 relative md:h-[250px] md:w-[320px] w-[200px] h-[150px] justify-self-center border-2 p-1 border-custom-purple rounded-md">
                   {imageLoading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
                        <div className="h-14 w-14 ">
@@ -266,7 +263,7 @@ function Account() {
                     <img
                       src={shopData.shop_image}
                       alt={shopData.shop_name}
-                      className={`drop-shadow-custom h-full w-full object-cover rounded-md ${
+                      className={`drop-shadow-custom h-full w-full justify-center object-cover rounded-md ${
                         imageLoading ? "opacity-0" : "opacity-100"
                       } transition-opacity duration-300`}
                       onLoad={handleImageLoad}
@@ -274,50 +271,38 @@ function Account() {
                     />
                   )}
                 </div>
-                <div className="text-slate-900 text-2xl text-center mt-2 font-bold">
+                <div className="text-slate-900 text-xl md:text-2xl text-center mt-2 font-semibold">
                   {shopData.shop_name}
                 </div>
 
-                <div className="text-slate-900 text-xl text-center mt-2 font-semibold">
+                <div className="text-slate-900 text-sm md:text-xl text-center mt-2 font-semibold">
                   0{shopData.contact_number}
                 </div>
-                <div className="text-slate-100 text-sm p-2 bg-custom-purple glass rounded-md text-center mt-2 font-semibold">
+                <div className="text-slate-100 text-sm p-2 bg-custom-purple glass rounded-md text-center mt-2 font-normal">
                   {shopData.address}
                 </div>
               </div>
-              <div className="w-2/3 h-[44vh]">
-                <div className="text-slate-700 text-xl font-bold text-left">
+              <div className="w-full md:mt-0 mt-2 md:w-2/3 h-full ">
+                <div className="text-slate-900 text-xl font-semibold text-left">
                   Merchant Description
                 </div>
-                <div className="text-custom-purple mt-2 font-medium w-full h-full text-sm rounded-sm p-2 bg-fuchsia-200 glass overflow-hidden overflow-y-scroll">
+                <div className="text-slate-800 mt-2 font-normal w-full h-full text-sm rounded-sm p-2 bg-slate-200 glass overflow-hidden overflow-y-scroll">
                   "{shopData.description}"
                 </div>
               </div>
-              <div className="w-1/2 h-auto">
-                <div className="text-slate-700 text-xl font-bold text-left">
+              <div className="w-full mt-5 md:mt-0 md:w-1/2 h-auto">
+                <div className="text-slate-900 text-xl font-semibold text-left">
                   Merchant Business Permit
                 </div>
-                <div className="text-custom-purple mt-2 font-medium w-full h-[44vh] rounded-md p-2 bg-red-100 overflow-hidden">
-                  {iframeLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200 rounded-md">
-                      <div className="h-14 w-14 ">
-                        <img
-                          src={hmmmEmote}
-                          className="h-full w-full object-cover"
-                        />
-                      </div><br/>
-                      <div>
-                        {" "}
-                        <span className="loading loading-bars loading-lg"></span>
-                      </div>
-                    </div>
-                  )}
-                  <iframe
-                    src={shopData.shop_BusinessPermit}
-                    className="w-full h-full border border-gray-300 rounded-md"
-                    title="Business Permit"
-                    onLoad={handleIframeLoad}
-                  />
+                <div className="text-custom-purple mt-2 font-normal w-full h-[44vh] rounded-md p-2 bg-slate-200 overflow-hidden">
+                    <img
+                      src={shopData.shop_BusinessPermit}
+                      alt="Business Permit"
+                      className="w-full h-full border border-gray-300 rounded-md"
+                      title="Business Permit"
+                      onLoad={handleImageLoad}
+                      onError={handleImageLoad}
+                    />
                 </div>
               </div>
             </div>
@@ -325,17 +310,17 @@ function Account() {
         </div>
         {/* ALLERTS ADD Item SUCCESS */}
         {showAlertEdit && (
-          <div className="fixed inset-0 z-20 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white h-auto mt-8 w-[50%]  justify-items-center rounded-md shadow-md relative">
+          <div className="fixed inset-0 z-20 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white h-2/3 overflow-y-scroll overflow-hidden  md:h-auto mt-5 md:mt-8 w-h-full md:w-[50%]  justify-items-center rounded-md shadow-md relative">
               <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
                 {" "}
               </div>
-              <h1 className="text-custom-purple text-2xl iceland-bold">
+              <h1 className="text-custom-purple text-xl md:text-2xl font-semibold">
                 Edit Account Information
               </h1>
               <div></div>
-              <div className="flex gap-2 w-full  px-10">
-                <div className=" w-1/2 h-auto ">
+              <div className="md:flex gap-2 w-full px-2 md:px-10">
+                <div className=" w-full md:w-1/2 h-auto ">
                   <div className=" p-2 w-full flex justify-center">
                     <div className="bg-slate-100 relative h-44 w-60 border-2 p-1 border-custom-purple rounded-md">
                       {imageLoading && (
@@ -367,7 +352,7 @@ function Account() {
                       value={formData.shop_name}
                       onChange={handleInputChange}
                       placeholder={shopData.shop_name}
-                      className="p-1 bg-slate-300 w-full font-medium text-custom-purple rounded-sm"
+                      className="p-1 bg-slate-300 text-sm w-full font-normal text-slate-900 rounded-sm"
                     ></input>{" "}
                     <br />
                     <div className="label">
@@ -383,7 +368,7 @@ function Account() {
                       onKeyDown={blockInvalidChar}
                       onInput={phonedigit}
                       placeholder={shopData.contact_number}
-                      className="p-1 bg-slate-300 w-full font-medium text-custom-purple rounded-sm"
+                      className="p-1 bg-slate-300 w-full text-sm font-normal text-slate-900 rounded-sm"
                     ></input>{" "}
                     <br />
                     <div className="label">
@@ -397,15 +382,15 @@ function Account() {
                       value={formData.address}
                       onChange={handleInputChange}
                       placeholder={shopData.address}
-                      className="p-1 bg-slate-300 w-full font-medium text-custom-purple rounded-sm"
+                      className="p-1 bg-slate-300 w-full text-sm font-normal text-slate-900 rounded-sm"
                     ></input>
                   </div>
                 </div>
-                <div className="w-1/2 h-auto p-2">
+                <div className="w-full md:w-1/2 h-auto p-2">
                   <input
                     type="file"
                     accept="image/*"
-                    className="p-1 bg-slate-300 w-full font-medium text-slate-800 rounded-sm"
+                    className="p-1 bg-slate-300 w-full font-normal text-sm text-slate-800 rounded-sm"
                     onChange={handleImageChange}
                   ></input>{" "}
                   <br />
@@ -419,7 +404,7 @@ function Account() {
                     value={formData.description}
                     onChange={handleInputChange}
                     placeholder={shopData.description}
-                    className="p-2 h-[80%] bg-slate-200 resize-none shadow-md shadow-slate-400 w-full text-custom-purple font-medium"
+                    className="p-2 h-[150px] md:h-[80%] bg-slate-200 text-sm resize-none shadow-md shadow-slate-400 w-full font-normal text-slate-900"
                   ></textarea>
                 </div>
               </div>

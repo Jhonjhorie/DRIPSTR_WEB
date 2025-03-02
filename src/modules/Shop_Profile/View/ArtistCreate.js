@@ -1199,31 +1199,38 @@ function ArtistCreate() {
               </div>
             </div>
 
-            <div className="w-full h-auto justify-end mr-14 flex m-2 mb-14 md:mb-0">
-              {loading ? (
-                <div className="text-center place-content-center px-5 mr-14 glass rounded-md bg-custom-purple">
-                  <span className="loading loading-dots loading-lg bg-slate-100"></span>
-                </div>
-              ) : (
-                <button
-                  type="submit"
-                  className="btn  justify-center w-full md:w-auto md:justify-center place-self-center mt-10 flex glass bg-custom-purple md:mr-7 md:px-10 iceland-regular tracking-wide text-lg text-white md:items-center "
-                >
-                  SUBMIT
-                </button>
-              )}
-              <div
-                onClick={ShowTandC}
-                data-tip="Read Merchant Terms and Condition"
-                className=" tooltip-left tooltip bg-slate-50 hover:scale-95 duration-200 cursor-pointer rounded-full shadow-md fixed right-7 bottom-14 md:bottom-7"
+           
+            <button
+                type="submit"
+                className="btn  justify-center w-full md:w-auto md:justify-center place-self-center mt-10 flex glass bg-custom-purple md:mr-7 md:px-10 iceland-regular tracking-wide text-lg text-white md:items-center "
+                disabled={loading} 
               >
-                <img
-                  src={questionEmote}
-                  alt="Success Emote"
-                  className="object-contain h-16 w-16 rounded-lg p-1 drop-shadow-customViolet"
-                />
-              </div>
-            </div>
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
+                    </svg>
+                    Loading...
+                  </span>
+                ) : (
+                  "SUBMIT"
+                )}
+              </button>
           </form>
         )}
       </div>

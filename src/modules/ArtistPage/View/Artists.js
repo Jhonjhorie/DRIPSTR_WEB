@@ -31,6 +31,7 @@ function Artists() {
   const [limit, setLimit] = useState(15);
   const [hasMore, setHasMore] = useState(true);
   const [artworks, setArtworks] = useState([]);
+
   useEffect(() => {
     const fetchUserAndArtworks = async () => {
       try {
@@ -91,7 +92,41 @@ function Artists() {
       setLoading(false);
     }
   };
+  const fetchArtworksPremium = async () => {
+    setLoading(true);
+    try {
+      const { data: arts, error } = await supabase
+        .from("artist_Arts")
+        .select(
+          `
+          id, 
+          art_Name, 
+          art_Image, 
+          art_Description, 
+          likes, 
+          artist_Id,
+          artists:artist_Id (id, artist_Name, artist_Image, is_Premium) 
+        `
+        )
+        .order("id", { ascending: false })
 
+      if (error) throw error;
+
+      setArtworks(arts);
+      setArtistData(arts);
+    } catch (error) {
+      console.error("Error fetching artworks:", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchArtworks();
+  }, []);
+  useEffect(() => {
+    fetchArtworksPremium();
+  }, []);
   // Load More Function
   const loadMore = () => {
     if (!hasMore) return;
@@ -99,11 +134,7 @@ function Artists() {
     setLimit(newLimit);
     fetchArtworks(newLimit);
   };
-
-  // Fetch artworks on mount
-  useEffect(() => {
-    fetchArtworks();
-  }, []);
+  
 
   const handleSelectArt = async (art) => {
     if (!art) {
