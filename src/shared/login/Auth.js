@@ -68,7 +68,15 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
       if (error) throw error;
   
       setIsSuccessModalOpen(true);
-      // ...existing success logic...
+      // Add immediate refresh after successful login
+      setTimeout(() => {
+        if (item) {
+          navigate(`/product/${item.item_Name}`, { state: { item } });
+        } else {
+          navigate("/");
+        }
+        window.location.reload();
+      }, 1500); // Reduced to 1.5 seconds for better UX
     } catch (error) {
       setToast({ 
         show: true, 
@@ -121,19 +129,19 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
       setTimeout(() => {
         navigate(`/product/${item.item_Name}`, { state: { item } });
         window.location.reload();
-      }, 3000);
+      }, 3000);   
     } else {
       if (isLogin) {
         setTimeout(() => {
           navigate("/");
           window.location.reload();
-        }, 3000);
+        }, 3000);   
       } else {
         setTimeout(() => {
           setIsSuccessModalOpen(false);
           onClose();
-          navigate("/set");
-        }, 2000);
+          navigate("/");
+        }, 2000);   
       }
     }
   };
