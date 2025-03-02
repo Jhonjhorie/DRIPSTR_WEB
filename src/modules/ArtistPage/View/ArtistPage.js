@@ -10,6 +10,11 @@ import { supabase } from "@/constants/supabase";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import FormCommision from "../Component/FormCommission";
+import History from "../Component/History";
+
+
+
+
 const { useState, useEffect } = React;
 
 function ArtistPage() {
@@ -795,9 +800,13 @@ function ArtistPage() {
           <box-icon name="share" type="solid" size="40px"></box-icon>
         </button>
       </div>
-      <div  className={`${
-            artist?.is_Premium ? "bg-gradient-to-b from-violet-500 to-gray-200" : "bg-gray-200"
-          } md:flex gap-2 w-full h-auto  justify-center p-2 `}>
+      <div
+        className={`${
+          artist?.is_Premium
+            ? "bg-gradient-to-b from-violet-500 to-gray-200"
+            : "bg-gray-200"
+        } md:flex gap-2 w-full h-auto  justify-center p-2 `}
+      >
         <div
           className={`h-80 w-80 mt-3 ${
             artist?.is_Premium ? "bg-yellow-500" : "bg-violet-900"
@@ -973,7 +982,7 @@ function ArtistPage() {
         </div>
       </div>
       {/* Artist Arts */}
-      <div className="h-auto p-2 pb-10 md:px-10 w-full bg-slate-300 ">
+      <div className="h-auto relative p-2 pb-10 md:px-10 w-full bg-slate-300 ">
         <div className="columns-2 sm:columns-3 mt-5 md:columns-4 gap-2 px-4 space-y-2">
           {artistArts.length > 0 ? (
             artistArts.map((art) => (
@@ -1032,6 +1041,10 @@ function ArtistPage() {
             </p>
           )}
         </div>
+        {/* Floating history of commissions */}
+      
+            <History artistId={id}/>
+        
       </div>
 
       {showAlertFollow && (

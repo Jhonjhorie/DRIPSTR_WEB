@@ -189,6 +189,7 @@ function ArtistCommision() {
             </div>
           )}
         </div>
+     
       </div>
 
       {modalOpen && selectedCommission && (
