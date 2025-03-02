@@ -254,6 +254,18 @@ export default AuthModal;
 
 export async function signUpUser({ email, password, fullName }) {
   try {
+    // First, check if user already exists
+    const { data: existingUser } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (existingUser) {
+      throw new Error('User already exists with this email');
+    }
+
+    // Sign up the user
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -270,18 +282,20 @@ export async function signUpUser({ email, password, fullName }) {
     const user = authData.user;
     if (!user) throw new Error('User creation failed');
 
-    // Create profile entry
+    // Create profile entry with upsert (will update if exists, insert if doesn't)
     const { error: profileError } = await supabase
       .from('profiles')
-      .insert([
+      .upsert([
         {
           id: user.id,
           full_name: fullName,
           email: email,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      ]);
+                  }
+      ], 
+      { 
+        onConflict: 'id',
+        ignoreDuplicates: false 
+      });
 
     if (profileError) throw profileError;
 
@@ -304,15 +318,3 @@ export async function getProfile(userId) {
   return data;
 }
 
-export async function updateProfile({ userId, updates }) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', userId);
-
-  if (error) throw error;
-  return data;
-}
