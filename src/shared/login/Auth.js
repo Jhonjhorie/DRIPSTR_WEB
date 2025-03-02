@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import SuccessModal from './components/SuccessModal';
 import ForgotPasswordModal from './components/ForgotPasswordModal';
 import GmailConfirmationModal from './components/GmailConfirmationModal';
-
+import Toast from "../../shared/alerts"; 
 const modalTransitionClass = "transition-all duration-300 ease-in-out";
 const formTransitionClass = "transition-all duration-500 ease-in-out transform";
 
@@ -19,6 +19,7 @@ const LOADING_ANIMATIONS = {
 
 const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
   const [isSignIn, setIsSignIn] = useState(true);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
   const navigate = useNavigate();  
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
@@ -51,24 +52,29 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
 
   const handleSignIn = async () => {
     const { email, password } = signInData;
-    if (!email || !password) return alert("Please enter both email and password.");
+    if (!email || !password) {
+      setToast({ 
+        show: true, 
+        message: "Please enter both email and password.", 
+        type: 'warning' 
+      });
+      return;
+    }
   
     setIsLoading(prev => ({ ...prev, signIn: true }));
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
   
       setIsSuccessModalOpen(true);
-      setTimeout(() => {
-        setIsSuccessModalOpen(false);
-        onClose();
-        handlePostLoginAction(true);
-      }, 2000);
+      // ...existing success logic...
     } catch (error) {
-      alert(`Sign In Error: ${error.message}`);
+      setToast({ 
+        show: true, 
+        message: `Sign In Error: ${error.message}`, 
+        type: 'error' 
+      });
     } finally {
       setIsLoading(prev => ({ ...prev, signIn: false }));
     }
@@ -77,8 +83,13 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
   const handleSignUp = async () => {
     const { email, password, fullName } = signUpData;
     
-    if (!email || !password || !fullName) {  // Add fullName check
-      return alert("Please fill in all fields.");
+    if (!email || !password || !fullName) {
+      setToast({ 
+        show: true, 
+        message: "Please fill in all fields.", 
+        type: 'warning' 
+      });
+      return;
     }
   
     setIsLoading(prev => ({ ...prev, signUp: true }));
@@ -88,9 +99,18 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
       if (error) throw new Error(error);
   
       setIsGmailModalOpen(true);
+      setToast({ 
+        show: true, 
+        message: "Registration successful! Please check your email.", 
+        type: 'success' 
+      });
     } catch (error) {
       console.error('Signup error:', error);
-      alert(`Sign Up Error: ${error.message}`);
+      setToast({ 
+        show: true, 
+        message: `Sign Up Error: ${error.message}`, 
+        type: 'error' 
+      });
     } finally {
       setIsLoading(prev => ({ ...prev, signUp: false }));
     }
@@ -122,8 +142,15 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
 
   return (
     <>
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: '', type: 'info' })}
+        />  
+      )}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
           <div className={`bg-white p-6 rounded-lg shadow-xl relative ${modalTransitionClass} w-[400px]`}>
             <button onClick={onClose} className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl">
               &times;

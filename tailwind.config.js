@@ -23,6 +23,15 @@ module.exports = {
         'customWhite': '4px 4px 10px rgba(255, 255, 255, 0.5)', 
         'customViolet': '4px 4px 15px rgba(138, 43, 226, 1)',
       },
+      animation: {
+        'fadeIn': 'fadeIn 0.3s ease-in-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        }
+      }
     },
   },
   plugins: [require("daisyui")],  
