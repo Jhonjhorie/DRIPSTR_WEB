@@ -108,7 +108,7 @@ function Followers() {
       // Fetch followers
       const { data: followers, error: followerError } = await supabase
         .from("merchant_Followers")
-        .select("id, acc_id, shop_id, join_at")
+        .select("id, acc_id, shop_id, created_at")
         .in(
           "shop_id",
           shops.map((shop) => shop.id)
@@ -207,7 +207,7 @@ function Followers() {
     const nameMatch =
       searchTerm.trim() === "" ||
       follower.profile?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
-      const joinDateString = follower.join_at;   
+      const joinDateString = follower.created_at;   
       if (!joinDateString) return true;
       const joinDate = new Date(joinDateString);     
       if (isNaN(joinDate.getTime())) return true;   
@@ -233,8 +233,8 @@ function Followers() {
     return nameMatch && dateMatch;
   })
   .sort((a, b) => {
-    const dateA = new Date(a.join_at || "");
-    const dateB = new Date(b.join_at || "");
+    const dateA = new Date(a.created_at || "");
+    const dateB = new Date(b.created_at|| "");
 
     if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0;
     if (selectedOption2 === "option2") return dateB - dateA; 
@@ -334,7 +334,7 @@ function Followers() {
                           name="user-x"
                           color="#FF2929"
                         ></box-icon>
-                        <box-icon
+                        {/* <box-icon
                           onClick={() => handleReportClick(follower.profile)}
                           onMouseEnter={(e) =>
                             e.currentTarget.setAttribute("color", "#FFF")
@@ -345,7 +345,7 @@ function Followers() {
                           type="solid"
                           name="message-alt-error"
                           color="#4335A7"
-                        ></box-icon>
+                        ></box-icon> */}
                         <box-icon
                           onClick={() => handleVoucherClick(follower.profile)}
                           onMouseEnter={(e) =>

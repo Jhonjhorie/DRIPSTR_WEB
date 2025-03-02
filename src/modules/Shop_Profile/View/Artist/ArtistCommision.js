@@ -97,7 +97,7 @@ function ArtistCommision() {
     try {
       const { error } = await supabase
         .from("art_Commision")
-        .update({ commission_Status: "done" })
+        .update({ commission_Status: "Completed" })
         .eq("id", commissionId);
 
       if (error) {

@@ -577,7 +577,7 @@ function ArtistPage() {
   const fetchArtistDetails = async (artistId) => {
     const { data, error } = await supabase
       .from("artist")
-      .select("artist_Name, artist_Image, owner_Id")
+      .select("artist_Name, artist_Image, owner_Id, is_Premium")
       .eq("id", artistId)
       .single();
 
@@ -703,17 +703,19 @@ function ArtistPage() {
 
   const fetchMessages = async () => {
     if (!currentUser?.id || !artist?.id) {
-      console.warn("Skipping fetchMessages: currentUser or artist is undefined");
+      console.warn(
+        "Skipping fetchMessages: currentUser or artist is undefined"
+      );
       return;
     }
-  
+
     const { data, error } = await supabase
       .from("artist_Messages")
       .select("content, status, message_dot")
       .eq("sender_Id", currentUser.id)
       .eq("artist_Id", artist.id)
       .maybeSingle();
-  
+
     if (error) {
       console.error("Error fetching messages:", error.message);
     } else if (data) {
@@ -724,11 +726,11 @@ function ArtistPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       fetchMessages();
-    }, 3000); 
-  
+    }, 3000);
+
     return () => clearInterval(interval);
-  }, [currentUser?.id, artist?.id]); 
-  
+  }, [currentUser?.id, artist?.id]);
+
   const handleUploadImage = async () => {
     if (!imageFile) return null;
 
@@ -793,8 +795,14 @@ function ArtistPage() {
           <box-icon name="share" type="solid" size="40px"></box-icon>
         </button>
       </div>
-      <div className="md:flex gap-2 w-full h-auto bg-gray-200 justify-center p-2 ">
-        <div className=" h-80 w-80 mt-3 bg-violet-900 glass mx-auto md:mx-0 rounded-md shadow-md p-2 ">
+      <div  className={`${
+            artist?.is_Premium ? "bg-gradient-to-b from-violet-500 to-gray-200" : "bg-gray-200"
+          } md:flex gap-2 w-full h-auto  justify-center p-2 `}>
+        <div
+          className={`h-80 w-80 mt-3 ${
+            artist?.is_Premium ? "bg-yellow-500" : "bg-violet-900"
+          } glass mx-auto md:mx-0 rounded-md shadow-md p-2`}
+        >
           <img
             src={artist.artist_Image}
             alt={artist.artist_Name}
@@ -803,45 +811,58 @@ function ArtistPage() {
         </div>
         <div className=" gap-2  ">
           <div className="flex mt-2 md:mt-0 justify-between">
-            <div>
+            <div className="flex gap-2 items-center">
               <h1 className="text-violet-900 font-bold text-2xl p-2">
                 {artist.artist_Name}
               </h1>
+              <div>
+                {artist.is_Premium && (
+                  <div className="badge badge-warning border-2 border-slate-100">
+                    Premium Artist
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex gap-2">
-            <div
-        onClick={async () => {
-          if (currentUser?.id === artist?.owner_Id) {
-            setShowAlertYO(true);
-            setTimeout(() => {
-              setShowAlertYO(false);
-            }, 3000);
-          } else {
-            setMessageModal(true);
+              <div
+                onClick={async () => {
+                  if (currentUser?.id === artist?.owner_Id) {
+                    setShowAlertYO(true);
+                    setTimeout(() => {
+                      setShowAlertYO(false);
+                    }, 3000);
+                  } else {
+                    setMessageModal(true);
 
-            // Update message status in Supabase (mark as read)
-            const { error } = await supabase
-              .from("artist_Messages")
-              .update({ message_dot: false })
-              .eq("sender_Id", currentUser?.id)
-              .eq("artist_Id", artist?.id);
+                    // Update message status in Supabase (mark as read)
+                    const { error } = await supabase
+                      .from("artist_Messages")
+                      .update({ message_dot: false })
+                      .eq("sender_Id", currentUser?.id)
+                      .eq("artist_Id", artist?.id);
 
-            if (error) {
-              console.error("Error updating message status:", error.message);
-            } else {
-              setMessageStatus(false); // Hide red dot locally
-            }
-          }
-        }}
-        className="relative flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
-      >
-        Message
-        <box-icon name="message-dots" type="solid" color="white"></box-icon>
-
-        {messageStatus && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-        )}
-      </div>
+                    if (error) {
+                      console.error(
+                        "Error updating message status:",
+                        error.message
+                      );
+                    } else {
+                      setMessageStatus(false); // Hide red dot locally
+                    }
+                  }
+                }}
+                className="relative flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
+              >
+                Message
+                <box-icon
+                  name="message-dots"
+                  type="solid"
+                  color="white"
+                ></box-icon>
+                {messageStatus && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                )}
+              </div>
 
               <button
                 onClick={isFollowing ? handleUnfollow : handleFollow}
@@ -953,7 +974,7 @@ function ArtistPage() {
       </div>
       {/* Artist Arts */}
       <div className="h-auto p-2 pb-10 md:px-10 w-full bg-slate-300 ">
-        <div className="columns-2 sm:columns-3 md:columns-4 gap-2 px-4 space-y-2">
+        <div className="columns-2 sm:columns-3 mt-5 md:columns-4 gap-2 px-4 space-y-2">
           {artistArts.length > 0 ? (
             artistArts.map((art) => (
               <div
@@ -1500,7 +1521,7 @@ function ArtistPage() {
               }}
               className="px-6 py-1 bg-purple-500 text-white rounded-md shadow hover:bg-purple-600 transition-colors duration-150"
             >
-             Start Commission
+              Start Commission
             </button>
           </div>
 
@@ -1601,11 +1622,9 @@ function ArtistPage() {
         </div>
       )}
       {commisionQR && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
           <div className="relative bg-custom-purple h-auto w-auto p-2 rounded-md ">
-           <FormCommision/>
+            <FormCommision />
             <button
               onClick={() => {
                 setCommissionQR(false);
