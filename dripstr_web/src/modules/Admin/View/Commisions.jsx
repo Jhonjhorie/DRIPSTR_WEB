@@ -78,7 +78,7 @@ function Commisions() {
                                             </p>
                                             <div className="flex justify-between items-center mt-1">
                                                 <p className="text-gray-500 truncate max-w-[70%]">
-                                                    {commision.description}
+                                                    Instruction: {commision.description}
                                                 </p>
                                                 <span className={`text-xs px-2 py-1 rounded-full ${commision.commission_Status === 'Pending'
                                                     ? 'bg-yellow-100 text-yellow-800'
