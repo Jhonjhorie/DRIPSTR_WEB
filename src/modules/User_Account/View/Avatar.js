@@ -257,6 +257,8 @@ const CharacterCustomization = () => {
   const [isBodyTypeInfoOpen, setIsBodyTypeInfoOpen] = useState(false);
   const [showLeftPanel, setShowLeftPanel] = useState(false);
   const [showRightPanel, setShowRightPanel] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -444,6 +446,91 @@ const CharacterCustomization = () => {
   // Add these helper functions at the component level
   const filterItemsByCategory = (items, category) => {
     return items.filter(item => item.product?.category === category);
+  };
+
+  const handleRemoveFromCloset = async (itemId) => {
+    try {
+      setIsRemoving(true);
+      const { error } = await supabase
+        .from('closet')
+        .delete()
+        .eq('id', itemId);
+  
+      if (error) throw error;
+  
+      // Update local state
+      setClosetItems(prev => prev.filter(item => item.id !== itemId));
+      
+      // If the removed item was being worn, clear the texture
+      if (selectedTexture === closetItems.find(item => item.id === itemId)?.product?.texture_3D) {
+        setSelectedTexture(null);
+      }
+  
+      setToast({
+        show: true,
+        message: "Item removed from closet",
+        type: 'success'
+      });
+  
+    } catch (error) {
+      console.error('Error removing item:', error);
+      setToast({
+        show: true,
+        message: "Failed to remove item from closet",
+        type: 'error'
+      });
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+  
+  const handleBulkRemove = async () => {
+    if (selectedItems.length === 0) return;
+  
+    try {
+      setIsRemoving(true);
+      const { error } = await supabase
+        .from('closet')
+        .delete()
+        .in('id', selectedItems);
+  
+      if (error) throw error;
+  
+      // Update local state
+      setClosetItems(prev => prev.filter(item => !selectedItems.includes(item.id)));
+      setSelectedItems([]);
+  
+      // Clear texture if any selected item was being worn
+      if (selectedItems.some(id => 
+        closetItems.find(item => item.id === id)?.product?.texture_3D === selectedTexture
+      )) {
+        setSelectedTexture(null);
+      }
+  
+      setToast({
+        show: true,
+        message: `${selectedItems.length} items removed from closet`,
+        type: 'success'
+      });
+  
+    } catch (error) {
+      console.error('Error removing items:', error);
+      setToast({
+        show: true,
+        message: "Failed to remove items from closet",
+        type: 'error'
+      });
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+  
+  const toggleItemSelection = (itemId) => {
+    setSelectedItems(prev => 
+      prev.includes(itemId)
+        ? prev.filter(id => id !== itemId)
+        : [...prev, itemId]
+    );
   };
 
   return (
@@ -814,6 +901,26 @@ const CharacterCustomization = () => {
               </span>
             </div>
 
+            {selectedItems.length > 0 && (
+              <div className="flex items-center justify-between mb-4 p-2 bg-gray-100 rounded-lg">
+                <span className="text-sm font-medium text-gray-700">
+                  {selectedItems.length} items selected
+                </span>
+                <button
+                  onClick={handleBulkRemove}
+                  className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  disabled={isRemoving}
+                >
+                  {isRemoving ? (
+                    <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-1" />
+                  ) : (
+                    <i className="fas fa-trash-alt mr-1"></i>
+                  )}
+                  Remove Selected
+                </button>
+              </div>
+            )}
+
             {loadingCloset ? (
               <div className="flex items-center justify-center h-40">
                 <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-gray-400" />
@@ -835,10 +942,23 @@ const CharacterCustomization = () => {
                     className={`relative group p-2 rounded-lg border-2 transition-all hover:shadow-md
                       ${selectedTexture === item.product.texture_3D
                         ? 'border-purple-600 bg-purple-50'
+                        : selectedItems.includes(item.id)
+                        ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-purple-300'
                       }
                     `}
                   >
+                    {/* Checkbox for bulk selection */}
+                    <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(item.id)}
+                        onChange={() => toggleItemSelection(item.id)}
+                        className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
+                      />
+                    </div>
+
+                    {/* Existing image and content */}
                     <div className="aspect-square relative mb-2">
                       <img 
                         src={item.variant?.imagePath || '/placeholder.png'} 
@@ -846,21 +966,33 @@ const CharacterCustomization = () => {
                         className="w-full h-full object-contain"
                       />
                       
-                      {/* Hover Actions */}
+                      {/* Updated hover actions */}
                       <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleTextureSelect(item)}
-                          className="p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors"
-                          title="Try On"
-                        >
-                          <i className="fas fa-tshirt text-sm"></i>
-                        </button>
+                        {item.product?.is3D && (
+                          <button
+                            onClick={() => handleTextureSelect(item)}
+                            className="p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors disabled:opacity-50"
+                            title="Try On"
+                            disabled={isRemoving}
+                          >
+                            <i className="fas fa-tshirt text-sm"></i>
+                          </button>
+                        )}
                         <button
                           onClick={() => handleViewProduct(item)}
-                          className="p-2 bg-white text-purple-600 rounded-full hover:bg-purple-50 transition-colors"
+                          className="p-2 bg-white text-purple-600 rounded-full hover:bg-purple-50 transition-colors disabled:opacity-50"
                           title="View Product"
+                          disabled={isRemoving}
                         >
                           <i className="fas fa-eye text-sm"></i>
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFromCloset(item.id)}
+                          className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors disabled:opacity-50"
+                          title="Remove from Closet"
+                          disabled={isRemoving}
+                        >
+                          <i className="fas fa-trash-alt text-sm"></i>
                         </button>
                       </div>
                     </div>
