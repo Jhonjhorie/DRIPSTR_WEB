@@ -191,14 +191,14 @@ function Payout() {
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Wallet Amount:</span>{' '}
-                                                P{Number(item.revenue?.revenue || 0).toLocaleString('en-US', {
+                                                ₱{Number(item.revenue?.revenue || 0).toLocaleString('en-US', {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 })}
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Cashout Amount:</span>{' '}
-                                                P{Number(item.qty || 0).toLocaleString('en-US', {
+                                                ₱{Number(item.qty || 0).toLocaleString('en-US', {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 })}
@@ -255,14 +255,14 @@ function Payout() {
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Wallet Amount:</span>{' '}
-                                                P{Number(item.wallet_Id?.revenue || 0).toLocaleString('en-US', {
+                                                ₱{Number(item.wallet_Id?.revenue || 0).toLocaleString('en-US', {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 })}
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Cashout Amount:</span>{' '}
-                                                P{Number(item.qty || 0).toLocaleString('en-US', {
+                                                ₱{Number(item.qty || 0).toLocaleString('en-US', {
                                                     minimumFractionDigits: 2,
                                                     maximumFractionDigits: 2,
                                                 })}
