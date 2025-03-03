@@ -22,9 +22,7 @@ function FormCommision() {
   const [artistArts, setArtistArts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [paymentType, setPaymentType] = useState("Pay Full");
-  const [commissions, setCommissions] = useState([]);
   const [downpaymentAmount, setDownpaymentAmount] = useState("");
-  const [openCommissionQR, setOpenCommissionQR] = useState(false);
   const [commission, setCommission] = useState(null);
 
   useEffect(() => {
