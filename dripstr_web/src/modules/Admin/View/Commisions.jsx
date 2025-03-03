@@ -8,13 +8,13 @@ function Commissions() {
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('Pending');
 
-// Define fetchCommissions outside useEffect
-const fetchCommissions = async () => {
-    setLoading(true);
-    try {
-        const { data, error } = await supabase
-            .from('art_Commision')
-            .select(`
+    // Define fetchCommissions outside useEffect
+    const fetchCommissions = async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('art_Commision')
+                .select(`
                 id,
                 created_at,
                 client_Id(full_name),
@@ -27,97 +27,97 @@ const fetchCommissions = async () => {
                 commission_Status,
                 image_Ref
             `);
-        if (error) throw error;
-        setCommissions(data || []);
-    } catch (error) {
-        setError(error.message);
-    } finally {
-        setLoading(false);
-    }
-};
+            if (error) throw error;
+            setCommissions(data || []);
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-// Handle check function
-const handleCheck = async (commissionId) => {
-    try {
-        // Fetch commission details with the correct join between artist and wallet
-        const { data: commission, error: fetchError } = await supabase
-            .from('art_Commision')
-            .select(`
+    // Handle check function
+    const handleCheck = async (commissionId) => {
+        try {
+            // Fetch commission details with the correct join between artist and wallet
+            const { data: commission, error: fetchError } = await supabase
+                .from('art_Commision')
+                .select(`
                 payment,
                 artist_Id (
                     id,
                     wallet
                 )
             `)
-            .eq('id', commissionId)
-            .single();
-
-        if (fetchError) throw fetchError;
-
-        console.log('Commission Data:', commission); // Log the response
-
-        // Verify commission data exists
-        if (!commission || !commission.artist_Id || !commission.artist_Id.wallet) {
-            throw new Error('Invalid commission or wallet data');
-        }
-
-        // Fetch wallet details from the artist_Wallet table using the wallet ID from artist
-        const { data: wallet, error: walletFetchError } = await supabase
-            .from('artist_Wallet')
-            .select('id, revenue')
-            .eq('id', commission.artist_Id.wallet)
-            .single();
-
-        if (walletFetchError) throw walletFetchError;
-
-        // Verify wallet data
-        if (!wallet) {
-            throw new Error('Invalid wallet data');
-        }
-
-        // Calculate the payment and get the current wallet revenue
-        const paymentToArtist = commission.payment * 0.99;
-        const walletId = wallet.id;
-        const currentRevenue = wallet.revenue;
-
-        // Perform updates in a transaction-like manner (wallet update and commission status update)
-        const [walletUpdate, statusUpdate] = await Promise.all([
-            supabase
-                .from('artist_Wallet')
-                .update({
-                    revenue: currentRevenue + paymentToArtist
-                })
-                .eq('id', walletId),
-            supabase
-                .from('art_Commision')
-                .update({
-                    commission_Status: 'Processed'
-                })
                 .eq('id', commissionId)
-        ]);
+                .single();
 
-        if (walletUpdate.error) throw walletUpdate.error;
-        if (statusUpdate.error) throw statusUpdate.error;
+            if (fetchError) throw fetchError;
 
-        console.log(`Commission ${commissionId} processed successfully! ₱${paymentToArtist.toLocaleString('en-US')}.00 added to wallet ${walletId}`);
+            console.log('Commission Data:', commission); // Log the response
 
-        // Refresh commissions
-        await fetchCommissions();
+            // Verify commission data exists
+            if (!commission || !commission.artist_Id || !commission.artist_Id.wallet) {
+                throw new Error('Invalid commission or wallet data');
+            }
 
-    } catch (error) {
-        console.error('Error processing commission:', error.message);
-        setError(error.message);
-    }
-};
+            // Fetch wallet details from the artist_Wallet table using the wallet ID from artist
+            const { data: wallet, error: walletFetchError } = await supabase
+                .from('artist_Wallet')
+                .select('id, revenue')
+                .eq('id', commission.artist_Id.wallet)
+                .single();
+
+            if (walletFetchError) throw walletFetchError;
+
+            // Verify wallet data
+            if (!wallet) {
+                throw new Error('Invalid wallet data');
+            }
+
+            // Calculate the payment and get the current wallet revenue
+            const paymentToArtist = commission.payment * 0.99;
+            const walletId = wallet.id;
+            const currentRevenue = wallet.revenue;
+
+            // Perform updates in a transaction-like manner (wallet update and commission status update)
+            const [walletUpdate, statusUpdate] = await Promise.all([
+                supabase
+                    .from('artist_Wallet')
+                    .update({
+                        revenue: currentRevenue + paymentToArtist
+                    })
+                    .eq('id', walletId),
+                supabase
+                    .from('art_Commision')
+                    .update({
+                        commission_Status: 'Processed'
+                    })
+                    .eq('id', commissionId)
+            ]);
+
+            if (walletUpdate.error) throw walletUpdate.error;
+            if (statusUpdate.error) throw statusUpdate.error;
+
+            console.log(`Commission ${commissionId} processed successfully! ₱${paymentToArtist.toLocaleString('en-US')}.00 added to wallet ${walletId}`);
+
+            // Refresh commissions
+            await fetchCommissions();
+
+        } catch (error) {
+            console.error('Error processing commission:', error.message);
+            setError(error.message);
+        }
+    };
 
 
 
-// useEffect hook
-useEffect(() => {
-    fetchCommissions();
-    const interval = setInterval(fetchCommissions, 60000);
-    return () => clearInterval(interval);
-}, []);
+    // useEffect hook
+    useEffect(() => {
+        fetchCommissions();
+        const interval = setInterval(fetchCommissions, 60000);
+        return () => clearInterval(interval);
+    }, []);
 
     const filteredCommissions = commissions.filter(
         (commission) => commission.commission_Status === activeTab
@@ -185,10 +185,13 @@ useEffect(() => {
                                             <p className="text-black truncate">
                                                 Commission Amount: ₱{Number(commission.payment).toLocaleString('en-US')}.00
                                             </p>
+                                            <p className="text-black truncate max-w-[70%]">
+                                                Instruction: {commission.description}
+                                            </p>
+                                            <p className="text-black truncate">
+                                                Receipt
+                                            </p>
                                             <div className="flex justify-between items-center mt-1">
-                                                <p className="text-black truncate max-w-[70%]">
-                                                    Instruction: {commission.description}
-                                                </p>
                                                 <div className="flex flex-col items-center gap-2">
                                                     <span className={`text-xs px-2 py-1 rounded-full ${commission.commission_Status === 'Pending'
                                                         ? 'bg-yellow-100 text-yellow-800'
