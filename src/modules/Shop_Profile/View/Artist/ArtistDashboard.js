@@ -151,8 +151,9 @@ function MerchantDashboard() {
       // Fetch only arts linked to this artist
       const { data: arts, error: artsError } = await supabase
         .from("artist_Arts")
-        .select("id, art_Name, art_Description, art_Image, likes, comments")
-        .eq("artist_Id", artist.id);
+        .select("id, art_Name, art_Description, art_Image, likes, comments, status")
+        .eq("artist_Id", artist.id)
+        .eq("status", "Approved");
   
       if (artsError) {
         console.error("Error fetching arts:", artsError.message);
@@ -223,6 +224,7 @@ function MerchantDashboard() {
           art_Description: artDesc,
           artist_Id: selectedArtistId,
           art_Image: imageUrl,
+          status: "Pending",
         },
       ]);
 

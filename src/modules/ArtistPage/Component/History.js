@@ -6,27 +6,42 @@ import { supabase } from "@/constants/supabase";
 const CommissionHistory = ({ artistId }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [commissions, setCommissions] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+
+ useEffect(() => {
+    const fetchUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error.message);
+        return;
+      }
+      setCurrentUser(data?.user || null);
+    };
+
+    fetchUser();
+  }, []);
 
   useEffect(() => {
-    console.log("Current artistId:", artistId); // Debugging line
-    if (isOpen && artistId) {
+    console.log("Current artistId:", artistId);
+    if (isOpen && artistId && currentUser?.id) {
       fetchCommissions();
     }
-  }, [isOpen, artistId]);
+  }, [isOpen, artistId, currentUser?.id]);
 
   const fetchCommissions = async () => {
-    if (!artistId) return;
+    if (!artistId || !currentUser?.id) return;
 
     const { data, error } = await supabase
       .from("art_Commision")
       .select("id, title, payment, commission_Status, created_at")
       .eq("artist_Id", artistId)
+      .eq("client_Id", currentUser.id) 
       .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching commissions:", error);
     } else {
-      console.log("Fetched commissions:", data); // Debugging line
+      console.log("Fetched commissions:", data);
       setCommissions(data);
     }
   };

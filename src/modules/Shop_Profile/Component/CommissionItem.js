@@ -94,7 +94,7 @@ function CommissionItem() {
             <div className="overflow-x-auto rounded-md border border-base-content/5 bg-base-200">
                 <table className="table">
                     {/* head */}
-                    <thead className='w-full bg-slate-800'>
+                    <thead className='w-full bg-custom-purple glass'>
                         <tr className='text-sm '>
                             <th></th>
                             <th className='text-white'>Name</th>

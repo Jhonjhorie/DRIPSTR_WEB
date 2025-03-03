@@ -45,14 +45,14 @@ function FormCommision() {
   const fetchMerchantCommissions = async () => {
     const { data, error } = await supabase.from("merchant_Commission")
     .select("*")
-    .eq("status", "pending");
+    .eq("status", "confirmed");
 
     if (error) {
       console.error("Error fetching merchant commissions:", error);
       return;
     }
 
-    setRecords(data.filter((record) => record.status === "pending"));
+    setRecords(data.filter((record) => record.status === "confirmed"));
   };
   useEffect(() => {
     fetchMerchantCommissions();
@@ -85,7 +85,7 @@ function FormCommision() {
       <div className="overflow-x-auto rounded-md border border-base-content/5 bg-base-200">
         <table className="table">
           {/* head */}
-          <thead className='w-full bg-slate-800'>
+          <thead className='w-full bg-custom-purple glass'>
             <tr className='text-sm '>
               <th></th>
               <th className='text-white'>Name</th>

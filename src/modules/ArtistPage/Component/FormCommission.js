@@ -122,7 +122,7 @@ function FormCommision() {
       imageUrl = await handleFileUpload(receipt);
     }
     if (Ref) {
-      imageUrl = await handleFileUploadRef(Ref);
+      imageUrlRef = await handleFileUploadRef(Ref);
     }
     const paymentAmount =
       paymentType === "Downpayment" ? downpaymentAmount : budget;
@@ -136,7 +136,7 @@ function FormCommision() {
         image_Ref: imageUrlRef,
         image: imageUrl,
         payment: paymentAmount,
-        commission_Status: "pending",
+        commission_Status: "Pending",
       },
     ]);
 
@@ -156,6 +156,7 @@ function FormCommision() {
     setLoading(false);
     fetchCommission();
   };
+
   const fetchCommission = async () => {
     if (!currentUser?.id || !id) return;
     setLoading(true);
@@ -180,7 +181,7 @@ function FormCommision() {
   return (
     <div className="bg-white relative w-auto h-auto rounded-sm p-2">
       <div className="   ">
-        {commission?.commission_Status === "pending" ? (
+        {commission?.commission_Status === "Pending" ? (
           <div className="w-[500px] h-[400px]">
             <h2 className="text-3xl font-bold iceland-regular text-center text-gray-800">
               Commission Details
@@ -273,7 +274,7 @@ function FormCommision() {
               Commission Title
               <input
                 type="text"
-                className="w-full p-2 mt-1 bg-slate-300 border rounded-md"
+                className="w-full p-2 mt-1  font-normal bg-slate-300 border rounded-md"
                 placeholder="Enter title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -281,10 +282,10 @@ function FormCommision() {
               />
             </label>
 
-            <label className="text-sm font-semibold text-gray-700">
+            <label className="text-sm font-semibolf text-gray-700">
               Description
               <textarea
-                className="w-full p-2 mt-1 bg-slate-300 border rounded-md"
+                className="w-full p-2 mt-1  font-normal bg-slate-300 border rounded-md"
                 rows="3"
                 placeholder="Describe your request"
                 value={description}
@@ -297,7 +298,7 @@ function FormCommision() {
               Deadline
               <input
                 type="date"
-                className="w-full p-2 mt-1 bg-slate-300 border rounded-md"
+                className="w-full p-2 mt-1 bg-slate-300  font-normal border rounded-md"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 required
@@ -308,7 +309,7 @@ function FormCommision() {
               Pay in Full (₱)
               <input
                 type="number"
-                className="w-full p-2 mt-1 bg-slate-300 border rounded-md"
+                className="w-full p-2 mt-1  font-normal bg-slate-300 border rounded-md"
                 placeholder="Enter budget"
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
