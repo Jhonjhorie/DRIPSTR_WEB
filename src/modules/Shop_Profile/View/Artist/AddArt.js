@@ -148,15 +148,15 @@ function ArtistAddArts() {
         .from("artist_Arts")
         .delete()
         .eq("id", selectedArt.id);
-        setSelectedImage(null);
-        setSelectedArt(null);
-        fetchUserProfileAndArt();
-        setArtName("");
-        setShowAlertDel(true);
-        setTimeout(() => {
-          setShowAlertDel(false);
-        }, 3000);
-        setArtDescription("");
+      setSelectedImage(null);
+      setSelectedArt(null);
+      fetchUserProfileAndArt();
+      setArtName("");
+      setShowAlertDel(true);
+      setTimeout(() => {
+        setShowAlertDel(false);
+      }, 3000);
+      setArtDescription("");
       if (error) throw error;
       console.log("Item deleted:", selectedArt);
     } catch (error) {
@@ -181,42 +181,44 @@ function ArtistAddArts() {
         <h1 className="text-3xl text-custom-purple font-bold text-center py-5 p-2">
           MANAGE ARTS
         </h1>
-        <div className=" w-full h-auto px-16  ">
-          <div className=" bg-slate-100 shadow-inner shadow-slate-500 flex flex-wrap gap-5 place-items-center rounded-md overflow-hidden overflow-y-scroll p-4 h-[500px] w-full">
-            {artistArts.map((art) => (
-              <div
-                key={art.id}
-                onClick={() =>
-                  handleImageClick(
-                    art.art_Image,
-                    art.art_Name,
-                    art.art_Description,
-                    art.id
-                  )
-                }
-                className="h-auto bg-custom-purple hover:scale-105 duration-200 cursor-pointer rounded-md glass w-44 p-2"
-              >
-                <div className="h-40 w-40 p-2 bg-slate-100 rounded-sm">
-                  <img
-                    src={art.art_Image}
-                    alt={art.art_Name}
-                    className="object-contain h-full w-full rounded-lg p-1 drop-shadow-customViolet"
-                  />
-                </div>
-                <div className="p-1">
-                  <div className="text-slate-50 text-center">
-                    {art.art_Name}
+        <div className="w-full h-auto px-16">
+          <div className="bg-slate-100 shadow-inner shadow-slate-500 rounded-md overflow-hidden overflow-y-scroll p-4 h-[500px] w-full">
+            <div className="columns-3 md:columns-4 lg:columns-5 gap-3 space-y-5">
+              {artistArts.map((art) => (
+                <div
+                  key={art.id}
+                  onClick={() =>
+                    handleImageClick(
+                      art.art_Image,
+                      art.art_Name,
+                      art.art_Description,
+                      art.id
+                    )
+                  }
+                  className="break-inside-avoid bg-custom-purple hover:scale-105 duration-200 cursor-pointer rounded-md glass p-2"
+                >
+                  <div className="w-full p-2 bg-slate-100 rounded-sm">
+                    <img
+                      src={art.art_Image}
+                      alt={art.art_Name}
+                      className="object-cover w-full rounded-lg p-1 drop-shadow-customViolet"
+                    />
+                  </div>
+                  <div className="p-1">
+                    <div className="text-slate-50 text-sm text-center">
+                      {art.art_Name}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
       {selectedImage && selectedArt && (
         <div className="fixed inset-0 bg-black bg-opacity-50 p-10 md:p-0 flex justify-center items-center">
           <div className="bg-white h-auto w-[800px] md:flex p-5 rounded-lg shadow-lg relative">
-            <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-2 rounded-t-md"></div>
+            <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
             <button
               className="absolute top-2 right-2 bg-white hover:bg-gray-200 duration-150 rounded-full p-1"
               onClick={closeModal}
@@ -389,7 +391,7 @@ function ArtistAddArts() {
           </div>
         </div>
       )}
-        {showDelArt && (
+      {showDelArt && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-20 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
             <div className="mt-10 ">

@@ -1099,7 +1099,7 @@ function MerchantDashboard() {
             </div>
 
             <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
-              New Art Successfully Added.
+              Art added wait for admin approval.
             </h2>
             <div
               onClick={handleCloseArtAddModal}

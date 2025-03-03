@@ -174,7 +174,7 @@ function ArtistCommision() {
                       <td
                         className={`py-2 px-4 ${
                           commission.commission_Status === "Processed"
-                            ? "text-green-500 font-semibold"
+                            ? "text-green-500 font-normal"
                             : "text-slate-900"
                         }`}
                       >
