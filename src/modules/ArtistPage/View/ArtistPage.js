@@ -827,7 +827,7 @@ function ArtistPage() {
               <div>
                 {artist.is_Premium && (
                   <div className="badge badge-warning border-2 border-slate-100">
-                    Premium Artist
+                    DripStar
                   </div>
                 )}
               </div>
