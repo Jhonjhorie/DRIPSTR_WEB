@@ -369,7 +369,7 @@ const CharacterCustomization = () => {
         return;
       }
   
-      if (!name || !selectedHair) {
+      if ( !selectedHair) {
         setToast({
           show: true,
           message: "Please complete all required fields before saving.",
