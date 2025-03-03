@@ -19,6 +19,10 @@ const Merchants = () => {
     const [selectedMerchant, setSelectedMerchant] = useState(null);
     const [idModal, setIdModal] = useState(false);
     const [enlargedImage, setEnlargedImage] = useState(null);
+    const [declineModal, setDeclineModal] = useState(false);
+    const [selectedDeclineId, setSelectedDeclineId] = useState(null);
+    const [declineReason, setDeclineReason] = useState('');
+    const [otherReason, setOtherReason] = useState('');
 
     // Fetch accepted merchants (Auto-refresh every 5 seconds)
     useEffect(() => {
@@ -116,19 +120,45 @@ const Merchants = () => {
         }
     };
 
-    const handleDecline = async (id) => {
+    const handleDecline = async () => {
+        const finalReason = declineReason === 'Others' ? otherReason : declineReason;
+
+        if (!declineReason && !otherReason.trim()) {
+            alert('Please select a reason or specify one in the text box');
+            return;
+        }
+
         try {
             await supabase
                 .from('merchantRegistration')
-                .update({ is_Approved: false })
-                .eq('id', id);
+                .update({
+                    is_Approved: false,
+                    decline_reason: finalReason
+                })
+                .eq('id', selectedDeclineId);
 
-            setRegister(prev => prev.filter(merchant => merchant.id !== id));
+            setRegister(prev => prev.filter(merchant => merchant.id !== selectedDeclineId));
             setSuccessDecline('Merchant declined successfully.');
             setTimeout(() => setSuccessDecline(''), 1500);
+            setDeclineModal(false);
+            setDeclineReason('');
+            setOtherReason('');
+            setSelectedDeclineId(null);
         } catch (error) {
             setError(error.message);
         }
+    };
+
+    const handleDeclineClick = (id) => {
+        setSelectedDeclineId(id);
+        setDeclineModal(true);
+    };
+
+    const closeDeclineModal = () => {
+        setDeclineModal(false);
+        setDeclineReason('');
+        setOtherReason('');
+        setSelectedDeclineId(null);
     };
 
     const handleSearch = (e) => {
@@ -244,7 +274,7 @@ const Merchants = () => {
                                                     Accept
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDecline(merchant.id)}
+                                                    onClick={() => handleDeclineClick(merchant.id)}
                                                     className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                                                 >
                                                     Decline
@@ -255,6 +285,65 @@ const Merchants = () => {
                                 )}
                             </div>
                         )}
+                    </div>
+                )}
+
+                {declineModal && (
+                    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                            <h2 className="text-xl font-semibold mb-4 text-black">Reason for Declining Merchant</h2>
+                            <div className="space-y-4 mb-6">
+                                {[
+                                    'Invalid ID',
+                                    'Credentials not Match',
+                                    'ID Expired',
+                                    'Blurry Photos'
+                                ].map((reason) => (
+                                    <div key={reason} className="flex items-center">
+                                        <input
+                                            type="radio"
+                                            id={reason}
+                                            name="declineReason"
+                                            value={reason}
+                                            checked={declineReason === reason}
+                                            onChange={(e) => {
+                                                setDeclineReason(e.target.value);
+                                                setOtherReason(''); // Clear text box when radio is selected
+                                            }}
+                                            className="mr-2"
+                                        />
+                                        <label htmlFor={reason} className="text-black">{reason}</label>
+                                    </div>
+                                ))}
+                                <div className="flex flex-col">
+                                    <h1 className='text-black'>Others:</h1>
+                                    <input
+                                        type="text"
+                                        placeholder="Please specify other reason"
+                                        value={otherReason}
+                                        onChange={(e) => {
+                                            setOtherReason(e.target.value);
+                                            setDeclineReason('Others'); // Set to 'Others' when typing
+                                        }}
+                                        className="mt-2 px-2 py-1 border rounded w-full text-black bg-white"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                                <button
+                                    onClick={closeDeclineModal}
+                                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDecline}
+                                    className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                                >
+                                    Confirm Decline
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -360,7 +449,7 @@ const Merchants = () => {
                                         </div>
                                         <div className="flex flex-col w-full">
                                             <p className="text-white text-sm hover:text-blue-900 hover:underline" onClick={() => handleId(merchant)}><strong>Shop Name:</strong> {merchant.shop_name}
-                                            {merchant.is_Premium && (
+                                                {merchant.is_Premium && (
                                                     <div className="bg-yellow-600 text-white text-xs font-semibold px-1 py-0.5 rounded-sm ml-2 inline-block">
                                                         Premium
                                                     </div>
