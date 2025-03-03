@@ -7,6 +7,8 @@ function Commissions() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('Pending');
+    const [showImage, setShowImage] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     // Define fetchCommissions outside useEffect
     const fetchCommissions = async () => {
@@ -110,7 +112,28 @@ function Commissions() {
         }
     };
 
+    const handleConfirm = async (commissionId) => {
+        try {
+            // Update the commission status to 'Confirmed'
+            const { error } = await supabase
+                .from('art_Commision')
+                .update({
+                    commission_Status: 'Confirmed'
+                })
+                .eq('id', commissionId);
 
+            if (error) throw error;
+
+            console.log(`Commission ${commissionId} status updated to Confirmed`);
+
+            // Refresh commissions
+            await fetchCommissions();
+
+        } catch (error) {
+            console.error('Error confirming commission:', error.message);
+            setError(error.message);
+        }
+    };
 
     // useEffect hook
     useEffect(() => {
@@ -122,6 +145,14 @@ function Commissions() {
     const filteredCommissions = commissions.filter(
         (commission) => commission.commission_Status === activeTab
     );
+
+    const handleImageClick = (image) => {
+        setSelectedImage(image); // Set the image URL to show in modal
+    };
+
+    const closeModal = () => {
+        setSelectedImage(null); // Close modal by clearing the image
+    };
 
     return (
         <div className='flex'>
@@ -158,13 +189,14 @@ function Commissions() {
                                 </h1>
                             ) : (
                                 filteredCommissions.map((commission) => (
+                                    // Inside the map function, replace the current commission div with this:
                                     <div
                                         key={commission.id}
                                         className="border rounded-md shadow-sm p-3 w-full bg-white flex items-center gap-3 hover:shadow-md transition-shadow"
                                     >
                                         <img
-                                            src={commission.image}
-                                            alt={commission.image}
+                                            src={commission.image_Ref}
+                                            alt={commission.image_Ref}
                                             className="w-[5.5rem] h-[5.5rem] rounded-sm object-cover flex-shrink-0"
                                         />
                                         <div className="flex-1 text-sm">
@@ -188,11 +220,14 @@ function Commissions() {
                                             <p className="text-black truncate max-w-[70%]">
                                                 Instruction: {commission.description}
                                             </p>
-                                            <p className="text-black truncate">
+                                            <p
+                                                className="text-blue-700 underline truncate cursor-pointer"
+                                                onClick={handleImageClick}
+                                            >
                                                 Receipt
                                             </p>
                                             <div className="flex justify-between items-center mt-1">
-                                                <div className="flex flex-col items-center gap-2">
+                                                <div className="flex flex-row justify-around items-center gap-2 ">
                                                     <span className={`text-xs px-2 py-1 rounded-full ${commission.commission_Status === 'Pending'
                                                         ? 'bg-yellow-100 text-yellow-800'
                                                         : 'bg-green-100 text-green-800'
@@ -207,13 +242,42 @@ function Commissions() {
                                                             Process
                                                         </button>
                                                     )}
+                                                    {commission.commission_Status === 'Pending' && (
+                                                        <button
+                                                            onClick={() => handleConfirm(commission.id)}
+                                                            className="px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
+                                                        >
+                                                            Confirm
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
+                                        {selectedImage && (
+                                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                                                <div className="bg-white rounded-lg  overflow-auto">
+                                                    <div className="flex justify-end">
+                                                        <button
+                                                            onClick={closeModal}
+                                                            className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+                                                        >
+                                                            X
+                                                        </button>
+                                                    </div>
+                                                    <img
+                                                        src={commission.image} // Use selectedImage instead of commission.image
+                                                        alt="Commission Receipt"
+                                                        className="h-[30rem] w-[30rem] object-cover"
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
+
                                 ))
                             )}
                         </div>
+
                     )}
                 </div>
             </div>
