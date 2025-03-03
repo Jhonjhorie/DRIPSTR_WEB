@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Toast from '../../../shared/alerts';
+import { Link } from 'react-router-dom';
 
 // Add this component near the top of your file
 const BodyTypeInfoModal = ({ isOpen, onClose }) => {
@@ -235,6 +236,7 @@ const CreateAvatarModal = ({ isOpen, onClose }) => {
 };
 
 const CharacterCustomization = () => {
+  const navigate = useNavigate();
   const [gender, setGender] = useState("Boy");
   const [selectedBodyType, setSelectedBodyType] = useState("Average");
   const [selectedHair, setSelectedHair] = useState(null);
@@ -433,6 +435,33 @@ const CharacterCustomization = () => {
 
   const handleTextureSelect = (item) => {
     setSelectedTexture(item.product.texture_3D);
+  };
+
+  // Add this function inside CharacterCustomization component
+  const handleRemoveFromCloset = async (itemId) => {
+    try {
+      const { error } = await supabase
+        .from('closet')
+        .delete()
+        .eq('id', itemId);
+  
+      if (error) throw error;
+  
+      // Update local state to remove item
+      setClosetItems(closetItems.filter(item => item.id !== itemId));
+      setToast({
+        show: true,
+        message: "Item removed from closet",
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('Error removing item:', error);
+      setToast({
+        show: true,
+        message: "Failed to remove item",
+        type: 'error'
+      });
+    }
   };
 
   return (
@@ -814,7 +843,7 @@ const CharacterCustomization = () => {
             ) : closetItems.length === 0 ? (
               <div className="text-center text-gray-500">No items in closet</div>
             ) : (
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {closetItems.map((item) => (
                   <div key={`${item.product_id}-${item.variant?.variant?.variant_Name}`}
                     className={`relative group p-2 rounded-lg border-2 transition-all ${
@@ -825,17 +854,32 @@ const CharacterCustomization = () => {
                   >
                     <button
                       onClick={() => handleTextureSelect(item)}
-                      className="w-full"
+                      className="w-full text-left"
                     >
                       <img 
                         src={item.variant?.imagePath || '/placeholder.png'} 
                         alt={item.product?.item_Name}
-                        className="w-full h-24 object-contain"
+                        className="w-full h-24 object-contain mb-2"
                       />
-                      <p className="text-xs text-center mt-1 truncate">
+                      <p className="text-xs font-medium truncate">
                         {item.product?.item_Name}
                       </p>
                     </button>
+                    
+                    <div className="mt-2 flex flex-col gap-1">
+                      <button
+                        onClick={() => navigate(`/product/${item.product.item_Name}`, { state: { item: item.product } })}
+                        className="w-full px-2 py-1 text-xs text-center bg-purple-100 text-purple-600 rounded hover:bg-purple-200 transition-colors"
+                      >
+                        View Product
+                      </button>
+                      <button
+                        onClick={() => handleRemoveFromCloset(item.id)}
+                        className="w-full px-2 py-1 text-xs text-center bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
