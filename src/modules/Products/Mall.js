@@ -4,19 +4,20 @@ import CategoriesRibbon from "./components/CategoriesRibbon";
 import ProductsView from "./components/ProductsView";
 import useProducts from "./hooks/useProducts";
 import SectionWrapper from "../Home/components/SectionWrapper";
-
+import useUserProfile from "@/shared/mulletCheck";
 // Data
 import { categories } from "@/constants/categories.ts";
 
 function Mall({ title2 }) {
-  const { products, loading, error } = useProducts();
+    const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
+   
   const location = useLocation();
   const [activeCategory, setActiveCategory] = useState(categories[0].label);
   
   const title = location.state?.title || title2 || "Dripstr";
   const filter = location.state?.filterM || 0;
   const icon = location.state?.icon || "faShoppingCart";
-
+  const { products, loading, error } = useProducts(isLoggedIn ? profile : null);
   return (
     <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col">
       {/* Categories navigation */}

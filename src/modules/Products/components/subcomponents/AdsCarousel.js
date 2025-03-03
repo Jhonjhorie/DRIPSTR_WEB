@@ -1,29 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../../../constants/supabase"; // Import Supabase client
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight, faChevronLeft, faShoppingCart } from "@fortawesome/free-solid-svg-icons";
-import { Link } from 'react-router-dom';
-import { ReactComponent as Logo } from '@/assets/images/LOGO.svg'; 
-import { averageRate } from "@/modules/Products/hooks/useRate.ts";
 
-const Carousel = () => {
-  const [images, setImages] = useState([]); // Fetch from Supabase
+
+const AdsCarousel = (ads) => {
+  const [images, setImages] = useState([]); 
   const [currentIndex, setCurrentIndex] = useState(0);
+useEffect(() => {
+    setImages(ads)
+}, [ads])
+  
 
-  // Fetch Images from Supabase
-  useEffect(() => {
-    const fetchImages = async () => {
-      const { data, error } = await supabase.from("carousel_images").select("image_url");
-      
-      if (error) {
-        console.error("Error fetching images from Supabase:", error.message);
-      } else {
-        setImages(data.map((item) => item.image_url)); // Store only image URLs
-      }
-    };
-
-    fetchImages();
-  }, []);
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex === 0 ? images.length - 1 : prevIndex - 1));
@@ -73,4 +60,4 @@ const Carousel = () => {
   );
 };
 
-export default Carousel;
+export default AdsCarousel;

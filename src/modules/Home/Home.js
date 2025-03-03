@@ -42,10 +42,11 @@ import PremShop from "../Products/components/premiumShop";
 function Home() {
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState(categories[0].label);
-  const { products, loading, error } = useProducts();
+ 
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const { ads, pShop, loading2, error2 } = useAds();
   const [showItem, setShowItem] = useState(3);
+  const { products, loading, error } = useProducts(profile);
   const navigate = useNavigate();
 
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 3, lg: 3 });

@@ -6,7 +6,6 @@ import { faAnglesDown, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import AuthModal from "../../shared/login/Auth";
 // Data
 
-import useProducts from "../Products/hooks/useProducts";
 import useMediaQueryChecker from "../../shared/hooks/useMediaQueryChecker";
 
 function LandingPage() {

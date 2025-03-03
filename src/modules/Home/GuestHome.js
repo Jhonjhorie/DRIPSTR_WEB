@@ -19,7 +19,6 @@ function GuestHome() {
   
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const { products, loading, error } = useProducts();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
