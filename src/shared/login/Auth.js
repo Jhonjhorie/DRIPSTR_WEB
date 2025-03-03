@@ -17,6 +17,40 @@ const LOADING_ANIMATIONS = {
   BALL: 'loading-ball'
 };
 
+const getErrorMessage = (error) => {
+  // Common error patterns
+  if (error.message.includes('already registered')) {
+    return 'This email is already registered. Please try logging in instead.';
+  }
+  if (error.message.includes('password')) {
+    return 'Password should be at least 6 characters long.';
+  }
+  if (error.message.includes('valid email')) {
+    return 'Please enter a valid email address.';
+  }
+  return error.message;
+};
+
+const validatePassword = (password) => {
+  const minLength = 8;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasNumbers = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  const errors = [];
+  if (password.length < minLength) errors.push(`At least ${minLength} characters`);
+  if (!hasUpperCase) errors.push('One uppercase letter');
+  if (!hasLowerCase) errors.push('One lowercase letter');
+  if (!hasNumbers) errors.push('One number');
+  if (!hasSpecialChar) errors.push('One special character');
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
 const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
   const [isSignIn, setIsSignIn] = useState(true);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
@@ -91,10 +125,33 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
   const handleSignUp = async () => {
     const { email, password, fullName } = signUpData;
     
+    // Input validation
     if (!email || !password || !fullName) {
       setToast({ 
         show: true, 
         message: "Please fill in all fields.", 
+        type: 'warning' 
+      });
+      return;
+    }
+  
+    // Password validation
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.isValid) {
+      setToast({ 
+        show: true, 
+        message: `Password requirements: ${passwordCheck.errors.join(', ')}`, 
+        type: 'warning' 
+      });
+      return;
+    }
+  
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setToast({ 
+        show: true, 
+        message: "Please enter a valid email address.", 
         type: 'warning' 
       });
       return;
@@ -112,11 +169,12 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
         message: "Registration successful! Please check your email.", 
         type: 'success' 
       });
+  
     } catch (error) {
       console.error('Signup error:', error);
       setToast({ 
         show: true, 
-        message: `Sign Up Error: ${error.message}`, 
+        message: getErrorMessage(error), 
         type: 'error' 
       });
     } finally {
@@ -204,6 +262,16 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
                       <i className={`fas ${showPassword.signUp ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                     </button>
                   </div>
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>Password must contain:</p>
+                    <ul className="list-disc pl-4 space-y-0.5">
+                      <li>At least 8 characters</li>
+                      <li>One uppercase letter</li>
+                      <li>One lowercase letter</li>
+                      <li>One number</li>
+                      <li>One special character (!@#$%^&*)</li>
+                    </ul>
+                  </div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center space-y-4 opacity-100 transition-opacity duration-500 w-full">
@@ -289,7 +357,7 @@ export default AuthModal;
 
 export async function signUpUser({ email, password, fullName }) {
   try {
-    // First, check if user already exists
+    // Check for existing user
     const { data: existingUser } = await supabase
       .from('profiles')
       .select('id')
@@ -297,10 +365,10 @@ export async function signUpUser({ email, password, fullName }) {
       .single();
 
     if (existingUser) {
-      throw new Error('User already exists with this email');
+      throw new Error('This email is already registered');
     }
 
-    // Sign up the user
+    // Sign up attempt
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -312,12 +380,18 @@ export async function signUpUser({ email, password, fullName }) {
       }
     });
 
-    if (authError) throw authError;
+    if (authError) {
+      // Handle specific auth errors
+      if (authError.message.includes('already registered')) {
+        throw new Error('This email is already registered');
+      }
+      throw authError;
+    }
 
     const user = authData.user;
-    if (!user) throw new Error('User creation failed');
+    if (!user) throw new Error('Registration failed. Please try again.');
 
-    // Create profile entry with upsert (will update if exists, insert if doesn't)
+    // Create profile
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert([
@@ -325,14 +399,18 @@ export async function signUpUser({ email, password, fullName }) {
           id: user.id,
           full_name: fullName,
           email: email,
-                  }
+        }
       ], 
       { 
         onConflict: 'id',
         ignoreDuplicates: false 
       });
 
-    if (profileError) throw profileError;
+    if (profileError) {
+      // Clean up auth if profile creation fails
+      await supabase.auth.signOut();
+      throw new Error('Failed to create profile. Please try again.');
+    }
 
     return { user, error: null };
 
