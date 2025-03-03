@@ -1,151 +1,135 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight, faChevronLeft } from '@fortawesome/free-solid-svg-icons';
 
 const CategoriesRibbon = ({ active, categories, onItemClick }) => {
- 
-  const containerRef = useRef(null); // Reference to the container
-  const [itemsPerScreen, setItemsPerScreen] = useState(1); // Default to 1 to avoid division by 0
+  const containerRef = useRef(null);
+  const [itemsPerScreen, setItemsPerScreen] = useState(1);
   const [currentScreen, setCurrentScreen] = useState(0);
 
-  const calculateItemWidth = () => {
-    const screenWidth = window.innerWidth;
-    return screenWidth >= 1025 ? 125 : screenWidth >= 768 ? 140 : screenWidth >= 640 ? 80 : 60; 
-  };
-
+  // Calculate viewport-responsive dimensions
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-
-        const itemWidth = calculateItemWidth();
-        const gap = 8;
-        const totalItemWidth = itemWidth + gap;
-
-       
-        const calculatedItemsPerScreen = Math.floor(containerWidth / totalItemWidth);
-        setItemsPerScreen(calculatedItemsPerScreen > 0 ? calculatedItemsPerScreen : 1);
+        
+        // Calculate based on container width rather than fixed sizes
+        // This gives us more flexibility across different screen sizes
+        const itemWidth = containerWidth >= 1024 ? 100 : containerWidth >= 768 ? 90 : 80;
+        const gap = 16; // Increased spacing between items
+        const calculatedItemsPerScreen = Math.floor((containerWidth - 120) / (itemWidth + gap)); // 120px for arrows and first item
+        
+        setItemsPerScreen(Math.max(calculatedItemsPerScreen, 1));
       }
     };
 
     updateDimensions();
-
     window.addEventListener('resize', updateDimensions);
-
-    return () => {
-      window.removeEventListener('resize', updateDimensions);
-    };
+    return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  const totalScreens = Math.ceil(categories.length / itemsPerScreen);
-
-  // Get the items visible on the current screen
+  // Navigation logic
+  const totalScreens = Math.ceil((categories.length - 1) / itemsPerScreen);
+  
   const getVisibleItems = () => {
     const start = currentScreen * itemsPerScreen;
-    
     return categories.slice(1).slice(start, start + itemsPerScreen);
   };
 
-  const goToPrevious = () => {
-    setCurrentScreen((prev) => Math.max(prev - 1, 0));
-  };
+  const goToPrevious = () => setCurrentScreen(prev => Math.max(prev - 1, 0));
+  const goToNext = () => setCurrentScreen(prev => Math.min(prev + 1, totalScreens - 1));
 
-  const goToNext = () => {
-    setCurrentScreen((prev) => Math.min(prev + 1, totalScreens - 1));
-  };
+  // Component for consistent category item rendering
+  const CategoryItem = ({ category, isActive, isFirstItem = false }) => (
+    <div
+      onClick={() => onItemClick(category.label)} 
+      className={`
+        flex flex-col items-center justify-center p-2
+        ${isFirstItem ? 'mr-4' : ''}
+        ${isActive 
+          ? 'bg-white shadow-md border-b-2 border-primary-color rounded-lg' 
+          : 'bg-transparent hover:bg-white hover:shadow-sm'}
+        transition-all duration-200 ease-in-out
+      `}
+    >
+      <div className={`
+        p-2 rounded-full mb-2
+        ${isActive ? 'bg-purple-50' : 'bg-gray-50'}
+      `}>
+        <img
+          src={category.icon}
+          alt={category.label}
+          className="w-6 h-6 md:w-8 md:h-8 object-contain"
+        />
+      </div>
+      <p className={`
+        text-center text-xs md:text-sm whitespace-nowrap
+        ${isActive ? 'text-primary-color font-medium' : 'text-gray-600'}
+      `}>
+        {category.label}
+      </p>
+    </div>
+  );
 
   return (
     <div
       ref={containerRef}
-      className="relative w-[96%] md:w-[56%] h-16 md:h-20 justify-center  items-center bg-slate-50 rounded-md shadow-lg pr-2 md:pr-3 gap-2 md:gap-8 flex overflow-hidden pl-0"
+      className="w-full max-w-4xl mx-auto bg-gray-50 rounded-lg shadow-sm py-3 px-4 overflow-hidden"
     >
-       <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md z-20">
-              {" "}
-            </div>
-      {/* Title */}
-   
-
-      {/* Categories */}
-      <div className="flex items-center w-full ">
-      <div
-              onClick={() => onItemClick(categories[0].label)} 
-              key={categories[0]}
-              className={`${
-                active === categories[0].label
-                  ? "opacity-100 border-2 border-primary-color rounded-lg"
-                  : "opacity-70 border-secondary-color hover:border-[1px] rounded-none hover:rounded-lg"
-              } hover:opacity-100 mr-4 px-1 md:px-4 md:min-w-20 md:h-20 sm:w-16 sm:h-16 w-16 h-16 flex flex-col items-start justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
-            >
-              <img
-                src={categories[0].icon}
-                alt={categories[0].label}
-                className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 object-contain mb-1"
-              />
-              <p
-                className={`${
-                  active === categories[0].label ? "text-primary-color text-sm md:text-base" : "text-gray-700 text-xs md:text-sm"
-                }  font-medium place-content-center justify-center flex items-center duration-300 transition-all`}
-              >
-                {categories[0].label}
-              </p>
-            </div>
-        {/* Left Arrow */}
-        {currentScreen > 0 && (
-          <button
-            onClick={goToPrevious}
-            className="p-1 md:p-2 bg-gray-200 hover:bg-gray-300 rounded-full mr-1 lg:mr-4"
-          >
-            <FontAwesomeIcon icon={faChevronLeft} className="text-sm md:text-lg" />
-          </button>
-        )}
-
-        {/* Categories List */}
-        <div className="flex flex-wrap justify-start w-full space-x-4 overflow-hidden">
+    
+      
+      <div className="flex items-center w-full">
+        {/* First category (always visible) */}
+        <CategoryItem 
+          category={categories[0]} 
+          isActive={active === categories[0].label}
+          isFirstItem={true}
+        />
         
-          {getVisibleItems().map((category, index) => (
-            <div
-              onClick={() => onItemClick(category.label)} 
-              key={index}
-              className={`${
-                active === category.label
-                  ? "opacity-100 border-2 border-primary-color  rounded-lg"
-                  : "opacity-70 border-secondary-color hover:border-[1px] rounded-none hover:rounded-lg"
-              } hover:opacity-100 md:w-20 md:h-20 sm:w-16 sm:h-16 w-10 h-16 flex flex-col items-center justify-center bg-slate-50 shadow-sm hover:shadow-lg  duration-300 transition-all ease-in-out`}
-            >
-              <img
-                src={category.icon}
-                alt={category.label}
-                className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 object-contain mb-1"
-              />
-              <p
-                className={`${
-                  active === category.label ? "text-primary-color text-[0.65rem] sm:text-xs md:text-[0.85rem] md:text-base font-semibold" : "text-gray-700 text-[0.65rem] sm:text-xs md:text-[0.80rem]  font-normal"
-                }   duration-300 transition-all`}
-              >
-                {category.label}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* Right Arrow */}
-        {currentScreen < totalScreens - 1 && (
-          <button
-            onClick={goToNext}
-            className="p-1 md:p-2 bg-gray-200 hover:bg-gray-300 rounded-full ml-1 lg:mr-4"
-          >
-            <FontAwesomeIcon icon={faChevronRight} className="text-sm md:text-lg" />
-          </button>
-        )}
-        {currentScreen > 0 && !(currentScreen < totalScreens - 1) && (
+        {/* Navigation area */}
+        <div className="flex items-center justify-between flex-grow overflow-hidden">
+          {/* Left Arrow */}
           <button
             onClick={goToPrevious}
-            className="p-1 md:p-2 bg-gray-200 hover:bg-gray-300 rounded-full ml-1 lg:mr-4"
+            className={`
+              p-2 rounded-full flex-shrink-0 mr-2
+              ${currentScreen > 0 
+                ? 'bg-white shadow-sm hover:bg-gray-100 text-gray-700' 
+                : 'hidden'}
+            `}
+            aria-label="Previous categories"
           >
-            <FontAwesomeIcon icon={faChevronRight} className="text-sm md:text-lg" />
+            <FontAwesomeIcon icon={faChevronLeft} className="text-sm" />
           </button>
-        )}
+
+          {/* Scrollable categories */}
+          <div className="flex justify-start space-x-6 overflow-hidden px-1">
+            {getVisibleItems().map((category, index) => (
+              <CategoryItem 
+                key={index}
+                category={category} 
+                isActive={active === category.label} 
+              />
+            ))}
+          </div>
+
+          {/* Right Arrow */}
+          <button
+            onClick={currentScreen < totalScreens - 1 ? goToNext : goToPrevious}
+            className={`
+              p-2 rounded-full flex-shrink-0 ml-2
+              ${(currentScreen < totalScreens - 1) || (currentScreen > 0)
+                ? 'bg-white shadow-sm hover:bg-gray-100 text-gray-700' 
+                : 'hidden'}
+            `}
+            aria-label={currentScreen < totalScreens - 1 ? "Next categories" : "Previous categories"}
+          >
+            <FontAwesomeIcon 
+              icon={currentScreen < totalScreens - 1 ? faChevronRight : faChevronLeft} 
+              className="text-sm" 
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

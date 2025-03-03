@@ -131,13 +131,13 @@ const ProductsView = ({
       </div>
     );
 
-  return (
-    <div className="w-full flex flex-col items-center justify-center min-h-[15rem]">
+ return (
+    <div className="w-full py-1">
       {/* BuyConfirm Modal */}
       {selectedItem && (
         <dialog
           id="my_modal_4"
-          className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
+          className="modal modal-bottom sm:modal-middle"
         >
           <BuyConfirm item={selectedItem} onClose={closeModal} />
           <form
@@ -151,35 +151,32 @@ const ProductsView = ({
 
       {/* Product Grid */}
       {filteredProductsD.length > 0 ? (
-        <div
-          className="grid gap-2 items-center justify-center"
-          style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}
-        >
+        <div className="grid gap-3 px-4" style={{ gridTemplateColumns: `repeat(${isSmall ? numColumns >= 2 ? 3 : numColumns : numColumns}, minmax(0, 1fr))` }}>
           {dataWithPlaceholders.map((item, index) =>
             item.empty ? (
               <div
                 key={`placeholder-${index}`}
-                className="flex flex-col mx-1 max-w-[13rem] w-[11rem] mb-2 p-2 rounded-md"
-                style={{ visibility: "hidden" }}
+                className="invisible"
               />
             ) : (
               <ProductCard
                 key={item.id || `product-${index}`}
                 item={item}
                 onClick={() => openModal(item)} 
+                isSmall={isSmall}
               />
             )
           )}
         </div>
       ) : (
-        <div className="min-h-24 flex-col min-w-full items-center flex">
-        <img
-          src={require("@/assets/emote/sad.png")}
-          alt="No Images Available"
-          className="drop-shadow-customViolet animate-pulse"
-        />
-        <p className="text-3xl">No Products Available</p>
-      </div>
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <img
+            src={require("@/assets/emote/sad.png")}
+            alt="No Products Available"
+            className="w-24 h-24 drop-shadow-customViolet animate-pulse"
+          />
+          <p className="text-xl text-gray-600">No Products Available</p>
+        </div>
       )}
     </div>
   );

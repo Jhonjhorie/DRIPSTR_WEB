@@ -2,36 +2,41 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
 
-
 const SectionWrapper = ({
   title,
   icon,
   buttonText,
-  bgColor,
-  textColor = 'text-slate-50',
-  width = 'w-[95%]',
+  bgColor = 'bg-gray-50',
+  textColor = 'text-gray-800',
   filter,
   children,
 }) => {
-   const navigate = useNavigate();
-   const gotoMall = (filterM, title, icon) => {
+  const navigate = useNavigate();
+  
+  const gotoMall = (filterM, title, icon) => {
     navigate(`/mall`, { state: { filterM, title, icon } });
-  }
+  };
+  
   return (
-    <div className={`${width} ${bgColor} drop-shadow-lg rounded-md flex justify-center flex-col p-2 `}>
-      <div className="flex justify-between text-2xl text-slate-500 items-start mb-1 ">
-        <p className={`text-bold ${textColor} font-[iceland]`}>
-          {title} <FontAwesomeIcon fontSize={16} icon={icon} />
-        </p>
-        {buttonText &&  <button 
-        onClick={() => gotoMall(filter, title, icon)}
-        className="btn glass hover:text-black rounded-md bg-primary-color text-white min-h-7 h-7 px-4">
-          {buttonText}
-        </button>}
-       
+    <div className={`w-full ${bgColor} shadow-sm rounded-lg overflow-hidden flex flex-col`}>
+      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+        <h2 className={`font-medium ${textColor} flex items-center gap-2`}>
+          {title}
+          {icon && <FontAwesomeIcon icon={icon} className="text-primary-color" />}
+        </h2>
+        
+        {buttonText && (
+          <button 
+            onClick={() => gotoMall(filter, title, icon)}
+            className="text-sm px-3 py-1 bg-primary-color hover:bg-primary-color/90 text-white rounded transition-colors duration-200 flex items-center"
+          >
+            {buttonText}
+          </button>
+        )}
       </div>
-      <div className='md:ml-3'>
-      {children}
+      
+      <div className="p-3 md:p-4">
+        {children}
       </div>
     </div>
   );

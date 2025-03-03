@@ -1,48 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom"; 
 import CategoriesRibbon from "./components/CategoriesRibbon";
-import MallRibbon from "./components/MallRibbon";
 import ProductsView from "./components/ProductsView";
 import useProducts from "./hooks/useProducts";
 import SectionWrapper from "../Home/components/SectionWrapper";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
 
 // Data
-import { MallItems } from "@/constants/mallItems.ts";
 import { categories } from "@/constants/categories.ts";
-import { searchProducts } from "@/utils/searchProducts";
 
-function Mall({title2}) {
+function Mall({ title2 }) {
   const { products, loading, error } = useProducts();
   const location = useLocation();
-  const [filCat, setFilCat] = useState(categories[0].label); 
-  const title = location.state?.title != null ? location.state?.title : title2 != null ? title2 : "Dripstr";
+  const [activeCategory, setActiveCategory] = useState(categories[0].label);
+  
+  const title = location.state?.title || title2 || "Dripstr";
   const filter = location.state?.filterM || 0;
-const icon = location.state?.icon || "faShoppingCart";
-
-
+  const icon = location.state?.icon || "faShoppingCart";
 
   return (
-    <div className="w-full  inset-0 h-full  bg-slate-300 flex flex-col ">
-
-         <div className="flex flex-col-reverse w-full gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
+    <div className="w-full h-full bg-slate-100 flex flex-col">
+      {/* Categories navigation */}
+      <div className="w-full px-4 py-3">
         <CategoriesRibbon
-          active={filCat}
+          active={activeCategory}
           categories={categories}
-          onItemClick={(label) => setFilCat(label)}
+          onItemClick={setActiveCategory}
         />
-      </div> 
-      <div className="flex flex-col lg:flex-row  flex-wrap w-full  justify-center items-center mb-4 gap-10 ">
+      </div>
+      
+      {/* Main content */}
+      <div className="flex-1 px-4 pb-6">
         <SectionWrapper
-          title={title}
-          icon={icon}
+          
+         
           textColor="text-secondary-color"
         >
           <ProductsView
             products={products}
             shopFil={0}
-            categories={filCat}
+            categories={activeCategory}
             filter={filter}
             loading={loading}
             error={error}
@@ -50,7 +46,7 @@ const icon = location.state?.icon || "faShoppingCart";
             sort="top"
           />
         </SectionWrapper>
-        </div>
+      </div>
     </div>
   );
 }

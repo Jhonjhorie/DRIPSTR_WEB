@@ -190,7 +190,7 @@ const VoucherStream = ({ profile }) => {
       </button>
       <div className="w-full flex gap-1 bg-stone-900 bg-opacity-50 rounded-lg p-0 h-[52px] md:h-[62px] justify-start items-center overflow-hidden">
         <div className="bg-slate-100 rounded-r-lg">
-          <p className="w-[5rem] md:w-[5rem] lg:w-[7rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
+          <p className="w-[6.25rem] md:w-[6rem] lg:w-[7rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
             Claim Vouchers
           </p>
         </div>
@@ -207,7 +207,7 @@ const VoucherStream = ({ profile }) => {
                 isClaimed ? "bg-secondary-color" : "bg-slate-50"
               } flex flex-none gap-2 items-center rounded-lg drop-shadow-sm overflow-hidden p-2 ${
                 isProd ? "border-primary-color" : "border-green-700"
-              } border-t-2 h-12 md:h-14 w-52 md:w-64 transition-transform duration-300 z-20`}
+              } border-t-2 h-12 md:h-14 w-64 md:w-64 transition-transform duration-300 z-20`}
               style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
               <div
@@ -265,8 +265,8 @@ const VoucherStream = ({ profile }) => {
             </div>
           );
         })}
-        <div className="bg-secondary-color text-white absolute right-0 top-2.5 rounded-l-lg">
-          <p className="w-[5rem] md:w-[5rem] lg:w-[7rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
+        <div className="bg-secondary-color text-white absolute right-0.5 top-2.5 rounded-l-lg">
+          <p className="w-[6.25rem] md:w-[6rem] lg:w-[7rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
             Start Shopping
           </p>
         </div>
