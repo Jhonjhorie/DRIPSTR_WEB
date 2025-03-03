@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo, Suspense } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Environment, Preload } from "@react-three/drei";
+import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
 import Sidebar from "../components/Sidebar";
@@ -12,37 +12,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Toast from '../../../shared/alerts';
-
-// Add this component at the top of your file
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('3D Rendering Error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <h2 className="text-xl font-bold text-red-600">Failed to load 3D viewer</h2>
-            <p className="text-gray-600">Please refresh the page or try again later.</p>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
 
 // Add this component near the top of your file
 const BodyTypeInfoModal = ({ isOpen, onClose }) => {
@@ -87,38 +56,31 @@ const BodyTypeInfoModal = ({ isOpen, onClose }) => {
   );
 };
 
-// Update your Part component
 function Part({ url, position, color, texture }) {
-  const [loadError, setLoadError] = useState(false);
-  const gltf = useGLTF(url, undefined, 
-    (error) => {
-      console.error('Model loading error:', error);
-      setLoadError(true);
-    }
-  );
+  const gltf = useGLTF(url);
+  const clonedScene = useMemo(() => SkeletonUtils.clone(gltf.scene), [gltf.scene]);
 
-  const clonedScene = useMemo(() => {
-    if (!gltf.scene) return null;
-    return SkeletonUtils.clone(gltf.scene);
-  }, [gltf.scene]);
-
-  const materialEffect = useMemo(() => {
-    if (!clonedScene) return;
+  useMemo(() => {
     clonedScene.traverse((node) => {
       if (node.isMesh) {
-        if (texture && node.material.name.includes('Shirt')) {
-          const tex = new TextureLoader().load(texture);
-          tex.wrapS = RepeatWrapping;
-          tex.wrapT = RepeatWrapping;
-          tex.minFilter = NearestFilter;
-          node.material.map = tex;
-          node.material.color.set(color || "#ffffff");
-          node.material.roughness = 0.7;
-          node.material.metalness = 0.0;
-          node.material.needsUpdate = true;
-          node.material.map.flipY = false;
-          node.material.map.needsUpdate = true;
+        node.material = node.material.clone();
+        
+        if (texture) {
+          // Apply texture if provided (for t-shirt)
+          const textureLoader = new TextureLoader();
+          textureLoader.load(texture, (tex) => {
+            tex.wrapS = tex.wrapT = RepeatWrapping;
+            tex.minFilter = NearestFilter;
+            node.material.map = tex;
+            node.material.color.set(color || "#ffffff");
+            node.material.roughness = 0.7;
+            node.material.metalness = 0.0;
+            node.material.needsUpdate = true;
+            node.material.map.flipY = false;
+            node.material.map.needsUpdate = true;
+          });
         } else {
+          // Apply just color for other parts (avatar, hair, shorts)
           node.material.color.set(color || "#ffffff");
           node.material.roughness = node.material.name.includes('Hair') ? 0.3 : 0.5;
           node.material.metalness = node.material.name.includes('Hair') ? 0.1 : 0.2;
@@ -126,15 +88,6 @@ function Part({ url, position, color, texture }) {
       }
     });
   }, [clonedScene, color, texture]);
-
-  if (loadError) {
-    return (
-      <mesh position={position}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="red" />
-      </mesh>
-    );
-  }
 
   return (
     <primitive 
@@ -227,22 +180,6 @@ function CameraController({ view }) {
   return null;
 }
 
-const PreloadAssets = () => {
-  const urls = [
-    ...Object.values(bodyTypeURLs.Boy).flat(),
-    ...Object.values(bodyTypeURLs.Girl).flat(),
-    ...Object.values(hairURLs),
-    ...Object.values(tshirURLs.Boy).flat(),
-    ...Object.values(tshirURLs.Girl).flat(),
-    ...Object.values(shortsURLs.Boy).flat(),
-    ...Object.values(shortsURLs.Girl).flat(),
-  ];
-
-  return <Preload all urls={urls} />;
-};
-
- 
-
 const CreateAvatarModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
@@ -320,9 +257,6 @@ const CharacterCustomization = () => {
   const [isBodyTypeInfoOpen, setIsBodyTypeInfoOpen] = useState(false);
   const [showLeftPanel, setShowLeftPanel] = useState(false);
   const [showRightPanel, setShowRightPanel] = useState(false);
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAvatar = async () => {
@@ -471,9 +405,8 @@ const CharacterCustomization = () => {
         type: 'success'
       });
 
-      // Close edit mode and hide panel
+      // Close edit mode and wait for toast before redirecting
       setIsEditing(false);
-      setShowLeftPanel(false); // Add this line
       setTimeout(() => {
         window.location.reload();
       }, 2000);
@@ -495,105 +428,11 @@ const CharacterCustomization = () => {
     setHairColor(originalAvatar.hairColor);
     setName(originalAvatar.name);
     setIsEditing(false);
-    setShowLeftPanel(false); // Add this line to hide the panel when canceling
+    setShowLeftPanel(false); // Hide the panel when canceling
   };
 
   const handleTextureSelect = (item) => {
     setSelectedTexture(item.product.texture_3D);
-  };
-
-  const handleViewProduct = (item) => {
-    navigate(`/product/${item.product.item_Name}`, { state: { item: item.product } });
-  };
-
-  // Add these helper functions at the component level
-  const filterItemsByCategory = (items, category) => {
-    return items.filter(item => item.product?.category === category);
-  };
-
-  const handleRemoveFromCloset = async (itemId) => {
-    try {
-      setIsRemoving(true);
-      const { error } = await supabase
-        .from('closet')
-        .delete()
-        .eq('id', itemId);
-  
-      if (error) throw error;
-  
-      // Update local state
-      setClosetItems(prev => prev.filter(item => item.id !== itemId));
-      
-      // If the removed item was being worn, clear the texture
-      if (selectedTexture === closetItems.find(item => item.id === itemId)?.product?.texture_3D) {
-        setSelectedTexture(null);
-      }
-  
-      setToast({
-        show: true,
-        message: "Item removed from closet",
-        type: 'success'
-      });
-  
-    } catch (error) {
-      console.error('Error removing item:', error);
-      setToast({
-        show: true,
-        message: "Failed to remove item from closet",
-        type: 'error'
-      });
-    } finally {
-      setIsRemoving(false);
-    }
-  };
-  
-  const handleBulkRemove = async () => {
-    if (selectedItems.length === 0) return;
-  
-    try {
-      setIsRemoving(true);
-      const { error } = await supabase
-        .from('closet')
-        .delete()
-        .in('id', selectedItems);
-  
-      if (error) throw error;
-  
-      // Update local state
-      setClosetItems(prev => prev.filter(item => !selectedItems.includes(item.id)));
-      setSelectedItems([]);
-  
-      // Clear texture if any selected item was being worn
-      if (selectedItems.some(id => 
-        closetItems.find(item => item.id === id)?.product?.texture_3D === selectedTexture
-      )) {
-        setSelectedTexture(null);
-      }
-  
-      setToast({
-        show: true,
-        message: `${selectedItems.length} items removed from closet`,
-        type: 'success'
-      });
-  
-    } catch (error) {
-      console.error('Error removing items:', error);
-      setToast({
-        show: true,
-        message: "Failed to remove items from closet",
-        type: 'error'
-      });
-    } finally {
-      setIsRemoving(false);
-    }
-  };
-  
-  const toggleItemSelection = (itemId) => {
-    setSelectedItems(prev => 
-      prev.includes(itemId)
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
-    );
   };
 
   return (
@@ -620,167 +459,177 @@ const CharacterCustomization = () => {
 
     <div className="p-4 flex-1">
       <div className="flex flex-row relative h-full">
-        {/* Left Panel Toggle Button - Only show when editing */}
-        {isEditing && (
-          <button
-            onClick={() => setShowLeftPanel(!showLeftPanel)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white rounded-r-lg shadow-lg p-2 hover:bg-gray-100 transition-colors"
-            title={showLeftPanel ? "Hide Edit Panel" : "Show Edit Panel"}
-          >
-            <i className={`fas fa-chevron-${showLeftPanel ? 'left' : 'right'} text-gray-600 z-30`}></i>
-          </button>
-        )}
+    {/* Left Panel Toggle Button - Only show when editing */}
+    {isEditing && (
+      <button
+        onClick={() => setShowLeftPanel(!showLeftPanel)}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white rounded-r-lg shadow-lg p-2 hover:bg-gray-100 transition-colors"
+        title={showLeftPanel ? "Hide Edit Panel" : "Show Edit Panel"}
+      >
+        <i className={`fas fa-chevron-${showLeftPanel ? 'left' : 'right'} text-gray-600 z-30`}></i>
+      </button>
+    )}
 
-        {/* Left Panel: Edit Form - Only show when editing */}
-        {isEditing && (
-          <div
-            className={`absolute left-0 top-0 h-full bg-white rounded-lg shadow-lg transition-transform duration-300 ease-in-out transform
-              ${showLeftPanel ? 'translate-x-0 z-10' : '-translate-x-full -z-20'}
-              w-80 overflow-y-auto
-            `}
-          >
-            <div className="p-4">
-              {isEditing && (
-                // Your existing edit form JSX here
-                // ... (keep all the form fields)
-                <div className="p-4 bg-white rounded-lg shadow-lg ">
-                  <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-xl font-bold text-gray-800">Edit Character</h1>
-                    <span
-                      className={`px-3 py-1 text-sm font-semibold rounded-full ${
-                        isEditing ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {isEditing ? "Editing" : "Viewing"}
-                    </span>
-                  </div>
-  
-                  {/* Gender Field */}
-                  <div className="mt-4">
-                    <label className="block text-gray-700 font-semibold mb-2">Gender</label>
-                    <select
-                      className={`w-full p-2 border rounded transition-all ${
-                        isEditing
-                          ? "bg-white border-blue-500 focus:ring-2 focus:ring-blue-500"
-                          : "bg-gray-100 border-gray-300 cursor-not-allowed"
-                      }`}
-                      value={gender}
-                      onChange={(e) => setGender(e.target.value)}
-                      disabled={!isEditing}
-                    >
-                      <option value="Boy">Men</option>
-                      <option value="Girl">Woman</option>
-                    </select>
-                  </div>
-  
-                  {/* Body Type Field */}
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-gray-700 font-semibold">Body Type</label>
-                      <button
-                        onClick={() => setIsBodyTypeInfoOpen(true)}
-                        className="text-purple-600 hover:text-purple-700 transition-colors"
-                        type="button"
-                      >
-                        <i className="fas fa-info-circle text-lg"></i>
-                      </button>
-                    </div>
-                    <select
-                      className={`w-full p-2 border rounded transition-all ${
-                        isEditing
-                          ? "bg-white border-blue-500 focus:ring-2 focus:ring-blue-500"
-                          : "bg-gray-100 border-gray-300 cursor-not-allowed"
-                      }`}
-                      value={selectedBodyType}
-                      onChange={(e) => setSelectedBodyType(e.target.value)}
-                      disabled={!isEditing}
-                    >
-                      {Object.keys(bodyTypeURLs[gender]).map((type) => (
-                        <option key={type} value={type}>
-                          {type}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-  
-                  {/* Skin Color Field */}
-                  <div className="mt-4">
-                    <label className="block text-gray-700 font-semibold mb-2">Skin Color</label>
-                    <div className="flex space-x-2">
-                      {[
-                        { label: "Light", color: "#f5c9a6" },
-                        { label: "Medium", color: "#d2a77d" },
-                        { label: "Tan", color: "#a67c5b" },
-                        { label: "Dark", color: "#67442e" },
-                      ].map((option) => (
-                        <button
-                          key={option.color}
-                          className={`w-10 h-10 border-2 rounded-full transition-all ${
-                            isEditing
-                              ? skincolor === option.color
-                                ? "border-blue-500 hover:scale-110"
-                                : "border-gray-300 hover:scale-110"
-                              : "border-gray-300 cursor-not-allowed"
-                          }`}
-                          style={{ backgroundColor: option.color }}
-                          onClick={() => setSkinColor(option.color)}
-                          disabled={!isEditing}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="flex flex-row space-x-4">
-                  {/* Hair Field */}
-                  <div className="mt-4 flex-col flex-1">
-                    <label className="block text-gray-700 font-semibold mb-2">Hair</label>
-                    <select
-                      className={`w-full  p-2 border rounded transition-all ${
-                        isEditing
-                          ? "bg-white border-blue-500 focus:ring-2 focus:ring-blue-500"
-                          : "bg-gray-100 border-gray-300 cursor-not-allowed"
-                      }`}
-                      value={selectedHair}
-                      onChange={(e) => setSelectedHair(e.target.value)}
-                      disabled={!isEditing}
-                    >
-                      {Object.entries(hairURLs).map(([key, url]) => (
-                        <option key={key} value={key}>
-                          {key}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-  
-                  {/* Hair Color Field */}
-                  <div className="mt-4 ">
-                    <label className="block text-gray-700 font-semibold mb-2">Hair Color</label>
-                    <input
-                      type="color"
-                      className={`w-20 h-10 p-1 border rounded transition-all ${
-                        isEditing
-                          ? "cursor-pointer border-blue-500"
-                          : "cursor-not-allowed border-gray-300"
-                      }`}
-                      value={haircolor}
-                      onChange={(e) => setHairColor(e.target.value)}
-                      disabled={!isEditing}
-                    />
-                  </div>
-  
-                  </div>
-  
-                </div>
-              )}
+    {/* Left Panel: Edit Form - Only show when editing */}
+    {isEditing && (
+      <div
+        className={`absolute left-0 top-0 h-full bg-white rounded-lg shadow-lg transition-transform duration-300 ease-in-out transform
+          ${showLeftPanel ? 'translate-x-0 z-10' : '-translate-x-full -z-20'}
+          w-80 overflow-y-auto
+        `}
+      >
+        <div className=" bg-white p-4 rounded-lg shadow-lg ">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-xl font-bold text-gray-800">Edit Character</h1>
+            <span
+              className={`px-3 py-1 text-sm font-semibold rounded-full ${
+                isEditing ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-800"
+              }`}
+            >
+              {isEditing ? "Editing" : "Viewing"}
+            </span>
+          </div>
+
+          {/* Name Field 
+          <div>
+            <label className="block text-gray-700 font-semibold mb-2">Name</label>
+            <input
+              type="text"
+              className={`w-full p-2 border rounded transition-all ${
+                isEditing
+                  ? "bg-white border-blue-500 focus:ring-2 focus:ring-blue-500"
+                  : "bg-gray-100 border-gray-300 cursor-not-allowed"
+              }`}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>  */}
+
+          {/* Gender Field */}
+          <div className="mt-4">
+            <label className="block text-gray-700 font-semibold mb-2">Gender</label>
+            <select
+              className={`w-full p-2 border rounded transition-all ${
+                isEditing
+                  ? "bg-white border-blue-500 focus:ring-2 focus:ring-blue-500"
+                  : "bg-gray-100 border-gray-300 cursor-not-allowed"
+              }`}
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              disabled={!isEditing}
+            >
+              <option value="Boy">Men</option>
+              <option value="Girl">Woman</option>
+            </select>
+          </div>
+
+          {/* Body Type Field */}
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-gray-700 font-semibold">Body Type</label>
+              <button
+                onClick={() => setIsBodyTypeInfoOpen(true)}
+                className="text-purple-600 hover:text-purple-700 transition-colors"
+                type="button"
+              >
+                <i className="fas fa-info-circle text-lg"></i>
+              </button>
+            </div>
+            <select
+              className={`w-full p-2 border rounded transition-all ${
+                isEditing
+                  ? "bg-white border-blue-500 focus:ring-2 focus:ring-blue-500"
+                  : "bg-gray-100 border-gray-300 cursor-not-allowed"
+              }`}
+              value={selectedBodyType}
+              onChange={(e) => setSelectedBodyType(e.target.value)}
+              disabled={!isEditing}
+            >
+              {Object.keys(bodyTypeURLs[gender]).map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Skin Color Field */}
+          <div className="mt-4">
+            <label className="block text-gray-700 font-semibold mb-2">Skin Color</label>
+            <div className="flex space-x-2">
+              {[
+                { label: "Light", color: "#f5c9a6" },
+                { label: "Medium", color: "#d2a77d" },
+                { label: "Tan", color: "#a67c5b" },
+                { label: "Dark", color: "#67442e" },
+              ].map((option) => (
+                <button
+                  key={option.color}
+                  className={`w-10 h-10 border-2 rounded-full transition-all ${
+                    isEditing
+                      ? skincolor === option.color
+                        ? "border-blue-500 hover:scale-110"
+                        : "border-gray-300 hover:scale-110"
+                      : "border-gray-300 cursor-not-allowed"
+                  }`}
+                  style={{ backgroundColor: option.color }}
+                  onClick={() => setSkinColor(option.color)}
+                  disabled={!isEditing}
+                />
+              ))}
             </div>
           </div>
-        )}
+          <div className="flex flex-row space-x-4">
+          {/* Hair Field */}
+          <div className="mt-4 flex-col flex-1">
+            <label className="block text-gray-700 font-semibold mb-2">Hair</label>
+            <select
+              className={`w-full  p-2 border rounded transition-all ${
+                isEditing
+                  ? "bg-white border-blue-500 focus:ring-2 focus:ring-blue-500"
+                  : "bg-gray-100 border-gray-300 cursor-not-allowed"
+              }`}
+              value={selectedHair}
+              onChange={(e) => setSelectedHair(e.target.value)}
+              disabled={!isEditing}
+            >
+              {Object.entries(hairURLs).map(([key, url]) => (
+                <option key={key} value={key}>
+                  {key}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Middle Panel: 3D Canvas */}
-        <div className="flex-1 h-[500px] mx-16 rounded-lg shadow-lg bg-gray-100">
-          <div className="relative flex flex-1 w-full h-full">
+          {/* Hair Color Field */}
+          <div className="mt-4 ">
+            <label className="block text-gray-700 font-semibold mb-2">Hair Color</label>
+            <input
+              type="color"
+              className={`w-20 h-10 p-1 border rounded transition-all ${
+                isEditing
+                  ? "cursor-pointer border-blue-500"
+                  : "cursor-not-allowed border-gray-300"
+              }`}
+              value={haircolor}
+              onChange={(e) => setHairColor(e.target.value)}
+              disabled={!isEditing}
+            />
+          </div>
 
-            {/* Darkened Background Image */}
-            <div 
+          </div>
+
+        </div>
+      </div>
+    )}
+
+    {/* Middle Panel: 3D Canvas */}
+    <div className="flex-1 h-[500px] mx-16 rounded-lg shadow-lg bg-gray-100">
+      <div className="relative flex flex-1 w-full h-full">
+
+        {/* Darkened Background Image */}
+        <div 
     className="absolute inset-0 bg-black bg-opacity-80"
     style={{ 
       backgroundImage: "url('/3d/canvasBG/Closet.jpg')", 
@@ -827,93 +676,79 @@ const CharacterCustomization = () => {
         </button>
       </div>
 
-      <ErrorBoundary>
-        <Suspense fallback={
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <FontAwesomeIcon icon={faSpinner} className="animate-spin text-4xl text-purple-600 mb-2" />
-              <p className="text-gray-600">Loading 3D viewer...</p>
-            </div>
-          </div>
-        }>
-          <Canvas 
-            camera={{ position: [0, 100, 200] }}
-            shadows
-            onError={(error) => {
-              console.error('Canvas Error:', error);
-            }}
-          >
-            <PreloadAssets />
-             {/* Lights */}
-            <ambientLight intensity={0.4} />
-            <hemisphereLight intensity={0.7} />
-            <directionalLight
-              castShadow
-              position={[2, 4, 1]}
-              intensity={1.5}
-              shadow-mapSize-width={1024}
-              shadow-mapSize-height={1024}
-            />
-            <spotLight
-              position={[-2, 4, -1]}
-              intensity={0.5}
-              angle={0.5}
-              penumbra={1}
-            />
+      <Canvas 
+        camera={{ position: [0, 100, 200] }}
+        shadows
+      >
+          
+        {/* Lights */}
+        <ambientLight intensity={0.4} />
+        <hemisphereLight intensity={0.7} />
+        <directionalLight
+          castShadow
+          position={[2, 4, 1]}
+          intensity={1.5}
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+        />
+        <spotLight
+          position={[-2, 4, -1]}
+          intensity={0.5}
+          angle={0.5}
+          penumbra={1}
+        />
 
-            <CameraController view={cameraView} />
-            
-            {/* Environment */}
-            <Environment preset="city" />
-            
-            {/* Platform and Models */}
-            <group position={[0, 0, 0]}>
-              <Platform />
-              {selectedHair && hairURLs[selectedHair] && (
-                <Part 
-                  url={hairURLs[selectedHair]} 
-                  position={[0, 0.85, 0]} 
-                  color={haircolor} 
-                />
-              )}
-              <Part 
-                url={bodyTypeURLs[gender][selectedBodyType]} 
-                position={[0, 0, 0]} 
-                color={skincolor} 
-              />
-              {getTShirtURL() && (
-                <Part 
-                  key={`tshirt-${gender}-${selectedBodyType}`} 
-                  url={getTShirtURL()} 
-                  position={[0, 0, 0]}
-                  texture={selectedTexture} // Pass selected texture
-                />
-              )}
-              {getShortsURL() && (
-                <Part 
-                  key={`shorts-${gender}-${selectedBodyType}`} 
-                  url={getShortsURL()} 
-                  position={[0, 0, 0]}
-                  color="#000000"
-                />
-              )}
-            </group>
-       
-            <OrbitControls 
-              target={[0, 80, 0]}
-              minPolarAngle={0}
-              maxPolarAngle={Math.PI}
-              minDistance={80}
-              maxDistance={300}
-              enablePan={true}
-              panSpeed={0.5}
-              rotateSpeed={0.5}
-              enableDamping={true}
-              dampingFactor={0.05}
+        <CameraController view={cameraView} />
+        
+        {/* Environment */}
+        <Environment preset="city" />
+        
+        {/* Platform and Models */}
+        <group position={[0, 0, 0]}>
+          <Platform />
+          {selectedHair && hairURLs[selectedHair] && (
+            <Part 
+              url={hairURLs[selectedHair]} 
+              position={[0, 0.85, 0]} 
+              color={haircolor} 
             />
-          </Canvas>
-        </Suspense>
-      </ErrorBoundary>
+          )}
+          <Part 
+            url={bodyTypeURLs[gender][selectedBodyType]} 
+            position={[0, 0, 0]} 
+            color={skincolor} 
+          />
+          {getTShirtURL() && (
+            <Part 
+              key={`tshirt-${gender}-${selectedBodyType}`} 
+              url={getTShirtURL()} 
+              position={[0, 0, 0]}
+              texture={selectedTexture} // Pass selected texture
+            />
+          )}
+          {getShortsURL() && (
+            <Part 
+              key={`shorts-${gender}-${selectedBodyType}`} 
+              url={getShortsURL()} 
+              position={[0, 0, 0]}
+              color="#000000"
+            />
+          )}
+        </group>
+   
+        <OrbitControls 
+          target={[0, 80, 0]}
+          minPolarAngle={0}
+          maxPolarAngle={Math.PI}
+          minDistance={80}
+          maxDistance={300}
+          enablePan={true}
+          panSpeed={0.5}
+          rotateSpeed={0.5}
+          enableDamping={true}
+          dampingFactor={0.05}
+        />
+      </Canvas>
     </div>
   </div>
 
@@ -944,7 +779,7 @@ const CharacterCustomization = () => {
                   className="p-2 w-40 bg-purple-500 text-white rounded hover:bg-purple-600 transition-all"
                   onClick={() => {
                     setIsEditing(true);
-                    setShowLeftPanel(true); // Add this line to show the panel when Edit is clicked
+                    setShowLeftPanel(true); // Show the panel when Edit is clicked
                   }}
                 >
                   Edit
@@ -954,151 +789,61 @@ const CharacterCustomization = () => {
           </div>
         </div>
 
-        {/* Right Panel Toggle Button */}
-        <button
-          onClick={() => setShowRightPanel(!showRightPanel)}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white rounded-l-lg shadow-lg p-2 hover:bg-gray-100 transition-colors"
-          title={showRightPanel ? "Hide Closet" : "Show Closet"}
-        >
-          <i className={`fas fa-chevron-${showRightPanel ? 'right' : 'left'} text-gray-600`}></i>
-        </button>
+    {/* Right Panel Toggle Button */}
+    <button
+      onClick={() => setShowRightPanel(!showRightPanel)}
+      className="absolute right-0 top-1/2 -translate-y-1/2 z-20 bg-white rounded-l-lg shadow-lg p-2 hover:bg-gray-100 transition-colors"
+      title={showRightPanel ? "Hide Closet" : "Show Closet"}
+    >
+      <i className={`fas fa-chevron-${showRightPanel ? 'right' : 'left'} text-gray-600`}></i>
+    </button>
 
-        {/* Right Panel: Closet */}
-        <div
-          className={`absolute right-0 top-0 h-full bg-white rounded-lg shadow-lg transition-transform duration-300 ease-in-out transform
-            ${showRightPanel ? 'translate-x-0' : 'translate-x-full'}
-            w-80 z-10 overflow-y-auto
-          `}
-        >
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-800">My Closet</h2>
-              <span className="px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full">
-                {closetItems.length} items
-              </span>
-            </div>
-
-            {selectedItems.length > 0 && (
-              <div className="flex items-center justify-between mb-4 p-2 bg-gray-100 rounded-lg">
-                <span className="text-sm font-medium text-gray-700">
-                  {selectedItems.length} items selected
-                </span>
-                <button
-                  onClick={handleBulkRemove}
-                  className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                  disabled={isRemoving}
-                >
-                  {isRemoving ? (
-                    <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-1" />
-                  ) : (
-                    <i className="fas fa-trash-alt mr-1"></i>
-                  )}
-                  Remove Selected
-                </button>
-              </div>
-            )}
-
+    {/* Right Panel: Closet */}
+    <div
+      className={`absolute right-0 top-0 h-full bg-white rounded-lg shadow-lg transition-transform duration-300 ease-in-out transform
+        ${showRightPanel ? 'translate-x-0' : 'translate-x-full'}
+        w-80 z-10 overflow-y-auto
+      `}
+    >
+      <div className="flex-1 bg-white rounded-lg shadow-lg p-4 overflow-y-auto">
+            <h2 className="text-lg font-semibold mb-3">My Closet</h2>
             {loadingCloset ? (
-              <div className="flex items-center justify-center h-40">
+              <div className="flex items-center justify-center h-full">
                 <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-gray-400" />
               </div>
             ) : closetItems.length === 0 ? (
-              <div className="text-center py-8">
-                <img 
-                  src="/emote/error.png" 
-                  alt="Empty Closet" 
-                  className="w-16 h-16 mx-auto mb-4 opacity-50"
-                />
-                <p className="text-gray-500">No items in closet</p>
-              </div>
+              <div className="text-center text-gray-500">No items in closet</div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 {closetItems.map((item) => (
-                  <div 
-                    key={`${item.product_id}-${item.variant?.variant?.variant_Name}`}
-                    className={`relative group p-2 rounded-lg border-2 transition-all hover:shadow-md
-                      ${selectedTexture === item.product.texture_3D
+                  <div key={`${item.product_id}-${item.variant?.variant?.variant_Name}`}
+                    className={`relative group p-2 rounded-lg border-2 transition-all ${
+                      selectedTexture === item.product.texture_3D
                         ? 'border-purple-600 bg-purple-50'
-                        : selectedItems.includes(item.id)
-                        ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-purple-300'
-                      }
-                    `}
+                    }`}
                   >
-                    {/* Checkbox for bulk selection */}
-                    <div className="absolute top-2 left-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <input
-                        type="checkbox"
-                        checked={selectedItems.includes(item.id)}
-                        onChange={() => toggleItemSelection(item.id)}
-                        className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                      />
-                    </div>
-
-                    {/* Existing image and content */}
-                    <div className="aspect-square relative mb-2">
+                    <button
+                      onClick={() => handleTextureSelect(item)}
+                      className="w-full"
+                    >
                       <img 
                         src={item.variant?.imagePath || '/placeholder.png'} 
                         alt={item.product?.item_Name}
-                        className="w-full h-full object-contain"
+                        className="w-full h-24 object-contain"
                       />
-                      
-                      {/* Updated hover actions */}
-                      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        {item.product?.is3D && (
-                          <button
-                            onClick={() => handleTextureSelect(item)}
-                            className="p-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors disabled:opacity-50"
-                            title="Try On"
-                            disabled={isRemoving}
-                          >
-                            <i className="fas fa-tshirt text-sm"></i>
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleViewProduct(item)}
-                          className="p-2 bg-white text-purple-600 rounded-full hover:bg-purple-50 transition-colors disabled:opacity-50"
-                          title="View Product"
-                          disabled={isRemoving}
-                        >
-                          <i className="fas fa-eye text-sm"></i>
-                        </button>
-                        <button
-                          onClick={() => handleRemoveFromCloset(item.id)}
-                          className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors disabled:opacity-50"
-                          title="Remove from Closet"
-                          disabled={isRemoving}
-                        >
-                          <i className="fas fa-trash-alt text-sm"></i>
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="text-center">
-                      <h3 className="text-sm font-medium text-gray-800 truncate">
+                      <p className="text-xs text-center mt-1 truncate">
                         {item.product?.item_Name}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {item.variant?.variant?.variant_Name || 'Default'}
                       </p>
-                    </div>
-
-                    {selectedTexture === item.product.texture_3D && (
-                      <div className="absolute -top-1 -right-1">
-                        <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-                          Wearing
-                        </span>
-                      </div>
-                    )}
+                    </button>
                   </div>
                 ))}
               </div>
             )}
-          </div>
         </div>
-
-      </div>
     </div>
+  </div>
+</div>
    
   </div>
     </>
