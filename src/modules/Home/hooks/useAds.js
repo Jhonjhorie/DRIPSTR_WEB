@@ -3,6 +3,7 @@ import { supabase } from '@/constants/supabase';
 
 const useAds = () => {
   const [ads, setAds] = useState([]);
+  const [pShop, setPShop] = useState([]);
   const [loading2, setLoading2] = useState(true);
   const [error2, setError2] = useState(null);
 
@@ -12,34 +13,46 @@ const useAds = () => {
       try {
         const { data, error } = await supabase
           .from('merchant_Subscription')
-          .select('*, shop:merchant_Id(shop_Ads)')
-  
-        if (error) throw error2;
-  
+          .select('subs_Enddate, status, shop:merchant_Id(*)');
 
-        const today = new Date(); // Get the current date
+        if (error) throw error;
 
-        const uniqueAds = data
-        .filter((s) => {
-            const endDate = s.subs_Enddate ? new Date(s.subs_Enddate) : null;
-            return endDate && endDate >= today; 
-          })
-          .filter((s) => s.status != "Expired")
-          .flatMap((s) => s.shop?.shop_Ads || [])
-          .filter((ad, index, self) => self.findIndex(a => a.id === ad.id) === index);
-  
-        setAds(uniqueAds); 
+        const today = new Date();
+
+        const filteredData = data.filter((s) => {
+          const endDate = s.subs_Enddate ? new Date(s.subs_Enddate) : null;
+          return endDate && endDate >= today && s.status !== "Expired";
+        });
+
+        const uniqueAds = filteredData
+          .flatMap((s) => (s.shop?.shop_Ads || []).map((ad) => ({
+            ...ad,
+            shop_Name: s.shop.shop_name,
+            shop: s.shop,
+          })))
+          .filter((ad, index, self) => self.findIndex((a) => a.id === ad.id) === index);
+
+        setAds(uniqueAds);
+
+        const uniqueShops = Array.from(
+          new Map(filteredData.map((s) => [s.shop.id, s.shop])).values()
+        );
+
+
+        setPShop(uniqueShops);
       } catch (err) {
-        setError2(err.message);
+        setError2(err?.message || 'An error occurred');
       } finally {
         setLoading2(false);
+        console.log("arrerer")
+        console.log(pShop)
       }
     };
-  
+
     fetchData();
   }, []);
 
-  return { ads, loading2, error2 }; 
+  return { ads, pShop, loading2, error2 };
 };
 
 export default useAds;

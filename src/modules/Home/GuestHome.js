@@ -48,7 +48,7 @@ function GuestHome() {
         />
       )}
       {/* Hero Section */}
-      <div className="flex flex-col w-full gap-1 p-2 items-center bg-slate-300 min-h-screen">
+      <div className="flex flex-col w-full gap-1 p-2 items-center bg-gray-200 min-h-screen">
         {/* Back Button and Guest Mode Banner */}
         <div className="flex flex-row w-full gap-2 lg:ml-16 ">
         <button 
@@ -85,7 +85,7 @@ function GuestHome() {
 
         {/* Breadcrumbs */}
         <div className="flex flex-col w-full items-center justify-center">
-          <div className="breadcrumbs text-lg text-slate-500 font-[iceland]">
+          <div className="breadcrumbs text-lg text-gray-500 font-[iceland]">
             <ul>
               <li className="font-bold text-primary-color flex items-center gap-2">
                 START <FontAwesomeIcon fontSize={16} icon={faShoppingCart} /> SHOPPING

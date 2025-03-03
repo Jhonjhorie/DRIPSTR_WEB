@@ -10,14 +10,31 @@ const useProducts = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('shop_Product') 
-           .select('*, shop(*)')
-           .eq('is_Post', true);
-        if (error) throw error;
-        setProducts(data); 
+        // Fetch products with associated shop
+        const { data: productsData, error: productsError } = await supabase
+          .from('shop_Product')
+          .select('*, shop(*)')
+          .eq('is_Post', true);
+        
+        if (productsError) throw productsError;
+
+        // Fetch premium merchants
+        const { data: premiumShops, error: premiumError } = await supabase
+          .from('merchant_Subscription')
+          .select('merchant_Id');
+
+        if (premiumError) throw premiumError;
+
+        const premiumShopIds = new Set(premiumShops.map((shop) => shop.merchant_Id));
+
+        const productsWithPremium = productsData.map((product) => ({
+          ...product,
+          isPremium: premiumShopIds.has(product.shop.id), 
+        }));
+
+        setProducts(productsWithPremium);
       } catch (err) {
-        setError(err.message); 
+        setError(err.message);
       } finally {
         setLoading(false);
       }
@@ -26,7 +43,7 @@ const useProducts = () => {
     fetchData();
   }, []);
 
-  return { products, loading, error }; 
+  return { products, loading, error };
 };
 
 export default useProducts;

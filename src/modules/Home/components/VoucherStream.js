@@ -171,7 +171,7 @@ const VoucherStream = ({ profile }) => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="w-full md:w-[65%] lg:w-[42%] flex-1 rounded-md mx-2 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
+    <div className="w-full  flex-1 rounded-md mx-2 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
       {showAlert && (
         <div className="w-[95%] absolute -top-60 justify-center flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
           <AlertDialog
@@ -190,7 +190,7 @@ const VoucherStream = ({ profile }) => {
       </button>
       <div className="w-full flex gap-1 bg-stone-900 bg-opacity-50 rounded-lg p-0 h-[52px] md:h-[62px] justify-start items-center overflow-hidden">
         <div className="bg-slate-100 rounded-r-lg">
-          <p className="w-[6.25rem] md:w-[6rem] lg:w-[7rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
+          <p className="w-[5rem] md:w-[6rem] lg:w-[7rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
             Claim Vouchers
           </p>
         </div>
@@ -266,7 +266,7 @@ const VoucherStream = ({ profile }) => {
           );
         })}
         <div className="bg-secondary-color text-white absolute right-0.5 top-2.5 rounded-l-lg">
-          <p className="w-[6.25rem] md:w-[6rem] lg:w-[7rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
+          <p className="w-[5rem] md:w-[6rem] lg:w-[7rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
             Start Shopping
           </p>
         </div>

@@ -22,13 +22,13 @@ const SectionWrapper = ({
       <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
         <h2 className={`font-medium ${textColor} flex items-center gap-2`}>
           {title}
-          {icon && <FontAwesomeIcon icon={icon} className="text-primary-color" />}
+          {icon && <FontAwesomeIcon icon={icon} className="text-secondary-color" />}
         </h2>
         
         {buttonText && (
           <button 
             onClick={() => gotoMall(filter, title, icon)}
-            className="text-sm px-3 py-1 bg-primary-color hover:bg-primary-color/90 text-white rounded transition-colors duration-200 flex items-center"
+            className="text-sm px-3 py-1 bg-[#141414] hover:bg-secondary-color text-white rounded transition-colors duration-200 flex items-center"
           >
             {buttonText}
           </button>

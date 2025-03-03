@@ -72,7 +72,7 @@ const BuyConfirm = ({ item, onClose }) => {
   };
 
   const handleShopClick = () => {
-    navigate(`/product/merchant-shop/${item.shop.shop_Name}`, {
+    navigate(`/product/merchant-shop/${item.shop.shop_name}`, {
       state: { shop: item.shop },
     });
   };
@@ -146,7 +146,7 @@ const BuyConfirm = ({ item, onClose }) => {
 
   if (loadingP) {
     return (
-      <div className="w-full md:w-[60.40rem] rounded-lg relative pb-16 items-center justify-center bg-slate-100 flex flex-col px-2 lg:px-8 h-[27rem] py-4">
+      <div className="w-full md:w-[60.40rem] rounded-lg relative pb-16 items-center justify-center bg-slate-100 flex flex-col px-2 lg:px-8 h-[27rem] ">
         <img
           src={require("@/assets/emote/hmmm.png")}
           alt="No Images Available"
@@ -159,7 +159,8 @@ const BuyConfirm = ({ item, onClose }) => {
     );
   } else {
     return (
-      <div className="w-full md:w-[60.40rem] h-full md:h-[27rem] bg-slate-50 rounded-lg shadow-lg z-50 overflow-hidden">
+      <div className="w-full  md:w-[60.40rem] h-full md:h-[27rem] bg-slate-50 rounded-lg shadow-lg z-50 overflow-hidden">
+     
         {mascot ? (
           <div className="flex flex-col items-center justify-center h-full w-full">
             <img
@@ -167,10 +168,12 @@ const BuyConfirm = ({ item, onClose }) => {
               alt="No Images Available"
               className="object-contain animate-bounce drop-shadow-customViolet"
             />
-            <span className="text-2xl md:text-3xl">Item added to cart successfully!</span>
+            <span className="text-2xl md:text-3xl">
+              Item added to cart successfully!
+            </span>
           </div>
         ) : (
-          <div className="flex flex-col md:flex-row">
+          <div className="flex flex-col md:flex-row  h-full  md:pr-0 pr-4 justify-center items-center">
             {/* Image Section */}
             <div className="w-full flex-none md:w-80 relative items-center flex justify-center">
               <div className="relative group">
@@ -227,12 +230,14 @@ const BuyConfirm = ({ item, onClose }) => {
             </div>
 
             {/* Details Section */}
-            <div className="flex flex-wrap h-full bg-slate-200 w-full">
+            <div className="flex flex-wrap h-full bg-gray-200 w-full">
               <div className="flex flex-col justify-start h-full w-full p-4">
                 <div className="flex flex-col">
                   <div className="flex justify-between">
                     <div className="flex items-center gap-0.5">
-                      <p className="text-xs text-slate-400 font-medium">Shop:</p>
+                      <p className="text-xs text-slate-400 font-medium">
+                        Shop:
+                      </p>
                       <button
                         onClick={handleShopClick}
                         className="px-0.5 md:px-1 text-xs py-0 min-h-6 h-6 rounded-md btn-ghost btn duration-300 transition-all w-36"
@@ -258,7 +263,9 @@ const BuyConfirm = ({ item, onClose }) => {
                         </div>
                         <h2 className="text-xs font-medium">
                           {item.item_Orders}{" "}
-                          <span className="text-slate-400 font-normal">Sold</span>
+                          <span className="text-slate-400 font-normal">
+                            Sold
+                          </span>
                         </h2>
                       </div>
                     </div>
@@ -337,7 +344,9 @@ const BuyConfirm = ({ item, onClose }) => {
                       </div>
                       <div className="items-center flex flex-col justify-center">
                         <div className="flex justify-end pl-2">
-                          <p className="text-xl md:text-2xl text-primary-color">₱</p>
+                          <p className="text-xl md:text-2xl text-primary-color">
+                            ₱
+                          </p>
                           <h2 className="text-4xl md:text-6xl font-bold text-primary-color">
                             {selectedSize
                               ? item?.discount > 0
@@ -367,8 +376,9 @@ const BuyConfirm = ({ item, onClose }) => {
                                 </span>
                                 <span className="text-base md:text-lg text-secondary-color px-1 font-bold opacity-50 line-through">
                                   ₱
-                                  {(Number(selectedSize?.price) || 0).toFixed(2) ||
-                                    "N/A"}
+                                  {(Number(selectedSize?.price) || 0).toFixed(
+                                    2
+                                  ) || "N/A"}
                                 </span>
                               </div>
                             )}

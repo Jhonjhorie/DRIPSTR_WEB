@@ -18,7 +18,7 @@ function Mall({ title2 }) {
   const icon = location.state?.icon || "faShoppingCart";
 
   return (
-    <div className="w-full h-full bg-slate-100 flex flex-col">
+    <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col">
       {/* Categories navigation */}
       <div className="w-full px-4 py-3">
         <CategoriesRibbon

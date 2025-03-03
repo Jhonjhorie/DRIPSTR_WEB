@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AdsBanner = ({ ads = [] }) => {
   const [currentAdIndex, setCurrentAdIndex] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (ads.length === 0) return;
@@ -21,12 +23,18 @@ const AdsBanner = ({ ads = [] }) => {
     setCurrentAdIndex(index);
   };
 
-  // Get the second ad (ensure it's not the same as the first one)
   const secondAdIndex = (currentAdIndex + 1) % ads.length;
 
   return (
-    <div className="w-[20rem] max-h-[24rem] overflow-hidden rounded-lg shadow-md bg-white relative flex flex-col">
-      <div className="w-full h-1/2 relative">
+    <div className="w-full md:ml-2 mt-1 md:mt-0 md:w-[20rem] h-[20rem] md:h-full max-h-[24rem] overflow-hidden rounded-lg shadow-md bg-white relative flex md:flex-col">
+      <div
+        className="w-1/2 md:w-full h-full md:h-1/2 relative cursor-pointer"
+        onClick={() => {
+          navigate(`/product/merchant-shop/${ads[currentAdIndex].shop_Name}`, {
+            state: { shop: ads[currentAdIndex].shop }, 
+          });
+        }}
+      >
         <img
           src={ads[currentAdIndex].ad_Image}
           alt={ads[currentAdIndex].ad_Name}
@@ -39,7 +47,14 @@ const AdsBanner = ({ ads = [] }) => {
         </div>
       </div>
 
-      <div className="w-full h-1/2 relative">
+      <div
+        className="w-1/2 md:w-full h-full md:h-1/2 relative cursor-pointer"
+        onClick={() => {
+          navigate(`/product/merchant-shop/${ads[secondAdIndex].shop_Name}`, {
+            state: { shop: ads[secondAdIndex].shop }, 
+          });
+        }}
+      >
         <img
           src={ads[secondAdIndex].ad_Image}
           alt={ads[secondAdIndex].ad_Name}
@@ -54,13 +69,13 @@ const AdsBanner = ({ ads = [] }) => {
 
       {/* Navigation dots */}
       {ads.length > 2 && (
-        <div className="absolute bottom-3 right-3 flex gap-2 z-20">
+        <div className="absolute bottom-0 left-5  gap-2 z-20 bg-slate-300 rounded-t-lg flex justify-center items-center space-x-2 w-24 h-4 p-1">
           {ads.map((_, index) => (
             <button
               key={index}
               onClick={() => goToAd(index)}
-              className={`w-2 h-2 rounded-full ${
-                index === currentAdIndex ? "bg-white" : "bg-white/50"
+              className={`h-2 rounded-full drop-shadow-lg transition-all duration-300 ${
+                index === currentAdIndex ? "bg-slate-50 w-4" : "bg-secondary-color w-2"
               }`}
               aria-label={`Go to advertisement ${index + 1}`}
             />

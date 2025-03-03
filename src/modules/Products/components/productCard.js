@@ -79,9 +79,13 @@ const ProductCard = ({ item, onClick, isSmall }) => {
         {/* Product name */}
         <div className="h-10">
           <p className="text-gray-800 text-sm line-clamp-2">
-            {item.texture_3D && (
-              <span className="bg-primary-color text-white text-xs px-1 py-0.5 mr-1 rounded">3D</span>
+          {item.isPremium && (
+              <span className="bg-secondary-color h-full text-white font-serif font-thin text-xs px-1 py-0.5 mr-0.5 rounded">DripStr</span>
             )}
+            {item.texture_3D && (
+              <span className="bg-primary-color h-full font-[iceland] text-white text-sm px-1 py-0.5 mr-0.5 rounded">3D</span>
+            )}
+            
             {item.item_Name}
           </p>
         </div>

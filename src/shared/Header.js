@@ -131,7 +131,7 @@ const Header = () => {
               />
             </button>
           </div>
-          <div className="drawer-side z-50">
+          <div className="drawer-side z-[999] ">
             <label
               htmlFor="my-drawer-cart"
               aria-label="close sidebar"

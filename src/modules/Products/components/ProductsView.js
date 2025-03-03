@@ -20,9 +20,14 @@ const ProductsView = ({
 
   const openModal = (item) => {
     setSelectedItem(item);
-    setTimeout(() => {
-      document.getElementById("my_modal_4").showModal();
+    const modal = document.getElementById("my_modal_4");
+    if (modal) {
+      setTimeout(() => {
+      modal.showModal();
     }, 50);
+    }
+   
+    
   };
 
   const closeModal = () => {
@@ -173,7 +178,7 @@ const ProductsView = ({
           <img
             src={require("@/assets/emote/sad.png")}
             alt="No Products Available"
-            className="w-24 h-24 drop-shadow-customViolet animate-pulse"
+            className="w-24 h-24 object-contain drop-shadow-md"
           />
           <p className="text-xl text-gray-600">No Products Available</p>
         </div>
