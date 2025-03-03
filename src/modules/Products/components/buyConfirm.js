@@ -231,7 +231,7 @@ const BuyConfirm = ({ item, onClose }) => {
 
             {/* Details Section */}
             <div className="flex flex-wrap h-full bg-gray-200 w-full">
-              <div className="flex flex-col justify-start h-full w-full p-4">
+              <div className="flex flex-col justify-start  h-full w-full p-4">
                 <div className="flex flex-col">
                   <div className="flex justify-between">
                     <div className="flex items-center gap-0.5">
@@ -315,8 +315,8 @@ const BuyConfirm = ({ item, onClose }) => {
                   </div>
                 </div>
 
-                <div>
-                  <div className="justify-start flex flex-col mb-5">
+                <div className="md:justify-between flex flex-col h-full w-full">
+                  <div className="justify-start  flex flex-col mb-5">
                     <div className="flex flex-row justify-between gap-5 pl-2">
                       <div className="flex items-end justify-center gap-2">
                         <label className="form-control w-20 max-w-xs">
@@ -328,17 +328,17 @@ const BuyConfirm = ({ item, onClose }) => {
                             value={quantity}
                             onChange={handleInputChange}
                             placeholder="How many"
-                            className="input input-bordered input-primary w-full max-w-xs"
+                            className="input input-bordered input-neutral w-full max-w-xs"
                           />
                         </label>
                         <button
-                          className="btn btn-success"
+                          className="btn  text-white w-5 btn-outline hover:bg-secondary-color hover:text-white bg-stone-800 bg-opacity-50"
                           onClick={handleIncrement}
                         >
                           +
                         </button>
                         <button
-                          className="btn btn-error"
+                          className="btn text-white w-5 hover:bg-secondary-color hover:text-white bg-stone-80"
                           onClick={handleDecrement}
                         >
                           -
@@ -349,7 +349,7 @@ const BuyConfirm = ({ item, onClose }) => {
                           <p className="text-xl md:text-2xl text-primary-color">
                             ₱
                           </p>
-                          <h2 className="text-4xl md:text-6xl font-bold text-primary-color">
+                          <h2 className="text-4xl md:text-6xl font-bold text-secondary-color">
                             {selectedSize
                               ? item?.discount > 0
                                 ? (
