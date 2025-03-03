@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { supabase } from "../../../constants/supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons"
+import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 import Sidebar from "./Shared/Sidebar";
 
 function Admins() {
@@ -17,6 +17,7 @@ function Admins() {
     // Form state
     const [adminUsername, setAdminUsername] = useState("");
     const [adminPassword, setAdminPassword] = useState("");
+    const [adminGcash, setAdminGcash] = useState(""); 
     const [error, setError] = useState("");
 
     // Fetch admins from the database
@@ -24,7 +25,7 @@ function Admins() {
         setLoading(true);
         const { data, error } = await supabase
             .from("admins")
-            .select("id, username, password");
+            .select("id, username, password, gcash");
 
         if (error) {
             console.error("❌ Error fetching admins:", error.message);
@@ -45,6 +46,7 @@ function Admins() {
         setAdminUsername("");
         setAdminPassword("");
         setSelectedAdminId(null);
+        setAdminGcash("");
         setShowModal(true);
     };
 
@@ -54,6 +56,7 @@ function Admins() {
         setSelectedAdminId(admin.id);
         setAdminUsername(admin.username);
         setAdminPassword(admin.password);
+        setAdminGcash(admin.gcash); // Set GCash image to the current value
         setShowModal(true);
     };
 
@@ -66,7 +69,7 @@ function Admins() {
             // Update existing admin
             const { error } = await supabase
                 .from("admins")
-                .update({ username: adminUsername, password: adminPassword })
+                .update({ username: adminUsername, password: adminPassword, gcash: adminGcash })
                 .eq("id", selectedAdminId);
 
             if (error) {
@@ -79,7 +82,7 @@ function Admins() {
             // Add new admin
             const { error } = await supabase
                 .from("admins")
-                .insert([{ username: adminUsername, password: adminPassword }]);
+                .insert([{ username: adminUsername, password: adminPassword, gcash: adminGcash }]);
 
             if (error) {
                 setError(error.message);
@@ -148,7 +151,6 @@ function Admins() {
                             <option value="descending">Descending</option>
                         </select>
                     </div>
-
                 </div>
                 {loading ? (
                     <p className="text-white text-center">Loading admins...</p>
@@ -159,28 +161,43 @@ function Admins() {
                                 <th className="p-2 border border-gray-500">ID</th>
                                 <th className="p-2 border border-gray-500">Username</th>
                                 <th className="p-2 border border-gray-500">Password</th>
+                                <th className="p-2 border border-gray-500">Gcash</th>
                                 <th className="p-2 border border-gray-500">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {fetchedAdmins.length > 0 ? (
                                 fetchedAdmins.map((admin) => (
-                                    <tr key={admin.id} className="text-center border-b border-gray-600">
-                                        <td className="p-2 border border-gray-500">{admin.id}</td>
-                                        <td className="p-2 border border-gray-500">{admin.username}</td>
-                                        <td className="p-2 border border-gray-500">{admin.password}</td>
-                                        <td className="p-2 border-gray-500 flex justify-center gap-4">
-                                            <button
-                                                className="text-blue-400 hover:text-blue-600"
-                                                onClick={() => handleEditAdmin(admin)}
-                                            >
-                                                <FontAwesomeIcon icon={faEdit} />
-                                                <span className="ml-2">Edit</span>
-                                            </button>
-                                            <button className="text-red-400 hover:text-red-600" onClick={() => handleDeleteAdmin(admin.id)}>
-                                                <FontAwesomeIcon icon={faTrash} />
-                                                <span className="ml-2">Delete</span>
-                                            </button>
+                                    <tr key={admin.id} className="border-b border-gray-600">
+                                        <td className="p-2 border border-gray-500 text-center align-middle">{admin.id}</td>
+                                        <td className="p-2 border border-gray-500 text-center align-middle">{admin.username}</td>
+                                        <td className="p-2 border border-gray-500 text-center align-middle">{admin.password}</td>
+                                        <td className="p-2 border border-gray-500">
+                                            <div className="flex justify-center items-center">
+                                                <img
+                                                    src={admin.gcash}
+                                                    className="w-[7rem] h-[7rem] cursor-pointer object-cover rounded-sm"
+                                                    alt="GCash QR"
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="p-2 border border-gray-500">
+                                            <div className="flex justify-center items-center gap-4">
+                                                <button
+                                                    className="text-blue-400 hover:text-blue-600 flex items-center"
+                                                    onClick={() => handleEditAdmin(admin)}
+                                                >
+                                                    <FontAwesomeIcon icon={faEdit} />
+                                                    <span className="ml-2">Edit</span>
+                                                </button>
+                                                <button
+                                                    className="text-red-400 hover:text-red-600 flex items-center"
+                                                    onClick={() => handleDeleteAdmin(admin.id)}
+                                                >
+                                                    <FontAwesomeIcon icon={faTrash} />
+                                                    <span className="ml-2">Delete</span>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
@@ -197,28 +214,72 @@ function Admins() {
                 {showModal && (
                     <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
                         <div className="bg-slate-800 p-6 rounded-lg shadow-lg w-96">
-                            <h2 className="text-xl font-bold mb-4">
+                            <h2 className="text-xl font-bold mb-4 text-white">
                                 {isEditMode ? "Edit Admin" : "Add Admin"}
                             </h2>
 
                             {error && <p className="text-red-500">{error}</p>}
-                            <h1 className="text-white text-md font-bold mb-1">Username</h1>
-                            <input
-                                type="text"
-                                placeholder="Username"
-                                value={adminUsername}
-                                onChange={(e) => setAdminUsername(e.target.value)}
-                                className="w-full p-2 border rounded mb-2"
-                            />
-                            <h1 className="text-white text-md font-bol mb-1">Password</h1>
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                value={adminPassword}
-                                onChange={(e) => setAdminPassword(e.target.value)}
-                                className="w-full p-2 border rounded mb-2"
-                            />
+                            
+                            <div className="space-y-4">
+                                {/* Username Field */}
+                                <div>
+                                    <h1 className="text-white text-md font-bold mb-1">Username</h1>
+                                    <input
+                                        type="text"
+                                        placeholder="Username"
+                                        value={adminUsername}
+                                        onChange={(e) => setAdminUsername(e.target.value)}
+                                        className="w-full p-2 border rounded mb-2"
+                                    />
+                                </div>
 
+                                {/* Password Field */}
+                                <div>
+                                    <h1 className="text-white text-md font-bold mb-1">Password</h1>
+                                    <input
+                                        type="password"
+                                        placeholder="Password"
+                                        value={adminPassword}
+                                        onChange={(e) => setAdminPassword(e.target.value)}
+                                        className="w-full p-2 border rounded mb-2"
+                                    />
+                                </div>
+
+                                {/* GCash Image Field */}
+                                <div>
+                                    <h1 className="text-white text-md font-bold mb-1">GCash</h1>
+                                    <div className="flex flex-col items-center">
+                                        <img
+                                            src={adminGcash || 'https://via.placeholder.com/112'} // Fallback image
+                                            className="h-[7rem] w-[7rem] object-cover rounded cursor-pointer mb-2"
+                                            alt="GCash QR Code"
+                                            onClick={() => document.getElementById('gcashInput').click()}
+                                        />
+                                        <input
+                                            id="gcashInput"
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    const reader = new FileReader();
+                                                    reader.onload = (e) => setAdminGcash(e.target.result);
+                                                    reader.readAsDataURL(file);
+                                                }
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => document.getElementById('gcashInput').click()}
+                                            className="text-blue-400 hover:text-blue-600 text-sm"
+                                        >
+                                            Change Image
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Buttons */}
                             <div className="flex justify-end space-x-2 mt-4">
                                 <button
                                     onClick={() => setShowModal(false)}
