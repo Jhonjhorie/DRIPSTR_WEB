@@ -259,24 +259,26 @@ const BuyConfirm = ({ item, onClose}) => {
                       </div>
                     </div>
                     <div className="flex justify-end gap-1 items-center">
-                    <WishlistButton profile={profile} item={item} isLoggedIn={isLoggedIn} />
-                    <ClosetButton 
-                      profile={profile} 
-                      item={item} 
-                      isLoggedIn={isLoggedIn} 
-                      selectedColor={selectedColor}
-                    />
+                      <WishlistButton profile={profile} item={item} isLoggedIn={isLoggedIn} />
+                      {item.is3D && ( // Only render ClosetButton if item.is3D is true
+                        <ClosetButton 
+                          profile={profile} 
+                          item={item} 
+                          isLoggedIn={isLoggedIn} 
+                          selectedColor={selectedColor}
+                        />
+                      )}
                       {isLoggedIn && (
                         <button
                           onClick={mulletReport}
-                          class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+                          className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
                         >
                           <FontAwesomeIcon icon={faTriangleExclamation} />
                         </button>
                       )}
                       <button
                         onClick={onClose}
-                        class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+                        className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
                       >
                         <FontAwesomeIcon icon={faX} />
                       </button>
