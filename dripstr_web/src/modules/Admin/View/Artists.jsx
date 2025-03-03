@@ -16,7 +16,7 @@ function Artists() {
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [enlargedImage, setEnlargedImage] = useState(null)
-  const itemsPerPage = 4; // Adjust as needed
+  const itemsPerPage = 3; // Adjust as needed
 
   useEffect(() => {
     const fetchArtistRegistration = async () => {
