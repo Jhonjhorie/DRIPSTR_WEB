@@ -34,7 +34,7 @@ function ShopPage() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState(categories[0]?.label || "");
-  const { products, loading, error } = useProducts();
+  const { products, loading, error } = useProducts(profile);
   
   // Stats for the shop (you would normally fetch these)
   const [stats, setStats] = useState({
@@ -238,7 +238,6 @@ function ShopPage() {
             filter={filMall}
             loading={loading}
             error={error}
-            premiumStyle={isPremium}
           />
         </div>
       </div>
