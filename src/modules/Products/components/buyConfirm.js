@@ -270,17 +270,19 @@ const BuyConfirm = ({ item, onClose }) => {
                       </div>
                     </div>
                     <div className="flex justify-end gap-1 items-center">
-                      <WishlistButton
+                        <WishlistButton
                         profile={profile}
                         item={item}
                         isLoggedIn={isLoggedIn}
                       />
-                      <ClosetButton
-                        profile={profile}
-                        item={item}
-                        isLoggedIn={isLoggedIn}
-                        selectedColor={selectedColor}
-                      />
+                        {item.is3D && ( // Only render ClosetButton if item.is3D is true
+                        <ClosetButton
+                            profile={profile}
+                            item={item}
+                            isLoggedIn={isLoggedIn}
+                            selectedColor={selectedColor}
+                          />
+                      )}
                       {isLoggedIn && (
                         <button
                           onClick={mulletReport}
@@ -291,7 +293,7 @@ const BuyConfirm = ({ item, onClose }) => {
                       )}
                       <button
                         onClick={onClose}
-                        className="flex-none flex md:relative top-5 right-5 md:top-0 md:right-0 absolute items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+                        class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
                       >
                         <FontAwesomeIcon icon={faX} />
                       </button>
