@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
+import { OrbitControls, useGLTF, Environment, Preload } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
 import Sidebar from "../components/Sidebar";
@@ -12,6 +12,37 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Toast from '../../../shared/alerts';
+
+// Add this component at the top of your file
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('3D Rendering Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <h2 className="text-xl font-bold text-red-600">Failed to load 3D viewer</h2>
+            <p className="text-gray-600">Please refresh the page or try again later.</p>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // Add this component near the top of your file
 const BodyTypeInfoModal = ({ isOpen, onClose }) => {
@@ -56,31 +87,36 @@ const BodyTypeInfoModal = ({ isOpen, onClose }) => {
   );
 };
 
+// Update your Part component
 function Part({ url, position, color, texture }) {
-  const gltf = useGLTF(url);
-  const clonedScene = useMemo(() => SkeletonUtils.clone(gltf.scene), [gltf.scene]);
+  const [loadError, setLoadError] = useState(false);
+  const gltf = useGLTF(url, undefined, (error) => {
+    console.error('Model loading error:', error);
+    setLoadError(true);
+  });
 
-  useMemo(() => {
+  const clonedScene = useMemo(() => {
+    if (!gltf.scene) return null;
+    return SkeletonUtils.clone(gltf.scene);
+  }, [gltf.scene]);
+
+  const materialEffect = useMemo(() => {
+    if (!clonedScene) return;
     clonedScene.traverse((node) => {
       if (node.isMesh) {
-        node.material = node.material.clone();
-        
-        if (texture) {
-          // Apply texture if provided (for t-shirt)
-          const textureLoader = new TextureLoader();
-          textureLoader.load(texture, (tex) => {
-            tex.wrapS = tex.wrapT = RepeatWrapping;
-            tex.minFilter = NearestFilter;
-            node.material.map = tex;
-            node.material.color.set(color || "#ffffff");
-            node.material.roughness = 0.7;
-            node.material.metalness = 0.0;
-            node.material.needsUpdate = true;
-            node.material.map.flipY = false;
-            node.material.map.needsUpdate = true;
-          });
+        if (texture && node.material.name.includes('Shirt')) {
+          const tex = new TextureLoader().load(texture);
+          tex.wrapS = RepeatWrapping;
+          tex.wrapT = RepeatWrapping;
+          tex.minFilter = NearestFilter;
+          node.material.map = tex;
+          node.material.color.set(color || "#ffffff");
+          node.material.roughness = 0.7;
+          node.material.metalness = 0.0;
+          node.material.needsUpdate = true;
+          node.material.map.flipY = false;
+          node.material.map.needsUpdate = true;
         } else {
-          // Apply just color for other parts (avatar, hair, shorts)
           node.material.color.set(color || "#ffffff");
           node.material.roughness = node.material.name.includes('Hair') ? 0.3 : 0.5;
           node.material.metalness = node.material.name.includes('Hair') ? 0.1 : 0.2;
@@ -88,6 +124,10 @@ function Part({ url, position, color, texture }) {
       }
     });
   }, [clonedScene, color, texture]);
+
+  if (loadError || !clonedScene) {
+    return null;
+  }
 
   return (
     <primitive 
@@ -179,6 +219,20 @@ function CameraController({ view }) {
 
   return null;
 }
+
+const PreloadAssets = () => {
+  const urls = [
+    ...Object.values(bodyTypeURLs.Boy).flat(),
+    ...Object.values(bodyTypeURLs.Girl).flat(),
+    ...Object.values(hairURLs),
+    ...Object.values(tshirURLs.Boy).flat(),
+    ...Object.values(tshirURLs.Girl).flat(),
+    ...Object.values(shortsURLs.Boy).flat(),
+    ...Object.values(shortsURLs.Girl).flat(),
+  ];
+
+  return <Preload all urls={urls} />;
+};
 
 const CreateAvatarModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -764,79 +818,93 @@ const CharacterCustomization = () => {
         </button>
       </div>
 
-      <Canvas 
-        camera={{ position: [0, 100, 200] }}
-        shadows
-      >
-          
-        {/* Lights */}
-        <ambientLight intensity={0.4} />
-        <hemisphereLight intensity={0.7} />
-        <directionalLight
-          castShadow
-          position={[2, 4, 1]}
-          intensity={1.5}
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        <spotLight
-          position={[-2, 4, -1]}
-          intensity={0.5}
-          angle={0.5}
-          penumbra={1}
-        />
+      <ErrorBoundary>
+        <Suspense fallback={
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <FontAwesomeIcon icon={faSpinner} className="animate-spin text-4xl text-purple-600 mb-2" />
+              <p className="text-gray-600">Loading 3D viewer...</p>
+            </div>
+          </div>
+        }>
+          <Canvas 
+            camera={{ position: [0, 100, 200] }}
+            shadows
+            onError={(error) => {
+              console.error('Canvas Error:', error);
+            }}
+          >
+            <PreloadAssets />
+            {/* Lights */}
+            <ambientLight intensity={0.4} />
+            <hemisphereLight intensity={0.7} />
+            <directionalLight
+              castShadow
+              position={[2, 4, 1]}
+              intensity={1.5}
+              shadow-mapSize-width={1024}
+              shadow-mapSize-height={1024}
+            />
+            <spotLight
+              position={[-2, 4, -1]}
+              intensity={0.5}
+              angle={0.5}
+              penumbra={1}
+            />
 
-        <CameraController view={cameraView} />
-        
-        {/* Environment */}
-        <Environment preset="city" />
-        
-        {/* Platform and Models */}
-        <group position={[0, 0, 0]}>
-          <Platform />
-          {selectedHair && hairURLs[selectedHair] && (
-            <Part 
-              url={hairURLs[selectedHair]} 
-              position={[0, 0.85, 0]} 
-              color={haircolor} 
+            <CameraController view={cameraView} />
+            
+            {/* Environment */}
+            <Environment preset="city" />
+            
+            {/* Platform and Models */}
+            <group position={[0, 0, 0]}>
+              <Platform />
+              {selectedHair && hairURLs[selectedHair] && (
+                <Part 
+                  url={hairURLs[selectedHair]} 
+                  position={[0, 0.85, 0]} 
+                  color={haircolor} 
+                />
+              )}
+              <Part 
+                url={bodyTypeURLs[gender][selectedBodyType]} 
+                position={[0, 0, 0]} 
+                color={skincolor} 
+              />
+              {getTShirtURL() && (
+                <Part 
+                  key={`tshirt-${gender}-${selectedBodyType}`} 
+                  url={getTShirtURL()} 
+                  position={[0, 0, 0]}
+                  texture={selectedTexture} // Pass selected texture
+                />
+              )}
+              {getShortsURL() && (
+                <Part 
+                  key={`shorts-${gender}-${selectedBodyType}`} 
+                  url={getShortsURL()} 
+                  position={[0, 0, 0]}
+                  color="#000000"
+                />
+              )}
+            </group>
+       
+            <OrbitControls 
+              target={[0, 80, 0]}
+              minPolarAngle={0}
+              maxPolarAngle={Math.PI}
+              minDistance={80}
+              maxDistance={300}
+              enablePan={true}
+              panSpeed={0.5}
+              rotateSpeed={0.5}
+              enableDamping={true}
+              dampingFactor={0.05}
             />
-          )}
-          <Part 
-            url={bodyTypeURLs[gender][selectedBodyType]} 
-            position={[0, 0, 0]} 
-            color={skincolor} 
-          />
-          {getTShirtURL() && (
-            <Part 
-              key={`tshirt-${gender}-${selectedBodyType}`} 
-              url={getTShirtURL()} 
-              position={[0, 0, 0]}
-              texture={selectedTexture} // Pass selected texture
-            />
-          )}
-          {getShortsURL() && (
-            <Part 
-              key={`shorts-${gender}-${selectedBodyType}`} 
-              url={getShortsURL()} 
-              position={[0, 0, 0]}
-              color="#000000"
-            />
-          )}
-        </group>
-   
-        <OrbitControls 
-          target={[0, 80, 0]}
-          minPolarAngle={0}
-          maxPolarAngle={Math.PI}
-          minDistance={80}
-          maxDistance={300}
-          enablePan={true}
-          panSpeed={0.5}
-          rotateSpeed={0.5}
-          enableDamping={true}
-          dampingFactor={0.05}
-        />
-      </Canvas>
+          </Canvas>
+        </Suspense>
+      </ErrorBoundary>
     </div>
   </div>
 
