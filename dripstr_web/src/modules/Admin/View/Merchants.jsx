@@ -225,7 +225,7 @@ const Merchants = () => {
                                                 alt={merchant.merchant_name}
                                                 className="w-full h-40 rounded-md mb-1"
                                             />
-                                            <h2 className="text-xl font-semibold text-black">{merchant.shop_name || 'Unnamed Artist'}</h2>
+                                            <h2 className="text-xl font-semibold text-black">{merchant.shop_name || 'Unnamed Shop'}</h2>
                                             <h2 className="text-md font-semibold text-black">{merchant.full_Name || merchant.id?.full_name || 'No Name'}</h2>
                                             <p className="text-gray-700">{merchant.description || 'No description'}</p>
                                             <p className="text-gray-500">{merchant.address || 'No address'}</p>
