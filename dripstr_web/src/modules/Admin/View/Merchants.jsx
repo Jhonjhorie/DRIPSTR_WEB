@@ -268,9 +268,9 @@ const Merchants = () => {
                                 <div className="flex flex-col items-center">
                                     <p className="text-black font-medium mb-2">Business Permit</p>
                                     <img
-                                        src={selectedMerchant.shop_BusinessPermit || 'https://via.placeholder.com/150'}
+                                        src={selectedMerchant.shop_BusinessPermit || 'No Image Uploaded'}
                                         alt={`${selectedMerchant.shop_name || 'Artist'} selfie`}
-                                        className="w-24 h-24 object-contain rounded-md"
+                                        className="w-24 h-24 object-contain rounded-md cursor-pointer"
                                         onClick={() => handleImageClick(selectedMerchant.shop_BusinessPermit)}
                                     />
                                 </div>
@@ -279,7 +279,7 @@ const Merchants = () => {
                                     <img
                                         src={selectedMerchant.selfie || 'https://via.placeholder.com/150'}
                                         alt={`${selectedMerchant.shop_name || 'Artist'} selfie`}
-                                        className="w-24 h-24 object-contain rounded-md"
+                                        className="w-24 h-24 object-contain rounded-md cursor-pointer"
                                         onClick={() => handleImageClick(selectedMerchant.selfie)}
                                     />
                                 </div>
@@ -288,7 +288,7 @@ const Merchants = () => {
                                     <img
                                         src={selectedMerchant.validID || selectedMerchant.valid_id || 'https://via.placeholder.com/150'}
                                         alt={`${selectedMerchant.artist_name || 'Artist'} ID`}
-                                        className="w-24 h-24 object-contain rounded-md"
+                                        className="w-24 h-24 object-contain rounded-md cursor-pointer"
                                         onClick={() => handleImageClick(selectedMerchant.validID || selectedMerchant.valid_id)}
                                     />
                                 </div>
@@ -297,7 +297,7 @@ const Merchants = () => {
                                     <img
                                         src={selectedMerchant.gcash || 'https://via.placeholder.com/150'}
                                         alt={`${selectedMerchant.artist_name || 'Artist'} GCash`}
-                                        className="w-24 h-24 object-contain rounded-md"
+                                        className="w-24 h-24 object-contain rounded-md cursor-pointer"
                                         onClick={() => handleImageClick(selectedMerchant.gcash)}
                                     />
                                 </div>
