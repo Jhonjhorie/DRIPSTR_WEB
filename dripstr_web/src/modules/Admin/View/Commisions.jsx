@@ -76,7 +76,7 @@ const handleCheck = async (commissionId) => {
         }
 
         // Calculate the payment and get the current wallet revenue
-        const paymentToArtist = commission.payment * 0.99; // 99% of the commission amount
+        const paymentToArtist = commission.payment * 0.99;
         const walletId = wallet.id;
         const currentRevenue = wallet.revenue;
 
