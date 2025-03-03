@@ -155,7 +155,7 @@ function ShopPage() {
                 </h1>
                 
                 {/* Rating */}
-                <div className="flex w-1/3 justify-between md:justify-end items-center mt-2 sm:mt-0 gap-2">
+                <div className="flex w-full md:w-auto justify-between md:justify-end items-center mt-2 sm:mt-0 gap-2">
                   <div className={`flex items-center gap-1 px-3 py-1 ${isPremium ? 'bg-black text-yellow-400' : 'bg-secondary-color bg-opacity-10 text-primary-color'}  rounded-full`}>
                     <FontAwesomeIcon icon={faStar} />
                     <span className="font-bold">{shop.shop_Rating || "0"}</span>
