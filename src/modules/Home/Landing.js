@@ -13,16 +13,13 @@ function LandingPage() {
   const [showAbout, setShowAbout] = useState(true);
   const [showArt, setShowArt] = useState(false);
   const [showMer, setShowMer] = useState(false);
+  const [actionLog, setActionLog] = useState("");
    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
    const isMobile = useMediaQueryChecker();
   const navigate = useNavigate();
 
   const handleShow = (action) => {
     if (action === "login") {
-      setIsAuthModalOpen(true)
-    }else if (action === "loginArtist") {
-      setIsAuthModalOpen(true)
-    }else if (action === "loginMerchant") {
       setIsAuthModalOpen(true)
     } 
     else if (action === "shop") {
@@ -46,8 +43,10 @@ function LandingPage() {
     if (action === "login") {
       setIsAuthModalOpen(true)
     }else if (action === "loginArtist") {
+      setActionLog(action)
       setIsAuthModalOpen(true)
     }else if (action === "loginMerchant") {
+      setActionLog(action)
       setIsAuthModalOpen(true)
     } 
     // navigate(`/login`, { state: { action } });
@@ -58,6 +57,7 @@ function LandingPage() {
          {isAuthModalOpen && (
         <AuthModal
           isOpen={isAuthModalOpen}
+          actionLog={actionLog}
           onClose={() => setIsAuthModalOpen(false)}
         />
       )}
@@ -203,11 +203,6 @@ function LandingPage() {
 
             {/* Details Section with Parallax Effect */}
             <div className="flex flex-col md:flex-row items-end gap-8">
-              <img
-                src={require("@/assets/emote/mascot.png")}
-                alt="No Images Available"
-                className=" drop-shadow-customViolet z-0 hidden sm:flex h-96 "
-              />
               <div className="join join-vertical w-full">
                 {/* Accordion Item 1: Browse & Discover Unique Products */}
                 <div className="collapse collapse-arrow join-item border border-base-300">
@@ -431,11 +426,6 @@ function LandingPage() {
 
   {/* Details Section with Parallax Effect */}
   <div className="flex flex-col md:flex-row items-end gap-8">
-    <img
-      src={require("@/assets/emote/mascot.png")}
-      alt="No Images Available"
-      className="drop-shadow-customViolet z-0 hidden sm:flex h-96"
-    />
     <div className="join join-vertical w-full">
       {/* Accordion Item 1: Sign Up & Set Up Your Artist Portfolio */}
       <div className="collapse collapse-arrow join-item border border-base-300">
@@ -522,11 +512,6 @@ function LandingPage() {
         
           {/* Details Section with Parallax Effect */}
           <div className="flex flex-col md:flex-row items-end gap-8">
-            <img
-              src={require("@/assets/emote/mascot.png")}
-              alt="No Images Available"
-              className="drop-shadow-customViolet z-0 hidden mb:flex h-96"
-            />
             <div className="join join-vertical w-full">
               {/* Accordion Item 1: Sign Up & Set Up Your Store */}
               <div className="collapse collapse-arrow join-item border border-base-300">

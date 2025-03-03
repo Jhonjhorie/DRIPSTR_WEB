@@ -328,7 +328,7 @@ const BuyConfirm = ({ item, onClose }) => {
                             value={quantity}
                             onChange={handleInputChange}
                             placeholder="How many"
-                            className="input input-bordered input-neutral w-full max-w-xs"
+                            className="input input-bordered bg-white input-neutral w-full max-w-xs"
                           />
                         </label>
                         <button
@@ -338,7 +338,7 @@ const BuyConfirm = ({ item, onClose }) => {
                           +
                         </button>
                         <button
-                          className="btn text-white w-5 hover:bg-secondary-color hover:text-white bg-stone-80"
+                          className="btn text-white w-5 hover:bg-secondary-color hover:text-white bg-stone-800 bg-opacity-50"
                           onClick={handleDecrement}
                         >
                           -

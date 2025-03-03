@@ -106,6 +106,10 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
       setTimeout(() => {
         if (item) {
           navigate(`/product/${item.item_Name}`, { state: { item } });
+        } else if(actionLog == "loginMerchant") {
+          navigate("/account/shop-setup")
+        }else if(actionLog == "loginArtist") {
+          navigate("/account/shop-setup")
         } else {
           navigate("/");
         }
