@@ -12,9 +12,6 @@ import { useParams } from "react-router-dom";
 import FormCommision from "../Component/FormCommission";
 import History from "../Component/History";
 
-
-
-
 const { useState, useEffect } = React;
 
 function ArtistPage() {
@@ -1042,9 +1039,13 @@ function ArtistPage() {
           )}
         </div>
         {/* Floating history of commissions */}
-      
-            <History artistId={id}/>
-        
+
+        <div>
+          {/* Hide hihi History if the user is the artist */}
+          {currentUser?.id !== artist?.owner_Id && (
+            <History artistId={artist.id} />
+          )}
+        </div>
       </div>
 
       {showAlertFollow && (

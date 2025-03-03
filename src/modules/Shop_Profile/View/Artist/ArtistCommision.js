@@ -62,8 +62,7 @@ function ArtistCommision() {
           profiles(full_name, profile_picture)
         `
           )
-          .eq("artist_Id", artistId)
-          .eq("commission_Status", "pending");
+          .eq("artist_Id", artistId);
 
         if (commissionError) {
           console.error("Error fetching commissions:", commissionError.message);
@@ -136,10 +135,11 @@ function ArtistCommision() {
             <div className=" bg-white shadow-md rounded-md w-auto h-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b text-slate-100 bg-custom-purple glass">
+                  <tr className="border-b text-slate-100  bg-custom-purple glass">
                     <th className="py-2 px-4">Sender Name</th>
                     <th className="py-2 px-4">Reference Image</th>
                     <th className="py-2 px-4">Deadline</th>
+                    <th className="py-2 px-4">Payment</th>
                     <th className="py-2 px-4">Status</th>
                     <th className="py-2 px-4">Action</th>
                   </tr>
@@ -169,6 +169,15 @@ function ArtistCommision() {
                         {commission.deadline}
                       </td>
                       <td className="py-2 text-slate-900 px-4">
+                        {commission.payment}
+                      </td>
+                      <td
+                        className={`py-2 px-4 ${
+                          commission.commission_Status === "Processed"
+                            ? "text-green-500 font-semibold"
+                            : "text-slate-900"
+                        }`}
+                      >
                         {commission.commission_Status}
                       </td>
                       <td className="py-2 px-4">
@@ -189,7 +198,6 @@ function ArtistCommision() {
             </div>
           )}
         </div>
-     
       </div>
 
       {modalOpen && selectedCommission && (
@@ -252,7 +260,7 @@ function ArtistCommision() {
       {modalOpenRefImage && selectedCommission && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-custom-purple relative text-slate-900 p-4 rounded-md shadow-lg w-auto">
-          <button
+            <button
               onClick={() => {
                 setModalOpenRefImage(false);
               }}
