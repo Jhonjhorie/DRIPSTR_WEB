@@ -5,6 +5,7 @@ import { SkeletonUtils } from "three-stdlib";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import { bodyTypeURLs, hairURLs } from "../../../constants/avatarConfig";
+import Toast from '../../../shared/alerts';
 
 function Part({ url, position, color }) {
   const gltf = useGLTF(url);
@@ -29,6 +30,7 @@ const CharacterCustomization = () => {
   const [skincolor, setSkinColor] = useState("#f5c9a6");
   const [haircolor, setHairColor] = useState("#000000");
   const [name, setName] = useState("");
+  const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
 
   const navigate = useNavigate();
 
@@ -43,29 +45,37 @@ const CharacterCustomization = () => {
 
   const handleSave = async () => {
     try {
-      // Get the current session
       const { data: session, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
-        console.error("Session Error:", sessionError);
-        alert("Unable to save character. Please try again.");
+        setToast({
+          show: true,
+          message: "Unable to save character. Please try again.",
+          type: 'error'
+        });
         return;
       }
 
       const account_ID = session?.session?.user?.id;
 
       if (!account_ID) {
-        alert("User not authenticated.");
+        setToast({
+          show: true,
+          message: "User not authenticated.",
+          type: 'error'
+        });
         return;
       }
 
-      // Validate required fields
-      if ( !selectedHair) {
-        alert("Please complete all required fields before saving.");
+      if (!selectedHair) {
+        setToast({
+          show: true,
+          message: "Please complete all required fields before saving.",
+          type: 'warning'
+        });
         return;
       }
 
-      // Prepare character data
       const characterData = {
         gender,
         bodytype: selectedBodyType,
@@ -73,142 +83,193 @@ const CharacterCustomization = () => {
         skincolor,
         haircolor,
         account_id: account_ID,
-       };
+      };
 
-      // Insert into Supabase database
       const { data, error } = await supabase.from("avatars").insert([characterData]);
 
       if (error) {
-        console.error("Database Error:", error);
-        alert("Failed to save character. Please try again.");
+        setToast({
+          show: true,
+          message: "Failed to save character. Please try again.",
+          type: 'error'
+        });
         return;
       }
 
-      console.log("Character Saved:", data);
-      alert("Character customization saved successfully!");
+      setToast({
+        show: true,
+        message: "Character created successfully!",
+        type: 'success'
+      });
+
+      // Redirect after successful creation
+      setTimeout(() => {
+        navigate("/account/avatar");
+      }, 2000);
+
     } catch (error) {
-      console.error("Unexpected Error:", error);
-      alert("An unexpected error occurred. Please try again.");
+      setToast({
+        show: true,
+        message: "An unexpected error occurred. Please try again.",
+        type: 'error'
+      });
     }
   };
 
   return (
-    <div className="p-4 flex min-h-screen bg-slate-200">
-      <div className="p-4 flex-1">
-        <div className="grid md:grid-cols-2 gap-6">
-
-
-        {/* 3D Model Container */}
-        <div className="flex-1 h-[500px] rounded-lg shadow-lg bg-gray-100">
-            <Canvas 
-            camera={{ position: [0, -20, 120] }}
-            style={{ background: "linear-gradient(to top, #1e3a8a, #3b82f6)" }}
-            >
-              <ambientLight intensity={0.8} />
-              <hemisphereLight intensity={1} />
-              <directionalLight intensity={1.2} position={[0, 0, 1]} />
-              <group>
-                {selectedHair && hairURLs[selectedHair] && (
-                  <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={haircolor} />
-                )}
-                <Part url={currentBody} position={[0, 0, 0]} color={skincolor} />
-              </group>
-             <OrbitControls target={[0, 110, 0]} minPolarAngle={Math.PI / 2} maxPolarAngle={Math.PI / 2} />
-            </Canvas>
-            <div className="p-2 w-full gap-3 flex flex-row justify-end mt-4">
-
-              <button
-                className="p-2 w-40 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={handleSave}
-              >
-                Save
-              </button>
-              <button
-                className="p-2 w-40 bg-gray-500 text-white rounded hover:bg-gray-600"
-                onClick={() => navigate("/account/Avatar")}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-
-
-          {/* Avatar Controls */}
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-xl font-bold text-gray-800">Create Character</h1>
-            </div>
-
-            {/* <div>
-              <label className="block text-gray-700 font-semibold mb-2">Name</label>
-              <input
-                type="text"
-                className="w-full p-2 border rounded bg-white"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+    // Remove min-h-screen since header is already taking up space
+    <div className="bg-base-200">
+      {/* Main Content - subtract header height */}
+      <div className="hero h-[calc(100vh-5rem)] py-5"> {/* Adjusted height and padding */}
+        <div className="card w-full max-w-6xl bg-base-100 shadow-xl">
+          <div className="card-body p-4"> {/* Reduced padding */}
+            {/* Toast Notification */}
+            {toast.show && (
+              <Toast
+                message={toast.message}
+                type={toast.type}
+                onClose={() => setToast({ show: false, message: '', type: 'info' })}
               />
-            </div> */}
-            <label className="block text-gray-700 font-semibold mb-2">Gender</label>
-            <select
-              className="w-full p-2 border rounded bg-white"
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-            >
-              <option value="Boy">Men</option>
-              <option value="Girl">Woman</option>
-            </select>
-            <label className="block text-gray-700 font-semibold mb-2 mt-2">Body Type</label>
-            <select
-              className="w-full p-2 border rounded bg-white"
-              value={selectedBodyType}
-              onChange={(e) => setSelectedBodyType(e.target.value)}
-            >
-              {Object.keys(bodyTypeURLs[gender]).map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-            <label className="block text-gray-700 font-semibold mb-2 mt-2">Skin Color</label>
-            <div className="flex space-x-2">
-              {[
-                { label: "Light", color: "#f5c9a6" },
-                { label: "Medium", color: "#d2a77d" },
-                { label: "Tan", color: "#a67c5b" },
-                { label: "Dark", color: "#67442e" },
-              ].map((option) => (
-                <button
-                  key={option.color}
-                  className={`w-10 h-10 border-2 ${
-                    skincolor === option.color ? "border-blue-500" : "border-gray-300"
-                  }`}
-                  style={{ backgroundColor: option.color }}
-                  onClick={() => setSkinColor(option.color)}
-                />
-              ))}
-            </div>
-            <label className="block text-gray-700 font-semibold mb-2 mt-2">Hair</label>
-            <select
-              className="w-full p-2 border rounded bg-white"
-              value={selectedHair}
-              onChange={(e) => setSelectedHair(e.target.value)}
-            >
-              {Object.entries(hairURLs).map(([key, url]) => (
-                <option key={key} value={key}>
-                  {key}
-                </option>
-              ))}
-            </select>
-            <label className="block text-gray-700 font-semibold mb-2 mt-4">Hair Color</label>
-            <input
-              type="color"
-              className="w-20 h-10 p-1 border rounded"
-              value={haircolor}
-              onChange={(e) => setHairColor(e.target.value)}
-            />
-          </div>
+            )}
 
-  
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4"> {/* Reduced gap */}
+              {/* Left Side - 3D Preview - Adjusted height */}
+              <div className="h-[calc(100vh-12rem)] rounded-lg overflow-hidden shadow-lg">
+                <div className="relative w-full h-full">
+                  <Canvas 
+                    camera={{ position: [0, -20, 120] }}
+                    style={{ background: "linear-gradient(to top, #1e3a8a, #3b82f6)" }}
+                  >
+                    <ambientLight intensity={0.8} />
+                    <hemisphereLight intensity={1} />
+                    <directionalLight intensity={1.2} position={[0, 0, 1]} />
+                    <group>
+                      {selectedHair && hairURLs[selectedHair] && (
+                        <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={haircolor} />
+                      )}
+                      <Part url={currentBody} position={[0, 0, 0]} color={skincolor} />
+                    </group>
+                    <OrbitControls 
+                      target={[0, 110, 0]} 
+                      minPolarAngle={Math.PI / 2} 
+                      maxPolarAngle={Math.PI / 2} 
+                    />
+                  </Canvas>
+                </div>
+              </div>
+
+              {/* Right Side - Controls - Added overflow-y-auto */}
+              <div className="space-y-4 h-[calc(100vh-12rem)] overflow-y-auto">
+                <div className="card bg-base-100 shadow-lg">
+                  <div className="card-body">
+                    <h2 className="card-title mb-4">Customize Your Avatar</h2>
+
+                    {/* Gender Selection */}
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text text-gray-700 font-medium">Gender</span>
+                      </label>
+                      <select
+                        className="select select-primary w-full"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                      >
+                        <option value="Boy">Men</option>
+                        <option value="Girl">Woman</option>
+                      </select>
+                    </div>
+
+                    {/* Body Type Selection */}
+                    <div className="form-control mt-4">
+                      <label className="label">
+                        <span className="label-text text-gray-700 font-medium">Body Type</span>
+                      </label>
+                      <select
+                        className="select select-primary w-full"
+                        value={selectedBodyType}
+                        onChange={(e) => setSelectedBodyType(e.target.value)}
+                      >
+                        {Object.keys(bodyTypeURLs[gender]).map((type) => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Skin Color Selection */}
+                    <div className="form-control mt-4">
+                      <label className="label">
+                        <span className="label-text text-gray-700 font-medium">Skin Tone</span>
+                      </label>
+                      <div className="flex gap-4">
+                        {[
+                          { label: "Light", color: "#f5c9a6" },
+                          { label: "Medium", color: "#d2a77d" },
+                          { label: "Tan", color: "#a67c5b" },
+                          { label: "Dark", color: "#67442e" },
+                        ].map((option) => (
+                          <button
+                            key={option.color}
+                            className={`w-12 h-12 rounded-full transition-all ${
+                              skincolor === option.color 
+                                ? 'ring-4 ring-primary ring-offset-2' 
+                                : 'hover:scale-110'
+                            }`}
+                            style={{ backgroundColor: option.color }}
+                            onClick={() => setSkinColor(option.color)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Hair Style Selection */}
+                    <div className="form-control mt-4">
+                      <label className="label">
+                        <span className="label-text text-gray-700 font-medium">Hair Style</span>
+                      </label>
+                      <select
+                        className="select select-primary w-full"
+                        value={selectedHair}
+                        onChange={(e) => setSelectedHair(e.target.value)}
+                      >
+                        {Object.entries(hairURLs).map(([key]) => (
+                          <option key={key} value={key}>{key}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Hair Color Selection */}
+                    <div className="form-control mt-4">
+                      <label className="label">
+                        <span className="label-text text-gray-700 font-medium">Hair Color</span>
+                      </label>
+                      <input
+                        type="color"
+                        className="w-24 h-12 cursor-pointer rounded"
+                        value={haircolor}
+                        onChange={(e) => setHairColor(e.target.value)}
+                      />
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="card-actions justify-end mt-8 gap-4">
+                      <button
+                        className="btn btn-ghost"
+                        onClick={() => navigate("/account/Avatar")}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        onClick={handleSave}
+                      >
+                        Create Avatar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

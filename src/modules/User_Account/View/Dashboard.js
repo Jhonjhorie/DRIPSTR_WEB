@@ -233,7 +233,7 @@ const Account = () => {
                 <div className="text-center py-8">
                   <p className="text-gray-500">No orders yet</p>
                   <Link
-                    to="/shop"
+                    to="/"
                     className="text-blue-600 hover:underline text-sm block mt-2"
                   >
                     Start shopping

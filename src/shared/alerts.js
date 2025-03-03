@@ -14,7 +14,7 @@ const Toast = ({ message, type = 'info', onClose }) => {
       case 'success':
         return {
           class: 'alert-success',
-          image: '/emote/happy.png'
+          image: '/emote/success.png'
         };
       case 'error':
         return {
@@ -24,12 +24,12 @@ const Toast = ({ message, type = 'info', onClose }) => {
       case 'warning':
         return {
           class: 'alert-warning',
-          image: '/emote/hmmm.png'
+          image: '/emote/error.png'
         };
       default:
         return {
           class: 'alert-info',
-          image: '/emote/think.png'
+          image: '/emote/question.png'
         };
     }
   };
