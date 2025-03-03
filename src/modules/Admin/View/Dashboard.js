@@ -68,15 +68,17 @@ const Dashboard = () => {
   const fetchCustomerCount = async () => {
     try {
       const { count, error } = await supabase
-        .from('accounts')
-        .select('id', { count: 'exact' })  // Replace 'id' with any column in the table
-
+        .from('profiles')
+        .select('*', { count: 'exact' }) // Use '*' or any column; count option is required
+        .eq("isMerchant", false) // Where isMerchant is false
+        .or("isArtist.eq.false,isArtist.is.null"); // Where isArtist is false OR null
+  
       if (error) throw error;
-      
-      return count;  // Return the count to use it later
+  
+      return count; // Returns the count of matching rows
     } catch (error) {
       console.error('Error fetching customer count:', error.message);
-      return 0;  // Return 0 in case of an error
+      return 0; // Return 0 in case of an error
     }
   };
 
