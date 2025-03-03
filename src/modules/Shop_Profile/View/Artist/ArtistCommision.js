@@ -97,7 +97,7 @@ function ArtistCommision() {
     try {
       const { error } = await supabase
         .from("art_Commision")
-        .update({ commission_Status: "done" })
+        .update({ commission_Status: "Completed" })
         .eq("id", commissionId);
 
       if (error) {
@@ -189,6 +189,7 @@ function ArtistCommision() {
             </div>
           )}
         </div>
+     
       </div>
 
       {modalOpen && selectedCommission && (

@@ -18,6 +18,7 @@ function Products() {
   const [adAdsAlert, setAdAdsAlert] = useState(false);
   const [imageSrc, setImageSrc] = React.useState("");
   const [showAlert, setShowAlert] = React.useState(false); // Alert
+  const [showAlertMI, setShowAlertMI] = React.useState(false); // Alert FOR MISSING YOU
   const [showAlertAd, setShowAlertAD] = React.useState(false); // Alert
   const [showAlertUnpost, setShowAlertUnpost] = React.useState(false); // Alert Unpost
   const [showAlertdelAD, setShowAlertDelad] = React.useState(false); // Alert Unpost
@@ -253,51 +254,64 @@ function Products() {
       console.error("Error updating the variant:", error);
     }
   };
-  const handleDeleteVarInfo = async (variantIndex, sizeIndex) => {
-    try {
-      // Ensure `selectedItem` and `item_Variant` exist
-      if (!selectedItem || !selectedItem.item_Variant) {
-        console.error("Selected item or item_Variant is undefined.");
-        alert("No item selected.");
-        return;
-      }
+  // const handleDeleteVarInfo = async (variantIndex, sizeIndex) => {
+  //   try {
+  //     // Ensure `selectedItem` and `item_Variant` exist
+  //     if (!selectedItem || !selectedItem.item_Variant) {
+  //       console.error("Selected item or item_Variant is undefined.");
+  //       alert("No item selected.");
+  //       return;
+  //     }
 
-      // Copy the `item_Variant` array
-      const updatedVariants = [...selectedItem.item_Variant];
+  //     // Copy the `item_Variant` array
+  //     const updatedVariants = [...selectedItem.item_Variant];
 
-      // Get the specific variant
-      const targetVariant = updatedVariants[variantIndex];
+  //     // Get the specific variant
+  //     const targetVariant = updatedVariants[variantIndex];
 
-      if (!targetVariant || !targetVariant.sizes) {
-        console.error("Target variant or sizes is undefined.");
-        alert("Invalid variant or size.");
-        return;
-      }
+  //     if (!targetVariant || !targetVariant.sizes) {
+  //       console.error("Target variant or sizes is undefined.");
+  //       alert("Invalid variant or size.");
+  //       return;
+  //     }
 
-      // Remove the specific size
-      targetVariant.sizes = targetVariant.sizes.filter(
-        (_, idx) => idx !== sizeIndex
-      );
+  //     // Remove the specific size
+  //     targetVariant.sizes = targetVariant.sizes.filter(
+  //       (_, idx) => idx !== sizeIndex
+  //     );
 
-      // Update the database
-      const { error } = await supabase
-        .from("shop_Product")
-        .update({ item_Variant: updatedVariants })
-        .eq("id", selectedItem.id);
+  //     // Update the database
+  //     const { error } = await supabase
+  //       .from("shop_Product")
+  //       .update({ item_Variant: updatedVariants })
+  //       .eq("id", selectedItem.id);
 
-      if (error) {
-        console.error("Error deleting the variant:", error);
-        alert("Failed to delete the size.");
-      } else {
-        setShowAlertEditDone(true);
-        setTimeout(() => setShowAlertEditDone(false), 3000);
-      }
-    } catch (error) {
-      console.error("Error deleting the size:", error);
-    }
-  };
+  //     if (error) {
+  //       console.error("Error deleting the variant:", error);
+  //       alert("Failed to delete the size.");
+  //     } else {
+  //       setShowAlertEditDone(true);
+  //       setTimeout(() => setShowAlertEditDone(false), 3000);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error deleting the size:", error);
+  //   }
+  // };
   const PostNotify = async () => {
     try {
+      // Check if selected item has variants with size info
+      if (
+        !selectedItem.item_Variant ||
+        selectedItem.item_Variant.length === 0 ||
+        selectedItem.item_Variant.some(
+          (variant) => !variant.sizes || variant.sizes.length === 0
+        )
+      ) {
+        setShowAlertMI(true);
+        setTimeout(() => setShowAlertMI(false), 3000);
+        return;
+      }
+
       // Update the `is_Post` status
       const { error } = await supabase
         .from("shop_Product")
@@ -306,7 +320,6 @@ function Products() {
 
       if (error) throw error;
 
-      // Re-fetch the updated product and image URL
       const { data: updatedItem, error: fetchError } = await supabase
         .from("shop_Product")
         .select("*")
@@ -315,10 +328,10 @@ function Products() {
 
       if (fetchError) throw fetchError;
 
-      // Fetch the image path for the first variant
       const { data: publicUrlData } = supabase.storage
         .from("product")
         .getPublicUrl(updatedItem.item_Variant?.[0]?.img || "");
+
       const totalQuantity = updatedItem.item_Variant?.reduce(
         (total, variant) =>
           total +
@@ -328,10 +341,9 @@ function Products() {
           ),
         0
       );
-      // Update state with the new product details
+
       fetchUserProfileAndShop();
 
-      // Notify user and reset states
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 3000);
       setSelectedItem(null);
@@ -340,6 +352,7 @@ function Products() {
       console.error("Error updating the post status:", error);
     }
   };
+
   const unPostNotify = async () => {
     try {
       // Update the `is_Post` status
@@ -507,29 +520,31 @@ function Products() {
         .select("shop_Ads")
         .eq("id", selectedShopId)
         .single();
-  
+
       if (fetchError) {
         console.error("Error fetching shop ads:", fetchError);
         alert("Failed to fetch shop ads.");
         return;
       }
-  
-      const updatedAds = shopData.shop_Ads.filter((ad) => ad.id !== selectedAd.id);
+
+      const updatedAds = shopData.shop_Ads.filter(
+        (ad) => ad.id !== selectedAd.id
+      );
 
       const { error: updateError } = await supabase
         .from("shop")
         .update({ shop_Ads: updatedAds })
         .eq("id", selectedShopId);
-  
+
       if (updateError) {
         console.error("Error deleting ad:", updateError);
         alert("Failed to delete the ad.");
         return;
       }
-  
+
       setIsViewModalOpen(false);
       await fetchUserProfileAndShop();
-  
+
       setShowAlertDelad(true);
       setTimeout(() => setShowAlertDelad(false), 3000);
     } catch (error) {
@@ -537,7 +552,7 @@ function Products() {
       alert("An unexpected error occurred.");
     }
   };
-  
+
   //Shops ads images
   const handleAddAd = async () => {
     if (!imageSrcAd || !adName) {
@@ -664,10 +679,10 @@ function Products() {
       </div>
 
       <div className="w-full h-full bg-slate-300 ">
-        <div className=" text-4xl text-custom-purple font-bold p-2 py-3">
+        <div className=" text-2xl md:text-4xl text-custom-purple font-semibold p-2 py-3">
           Manage Products
         </div>
-        <div className="h-[550px] p-5 w-full overflow-hidden rounded-md shadow-md bg-slate-100">
+        <div className="h-[550px] mt-2 mb-20 md:mt-0 md:mb-0   p-5 w-full overflow-hidden rounded-md shadow-md bg-slate-100">
           <div className=" w-full flex gap-5 place-items-center justify-between mb-2">
             <div className="md:flex md:gap-2 font-semibold text-slate-400">
               <div
@@ -699,9 +714,9 @@ function Products() {
               <box-icon type="solid" color="#e2e8f0" name="palette"></box-icon>
             </div>
           </div>
-          <div className="w-full h-full custom-scrollbar bg-slate-200 shadow-inner rounded-md p-4 overflow-y-scroll">
+          <div className="w-full h-full custom-scrollbar bg-slate-200 shadow-inner rounded-md p-4 overflow-y-scroll overflow-x-auto">
             {activeTabs === "manage-products" && (
-              <div className="mb-8">
+              <div className="mb-8 min-w-[800px]">
                 <div className="flex justify-between">
                   <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">
                     Manage Product
@@ -806,12 +821,12 @@ function Products() {
                   })
                 ) : (
                   <div className="">
-                    <div className="w-fill h-full justify-items-center content-center">
+                    <div className="w-full h-full justify-items-center content-center">
                       <div className="mt-10">
                         <img
                           src={sadEmote}
                           alt="Success Emote"
-                          className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                          className="object-contain h-[100px]  rounded-lg p-1 drop-shadow-customViolet"
                         />
                       </div>
                       <div className="">
@@ -826,7 +841,7 @@ function Products() {
               </div>
             )}
             {activeTabs === "manage-adds" && (
-              <div>
+              <div className="mb-8 min-w-[800px]">
                 <div className="flex justify-between">
                   <h2 className="text-xl md:text-3xl text-custom-purple iceland-regular mt-3 md:mt-0 font-bold mb-4 flex place-items-center gap-1 md:gap-5">
                     Manage Shop Advertisement
@@ -898,7 +913,7 @@ function Products() {
                         <img
                           src={sadEmote}
                           alt="Success Emote"
-                          className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+                          className="object-contain  h-[100px] rounded-lg p-1 drop-shadow-customViolet"
                         />
                       </div>
                       <div className="">
@@ -1039,9 +1054,41 @@ function Products() {
           </div>
         </div>
       )}
+      {showAlertMI && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-10 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple  text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Item can't be post, there's missing size information</span>
+          </div>
+        </div>
+      )}
       {showAlertAd && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-          <div className="absolute -top-44 left-28 -z-10 justify-items-center content-center">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={questionEmote}
@@ -1138,14 +1185,17 @@ function Products() {
       )}
       {/* EDIT, VIEW, POST, REMOVE ITEM */}
       {selectedItem && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
-          <div className="bg-white rounded-lg  md:w-1/2 h-2/3 w-full ">
+        <div
+        onClick={() => setSelectedItem(false)}
+        className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
+          <div onClick={(e) => e.stopPropagation()}
+           className="bg-white rounded-lg  md:w-1/2 h-2/3 w-full ">
             <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 w-full rounded-t-md  " />
-            <div className=" flex justify-between items-center ">
+            <div className=" flex justify-between items-center pr-2 ">
               <div className="text-custom-purple font-semibold iceland-regular text-2xl p-2">
                 ITEM INFORMATION
               </div>
-              <div className="h-full w-2/12 flex items-center justify-center">
+              <div className="h-full w-auto md:w-2/12 flex items-center justify-center">
                 {selectedItem.is_Post === false ? (
                   // Red dot and "Not Posted" text
                   <div className="flex items-center gap-2">
@@ -1168,9 +1218,9 @@ function Products() {
               </div>
             </div>
 
-            <div className="h-full bg-white w-full relative p-2 flex gap-2">
-              <div className=" w-4/12 h-full relative">
-                <div className="w-full h-[200px] rounded-sm bg-slate-100 p-2 shadow-inner shadow-custom-purple mb-2">
+            <div className="h-full bg-white w-full relative overflow-hidden overflow-y-scroll p-2 md:flex gap-2">
+              <div className="w-full md:w-4/12 h-auto md:h-full relative">
+                <div className=" w-[200px] md:w-full place-self-center h-[200px] rounded-sm bg-slate-100 p-2 shadow-inner shadow-custom-purple mb-2">
                   <img
                     src={selectedItem.firstVariant.imagePath}
                     alt={`Image of ${selectedItem.item_Name}`}
@@ -1206,13 +1256,13 @@ function Products() {
                 </div>
                 <div
                   onClick={handleCloseModal}
-                  className="bg-custom-purple w-full bottom-2 p-1 justify-center flex iceland-regular rounded-sm glass 
-                  hover:scale-95 duration-300 cursor-pointer absolute text-black font-semibold hover:bg-primary-color"
+                  className="bg-custom-purple w-full md:bottom-2 scale-95 p-1 justify-center flex iceland-regular rounded-sm glass 
+                  hover:scale-90 duration-300 cursor-pointer absolute text-black font-semibold hover:bg-primary-color"
                 >
                   CLOSE
                 </div>
               </div>
-              <div className="bg-slate-900 w-full h-full overflow-hidden relative overflow-y-scroll custom-scrollbar">
+              <div className="bg-slate-900 w-full mt-10 md:mt-0 h-full overflow-hidden relative overflow-y-scroll custom-scrollbar">
                 <div className=" w-full bg-white h-auto px-2 ">
                   <div className="sticky bg-white h-auto z-10 top-0 flex justify-between place-items-center ">
                     <div className="text-2xl text-primary-color  font-bold">
@@ -1446,7 +1496,7 @@ function Products() {
           </div>
           {/* Post Variant Confirmation */}
           {showAlert2 && (
-            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800">
                   Post this Item{" "}
@@ -1460,13 +1510,13 @@ function Products() {
                     onClick={handleClosePostItem}
                     className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
                   >
-                    No! go back.
+                    Cancel
                   </button>
                   <button
                     onClick={PostNotify}
                     className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
                   >
-                    Yeah sure!
+                    Okay
                   </button>
                 </div>
               </div>
@@ -1474,7 +1524,7 @@ function Products() {
           )}
           {/* Unpost Variant Confirmation */}
           {showAlertUnP && (
-            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
                   Are you sure you want to Unpost this <br />
@@ -1488,13 +1538,13 @@ function Products() {
                     onClick={handleClosePostItem}
                     className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
                   >
-                    No! go back.
+                    Cancel
                   </button>
                   <button
                     onClick={unPostNotify}
                     className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
                   >
-                    Yeah sure!
+                    Okay
                   </button>
                 </div>
               </div>
@@ -1502,7 +1552,7 @@ function Products() {
           )}
           {/* Delete Variant Confirmation */}
           {showAlertDelCon && (
-            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
                   Are you sure you want to Delete this <br />
@@ -1516,13 +1566,13 @@ function Products() {
                     onClick={handleClosePostItem}
                     className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
                   >
-                    No! go back.
+                    Cancel
                   </button>
                   <button
                     onClick={DeleteItem}
                     className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
                   >
-                    Yeah sure!
+                    Okay
                   </button>
                 </div>
               </div>
@@ -1530,7 +1580,7 @@ function Products() {
           )}
           {/* Delete Variant Confirmation */}
           {ConfirmUpdate && (
-            <div className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div  onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
                   Are you sure you want to Update this <br />
@@ -1563,13 +1613,13 @@ function Products() {
                     }}
                     className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
                   >
-                    No! go back.
+                    Cancel
                   </button>
                   <button
                     onClick={handleConfirmedUpdate}
                     className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
                   >
-                    Yeah sure!
+                    Okay
                   </button>
                 </div>
               </div>
@@ -1577,7 +1627,7 @@ function Products() {
           )}
           {/* Alert Update Variant Confirmation */}
           {showAlertEditDone && (
-            <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+            <div  onClick={(e) => e.stopPropagation()}className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
               <div
                 role="alert"
                 className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
@@ -1676,7 +1726,7 @@ function Products() {
       {isViewModalOpen && selectedAd && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75">
           <div className="bg-white rounded-lg p-5 w-full max-w-md shadow-lg relative">
-          <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
             </div>
             <h2 className="text-xl font-bold text-custom-purple mb-3">
@@ -1690,11 +1740,17 @@ function Products() {
               />
             </div>
             <div className="flex justify-between mt-2">
-              <button  onClick={() => setIsViewModalOpen(false)} className="duration-200  bg-custom-purple glass hover:bg-primary-color text-white  px-2 py-1 rounded">
+              <button
+                onClick={() => setIsViewModalOpen(false)}
+                className="duration-200  bg-custom-purple glass hover:bg-primary-color text-white  px-2 py-1 rounded"
+              >
                 Close
               </button>
 
-              <button onClick={handleDeleteAd} className="duration-200  hover:bg-red-700 glass text-white bg-red-500 px-2 py-1 rounded">
+              <button
+                onClick={handleDeleteAd}
+                className="duration-200  hover:bg-red-700 glass text-white bg-red-500 px-2 py-1 rounded"
+              >
                 Delete
               </button>
             </div>
@@ -1703,37 +1759,36 @@ function Products() {
       )}
       {showAlertdelAD && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-        <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
-          <div className="mt-10 ">
-            <img
-              src={successEmote}
-              alt="Success Emote"
-              className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-            />
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-red-600 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Advertisement is Successfully Deleted.</span>
           </div>
         </div>
-        <div
-          role="alert"
-          className="alert alert-success shadow-md flex items-center p-4 bg-red-600 text-slate-50 font-semibold rounded-md"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 shrink-0 stroke-current mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>Advertisement is Successfully Deleted.</span>
-        </div>
-      </div>
       )}
-  
     </div>
   );
 }

@@ -22,7 +22,7 @@ const AddItem = () => {
   const [variantToDeleteName, setVariantToDeleteName] = useState("");
   const [selectedShopId, setSelectedShopId] = useState(null);
   const [shopData, setShopData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCategoryYN, setSelectedCategoryVouchYN] = useState("");
@@ -248,8 +248,8 @@ const AddItem = () => {
 
       // Prepare the formatted variants
       const formattedVariants = updatedVariants.map((variant) => ({
-        img: variant.image || "", // Use the uploaded image path
-        imagePath: variant.imagePath || "", // Include the public URL
+        img: variant.image || "",
+        imagePath: variant.imagePath || "", 
         variant_Name: variant.name,
         sizes: variant.info.map((info, index) => ({
           id: index + 1,
@@ -310,11 +310,11 @@ const AddItem = () => {
       setImageSrc(""); // Clear the image preview
       const fileInput = document.getElementById("imageInput");
       if (fileInput) {
-        fileInput.value = ""; // Reset the file input field
+        fileInput.value = ""; 
       }
-      setVariantToDelete(null); // Reset the variant index
-      setVariantToDeleteName(""); // Reset the variant name
-      setShowModalDelete(false); // Close the modal
+      setVariantToDelete(null); 
+      setVariantToDeleteName(""); 
+      setShowModalDelete(false); 
     }
   };
 
@@ -518,7 +518,7 @@ const AddItem = () => {
                   ></input>{" "}
                 </div>
               </div>
-              <div className="mt-2">
+              <div className="mb-5 md:mb-0 -mt-2">
                 <label className="text-slate-950 font-semibold mr-2 text-[15px]">
                   Enable 3D Preview:
                 </label>
@@ -535,7 +535,7 @@ const AddItem = () => {
                 </div>
 
                 {is3DEnabled && (
-                  <div className="mt-2">
+                  <div className="mt-2 md:mb-0 mb-5">
                     <label className="text-slate-950 font-semibold mr-2 text-[15px]">
                       Upload Texture File (PNG):
                     </label>
@@ -552,14 +552,14 @@ const AddItem = () => {
                 )}
               </div>
             </div>
-            <div className="w-full h-full md:-mt-0 -mt-10 p-2 ">
+            <div className="w-full h-full md:-mt-0 mt-2 p-2 ">
               <div
                 onClick={addVariant}
                 className="p-2 w-28 text-center cursor-pointer bg-green-700 rounded-md shadow-slate-700 hover:scale-95 duration-200 shadow-md text-white"
               >
                 Add Variant
               </div>
-              <div className="w-full h-[70vh]   overflow-y-scroll mt-2 p-3">
+              <div className="w-full h-[70vh] overflow-y-scroll mt-2 p-1 md:p-3">
                 {variants.length === 0 && (
                   <div className="w-fill h-full justify-items-center content-center">
                     <div className="-mt-10">

@@ -111,7 +111,7 @@ function SideBar() {
               <img
                 src={shopImageUrl}
                 alt="Shop Logo"
-                className="drop-shadow-custom object-cover rounded-full h-36    w-full"
+                className="drop-shadow-custom object-cover rounded-full h-[135px] w-full"
               />
             </div>
             <div  onClick={() => navigate("/shop/Account")} data-tip="Edit Merchant Account" className="  p-2 tooltip tooltip-left duration-200 cursor-pointer">
@@ -215,6 +215,15 @@ function SideBar() {
               Merchant Wallet
             </a>
             <box-icon type='solid' color="#4D077C" name='wallet'></box-icon>
+          </li>
+          <li
+            onClick={() => navigate("/shop/CommissionPage")}
+            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+          >
+            <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
+              Commissions
+            </a>
+            <box-icon type='solid' color="#4D077C" name='bookmark-heart'></box-icon>
           </li>
         </ul>
       </div>

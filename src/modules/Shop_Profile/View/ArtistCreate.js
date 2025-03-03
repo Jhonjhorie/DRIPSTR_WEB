@@ -5,12 +5,18 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import questionEmote from "../../../../src/assets/emote/question.png";
 import successEmote from "../../../../src/assets/emote/success.png";
+import sadEmote from "../../../../src/assets/emote/error.png";
+import hmmEmote from "../../../../src/assets/emote/hmmm.png";
+import { useAddressFields } from "../../../../src/shared/login/hooks/useAddressFields";
 import "boxicons";
 
 function ArtistCreate() {
   const navigate = useNavigate();
   const [artistName, setArtistName] = useState("");
   const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [artistDescription, setArtistDescription] = useState("");
   const [fileName, setFileName] = useState("");
@@ -29,23 +35,106 @@ function ArtistCreate() {
   const [showAlert7, setShowAlert7] = React.useState(false); // AlertImageMissing
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
   const [loading, setLoading] = useState(false);
+  const [loadings, setLoadings] = useState(false);
   const [AcceptedTermsArtist, setAcceptedTermsArtist] = useState(false);
   const [TermsandConditionArtist, setTermsandConditionArtist] =
     React.useState(false); // Alert TANDC
   const handleArtistNameChange = (e) => setArtistName(e.target.value);
-  const handleFullNameChange = (e) => setFullName(e.target.value);
   const handleArtistDescriptionChange = (e) =>
     setArtistDescription(e.target.value);
 
+  //checking the reg of the artist
+  const [hasCreatedAccount, setHasCreatedAccount] = useState(false);
+  const [error, setError] = useState(null);
+  const [isStat, setStatus] = useState(null);
+  const [loadingFetch, setLoadingFetch] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fetchUserProfile = async () => {
+    setLoading(false);
+    try {
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+
+      if (authError) {
+        setError(authError.message);
+
+        return;
+      }
+
+      if (user) {
+        const { data: artData, error: artError } = await supabase
+          .from("artist_registration")
+          .select("is_approved")
+          .eq("acc_id", user.id);
+
+        if (artError) {
+          console.error("Error fetching shop data:", artError.message);
+        } else if (artData && artData.length > 0) {
+          const artsShop = artData[0];
+          setHasCreatedAccount(true);
+
+          if (artsShop.is_approved === true) {
+            setStatus("approved");
+          } else if (artsShop.is_approved === false) {
+            setStatus("declined");
+          } else {
+            setStatus("pending");
+          }
+        } else {
+          setHasCreatedAccount(false);
+          setStatus(null);
+        }
+      } else {
+        console.log("No user is signed in.");
+        setError("No user is signed in.");
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error.message);
+      setError("An error occurred while fetching user data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
   const phonedigit = (e) => {
     let value = e.target.value;
     value = value.replace(/[^0-9]/g, "").slice(0, 11);
     setPhoneNumber(value);
   };
+
+  const [imageFileSELFIE, setImageFileSELFIE] = useState(null);
+  const [selectedImageSELFIE, setSelectedImageSELFIE] = useState(null);
+  const [imageFileGCASH, setImageFileGCASH] = useState(null);
+  const [selectedImageGCASH, setSelectedImageGCASH] = useState(null);
+  const [selectedImageUP1, setSelectedImageUP1] = useState(null);
+  const [selectedImageUP2, setSelectedImageUP2] = useState(null);
+  const [imageFileUP1, setImageFileUP1] = useState(null);
+  const [imageFileUP2, setImageFileUP2] = useState(null);
+
+  const [showAlert11, setShowAlert11] = useState(false);
+  const [showAlert22, setShowAlert22] = useState(false);
+  const [showAlert33, setShowAlert33] = useState(false);
+  const [showAlert44, setShowAlert44] = useState(false);
+  const [showAlert55, setShowAlert55] = useState(false);
+  const [showAlert66, setShowAlert66] = useState(false);
+  const maxSize = 2 * 1024 * 1024;
   const handleFileChange = (event) => {
-    const file = event.target.files[0]; // Get the selected file
+    const file = event.target.files[0];
+
     if (file) {
-      setImageFile(file); 
+      if (file.size > maxSize) {
+        setShowAlert11(true);
+        setTimeout(() => setShowAlert11(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFile(file);
       setSelectedImage(URL.createObjectURL(file));
       console.log("Selected file:", file);
     }
@@ -53,236 +142,352 @@ function ArtistCreate() {
   const handleFileChangeID = (event) => {
     const file = event.target.files[0];
     if (file) {
+      if (file.size > maxSize) {
+        setShowAlert44(true);
+        setTimeout(() => setShowAlert44(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
       setImageFileID(file);
       setSelectedImageID(URL.createObjectURL(file));
       console.log("Selected file:", file);
     }
   };
+  const handleFileChangeGCASH = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert22(true);
+        setTimeout(() => setShowAlert22(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileGCASH(file);
+      setSelectedImageGCASH(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChangeSELFIE = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert33(true);
+        setTimeout(() => setShowAlert33(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileSELFIE(file);
+      setSelectedImageSELFIE(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChangeUP1 = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert55(true);
+        setTimeout(() => setShowAlert55(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileUP1(file);
+      setSelectedImageUP1(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChangeUP2 = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert66(true);
+        setTimeout(() => setShowAlert66(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileUP2(file);
+      setSelectedImageUP2(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+
+  const handleFirstNameChange = (e) => setFirstName(e.target.value);
+  const handleMiddleNameChange = (e) => setMiddleName(e.target.value);
+  const handleLastNameChange = (e) => setLastName(e.target.value);
+
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     setLoading(true);
- 
-    //handles alerts on missing inputs
-    if (!fullName.trim()) {
+
+    const fullName = `${firstName} ${middleName} ${lastName}`.trim();
+    const findRegion =
+      regions?.find((r) => r.code === selected.region)?.name ||
+      "Unknown Region";
+    const findCity =
+      cities?.find((c) => c.code === selected.city)?.name || "Unknown City";
+    const findBarangay =
+      barangays?.find((b) => b.code === selected.barangay)?.name ||
+      "Unknown Barangay";
+
+    const fullAddress = `${selected.exactLocation}, ${findBarangay}, ${findCity}, ${findRegion}`;
+    console.log("Final Full Address:", fullAddress);
+
+    // Handle input validation
+    if (!firstName.trim() || !lastName.trim()) {
       console.error("Full name is required");
       setShowAlertFL(true);
-      setTimeout(() => {
-        setShowAlertFL(false);
-      }, 3000);
+      setTimeout(() => setShowAlertFL(false), 3000);
       setLoading(false);
       return;
     }
     if (!artistName.trim()) {
       console.error("Shop name is required");
       setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 3000);
+      setTimeout(() => setShowAlert(false), 3000);
       setLoading(false);
       return;
     }
     if (!selectedCategory.trim()) {
-      console.error("Shop name is required");
+      console.error("Category is required");
       setShowAlert7(true);
-      setTimeout(() => {
-        setShowAlert7(false);
-      }, 3000);
+      setTimeout(() => setShowAlert7(false), 3000);
       setLoading(false);
       return;
     }
     if (!phoneNumber.trim()) {
       console.error("Phone Number is required");
       setShowAlert2(true);
-      setTimeout(() => {
-        setShowAlert2(false);
-      }, 3000);
+      setTimeout(() => setShowAlert2(false), 3000);
       setLoading(false);
-      return; 
+      return;
     }
     if (phoneNumber.length !== 11) {
       console.error("Phone Number must be 11 digits");
       setShowAlert4(true);
-      setTimeout(() => {
-        setShowAlert4(false);
-      }, 3000);
+      setTimeout(() => setShowAlert4(false), 3000);
       setLoading(false);
-      return; 
+      return;
     }
     if (!artistDescription.trim()) {
       console.error("Shop Description is required");
       setShowAlert5(true);
-      setTimeout(() => {
-        setShowAlert5(false);
-      }, 3000);
+      setTimeout(() => setShowAlert5(false), 3000);
       setLoading(false);
-      return; 
+      return;
     }
     if (!selectedImage) {
       console.error("Shop Image is required");
       setShowAlert6(true);
-      setTimeout(() => {
-        setShowAlert6(false);
-      }, 3000);
+      setTimeout(() => setShowAlert6(false), 3000);
       setLoading(false);
-      return; 
+      return;
+    }
+    if (!selectedImageUP1) {
+      console.error("art2 is required");
+      setShowAlert6(true);
+      setTimeout(() => setShowAlert6(false), 3000);
+      setLoading(false);
+      return;
+    }
+    if (!selectedImageUP2) {
+      console.error("art1 is required");
+      setShowAlert6(true);
+      setTimeout(() => setShowAlert6(false), 3000);
+      setLoading(false);
+      return;
+    }
+    if (!setImageFileSELFIE) {
+      console.error("Seldie is required");
+      setShowAlert6(true);
+      setTimeout(() => setShowAlert6(false), 3000);
+      setLoading(false);
+      return;
+    }
+    if (!setImageFileGCASH) {
+      console.error("Gcash is required");
+      setShowAlert6(true);
+      setTimeout(() => setShowAlert6(false), 3000);
+      setLoading(false);
+      return;
     }
 
+    // Get user ID
     const {
       data: { user },
       error: userError,
     } = await supabase.auth.getUser();
     if (!user || userError) {
       console.error("No user found");
+      setLoading(false);
       return;
     }
 
-    let uploadedImageUrl = null;
-
-    if (imageFile) {
+    // Upload images
+    const uploadImage = async (file, path) => {
+      if (!file) return null;
       try {
-        const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, ""); 
-        const uniqueFileName = `artist_profile/${timestamp}_${imageFile.name}`;
-    
+        const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, "");
+        const uniqueFileName = `${path}/${timestamp}_${file.name}`;
+
         const { data, error: uploadError } = await supabase.storage
           .from("shop_profile")
-          .upload(uniqueFileName, imageFile);
-    
-        if (uploadError) {
-          console.error("Error uploading image:", uploadError.message);
-          return;
-        }
-    
-        if (data?.path) {
-          const { data: publicUrlData, error: urlError } = supabase.storage
-            .from("shop_profile")
-            .getPublicUrl(data.path);
-    
-          if (urlError) {
-            console.error("Error fetching image URL:", urlError.message);
-            return;
-          }
-    
-          uploadedImageUrl = publicUrlData.publicUrl;
-          console.log("Image uploaded successfully:", uploadedImageUrl);
-        }
-      } catch (err) {
-        console.error("Unexpected error while uploading image:", err);
-        return;
-      }
-    }
-    let uploadedImageUrlId = null;
+          .upload(uniqueFileName, file);
 
-    if (imageFileID) {
-      try {
-        const timestamp = new Date().toISOString().replace(/[-T:.Z]/g, ""); 
-        const uniqueFileName = `valid_ID/${timestamp}_${imageFile.name}`;
-    
-        const { data, error: uploadError } = await supabase.storage
+        if (uploadError) {
+          console.error(`Error uploading ${path}:`, uploadError.message);
+          return null;
+        }
+
+        const { data: publicUrlData, error: urlError } = supabase.storage
           .from("shop_profile")
-          .upload(uniqueFileName, imageFile);
-    
-        if (uploadError) {
-          console.error("Error uploading image:", uploadError.message);
-          return;
-        }
-    
-        if (data?.path) {
-          const { data: publicUrlData, error: urlError } = supabase.storage
-            .from("shop_profile")
-            .getPublicUrl(data.path);
-    
-          if (urlError) {
-            console.error("Error fetching image URL:", urlError.message);
-            return;
-          }
-    
-          uploadedImageUrlId = publicUrlData.publicUrl;
-          console.log("Image uploaded successfully:", uploadedImageUrlId);
-        }
-      } catch (err) {
-        console.error("Unexpected error while uploading image:", err);
-        return;
-      }
-    }
+          .getPublicUrl(data.path);
 
-    const userId = user.id;
+        if (urlError) {
+          console.error(`Error fetching ${path} URL:`, urlError.message);
+          return null;
+        }
+
+        return publicUrlData.publicUrl;
+      } catch (err) {
+        console.error(`Unexpected error while uploading ${path}:`, err);
+        return null;
+      }
+    };
+
+    const uploadedImageUrl = await uploadImage(imageFile, "artist_profile");
+    const uploadedImageUrlId = await uploadImage(imageFileID, "valid_ID");
+    const uploadedImageUrlGCASH = await uploadImage(imageFileGCASH, "valid_ID");
+    const uploadedImageUrlSELFIE = await uploadImage(
+      imageFileSELFIE,
+      "valid_ID"
+    );
+    const uploadedImageUP1 = await uploadImage(imageFileUP1, "sampleart");
+    const uploadedImageUP2 = await uploadImage(imageFileUP2, "sampleart2");
 
     try {
+      // Insert into "artist" table
       const { data: shopData, error: shopError } = await supabase
-        .from("artist")
+        .from("artist_registration")
         .insert([
           {
-            full_Name: fullName,
-            artist_Name: artistName,
-            contact_number: phoneNumber,
-            art_Type: selectedCategory,
-            artist_Bio: artistDescription,
-            owner_Id: userId,
-            artist_Image: uploadedImageUrl || null,
-            valid_ID: uploadedImageUrlId || null,
+            acc_id: user.id,
+            full_name: fullName,
+            address: fullAddress,
+            artist_name: artistName,
+            description: artistDescription,
+            art_type: selectedCategory,
+            valid_id: uploadedImageUrlId || null,
+            selfie: uploadedImageUrlSELFIE || null,
+            is_approved: null,
+            mobile_number: phoneNumber,
+            artist_profilePic: uploadedImageUrl || null,
+            gcash: uploadedImageUrlGCASH || null,
+            sample_art: JSON.stringify([
+              uploadedImageUP1 || null,
+              uploadedImageUP2 || null,
+            ]),
           },
         ])
         .single();
 
       if (shopError) {
-        console.error("Error inserting shop data:", shopError.message);
+        console.error("Error inserting artist data:", shopError.message);
+        setLoading(false);
         return;
       }
+
       console.log("Artist page created successfully:", shopData);
 
-
+      // Insert into "artist_Wallet" table
       const { data: walletData, error: walletError } = await supabase
-      .from("artist_Wallet")
-      .insert([
-        {
-          number: phoneNumber,
-          owner_Name: fullName,
-          revenue: "0",
-          valid_ID: uploadedImageUrlId || null,
-          owner_ID: userId, 
-        },
-      ]);
+        .from("artist_Wallet")
+        .insert([
+          {
+            number: phoneNumber,
+            owner_Name: fullName,
+            revenue: "0",
+            valid_ID: uploadedImageUrlId || null,
+            owner_ID: user.id,
+          },
+        ]);
 
-    if (walletError) {
-      console.error(
-        "Error inserting into merchant_Wallet:",
-        walletError.message
-      );
-      return;
-    }
+      if (walletError) {
+        console.error(
+          "Error inserting into artist_Wallet:",
+          walletError.message
+        );
+        setLoading(false);
+        return;
+      }
 
-    console.log("Merchant Wallet created successfully:", walletData);
-      setShowAlertSuccess(true);
+      console.log("Artist Wallet created successfully:", walletData);
 
-
+      // Update profile to set isArtist to true
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ isArtist: true })
-        .eq("id", userId);
+        .update({ isArtist: false })
+        .eq("id", user.id);
 
       if (updateError) {
         console.error("Error updating user profile:", updateError.message);
+        setLoading(false);
         return;
       }
 
-      // Reset form fields after successful insertion
+      console.log("User profile updated successfully.");
+
+      // Show success message
+      setShowAlertSuccess(true);
+      setTimeout(() => setShowAlertSuccess(false), 3000);
+
+      // Reset form fields after successful submission
+      setFirstName("");
+      setMiddleName("");
+      setLastName("");
       setFullName("");
       setArtistName("");
       setPhoneNumber("");
       setArtistDescription("");
+      setSelectedCategory("");
+      setSelected({
+        region: "",
+        city: "",
+        barangay: "",
+        exactLocation: "",
+      });
       setImageFile(null);
       setImageFileID(null);
+      setImageFileGCASH(null);
+      setImageFileSELFIE(null);
+      setImageFileUP1(null);
+      setImageFileUP2(null);
     } catch (err) {
       console.error("Unexpected error:", err);
     } finally {
       setLoading(false);
     }
   };
+  const {
+    addressData: { regions, cities, barangays },
+    selected,
+    handleRegionChange,
+    handleCityChange,
+    handleExactLocationChange,
+    setSelected,
+  } = useAddressFields(true, false);
+
   const closeConfirmArtistCreation = () => {
-    setTimeout(() => {
-      setShowAlertSuccess(false);
-    }, 1000);
-    navigate("/shop/Artist/ArtistDashboard");
+    fetchUserProfile();
+    setShowAlertSuccess(false);
   };
   const handleCloseTandC = () => {
     setTermsandConditionArtist(false);
@@ -296,19 +501,19 @@ function ArtistCreate() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-  
+
       if (!user) return;
       const { data, error } = await supabase
         .from("profiles")
         .select("acceptTerms_Artist")
         .eq("id", user.id)
         .single();
-  
+
       if (error) {
         console.error("Error fetching terms:", error);
         return;
       }
-  
+
       if (data?.acceptTerms_Artist) {
         setAcceptedTermsArtist(true);
         setTermsandConditionArtist(false);
@@ -316,10 +521,9 @@ function ArtistCreate() {
         setTermsandConditionArtist(true);
       }
     };
-  
+
     checkAcceptedTerms();
   }, []);
-  
 
   const handleAcceptTerms = async () => {
     const {
@@ -368,165 +572,578 @@ function ArtistCreate() {
     }
   };
 
+  //chech if accepted
+  const handleClickFetch = () => {
+    setLoadingFetch(true);
+    setTimeout(() => {
+      setLoadingFetch(false);
+    }, 5000);
+    fetchUserProfile();
+  };
+
+  const handleSetisMerchant = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (!user || userError) {
+      console.error("No user found");
+      return;
+    }
+
+    const userId = user.id;
+
+    try {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ isMerchant: true })
+        .eq("id", userId);
+
+      if (updateError) {
+        console.error("Error updating user profile:", updateError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log(
+        "User profile updated with merchant_id and ismerchant = true"
+      );
+      navigate("/shop/MerchantDashboard");
+      window.location.reload();
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  //when decline delete the data both merchantreg and wallet
+  const handleRedo = async (artID) => {
+    if (!artID) {
+      console.error("No shop ID provided");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Ensure user is authenticated
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (!user || userError) {
+        console.error("No user found");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const userId = user.id;
+
+      // Delete the shop row where shop_id matches
+      const { error: deleteError } = await supabase
+        .from("artist_registration")
+        .delete()
+        .eq("acc_id", userId);
+
+      if (deleteError) {
+        console.error("Error deleting artist:", deleteError.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { error: deleteError2 } = await supabase
+        .from("artist_Wallet")
+        .delete()
+        .eq("owner_ID", userId);
+
+      if (deleteError2) {
+        console.error("Error deleting artist:", deleteError2.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log("artist deleted and user profile updated.");
+      fetchUserProfile();
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div className="h-full w-full">
       <div className="h-full w-full lg:flex justify-center items-center bg-slate-300 p-1  ">
         {/* FIRST CONTAINER */}
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-3xl bg-white mb-16 md:mb-0 mt-5 md:mt-0 shadow-lg rounded-lg p-6"
-        >
-          <div className=" h-auto  w-full md:px-10 -mt-2 overflow-hidden ">
-            <div className="flex w-full md:gap-2 md:justify-start justify-center mt-5 md:mt-0  ">
-              <box-icon
-                name="palette"
-                type="solid"
-                color="#4D077C"
-                size="md"
-              ></box-icon>
-              <div className="font-bold text-2xl  flex p-2 text-custom-purple iceland-regular ">
-                Create Artist Account
+        {loadings ? (
+          <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
+            <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
+              <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                {" "}
+              </div>
+
+              <div className="p-5">
+                <img
+                  src={hmmEmote}
+                  alt="hmmm Emote"
+                  className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                />
+              </div>
+
+              <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                Waiting...
+              </h2>
+            </div>
+          </div>
+        ) : hasCreatedAccount ? (
+          isStat === "approved" ? (
+            <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
+              <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
+                <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  ✅ You are an Artist now! 🎉{" "}
+                </h2>
+                <div className="p-5">
+                  <img
+                    src={successEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  Start the journey now!
+                </h2>
+                <div
+                  onClick={handleSetisMerchant}
+                  className="p-4 bg-custom-purple cursor-pointer hover:scale-95 duration-200 text-white rounded flex items-center justify-center"
+                >
+                  {" "}
+                  <span className="iceland-regular text-2xl ">
+                    Enter Dripstr Merchant
+                  </span>{" "}
+                </div>
               </div>
             </div>
-            <div className="font-bold text-5xl text-center md:text-left p-2 text-custom-purple iceland-bold">
-              Get Started
-            </div>
+          ) : isStat === "pending" ? (
+            <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
+              <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
+                <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
 
-            <div className="md:flex w-full -mt-5 place-items-center h-[50%] gap-2 lg:gap-8  p-2 ">
-              <div className="w-full md:w-1/2 h-full flex items-center justify-center">
-                <div className="w-full max-w-xs">
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  ⏳ Your artist account is pending for approval.
+                </h2>
+                <div className="p-5">
+                  <img
+                    src={hmmEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  Please wait for admin approval. The verification process may
+                  take 1-7 days.
+                </h2>
+                <button
+                  onClick={handleClickFetch}
+                  className="p-4 bg-custom-purple text-white rounded flex items-center justify-center"
+                  disabled={loadingFetch}
+                >
+                  {loadingFetch ? (
+                    <span className="loading loading-dots loading-lg"></span>
+                  ) : (
+                    <span className="iceland-regular text-2xl">
+                      Reload for Update
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : isStat === "declined" ? (
+            <div className="-mt-10 place-items-center flex justify-center w-full h-full  p-2">
+              <div className="bg-white w-auto p-5 h-auto  justify-items-center rounded-md shadow-md relative">
+                <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  ❌ Your artist account request was declined.
+                </h2>
+                <div className="p-5">
+                  <img
+                    src={sadEmote}
+                    alt="Success Emote"
+                    className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+                  />
+                </div>
+
+                <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
+                  Create new registration? or Contact our support.
+                </h2>
+                <div
+                  onClick={handleRedo}
+                  className="bg-primary-color m-2 p-1 px-2 hover:scale-95 glass duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                >
+                  {" "}
+                  <span className="iceland-regular text-2xl ">
+                    Redo registration
+                  </span>{" "}
+                </div>
+              </div>
+            </div>
+          ) : null
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="w-full max-w-3xl bg-white mb-16 md:mb-0 mt-5 md:mt-0 shadow-lg rounded-lg p-6"
+          >
+            <div className=" h-auto  w-full md:px-5 -mt-2 overflow-hidden ">
+              <div className="flex w-full md:gap-2 md:justify-start justify-center mt-5 md:mt-0  ">
+                <box-icon
+                  name="palette"
+                  type="solid"
+                  color="#4D077C"
+                  size="md"
+                ></box-icon>
+                <div className="font-bold text-2xl  flex p-2 text-custom-purple iceland-regular ">
+                  Create Artist Account
+                </div>
+              </div>
+              <div className="font-bold text-5xl text-center md:text-left p-2 text-custom-purple iceland-bold">
+                Get Started
+              </div>
+              <div className="label-text text-xl  font-semibold px-2 text-slate-900">
+                Artist Information
+              </div>
+
+              <div className=" w-full mt-1 place-items-center h-[50%] gap-2 lg:gap-8  p-2 ">
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full ">
+                    <label className="form-control w-full">
+                      <div className="label">
+                        <span className="label-text text-slate-900 font-semibold">
+                          Type your Fullname
+                        </span>
+                      </div>
+                    </label>
+                    <div className="w-full -mt-2 gap-3 md:flex">
+                      <label className="form-control w-full">
+                        <div className="label">
+                          <span className="label-text-alt px-1 font-medium text-slate-700">
+                            First Name
+                          </span>
+                        </div>
+                        <input
+                          id="firstName"
+                          value={firstName}
+                          onChange={handleFirstNameChange}
+                          type="text"
+                          placeholder="Type here"
+                          className="input  input-bordered text-black rounded text-sm bg-slate-200 border-violet-950 border w-full"
+                        />
+                      </label>
+                      <label className="form-control w-full">
+                        <div className="label">
+                          <span className="label-text-alt px-1 font-medium text-slate-700">
+                            Middle Name
+                          </span>
+                        </div>
+                        <input
+                          id="middleName"
+                          value={middleName}
+                          onChange={handleMiddleNameChange}
+                          type="text"
+                          placeholder="Type here"
+                          className="input input-bordered text-black rounded text-sm bg-slate-200 border-violet-950 border w-full"
+                        />
+                      </label>
+                      <label className="form-control w-full">
+                        <div className="label">
+                          <span className="label-text-alt px-1 font-medium text-slate-700">
+                            Last Name
+                          </span>
+                        </div>
+                        <input
+                          id="lastName"
+                          value={lastName}
+                          onChange={handleLastNameChange}
+                          type="text"
+                          placeholder="Type here"
+                          className="input  input-bordered text-black text-sm rounded bg-slate-200 border-violet-950 border w-full"
+                        />
+                      </label>
+                    </div>
+                    <div className="md:flex mt-4 gap-1 w-full">
+                      <div className="w-full md:w-1/2 ">
+                        <label className="form-control  w-full">
+                          <div className="label">
+                            <span className="label-text text-slate-900 font-semibold">
+                              What is your Artist Name?
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            id="artistName"
+                            value={artistName}
+                            onChange={handleArtistNameChange}
+                            placeholder="Type here"
+                            className="input input-bordered text-sm text-black rounded bg-slate-200 border-violet-950 border w-full"
+                          />
+                        </label>
+                        <div className="w-full mt-4">
+                          <div className="label  w-full">
+                            <span className="label-text text-slate-900  font-semibold">
+                              Select your Artist Photo
+                            </span>
+                          </div>
+                          <div className="h-auto w-full flex justify-center ">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileChange}
+                              placeholder={fileName || "Choose a file..."}
+                              className="file-input text-sm rounded bg-slate-200 border-violet-950 border   bottom-0 file-input-bordered w-full"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-full md:w-1/2 h-full -mt-2 rounded-md place-items-center justify-center p-2">
+                        <label className="form-control w-full">
+                          <div className="label">
+                            <span className="label-text font-semibold text-slate-900">
+                              What is your Art Style?
+                            </span>
+                          </div>
+
+                          {/* Dropdown */}
+                          <div className="dropdown dropdown-bottom w-full">
+                            <div
+                              tabIndex={0}
+                              role="button"
+                              className="bg-custom-purple border-violet-950 glass h-[49px]  hover:scale-95 duration-300 rounded text-center text-slate-100 p-2  w-full"
+                            >
+                              {selectedCategory || "Choose a Category"}
+                            </div>
+                            <ul
+                              tabIndex={0}
+                              className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
+                            >
+                              {categories.map((category) => (
+                                <li key={category}>
+                                  <a
+                                    onClick={() =>
+                                      handleCategorySelect(category)
+                                    }
+                                  >
+                                    {category}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* Custom Input for "Others" */}
+                          {showCustomInput && (
+                            <input
+                              type="text"
+                              value={customCategory}
+                              onChange={(e) =>
+                                setCustomCategory(e.target.value)
+                              }
+                              placeholder="Enter your art style"
+                              className="input mt-2  input-bordered text-black text-sm rounded bg-slate-200 border-violet-950 border w-full"
+                            />
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <label className="form-control mt-2 mx-2 flex justify-center items-center md:items-start ">
+                <div className="label">
+                  <span className="label-text font-semibold text-slate-900">
+                    Introduce yourself
+                  </span>
+                </div>
+                <textarea
+                  id="artistDescription"
+                  value={artistDescription}
+                  onChange={handleArtistDescriptionChange}
+                  className="textarea text-sm resize-none textarea-bordered w-[90%] md:w-full text-black rounded bg-slate-200 border-violet-950 border h-16"
+                ></textarea>
+              </label>
+              <div className="w-full mt-4 px-2">
+                {/* Region Dropdown */}
+                <div className="label">
+                  <span className="label-text font-semibold text-slate-900">
+                    Select and type your Address
+                  </span>
+                </div>
+                <div className="flex gap-2 w-full  -mt-2">
+                  <div className="w-full">
+                    <label className="block label-text-alt font-medium text-slate-700 p-2">
+                      Region
+                    </label>
+                    <select
+                      name="region"
+                      className="select select-bordered text-black rounded border-violet-950 border bg-gray-100 w-full"
+                      value={selected.region}
+                      onChange={(e) => handleRegionChange(e.target.value)}
+                      disabled={loading.regions}
+                    >
+                      <option value="">
+                        {loading.regions ? "Loading..." : "Select Region"}
+                      </option>
+                      {regions.map((region) => (
+                        <option key={region.code} value={region.code}>
+                          {region.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-full">
+                    {/* City Dropdown */}
+                    <label className="block label-text-alt font-medium text-slate-700 p-2">
+                      City/Municipality
+                    </label>
+                    <select
+                      name="city"
+                      className="select select-bordered text-black rounded border-violet-950 border bg-gray-100 w-full"
+                      value={selected.city}
+                      onChange={(e) => handleCityChange(e.target.value)}
+                      disabled={!selected.region || loading.cities}
+                    >
+                      <option value="">
+                        {loading.cities ? "Loading..." : "Select City"}
+                      </option>
+                      {cities.map((city) => (
+                        <option key={city.code} value={city.code}>
+                          {city.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* Barangay Dropdown */}
+                  <div className="w-full">
+                    <label className="block label-text-alt font-medium text-slate-700 p-2">
+                      Barangay
+                    </label>
+                    <select
+                      name="barangay"
+                      className="select select-bordered text-black rounded border-violet-950 border bg-gray-100 w-full"
+                      value={selected.barangay}
+                      onChange={(e) =>
+                        setSelected((prev) => ({
+                          ...prev,
+                          barangay: e.target.value,
+                        }))
+                      }
+                      disabled={!selected.city || loading.barangays}
+                    >
+                      <option value="">
+                        {loading.barangays ? "Loading..." : "Select Barangay"}
+                      </option>
+                      {barangays.map((barangay) => (
+                        <option key={barangay.code} value={barangay.code}>
+                          {barangay.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Exact Location Input */}
+                <label className="block mt-3 text-sm font-medium p-2 text-slate-900">
+                  Exact Location
+                </label>
+                <input
+                  type="text"
+                  name="exactLocation"
+                  placeholder="Street, Block, Building, Floor, etc."
+                  className="input input-bordered text-sm rounded bg-slate-200  border-violet-950 border text-black w-full"
+                  value={selected.exactLocation}
+                  onChange={(e) => handleExactLocationChange(e.target.value)}
+                />
+              </div>
+
+              <div className="border mt-8  border-slate-300 w-full"></div>
+              <div className="label-text text-xl mt-5 font-semibold  text-slate-900">
+                Wallet Information
+              </div>
+              <div className="md:flex w-full px-2 gap-3 mt-5">
+                {/* Gcash Number Input */}
+                <div className="w-full md:w-1/2">
                   <label className="form-control w-full">
-                    <div className="label">
-                      <span className="label-text text-slate-800 font-semibold">
-                        What is your Fullname?
-                      </span>
-                    </div>
-                    <input
-                      type="text"
-                      id="fullName"
-                      value={fullName}
-                      onChange={handleFullNameChange}
-                      placeholder="Type here"
-                      className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
-                    />
-                  </label>
-                  <label className="form-control w-full">
-                    <div className="label">
-                      <span className="label-text text-slate-800 font-semibold">
-                        What is your Artist Name?
-                      </span>
-                    </div>
-                    <input
-                      type="text"
-                      id="artistName"
-                      value={artistName}
-                      onChange={handleArtistNameChange}
-                      placeholder="Type here"
-                      className="input input-bordered text-black bg-slate-100 border-violet-950 border-[2px] w-full"
-                    />
-                  </label>
-                  <label className="form-control w-full max-w-xs mt-1">
-                    <div className="label">
-                      <span className="label-text text-slate-800 font-semibold">
-                        What is your Gcash number?
-                      </span>
-                    </div>
+                    <span className="label-text text-slate-900 font-semibold px-1">
+                      Type your verified Gcash number
+                    </span>
                     <input
                       type="tel"
                       id="phoneNumber"
                       value={phoneNumber}
                       placeholder="Type here"
                       onChange={phonedigit}
-                      className="input input-bordered bg-slate-100 text-black border-violet-950 border-[2px] w-full"
+                      className="input input-bordered text-sm mt-2 text-black rounded bg-slate-200 border-violet-950 border w-full"
                     />
-                  </label>
-                  <div className="label">
-                    <span className="label-text-alt text-slate-700">
+                    <span className="label-text-alt text-slate-700 mt-1">
                       Phone number should be 11 digits.
                     </span>
-                  </div>
+                  </label>
                 </div>
-              </div>
 
-              <div className="w-full md:w-1/2 h-full rounded-md -mt-7  place-items-center justify-center p-2">
-                <label className="form-control w-full max-w-xs">
-                  <div className="label">
-                    <span className="label-text font-semibold text-slate-800">
-                      What is your Art Style?
-                    </span>
-                  </div>
-
-                  {/* Dropdown */}
-                  <div className="dropdown dropdown-bottom w-full">
-                    <div
-                      tabIndex={0}
-                      role="button"
-                      className="bg-custom-purple glass hover:scale-95 duration-300 rounded-md text-center text-slate-100 p-2  w-full"
-                    >
-                      {selectedCategory || "Choose a Category"}
-                    </div>
-                    <ul
-                      tabIndex={0}
-                      className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
-                    >
-                      {categories.map((category) => (
-                        <li key={category}>
-                          <a onClick={() => handleCategorySelect(category)}>
-                            {category}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Custom Input for "Others" */}
-                  {showCustomInput && (
-                    <input
-                      type="text"
-                      value={customCategory}
-                      onChange={(e) => setCustomCategory(e.target.value)}
-                      placeholder="Enter your art style"
-                      className="mt-2 p-2 border bg-slate-50 text-slate-900 border-gray-300 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-primary-color"
-                    />
-                  )}
-                </label>
-
-
-
-                <div className="label mt-1 w-full">
-                  <span className="label-text text-slate-800 font-semibold">
-                    Select your Artist Photo
+                <label className="form-control md:w-1/2 mt- w-full">
+                  <span className="label-text text-slate-900 font-semibold px-1">
+                    Screenshot of verified Gcash account
                   </span>
-                </div>
-                <div className="h-auto w-full flex justify-center ">
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handleFileChange}
-                    placeholder={fileName || "Choose a file..."}
-                    className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
+                    onChange={handleFileChangeGCASH}
+                    className="file-input mt-2 bg-slate-200 border-violet-950 border rounded w-full"
                   />
-                </div>
-                <div className="flex w-full gap-2 mt-3">
-                  <div className=" flex-start">
-                    <label className="label-text w-full  font-semibold ml-2 text-slate-800">
+                </label>
+              </div>
+              {/* Upload Valid ID */}
+              <div className="w-full gap-3 px-2 mt-4 md:flex">
+                <label className="form-control md:w-1/2 w-full">
+                  <span className="label-text text-slate-900 font-semibold px-1">
+                    Upload a selfie of you
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChangeSELFIE}
+                    className="file-input mt-2 bg-slate-200 border-violet-950 border rounded w-full"
+                  />
+                </label>
+                <div className="w-full md:w-1/2 -mt-1.5 rounded-md">
+                  <div className="flex items-center gap-3">
+                    <label className="label-text font-semibold text-slate-900">
                       Upload Valid ID
                     </label>
-                  </div>
-                  <div className="relative">
-                    <div className="group cursor-help inline-block">
+                    {/* Info Tooltip */}
+                    <div className="group relative cursor-pointer">
                       <box-icon
                         color="#5B21B6"
                         name="info-circle"
                         type="solid"
                         className="hover:scale-105 duration-100"
                       ></box-icon>
-
-                      {/* Tooltip - Only appears when hovering the icon */}
+                      {/* Tooltip */}
                       <div className="absolute left-1/2 -translate-x-1/2 bottom-8 w-64 p-2 bg-gray-900 text-white text-sm rounded-md shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                        <p className="font-semibold">
-                          Valid IDs for Artist:
-                        </p>
+                        <p className="font-semibold">Valid IDs for Artist:</p>
                         <ul className="list-disc list-inside">
                           <li>Passport</li>
                           <li>Driver’s License</li>
@@ -540,60 +1157,82 @@ function ArtistCreate() {
                         </ul>
                       </div>
                     </div>
+                    {/* File Upload */}
                   </div>
-                </div>
-                <div className="h-auto w-full flex  justify-center ">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleFileChangeID}
-                    placeholder={fileName || "Choose a file..."}
-                    className="file-input bg-slate-100 border-violet-950 border-2 max-w-xs  bottom-0 file-input-bordered w-full"
+                    className="file-input mt-1 bg-slate-200 border-violet-950 border rounded w-full"
                   />
                 </div>
               </div>
+
+              <div className="border mt-7  border-slate-300 w-full"></div>
+              <div className="label-text text-xl mt-5 font-semibold px-2 text-slate-900">
+                Supporting Art
+              </div>
+              <div className="md:flex w-full px-2 gap-3 mt-5">
+                <label className="form-control md:w-1/2 mt- w-full">
+                  <span className="label-text text-slate-900 font-semibold px-1">
+                    Upload you art 1
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChangeUP1}
+                    className="file-input mt-2 bg-slate-200 border-violet-950 border rounded w-full"
+                  />
+                </label>
+
+                <label className="form-control md:w-1/2 mt- w-full">
+                  <span className="label-text text-slate-900 font-semibold px-1">
+                    Upload you art 2
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChangeUP2}
+                    className="file-input mt-2 bg-slate-200 border-violet-950 border rounded w-full"
+                  />
+                </label>
+              </div>
             </div>
 
-            <label className="form-control -mt-5 mx-2 flex justify-center items-center md:items-start ">
-              <div className="label">
-                <span className="label-text font-semibold text-slate-800">
-                  Introduce yourself
-                </span>
-              </div>
-              <textarea
-                id="artistDescription"
-                value={artistDescription}
-                onChange={handleArtistDescriptionChange}
-                className="textarea font-semibold resize-none textarea-bordered w-[90%] md:w-full bg-slate-100 text-black border-violet-950 border-[2px] h-24"
-              ></textarea>
-            </label>
-          </div>
-          <div className="w-full h-auto justify-start flex m-2 mb-14 md:mb-0">
-            {loading ? (
-              <div className="text-center place-content-center px-5 mr-14 glass rounded-md bg-custom-purple">
-                <span className="loading loading-dots loading-lg bg-slate-100"></span>
-              </div>
-            ) : (
-              <button
+           
+            <button
                 type="submit"
-                className="btn glass bg-custom-purple   ml-[6%] iceland-regular tracking-wide text-lg text-white "
+                className="btn  justify-center w-full md:w-auto md:justify-center place-self-center mt-10 flex glass bg-custom-purple md:mr-7 md:px-10 iceland-regular tracking-wide text-lg text-white md:items-center "
+                disabled={loading} 
               >
-                SUBMIT
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin h-5 w-5 mr-2 text-white"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
+                    </svg>
+                    Loading...
+                  </span>
+                ) : (
+                  "SUBMIT"
+                )}
               </button>
-            )}
-            <div
-              onClick={ShowTandC}
-              data-tip="Read Merchant Terms and Condition"
-              className=" tooltip-left tooltip bg-slate-50 hover:scale-95 duration-200 cursor-pointer rounded-full shadow-md fixed right-7 bottom-14 md:bottom-7"
-            >
-              <img
-                src={questionEmote}
-                alt="Success Emote"
-                className="object-contain h-16 w-16 rounded-lg p-1 drop-shadow-customViolet"
-              />
-            </div>
-          </div>
-        </form>
+          </form>
+        )}
       </div>
       {showAlert && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
@@ -1158,6 +1797,198 @@ function ArtistCreate() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {showAlert11 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Artist photo should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlert22 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Gcash screenshot should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlert33 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Your selfie should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlert44 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Valid ID should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlert55 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Sample art 1 should not exceed to 2mb!</span>
+          </div>
+        </div>
+      )}
+      {showAlert66 && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Sample art 2 should not exceed to 2mb!</span>
           </div>
         </div>
       )}

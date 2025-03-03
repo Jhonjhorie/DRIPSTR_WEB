@@ -238,12 +238,12 @@ function Orders({ shopOwnerId }) {
       <div className="absolute mx-3 right-0 z-20">
         <SideBar />
       </div>
-      <div className=" text-2xl md:text-3xl text-custom-purple font-bold md:px-56 p-4">
+      <div className="text-2xl md:text-4xl text-custom-purple font-semibold p-2 py-3 md:pl-20    ">
         {" "}
-        SHOP ORDERS{" "}
+        Manage Orders{" "}
       </div>
-      <div className="w-full h-auto  place-items-center ">
-        <div className="w-full md:w-3/4  rounded-md shadow-md mb-20 md:mb-0 lg:w-3/4 h-[550px] bg-slate-100 p-2">
+      <div className="w-full h-auto px-2 md:px-20 place-items-center ">
+        <div className="w-full rounded-md shadow-md mb-20 md:mb-0 h-[550px] bg-slate-100 p-2">
           <div className="w-full oveflow-hidden overflow-y-scroll custom-scrollbar relative h-full bg-slate-200 rounded-sm">
             <div className="w-full z-10 sticky top-0 h-auto pt-2 glass bg-custom-purple rounded-t-md">
               <ul className="flex justify-around place-items-center  text-slate-300 cursor-pointer">
