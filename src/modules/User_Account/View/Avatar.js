@@ -90,10 +90,12 @@ const BodyTypeInfoModal = ({ isOpen, onClose }) => {
 // Update your Part component
 function Part({ url, position, color, texture }) {
   const [loadError, setLoadError] = useState(false);
-  const gltf = useGLTF(url, undefined, (error) => {
-    console.error('Model loading error:', error);
-    setLoadError(true);
-  });
+  const gltf = useGLTF(url, undefined, 
+    (error) => {
+      console.error('Model loading error:', error);
+      setLoadError(true);
+    }
+  );
 
   const clonedScene = useMemo(() => {
     if (!gltf.scene) return null;
@@ -125,8 +127,13 @@ function Part({ url, position, color, texture }) {
     });
   }, [clonedScene, color, texture]);
 
-  if (loadError || !clonedScene) {
-    return null;
+  if (loadError) {
+    return (
+      <mesh position={position}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+    );
   }
 
   return (
@@ -233,6 +240,8 @@ const PreloadAssets = () => {
 
   return <Preload all urls={urls} />;
 };
+
+ 
 
 const CreateAvatarModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -835,7 +844,7 @@ const CharacterCustomization = () => {
             }}
           >
             <PreloadAssets />
-            {/* Lights */}
+             {/* Lights */}
             <ambientLight intensity={0.4} />
             <hemisphereLight intensity={0.7} />
             <directionalLight
