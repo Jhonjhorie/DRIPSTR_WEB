@@ -147,12 +147,36 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               </p>
 
               {order.order_status === "To prepare" && (
-                <p className="text-sm text-slate-700">
-                  Cancel:{" "}
-                  <span className="font-medium">
-                    {order.buyerPhone || "N/A"}
-                  </span>
-                </p>
+                <div>
+                  <p className="text-sm text-slate-700">
+                    Cancel status:{" "}
+                    <span className="font-medium">
+                      {order.cancellation_status || "none"}
+                    </span>
+                  </p>
+                  <p className="text-sm text-slate-700">
+                    Cancelation reason:{" "}
+                    <span className="font-medium">
+                      {order.cancellation_reason || "none"}
+                    </span>
+                  </p>
+                </div>
+              )}
+                {order.order_status === "Cancelled" && (
+                <div>
+                  <p className="text-sm text-slate-700">
+                    Cancel status:{" "}
+                    <span className="font-medium">
+                      {order.cancellation_status || "none"}
+                    </span>
+                  </p>
+                  <p className="text-sm text-slate-700">
+                    Cancelation reason:{" "}
+                    <span className="font-medium">
+                      {order.cancellation_reason || "none"}
+                    </span>
+                  </p>
+                </div>
               )}
             </div>
           </div>
@@ -326,7 +350,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <strong>Address:</strong> {order.buyerAddress || "N/A"}
                 </p>
                 <p className="text-sm text-slate-700">
-                  <strong>Mobile Number:</strong> {order.buyerPhone || "N/A"}
+                  <strong>Mobile number:</strong> {order.buyerPhone || "N/A"}
                 </p>
               </div>
 
@@ -339,7 +363,10 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <strong>Subtotal:</strong> ₱{order.total_price.toFixed(2)}
                 </p>
                 <p className="text-sm text-slate-700">
-                  <strong>Shipping Fee:</strong> ₱{order.shipping_fee}
+                  <strong>Shipping fee:</strong> ₱{order.shipping_fee}
+                </p>
+                <p className="text-sm text-slate-700">
+                  <strong>Shipping method:</strong> {order.shipping_method}
                 </p>
                 <div className="flex justify-end gap-2 items-center mt-2 font-semibold text-lg">
                   <span className="text-slate-800 text-sm">Total Price:</span>
@@ -358,7 +385,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
             <div className="flex justify-end gap-2 mt-4">
               <button
-                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
+                className="bg-gray-500 px-4 py-2 text-white text-sm rounded hover:bg-gray-600"
                 onClick={() => setIsModalOpen(false)}
               >
                 Cancel
@@ -519,6 +546,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           </div>
         </div>
       )}
+      
     </div>
   );
 };

@@ -5,6 +5,7 @@ import logo from "../../../assets/shop/logoBlack.png";
 import sample1 from "../../../assets/images/samples/5.png";
 import { supabase } from "@/constants/supabase";
 import OrderCard from "../Component/OrderCard";
+import questionEmote from "../../../assets/emote/success.png"
 
 function Orders({ shopOwnerId }) {
   const [activeTab, setActiveTab] = useState("new-orders");
@@ -13,9 +14,7 @@ function Orders({ shopOwnerId }) {
   const [isModalOpen3, setIsModalOpen3] = useState(false);
   const [isModalOpen4, setIsModalOpen4] = useState(false);
   const [isModalOpen5, setIsModalOpen5] = useState(false);
-  const [shopId, setShopId] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   const handlePrepare = () => {
@@ -317,11 +316,11 @@ function Orders({ shopOwnerId }) {
                         Preparing Orders
                       </h2>
                     </div>
-                    <div>
+                    {/* <div>
                       <button className="text-sm bg-custom-purple rounded p-2 glass text-white font-normal mb-2">
                         Print all Orders
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                   <div>
                     {orders.preparing.map((order) => (
@@ -395,6 +394,8 @@ function Orders({ shopOwnerId }) {
         </div>
       </div>
 
+      {/* Alert */}
+ 
       {/* TO DELIVER */}
       {isModalOpen2 && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
