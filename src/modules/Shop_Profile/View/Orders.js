@@ -297,424 +297,436 @@ function Orders({ shopOwnerId }) {
 
               {activeTab === "preparing" && (
                 <div>
-                  <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    Preparing Orders
-                  </h2>
-                  {orders.preparing.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
+                  <div className="flex justify-between">
+                    <div>
+                      <h2 className="text-xl text-custom-purple font-bold mb-4">
+                        Preparing Orders
+                      </h2>
+                    </div>
+                    <div>
+                      <button className="text-sm bg-custom-purple rounded p-2 glass text-white font-normal mb-2">
+                        Print all Orders
+                      </button>
+                    </div>
+                  </div>
+                    <div>
+
+                      {orders.preparing.map((order) => (
+                        <OrderCard
+                          key={order.id}
+                          order={order}
+                          refreshOrders={refreshOrders}
+                        />
+                      ))}
+                    </div>
                 </div>
               )}
 
-              {activeTab === "shipped" && (
-                <div>
-                  <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    On transit Orders
-                  </h2>
-                  {orders.shipped.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
+                    {activeTab === "shipped" && (
+                      <div>
+                        <h2 className="text-xl text-custom-purple font-bold mb-4">
+                          On transit Orders
+                        </h2>
+                        {orders.shipped.map((order) => (
+                          <OrderCard
+                            key={order.id}
+                            order={order}
+                            refreshOrders={refreshOrders}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {activeTab === "cancelled" && (
+                      <div>
+                        <h2 className="text-xl text-custom-purple font-bold mb-4">
+                          Cancelled Orders
+                        </h2>
+                        {orders.cancelled.map((order) => (
+                          <OrderCard
+                            key={order.id}
+                            order={order}
+                            refreshOrders={refreshOrders}
+                          />
+                        ))}
+                      </div>
+                    )}
+                    {activeTab === "completed" && (
+                      <div>
+                        <h2 className="text-xl text-custom-purple font-bold mb-4">
+                          Completed Orders
+                        </h2>
+                        {orders.completed.map((order) => (
+                          <OrderCard
+                            key={order.id}
+                            order={order}
+                            refreshOrders={refreshOrders}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-              {activeTab === "cancelled" && (
-                <div>
-                  <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    Cancelled Orders
-                  </h2>
-                  {orders.cancelled.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
-                </div>
-              )}
-              {activeTab === "completed" && (
-                <div>
-                  <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    Completed Orders
-                  </h2>
-                  {orders.completed.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
         </div>
-      </div>
+          </div>
 
-      {/* TO DELIVER */}
-      {isModalOpen2 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <h2 className="font-medium text-slate-800 py-2  ">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Information
-              </span>
-            </h2>
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={sample1}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto  p-2 relative ">
-                <div className=" flex w-full  justify-between place-items-center ">
-                  <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
-                    Viscount Black
-                  </div>
-                  <div className=" text-xl font-semibold text-slate-950  ">
-                    ID: 10
-                  </div>
-                </div>
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Name: <span className="text-slate-900"> {Name} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Address: <span className="text-slate-900"> {Address} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Phone number:{" "}
-                  <span className="text-slate-900"> {Phone} </span>{" "}
-                </a>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800"> Blue </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size: <span className="text-sm text-slate-800"> XL </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800"> 20% off </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800"> ₱140 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800"> ₱30 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Changed mind Reason:{" "}
-                  <span className="text-sm text-slate-800">
-                    {" "}
-                    Mistakenly order{" "}
+          {/* TO DELIVER */}
+          {isModalOpen2 && (
+            <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+              <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
+                <h2 className="font-medium text-slate-800 py-2  ">
+                  <span className="font-bold text-[20px] md:text-2xl">
+                    Order Information
                   </span>
+                </h2>
+                <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
+                  <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
+                    <img
+                      src={logo}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="w-1/3 h-full bg-slate-100">
+                    <img
+                      src={sample1}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="w-full md:w-2/3 h-auto  p-2 relative ">
+                    <div className=" flex w-full  justify-between place-items-center ">
+                      <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
+                        Viscount Black
+                      </div>
+                      <div className=" text-xl font-semibold text-slate-950  ">
+                        ID: 10
+                      </div>
+                    </div>
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Name: <span className="text-slate-900"> {Name} </span>{" "}
+                    </a>{" "}
+                    <br />
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Address: <span className="text-slate-900"> {Address} </span>{" "}
+                    </a>{" "}
+                    <br />
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Phone number:{" "}
+                      <span className="text-slate-900"> {Phone} </span>{" "}
+                    </a>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Variant:{" "}
+                      <span className="text-sm text-slate-800"> Blue </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Size: <span className="text-sm text-slate-800"> XL </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Vouchers:{" "}
+                      <span className="text-sm text-slate-800"> 20% off </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Item Price:{" "}
+                      <span className="text-sm text-slate-800"> ₱140 </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Delivery fee:{" "}
+                      <span className="text-sm text-slate-800"> ₱30 </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Changed mind Reason:{" "}
+                      <span className="text-sm text-slate-800">
+                        {" "}
+                        Mistakenly order{" "}
+                      </span>
+                    </div>
+                    <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
+                      PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
-                  PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
+                <div className="flex justify-between w-full">
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                    onClick={handleCloseModal}
+                  >
+                    Close
+                  </button>
+                  <div className=" flex gap-2 md:gap-4">
+                    <button
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+                      onClick={handleCloseModal}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+                      onClick={handleCloseModal}
+                    >
+                      SHIP
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-              <div className=" flex gap-2 md:gap-4">
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  onClick={handleCloseModal}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-                  onClick={handleCloseModal}
-                >
-                  SHIP
-                </button>
+          )}
+          {/* OTW */}
+          {isModalOpen3 && (
+            <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+              <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
+                <h2 className="font-medium text-slate-800 py-2  ">
+                  <span className="font-bold text-[20px] md:text-2xl">
+                    Order Information
+                  </span>
+                </h2>
+                <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
+                  <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
+                    <img
+                      src={logo}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="w-1/3 h-full bg-slate-100">
+                    <img
+                      src={sample1}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="w-full md:w-2/3 h-auto  p-2 relative ">
+                    <div className=" flex w-full  justify-between place-items-center ">
+                      <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
+                        Viscount Black
+                      </div>
+                      <div className=" text-xl font-semibold text-slate-950  ">
+                        ID: 10
+                      </div>
+                    </div>
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Name: <span className="text-slate-900"> {Name} </span>{" "}
+                    </a>{" "}
+                    <br />
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Address: <span className="text-slate-900"> {Address} </span>{" "}
+                    </a>{" "}
+                    <br />
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Phone number:{" "}
+                      <span className="text-slate-900"> {Phone} </span>{" "}
+                    </a>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Variant:{" "}
+                      <span className="text-sm text-slate-800"> Blue </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Size: <span className="text-sm text-slate-800"> XL </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Vouchers:{" "}
+                      <span className="text-sm text-slate-800"> 20% off </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Item Price:{" "}
+                      <span className="text-sm text-slate-800"> ₱140 </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Delivery fee:{" "}
+                      <span className="text-sm text-slate-800"> ₱30 </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Status:{" "}
+                      <span className="text-sm text-slate-800"> In Transit </span>
+                    </div>
+                    <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
+                      PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between w-full">
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                    onClick={handleCloseModal}
+                  >
+                    Close
+                  </button>
+                  <button className="bg-green-500 cursor-not-allowed text-white px-4 py-2 rounded hover:bg-green-700">
+                    Completed
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+          {/* CANCELLED */}
+          {isModalOpen4 && (
+            <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+              <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
+                <h2 className="font-medium text-slate-800 py-2  ">
+                  <span className="font-bold text-[20px] md:text-2xl">
+                    Order Cancelled
+                  </span>
+                </h2>
+                <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
+                  <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
+                    <img
+                      src={logo}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="w-1/3 h-full bg-slate-100">
+                    <img
+                      src={sample1}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="w-full md:w-2/3 h-auto  p-2 relative ">
+                    <div className=" flex w-full  justify-between place-items-center ">
+                      <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
+                        Viscount Black
+                      </div>
+                      <div className=" text-xl font-semibold text-slate-950  ">
+                        ID: 10
+                      </div>
+                    </div>
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Name: <span className="text-slate-900"> {Name} </span>{" "}
+                    </a>{" "}
+                    <br />
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Address: <span className="text-slate-900"> {Address} </span>{" "}
+                    </a>{" "}
+                    <br />
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Phone number:{" "}
+                      <span className="text-slate-900"> {Phone} </span>{" "}
+                    </a>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Variant:{" "}
+                      <span className="text-sm text-slate-800"> Blue </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Size: <span className="text-sm text-slate-800"> XL </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Vouchers:{" "}
+                      <span className="text-sm text-slate-800"> 20% off </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Item Price:{" "}
+                      <span className="text-sm text-slate-800"> ₱140 </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Delivery fee:{" "}
+                      <span className="text-sm text-slate-800"> ₱30 </span>
+                    </div>
+                    <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
+                      PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between w-full">
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                    onClick={handleCloseModal}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* COMPLETED */}
+          {isModalOpen5 && (
+            <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+              <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
+                <h2 className="font-medium text-slate-800 py-2  ">
+                  <span className="font-bold text-[20px] md:text-2xl">
+                    Order Completed
+                  </span>
+                </h2>
+                <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
+                  <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
+                    <img
+                      src={logo}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="w-1/3 h-full bg-slate-100">
+                    <img
+                      src={sample1}
+                      alt="Shop Logo"
+                      className="drop-shadow-custom h-full w-full object-cover rounded-md"
+                      sizes="100%"
+                    />
+                  </div>
+                  <div className="w-full md:w-2/3 h-auto  p-2 relative ">
+                    <div className=" flex w-full  justify-between place-items-center ">
+                      <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
+                        Viscount Black
+                      </div>
+                      <div className=" text-xl font-semibold text-slate-950  ">
+                        ID: 10
+                      </div>
+                    </div>
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Name: <span className="text-slate-900"> {Name} </span>{" "}
+                    </a>{" "}
+                    <br />
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Address: <span className="text-slate-900"> {Address} </span>{" "}
+                    </a>{" "}
+                    <br />
+                    <a className="text-sm text-custom-purple font-semibold ">
+                      Phone number:{" "}
+                      <span className="text-slate-900"> {Phone} </span>{" "}
+                    </a>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Variant:{" "}
+                      <span className="text-sm text-slate-800"> Blue </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Size: <span className="text-sm text-slate-800"> XL </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Vouchers:{" "}
+                      <span className="text-sm text-slate-800"> 20% off </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Item Price:{" "}
+                      <span className="text-sm text-slate-800"> ₱140 </span>
+                    </div>
+                    <div className="text-custom-purple text-sm font-semibold">
+                      Delivery fee:{" "}
+                      <span className="text-sm text-slate-800"> ₱30 </span>
+                    </div>
+                    <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
+                      PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between w-full">
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                    onClick={handleCloseModal}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
-      {/* OTW */}
-      {isModalOpen3 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <h2 className="font-medium text-slate-800 py-2  ">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Information
-              </span>
-            </h2>
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={sample1}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto  p-2 relative ">
-                <div className=" flex w-full  justify-between place-items-center ">
-                  <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
-                    Viscount Black
-                  </div>
-                  <div className=" text-xl font-semibold text-slate-950  ">
-                    ID: 10
-                  </div>
-                </div>
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Name: <span className="text-slate-900"> {Name} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Address: <span className="text-slate-900"> {Address} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Phone number:{" "}
-                  <span className="text-slate-900"> {Phone} </span>{" "}
-                </a>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800"> Blue </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size: <span className="text-sm text-slate-800"> XL </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800"> 20% off </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800"> ₱140 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800"> ₱30 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Status:{" "}
-                  <span className="text-sm text-slate-800"> In Transit </span>
-                </div>
-                <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
-                  PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-              <button className="bg-green-500 cursor-not-allowed text-white px-4 py-2 rounded hover:bg-green-700">
-                Completed
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* CANCELLED */}
-      {isModalOpen4 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <h2 className="font-medium text-slate-800 py-2  ">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Cancelled
-              </span>
-            </h2>
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={sample1}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto  p-2 relative ">
-                <div className=" flex w-full  justify-between place-items-center ">
-                  <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
-                    Viscount Black
-                  </div>
-                  <div className=" text-xl font-semibold text-slate-950  ">
-                    ID: 10
-                  </div>
-                </div>
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Name: <span className="text-slate-900"> {Name} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Address: <span className="text-slate-900"> {Address} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Phone number:{" "}
-                  <span className="text-slate-900"> {Phone} </span>{" "}
-                </a>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800"> Blue </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size: <span className="text-sm text-slate-800"> XL </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800"> 20% off </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800"> ₱140 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800"> ₱30 </span>
-                </div>
-                <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
-                  PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* COMPLETED */}
-      {isModalOpen5 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <h2 className="font-medium text-slate-800 py-2  ">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Completed
-              </span>
-            </h2>
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={sample1}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto  p-2 relative ">
-                <div className=" flex w-full  justify-between place-items-center ">
-                  <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
-                    Viscount Black
-                  </div>
-                  <div className=" text-xl font-semibold text-slate-950  ">
-                    ID: 10
-                  </div>
-                </div>
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Name: <span className="text-slate-900"> {Name} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Address: <span className="text-slate-900"> {Address} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Phone number:{" "}
-                  <span className="text-slate-900"> {Phone} </span>{" "}
-                </a>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800"> Blue </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size: <span className="text-sm text-slate-800"> XL </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800"> 20% off </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800"> ₱140 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800"> ₱30 </span>
-                </div>
-                <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
-                  PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+        );
 }
 
-export default Orders;
+        export default Orders;
