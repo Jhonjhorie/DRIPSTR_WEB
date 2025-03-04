@@ -38,6 +38,8 @@ import useResponsiveItems from "../../shared/hooks/useResponsiveItems";
 import Mall from "../Products/Mall";
 import AdsBanner from "./components/AdsBanner";
 import PremShop from "../Products/components/premiumShop";
+import { supabase } from '../../constants/supabase';
+import Toast from "@/shared/alerts";
 
 function Home() {
   const [filMall, setFilMall] = useState(0);
@@ -48,11 +50,35 @@ function Home() {
   const [showItem, setShowItem] = useState(3);
   const { products, loading, error } = useProducts(profile);
   const navigate = useNavigate();
-
+  const [showAddressAlert, setShowAddressAlert] = useState(false);
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 3, lg: 3 });
 
-  if (loadingP) return <LoadingMullet />;
+   useEffect(() => {
+    if (isLoggedIn && profile?.id) {
+      checkUserAddress(profile.id);
+    }
+  }, [isLoggedIn, profile]);
 
+
+  if (loadingP) return <LoadingMullet />;
+  const checkUserAddress = async (userId) => {
+    try {
+      const { data: addresses, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', userId)
+        .limit(1);
+
+      if (error) throw error;
+
+      if (!addresses || addresses.length === 0) {
+        setShowAddressAlert(true);
+      }
+    } catch (error) {
+      console.error('Error checking address:', error);
+    }
+  };
+  
   if (!isLoggedIn) return <LandingPage />;
   const openModalTerms = () => {
     const modal = document.getElementById("my_modal_terms");
@@ -102,9 +128,20 @@ function Home() {
       modal.close();
     }
   };
-
+  if (loadingP) return <LoadingMullet />;
+  if (!isLoggedIn) return <LandingPage />;
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+            {showAddressAlert && (
+        <Toast
+          message="Please set up your shipping address to continue shopping"
+          type="warning"
+          onClose={() => {
+            setShowAddressAlert(false);
+            navigate('/account-setup');
+          }}
+        />
+      )}
       <section className="w-full py-4 bg-gray-50 flex justify-center">
         <div className="container mx-2 h-96 flex flex-col md:flex-row justify-center">
           <Carousel images={Images} />

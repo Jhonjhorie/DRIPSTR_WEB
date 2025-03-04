@@ -114,7 +114,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
           navigate("/");
         }
         window.location.reload();
-      }, 1500); // Reduced to 1.5 seconds for better UX
+      }, 1500);  
     } catch (error) {
       setToast({ 
         show: true, 
