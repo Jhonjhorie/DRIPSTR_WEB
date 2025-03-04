@@ -1,11 +1,16 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/constants/supabase";
 import { useReactToPrint } from 'react-to-print';
 
 const OrderCard = ({ order, refreshOrders, setOrders }) => {
   const [loading, setLoading] = useState(false);
+  const [loadings, setLoadings] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); //Print order report
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [shopData, setShopData] = useState([]);
+  const [error, setError] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
 
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -140,65 +145,62 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
       {/* Modal Print Report */}
       {isModalOpen && (
-        <dialog id="print" className="fixed z-10 inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="bg-white p-6 text-slate-800 rounded shadow-lg w-auto">
-            <h2 className="text-lg font-semibold mb-4">Order Details</h2>
+        <dialog id="print" className="fixed inset-0  w-full p-2 bg-black bg-opacity-70 md:flex justify-center items-center z-50">
+          <div className="bg-white p-1 ext-slate-800 rounded shadow-lg w-auto">
+            <h2 className="text-lg font-semibold mb-2">Order Details</h2>
 
             {/* Only wrap the content inside this div for printing */}
-            <div ref={contentRef} className="p-4 border border-gray-300">
-              <p className="text-xl mb-2 font-semibold text-slate-900">
-                Transaction ID:{" "}
-                <span className="font-normal text-md ">{order.transaction_id}</span>
-              </p>
-              <div  className="w-full h-auto flex gap-2">
-                <div className="p-1 rounded-md shadow-md h-36 w-40 bg-slate-800">
+            <div ref={contentRef} className="max-w-md mx-auto bg-white shadow-lg border border-gray-300 p-6 rounded-lg">
+              {/* Header */}
+              <div className="text-center border-b pb-4">
+                <h2 className="text-2xl font-bold text-slate-900">INVOICE</h2>
+                <p className="text-sm text-gray-600">Transaction ID: <span className="font-medium">{order.transaction_id}</span></p>
+              </div>
+
+              {/* Product Section */}
+              <div className="flex gap-4 mt-4">
+                <div className="p-1 rounded-md shadow-md h-36 w-36 bg-slate-800">
                   <img
                     src={order.variantImg || "placeholder.jpg"}
                     alt={order.variantName || "Product Image"}
-                    className="h-full bg-slate-900 w-full object-cover rounded-md"
+                    className="h-full w-full object-cover rounded-md"
                   />
                 </div>
 
-                <div className="w-1/2 pt-3 relative h-auto">
-                  <p className="text-sm text-slate-700">
-                    <strong>Product: </strong>{" "}
-                    <span className="font-medium">{order.productName || "N/A"}</span>
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    <strong>Receiver: </strong><span className="font-medium">{order.buyerName || "N/A"}</span>
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    <strong>Address: </strong><span className="font-medium"> {order.buyerAddress || "N/A"}</span>
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    <strong>Mobile number: </strong><span className="font-medium">{order.buyerPhone || "N/A"}</span>
-                  </p>
-                </div>
-
-                <div className="w-1/2 pt-3 relative h-auto">
-                  <p className="text-sm text-slate-700">
-                    <strong>Variant:</strong>{" "}
-                    <span className="font-medium">{order.variantName || "N/A"}</span>
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    <strong>Size: </strong><span className="font-medium">{order.size}</span>
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    <strong>Quantity: </strong><span className="font-medium">{order.quantity}</span>
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    <strong>Price: </strong><span className="font-medium">₱{order.total_price}</span>
-                  </p>
-                  <p className="text-sm text-slate-700">
-                    <strong>Shipping Fee: {" "}</strong>
-                    <span className="font-medium">₱{order.shipping_fee || "N/A"}</span>
-                  </p>
-
+                <div className="flex-1">
+                  <p className="text-sm text-slate-700"><strong>Product:</strong> {order.productName || "N/A"}</p>
+                  <p className="text-sm text-slate-700"><strong>Variant:</strong> {order.variantName || "N/A"}</p>
+                  <p className="text-sm text-slate-700"><strong>Size:</strong> {order.size}</p>
+                  <p className="text-sm text-slate-700"><strong>Quantity:</strong> {order.quantity}</p>
+                  <p className="text-sm text-slate-700"><strong>Price per Item:</strong> ₱{(order.total_price / order.quantity).toFixed(2)}</p>
                 </div>
               </div>
 
-              <div className="mt-2 flex items-center justify-end w-full"><strong className="text-semibold">Total Price: </strong> {" "} <p className="text-xl">₱{order.total_price.toFixed(2)}</p></div>
+              {/* Shipping Details */}
+              <div className="mt-4 border-t pt-4">
+                <h3 className="text-md font-semibold text-slate-900">Shipping Details</h3>
+                <p className="text-sm text-slate-700"><strong>Receiver:</strong> {order.buyerName || "N/A"}</p>
+                <p className="text-sm text-slate-700"><strong>Address:</strong> {order.buyerAddress || "N/A"}</p>
+                <p className="text-sm text-slate-700"><strong>Mobile Number:</strong> {order.buyerPhone || "N/A"}</p>
+              </div>
+
+              {/* Pricing Summary */}
+              <div className="mt-4 border-t pt-4">
+                <h3 className="text-md font-semibold text-slate-900">Order Summary</h3>
+                <p className="text-sm text-slate-700"><strong>Subtotal:</strong> ₱{order.total_price.toFixed(2)}</p>
+                <p className="text-sm text-slate-700"><strong>Shipping Fee:</strong> ₱{order.shipping_fee || "N/A"}</p>
+                <div className="flex justify-between items-center mt-2 font-semibold text-lg">
+                  <span>Total Price:</span>
+                  <span className="text-xl text-green-600">₱{(order.total_price + (order.shipping_fee || 0)).toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center text-xs text-gray-500 mt-4 border-t pt-2">
+                <p>Thank you for shopping with Dripstr!</p>
+              </div>
             </div>
+
 
             <div className="flex justify-end mt-4">
               <button
