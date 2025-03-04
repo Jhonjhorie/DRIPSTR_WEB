@@ -31,12 +31,12 @@ const FollowedArtists = () => {
         return;
       }
 
-      // Fetch followed artists
+      // Fetch artists where user is in followers_Detail
       const { data: artists, error: artistError } = await supabase
         .from('artist')
         .select('*')
         .not('followers_Detail', 'is', null)
-        .filter('followers_Detail', 'cs', `{"id":"${user.id}"}`);
+        .filter('followers_Detail', 'cs', JSON.stringify([{ id: user.id }]));
 
       if (artistError) throw artistError;
 
@@ -136,6 +136,97 @@ const FollowedArtists = () => {
       setToast({
         show: true,
         message: 'Failed to unfollow shop',
+        type: 'error'
+      });
+    }
+  };
+
+  // Add this new function after your existing functions
+  const handleFollowArtist = async (artistId) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setToast({
+          show: true,
+          message: 'Please login to follow artists',
+          type: 'warning'
+        });
+        return;
+      }
+  
+      // Get user's profile info
+      const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('username, full_name')
+        .eq('id', user.id)
+        .single();
+  
+      if (profileError) throw profileError;
+  
+      // Get current artist data
+      const { data: artistData, error: fetchError } = await supabase
+        .from('artist')
+        .select('followers_Detail')
+        .eq('id', artistId)
+        .single();
+  
+      if (fetchError) throw fetchError;
+  
+      // Check if already following
+      const currentFollowers = artistData.followers_Detail || [];
+      const alreadyFollowing = currentFollowers.some(
+        follower => follower.id === user.id
+      );
+  
+      if (alreadyFollowing) {
+        setToast({
+          show: true,
+          message: 'You are already following this artist',
+          type: 'info'
+        });
+        return;
+      }
+  
+      // Add new follower
+      const updatedFollowers = [
+        ...currentFollowers,
+        {
+          id: user.id,
+          name: userProfile.full_name || userProfile.username,
+          followed_at: new Date().toISOString()
+        }
+      ];
+  
+      // Update artist's followers
+      const { error: updateError } = await supabase
+        .from('artist')
+        .update({ followers_Detail: updatedFollowers })
+        .eq('id', artistId);
+  
+      if (updateError) throw updateError;
+  
+      // Update local state
+      const { data: updatedArtist, error: refreshError } = await supabase
+        .from('artist')
+        .select('*')
+        .eq('id', artistId)
+        .single();
+  
+      if (refreshError) throw refreshError;
+  
+      setFollowedArtists(prev => [...prev, updatedArtist]);
+      
+      setToast({
+        show: true,
+        message: 'Successfully followed artist',
+        type: 'success'
+      });
+  
+    } catch (error) {
+      console.error('Error following artist:', error);
+      setToast({
+        show: true,
+        message: 'Failed to follow artist',
         type: 'error'
       });
     }
@@ -252,7 +343,7 @@ const FollowedArtists = () => {
 
                         <div className="flex justify-between items-center">
                           <button
-                            onClick={() => navigate(`/shop/${shop.id}`)}
+                            onClick={() => navigate(`/product/merchant-shop/${shop.shop_name}`)}
                             className="text-purple-600 hover:text-purple-800 font-medium"
                           >
                             Visit Shop
