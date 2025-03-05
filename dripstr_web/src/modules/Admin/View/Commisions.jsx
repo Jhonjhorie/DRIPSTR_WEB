@@ -4,6 +4,7 @@ import Sidebar from './Shared/Sidebar';
 
 function Commissions() {
     const [commissions, setCommissions] = useState([]);
+    const [merchantCommissions, setMerchantCommissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('Artist');
@@ -316,7 +317,7 @@ function Commissions() {
                                                     ? `Artist: ${commission.artist_Id.artist_Name}`
                                                     : commission.merchantId
                                                         ? `Merchant: ${commission.merchantId.shop_name}`
-                                                        : 'Not commissioned by a merchant yet'}
+                                                        : 'Not commissioned by a merchant yet.'}
                                             </p>
                                             <p className="text-black truncate">
                                                 To: {commission.client_Id?.full_name}
