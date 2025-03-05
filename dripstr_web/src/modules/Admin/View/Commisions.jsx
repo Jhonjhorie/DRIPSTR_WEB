@@ -373,22 +373,27 @@ function Commissions() {
                                         </div>
                                         {selectedImage && (
                                             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                                <div className="bg-white rounded-lg w-[20rem] h-[35rem]">
-                                                    {/* Close Button */}
-                                                    <div className="flex justify-end">
+                                                <div className="bg-white rounded-lg w-[20rem] h-[35rem] flex flex-col">
+                                                    {/* Header */}
+                                                    <div className="flex justify-between items-center p-3 border-b">
+                                                        <div className="flex flex-col text-black font-bold">
+                                                            <h1 className="text-lg">{activeTab === 'Artist' ? commission.title : 'Commission Receipt'}</h1>
+                                                            <p className="text-sm"> {activeTab === 'Artist' ?`To: ${commission.client_Id?.full_name}` : `Commission ${commission.id}`}</p>
+                                                        </div>
                                                         <button
                                                             onClick={closeModal}
-                                                            className="text-gray-500 hover:text-gray-700 text-xl font-bold p-4"
+                                                            className="text-gray-500 hover:text-gray-700 text-xl font-bold p-2"
                                                         >
                                                             X
                                                         </button>
                                                     </div>
+
                                                     {/* Image */}
-                                                    <div className="flex justify-center">
+                                                    <div className="flex justify-center items-center flex-1 p-2">
                                                         <img
                                                             src={selectedImage || "path/to/fallback-image.jpg"}
                                                             alt="Commission Receipt"
-                                                            className="max-w-full max-h-[90vh] object-contain"
+                                                            className="object-contain max-w-full max-h-full"
                                                             onError={() => console.log("Image failed to load:", selectedImage)} // Debug
                                                         />
                                                     </div>
