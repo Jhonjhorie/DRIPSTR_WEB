@@ -27,7 +27,8 @@ function Commissions() {
                     status,
                     merchantId(shop_name, wallet(id, revenue)),
                     filePath,
-                    notes
+                    notes,
+                    receipt
                 `);
             if (error) throw error;
             setMerchantCommissions(data || []);
@@ -64,6 +65,8 @@ function Commissions() {
             setLoading(false);
         }
     };
+
+
 
     const handleCheck = async (commissionId) => {
         if (!commissionId) {
@@ -233,6 +236,7 @@ function Commissions() {
     });
 
     const handleImageClick = (image) => {
+        console.log("Image clicked:", image);
         setSelectedImage(image);
     };
 
@@ -291,16 +295,10 @@ function Commissions() {
                                         className="border rounded-md shadow-sm p-3 w-full bg-white flex items-center gap-3 hover:shadow-md transition-shadow"
                                     >
                                         <img
-                                            src={
-                                                activeTab === 'Artist'
-                                                    ? commission.image_Ref || commission.image
-                                                    : commission.filePath || commission.image
-                                            }
-                                            alt={
-                                                activeTab === 'Artist'
-                                                    ? commission.image_Ref || commission.image || 'No image available'
-                                                    : commission.filePath || commission.image || 'No image available'
-                                            }
+
+                                            src={activeTab === 'Artist' ? commission.image_Ref : commission.filePath}
+                                            alt={activeTab === 'Artist' ? commission.image_Ref || 'No image available' : commission.filePath || 'No image available'}
+
                                             className="w-[5.5rem] h-[5.5rem] rounded-sm object-cover flex-shrink-0"
                                         />
                                         <div className="flex-1 text-sm">
@@ -330,15 +328,15 @@ function Commissions() {
                                             </p>
                                             <p
                                                 className="text-blue-700 underline truncate cursor-pointer"
-                                                onClick={() => handleImageClick(activeTab === 'Artist' ? commission.image_Ref || commission.image : commission.filePath || commission.image)}
+                                                onClick={() => handleImageClick(activeTab === 'Artist' ? commission.image : commission.receipt)}
                                             >
                                                 Receipt
                                             </p>
                                             <div className="flex justify-between items-center mt-1">
                                                 <div className="flex flex-row justify-around items-center gap-2">
                                                     <span className={`text-xs px-2 py-1 rounded-full ${(commission.status === 'Pending' || commission.commission_Status === 'Pending')
-                                                            ? 'bg-yellow-100 text-yellow-800'
-                                                            : 'bg-green-100 text-green-800'
+                                                        ? 'bg-yellow-100 text-yellow-800'
+                                                        : 'bg-green-100 text-green-800'
                                                         }`}>
                                                         {commission.status || commission.commission_Status}
                                                     </span>
@@ -375,20 +373,25 @@ function Commissions() {
                                         </div>
                                         {selectedImage && (
                                             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                                <div className="bg-white rounded-lg overflow-auto">
+                                                <div className="bg-white rounded-lg w-[20rem] h-[35rem] p-4">
+                                                    {/* Close Button */}
                                                     <div className="flex justify-end">
                                                         <button
                                                             onClick={closeModal}
-                                                            className="text-gray-500 hover:text-gray-700 text-xl font-bold"
+                                                            className="text-gray-500 hover:text-gray-700 text-xl font-bold p-4"
                                                         >
                                                             X
                                                         </button>
                                                     </div>
-                                                    <img
-                                                        src={selectedImage}
-                                                        alt="Commission Receipt"
-                                                        className="h-[30rem] w-[30rem] object-cover"
-                                                    />
+                                                    {/* Image */}
+                                                    <div className="flex justify-center">
+                                                        <img
+                                                            src={selectedImage || "path/to/fallback-image.jpg"}
+                                                            alt="Commission Receipt"
+                                                            className="max-w-full max-h-[90vh] object-contain"
+                                                            onError={() => console.log("Image failed to load:", selectedImage)} // Debug
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         )}
