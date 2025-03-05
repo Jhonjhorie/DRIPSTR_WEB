@@ -368,7 +368,7 @@ function Artists() {
       // Fetch the artwork's artist ID
       const { data: artData, error: artError } = await supabase
         .from("artist_Arts")
-        .select("artist_Id, comments")
+        .select("artist_Id, comments, status")
         .eq("id", artId)
         .single();
 
@@ -653,7 +653,7 @@ function Artists() {
           {/* Artist that avail premium priority HAHA */}
           <div className="columns-2 sm:columns-3 mb-2 md:columns-4 gap-2 space-y-2">
             {artistData
-              .filter((art) => art.artists?.is_Premium)
+              .filter((art) => art.artists?.is_Premium || art.status === "Approved")
               .map((art) => (
                 <div
                   key={art.id}

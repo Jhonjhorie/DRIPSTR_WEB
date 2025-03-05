@@ -41,7 +41,7 @@ function ArtistAddArts() {
       if (user) {
         const { data: artists, error: artistError } = await supabase
           .from("artist")
-          .select("artist_Name, id, artist_Bio, art_Type, artist_Image")
+          .select("artist_Name, id, artist_Bio, art_Type, artist_Image ")
           .eq("owner_Id", user.id);
 
         if (artistError) {
@@ -55,7 +55,7 @@ function ArtistAddArts() {
 
           const { data: arts, error: artsError } = await supabase
             .from("artist_Arts")
-            .select("art_Name, id, art_Description, art_Image")
+            .select("art_Name, id, art_Description, art_Image, status")
             .eq("artist_Id", artist.id);
 
           if (artsError) {
@@ -173,7 +173,7 @@ function ArtistAddArts() {
   };
 
   return (
-    <div className="h-full w-full bg-slate-300 overflow-y-scroll custom-scrollbar  ">
+    <div className="h-full w-full bg-slate-300 ">
       <div className="absolute mx-3 right-0 z-10">
         <ArtistSideBar></ArtistSideBar>
       </div>
@@ -195,7 +195,7 @@ function ArtistAddArts() {
                       art.id
                     )
                   }
-                  className="break-inside-avoid bg-custom-purple hover:scale-105 duration-200 cursor-pointer rounded-md glass p-2"
+                  className="break-inside-avoid relative bg-custom-purple hover:scale-105 duration-200 cursor-pointer rounded-md glass p-2"
                 >
                   <div className="w-full p-2 bg-slate-100 rounded-sm">
                     <img
@@ -208,6 +208,27 @@ function ArtistAddArts() {
                     <div className="text-slate-50 text-sm text-center">
                       {art.art_Name}
                     </div>
+                  </div>
+                  <div className="w-auto bg-slate-100 px-1 rounded-bl-md glass bg-transparent absolute top-2 right-2 flex ">
+                    {art.status === "Pending" ? (
+                      // Red dot and "Not Posted" text
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="h-3 w-3 rounded-full bg-red-500"
+                          title="Not Posted"
+                        ></div>
+                        <span className="text-sm text-red-500">Not Posted</span>
+                      </div>
+                    ) : (
+                      // Green dot and "Posted" text
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="h-3 w-3 rounded-full bg-green-500"
+                          title="Posted"
+                        ></div>
+                        <span className="text-sm text-green-500">Posted</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -251,9 +272,8 @@ function ArtistAddArts() {
                 id="artName"
                 value={artName}
                 onChange={(e) => setArtName(e.target.value)}
-                className={`w-full p-1 mb-2 rounded-md bg-slate-300 font-semibold ${
-                  isEditable ? "text-custom-purple" : "text-slate-500"
-                }`}
+                className={`w-full p-1 mb-2 rounded-md bg-slate-300 font-semibold ${isEditable ? "text-custom-purple" : "text-slate-500"
+                  }`}
                 readOnly={!isEditable}
               />
 
@@ -264,9 +284,8 @@ function ArtistAddArts() {
                 id="artDescription"
                 value={artDescription}
                 onChange={(e) => setArtDescription(e.target.value)} // Update state on change
-                className={`w-full resize-none p-1 rounded-md bg-slate-300 font-semibold ${
-                  isEditable ? "text-custom-purple" : "text-slate-500"
-                }`}
+                className={`w-full resize-none p-1 rounded-md bg-slate-300 font-semibold ${isEditable ? "text-custom-purple" : "text-slate-500"
+                  }`}
                 readOnly={!isEditable}
               />
 
@@ -274,24 +293,28 @@ function ArtistAddArts() {
                 {isEditable ? (
                   <button
                     onClick={handleCon}
-                    className="px-4 p-1 hover:bg-blue-700 bg-blue-500 duration-150 text-slate-50 rounded-md"
+                    className="px-4 py-2 text-sm hover:bg-blue-700 bg-blue-500 duration-150 text-slate-50 rounded"
                   >
-                    SAVE
+                    Save
                   </button>
                 ) : (
                   <button
                     onClick={handleEditClick}
-                    className="px-4 p-1 hover:bg-green-700 bg-green-500 duration-150 text-slate-50 rounded-md"
+                    className="px-4 py-2 text-sm hover:bg-green-700 bg-green-500 duration-150 text-slate-50 rounded"
                   >
-                    EDIT
+                    Edit
                   </button>
                 )}
-
+                {/* <button
+                  className="px-4 py-2 text-sm hover:bg-custom-purple bg-primary-color duration-150 text-slate-50 rounded"
+                >
+                  Unpost
+                </button> */}
                 <button
                   onClick={DeleteArt}
-                  className="px-4 p-1 hover:bg-red-700 bg-red-500 duration-150 text-slate-50 rounded-md"
+                  className="px-4 py-2 text-sm hover:bg-red-700 bg-red-500 duration-150 text-slate-50 rounded"
                 >
-                  DELETE
+                  Delete
                 </button>
               </div>
             </div>
@@ -316,15 +339,16 @@ function ArtistAddArts() {
                 <div className="w-full flex justify-between">
                   <div
                     onClick={closeConfirmEditCon}
-                    className="bg-red-500 hover:bg-red-300 m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                    className="bg-gray-300 px-4 py-2 font-medium text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </div>
+
                   <div
                     onClick={handleSaveClick}
-                    className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                    className="bg-blue-500  font-medium text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay!
+                    Confirm
                   </div>
                 </div>
               </div>

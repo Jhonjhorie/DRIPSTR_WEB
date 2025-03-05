@@ -411,7 +411,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               Are you sure you want to set this order to "To deliver"?
             </p>
 
-            <div className="mt-4 flex justify-end space-x-2">
+            <div className="mt-4 flex justify-between space-x-2">
               <button
                 className="bg-gray-300 px-4 py-2 text-sm text-slate-900 rounded hover:bg-gray-400"
                 onClick={() => setIsModalOpenToDeliver(false)}
@@ -432,13 +432,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
-              Confirm to ship
+              Confirm to prepare
             </p>
             <p className="text-sm text-gray-800">
               Are you sure you want to set this order to "To prepare"?
             </p>
 
-            <div className="mt-4 flex justify-end space-x-2">
+            <div className="mt-4 flex justify-between space-x-2">
               <button
                 className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                 onClick={() => setIsModalOpenToProcess(false)}
@@ -465,7 +465,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               Are you sure you want to set this order to "To ship"?
             </p>
 
-            <div className="mt-4 flex justify-end space-x-2">
+            <div className="mt-4 flex justify-between space-x-2">
               <button
                 className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                 onClick={() => setIsModalOpenToPrepare(false)}
@@ -492,7 +492,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               Are you sure you want to cancel this order?
             </p>
 
-            <div className="mt-4 flex justify-end space-x-2">
+            <div className="mt-4 flex justify-between space-x-2">
               <button
                 className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                 onClick={() => setIsModalOpenToCancel(false)}

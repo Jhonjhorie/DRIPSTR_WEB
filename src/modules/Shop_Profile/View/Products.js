@@ -167,9 +167,9 @@ function Products() {
 
                 const updatedFirstVariant = firstVariant
                   ? {
-                      ...firstVariant,
-                      imagePath: firstVariantUrlData?.publicUrl || null,
-                    }
+                    ...firstVariant,
+                    imagePath: firstVariantUrlData?.publicUrl || null,
+                  }
                   : null;
 
                 // Fetch image paths for all variants
@@ -870,8 +870,8 @@ function Products() {
                   <li className="list-none pr-4">Action</li>
                 </div>
                 {shopData.length > 0 &&
-                shopData[0].shop_Ads &&
-                shopData[0].shop_Ads.length > 0 ? (
+                  shopData[0].shop_Ads &&
+                  shopData[0].shop_Ads.length > 0 ? (
                   shopData[0].shop_Ads.map((ad, index) => {
                     return (
                       <div
@@ -1186,10 +1186,10 @@ function Products() {
       {/* EDIT, VIEW, POST, REMOVE ITEM */}
       {selectedItem && (
         <div
-        onClick={() => setSelectedItem(false)}
-        className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
+          onClick={() => setSelectedItem(false)}
+          className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
           <div onClick={(e) => e.stopPropagation()}
-           className="bg-white rounded-lg  md:w-1/2 h-2/3 w-full ">
+            className="bg-white rounded-lg  md:w-1/2 h-2/3 w-full ">
             <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 w-full rounded-t-md  " />
             <div className=" flex justify-between items-center pr-2 ">
               <div className="text-custom-purple font-semibold iceland-regular text-2xl p-2">
@@ -1381,11 +1381,10 @@ function Products() {
                                 toggleEdit(variantIndex);
                               }
                             }}
-                            className={`${
-                              editableVariants[variantIndex]
+                            className={`${editableVariants[variantIndex]
                                 ? "bg-green-500"
                                 : "bg-blue-500"
-                            } text-white text-sm px-3 py-1 rounded-md`}
+                              } text-white text-sm px-3 py-1 rounded-md`}
                           >
                             {editableVariants[variantIndex] ? "Save" : "Edit"}
                           </button>
@@ -1402,11 +1401,10 @@ function Products() {
                                   Size:
                                 </label>
                                 <input
-                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                    editableVariants[variantIndex]
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${editableVariants[variantIndex]
                                       ? "bg-slate-300"
                                       : "bg-slate-100"
-                                  }`}
+                                    }`}
                                   type="text"
                                   value={size.size}
                                   onChange={(e) =>
@@ -1426,11 +1424,10 @@ function Products() {
                                 </label>
                                 <input
                                   onKeyDown={blockInvalidChar}
-                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                    editableVariants[variantIndex]
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${editableVariants[variantIndex]
                                       ? "bg-slate-300"
                                       : "bg-slate-100"
-                                  }`}
+                                    }`}
                                   type="number"
                                   value={size.qty}
                                   onChange={(e) =>
@@ -1450,11 +1447,10 @@ function Products() {
                                 </label>
                                 <input
                                   onKeyDown={blockInvalidChar}
-                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                    editableVariants[variantIndex]
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${editableVariants[variantIndex]
                                       ? "bg-slate-300"
                                       : "bg-slate-100"
-                                  }`}
+                                    }`}
                                   type="number"
                                   value={size.price}
                                   onChange={(e) =>
@@ -1499,8 +1495,8 @@ function Products() {
             <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800">
-                  Post this Item{" "}
-                  <span className="font-bold text-primary-color">
+                Are you sure you want to post this Item{" "}
+                  <span className="font-semibold text-primary-color">
                     {selectedItem.item_Name}
                   </span>
                   ?
@@ -1508,15 +1504,15 @@ function Products() {
                 <div className="flex w-full gap-2 justify-between">
                   <button
                     onClick={handleClosePostItem}
-                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                    className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={PostNotify}
-                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -1527,8 +1523,8 @@ function Products() {
             <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
-                  Are you sure you want to Unpost this <br />
-                  <span className="font-bold text-primary-color">
+                  Are you sure you want to unpost this <br />
+                  <span className="font-semibold text-primary-color">
                     {selectedItem.item_Name}
                   </span>
                   ?
@@ -1536,15 +1532,15 @@ function Products() {
                 <div className="flex w-full gap-2 justify-between">
                   <button
                     onClick={handleClosePostItem}
-                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                    className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={unPostNotify}
-                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -1556,7 +1552,7 @@ function Products() {
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
                   Are you sure you want to Delete this <br />
-                  <span className="font-bold text-primary-color">
+                  <span className="font-semibold text-primary-color">
                     {selectedItem.item_Name}
                   </span>
                   ?
@@ -1564,15 +1560,15 @@ function Products() {
                 <div className="flex w-full gap-2 justify-between">
                   <button
                     onClick={handleClosePostItem}
-                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                    className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={DeleteItem}
-                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -1580,11 +1576,11 @@ function Products() {
           )}
           {/* Delete Variant Confirmation */}
           {ConfirmUpdate && (
-            <div  onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
                   Are you sure you want to Update this <br />
-                  <span className="font-bold text-primary-color">
+                  <span className="font-semibold text-primary-color">
                     {selectedItem.item_Name}
                   </span>
                   ?
@@ -1611,15 +1607,15 @@ function Products() {
                       setCurrentVariantIndex(null);
                       toggleEdit(currentVariantIndex);
                     }}
-                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                   className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleConfirmedUpdate}
-                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -1627,7 +1623,7 @@ function Products() {
           )}
           {/* Alert Update Variant Confirmation */}
           {showAlertEditDone && (
-            <div  onClick={(e) => e.stopPropagation()}className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+            <div onClick={(e) => e.stopPropagation()} className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
               <div
                 role="alert"
                 className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
