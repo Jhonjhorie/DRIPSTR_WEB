@@ -282,7 +282,7 @@ function Commissions() {
                         <div className="flex flex-col gap-3 w-full">
                             {filteredData.length === 0 ? (
                                 <h1 className="flex justify-center items-center font-bold text-2xl text-white py-4">
-                                    No {activeTab} Commissions
+                                    No {statusTab} {activeTab} Commissions
                                 </h1>
                             ) : (
                                 filteredData.map((commission) => (
