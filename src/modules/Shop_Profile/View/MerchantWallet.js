@@ -117,9 +117,11 @@ function MerchantWallet() {
   const [showAlertBL, setIsModalOpenBL] = useState(false); //CASHOUT CONFIRMATION
   const [showAlertSend, setIsModalOpenSend] = useState(false); //CASHOUT CONFIRMATION
   const [showAlertMin, setIsModalOpenMin] = useState(false); //CASHOUT CONFIRMATION
+
+
   const handleSubmitCashout = async () => {
-    if (!amount || !reason) {
-      setMessage("Please enter both amount and reason.");
+    if (!amount ) {
+      console.log("Please enter both amount and reason.");
       return;
     }
 
@@ -129,13 +131,13 @@ function MerchantWallet() {
         full_Name: walletData.owner_Name,
         owner_Id: walletData.owner_ID,
         qty: amount,
-        reason: reason,
+        reason: "Cashout",
         status: "Pending",
       },
     ]);
 
     if (error) {
-      setMessage("Error submitting request. Try again.");
+      console.log("Error submitting request. Try again.");
     } else {
       setAmount("");
       setReason("");
@@ -147,13 +149,13 @@ function MerchantWallet() {
     setLoading(false);
   };
   const handleSubmitCashoutcONF = async () => {
-    if (!amount || !reason) {
-      setMessage("Please enter both amount and reason.");
+    if (!amount ) {
+      console.log("Please enter both amount and reason.");
       return;
     }
 
     if (!walletData) {
-      setMessage("Wallet data not available.");
+      console.log("Wallet data not available.");
       return;
     }
     if (parseFloat(amount) < 100) {
@@ -677,12 +679,12 @@ function MerchantWallet() {
                 onInput={phonedigit}
                 className="w-full p-2 border text-sm text-slate-800 bg-slate-300 rounded-md mb-2"
               />
-              <textarea
+              {/* <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Reason for Cashout"
                 className="w-full p-2 border text-sm text-slate-800 rounded-md bg-slate-300"
-              ></textarea>
+              ></textarea> */}
               <button
                 onClick={handleSubmitCashoutcONF}
                 className="mt-3 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-full"
@@ -713,7 +715,7 @@ function MerchantWallet() {
                     key={transaction.id}
                     className="p-2 border-b flex justify-between"
                   >
-                    <span>
+                    <span className="text-sm">
                       ₱{transaction.qty} - {transaction.reason}
                     </span>
                     <span
@@ -827,12 +829,12 @@ function MerchantWallet() {
             <h3 className="text-lg font-semibold text-slate-900 mb-4">
               Are you sure you want to submit this cashout request?
             </h3>
-            <span className="text-custom-purple font-semibold">Amount:</span>
+            <span className="text-custom-purple text-sm font-semibold">Amount:</span>
             <input
               type="number"
               value={amount}
               placeholder="Enter Amount"
-              className="w-full disabled p-2  text-slate-800 bg-slate-300 rounded-md mb-2"
+              className="w-full disabled p-2 text-sm text-slate-800 bg-slate-300 rounded-md mb-2"
             />
             <div className="flex justify-end gap-4">
               <button

@@ -46,7 +46,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
       setLoading(true);
       const { error } = await supabase
         .from("orders")
-        .update({ order_status: newStatus })
+        .update({ shipping_status: newStatus })
         .eq("id", orderId);
 
       if (error) throw error;
@@ -58,7 +58,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
       } else if (setOrders) {
         setOrders((prevOrders) =>
           prevOrders.map((o) =>
-            o.id === orderId ? { ...o, order_status: newStatus } : o
+            o.id === orderId ? { ...o, shipping_status: newStatus } : o
           )
         );
       }
@@ -69,14 +69,15 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
     }
   };
 
+  //print the div content serves as a handout copy
   const contentRef = useRef(null);
   const handlePrint = useReactToPrint({ contentRef });
 
   //modal for confirmation
-  const handleProcess = () => {
-    updateOrderStatus(order.id, "To prepare");
-    setIsModalOpenToProcess(false);
-  };
+  // const handleProcess = () => {
+  //   updateOrderStatus(order.id, "To prepare");
+  //   setIsModalOpenToProcess(false);
+  // };
   const handlePrepare = () => {
     updateOrderStatus(order.id, "To ship");
     setIsModalOpenToPrepare(false);
@@ -86,7 +87,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
     setIsModalOpenToDeliver(false);
   };
   const handleCancel = () => {
-    updateOrderStatus(order.id, "Cancelled");
+    updateOrderStatus(order.id, "Cancel");
     setIsModalOpenToCancel(false);
   };
 
@@ -106,14 +107,14 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
   return (
     <div
       className={`border relative rounded-lg p-4 shadow-md mb-4 ${
-        order.order_status === "Cancelled"
-          ? "border-red-500 bg-red-100"
-          : order.order_status === "Delivered"
-          ? "border-green-500 bg-green-100"
+        order.shipping_status === "Cancel"
+          ? "bg-slate-300"
+          : order.shipping_status === "Delivered"
+          ? "bg-slate-300"
           : "bg-white"
       }`}
     >
-      <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md"></div>
+      <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
       <h2 className="text-lg font-bold text-slate-900">Order #{order.id}</h2>
       <div className="w-full flex gap-2">
         {/* Product Details */}
@@ -142,42 +143,95 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               <p className="text-sm text-slate-700">
                 Address:{" "}
                 <span className="font-medium">
-                  {order.buyerAddress || "N/A"}
+                  {order.shipping_addr || "N/A"}
                 </span>
               </p>
+              <p className="text-sm text-slate-700">
+                Payment method:{" "}
+                <span className="font-medium">
+                  {order.payment_method || "N/A"}
+                </span>
+              </p>
+              {order.payment_method === "Gcash" && (
+                <div>
+                  <p className="text-sm text-slate-700">
+                    Is paid:{" "}
+                    <span className="font-medium">
+                      {order.payment_status || "none"}
+                    </span>
+                  </p>
+                </div>
+              )}
 
-              {order.order_status === "To prepare" && (
+              {order.shipping_status === "To prepare" && (
                 <div>
                   <p className="text-sm text-slate-700">
-                    Cancel status:{" "}
-                    <span className="font-medium">
-                      {order.cancellation_status || "none"}
+                    Cancelation reason:{" "}
+                    <span  className={`font-medium ${
+                        order.cancellation_requested_at
+                          ? "text-red-500"
+                          : "text-slate-700"
+                      }`}>
+                      {order.cancellation_reason || "none"}
                     </span>
                   </p>
                   <p className="text-sm text-slate-700">
-                    Cancelation reason:{" "}
-                    <span className="font-medium">
-                      {order.cancellation_reason || "none"}
+                    Cancelation date:{" "}
+                    <span
+                      className={`font-medium ${
+                        order.cancellation_requested_at
+                          ? "text-red-500"
+                          : "text-slate-700"
+                      }`}
+                    >
+                      {order.cancellation_requested_at
+                        ? new Date(
+                            order.cancellation_requested_at
+                          ).toLocaleString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : "none"}
                     </span>
                   </p>
                 </div>
               )}
-                {order.order_status === "Cancelled" && (
+              {order.shipping_status === "Cancel" && (
                 <div>
                   <p className="text-sm text-slate-700">
-                    Cancel status:{" "}
-                    <span className="font-medium">
-                      {order.cancellation_status || "none"}
+                    Cancelation reason:{" "}
+                    <span  className={`font-medium ${
+                        order.cancellation_requested_at
+                          ? "text-red-500"
+                          : "text-slate-700"
+                      }`}>
+                      {order.cancellation_reason || "none"}
                     </span>
                   </p>
                   <p className="text-sm text-slate-700">
-                    Cancelation reason:{" "}
-                    <span className="font-medium">
-                      {order.cancellation_reason || "none"}
+                    Cancelation date:{" "}
+                    <span
+                      className={`font-medium ${
+                        order.cancellation_requested_at
+                          ? "text-red-500"
+                          : "text-slate-700"
+                      }`}
+                    >
+                      {order.cancellation_requested_at
+                        ? new Date(
+                            order.cancellation_requested_at
+                          ).toLocaleString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : "none"}
                     </span>
                   </p>
                 </div>
               )}
+         
             </div>
           </div>
         </div>
@@ -213,16 +267,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
       {/* Buttons */}
       <div className="flex justify-end mt-4">
-        {order.order_status === "To pay" && (
-          <button
-            className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-            onClick={() => setIsModalOpenToProcess(true)}
-            disabled={loading}
-          >
-            {loading ? "Updating..." : "Mark as to prepare"}
-          </button>
-        )}
-        {order.order_status === "To prepare" && (
+        {order.shipping_status === "To prepare" && (
           <div className="flex gap-2">
             <button
               className="bg-gray-500 text-sm text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50 ml-2"
@@ -240,7 +285,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             </button>
           </div>
         )}
-        {order.order_status === "To ship" && (
+        {order.shipping_status === "To ship" && (
           <div className="flex gap-2">
             <button
               className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 "
@@ -257,7 +302,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             </button>
           </div>
         )}
-        {order.order_status === "To deliver" && (
+        {order.shipping_status === "To deliver" && (
           <button
             className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
             onClick={handleOpenDeliveryInfo}
@@ -266,7 +311,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             {loading ? "Updating..." : "Status"}
           </button>
         )}
-        {order.order_status === "Completed" && (
+        {order.shipping_status === "Completed" && (
           <button
             className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 ml-2"
             disabled={loading}
@@ -313,26 +358,26 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 </div>
 
                 <div className="flex-1">
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-slate-800">
                     <strong>Product:</strong> {order.productName || "N/A"}
                   </p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-slate-800">
                     <strong>Variant:</strong> {order.variantName || "N/A"}
                   </p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-slate-800">
                     <strong>Size:</strong> {order.size}
                   </p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-slate-800">
                     <strong>Quantity:</strong> {order.quantity}
                   </p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-slate-800">
                     <strong>Price per Item:</strong> ₱
                     {(order.total_price / order.quantity).toFixed(2)}
                   </p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-slate-800">
                     <strong>Shop:</strong> {shopData?.shop_name || "N/A"}
                   </p>
-                  <p className="text-sm text-slate-700">
+                  <p className="text-sm text-slate-800">
                     <strong>Address:</strong> {shopData?.address || "N/A"}
                   </p>
                 </div>
@@ -343,13 +388,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 <h3 className="text-md font-semibold text-slate-900">
                   Shipping Details
                 </h3>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-800">
                   <strong>Receiver:</strong> {order.buyerName || "N/A"}
                 </p>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-800">
                   <strong>Address:</strong> {order.buyerAddress || "N/A"}
                 </p>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-800">
                   <strong>Mobile number:</strong> {order.buyerPhone || "N/A"}
                 </p>
               </div>
@@ -359,13 +404,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 <h3 className="text-md font-semibold text-slate-900">
                   Order Summary
                 </h3>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-800">
                   <strong>Subtotal:</strong> ₱{order.total_price.toFixed(2)}
                 </p>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-800">
                   <strong>Shipping fee:</strong> ₱{order.shipping_fee}
                 </p>
-                <p className="text-sm text-slate-700">
+                <p className="text-sm text-slate-800">
                   <strong>Shipping method:</strong> {order.shipping_method}
                 </p>
                 <div className="flex justify-end gap-2 items-center mt-2 font-semibold text-lg">
@@ -405,7 +450,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         <div className="fixed inset-0 flex z-10 items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
-              Confirm Deliver
+              Confirm Deliver Order <span className="text-custom-purple">{order.productName || "N/A"}</span>
             </p>
             <p className="text-sm text-gray-800">
               Are you sure you want to set this order to "To deliver"?
@@ -428,7 +473,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           </div>
         </div>
       )}
-      {isModalOpenToProcess && (
+      {/* {isModalOpenToProcess && (
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
@@ -454,12 +499,12 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
       {isModalOpenToPrepare && (
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
-              Confirm to ship
+              Confirm to ship <span className="text-custom-purple">{order.productName || "N/A"}</span>
             </p>
             <p className="text-sm text-gray-800">
               Are you sure you want to set this order to "To ship"?
@@ -486,7 +531,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-4 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
-              Confirm to cancel
+              Confirm cancel order <span className="text-custom-purple">{order.productName || "N/A"}</span>
             </p>
             <p className="text-sm text-gray-800">
               Are you sure you want to cancel this order?
@@ -546,7 +591,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           </div>
         </div>
       )}
-      
     </div>
   );
 };
