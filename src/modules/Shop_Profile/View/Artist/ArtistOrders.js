@@ -19,18 +19,13 @@ function AristOrders() {
   const [selectedUser, setSelectedUser] = React.useState(null);
   const [isClosing, setIsClosing] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
-  const [userId, setUserId] = useState(null);
   const [artist, setArtist] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [selectedArtistId, setSelectedArtistId] = useState(null);
-  const [selectedMessage, setSelectedMessage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [messageContent, setMessageContent] = useState("");
   const [imageFile, setImageFile] = useState(null);
-  const [artistId, setArtistId] = useState(null);
-  const [selectedImage2, setSelectedImage2] = useState(null);
   const [imageOrientation, setImageOrientation] = useState("landscape");
   useEffect(() => {
     const fetchUser = async () => {

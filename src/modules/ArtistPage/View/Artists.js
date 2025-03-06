@@ -518,8 +518,8 @@ function Artists() {
       <h1 className="text-center pt-5 text-5xl text-slate-50  bg-violet-500 font-extrabold  iceland-regular">
         DRIPSTR TOP ARTIST
       </h1>
-      <div className="w-full place-content-center py-5 md:py-16 gap-10 bg-slate-200 relative h-auto flex">
-        <div className="absolute w-full h-full bg-gradient-to-b  from-violet-500 to-fuchsia-500 inset-0 overflow-hidden">
+      <div className="w-full place-content-center rounded-b-3xl border-b-2 border-violet-900 py-5 md:py-16 gap-10 bg-slate-200 relative h-auto flex">
+        <div className="absolute w-full h-full rounded-b-3xl  bg-gradient-to-b  from-violet-500 to-fuchsia-500 inset-0 overflow-hidden">
           {Array.from({ length: 50 }).map((_, index) => {
             const randomX = Math.random() * 100;
             const randomY = Math.random() * 100;
@@ -629,7 +629,7 @@ function Artists() {
       {topArtistsMobile.map((artist, index) => (
         <div
           key={index}
-          className="w-full h-auto bg-gradient-to-b  from-fuchsia-500 to-fuchsia-500 md:hidden block p-2"
+          className="w-full h-auto bg-gradient-to-b rounded-b-xl  from-fuchsia-500 to-fuchsia-500 md:hidden block p-2"
         >
           <div className="w-full relative h-32 flex border-2 border-slate-900 shadow-white shadow-md rounded-md ">
             <div className="absolute z-20 px-3.5 bg-yellow-600  top-10 left-[21%]  text-2xl text-slate-100 font-semibold iceland-regular  shadow-md border-slate-900 border-2 = rounded-full p-1">
@@ -676,7 +676,7 @@ function Artists() {
           </div>
         </div>
       ))}
-      <div className="bg-gradient-to-b  from-fuchsia-500 to-slate-300 h-40">
+      <div className=" ">
         <div className="text-slate-800 text-5xl font-bold iceland-regular text-center w-full p-5 ">
           DRIPSTR GALLERY
         </div>
@@ -690,10 +690,10 @@ function Artists() {
         <div className="px-4 mb-20 space-y-6">
           <div className="flex justify-center mb-4 gap-4">
             <button
-              className={`px-4 py-2 text-sm rounded glass font-semibold ${
+              className={`px-4 py-2 text-sm  rounded glass font-semibold ${
                 showPremium
                   ? "bg-yellow-500 text-white"
-                  : "bg-gray-200 text-slate-600"
+                  : "bg-gray-100 text-slate-800"
               }`}
               onClick={() => setShowPremium(true)}
             >
@@ -703,7 +703,7 @@ function Artists() {
               className={`px-4 py-2 text-sm rounded glass font-semibold ${
                 !showPremium
                   ? "bg-custom-purple text-white"
-                  : "bg-gray-200 text-slate-600"
+                  : "bg-gray-100 text-slate-800"
               }`}
               onClick={() => setShowPremium(false)}
             >

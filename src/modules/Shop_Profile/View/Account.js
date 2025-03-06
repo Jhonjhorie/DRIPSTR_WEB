@@ -442,7 +442,7 @@ function Account() {
                 />
               </div>
 
-              <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
+              <h2 className="text-2xl font-bold iceland-regular mb-4 text-center text-slate-900 ">
                 Merchant Page Updated Successfully
               </h2>
               <div

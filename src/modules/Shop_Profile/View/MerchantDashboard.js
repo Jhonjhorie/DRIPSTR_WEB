@@ -647,6 +647,7 @@ function MerchantDashboard() {
           <div className=" md:w-full mb-2 w-auto bg-slate-200 glass shadow-md p-1.5 rounded-md h-[70%] md:h-[75%]">
             <div className="w-full bg-slate-50 h-full rounded-md place-items-center">
               <BarChart
+              className="text-sm"
                 series={[
                   {
                     data: pData,

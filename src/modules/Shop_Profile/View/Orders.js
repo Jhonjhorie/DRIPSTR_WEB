@@ -311,7 +311,7 @@ function Orders({ shopOwnerId }) {
                     ) : (
                       <div className="justify-items-center mt-28">
                         <img src={hmmmEmote} className="h-20 " />
-                        <div className="text-slate-800">No orders yetF.</div>
+                        <div className="text-slate-800">No orders yet.</div>
                       </div>
                     )}
                   </div>

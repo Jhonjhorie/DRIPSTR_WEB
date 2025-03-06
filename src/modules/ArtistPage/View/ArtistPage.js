@@ -367,8 +367,9 @@ function ArtistPage() {
         const { data, error } = await supabase
           .from("artist_Arts")
           .select("*")
-          .eq("artist_Id", id);
-
+          .eq("artist_Id", id)
+          .eq("status", "Approved");
+          
         if (error) {
           console.error("Error fetching artist arts:", error.message);
         } else {
