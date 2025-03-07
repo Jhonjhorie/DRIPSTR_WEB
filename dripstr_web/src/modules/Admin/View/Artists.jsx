@@ -70,21 +70,21 @@ function Artists() {
         .eq('id', id)
         .single();
       if (fetchError) throw fetchError;
-  
+
       console.log("Fetched artist data:", artistData);
-  
+
       console.log("Updating artist registration...");
       const { error: updateError } = await supabase
         .from('artist_registration')
         .update({ is_approved: true })
         .eq('id', id);
       if (updateError) throw updateError;
-  
+
       console.log("Inserting into artist table...");
       const { data: newArtist, error: insertError } = await supabase
         .from('artist')
         .insert([{
-          
+
           created_at: artistData.created_at,
           owner_Id: artistData.acc_id, // Ensure this references a valid profile ID
           artist_Name: artistData.artist_name,
@@ -103,14 +103,14 @@ function Artists() {
         .select()
         .single(); // Get the newly inserted artist data
       if (insertError) throw insertError;
-  
+
       console.log("Inserting completed, updating profiles table...");
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ isArtist: true })
         .eq('id', artistData.acc_id); // Use acc_id instead of id
       if (profileError) throw profileError;
-  
+
       console.log("Updating UI...");
       setRegister(prev => prev.filter(artist => artist.id !== id));
       setAcceptedArtists(prev => [...prev, { ...artistData, id: newArtist.id }]);
@@ -119,7 +119,7 @@ function Artists() {
       setError(error.message);
     }
   };
-  
+
 
   const handleDecline = async (id) => {
     try {
@@ -151,6 +151,22 @@ function Artists() {
   const closeEnlargedImage = () => {
     setEnlargedImage(null);
   };
+
+  const getSampleArtUrls = (sampleArt) => {
+    try {
+      if (!sampleArt) return [];
+      // Parse the sampleArt if it is a string
+      const parsedArt = JSON.parse(sampleArt);
+      // Ensure it's an array before returning
+      return Array.isArray(parsedArt) ? parsedArt : [];
+    } catch (error) {
+      console.error("Error parsing sample_art:", error.message);
+      return [];
+    }
+  };
+
+
+
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -274,6 +290,26 @@ function Artists() {
                     onClick={() => handleImageClick(selectedArtist.gcash)}
                   />
                 </div>
+                <div className="flex flex-col gap-2">
+                  {getSampleArtUrls(selectedArtist.sample_art).length > 0 ? (
+                    getSampleArtUrls(selectedArtist.sample_art).map((url, index) => (
+                      <img
+                        key={index}
+                        src={url || 'https://via.placeholder.com/150'}
+                        alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} Sample Art ${index + 1}`}
+                        className="w-24 h-24 object-contain rounded-md cursor-pointer"
+                        onClick={() => handleImageClick(url)}
+                      />
+                    ))
+                  ) : (
+                    <img
+                      src="https://via.placeholder.com/150"
+                      alt="No Sample Art"
+                      className="w-24 h-24 object-contain rounded-md cursor-pointer"
+                    />
+                  )}
+                </div>
+
               </div>
               <button
                 onClick={closeModal}
