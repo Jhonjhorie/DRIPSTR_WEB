@@ -12,31 +12,29 @@ function Orders() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("orders")
+        .select("id, created_at, acc_num(full_name), prod_num(item_Name, shop_Name), quantity, total_price, payment_method, order_variation, shipping_addr, transaction_id, date_of_order, proof_of_payment, payment_status, shop_id(wallet(id, revenue))")
+        .eq("payment_method", "Gcash")
+        .eq('payment_status', 'Pending to Admin');
+
+      if (error) throw error;
+
+      console.log("Fetched data:", data);
+      setOrders(data || []);
+    } catch (error) {
+      console.error("Error in fetchOrders:", error.message);
+      setError(error.message);
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("orders")
-          .select("id, created_at, acc_num(full_name), prod_num(item_Name, shop_Name), quantity, total_price, payment_method, order_variation, shipping_addr, transaction_id, date_of_order, proof_of_payment, payment_status")
-          .eq("payment_method", "Gcash")
-          .eq('payment_status', 'Pending to Admin')
-
-        if (error) {
-          console.error("Error fetching orders:", error.message);
-          throw error;
-        }
-
-        console.log("Fetched data:", data);
-        setOrders(data || []);
-      } catch (error) {
-        console.error("Error in fetchOrders:", error.message);
-        setError(error.message);
-        setOrders([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchOrders();
   }, []);
 
@@ -51,6 +49,59 @@ function Orders() {
     setSelectedImage(null);
   };
 
+  const handleApprove = async (orderId) => {
+    try {
+      // First, get the order details including total_price and shop_id
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .select('total_price, shop_id(wallet(id, revenue))')
+        .eq('id', orderId)
+        .single(); // Get single record
+  
+      if (orderError) throw orderError;
+  
+      // Calculate 97% of total_price
+      const revenueIncrease = Number(orderData.total_price) * 0.97;
+  
+      // Start a transaction-like operation
+      // Update order status
+      const { data: updatedOrder, error: updateError } = await supabase
+        .from('orders')
+        .update({
+          payment_status: 'Paid',
+          isPaid: true
+        })
+        .eq('id', orderId)
+        .select();
+  
+      if (updateError) throw updateError;
+  
+      // Update wallet revenue
+      const currentRevenue = orderData.shop_id?.wallet?.revenue || 0;
+      const newRevenue = currentRevenue + revenueIncrease;
+  
+      const { data: walletData, error: walletError } = await supabase
+        .from('merchant_Wallet')
+        .update({
+          revenue: newRevenue
+        })
+        .eq('id', orderData.shop_id.wallet.id)
+        .select();
+  
+      if (walletError) throw walletError;
+
+      setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
+
+      // Then refetch to ensure consistency with database
+      await fetchOrders();
+  
+      console.log('Order updated:', updatedOrder);
+      console.log('Wallet updated:', walletData);
+  
+    } catch (error) {
+      console.error('Error in approval process:', error.message);
+    }
+  };
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -106,6 +157,12 @@ function Orders() {
                       >
                         Proof of payment
                       </p>
+                      <button
+                        onClick={() => handleApprove(order.id)}
+                        className="flex-1 w-20 mt-2 p-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
+                      >
+                        Approve
+                      </button>
                     </div>
                   </div>
                 ))
