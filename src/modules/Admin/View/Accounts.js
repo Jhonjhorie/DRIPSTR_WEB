@@ -51,23 +51,21 @@ function Accounts() {
     <div className="flex flex-row min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <div className="h-16 px-5">
-          <SearchSortFilter />
-        </div>
 
         <div className="flex-1 m-5 bg-slate-900 rounded-3xl p-6">
           <h1 className="text-white text-2xl font-bold mb-4">Accounts</h1>
           <p>Total Users: {all}</p> {/* Fixed <p1> to <p> */}
           <div className="w-full h-full overflow-auto">
             <AccountTable accounts={currentAccounts} /> {/* Pass paginated data */}
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+            />
           </div>
+
         </div>
-        <Pagination
-          currentPage={currentPage}
-          totalItems={totalItems}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-        />
       </div>
     </div>
   );
