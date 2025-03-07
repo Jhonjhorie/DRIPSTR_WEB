@@ -190,7 +190,7 @@ function PlaceOrder() {
 
     totalDiscountPrice = holder;
     const grandTotal =
-      (totalDiscountPrice == 0 ? totalPrice : totalDiscountPrice) +
+      (totalDiscountPrice === 0 ? totalPrice : totalDiscountPrice) +
       totalShippingFee;
     setTotalPrice(totalPrice);
     setTotalDiscountPrice(totalDiscountPrice);
@@ -262,11 +262,9 @@ function PlaceOrder() {
             shipping_fee: itemShippingFee,
             discount: item.prod.discount || 0,
             final_price: itemPrice + itemShippingFee,
-            order_status:
-              paymentMethod == "COD" ? "To pay" : "Pending to Admin",
+            payment_status: paymentMethod === "COD" ? "To pay" : "Pending to Admin",
             proof_of_payment: image,
             shop_transaction_id: transactionId,
-            isPaid: false,
             shipping_status: "To prepare",
             voucher_used: isFirstShop && isFirstItemInShop ? voucherUsed : null,
             estimated_delivery: endDate,
