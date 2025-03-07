@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "../../../constants/supabase";
 import Sidebar from './Shared/Sidebar';
+import Pagination from './Components/Pagination';
 
 function Orders() {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true); // Initial loading state
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const itemsPerPage = 4;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -18,22 +23,39 @@ function Orders() {
 
         if (error) {
           console.error("Error fetching orders:", error.message);
-          throw error; // Throw to catch block
+          throw error;
         }
 
-        console.log("Fetched data:", data); // Debug: Check the returned data
-        setOrders(data || []); // Set data or empty array if null
+        console.log("Fetched data:", data);
+        setOrders(data || []);
       } catch (error) {
         console.error("Error in fetchOrders:", error.message);
-        setError(error.message); // Set error state
-        setOrders([]); // Set empty array on error
+        setError(error.message);
+        setOrders([]);
       } finally {
-        setLoading(false); // Always set loading to false when done
+        setLoading(false);
       }
     };
 
     fetchOrders();
   }, []);
+
+  // Modal handlers
+  const openModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
+  };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(orders.length / itemsPerPage);
 
   return (
     <div className='flex'>
@@ -41,63 +63,84 @@ function Orders() {
       <div className="flex-1 m-5 bg-slate-900 rounded-3xl p-6">
         <h1 className="text-white text-2xl font-bold mb-4">Orders</h1>
         <div className="p-4">
-  {loading ? (
-    <p className="text-white">Loading...</p>
-  ) : error ? (
-    <p className="text-red-500">{error}</p>
-  ) : (
-    <div className="flex flex-col gap-3">
-      {orders.length === 0 ? (
-        <h1 className="flex justify-center items-center font-bold text-xl text-white">
-          No Pending Orders
-        </h1>
-      ) : (
-        orders.map((order) => (
-          <div
-            key={order.id}
-            className="flex flex-row bg-white rounded-md shadow-md overflow-hidden p-3 gap-3"
-          >
-            <div className="flex-shrink-0">
-              <img
-                src={order.order_variation?.imagePath}
-                alt="product image"
-                className="w-24 h-24 object-contain rounded-md"
-              />
+          {loading ? (
+            <p className="text-white">Loading...</p>
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {currentOrders.length === 0 ? (
+                <h1 className="flex justify-center items-center font-bold text-xl text-white">
+                  No Pending Orders
+                </h1>
+              ) : (
+                currentOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="flex flex-row bg-white rounded-md shadow-md overflow-hidden p-3 gap-3"
+                  >
+                    <div className="flex-shrink-0">
+                      <img
+                        src={order.order_variation?.imagePath}
+                        alt="product image"
+                        className="w-24 h-24 object-contain rounded-md"
+                      />
+                    </div>
+                    <div className="flex flex-col w-full text-md text-black">
+                      <div className="flex justify-between items-baseline">
+                        <p className="font-semibold truncate">{order.prod_num?.shop_Name} - {order.prod_num?.item_Name}</p>
+                        <p className="text-right text-sm text-gray-600">
+                          {order.transaction_id} | {new Date(order.date_of_order).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <p className="font-semibold truncate">{order.acc_num?.full_name} - {order.shipping_addr}</p>
+                      <p className="font-semibold text-xsm text-black">
+                        ₱{Number(order.total_price).toLocaleString('en-US')}.00 | Qty: {order.quantity}
+                      </p>
+                      <p className=" text-xsm font-semibold text-black">
+                        {order.payment_status}
+                      </p>
+                      <p
+                        className="font-semibold text-blue-700 text-sm underline cursor-pointer"
+                        onClick={() => openModal(order.proof_of_payment)}
+                      >
+                        Proof of payment
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-            <div className="flex flex-col w-full text-md text-black">
-              <div className="flex justify-between items-baseline">
-                <p className="font-semibold truncate">{order.prod_num?.shop_Name} - {order.prod_num?.item_Name}</p>
-                <p className="text-right text-sm text-gray-600">
-                  {order.transaction_id} | {new Date(order.date_of_order).toLocaleDateString()}
-                </p>
+          )}
+          <Pagination
+            currentPage={currentPage}
+            totalItems={orders.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={setCurrentPage}
+          />
+        </div>
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg max-w-2xl max-h-[90vh] overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Proof of Payment</h2>
+                <button
+                  onClick={closeModal}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
               </div>
-              <p className="font-semibold truncate">{order.acc_num?.full_name} - {order.shipping_addr}</p>
-              <p className="font-semibold text-xsm text-black">
-                ₱{Number(order.total_price).toLocaleString('en-US')}.00 | Qty: {order.quantity}
-              </p>
-              <p className=" text-xsm font-semibold text-black">
-                {order.payment_status}
-              </p>
-              
-                <p className="font-semibold text-blue-700 text-sm underline cursor-pointer">
-                  Proof of payment
-                </p>
-                {order.proof_of_payment && (
-                  <img
-                    src={order.proof_of_payment}
-                    className="h-5 w-5 inline-block"
-                    alt="proof of payment"
-                  />
-                )}
-              
+              {selectedImage && (
+                <img
+                  src={selectedImage}
+                  alt="Proof of payment"
+                  className="max-w-full max-h-[70vh] object-contain"
+                />
+              )}
             </div>
           </div>
-        ))
-      )}
-    </div>
-  )}
-</div>
-
+        )}
       </div>
     </div>
   );
