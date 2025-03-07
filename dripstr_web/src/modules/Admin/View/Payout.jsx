@@ -187,7 +187,7 @@ function Payout() {
                                         <div className="space-y-2">
                                             <p className="text-black">
                                                 <span className="font-medium">Mobile:</span>{' '}
-                                                {item.revenue?.number || 'None'}
+                                                +63{item.revenue?.number || 'None'}
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Wallet Amount:</span>{' '}
