@@ -3,6 +3,7 @@ import { supabase } from "@/constants/supabase";
 
 const useProducts = (profile) => {
   const [products, setProducts] = useState([]);
+  const [premiumShop, setPremiumShop] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,10 +30,14 @@ const useProducts = (profile) => {
           ? productsData.filter((item) => item.shop?.owner_Id !== profile.id)
           : productsData;
 
-        const productsWithPremium = filteredProducts.map((product) => ({
-          ...product,
-          isPremium: premiumShopIds.has(product.shop.id),
-        }));
+          const productsWithPremium = filteredProducts.map((product) => ({
+            ...product,
+            isPremium: premiumShopIds.has(product.shop.id),
+            shop: {
+              ...product.shop,
+              isPremiumShop: premiumShopIds.has(product.shop.id),
+            },
+          }));
 
         setProducts(productsWithPremium);
       } catch (err) {

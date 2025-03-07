@@ -171,7 +171,7 @@ const VoucherStream = ({ profile }) => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="w-full  flex-1 rounded-md mx-2 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
+    <div className="w-full lg:min-w-[28.25rem] flex-1 rounded-md mx-2 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
       {showAlert && (
         <div className="w-[95%] absolute -top-60 justify-center flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
           <AlertDialog
