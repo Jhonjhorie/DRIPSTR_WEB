@@ -117,7 +117,7 @@ function Arts() {
                                         <img
                                             src={art.art_Image}
                                             alt={art.art_Name}
-                                            className="w-full h-60 object-contain bg-gray-100"
+                                            className="w-full h-[15rem] object-contain bg-gray-100"
                                         />
                                     </div>
 
