@@ -68,7 +68,7 @@ function Sidebar() {
         className="flex mt-10 h-9 lg:hidden duration-500 p-2 m-2 text-white rounded-md focus:outline-none hover:bg-gray-800"
         aria-label="Toggle Sidebar"
       >
-<FontAwesomeIcon icon={faBars} className="w-5 h-5" />
+        <FontAwesomeIcon icon={faBars} className="w-5 h-5" />
       </button>
 
       <div
@@ -115,6 +115,13 @@ function Sidebar() {
             label="Commisions"
             to="/admin/commisions"
           />
+                    <SidebarItem
+            icon={
+              <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
+            }
+            label="Arts"
+            to="/admin/arts"
+          />
           <SidebarItem
             icon={
               <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
@@ -142,7 +149,7 @@ function Sidebar() {
             <div className="flex flex-row">
               <SidebarItem
                 icon={
-                <FontAwesomeIcon icon={faCircleUser} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faCircleUser} className="w-5 h-5" />
                 }
                 label={
                   <span className="flex items-center justify-between w-full">
@@ -177,7 +184,7 @@ function Sidebar() {
                 {isChief && (
                   <SidebarItem
                     icon={
-                    <FontAwesomeIcon icon={faUserTie} className="w-5 h-5" />
+                      <FontAwesomeIcon icon={faUserTie} className="w-5 h-5" />
                     }
                     label="Admins"
                     to="/admin/admins"
