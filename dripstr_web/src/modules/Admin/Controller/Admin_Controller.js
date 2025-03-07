@@ -17,7 +17,7 @@ import Artists from "../View/Artists";
 import Orders from "../View/Orders";
 import Commisions from "../View/Commisions";
 import Arts from "../View/Arts";
-
+import Management from "../View/Management";
 const AdminController = () => {
   return (
     <main className="bg-slate-800 p-4">
@@ -31,8 +31,6 @@ const AdminController = () => {
           <Route path="/reports" element={<Reports />} />
           <Route path="/accounts" element={<Accounts />} />
           <Route path="/accounts/:accountId" element={<AccountDetail />} />
-          <Route path="/headline" element={<Headline />} />
-          <Route path="/vouchers" element={<Vouchers />} />
           <Route path="/merchants" element={<Merchants />} />
           <Route path="/reports/:reportNo" element={<ReportDetail />} />
           <Route path="/admins" element={<Admins />} />
@@ -41,6 +39,7 @@ const AdminController = () => {
           <Route path="/commisions" element={<Commisions />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/arts" element={<Arts />} />
+          <Route path="/management" element={<Management />} />
         </Route>
       </Routes>
     </main>

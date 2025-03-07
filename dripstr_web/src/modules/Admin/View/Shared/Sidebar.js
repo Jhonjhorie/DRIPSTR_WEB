@@ -3,7 +3,7 @@ import { supabase } from "@/constants/supabase";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../../../assets/logoName.png";
 import { ArrowDownCircleIcon } from "@heroicons/react/16/solid";
-import { faDashboard, faMoneyBill, faShoppingBag, faImages, faTag, faShop, faUserTie, faPalette, faCircleUser, faExclamationCircle, faHamburger, faBars } from "@fortawesome/free-solid-svg-icons";
+import { faDashboard, faMoneyBill, faShoppingBag, faImages, faTag, faShop, faUserTie, faPalette, faCircleUser, faExclamationCircle, faHamburger, faBars, faGear } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Sidebar() {
@@ -129,19 +129,12 @@ function Sidebar() {
             label="Orders"
             to="/admin/orders"
           />
-          <SidebarItem
+                    <SidebarItem
             icon={
-              <FontAwesomeIcon icon={faTag} className="w-5 h-5" />
+              <FontAwesomeIcon icon={faGear} className="w-5 h-5" />
             }
-            label="Vouchers"
-            to="/admin/vouchers"
-          />
-          <SidebarItem
-            icon={
-              <FontAwesomeIcon icon={faImages} className="w-5 h-5" />
-            }
-            label="Headline"
-            to="/admin/headline"
+            label="Management"
+            to="/admin/management"
           />
 
           {/* Users with Dropdown */}

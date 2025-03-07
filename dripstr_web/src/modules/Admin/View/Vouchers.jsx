@@ -154,9 +154,7 @@ function Vouchers() {
     return (
         <>
             <div className='flex flex-row'>
-                <Sidebar />
-                <div className='bg-slate-900 p-6 rounded-3xl shadow-lg w-full h-screen'>
-                    <h1 className='font-bold text-white text-3xl mb-4'>Vouchers</h1>
+                <div className='bg-slate-900 p-6 rounded-3xl shadow-lg w-full'>
 
                     <div className="flex items-end justify-end">
                         <button
