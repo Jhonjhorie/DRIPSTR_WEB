@@ -175,7 +175,6 @@ function PlaceOrder() {
       const shippingVoucher = selectedVouchers.find(
         (v) => v.voucher_type === "Shipping"
       );
-      
 
       if (isFirstShop2 && shippingVoucher) {
         totalShippingFee += Math.max(
@@ -259,7 +258,7 @@ function PlaceOrder() {
               selectedAddress.full_address || "No address provided",
             shipping_postcode: selectedPostcode || "No postcode provided",
             shipping_method: shippingMethod,
-            shipping_fee: itemShippingFee,
+            shipping_fee: itemShippingFee || 0,
             discount: item.prod.discount || 0,
             final_price: itemPrice + itemShippingFee,
             order_status:
@@ -524,11 +523,11 @@ function PlaceOrder() {
                         <div className="text-sm text-gray-600">Subtotal</div>
                         <div className="font-semibold text-lg">
                           ₱
-                          {(item.prod.discount
-                            ? Number(
-                                item.size.price * (1 - item.prod.discount / 100)
-                              ).toFixed(2)
-                            : Number(item.size.price) * item.qty
+                          {Number(
+                            item.prod.discount
+                              ? item.size.price *
+                                  (1 - Number(item.prod.discount) / 100)
+                              : item.size.price * item.qty
                           ).toFixed(2)}
                         </div>
                       </div>

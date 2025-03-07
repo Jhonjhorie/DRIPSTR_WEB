@@ -8,13 +8,14 @@ const SectionWrapper = ({
   buttonText,
   bgColor = 'bg-gray-50',
   textColor = 'text-gray-800',
-  filter,
+  filterM,
   children,
+  shopFil
 }) => {
   const navigate = useNavigate();
   
-  const gotoMall = (filterM, title, icon) => {
-    navigate(`/mall`, { state: { filterM, title, icon } });
+  const gotoMall = (filterM, title, icon, shopFil) => {
+    navigate(`/mall`, { state: { filterM, title, icon, shopFil } });
   };
   
   return (
@@ -27,7 +28,7 @@ const SectionWrapper = ({
         
         {buttonText && (
           <button 
-            onClick={() => gotoMall(filter, title, icon)}
+            onClick={() => gotoMall(filterM, title, icon, shopFil)}
             className="text-sm px-3 py-1 bg-[#141414] hover:bg-secondary-color text-white rounded transition-colors duration-200 flex items-center"
           >
             {buttonText}

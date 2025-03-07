@@ -38,16 +38,18 @@ import useResponsiveItems from "../../shared/hooks/useResponsiveItems";
 import Mall from "../Products/Mall";
 import AdsBanner from "./components/AdsBanner";
 import PremShop from "../Products/components/premiumShop";
+import useFollowedStore from "./hooks/useFollowedStore";
 
 function Home() {
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState(categories[0].label);
- 
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const { ads, pShop, loading2, error2 } = useAds();
+  const { fShop, loadingfShop, errorfShop } = useFollowedStore(profile);
   const [showItem, setShowItem] = useState(3);
   const { products, loading, error } = useProducts(profile);
   const navigate = useNavigate();
+  const shopFil = fShop.length > 0 ? fShop.map((shop) => shop.id) : 0;
 
   const itemsToShow = useResponsiveItems({ mb: 2, sm: 2, md: 3, lg: 3 });
 
@@ -102,6 +104,8 @@ function Home() {
       modal.close();
     }
   };
+  console.log("shopfil")
+  console.log(shopFil)
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -129,8 +133,9 @@ function Home() {
         {/* Featured Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <SectionWrapper
-            title="Discounted Products"
+            title="Discounted Mall"
             icon={faTags}
+            filterM={3}
             buttonText="See More"
           >
             <ProductsView
@@ -150,10 +155,11 @@ function Home() {
             title="Followed Stores"
             icon={faStore}
             buttonText="See More"
+            shopFil={shopFil}
           >
             <ProductsView
               products={products}
-              shopFil={0}
+              shopFil={shopFil}
               categories={filCat}
               filter={filMall}
               loading={loading}

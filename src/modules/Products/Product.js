@@ -239,7 +239,7 @@ function Product() {
                       className="hover:underline px-1 py-0 min-h-8 h-8 btn-ghost btn duration-300 transition-all justify-start md:max-w-80 max-w-52"
                     >
                       <p className="truncate">
-                        {item.shop_Name || "No shop available"}
+                        {item.shop.shop_name || "No shop available"}
                       </p>
                     </button>
                   </div>
