@@ -130,7 +130,12 @@ const Orders = () => {
   }, [profile]); // Add profile as a dependency
 
   const getStatusDisplay = (order) => {
-    // For order status display
+    if (order.refund_status === "Requested") {
+      return "Refund Requested";
+    }
+    if (order.refund_status === "Approved") {
+      return "Refunded";
+    }
     if (order.shipping_status === "cancel") {
       return "Cancelled";
     }
@@ -146,9 +151,6 @@ const Orders = () => {
       case "complete":
         return "Completed";
       default:
-        if (order.refund_status !== "Not Requested") {
-          return `Refund ${order.refund_status}`;
-        }
         return order.shipping_status;
     }
   };
@@ -200,7 +202,7 @@ const Orders = () => {
               placeholder="Search orders..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:border-purple-500"
+              className="w-full pl-10 pr-4 py-2 rounded-md border bg-white border-gray-200 focus:outline-none focus:border-purple-500"
             />
           </div>
         </div>
@@ -221,6 +223,8 @@ const Orders = () => {
                   </h2>
                   <div className="flex flex-col items-end">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      order.refund_status === "Requested" ? "bg-orange-100 text-orange-800" :
+                      order.refund_status === "Approved" ? "bg-green-100 text-green-800" :
                       order.shipping_status === "cancel" ? "bg-gray-100 text-gray-800" :
                       order.shipping_status === "preparing" && order.payment_method !== "COD" ? 
                         "bg-purple-100 text-purple-800" :
@@ -228,7 +232,6 @@ const Orders = () => {
                       order.shipping_status === "to deliver" ? "bg-blue-100 text-blue-800" :
                       (order.shipping_status === "delivered" || order.shipping_status === "complete") ? 
                         "bg-green-100 text-green-800" :
-                      order.refund_status !== "Not Requested" ? "bg-orange-100 text-orange-800" :
                       "bg-gray-100 text-gray-800"
                     }`}>
                       {getStatusDisplay(order)}
