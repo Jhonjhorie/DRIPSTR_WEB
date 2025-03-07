@@ -318,12 +318,12 @@ function Commissions() {
                                                         : 'Not commissioned by a merchant yet.'}
                                             </p>
                                             <p className="text-black truncate">
-                                                To: {commission.client_Id?.full_name}
+                                                Client: {commission.client_Id?.full_name}
                                             </p>
                                             <p className="text-black truncate">
                                                 Commission Amount: ₱{Number(commission.pricing || commission.payment).toLocaleString('en-US')}.00
                                             </p>
-                                            <p className="text-black truncate max-w-[70%]">
+                                            <p className="text-black max-w-[70%]">
                                                 Instruction: {commission.description} - Notes: {commission.notes || 'None'}
                                             </p>
                                             <p
