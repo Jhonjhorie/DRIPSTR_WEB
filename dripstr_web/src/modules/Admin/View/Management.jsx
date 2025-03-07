@@ -15,7 +15,7 @@ function Management() {
             <Sidebar />
             <div className="w-full h-screen flex flex-col items-center">
                 <div className="bg-slate-900 p-6 rounded-3xl shadow-lg w-full h-full">
-                <h1 className="text-white font-bold text-3xl mb-4">Management</h1>
+                <h1 className="text-white font-bold text-3xl mb-4">Voucher/Headline Management</h1>
                     {/* Tab Navigation */}
                     <div className="flex justify-start mb-6">
                         <button
