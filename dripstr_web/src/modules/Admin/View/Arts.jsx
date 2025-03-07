@@ -107,7 +107,7 @@ function Arts() {
                 No items found
               </p>
             ) : (
-              currentArts.map((art) => ( // Use currentArts instead of arts
+              currentArts.map((art) => ( 
                 <div
                   key={art.id}
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
@@ -118,7 +118,7 @@ function Arts() {
                       <img
                         src={art.art_Image}
                         alt={art.art_Name}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-60 object-contain"
                       />
                     </div>
 
@@ -161,7 +161,7 @@ function Arts() {
                         </button>
                         <button
                           onClick={() => declineArt(art.id)}
-                          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200"
+                          className="mt-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200"
                         >
                           Decline
                         </button>
