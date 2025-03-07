@@ -84,7 +84,7 @@ function Artists() {
       const { data: newArtist, error: insertError } = await supabase
         .from('artist')
         .insert([{
-          // Remove id to let Supabase auto-generate it
+          
           created_at: artistData.created_at,
           owner_Id: artistData.acc_id, // Ensure this references a valid profile ID
           artist_Name: artistData.artist_name,
@@ -252,7 +252,7 @@ function Artists() {
                   <img
                     src={selectedArtist.selfie || 'https://via.placeholder.com/150'}
                     alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} selfie`}
-                    className="w-24 h-24 object-contain rounded-md"
+                    className="w-24 h-24 object-contain rounded-md cursor-pointer"
                     onClick={() => handleImageClick(selectedArtist.selfie)}
                   />
                 </div>
@@ -261,7 +261,7 @@ function Artists() {
                   <img
                     src={selectedArtist.valid_id || selectedArtist.valid_ID || 'https://via.placeholder.com/150'}
                     alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} ID`}
-                    className="w-24 h-24 object-contain rounded-md"
+                    className="w-24 h-24 object-contain rounded-md cursor-pointer"
                     onClick={() => handleImageClick(selectedArtist.valid_id || selectedArtist.valid_ID)}
                   />
                 </div>
@@ -270,7 +270,7 @@ function Artists() {
                   <img
                     src={selectedArtist.gcash || 'https://via.placeholder.com/150'}
                     alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} GCash`}
-                    className="w-24 h-24 object-contain rounded-md"
+                    className="w-24 h-24 object-contain rounded-md cursor-pointer"
                     onClick={() => handleImageClick(selectedArtist.gcash)}
                   />
                 </div>
