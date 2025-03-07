@@ -243,7 +243,7 @@ const BuyConfirm = ({ item, onClose }) => {
                         className="px-0.5 md:px-1 text-xs py-0 min-h-6 h-6 rounded-md btn-ghost btn duration-300 transition-all w-36"
                       >
                         <p className="truncate">
-                          {item.shop_Name || "No shop available"}
+                          {item.shop.shop_name || "No shop available"}
                         </p>
                       </button>
                     </div>

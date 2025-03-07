@@ -38,8 +38,6 @@ const ProductsView = ({
     }
   };
 
-
- 
   const filteredProducts = products.filter((item) => {
     switch (filter) {
       case 0:
@@ -59,26 +57,31 @@ const ProductsView = ({
     }
   });
 
-  // Filter products based on the selected category
   const filteredProductsC = filteredProducts.filter(
     (item) => categories === "All" || item.item_Category === categories
   );
 
-  // Sort and filter products based on shop filter
+  
   const filteredProductsD =
-    sort === "top"
-      ? filteredProductsC
-          .filter((item) => shopFil === 0 || item.shop_Id === shopFil)
-          .sort((a, b) => {
-            const weightRating = 0.6;
-            const weightOrders = 0.4;
+  sort === "top"
+    ? filteredProductsC
+        .filter((item) =>
+          shopFil === 0 || 
+          (Array.isArray(shopFil) ? shopFil.includes(item.shop_Id) : item.shop_Id === shopFil)
+        )
+        .sort((a, b) => {
+          const weightRating = 0.6;
+          const weightOrders = 0.4;
 
-            const scoreA = a.item_Rating * weightRating + a.item_Orders * weightOrders;
-            const scoreB = b.item_Rating * weightRating + b.item_Orders * weightOrders;
+          const scoreA = a.item_Rating * weightRating + a.item_Orders * weightOrders;
+          const scoreB = b.item_Rating * weightRating + b.item_Orders * weightOrders;
 
-            return scoreB - scoreA;
-          })
-      : filteredProductsC.filter((item) => shopFil === 0 || item.shop_Id === shopFil);
+          return scoreB - scoreA;
+        })
+    : filteredProductsC.filter((item) =>
+        shopFil === 0 || 
+        (Array.isArray(shopFil) ? shopFil.includes(item.shop_Id) : item.shop_Id === shopFil)
+      );
 
   // Calculate placeholders for grid layout
   const totalItems = filteredProductsD.length;

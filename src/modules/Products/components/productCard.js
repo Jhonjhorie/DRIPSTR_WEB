@@ -44,7 +44,7 @@ const ProductCard = ({ item, onClick, isSmall }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
-      className="flex flex-col hover:scale-105  w-full max-w-[12rem] bg-white rounded-md shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+      className="flex flex-col hover:scale-105  w-full max-w-[12rem] bg-white rounded-md shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer"
     >
       {/* Image container */}
       <div className="relative h-48">

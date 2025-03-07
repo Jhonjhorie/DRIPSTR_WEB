@@ -8,14 +8,14 @@ import {
   faBox,
   faShoppingBag,
   faUsers,
-  faCrown
+  faCrown,
+  faAnglesLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import useCarts from "./hooks/useCart.js";
 import ReportDialog from "./components/reportModal.js";
 import CategoriesRibbon from "./components/CategoriesRibbon.js";
 import AlertDialog from "./components/alertDialog2.js";
 import ProductsView from "./components/ProductsView.js";
-
 
 // Data
 import { categories } from "@/constants/categories.ts";
@@ -35,24 +35,26 @@ function ShopPage() {
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState(categories[0]?.label || "");
   const { products, loading, error } = useProducts(profile);
-  
-  // Stats for the shop (you would normally fetch these)
+
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalSold: 0,
-    totalFollowers: 0
+    totalFollowers: 0,
   });
-  
+
   useEffect(() => {
     // Calculate stats based on available products
     if (products && products.length) {
-      const shopProducts = products.filter(p => p.shop_id === shop.id);
-      const soldCount = shopProducts.reduce((acc, product) => acc + (product.sold_count || 0), 0);
-      
+      const shopProducts = products.filter((p) => p.shop_id === shop.id);
+      const soldCount = shopProducts.reduce(
+        (acc, product) => acc + (product.sold_count || 0),
+        0
+      );
+
       setStats({
         totalProducts: shopProducts.length,
         totalSold: soldCount,
-        totalFollowers: shop.followers_count || 0
+        totalFollowers: shop.followers_count || 0,
       });
     }
   }, [products, shop]);
@@ -66,7 +68,7 @@ function ShopPage() {
   };
 
   const imagePreview = shop.shop_image != null ? shop.shop_image : null;
-  const isPremium = shop.is_premium === true;
+  const isPremium = shop.isPremiumShop;
 
   if (!shop || Object.keys(shop).length === 0) {
     return (
@@ -79,7 +81,11 @@ function ShopPage() {
   }
 
   return (
-    <div className={`w-full font-[iceland] relative bg-white flex flex-col ${isPremium ? 'bg-gradient-to-b from-gray-50 to-gray-100' : 'bg-white'}`}>
+    <div
+      className={`w-full font-[iceland] relative bg-white flex flex-col ${
+        isPremium ? "" : ""
+      } bg-gradient-to-b from-gray-50 to-gray-100`}
+    >
       {/* Report Dialog */}
       <dialog
         id="my_modal_reportS"
@@ -98,7 +104,7 @@ function ShopPage() {
           <button onClick={closeModalRepS}></button>
         </form>
       </dialog>
-      
+
       {/* Alert */}
       {showAlert && (
         <div className="w-[95%] absolute -top-60 justify-center flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
@@ -108,25 +114,35 @@ function ShopPage() {
           />
         </div>
       )}
-      
+
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 relative">
         {/* Premium Badge */}
         {isPremium && (
-          <div className="mb-4 flex justify-end">
+          <div className="absolute top-4 left-5 flex justify-end">
             <span className="inline-flex items-center gap-1 px-3 py-1 bg-black text-yellow-400 rounded-full text-sm font-medium">
               <FontAwesomeIcon icon={faCrown} /> Premium Merchant
             </span>
           </div>
         )}
-        
+
         {/* Shop Header Section */}
-        <div className={`rounded-lg overflow-hidden ${isPremium ? 'bg-black bg-opacity-5 shadow-lg' : 'bg-white shadow'} p-4 sm:p-6`}>
+        <div
+          className={`rounded-lg overflow-hidden ${
+            isPremium ? "bg-black bg-opacity-90 shadow-lg" : "bg-white shadow"
+          } p-4 sm:p-6`}
+        >
           <div className="flex flex-col md:flex-row gap-6">
             {/* Shop Image */}
             <div className="flex-shrink-0 w-full md:w-64 h-64">
               {imagePreview ? (
-                <div className={`relative h-full w-full overflow-hidden rounded-md ${isPremium ? 'border-2 border-primary-color' : 'border border-gray-200'}`}>
+                <div
+                  className={`relative h-full w-full overflow-hidden rounded-md ${
+                    isPremium
+                      ? "border-2 border-yellow-400"
+                      : "border border-primary-color"
+                  }`}
+                >
                   <img
                     src={imagePreview}
                     alt={`${shop.shop_name}`}
@@ -146,91 +162,153 @@ function ShopPage() {
                 </div>
               )}
             </div>
-            
+
             {/* Shop Info */}
             <div className="flex-1 flex flex-col">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-                <h1 className={`text-3xl sm:text-4xl font-bold ${isPremium ? 'text-gray-900' : 'text-secondary-color'} line-clamp-2`}>
+                <h1
+                  className={`text-3xl sm:text-4xl font-bold ${
+                    isPremium ? "text-gray-50" : "text-secondary-color"
+                  } line-clamp-2`}
+                >
                   {shop.shop_name}
                 </h1>
-                
+
                 {/* Rating */}
-                <div className="flex w-1/3 justify-between md:justify-end items-center mt-2 sm:mt-0 gap-2">
-                  <div className={`flex items-center gap-1 px-3 py-1 ${isPremium ? 'bg-black text-yellow-400' : 'bg-secondary-color bg-opacity-10 text-primary-color'}  rounded-full`}>
+                <div className="flex w-full md:w-auto justify-between md:justify-end items-center mt-2 sm:mt-0 gap-2">
+                  <div
+                    className={`flex items-center gap-1 px-3 py-1 ${
+                      isPremium
+                        ? "bg-black text-yellow-400"
+                        : "bg-secondary-color bg-opacity-10 text-primary-color"
+                    }  rounded-full`}
+                  >
                     <FontAwesomeIcon icon={faStar} />
                     <span className="font-bold">{shop.shop_Rating || "0"}</span>
                   </div>
-                    {/* Action buttons */}
-              {isLoggedIn && (
-                <div className="flex gap-2 mt-auto">
-                  <MerchantFollow 
-                    profile={profile} 
-                    shop={shop} 
-                    isLoggedIn={isLoggedIn}
-                    customClassName={isPremium ? "border-black hover:bg-black hover:text-white" : ""} 
-                  />
-                  <button
-                    onClick={mulletReport}
-                    className={`flex items-center justify-center h-10 px-4 gap-1 rounded-md text-gray-500 hover:text-gray-700 border ${isPremium ? 'border-gray-500 hover:border-gray-800' : 'border-gray-300 hover:border-gray-500'} transition-all duration-300`}
-                  >
-                    <FontAwesomeIcon icon={faTriangleExclamation} size="sm" /> Report
-                  </button>
-                </div>
-              )}
+                  {/* Action buttons */}
+                  {isLoggedIn && (
+                    <div className="flex gap-2 mt-auto">
+                      <MerchantFollow
+                        profile={profile}
+                        shop={shop}
+                        isLoggedIn={isLoggedIn}
+                        customClassName={
+                          isPremium
+                            ? "border-black hover:bg-black hover:text-white"
+                            : ""
+                        }
+                      />
+                      <button
+                        onClick={mulletReport}
+                        className={`flex items-center justify-center h-10 px-4 gap-1 rounded-md text-gray-500 hover:text-gray-700 border ${
+                          isPremium
+                            ? "border-gray-500 hover:border-gray-800"
+                            : "border-gray-300 hover:border-gray-500"
+                        } transition-all duration-300`}
+                      >
+                        <FontAwesomeIcon
+                          icon={faTriangleExclamation}
+                          size="sm"
+                        />{" "}
+                        Report
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-              
+
               {/* Shop description */}
               <div className="border-t border-b border-gray-200 py-4 mb-4">
-                <p className="text-gray-700">{shop.description || "No description available."}</p>
+                <p
+                  className={`${isPremium ? "text-gray-400" : "text-gray-700"}`}
+                >
+                  {shop.description || "No description available."}
+                </p>
               </div>
-              
+
               {/* Stats Section */}
               <div className="grid grid-cols-3 gap-4 mb-4">
-                <div className="text-center p-2 rounded-md bg-gray-50">
-                  <FontAwesomeIcon icon={faBox} className="text-primary-color mb-1" />
+              <div className="text-center p-2 rounded-md bg-gray-50 flex w-full h-full justify-center items-center">
+                  <FontAwesomeIcon
+                    icon={faBox}
+                    className="text-primary-color text-xl md:text-3xl"
+                  />
+                          <div className="divider max-w-1  divider-horizontal "></div>
+                  <div className="text-center">
                   <p className="text-sm text-gray-500">Products</p>
-                  <p className="font-bold text-xl">{stats.totalProducts}</p>
+                  <p className="font-bold text-base md:text-2xl">{stats.totalProducts}</p></div>
                 </div>
-                <div className="text-center p-2 rounded-md bg-gray-50">
-                  <FontAwesomeIcon icon={faShoppingBag} className="text-primary-color mb-1" />
-                  <p className="text-sm text-gray-500">Sold</p>
-                  <p className="font-bold text-xl">{stats.totalSold}</p>
+                <div className="text-center p-2 rounded-md bg-gray-50 flex w-full h-full justify-center items-center">
+                  <FontAwesomeIcon
+                    icon={faShoppingBag}
+                    className="text-primary-color text-xl md:text-3xl"
+                  />
+                          <div className="divider max-w-1 divider-horizontal "></div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Sold</p>
+                    <p className="font-bold text-base md:text-2xl">{stats.totalSold}</p>
+                  </div>
                 </div>
-                <div className="text-center p-2 rounded-md bg-gray-50">
-                  <FontAwesomeIcon icon={faUsers} className="text-primary-color mb-1" />
+                <div className="text-center p-2 rounded-md bg-gray-50 flex w-full h-full justify-center items-center">
+                  <FontAwesomeIcon
+                    icon={faUsers}
+                    className="text-primary-color text-xl md:text-3xl"
+                  />
+                  <div className="divider max-w-1 divider-horizontal "></div>
+                  <div className="text-center">
                   <p className="text-sm text-gray-500">Followers</p>
-                  <p className="font-bold text-xl">{stats.totalFollowers}</p>
+                  <p className="font-bold text-base md:text-2xl">{stats.totalFollowers}</p></div>
                 </div>
               </div>
-              
-            
             </div>
           </div>
         </div>
-        
+
         {/* Ad Banner Section */}
         {/* <div className="my-6 mx-auto w-full max-w-[15rem] h-[10rem]">
           {/* <AdsCarousel ads={shop.shop_Ads}/> */}
-          {/* Fallback if you don't have the component: */}
-          {/* <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center text-gray-500 border border-dashed border-gray-300">
+        {/* Fallback if you don't have the component: */}
+        {/* <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center text-gray-500 border border-dashed border-gray-300">
             Advertisement Space
           </div> 
         </div> */}
-        
+
         {/* Categories Section */}
-        <div className={`${isPremium ? 'bg-gray-900 bg-opacity-5' : 'bg-gray-100'} rounded-lg p-4 mb-6`}>
-          <CategoriesRibbon
-            active={filCat}
-            categories={categories}
-            onItemClick={(label) => setFilCat(label)}
-            premiumStyle={isPremium}
-          />
+        <div
+          className={`${
+            isPremium ? "bg-gray-900 bg-opacity-5" : "bg-gray-100"
+          } flex w-full px-4 py-3 justify-center rounded-lg p-4 mb-6`}
+        >
+          <button
+            onClick={() => navigate("/")}
+            className="w-12 px-8  rounded-md bg-slate-50 flex items-center justify-center text-2xl"
+          >
+            <FontAwesomeIcon icon={faAnglesLeft} />
+          </button>
+          <div className="w-full max-w-4xl">
+            <CategoriesRibbon
+              active={filCat}
+              categories={categories}
+              onItemClick={(label) => setFilCat(label)}
+              premiumStyle={isPremium}
+            />
+          </div>
         </div>
-        
+
         {/* Products Section */}
-        <div className={`${isPremium ? 'bg-white shadow-lg' : 'bg-white'} rounded-lg p-4`}>
-          <h2 className={`text-2xl font-bold mb-4 ${isPremium ? 'text-gray-900' : 'text-secondary-color'}`}>Products</h2>
+        <div
+          className={`${
+            isPremium ? "bg-white shadow-lg" : "bg-white"
+          } rounded-lg p-4`}
+        >
+          <h2
+            className={`text-2xl font-bold mb-4 ${
+              isPremium ? "text-gray-900" : "text-secondary-color"
+            }`}
+          >
+            Products
+          </h2>
           <ProductsView
             products={products}
             categories={filCat}
