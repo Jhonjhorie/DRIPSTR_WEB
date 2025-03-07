@@ -60,14 +60,15 @@ function Accounts() {
           <p>Total Users: {all}</p> {/* Fixed <p1> to <p> */}
           <div className="w-full h-full overflow-auto">
             <AccountTable accounts={currentAccounts} /> {/* Pass paginated data */}
-          </div>
-        </div>
-        <Pagination
+            <Pagination
           currentPage={currentPage}
           totalItems={totalItems}
           itemsPerPage={itemsPerPage}
           onPageChange={handlePageChange}
         />
+          </div>
+          
+        </div>
       </div>
     </div>
   );
