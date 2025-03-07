@@ -115,7 +115,7 @@ function Sidebar() {
             label="Commisions"
             to="/admin/commisions"
           />
-                    <SidebarItem
+          <SidebarItem
             icon={
               <FontAwesomeIcon icon={faShoppingBag} className="w-5 h-5" />
             }
