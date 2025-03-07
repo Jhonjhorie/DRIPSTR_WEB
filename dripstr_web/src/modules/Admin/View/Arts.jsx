@@ -57,6 +57,26 @@ function Arts() {
     }
   };
 
+  const declineArt = async (artId) => {
+    try {
+      // Update the status in Supabase
+      const { error } = await supabase
+        .from('artist_Arts')
+        .update({ status: 'Declined' })
+        .eq('id', artId);
+
+      if (error) {
+        throw error;
+      }
+
+      // Update local state to remove the approved item from the list
+      setArts((prevArts) => prevArts.filter((art) => art.id !== artId));
+    } catch (error) {
+      console.error('Error approving art:', error.message);
+      setError(error.message);
+    }
+  };
+
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -138,6 +158,12 @@ function Arts() {
                           className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200"
                         >
                           Approve
+                        </button>
+                        <button
+                          onClick={() => declineArt(art.id)}
+                          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200"
+                        >
+                          Decline
                         </button>
                       </div>
                     </div>
