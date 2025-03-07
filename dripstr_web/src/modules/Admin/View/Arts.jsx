@@ -8,7 +8,7 @@ function Arts() {
     const [arts, setArts] = useState([]);        // Store fetched data
     const [loading, setLoading] = useState(true); // Loading state
     const [error, setError] = useState(null);     // Error state
-    const itemsPerPage = 6;                       // Items per page
+    const itemsPerPage = 3;                       // Items per page
     const [currentPage, setCurrentPage] = useState(1); // Current page
 
     const fetchArts = async () => {
