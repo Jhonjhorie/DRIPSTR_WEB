@@ -376,10 +376,7 @@ function Commissions() {
                                                 <div className="bg-white rounded-lg w-[20rem] h-[35rem] flex flex-col">
                                                     {/* Header */}
                                                     <div className="flex justify-between items-center p-3 border-b">
-                                                        <div className="flex flex-col text-black font-bold">
-                                                            <h1 className="text-lg">{activeTab === 'Artist' ? commission.title : 'Commission Receipt'}</h1>
-                                                            <p className="text-sm"> {activeTab === 'Artist' ?`To: ${commission.client_Id?.full_name}` : `Commission ${commission.id}`}</p>
-                                                        </div>
+                                                
                                                         <button
                                                             onClick={closeModal}
                                                             className="text-gray-500 hover:text-gray-700 text-xl font-bold p-2"
