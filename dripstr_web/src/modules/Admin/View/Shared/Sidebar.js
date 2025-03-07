@@ -3,7 +3,7 @@ import { supabase } from "@/constants/supabase";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../../../assets/logoName.png";
 import { ArrowDownCircleIcon } from "@heroicons/react/16/solid";
-import { faDashboard, faMoneyBill, faShoppingBag, faImages, faTag, faShop, faUserTie, faPalette, faCircleUser, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { faDashboard, faMoneyBill, faShoppingBag, faImages, faTag, faShop, faUserTie, faPalette, faCircleUser, faExclamationCircle, faHamburger, faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Sidebar() {
@@ -68,20 +68,7 @@ function Sidebar() {
         className="flex mt-10 h-9 lg:hidden duration-500 p-2 m-2 text-white rounded-md focus:outline-none hover:bg-gray-800"
         aria-label="Toggle Sidebar"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
-          className="w-5 h-5"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M3.75 6h16.5M3.75 12h16.5m-16.5 6h16.5"
-          />
-        </svg>
+<FontAwesomeIcon icon={faBars} className="w-5 h-5" />
       </button>
 
       <div

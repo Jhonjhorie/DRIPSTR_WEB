@@ -2,31 +2,27 @@ import React, { useState, useEffect } from "react";
 import TopItems from "./Components/TopItems";
 import Sidebar from "./Shared/Sidebar";
 import SalesStatistics from "./Components/SalesStatistics";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { supabase } from "../../../constants/supabase";
+import { faPalette, faStore, faUser, faUsers } from "@fortawesome/free-solid-svg-icons";
 
 // Mock Data
 const topItems = Array(6).fill({ label: "Item", soldCount: "6" });
 
 // Icon Component
 const Icon = ({ name }) => {
-  const iconPaths = {
-    "user-group": "M18 18.72a9.094 9.094 0 0 0 3.741-...",
-    store: "M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a...",
-    pencil: "M16.862 4.487 1.687-1.688a1.875 1.875 0 1...",
-    users: "M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337...",
+  const iconMap = {
+    "user-group": faUser,
+    store: faStore,
+    pencil: faPalette,
+    users: faUsers,
   };
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      strokeWidth="1.5"
-      stroke="currentColor"
+    <FontAwesomeIcon
+      icon={iconMap[name]}
       className="w-10 h-10 text-white"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d={iconPaths[name]} />
-    </svg>
+    />
   );
 };
 
@@ -116,7 +112,7 @@ const Dashboard = () => {
       const updatedStatisticsData = [
         { label: `${customerCount === 1 ? "Customer" : "Customers"}` , count: customerCount, icon: "user-group" },
         { label: `${merchantCount === 1 ? "Merchant" : "Merchants"}`, count: merchantCount, icon: "store" },
-        { label: `${designerCount === 1 ? "Designer" : "Designers"}`, count: designerCount, icon: "pencil" },
+        { label: `${designerCount === 1 ? "Artist" : "Artists"}`, count: designerCount, icon: "pencil" },
         { label: `${overall === 1 ? "Total User" : "Total Users"}`, count: overall, icon: "users" },
       ];
 
