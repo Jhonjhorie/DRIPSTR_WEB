@@ -90,6 +90,13 @@ function Sidebar() {
             label="Reports"
             to="/admin/reports"
           />
+                    <SidebarItem
+            icon={
+              <FontAwesomeIcon icon={faMoneyBill} className="w-5 h-5" />
+            }
+            label="Subscription"
+            to="/admin/subscriptions"
+          />
           <SidebarItem
             icon={
               <FontAwesomeIcon icon={faMoneyBill} className="w-5 h-5" />

@@ -18,6 +18,7 @@ import Orders from "../View/Orders";
 import Commisions from "../View/Commisions";
 import Arts from "../View/Arts";
 import Management from "../View/Management";
+import Subscriptions from "../View/Subscriptions";
 const AdminController = () => {
   return (
     <main className="bg-slate-800 p-4">
@@ -40,6 +41,7 @@ const AdminController = () => {
           <Route path="/orders" element={<Orders />} />
           <Route path="/arts" element={<Arts />} />
           <Route path="/management" element={<Management />} />
+          <Route path="/subscriptions" element={<Subscriptions />} />
         </Route>
       </Routes>
     </main>
