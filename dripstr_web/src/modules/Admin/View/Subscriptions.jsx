@@ -14,7 +14,7 @@ function Subscriptions() {
         try {
             const { data, error } = await supabase
                 .from('artist_Subscription')
-                .select('*, artist_Id(artist_Name, contact_number)')
+                .select('*, artist_Id(artist_Name, contact_number, is_Premium)')
                 .eq('status', 'Pending')
                 .eq('payment', 'Gcash')
 
@@ -127,8 +127,12 @@ function Subscriptions() {
                                             <p className="text-sm text-gray-600 line-clamp-2">
                                                 {item.reason}
                                             </p>
+                                            <div className="text-sm text-white bg-orange-500 rounded-md w-[3.5rem]  ">
+                                            <p className="text-sm text-white text-center">
+                                                {item.status}
+                                            </p>
+                                            </div>
                                         </div>
-
                                         {/* Buttons Section */}
                                         <div className="mt-4 flex gap-3">
                                             <button
