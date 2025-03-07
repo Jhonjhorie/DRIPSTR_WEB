@@ -46,7 +46,7 @@ function Artists() {
       try {
         const { data, error } = await supabase
           .from('artist')
-          .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID, gcash');
+          .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID, gcash, wallet');
         if (error) throw error;
         setArtists(data || []);
       } catch (error) {
@@ -63,38 +63,63 @@ function Artists() {
 
   const handleAccept = async (id) => {
     try {
+      console.log("Fetching artist registration data...");
       const { data: artistData, error: fetchError } = await supabase
         .from('artist_registration')
-        .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, valid_id')
+        .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash, sample_art')
         .eq('id', id)
         .single();
       if (fetchError) throw fetchError;
-
-      await supabase.from('artist_registration').update({ is_approved: true }).eq('id', id);
-      await supabase.from('artist').insert([{
-        id: artistData.id,
-        created_at: artistData.created_at,
-        owner_Id: artistData.acc_id,
-        artist_Name: artistData.artist_name,
-        artist_Bio: artistData.description,
-        art_Type: artistData.art_type,
-        artist_Image: artistData.artist_profilePic,
-        contact_number: artistData.mobile_number,
-        full_Name: artistData.full_name,
-        selfie: artistData.selfie,
-        valid_ID: artistData.valid_id,
-        followers_Detail: null,
-        is_Premium: null,
-        gcash: artistData.gcash
-      }]);
-      await supabase.from('profiles').update({ isArtist: true }).eq('id', id);
-
+  
+      console.log("Fetched artist data:", artistData);
+  
+      console.log("Updating artist registration...");
+      const { error: updateError } = await supabase
+        .from('artist_registration')
+        .update({ is_approved: true })
+        .eq('id', id);
+      if (updateError) throw updateError;
+  
+      console.log("Inserting into artist table...");
+      const { data: newArtist, error: insertError } = await supabase
+        .from('artist')
+        .insert([{
+          // Remove id to let Supabase auto-generate it
+          created_at: artistData.created_at,
+          owner_Id: artistData.acc_id, // Ensure this references a valid profile ID
+          artist_Name: artistData.artist_name,
+          artist_Bio: artistData.description,
+          art_Type: artistData.art_type,
+          artist_Image: artistData.artist_profilePic,
+          contact_number: artistData.mobile_number,
+          full_Name: artistData.full_name,
+          selfie: artistData.selfie,
+          valid_ID: artistData.valid_id,
+          followers_Detail: null,
+          is_Premium: null,
+          gcash: artistData.gcash,
+          sample_art: artistData.sample_art
+        }])
+        .select()
+        .single(); // Get the newly inserted artist data
+      if (insertError) throw insertError;
+  
+      console.log("Inserting completed, updating profiles table...");
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ isArtist: true })
+        .eq('id', artistData.acc_id); // Use acc_id instead of id
+      if (profileError) throw profileError;
+  
+      console.log("Updating UI...");
       setRegister(prev => prev.filter(artist => artist.id !== id));
-      setAcceptedArtists(prev => [...prev, artistData]);
+      setAcceptedArtists(prev => [...prev, { ...artistData, id: newArtist.id }]);
     } catch (error) {
+      console.error("Error during artist accept:", error.message);
       setError(error.message);
     }
   };
+  
 
   const handleDecline = async (id) => {
     try {
