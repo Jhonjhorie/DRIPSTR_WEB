@@ -154,7 +154,7 @@ function Vouchers() {
     return (
         <>
             <div className='flex flex-row'>
-                <div className='bg-slate-900 p-6 rounded-3xl shadow-lg w-full'>
+                <div className='bg-slate-900 rounded-3xl shadow-lg w-full'>
 
                     <div className="flex items-end justify-end">
                         <button
