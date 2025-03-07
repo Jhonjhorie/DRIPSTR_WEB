@@ -16,6 +16,7 @@ import PrivateRoute from "./PrivateRoute";
 import Artists from "../View/Artists";
 import Orders from "../View/Orders";
 import Commisions from "../View/Commisions";
+import Arts from "../View/Arts";
 
 const AdminController = () => {
   return (
@@ -39,6 +40,7 @@ const AdminController = () => {
           <Route path="/cashout" element={<Cashout />} />
           <Route path="/commisions" element={<Commisions />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/arts" element={<Arts />} />
         </Route>
       </Routes>
     </main>
