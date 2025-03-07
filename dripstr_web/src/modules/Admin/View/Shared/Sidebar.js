@@ -3,7 +3,7 @@ import { supabase } from "@/constants/supabase";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../../../assets/logoName.png";
 import { ArrowDownCircleIcon } from "@heroicons/react/16/solid";
-import { faDashboard, faMoneyBill, faShoppingBag, faImages, faTag, faShop, faUserTie, faPalette, faCircleUser, faExclamationCircle, faHamburger, faBars, faGear } from "@fortawesome/free-solid-svg-icons";
+import { faDashboard, faMoneyBill, faShoppingBag, faImages, faTag, faShop, faUserTie, faPalette, faCircleUser, faExclamationCircle, faHamburger, faBars, faGear, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Sidebar() {
@@ -129,7 +129,7 @@ function Sidebar() {
             label="Orders"
             to="/admin/orders"
           />
-                    <SidebarItem
+          <SidebarItem
             icon={
               <FontAwesomeIcon icon={faGear} className="w-5 h-5" />
             }
@@ -186,13 +186,6 @@ function Sidebar() {
               </div>
             )}
           </div>
-
-          <button
-            onClick={handleLogout}
-            className="mt-auto w-full p-3 text-center bg-red-600 rounded-2xl hover:bg-red-700 transition-all duration-300"
-          >
-            Logout
-          </button>
         </nav>
       </div>
     </div>

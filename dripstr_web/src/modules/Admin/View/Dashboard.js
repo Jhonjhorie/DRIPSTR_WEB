@@ -4,7 +4,8 @@ import Sidebar from "./Shared/Sidebar";
 import SalesStatistics from "./Components/SalesStatistics";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { supabase } from "../../../constants/supabase";
-import { faPalette, faStore, faUser, faUsers } from "@fortawesome/free-solid-svg-icons";
+import { faPalette, faStore, faUser, faUsers, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { NavLink, useNavigate } from "react-router-dom";
 
 // Mock Data
 const topItems = Array(6).fill({ label: "Item", soldCount: "6" });
@@ -25,6 +26,7 @@ const Icon = ({ name }) => {
     />
   );
 };
+
 
 // User Statistic Card Component
 const UserStatisticCard = ({ label, count, icon }) => (
@@ -53,7 +55,7 @@ const Dashboard = () => {
         .eq('is_Approved', true);  // Filter where is_Approved is true
 
       if (error) throw error;
-      
+
       return count;  // Return the count to use it later
     } catch (error) {
       console.error('Error fetching merchant count:', error.message);
@@ -68,9 +70,9 @@ const Dashboard = () => {
         .select('*', { count: 'exact' }) // Use '*' or any column; count option is required
         .eq("isMerchant", false) // Where isMerchant is false
         .or("isArtist.eq.false,isArtist.is.null"); // Where isArtist is false OR null
-  
+
       if (error) throw error;
-  
+
       return count; // Returns the count of matching rows
     } catch (error) {
       console.error('Error fetching customer count:', error.message);
@@ -85,7 +87,7 @@ const Dashboard = () => {
         .select('id', { count: 'exact' })  // Replace 'id' with any column in the table
 
       if (error) throw error;
-      
+
       return count;  // Return the count to use it later
     } catch (error) {
       console.error('Error fetching designer count:', error.message);
@@ -110,7 +112,7 @@ const Dashboard = () => {
       const overall = customerCount + merchantCount + designerCount;
 
       const updatedStatisticsData = [
-        { label: `${customerCount === 1 ? "Customer" : "Customers"}` , count: customerCount, icon: "user-group" },
+        { label: `${customerCount === 1 ? "Customer" : "Customers"}`, count: customerCount, icon: "user-group" },
         { label: `${merchantCount === 1 ? "Merchant" : "Merchants"}`, count: merchantCount, icon: "store" },
         { label: `${designerCount === 1 ? "Artist" : "Artists"}`, count: designerCount, icon: "pencil" },
         { label: `${overall === 1 ? "Total User" : "Total Users"}`, count: overall, icon: "users" },
@@ -120,15 +122,29 @@ const Dashboard = () => {
     };
 
     updateStatisticsData();
+
   }, []);
+
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem("adminToken");
+    navigate("/admin");
+  };
 
   return (
     <div className="flex flex-row min-h-screen">
       <Sidebar />
       <div className="flex flex-col w-full p-4">
         <div className="flex flex-row justify-between mb-4">
-        <h1 className="text-white font-extrabold text-4xl mb-4">Dashboard</h1>
-        <h1 className="text-white font-extrabold text-4xl mb-4">Welcome, {username}! </h1>
+          <h1 className="text-white font-extrabold text-4xl mb-4">Dashboard</h1>
+          <div className="flex flex-col items-end">
+            <h1 className="text-white font-extrabold text-4xl mb-2">Welcome, {username}! </h1>
+            <button onClick={handleLogout} className="items-end justify-end hover:text-blue-500 hover:underline text-lg text-white" >
+              <FontAwesomeIcon icon={faRightFromBracket}/> Logout
+            </button>
+          </div>
         </div>
         {/* User Statistics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
