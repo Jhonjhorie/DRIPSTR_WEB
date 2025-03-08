@@ -401,10 +401,34 @@ const CharacterCustomization = () => {
         const { data, error } = await supabase
           .from('closet')
           .select(`
-            *,
-            product:shop_Product (*)
+            id,
+            created_at,
+            user_id,
+            product_id,
+            variant,
+            product:shop_Product (
+              id,
+              created_at,
+              item_Name,
+              item_Description,
+              item_Category,
+              item_Tags,
+              item_Variant,
+              item_Rating,
+              item_Orders,
+              shop_Id,
+              shop_Name,
+              is_Post,
+              reviews,
+              is3D,
+              discount,
+              apply_Vouch,
+              texture_3D,
+              type3D
+            )
           `)
-          .eq('user_id', session.session.user.id);
+          .eq('user_id', session.session.user.id)
+          .order('created_at', { ascending: false });
 
         if (error) throw error;
         setClosetItems(data || []);
@@ -540,6 +564,57 @@ const CharacterCustomization = () => {
       setToast({
         show: true,
         message: "Failed to remove item",
+        type: 'error'
+      });
+    }
+  };
+
+  const handleViewProduct = (item) => {
+    if (!item?.product) return;
+  
+    try {
+      // Parse variant data if needed
+      const variants = typeof item.product.item_Variant === 'string' 
+        ? JSON.parse(item.product.item_Variant)
+        : item.product.item_Variant || [];
+  
+      // Find current variant
+      const currentVariant = variants.find(v => v.imagePath === item.variant?.imagePath) || variants[0];
+  
+      // Construct product data matching the format used in other pages
+      const productData = {
+        id: item.product.id,
+        item_Name: item.product.item_Name,
+        item_Description: item.product.item_Description,
+        item_Category: item.product.item_Category,
+        item_Tags: item.product.item_Tags || [],
+        item_Variant: variants,
+        item_Rating: item.product.item_Rating || 0,
+        item_Orders: item.product.item_Orders || 0,
+        texture_3D: item.product.texture_3D,
+        type3D: item.product.type3D,
+        shop_Name: item.product.shop_Name,
+        shop_Id: item.product.shop_Id,
+        is_Post: item.product.is_Post || false,
+        reviews: item.product.reviews || [],
+        is3D: item.product.is3D || false,
+        discount: item.product.discount || 0,
+        apply_Vouch: item.product.apply_Vouch,
+        selectedVariant: currentVariant,
+        shop: {
+          shop_name: item.product.shop_Name,
+          shop_Id: item.product.shop_Id
+        }
+      };
+  
+      navigate(`/product/${productData.item_Name}`, {
+        state: { item: productData }
+      });
+    } catch (error) {
+      console.error('Error processing product data:', error);
+      setToast({
+        show: true,
+        message: 'Error viewing product details',
         type: 'error'
       });
     }
@@ -963,7 +1038,7 @@ const CharacterCustomization = () => {
                     
                     <div className="mt-2 flex flex-col gap-1">
                       <button
-                        onClick={() => navigate(`/product/${item.product.item_Name}`, { state: { item: item.product } })}
+                        onClick={() => handleViewProduct(item)}
                         className="w-full px-2 py-1 text-xs text-center bg-purple-100 text-purple-600 rounded hover:bg-purple-200 transition-colors"
                       >
                         View Product
