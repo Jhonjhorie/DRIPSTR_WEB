@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
@@ -13,6 +13,10 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Toast from '../../../shared/alerts';
 import { Link } from 'react-router-dom';
+
+// Add to top of Avatar.js
+useGLTF.preload(Object.values(bodyTypeURLs.Boy).flat());
+useGLTF.preload(Object.values(bodyTypeURLs.Girl).flat());
 
 // Add this component near the top of your file
 const BodyTypeInfoModal = ({ isOpen, onClose }) => {
@@ -58,9 +62,11 @@ const BodyTypeInfoModal = ({ isOpen, onClose }) => {
 };
 
 function Part({ url, position, color, texture }) {
-  // Add error handling for model loading
+  const [loadError, setLoadError] = useState(false);
+
   const gltf = useGLTF(url, undefined, (error) => {
     console.error('Error loading model:', error);
+    setLoadError(true);
   });
 
   const clonedScene = useMemo(() => {
@@ -108,6 +114,25 @@ function Part({ url, position, color, texture }) {
       console.error('Error updating materials:', error);
     }
   }, [clonedScene, color, texture]);
+
+  useEffect(() => {
+    return () => {
+      // Cleanup
+      if (gltf) {
+        gltf.scene.traverse((node) => {
+          if (node.isMesh) {
+            node.geometry.dispose();
+            node.material.dispose();
+          }
+        });
+      }
+    };
+  }, [gltf]);
+
+  if (loadError) {
+    console.error(`Failed to load model: ${url}`);
+    return null;
+  }
 
   if (!clonedScene) return null;
 
@@ -460,7 +485,6 @@ const CharacterCustomization = () => {
     setSelectedTexture(item.product.texture_3D);
   };
 
-  // Add this function inside CharacterCustomization component
   const handleRemoveFromCloset = async (itemId) => {
     try {
       const { error } = await supabase
@@ -728,82 +752,91 @@ const CharacterCustomization = () => {
         </button>
       </div>
 
-      <Canvas 
-        camera={{ position: [0, 100, 200] }}
-        shadows
-        onError={(error) => {
-          console.error('Canvas error:', error);
-        }}
-      >
-          
-        {/* Lights */}
-        <ambientLight intensity={0.4} />
-        <hemisphereLight intensity={0.7} />
-        <directionalLight
-          castShadow
-          position={[2, 4, 1]}
-          intensity={1.5}
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        <spotLight
-          position={[-2, 4, -1]}
-          intensity={0.5}
-          angle={0.5}
-          penumbra={1}
-        />
-
-        <CameraController view={cameraView} />
-        
-        {/* Environment */}
-        <Environment preset="city" />
-        
-        {/* Platform and Models */}
-        <group position={[0, 0, 0]}>
-          <Platform />
-          {selectedHair && hairURLs[selectedHair] && (
-            <Part 
-              url={hairURLs[selectedHair]} 
-              position={[0, 0.85, 0]} 
-              color={haircolor} 
-            />
-          )}
-          <Part 
-            url={bodyTypeURLs[gender][selectedBodyType]} 
-            position={[0, 0, 0]} 
-            color={skincolor} 
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <img src="/emote/hmmm.png" alt="Loading" className="w-24 h-24 mx-auto animate-bounce" />
+            <p className="mt-4 text-gray-600">Loading 3D Model...</p>
+          </div>
+        </div>
+      }>
+        <Canvas 
+          camera={{ position: [0, 100, 200] }}
+          shadows
+          onError={(error) => {
+            console.error('Canvas error:', error);
+          }}
+        >
+            
+          {/* Lights */}
+          <ambientLight intensity={0.4} />
+          <hemisphereLight intensity={0.7} />
+          <directionalLight
+            castShadow
+            position={[2, 4, 1]}
+            intensity={1.5}
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
           />
-          {getTShirtURL() && (
+          <spotLight
+            position={[-2, 4, -1]}
+            intensity={0.5}
+            angle={0.5}
+            penumbra={1}
+          />
+
+          <CameraController view={cameraView} />
+          
+          {/* Environment */}
+          <Environment preset="city" />
+          
+          {/* Platform and Models */}
+          <group position={[0, 0, 0]}>
+            <Platform />
+            {selectedHair && hairURLs[selectedHair] && (
+              <Part 
+                url={hairURLs[selectedHair]} 
+                position={[0, 0.85, 0]} 
+                color={haircolor} 
+              />
+            )}
             <Part 
-              key={`tshirt-${gender}-${selectedBodyType}`} 
-              url={getTShirtURL()} 
-              position={[0, 0, 0]}
-              texture={selectedTexture} // Pass selected texture
+              url={bodyTypeURLs[gender][selectedBodyType]} 
+              position={[0, 0, 0]} 
+              color={skincolor} 
             />
-          )}
-          {getShortsURL() && (
-            <Part 
-              key={`shorts-${gender}-${selectedBodyType}`} 
-              url={getShortsURL()} 
-              position={[0, 0, 0]}
-              color="#000000"
-            />
-          )}
-        </group>
-   
-        <OrbitControls 
-          target={[0, 80, 0]}
-          minPolarAngle={0}
-          maxPolarAngle={Math.PI}
-          minDistance={80}
-          maxDistance={300}
-          enablePan={true}
-          panSpeed={0.5}
-          rotateSpeed={0.5}
-          enableDamping={true}
-          dampingFactor={0.05}
-        />
-      </Canvas>
+            {getTShirtURL() && (
+              <Part 
+                key={`tshirt-${gender}-${selectedBodyType}`} 
+                url={getTShirtURL()} 
+                position={[0, 0, 0]}
+                texture={selectedTexture} // Pass selected texture
+              />
+            )}
+            {getShortsURL() && (
+              <Part 
+                key={`shorts-${gender}-${selectedBodyType}`} 
+                url={getShortsURL()} 
+                position={[0, 0, 0]}
+                color="#000000"
+              />
+            )}
+          </group>
+    
+          <OrbitControls 
+            target={[0, 80, 0]}
+            minPolarAngle={0}
+            maxPolarAngle={Math.PI}
+            minDistance={80}
+            maxDistance={300}
+            enablePan={true}
+            panSpeed={0.5}
+            rotateSpeed={0.5}
+            enableDamping={true}
+            dampingFactor={0.05}
+          />
+        </Canvas>
+      </Suspense>
     </div>
   </div>
 

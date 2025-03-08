@@ -1,25 +1,27 @@
 // src/constants/avatarConfig.js
 
-const BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://dripstr-web.vercel.app'
-  : '';
-
-// Update the model paths to ensure they start with '/'
-const bodyTypeURLs = {
-    Boy: {
-      Average: `/3d/avatars/guyz/Average.glb`,
-      Muscular: `/3d/avatars/guyz/Muscular.glb`,
-      PlusSize: `/3d/avatars/guyz/PlusSize.glb`,
-      Petite: `/3d/avatars/guyz/Thin.glb`,
-    },
-    Girl: {
-      Average: `/3d/avatars/gurlz/Average.glb`,
-      Muscular: `/3d/avatars/gurlz/Muscular.glb`,
-      PlusSize: `/3d/avatars/gurlz/PlusSize.glb`,
-      Petite: `/3d/avatars/gurlz/Thin.glb`,
-    },
+const getBasePath = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://dripstr-web.vercel.app';
+  }
+  return '';
 };
-  
+
+export const bodyTypeURLs = {
+  Boy: {
+    Average: `${getBasePath()}/3d/avatars/guyz/Average.glb`,
+    Muscular: `${getBasePath()}/3d/avatars/guyz/Muscular.glb`,
+    PlusSize: `${getBasePath()}/3d/avatars/guyz/PlusSize.glb`,
+    Petite: `${getBasePath()}/3d/avatars/guyz/Thin.glb`,
+  },
+  Girl: {
+    Average: `${getBasePath()}/3d/avatars/gurlz/Average.glb`,
+    Muscular: `${getBasePath()}/3d/avatars/gurlz/Muscular.glb`,
+    PlusSize: `${getBasePath()}/3d/avatars/gurlz/PlusSize.glb`,
+    Petite: `${getBasePath()}/3d/avatars/gurlz/Thin.glb`,
+  }
+};
+
 const hairURLs = {
     Barbers: `/3d/hair/man/ManHair1.glb`,
     PogiCut: `/3d/hair/man/ManHair2.glb`,
@@ -60,11 +62,11 @@ const shortsURLs = {
   
 const tshirtTextureURLs = {
   Boy: {
-    Average: `${BASE_URL}/3d/uvmap/TexturedMESH.png`,
+    Average: `${getBasePath()}/3d/uvmap/TexturedMESH.png`,
   },
   Girl: {
-    Average: `${BASE_URL}/3d/wears/guyz/tshirts/Average_Tshirt_Texture.glb`,
+    Average: `${getBasePath()}/3d/wears/guyz/tshirts/Average_Tshirt_Texture.glb`,
   }
 }
 
-export { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs, tshirtTextureURLs };
+export { hairURLs, tshirURLs, shortsURLs, tshirtTextureURLs };
