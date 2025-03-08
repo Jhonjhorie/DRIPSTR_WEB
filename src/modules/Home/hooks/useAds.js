@@ -35,9 +35,10 @@ const useAds = () => {
         setAds(uniqueAds);
 
         const uniqueShops = Array.from(
-          new Map(filteredData.map((s) => [s.shop.id, s.shop])).values()
+          new Map(
+            filteredData.map((s) => [s.shop.id, { ...s.shop, isPremiumShop: true }])
+          ).values()
         );
-
 
         setPShop(uniqueShops);
       } catch (err) {

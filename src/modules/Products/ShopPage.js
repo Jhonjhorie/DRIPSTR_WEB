@@ -24,6 +24,7 @@ import useUserProfile from "@/shared/mulletCheck";
 import MerchantFollow from "./components/subcomponents/MerchantFollow.js";
 import AdsBanner from "../Home/components/AdsBanner.js";
 import AdsCarousel from "./components/subcomponents/AdsCarousel.js";
+import ShopVoucherStream from "./components/subcomponents/ShopVoucher.js";
 
 function ShopPage() {
   const location = useLocation();
@@ -266,13 +267,14 @@ function ShopPage() {
         </div>
 
         {/* Ad Banner Section */}
-        {/* <div className="my-6 mx-auto w-full max-w-[15rem] h-[10rem]">
+         <div className="my-6 mx-auto w-full max-w-[15rem] h-[10rem]">
           {/* <AdsCarousel ads={shop.shop_Ads}/> */}
         {/* Fallback if you don't have the component: */}
         {/* <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center text-gray-500 border border-dashed border-gray-300">
             Advertisement Space
-          </div> 
-        </div> */}
+          </div> */}
+          <ShopVoucherStream profile={profile} shop={shop}/>
+        </div> 
 
         {/* Categories Section */}
         <div

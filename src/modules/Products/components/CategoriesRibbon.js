@@ -43,7 +43,7 @@ const CategoriesRibbon = ({ active, categories, onItemClick }) => {
       `}
     >
       <div className={`p-2 rounded-full mb-2 mx-2 md:mx-2 transition-all duration-300 ${isActive ? 'bg-purple-50' : 'bg-gray-50'}`}>
-        <img src={category.icon} alt={category.label} className="w-6 h-6 md:w-8 md:h-8 object-contain" />
+        <img src={category.icon} alt={category.label} className="w-6 h-6 md:w-7 md:h-8 object-contain" />
       </div>
       <p className={`text-center text-xs md:text-sm whitespace-nowrap ${isActive ? 'text-primary-color font-medium' : 'text-gray-600'}`}>{category.label}</p>
     </div>
