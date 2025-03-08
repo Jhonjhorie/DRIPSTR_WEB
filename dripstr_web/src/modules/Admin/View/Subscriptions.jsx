@@ -57,7 +57,81 @@ function Subscriptions() {
         }
     }, [activeTab]);
 
-    const approveItem = (id) => console.log(`Approved item with ID: ${id}`);
+    const approveItem = async (id) => {
+        try {
+            // Start a transaction-like operation
+            setLoading(true);
+            
+            // Determine if it's an artist or merchant based on activeTab
+            if (activeTab === 'Artists') {
+                // 1. Get the artist subscription details first
+                const { data: subscription, error: fetchError } = await supabase
+                    .from('artist_Subscription')
+                    .select('artist_Id')
+                    .eq('id', id)
+                    .single();
+    
+                if (fetchError) throw fetchError;
+    
+                // 2. Update artist's is_Premium status
+                const { error: artistError } = await supabase
+                    .from('artist')
+                    .update({ is_Premium: true })
+                    .eq('id', subscription.artist_Id);
+    
+                if (artistError) throw artistError;
+    
+                // 3. Update subscription status
+                const { error: statusError } = await supabase
+                    .from('artist_Subscription')
+                    .update({ status: 'Completed' })
+                    .eq('id', id);
+    
+                if (statusError) throw statusError;
+    
+            } else if (activeTab === 'Merchants') {
+                // 1. Get the merchant subscription details first
+                const { data: subscription, error: fetchError } = await supabase
+                    .from('merchant_Subscription')
+                    .select('merchant_Id')
+                    .eq('id', id)
+                    .single();
+    
+                if (fetchError) throw fetchError;
+    
+                // 2. Update merchant's is_Premium status
+                const { error: merchantError } = await supabase
+                    .from('shop') // Assuming the table name is 'shop' for merchants
+                    .update({ is_Premium: true })
+                    .eq('id', subscription.merchant_Id);
+    
+                if (merchantError) throw merchantError;
+    
+                // 3. Update subscription status
+                const { error: statusError } = await supabase
+                    .from('merchant_Subscription')
+                    .update({ status: 'Completed' })
+                    .eq('id', id);
+    
+                if (statusError) throw statusError;
+            }
+    
+            // Refresh the data after successful update
+            if (activeTab === 'Artists') {
+                await fetchArtists();
+            } else {
+                await fetchMerchants();
+            }
+    
+        } catch (error) {
+            console.error('Error approving item:', error.message);
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    
     const declineItem = (id) => console.log(`Declined item with ID: ${id}`);
 
     // Function to open modal
