@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../../../constants/supabase';
 
+
 const ForgotPasswordModal = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -11,13 +12,9 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
     setLoading(true);
     setMessage('');
 
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://dripstr-web.vercel.app'
-      : 'http://localhost:3000';
-
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${baseUrl}/login/reset-password`,
+        redirectTo: 'https://dripstr-web.vercel.app/reset-password',
       });
 
       if (error) throw error;
@@ -30,7 +27,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
       setLoading(false);
     }
   };
-  
+
   if (!isOpen) return null;
 
   return (
