@@ -11,9 +11,13 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
     setLoading(true);
     setMessage('');
 
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://dripstr-web.vercel.app'
+      : 'http://localhost:3000';
+
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/login/reset-password`,
+        redirectTo: `${baseUrl}/login/reset-password`,
       });
 
       if (error) throw error;
@@ -26,7 +30,7 @@ const ForgotPasswordModal = ({ isOpen, onClose }) => {
       setLoading(false);
     }
   };
-
+  
   if (!isOpen) return null;
 
   return (
