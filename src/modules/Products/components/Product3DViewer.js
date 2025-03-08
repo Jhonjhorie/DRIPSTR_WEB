@@ -11,7 +11,6 @@ import { bodyTypeURLs, tshirURLs, shortsURLs, hairURLs } from '../../../constant
 
 const Model = ({ avatarData, productData, color }) => {
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   // Get correct model paths from avatar config
   const avatarPath = avatarData?.gender && avatarData?.bodytype ? 
@@ -30,135 +29,83 @@ const Model = ({ avatarData, productData, color }) => {
     hairURLs[avatarData.hair] : 
     hairURLs.Barbers;
 
-  // Load models with error handling
-  const avatarGLTF = useGLTF(avatarPath, undefined, (error) => {
-    console.error('Error loading avatar model:', error);
-    setError(error);
-  });
+  // Load models using GLTF
+  const { scene: avatarGLTF } = useGLTF(avatarPath);
+  const { scene: tshirtGLTF } = useGLTF(tshirtPath);
+  const { scene: shortsGLTF } = useGLTF(shortsPath);
+  const { scene: hairGLTF } = useGLTF(hairPath);
 
-  const tshirtGLTF = useGLTF(tshirtPath, undefined, (error) => {
-    console.error('Error loading tshirt model:', error);
-    setError(error);
-  });
-
-  const shortsGLTF = useGLTF(shortsPath, undefined, (error) => {
-    console.error('Error loading shorts model:', error);
-    setError(error);
-  });
-
-  const hairGLTF = useGLTF(hairPath, undefined, (error) => {
-    console.error('Error loading hair model:', error);
-    setError(error);
-  });
-
-  // Clone scenes with error handling
-  const scenes = useMemo(() => {
-    try {
-      return {
-        avatarScene: SkeletonUtils.clone(avatarGLTF.scene),
-        tshirtScene: SkeletonUtils.clone(tshirtGLTF.scene),
-        shortsScene: SkeletonUtils.clone(shortsGLTF.scene),
-        hairScene: SkeletonUtils.clone(hairGLTF.scene)
-      };
-    } catch (error) {
-      console.error('Error cloning scenes:', error);
-      setError(error);
-      return null;
-    }
-  }, [avatarGLTF, tshirtGLTF, shortsGLTF, hairGLTF]);
+  // Clone scenes for independent material manipulation
+  const avatarScene = useMemo(() => SkeletonUtils.clone(avatarGLTF), [avatarGLTF]);
+  const tshirtScene = useMemo(() => SkeletonUtils.clone(tshirtGLTF), [tshirtGLTF]);
+  const shortsScene = useMemo(() => SkeletonUtils.clone(shortsGLTF), [shortsGLTF]);
+  const hairScene = useMemo(() => SkeletonUtils.clone(hairGLTF), [hairGLTF]);
 
   useEffect(() => {
-    if (!scenes) return;
+    // Handle T-shirt texture and material
+    if (tshirtScene && productData?.texture_3D) {
+      tshirtScene.traverse((node) => {
+        if (node.isMesh) {
+          node.material = node.material.clone();
+          const texture = new TextureLoader().load(productData.texture_3D, (tex) => {
+            tex.wrapS = tex.wrapT = RepeatWrapping;
+            tex.minFilter = NearestFilter;
+            node.material.map = tex;
+            node.material.color = new THREE.Color(color);
+            node.material.roughness = 0.7;
+            node.material.metalness = 0.0;
+            node.material.needsUpdate = true;
+            node.material.map.flipY = false;
+            node.material.map.needsUpdate = true;
+          });
+        }
+      });
+    }
 
-    try {
-      // Handle T-shirt texture and material
-      if (scenes.tshirtScene && productData?.texture_3D) {
-        scenes.tshirtScene.traverse((node) => {
-          if (node.isMesh) {
-            node.material = node.material.clone();
-            const textureLoader = new TextureLoader();
-            textureLoader.load(
-              productData.texture_3D,
-              (tex) => {
-                tex.wrapS = tex.wrapT = RepeatWrapping;
-                tex.minFilter = NearestFilter;
-                node.material.map = tex;
-                node.material.color = new THREE.Color(color);
-                node.material.roughness = 0.7;
-                node.material.metalness = 0.0;
-                node.material.needsUpdate = true;
-                node.material.map.flipY = false;
-                node.material.map.needsUpdate = true;
-                setLoading(false);
-              },
-              undefined,
-              (error) => {
-                console.error('Error loading texture:', error);
-                setError(error);
-              }
-            );
-          }
+    // Handle avatar material
+    avatarScene.traverse((node) => {
+      if (node.isMesh) {
+        node.material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(avatarData?.skincolor || '#f5c9a6'),
+          roughness: 0.5,
+          metalness: 0.2,
         });
       }
+    });
 
-      // Handle avatar material
-      scenes.avatarScene.traverse((node) => {
-        if (node.isMesh) {
-          node.material = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(avatarData?.skincolor || '#f5c9a6'),
-            roughness: 0.5,
-            metalness: 0.2,
-          });
-        }
-      });
+    // Handle hair material
+    hairScene.traverse((node) => {
+      if (node.isMesh) {
+        node.material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color(avatarData?.haircolor || '#000000'),
+          roughness: 0.3,
+          metalness: 0.1,
+        });
+      }
+    });
 
-      // Handle hair material
-      scenes.hairScene.traverse((node) => {
-        if (node.isMesh) {
-          node.material = new THREE.MeshStandardMaterial({
-            color: new THREE.Color(avatarData?.haircolor || '#000000'),
-            roughness: 0.3,
-            metalness: 0.1,
-          });
-        }
-      });
-
-      // Handle shorts material
-      scenes.shortsScene.traverse((node) => {
-        if (node.isMesh) {
-          node.material = new THREE.MeshStandardMaterial({
-            color: new THREE.Color('#000000'),
-            roughness: 0.7,
-            metalness: 0.0,
-          });
-        }
-      });
-    } catch (error) {
-      console.error('Error updating materials:', error);
-      setError(error);
-    }
-  }, [scenes, color, productData, avatarData]);
+    // Handle shorts material
+    shortsScene.traverse((node) => {
+      if (node.isMesh) {
+        node.material = new THREE.MeshStandardMaterial({
+          color: new THREE.Color('#000000'),
+          roughness: 0.7,
+          metalness: 0.0,
+        });
+      }
+    });
+  }, [avatarScene, tshirtScene, hairScene, shortsScene, color, productData, avatarData]);
 
   if (error) {
-    return (
-      <Html center>
-        <div className="text-red-500 bg-white p-2 rounded">
-          Error loading model. Please try refreshing the page.
-        </div>
-      </Html>
-    );
-  }
-
-  if (loading) {
-    return <LoadingSpinner />;
+    return <Html center><div className="text-red-500">Error loading model</div></Html>;
   }
 
   return (
     <group>
-      <primitive object={scenes?.avatarScene} scale={1} />
-      <primitive object={scenes?.tshirtScene} scale={1} />
-      <primitive object={scenes?.shortsScene} scale={1} />
-      <primitive object={scenes?.hairScene} scale={1} />
+      <primitive object={avatarScene} scale={1} />
+      <primitive object={tshirtScene} scale={1} />
+      <primitive object={shortsScene} scale={1} />
+      <primitive object={hairScene} scale={1} />
     </group>
   );
 };
@@ -253,14 +200,10 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
       
       {/* 3D Canvas */}
       <div className={className}>
-      <Canvas 
-        camera={{ position: [0, 100, 200], fov: 75 }}
-        shadows
-        onError={(error) => {
-          console.error('Canvas error:', error);
-        }}
-        fallback={<LoadingSpinner />}
-      >
+        <Canvas 
+          camera={{ position: [0, 100, 200], fov: 75 }}
+          shadows
+        > 
           
           <Suspense fallback={<LoadingSpinner />}>
             {/* Lights */}
@@ -312,9 +255,8 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
 
 const LoadingSpinner = () => (
   <Html center>
-    <div className="bg-black bg-opacity-50 p-4 rounded-lg text-white flex items-center space-x-2">
+    <div className="text-slate-400">
       <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl" />
-      <span>Loading 3D Model...</span>
     </div>
   </Html>
 );
