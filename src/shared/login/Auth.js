@@ -106,9 +106,9 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
       setTimeout(() => {
         if (item) {
           navigate(`/product/${item.item_Name}`, { state: { item } });
-        } else if(actionLog == "loginMerchant") {
+        } else if(actionLog === "loginMerchant") {
           navigate("/account/shop-setup")
-        }else if(actionLog == "loginArtist") {
+        }else if(actionLog === "loginArtist") {
           navigate("/account/shop-setup")
         } else {
           navigate("/");
@@ -118,7 +118,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
     } catch (error) {
       setToast({ 
         show: true, 
-        message: `Sign In Error: ${error.message}`, 
+        message: `${error.message}`, 
         type: 'error' 
       });
     } finally {

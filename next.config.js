@@ -12,4 +12,17 @@ module.exports = {
     });
     return config;
   },
-}
+  async headers() {
+    return [
+      {
+        source: '/3d/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
+  },
+};

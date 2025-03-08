@@ -58,37 +58,58 @@ const BodyTypeInfoModal = ({ isOpen, onClose }) => {
 };
 
 function Part({ url, position, color, texture }) {
-  const gltf = useGLTF(url);
-  const clonedScene = useMemo(() => SkeletonUtils.clone(gltf.scene), [gltf.scene]);
+  // Add error handling for model loading
+  const gltf = useGLTF(url, undefined, (error) => {
+    console.error('Error loading model:', error);
+  });
 
-  useMemo(() => {
-    clonedScene.traverse((node) => {
-      if (node.isMesh) {
-        node.material = node.material.clone();
-        
-        if (texture) {
-          // Apply texture if provided (for t-shirt)
-          const textureLoader = new TextureLoader();
-          textureLoader.load(texture, (tex) => {
-            tex.wrapS = tex.wrapT = RepeatWrapping;
-            tex.minFilter = NearestFilter;
-            node.material.map = tex;
+  const clonedScene = useMemo(() => {
+    try {
+      return SkeletonUtils.clone(gltf.scene);
+    } catch (error) {
+      console.error('Error cloning scene:', error);
+      return null;
+    }
+  }, [gltf.scene]);
+
+  useEffect(() => {
+    if (!clonedScene) return;
+
+    try {
+      clonedScene.traverse((node) => {
+        if (node.isMesh) {
+          node.material = node.material.clone();
+          
+          if (texture) {
+            const textureLoader = new TextureLoader();
+            textureLoader.load(texture, 
+              (tex) => {
+                tex.wrapS = tex.wrapT = RepeatWrapping;
+                tex.minFilter = NearestFilter;
+                node.material.map = tex;
+                node.material.color.set(color || "#ffffff");
+                node.material.roughness = 0.7;
+                node.material.metalness = 0.0;
+                node.material.needsUpdate = true;
+                node.material.map.flipY = false;
+                node.material.map.needsUpdate = true;
+              },
+              undefined,
+              (error) => console.error('Error loading texture:', error)
+            );
+          } else {
             node.material.color.set(color || "#ffffff");
-            node.material.roughness = 0.7;
-            node.material.metalness = 0.0;
-            node.material.needsUpdate = true;
-            node.material.map.flipY = false;
-            node.material.map.needsUpdate = true;
-          });
-        } else {
-          // Apply just color for other parts (avatar, hair, shorts)
-          node.material.color.set(color || "#ffffff");
-          node.material.roughness = node.material.name.includes('Hair') ? 0.3 : 0.5;
-          node.material.metalness = node.material.name.includes('Hair') ? 0.1 : 0.2;
+            node.material.roughness = node.material.name.includes('Hair') ? 0.3 : 0.5;
+            node.material.metalness = node.material.name.includes('Hair') ? 0.1 : 0.2;
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      console.error('Error updating materials:', error);
+    }
   }, [clonedScene, color, texture]);
+
+  if (!clonedScene) return null;
 
   return (
     <primitive 
@@ -263,6 +284,7 @@ const CharacterCustomization = () => {
   useEffect(() => {
     const fetchAvatar = async () => {
       try {
+        console.log('Fetching avatar data...');
         const { data: session, error: sessionError } = await supabase.auth.getSession();
         if (sessionError) {
           console.error("Session Error:", sessionError);
@@ -302,6 +324,7 @@ const CharacterCustomization = () => {
           hairColor: avatarData.haircolor,
           name: avatarData.name,
         });
+        console.log('Avatar data loaded:', avatarData);
       } catch (error) {
         console.error("Unexpected Error:", error);
       }
@@ -708,6 +731,9 @@ const CharacterCustomization = () => {
       <Canvas 
         camera={{ position: [0, 100, 200] }}
         shadows
+        onError={(error) => {
+          console.error('Canvas error:', error);
+        }}
       >
           
         {/* Lights */}
