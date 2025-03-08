@@ -53,7 +53,7 @@ const CommissionHistory = ({ artistId }) => {
         data-tip="See Commission History"
         bgColor="bg-transparent"
         textColor="text-secondary-color"
-        className="flex-none flex fixed bottom-5 cursor-pointer right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md hover:text-black text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
+        className="flex-none flex fixed bottom-16 md:bottom-4 cursor-pointer right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md hover:text-black text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
         onClick={() => setIsOpen(!isOpen)}
       >
         <FontAwesomeIcon icon={faHistory} />
@@ -61,7 +61,7 @@ const CommissionHistory = ({ artistId }) => {
 
       {/* Commission History Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex px-2 justify-center items-center z-20">
           <div className="bg-white rounded-md shadow-lg w-96">
             <div className="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
             <div className="p-2 bg-slate-100">

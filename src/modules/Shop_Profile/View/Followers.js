@@ -380,7 +380,7 @@ function Followers() {
                           name="message-alt-error"
                           color="#4335A7"
                         ></box-icon>
-                        <box-icon
+                        {/* <box-icon
                           onMouseEnter={(e) =>
                             e.currentTarget.setAttribute("color", "#FFF")
                           }
@@ -390,7 +390,7 @@ function Followers() {
                           type="solid"
                           name="coupon"
                           color="#FAB12F"
-                        ></box-icon>
+                        ></box-icon> */}
                       </div>
                     </div>
                   ))

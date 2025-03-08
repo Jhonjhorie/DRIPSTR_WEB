@@ -967,7 +967,7 @@ const AddItem = () => {
                   onClick={closeConfirmAdd}
                   className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
                 >
-                  Okay!
+                  Confirm
                 </div>
               </div>
             </div>

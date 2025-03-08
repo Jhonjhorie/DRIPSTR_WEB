@@ -175,38 +175,49 @@ function ArtistPage() {
   //Fetch artist arts
   useEffect(() => {
     const fetchArtistArts = async () => {
+      if (!id) return; 
+  
       try {
         console.log("Fetching artworks for artist ID:", id);
-
+  
         const { data, error } = await supabase
-          .from("artist_Arts")
+          .from("artist_Arts") 
           .select("*")
+          .eq("status", "Approved")
           .eq("artist_Id", id);
-
+  
         if (error) {
           console.error("Error fetching artworks:", error);
         } else {
-          console.log("Fetched Artworks:", data);
-          setArtistArts(data);
+          console.log("Fetched Artworks (before setting state):", data);
+  
+          const filteredData = data.filter((art) => art.status === "Approved");
+          console.log("Filtered Artworks:", filteredData);
+  
+          setArtistArts(filteredData || []);
         }
       } catch (err) {
         console.error("Unexpected error:", err);
       }
     };
-
-    if (id) fetchArtistArts();
+  
+    fetchArtistArts();
   }, [id]);
+  
 
-  const handleLike = async (artId, likes) => {
-    let updatedLikes = likes.includes(userId)
-      ? likes.filter((id) => id !== userId) // Unlike
-      : [...likes, userId]; // Like
-
+  const handleLike = async (artId, likes = []) => {
+    // Ensure likes is an array
+    let updatedLikes = Array.isArray(likes) ? likes : [];
+  
+    updatedLikes = updatedLikes.includes(userId)
+      ? updatedLikes.filter((id) => id !== userId) 
+      : [...updatedLikes, userId]; 
+  
     const { error } = await supabase
       .from("artist_Arts")
       .update({ likes: updatedLikes })
       .eq("id", artId);
-
+  
     if (!error) {
       setArtistArts((prevArts) =>
         prevArts.map((art) =>
@@ -218,6 +229,7 @@ function ArtistPage() {
     }
     fetchTotalLikes();
   };
+  
 
   const handleSelectArtReport = (art2) => {
     if (!art2) {
@@ -981,7 +993,7 @@ function ArtistPage() {
       </div>
       {/* Artist Arts */}
       <div className="h-auto relative p-2 pb-10 md:px-10 w-full bg-slate-300 ">
-        <div className="columns-2 sm:columns-3 mt-5 md:columns-4 gap-2 px-4 space-y-2">
+        <div className="columns-2 sm:columns-3 mt-5 md:columns-4 gap-2 px-4 pb-10 space-y-2">
           {artistArts.length > 0 ? (
             artistArts.map((art) => (
               <div
@@ -1543,7 +1555,7 @@ function ArtistPage() {
           {/* Message Input Area: Always shown */}
           <div className="w-full h-20 bg-slate-600 rounded-md flex gap-1 p-1 items-center">
             <div className="w-full h-full relative">
-              {/* Image Preview (if selected) */}
+              {/* Image Preview  */}
               {imageFile && (
                 <div className="absolute top-0 left-0 z-10 p-1">
                   <img

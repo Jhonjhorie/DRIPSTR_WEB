@@ -594,7 +594,13 @@ function MerchantWallet() {
                 <p className="text-2xl font-bold">Loading...</p>
               ) : (
                 <p className="text-3xl font-bold">
-                  ₱{walletData?.revenue || "0.00"}
+                  ₱
+                  {walletData?.revenue
+                    ? Number(walletData.revenue).toLocaleString("en-PH", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "0.00"}
                 </p>
               )}
             </div>
@@ -751,7 +757,6 @@ function MerchantWallet() {
             {/* Info Display */}
             <div className="h-[300px] w-full shadow-inner shadow-slate-400 rounded-md overflow-y-auto bg-slate-300 p-4">
               <div className="max-w-3xl mx-auto px-6">
-
                 <div className="space-y-6">
                   <div className="p-4 bg-gray-100 rounded-lg shadow-md">
                     <h2 className="text-lg text-black font-semibold">

@@ -116,7 +116,7 @@ function ArtistWallet() {
   }, []);
 
   const handleSubmitCashout = async () => {
-    if (!amount ) {
+    if (!amount) {
       setMessage("Please enter both amount and reason.");
       return;
     }
@@ -315,8 +315,9 @@ function ArtistWallet() {
         throw new Error("Please upload proof of payment.");
       }
 
-      const filePath = `proofsarts/${currentUser.id}_${Date.now()}_${gcashProof.name
-        }`;
+      const filePath = `proofsarts/${currentUser.id}_${Date.now()}_${
+        gcashProof.name
+      }`;
       const { data, error: uploadError } = await supabase.storage
         .from("wallet_docs")
         .upload(filePath, gcashProof);
@@ -575,10 +576,11 @@ function ArtistWallet() {
       <div className="flex gap-2 w-full h-auto">
         <div className="w-1/3  h-full flex flex-col items-center">
           <div
-            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${isPremium
-              ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]"
-              : ""
-              }`}
+            className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${
+              isPremium
+                ? "border-4 border-yellow-400 bg-gradient-to-r relative mt-2 from-yellow-600 to-indigo-500 h-[180px]"
+                : ""
+            }`}
           >
             {/* Wallet Icon and Name */}
             <div className="absolute bottom-2 right-2">
@@ -591,13 +593,25 @@ function ArtistWallet() {
 
             {/* Balance */}
             <div>
-              <p className="text-sm">Your Balance</p>
               {loading ? (
                 <p className="text-2xl font-bold">Loading...</p>
               ) : (
-                <p className="text-3xl font-bold">
-                  ₱{walletData?.revenue || "0.00"}
-                </p>
+                <div>
+                  <p className="text-sm">Your Balance</p>
+                  {loading ? (
+                    <p className="text-2xl font-bold">Loading...</p>
+                  ) : (
+                    <p className="text-3xl font-bold">
+                      ₱
+                      {walletData?.revenue
+                        ? Number(walletData.revenue).toLocaleString("en-PH", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : "0.00"}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
 
@@ -713,12 +727,13 @@ function ArtistWallet() {
                       ₱{transaction.qty} - {transaction.reason}
                     </span>
                     <span
-                      className={`text-sm font-semibold ${transaction.status === "Pending"
-                        ? "text-yellow-500"
-                        : transaction.status === "Subscription Expired"
+                      className={`text-sm font-semibold ${
+                        transaction.status === "Pending"
+                          ? "text-yellow-500"
+                          : transaction.status === "Subscription Expired"
                           ? "text-red-500"
                           : "text-green-600"
-                        }`}
+                      }`}
                     >
                       {transaction.status}
                     </span>
@@ -746,7 +761,6 @@ function ArtistWallet() {
             {/* Info Display */}
             <div className="h-[300px] w-full shadow-inner shadow-slate-400 rounded-md overflow-y-auto bg-slate-300 p-4">
               <div className="max-w-3xl mx-auto px-6">
-
                 <div className="space-y-6">
                   <div className="p-4 bg-gray-100 rounded-lg shadow-md">
                     <h2 className="text-lg text-black font-semibold">
@@ -1190,20 +1204,22 @@ function ArtistWallet() {
                 <button
                   onClick={() => setActiveTabSubs("Wallet")}
                   disabled={isPending || isPremium}
-                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-primary-color"
-                    }`}
+                  className={`bg-custom-purple glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
+                    isPending || isPremium
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-primary-color"
+                  }`}
                 >
                   Pay via Dripstr Wallet
                 </button>
                 <button
                   onClick={() => setActiveTabSubs("Gcash")}
                   disabled={isPending || isPremium}
-                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${isPending || isPremium
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-blue-700"
-                    }`}
+                  className={`bg-blue-600 glass px-4 py-2 text-white rounded-sm font-semibold transition duration-300 ${
+                    isPending || isPremium
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-blue-700"
+                  }`}
                 >
                   Pay via Gcash
                 </button>
