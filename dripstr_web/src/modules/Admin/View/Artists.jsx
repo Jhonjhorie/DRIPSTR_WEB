@@ -19,6 +19,7 @@ function Artists() {
   const [declineModal, setDeclineModal] = useState(false);  // For the decline modal
   const [declineReason, setDeclineReason] = useState('');  // Selected decline reason
   const [otherReason, setOtherReason] = useState('');  // Text input for "Others" reason
+  const [searchQuery, setSearchQuery] = useState(''); // New state for search
   const itemsPerPage = 3; // Adjust as needed
 
 
@@ -195,12 +196,22 @@ function Artists() {
     }
   };
 
+  const filteredArtists = artists.filter(artist => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      artist.artist_Name?.toLowerCase().includes(searchLower) ||
+      artist.full_Name?.toLowerCase().includes(searchLower) ||
+      artist.owner_Id?.full_name?.toLowerCase().includes(searchLower) ||
+      artist.art_Type?.toLowerCase().includes(searchLower) ||
+      artist.contact_number?.toLowerCase().includes(searchLower)
+    );
+  });
 
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentArtists = artists.slice(indexOfFirstItem, indexOfLastItem);
+  const currentArtists = filteredArtists.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="flex">
@@ -222,8 +233,13 @@ function Artists() {
           </button>
           <input
             type="text"
-            placeholder="Search"
-            className="px-4 py-2 border rounded bg-white text-black"
+            placeholder="Search artists..."
+            className="px-4 py-2 border rounded bg-white text-black w-64"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1); // Reset to first page when searching
+            }}
           />
         </div>
 
@@ -426,7 +442,7 @@ function Artists() {
                 <div className="space-y-6">
                   {currentArtists.length === 0 ? (
                     <h1 className="text-center font-bold text-3xl text-white">
-                      No Artists
+                      {searchQuery ? 'No matching artists found' : 'No Artists'}
                     </h1>
                   ) : (
                     currentArtists.map((artist) => (
