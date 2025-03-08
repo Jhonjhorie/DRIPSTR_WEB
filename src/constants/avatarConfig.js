@@ -7,18 +7,37 @@ const getBasePath = () => {
   return '';
 };
 
+// Add error handling for model loading
+const createModelURL = (path) => {
+  const url = `${getBasePath()}${path}`;
+  return {
+    url,
+    load: async () => {
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+      } catch (error) {
+        console.error(`Failed to load model: ${url}`, error);
+        return null;
+      }
+    }
+  };
+};
+
 export const bodyTypeURLs = {
   Boy: {
-    Average: `${getBasePath()}/3d/avatars/guyz/Average.glb`,
-    Muscular: `${getBasePath()}/3d/avatars/guyz/Muscular.glb`,
-    PlusSize: `${getBasePath()}/3d/avatars/guyz/PlusSize.glb`,
-    Petite: `${getBasePath()}/3d/avatars/guyz/Thin.glb`,
+    Average: createModelURL('/3d/avatars/guyz/Average.glb'),
+    Muscular: createModelURL('/3d/avatars/guyz/Muscular.glb'),
+    PlusSize: createModelURL('/3d/avatars/guyz/PlusSize.glb'),
+    Petite: createModelURL('/3d/avatars/guyz/Thin.glb'),
   },
   Girl: {
-    Average: `${getBasePath()}/3d/avatars/gurlz/Average.glb`,
-    Muscular: `${getBasePath()}/3d/avatars/gurlz/Muscular.glb`,
-    PlusSize: `${getBasePath()}/3d/avatars/gurlz/PlusSize.glb`,
-    Petite: `${getBasePath()}/3d/avatars/gurlz/Thin.glb`,
+    Average: createModelURL('/3d/avatars/gurlz/Average.glb'),
+    Muscular: createModelURL('/3d/avatars/gurlz/Muscular.glb'),
+    PlusSize: createModelURL('/3d/avatars/gurlz/PlusSize.glb'),
+    Petite: createModelURL('/3d/avatars/gurlz/Thin.glb'),
   }
 };
 

@@ -63,20 +63,31 @@ const BodyTypeInfoModal = ({ isOpen, onClose }) => {
 
 function Part({ url, position, color, texture }) {
   const [loadError, setLoadError] = useState(false);
+  const [modelUrl, setModelUrl] = useState(url?.url || url);
 
-  const gltf = useGLTF(url, undefined, (error) => {
+  useEffect(() => {
+    if (url?.load) {
+      url.load().then(blobUrl => {
+        if (blobUrl) setModelUrl(blobUrl);
+        else setLoadError(true);
+      });
+    }
+  }, [url]);
+
+  const { scene } = useGLTF(modelUrl, undefined, (error) => {
     console.error('Error loading model:', error);
     setLoadError(true);
   });
 
   const clonedScene = useMemo(() => {
+    if (!scene) return null;
     try {
-      return SkeletonUtils.clone(gltf.scene);
+      return SkeletonUtils.clone(scene);
     } catch (error) {
       console.error('Error cloning scene:', error);
       return null;
     }
-  }, [gltf.scene]);
+  }, [scene]);
 
   useEffect(() => {
     if (!clonedScene) return;
@@ -118,8 +129,8 @@ function Part({ url, position, color, texture }) {
   useEffect(() => {
     return () => {
       // Cleanup
-      if (gltf) {
-        gltf.scene.traverse((node) => {
+      if (scene) {
+        scene.traverse((node) => {
           if (node.isMesh) {
             node.geometry.dispose();
             node.material.dispose();
@@ -127,7 +138,7 @@ function Part({ url, position, color, texture }) {
         });
       }
     };
-  }, [gltf]);
+  }, [scene]);
 
   if (loadError) {
     console.error(`Failed to load model: ${url}`);
@@ -226,6 +237,29 @@ function CameraController({ view }) {
 
   return null;
 }
+
+const ThreeDErrorBoundary = ({ children }) => {
+  const [hasError, setHasError] = useState(false);
+
+  if (hasError) {
+    return (
+      <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">
+        <div className="text-center p-8">
+          <img src="/emote/error.png" alt="Error" className="w-24 h-24 mx-auto mb-4" />
+          <p className="text-red-600">Failed to load 3D model</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return children;
+};
 
 const CreateAvatarModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
@@ -760,82 +794,84 @@ const CharacterCustomization = () => {
           </div>
         </div>
       }>
-        <Canvas 
-          camera={{ position: [0, 100, 200] }}
-          shadows
-          onError={(error) => {
-            console.error('Canvas error:', error);
-          }}
-        >
-            
-          {/* Lights */}
-          <ambientLight intensity={0.4} />
-          <hemisphereLight intensity={0.7} />
-          <directionalLight
-            castShadow
-            position={[2, 4, 1]}
-            intensity={1.5}
-            shadow-mapSize-width={1024}
-            shadow-mapSize-height={1024}
-          />
-          <spotLight
-            position={[-2, 4, -1]}
-            intensity={0.5}
-            angle={0.5}
-            penumbra={1}
-          />
-
-          <CameraController view={cameraView} />
-          
-          {/* Environment */}
-          <Environment preset="city" />
-          
-          {/* Platform and Models */}
-          <group position={[0, 0, 0]}>
-            <Platform />
-            {selectedHair && hairURLs[selectedHair] && (
-              <Part 
-                url={hairURLs[selectedHair]} 
-                position={[0, 0.85, 0]} 
-                color={haircolor} 
-              />
-            )}
-            <Part 
-              url={bodyTypeURLs[gender][selectedBodyType]} 
-              position={[0, 0, 0]} 
-              color={skincolor} 
+        <ThreeDErrorBoundary>
+          <Canvas 
+            camera={{ position: [0, 100, 200] }}
+            shadows
+            onError={(error) => {
+              console.error('Canvas error:', error);
+            }}
+          >
+              
+            {/* Lights */}
+            <ambientLight intensity={0.4} />
+            <hemisphereLight intensity={0.7} />
+            <directionalLight
+              castShadow
+              position={[2, 4, 1]}
+              intensity={1.5}
+              shadow-mapSize-width={1024}
+              shadow-mapSize-height={1024}
             />
-            {getTShirtURL() && (
+            <spotLight
+              position={[-2, 4, -1]}
+              intensity={0.5}
+              angle={0.5}
+              penumbra={1}
+            />
+
+            <CameraController view={cameraView} />
+            
+            {/* Environment */}
+            <Environment preset="city" />
+            
+            {/* Platform and Models */}
+            <group position={[0, 0, 0]}>
+              <Platform />
+              {selectedHair && hairURLs[selectedHair] && (
+                <Part 
+                  url={hairURLs[selectedHair]} 
+                  position={[0, 0.85, 0]} 
+                  color={haircolor} 
+                />
+              )}
               <Part 
-                key={`tshirt-${gender}-${selectedBodyType}`} 
-                url={getTShirtURL()} 
-                position={[0, 0, 0]}
-                texture={selectedTexture} // Pass selected texture
+                url={bodyTypeURLs[gender][selectedBodyType]} 
+                position={[0, 0, 0]} 
+                color={skincolor} 
               />
-            )}
-            {getShortsURL() && (
-              <Part 
-                key={`shorts-${gender}-${selectedBodyType}`} 
-                url={getShortsURL()} 
-                position={[0, 0, 0]}
-                color="#000000"
-              />
-            )}
-          </group>
-    
-          <OrbitControls 
-            target={[0, 80, 0]}
-            minPolarAngle={0}
-            maxPolarAngle={Math.PI}
-            minDistance={80}
-            maxDistance={300}
-            enablePan={true}
-            panSpeed={0.5}
-            rotateSpeed={0.5}
-            enableDamping={true}
-            dampingFactor={0.05}
-          />
-        </Canvas>
+              {getTShirtURL() && (
+                <Part 
+                  key={`tshirt-${gender}-${selectedBodyType}`} 
+                  url={getTShirtURL()} 
+                  position={[0, 0, 0]}
+                  texture={selectedTexture} // Pass selected texture
+                />
+              )}
+              {getShortsURL() && (
+                <Part 
+                  key={`shorts-${gender}-${selectedBodyType}`} 
+                  url={getShortsURL()} 
+                  position={[0, 0, 0]}
+                  color="#000000"
+                />
+              )}
+            </group>
+      
+            <OrbitControls 
+              target={[0, 80, 0]}
+              minPolarAngle={0}
+              maxPolarAngle={Math.PI}
+              minDistance={80}
+              maxDistance={300}
+              enablePan={true}
+              panSpeed={0.5}
+              rotateSpeed={0.5}
+              enableDamping={true}
+              dampingFactor={0.05}
+            />
+          </Canvas>
+        </ThreeDErrorBoundary>
       </Suspense>
     </div>
   </div>
