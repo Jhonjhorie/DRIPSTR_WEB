@@ -448,7 +448,7 @@ function Artists() {
                               </div>
                             )}
                           </h2>
-                          <h3 className="text-md font-medium text-white cursor-pointer">
+                          <h3 className="text-md font-medium text-white">
                             {artist.full_Name || artist.owner_Id?.full_name || 'Unnamed Artist'}
                           </h3>
                           <p className="text-white text-sm">
