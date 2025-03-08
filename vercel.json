@@ -8,7 +8,29 @@
         "content-type": "model/gltf-binary"
       },
       "continue": true
+    },
+    {
+      "src": "/3d/(.*)\\.glb",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable",
+        "content-encoding": "br"
+      }
     }
   ],
-  "public": true
+  "public": true,
+  "headers": [
+    {
+      "source": "/3d/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Content-Type",
+          "value": "model/gltf-binary"
+        }
+      ]
+    }
+  ]
 }

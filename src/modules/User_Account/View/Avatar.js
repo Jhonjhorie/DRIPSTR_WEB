@@ -65,15 +65,6 @@ function Part({ url, position, color, texture }) {
   const [loadError, setLoadError] = useState(false);
   const [modelUrl, setModelUrl] = useState(url?.url || url);
 
-  useEffect(() => {
-    if (url?.load) {
-      url.load().then(blobUrl => {
-        if (blobUrl) setModelUrl(blobUrl);
-        else setLoadError(true);
-      });
-    }
-  }, [url]);
-
   const { scene } = useGLTF(modelUrl, undefined, (error) => {
     console.error('Error loading model:', error);
     setLoadError(true);

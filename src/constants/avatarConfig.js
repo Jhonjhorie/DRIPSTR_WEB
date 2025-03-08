@@ -1,22 +1,21 @@
 // src/constants/avatarConfig.js
 
 const BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://dripstr-web.vercel.app'
+  ? 'https://dripstr-web.vercel.app/' 
   : '';
 
-// Update the model paths to ensure they start with '/'
 const bodyTypeURLs = {
     Boy: {
-      Average: `/3d/avatars/guyz/Average.glb`,
-      Muscular: `/3d/avatars/guyz/Muscular.glb`,
-      PlusSize: `/3d/avatars/guyz/PlusSize.glb`,
-      Petite: `/3d/avatars/guyz/Thin.glb`,
+      Average: `${BASE_URL}/3d/avatars/guyz/Average.glb`,
+      Muscular: `${BASE_URL}/3d/avatars/guyz/Muscular.glb`,
+      PlusSize: `${BASE_URL}/3d/avatars/guyz/PlusSize.glb`,
+      Petite: `${BASE_URL}/3d/avatars/guyz/Thin.glb`,
     },
     Girl: {
-      Average: `/3d/avatars/gurlz/Average.glb`,
-      Muscular: `/3d/avatars/gurlz/Muscular.glb`,
-      PlusSize: `/3d/avatars/gurlz/PlusSize.glb`,
-      Petite: `/3d/avatars/gurlz/Thin.glb`,
+      Average: `${BASE_URL}/3d/avatars/gurlz/Average.glb`,
+      Muscular: `${BASE_URL}/3d/avatars/gurlz/Muscular.glb`,
+      PlusSize: `${BASE_URL}/3d/avatars/gurlz/PlusSize.glb`,
+      Petite: `${BASE_URL}/3d/avatars/gurlz/Thin.glb`,
     },
 };
   
