@@ -7,18 +7,19 @@ import Sidebar from "./Shared/Sidebar";
 function Admins() {
     const [fetchedAdmins, setFetchedAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [sortOrder, setSortOrder] = useState('ascending'); // Tracks sort order
-
-    // Modal states
+    const [sortOrder, setSortOrder] = useState('ascending');
+    // Modal states for admin editing
     const [showModal, setShowModal] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedAdminId, setSelectedAdminId] = useState(null);
-
     // Form state
     const [adminUsername, setAdminUsername] = useState("");
     const [adminPassword, setAdminPassword] = useState("");
-    const [adminGcash, setAdminGcash] = useState(""); 
+    const [adminGcash, setAdminGcash] = useState("");
     const [error, setError] = useState("");
+    // State for image preview modal
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     // Fetch admins from the database
     const fetchAdmins = async () => {
@@ -56,8 +57,14 @@ function Admins() {
         setSelectedAdminId(admin.id);
         setAdminUsername(admin.username);
         setAdminPassword(admin.password);
-        setAdminGcash(admin.gcash); // Set GCash image to the current value
+        setAdminGcash(admin.gcash);
         setShowModal(true);
+    };
+
+    // Handle image click
+    const handleImageClick = (imageUrl) => {
+        setSelectedImage(imageUrl);
+        setShowImageModal(true);
     };
 
     // Handle submit (both add & edit)
@@ -66,7 +73,6 @@ function Admins() {
         setError("");
 
         if (isEditMode) {
-            // Update existing admin
             const { error } = await supabase
                 .from("admins")
                 .update({ username: adminUsername, password: adminPassword, gcash: adminGcash })
@@ -76,10 +82,9 @@ function Admins() {
                 setError(error.message);
             } else {
                 setShowModal(false);
-                fetchAdmins(); // Refresh the admin list after editing
+                fetchAdmins();
             }
         } else {
-            // Add new admin
             const { error } = await supabase
                 .from("admins")
                 .insert([{ username: adminUsername, password: adminPassword, gcash: adminGcash }]);
@@ -88,10 +93,9 @@ function Admins() {
                 setError(error.message);
             } else {
                 setShowModal(false);
-                fetchAdmins(); // Refresh the admin list after adding
+                fetchAdmins();
             }
         }
-
         setLoading(false);
     };
 
@@ -108,23 +112,18 @@ function Admins() {
             console.error("❌ Error deleting admin:", error.message);
         } else {
             console.log("✅ Admin deleted successfully");
-            setFetchedAdmins((prevAdmins) => prevAdmins.filter(admin => admin.id !== id)); // Update state locally
+            setFetchedAdmins((prevAdmins) => prevAdmins.filter(admin => admin.id !== id));
         }
         setLoading(false);
     };
 
     const handleSortChange = (event) => {
-        const selectedSortOrder = event.target.value; // Get the selected sort order
-        setSortOrder(selectedSortOrder); // Update the sort order state
-
+        const selectedSortOrder = event.target.value;
+        setSortOrder(selectedSortOrder);
         const sortedAdmins = [...fetchedAdmins].sort((a, b) => {
-            // Sort based on the selected order
-            return selectedSortOrder === 'ascending'
-                ? a.id - b.id
-                : b.id - a.id;
+            return selectedSortOrder === 'ascending' ? a.id - b.id : b.id - a.id;
         });
-
-        setFetchedAdmins(sortedAdmins); // Update the admins with the sorted list
+        setFetchedAdmins(sortedAdmins);
     };
 
     return (
@@ -145,7 +144,7 @@ function Admins() {
                             id="sortOrder"
                             value={sortOrder}
                             onChange={handleSortChange}
-                            className="bg-blue-500 text-white font-bold rounded py-2 "
+                            className="bg-blue-500 text-white font-bold rounded py-2"
                         >
                             <option value="ascending">Ascending</option>
                             <option value="descending">Descending</option>
@@ -172,14 +171,13 @@ function Admins() {
                                         <td className="p-2 border border-gray-500 text-center align-middle">{admin.id}</td>
                                         <td className="p-2 border border-gray-500 text-center align-middle">{admin.username}</td>
                                         <td className="p-2 border border-gray-500 text-center align-middle">{admin.password}</td>
-                                        <td className="p-2 border border-gray-500">
-                                            <div className="flex justify-center items-center">
-                                                <img
-                                                    src={admin.gcash}
-                                                    className="w-[7rem] h-[7rem] cursor-pointer object-cover rounded-sm"
-                                                    alt="GCash QR"
-                                                />
-                                            </div>
+                                        <td className="p-2 border border-gray-500 text-center align-middle">
+                                            <p 
+                                                className="text-blue-400 hover:text-blue-600 cursor-pointer"
+                                                onClick={() => handleImageClick(admin.gcash)}
+                                            >
+                                                Image
+                                            </p>
                                         </td>
                                         <td className="p-2 border border-gray-500">
                                             <div className="flex justify-center items-center gap-4">
@@ -203,7 +201,7 @@ function Admins() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="3" className="text-center p-2">No admins found</td>
+                                    <td colSpan="5" className="text-center p-2">No admins found</td>
                                 </tr>
                             )}
                         </tbody>
@@ -221,7 +219,6 @@ function Admins() {
                             {error && <p className="text-red-500">{error}</p>}
                             
                             <div className="space-y-4">
-                                {/* Username Field */}
                                 <div>
                                     <h1 className="text-white text-md font-bold mb-1">Username</h1>
                                     <input
@@ -232,8 +229,6 @@ function Admins() {
                                         className="w-full p-2 border rounded mb-2"
                                     />
                                 </div>
-
-                                {/* Password Field */}
                                 <div>
                                     <h1 className="text-white text-md font-bold mb-1">Password</h1>
                                     <input
@@ -244,13 +239,11 @@ function Admins() {
                                         className="w-full p-2 border rounded mb-2"
                                     />
                                 </div>
-
-                                {/* GCash Image Field */}
                                 <div>
                                     <h1 className="text-white text-md font-bold mb-1">GCash</h1>
                                     <div className="flex flex-col items-center">
                                         <img
-                                            src={adminGcash || 'https://via.placeholder.com/112'} // Fallback image
+                                            src={adminGcash || 'https://via.placeholder.com/112'}
                                             className="h-[7rem] w-[7rem] object-cover rounded cursor-pointer mb-2"
                                             alt="GCash QR Code"
                                             onClick={() => document.getElementById('gcashInput').click()}
@@ -279,7 +272,6 @@ function Admins() {
                                 </div>
                             </div>
 
-                            {/* Buttons */}
                             <div className="flex justify-end space-x-2 mt-4">
                                 <button
                                     onClick={() => setShowModal(false)}
@@ -293,6 +285,27 @@ function Admins() {
                                     className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
                                 >
                                     {loading ? "Saving..." : isEditMode ? "Update" : "Add"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Image Preview Modal */}
+                {showImageModal && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+                        <div className="bg-slate-800 p-6 rounded-lg shadow-lg">
+                            <img
+                                src={selectedImage}
+                                className="max-w-[90vw] max-h-[90vh] object-contain rounded"
+                                alt="GCash QR Preview"
+                            />
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    onClick={() => setShowImageModal(false)}
+                                    className="bg-gray-400 hover:bg-gray-600 text-white py-2 px-4 rounded"
+                                >
+                                    Close
                                 </button>
                             </div>
                         </div>
