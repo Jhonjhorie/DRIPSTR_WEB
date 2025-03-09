@@ -71,8 +71,8 @@ function SideBar() {
   return (
     <div className="relative flex  md:mr-0" ref={navbarRef}>
       <div
-        className="dropdown dropdown-bottom dropdown-end bg-slate-100 shadow-md border-2 border-primary-color 
-    shadow-primary-color h-12 w-20 mt-2 rounded-md mr-16 "
+        className="dropdown  dropdown-bottom dropdown-end bg-slate-100 shadow-md border-2 border-primary-color 
+    shadow-primary-color h-12 w-20 mt-2 rounded-md -ml-36 "
       >
         {shopImageUrl ? (
           <img

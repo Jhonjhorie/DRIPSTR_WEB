@@ -933,7 +933,7 @@ function Products() {
       </div>
       {/* Add Advertisement Modal */}
       {isModalOpenAds && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
           <div className="bg-white relative rounded-md p-5 h-auto w-full md:w-3/4 pt-2 lg:w-1/2 m-2 md:m-0 auto">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
@@ -982,7 +982,7 @@ function Products() {
                   </div>
                 </div>
               </div>
-              <div className="w-[180px] h-2/3 md:w-full md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
+              <div className="w-full h-2/3 md:w-full md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
                 <div className="bg-slate-100 h-[200px] md:h-full rounded-sm shadow-md place-items-center flex place-content-center">
                   {imageSrcAds ? (
                     <img
@@ -999,13 +999,13 @@ function Products() {
 
             <div className="flex justify-between w-full">
               <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                 onClick={handleCloseModalAD}
               >
-                Close
+                Cancel
               </button>
               <button
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center justify-center gap-2"
+                 className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                 onClick={handleAddAd}
                 disabled={loading}
               >
@@ -1014,7 +1014,7 @@ function Products() {
                     <span className="loading loading-dots loading-sm"></span>
                   </>
                 ) : (
-                  "Add"
+                  "Confirm"
                 )}
               </button>
             </div>
@@ -1187,10 +1187,10 @@ function Products() {
       {selectedItem && (
         <div
           onClick={() => setSelectedItem(false)}
-          className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
           <div onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-lg  md:w-1/2 h-2/3 w-full ">
-            <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 w-full rounded-t-md  " />
+            className="bg-white rounded-lg  md:w-1/2 h-3/4 -mt-14 md:mt-0 md:h-2/3 w-full ">
+            <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 w-full rounded-t-md  " />
             <div className=" flex justify-between items-center pr-2 ">
               <div className="text-custom-purple font-semibold iceland-regular text-2xl p-2">
                 ITEM INFORMATION
@@ -1738,14 +1738,14 @@ function Products() {
             <div className="flex justify-between mt-2">
               <button
                 onClick={() => setIsViewModalOpen(false)}
-                className="duration-200  bg-custom-purple glass hover:bg-primary-color text-white  px-2 py-1 rounded"
+                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
               >
                 Close
               </button>
 
               <button
                 onClick={handleDeleteAd}
-                className="duration-200  hover:bg-red-700 glass text-white bg-red-500 px-2 py-1 rounded"
+                className="duration-200  hover:bg-red-700  text-slate-900 bg-red-500 px-2 py-1 rounded"
               >
                 Delete
               </button>

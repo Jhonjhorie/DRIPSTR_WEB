@@ -106,7 +106,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
   return (
     <div
-      className={`border relative rounded-lg p-4 shadow-md mb-4 ${
+      className={`border relative rounded-lg p-4 shadow-md mb-4  ${
         order.shipping_status === "Cancel"
           ? "bg-slate-300"
           : order.shipping_status === "Delivered"
@@ -114,20 +114,20 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           : "bg-white"
       }`}
     >
-      <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
+      <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md "></div>
       <h2 className="text-lg font-bold text-slate-900">Order #{order.id}</h2>
-      <div className="w-full flex gap-2">
+      <div className="w-full md:flex gap-2">
         {/* Product Details */}
         <div className="w-full h-auto">
-          <div className="flex gap-4 mt-3">
-            <div className="p-1 rounded-md shadow-md h-36 w-40 bg-slate-800">
+          <div className="md:flex gap-4 mt-3">
+            <div className="p-1 rounded-md place-self-center shadow-md h-36 w-40 bg-slate-800">
               <img
                 src={order.variantImg || "placeholder.jpg"}
                 alt={order.variantName || "Product Image"}
                 className="h-full bg-slate-900 w-full object-cover rounded-md"
               />
             </div>
-            <div className="w-full h-auto">
+            <div className="w-full h-auto mt-2 md:mt-0">
               <p className="text-sm text-custom-purple">
                 Product:{" "}
                 <span className="font-medium">{order.productName}</span>
@@ -258,7 +258,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             Shipping method:{" "}
             <span className="font-medium">{order.shipping_method}</span>
           </p>
-          <p className="text-xl font-semibold absolute bottom-0 right-0 text-yellow-600">
+          <p className="text-xl font-semibold md:absolute bottom-0 right-0 text-yellow-600">
             Total: ₱
             {order.final_price || order.total_price + order.shipping_fee}
           </p>

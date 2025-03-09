@@ -222,7 +222,7 @@ function Account() {
   };
 
   return (
-    <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar  md:flex">
+    <div className="h-full w-full  bg-slate-300 md:flex">
       <div className="absolute mx-3 right-0 z-10">
         <SideBar />
       </div>

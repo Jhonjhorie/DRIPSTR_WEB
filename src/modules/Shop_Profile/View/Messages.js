@@ -325,15 +325,15 @@ function Messages() {
 
 
   return (
-    <div className="h-full w-full overflow-y-scroll bg-slate-300 custom-scrollbar ">
+    <div className="h-full w-full bg-slate-300  ">
       <div className="absolute mx-3 right-0 z-20">
         <SideBar />
       </div>
 
       <div className="w-full h-full overflow-hidden bg-slate-300 md:px-10 lg:px-16">
-        <div className="w-full h-full bg-slate-100 flex">
+        <div className="w-full h-full bg-slate-100 md:flex ">
           {/* Left Sidebar with Customer Data */}
-          <div className="w-2/5 bg-gradient-to-br relative from-violet-500 to-fuchsia-500 p-1 h-auto shadow-black">
+          <div className="md:w-2/5 w-full bg-gradient-to-br relative from-violet-500 to-fuchsia-500 p-1 h-auto shadow-black">
             <div className="text-2xl font-semibold p-2 py-5 text-white flex items-center justify-between">
               <label>Messages</label>
               <box-icon
@@ -342,7 +342,7 @@ function Messages() {
                 name="message-square-dots"
               />
             </div>
-            <div className="h-[500px] overflow-hidden overflow-y-scroll rounded-md bg-slate-100 bg-opacity-40 glass shadow-black w-full shadow-inner pt-2 pl-2">
+            <div className="h-[500px] overflow-hidden overflow-y-scroll rounded-md bg-slate-100 bg-opacity-40 glass shadow-black w-full shadow-inner md:pt-2 p-2 md:p-0 md:pl-2">
               {messages.map((message, index) => (
                 <div
                   key={index}
@@ -390,23 +390,23 @@ function Messages() {
             </div>
           </div>
           {/* Right Chat Window */}
-          <div className="w-full relative bg-gradient-to-bl from-violet-500 to-fuchsia-500 h-full">
+          <div className="w-full absolute md:top-0 top-32 md:relative bg-gradient-to-bl from-violet-500 to-fuchsia-500 md:h-full">
             {/* Background Images */}
-            <div className="absolute z-10 top-0 right-0">
+            <div className="hidden md:absolute md:block  z-10 top-0 right-0">
               <img
                 src={streetBG}
                 className="drop-shadow-customWhite h-full w-full object-cover rounded-full"
                 sizes="100%"
               />
             </div>
-            <div className="absolute z-0 bottom-0 left-0">
+            <div className="hidden md:absolute md:block z-0 bottom-0 left-0">
               <img
                 src={starBG}
                 className="drop-shadow-customWhite h-full w-full object-cover rounded-full"
                 sizes="100%"
               />
             </div>
-            <div className="absolute top-32 z-0">
+            <div className="hidden md:absolute md:block  top-32 z-0">
               <img
                 src={drp}
                 className="drop-shadow-customWhite h-full w-full object-cover rounded-full"
@@ -415,7 +415,7 @@ function Messages() {
             </div>
             {selectedUser && (
               <div
-                className={`w-full h-full relative z-10 bg-custom-purple glass flex ${
+                className={`w-full md:h-full relative z-10 md:mb-0 mb-16 bg-custom-purple glass flex ${
                   isClosing ? "fade-out" : "fade-in"
                 }`}
               >
@@ -435,7 +435,7 @@ function Messages() {
                     </div>
                     <div
                       onClick={handleCloseChat}
-                      className="hover:scale-95 duration-300 pr-20 cursor-pointer rounded-md p-1 justify-center flex"
+                      className="hover:scale-95 duration-300 md:pr-20 cursor-pointer rounded-md p-1 justify-center flex"
                     >
                       <box-icon name="message-square-x" color="#000"></box-icon>
                     </div>

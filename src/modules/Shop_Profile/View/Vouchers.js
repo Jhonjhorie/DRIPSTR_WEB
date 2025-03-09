@@ -139,7 +139,14 @@ function Vouchers() {
         : [...prev, follower]
     );
   };
-
+  // Function to toggle "Select All"
+  const toggleSelectAll = () => {
+    if (selectedFollowers.length === sortedFollowers.length) {
+      setSelectedFollowers([]);
+    } else {
+      setSelectedFollowers([...sortedFollowers]);
+    }
+  };
   const toggleSortOrder = () => {
     setSortOrder((prev) => (prev === "newest" ? "oldest" : "newest"));
   };
@@ -148,15 +155,6 @@ function Vouchers() {
       ? new Date(b.created_at) - new Date(a.created_at)
       : new Date(a.created_at) - new Date(b.created_at);
   });
-
-  // Function to toggle "Select All"
-  const toggleSelectAll = () => {
-    if (selectedFollowers.length === sortedFollowers.length) {
-      setSelectedFollowers([]);
-    } else {
-      setSelectedFollowers(sortedFollowers.map((f) => f.acc_id));
-    }
-  };
 
   // Onsubmit new shop Vouchers
   const handleCreateVoucher = async () => {
@@ -272,7 +270,7 @@ function Vouchers() {
       const vouchersToInsert = validSelectedFollowers.flatMap((f) =>
         selectedVouchers.map((voucher) => ({
           acc_id: f.acc_id,
-          isClaim: false,
+          isClaim: true,
           isUsed: false,
           vouch_MID: voucher.id,
           merchant_Id: selectedShopId,
@@ -868,10 +866,15 @@ function Vouchers() {
                     className="mb-2 text-custom-purple"
                   >
                     <span className="text-violet-600 font-semibold ">
-                      "{voucher.label}"
+                      "{voucher.name}"
                     </span>{" "}
-                    {voucher.items_off}% OFF - Minimum Spend: ₱
-                    {voucher.min_spend}
+                    {Number(voucher.item_Off).toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
+                    % OFF - Minimum Spend: ₱
+                    {Number(voucher.min_Spend).toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
                   </li>
                 ))
               ) : (
@@ -965,7 +968,7 @@ function Vouchers() {
 
       {showAlertSent && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-          <div className="absolute -top-52 left-28 -z-10 justify-items-center content-center">
+          <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={successEmote}
@@ -997,7 +1000,7 @@ function Vouchers() {
       )}
       {showAlertSentNosel && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-          <div className="absolute -top-52 left-28 -z-10 justify-items-center content-center">
+          <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img
                 src={questionEmote}
@@ -1063,35 +1066,35 @@ function Vouchers() {
       {/* ALLERTS DELETE VOUCHERS */}
       {showAlertDel && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-          <div className="absolute -top-28 left-28 -z-10 justify-items-center content-center">
-            <div className="mt-10 ">
-              <img
-                src={successEmote}
-                alt="Success Emote"
-                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-              />
-            </div>
-          </div>
-          <div
-            role="alert"
-            className="alert z-20 alert-success shadow-md flex items-center p-4  bg-red-600 text-slate-50 font-semibold rounded-md"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 shrink-0 stroke-current"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span>Voucher Deleted</span>
+        <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
+          <div className="mt-10 ">
+            <img
+              src={successEmote}
+              alt="Success Emote"
+              className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+            />
           </div>
         </div>
+        <div
+          role="alert"
+          className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-slate-50 font-semibold rounded-md"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="h-6 w-6 shrink-0 stroke-current"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <span>Selected Voucher Deleted!</span>
+        </div>
+      </div>
       )}
       {/* ALLERTS DELETE VOUCHERS */}
       {showNoSelectedVoucher && (
