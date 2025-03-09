@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar";
 import { Link } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import ProfilePictureUploadModal from "../components/ProfilePictureUploadModal";
+import hmmmEmote from '../../../assets/emote/hmmm.png';  // Add this import at the top
 
 import useUserData from "../Model/User_Account_Model";
 
@@ -96,184 +97,170 @@ const UserProfile = () => {
 
   return (
     <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
-      <div className="sticky h-full ">
+      <div className="sticky h-full">
         <Sidebar />
       </div>
 
       <div className="flex-1 p-4 px-9">
-        {" "}
-        <h1 className="text-xl font-bold text-gray-800 mb-4">My Profile</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+            <i className="fas fa-user-circle mr-3 text-primary-color"></i>
+            My Profile
+          </h1>
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-2 text-primary-color hover:text-primary-color/80 transition-colors"
+            >
+              <i className="fas fa-edit"></i>
+              <span>Edit Profile</span>
+            </button>
+          )}
+        </div>
+
         {loading ? (
-          <div className="flex flex-col mt-36 justify-center items-center">
-            <img src="/emote/hmmm.png" alt="Loading..." className="w-50 h-50" />
-            <label>Loading...</label>
+          <div className="flex mt-36 flex-col h-100 justify-center items-center">
+            <img src={hmmmEmote} alt="Loading..." className="w-24 h-24 mb-4 animate-bounce" />
+            <p className="mt-4 text-gray-600">Loading your profile...</p>
           </div>
         ) : (
-          <div className="bg-slate-200 relative ">
-            <div className=" w-full  bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
-              {" "}
-            </div>
-
-            <div className="bg-gray-100 p-4 rounded-lg shadow">
-              <div className="">
-                <div className="flex justify-between mb-4">
-                  <div className="flex items-center">
-                    <img
-                      src={profile.profile_picture || "/default-avatar.png"}
-                      alt="Profile"
-                      className="w-24 h-24 rounded-full border-2 object-cover border-gray-300 mr-2 cursor-pointer"
-                      onClick={() => setIsModalOpen(true)}
-                    />
-                    <div>
-                      {isEditing ? (
-                        <input
-                          type="text"
-                          name="full_name"
-                          value={profile.full_name}
-                          onChange={handleInputChange}
-                          placeholder="Enter your Full Namer"
-                          className="text-lg bg-slate-200 text-gray-700 border border-gray-300 rounded-md p-2 w-full"
-                        />
-                      ) : (
-                        <h2 className="text-lg text-gray-900 font-semibold">
-                          {profile.full_name}
-                        </h2>
-                      )}
-                      <button
-                        className="text-blue-600 font-medium"
-                        onClick={() => setIsModalOpen(true)}
-                      >
-                        Change Picture
-                      </button>
-                    </div>
-                  </div>
-                  <div className="align-middle justify-center">
-                    {/*<Link to="../Avatar">
-                      <button className="text-blue-600 font-medium hover:underline hover:text-blue-800">
-                        See Avatar
-                      </button>
-                    </Link>*/}
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                    Contact Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="text-gray-600 font-medium block">
-                        Email Address
-                      </label>
-                      <div className="flex justify-between rounded-md w-full">
-                        {isEditing ? (
-                          <input
-                            type="email"
-                            name="email"
-                            value={profile.email}
-                            onChange={handleInputChange}
-                            className="text-lg text-gray-900 border p-2 border-gray-300 bg-slate-200 rounded-md w-full"
-                          />
-                        ) : (
-                          <p className="text-lg text-gray-900">
-                            {profile.email}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-gray-600 font-medium block">
-                        Mobile
-                      </label>
-                      <div className="flex items-center justify-between">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            name="mobile"
-                            value={profile.mobile}
-                            onChange={handleInputChange}
-                            placeholder="Enter your mobile number"
-                            className="text-lg bg-slate-200 text-gray-700 border border-gray-300 rounded-md p-2 w-full"
-                          />
-                        ) : (
-                          <p className="text-lg text-gray-900">
-                            {profile.mobile}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                    Personal Information
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="text-gray-600 font-medium block">
-                        Birthday
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="date"
-                          name="birthday"
-                          value={profile.birthday}
-                          onChange={handleInputChange}
-                          className="text-lg bg-slate-200 text-gray-700 border border-gray-300 rounded-md p-2 w-full"
-                        />
-                      ) : (
-                        <p className="text-lg text-gray-900">
-                          {profile.birthday}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="text-gray-600 font-medium block">
-                        Gender
-                      </label>
-                      {isEditing ? (
-                        <select
-                          name="gender"
-                          value={profile.gender}
-                          onChange={handleInputChange}
-                          className="text-lg text-gray-700 border bg-slate-200 border-gray-300 rounded-md p-2 w-full"
-                        >
-                          <option value="">Select Gender</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      ) : (
-                        <p className="text-lg text-gray-900">
-                          {profile.gender}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 justify-end mt-10">
-                  {isEditing && (
-                    <button
-                      className="bg-gray-400 text-white font-medium py-2 px-4 rounded-md"
-                      onClick={handleCancel}
-                    >
-                      Cancel
-                    </button>
-                  )}
+          <div className="bg-white p-6 rounded-xl relative shadow-md hover:shadow-lg transition-shadow duration-300">
+            <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-xl"></div>
+            
+            <div className="space-y-6">
+              {/* Profile Header */}
+              <div className="flex items-start gap-6">
+                <div className="relative group">
+                  <img
+                    src={profile.profile_picture || "/default-avatar.png"}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-gray-50 shadow-md transition-transform group-hover:scale-105"
+                    onClick={() => setIsModalOpen(true)}
+                  />
                   <button
-                    className="bg-blue-600 text-white font-medium py-2 px-4 rounded-md"
-                    onClick={
-                      isEditing ? updateProfile : () => setIsEditing(true)
-                    }
+                    onClick={() => setIsModalOpen(true)}
+                    className="absolute bottom-0 right-0 bg-primary-color text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    {isEditing ? "Save Changes" : "Edit"}
+                    <i className="fas fa-camera text-sm"></i>
                   </button>
                 </div>
+                <div>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="full_name"
+                      value={profile.full_name}
+                      onChange={handleInputChange}
+                      placeholder="Enter your Full Name"
+                      className="text-xl font-semibold bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-color focus:border-transparent outline-none mb-2"
+                    />
+                  ) : (
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                      {profile.full_name}
+                    </h2>
+                  )}
+                </div>
               </div>
+
+              {/* Contact Information */}
+              <div className="border-t border-gray-100 pt-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <i className="fas fa-address-card mr-2 text-primary-color"></i>
+                  Contact Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-600">Email Address</label>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        name="email"
+                        value={profile.email}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      />
+                    ) : (
+                      <p className="text-gray-800 bg-gray-50 px-4 py-2 rounded-lg">{profile.email}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-600">Mobile Number</label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="mobile"
+                        value={profile.mobile}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      />
+                    ) : (
+                      <p className="text-gray-800 bg-gray-50 px-4 py-2 rounded-lg">{profile.mobile}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Personal Information */}
+              <div className="border-t border-gray-100 pt-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <i className="fas fa-user mr-2 text-primary-color"></i>
+                  Personal Information
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-600">Birthday</label>
+                    {isEditing ? (
+                      <input
+                        type="date"
+                        name="birthday"
+                        value={profile.birthday}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      />
+                    ) : (
+                      <p className="text-gray-800 bg-gray-50 px-4 py-2 rounded-lg">{profile.birthday}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-600">Gender</label>
+                    {isEditing ? (
+                      <select
+                        name="gender"
+                        value={profile.gender}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    ) : (
+                      <p className="text-gray-800 bg-gray-50 px-4 py-2 rounded-lg">{profile.gender}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              {isEditing && (
+                <div className="flex gap-4 justify-end mt-8 pt-6 border-t border-gray-100">
+                  <button
+                    onClick={handleCancel}
+                    className="px-6 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={updateProfile}
+                    className="px-6 py-2 bg-primary-color text-white rounded-lg hover:bg-primary-color/90 transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

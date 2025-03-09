@@ -164,16 +164,18 @@ const Orders = () => {
   }
 
   return (
-    <div className="p-4 bg-slate-200 flex flex-row h-screen overflow-hidden">
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
       <div className="sticky h-full">
         <Sidebar />
       </div>
 
-      <div className="px-5 flex-1 flex flex-col h-full">
+      <div className="flex-1 p-4 px-9">
         {/* Fixed Header Section */}
         <div className="flex-none">
-          <h1 className="text-xl font-bold text-gray-800 mb-6">My Orders</h1>
-          
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+          <i className="fas fa-shopping-bag mr-3 text-primary-color"></i>
+          My Orders
+        </h1>          
           {/* Navigation Tabs */}
           <div className="tabs mb-1 border-b border-gray-300 flex flex-row justify-around">
             {tabs.map((tab) => (

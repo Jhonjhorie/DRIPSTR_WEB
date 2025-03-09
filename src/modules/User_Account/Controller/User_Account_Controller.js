@@ -15,7 +15,8 @@ import Avatar from '../View/Avatar';
 import CharacterCreation from '../View/CharacterCreation';  
 import Try from '../View/RPMCreateAvatar';
 import NotificationDemo from '../View/trynotif';
-  
+import MyVouchers from '../View/MyVouchers';
+
 const UserController = () => {
   return (
     <Routes>
@@ -34,6 +35,7 @@ const UserController = () => {
       <Route path="/Try" element={<Try />} />
       <Route path="/avatar" element={<Avatar />} />
       <Route path="/trynotif" element={<NotificationDemo />} />
+      <Route path="/vouchers" element={<MyVouchers />} />
 
     </Routes>
   );
