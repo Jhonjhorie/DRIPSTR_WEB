@@ -18,7 +18,7 @@ const ApplyVoucher = ({ profile, onClose, onSelectVouchers, price }) => {
   
       const { data: cusVoucherData, error: cusVoucherError } = await supabase
         .from("customer_vouchers")
-        .select("*, vouch:voucher_id (id, voucher_name, voucher_type, discount, expiration, condition)")
+        .select("*, vouch:voucher_id (id, voucher_name, voucher_type, discount, expiration, condition, isDeactivate)")
         .eq("acc_id", profile?.id)
         .eq("vouch.isDeactivate", false)
         .order("id", { ascending: false });
@@ -39,10 +39,15 @@ const ApplyVoucher = ({ profile, onClose, onSelectVouchers, price }) => {
         expirationDate.setHours(23, 59, 59, 999);
         return expirationDate >= today && cv.isClaim === true && cv.isUsed === false;
       });
+      const validVouchers2 = voucherData.filter((cv) => {
+        const expirationDate = new Date(cv.expiration);
+        expirationDate.setHours(23, 59, 59, 999);
+        return expirationDate >= today;
+      });
   
       const combinedVouchers = [
         ...validVouchers.map((cv) => ({ ...cv.vouch, isClaimed: cv.isClaim })),
-        ...voucherData.map((voucher) => ({ ...voucher, isClaimed: false })),
+        ...validVouchers2.map((voucher) => ({ ...voucher, isClaimed: false })),
       ];
   
       const sortedVouchers = combinedVouchers.sort((a, b) => {
@@ -176,7 +181,7 @@ const ApplyVoucher = ({ profile, onClose, onSelectVouchers, price }) => {
               (v) => v.id === voucher.id
             );
             const isClaimed = voucher.isClaimed;
-            const isProd = voucher.voucher_type === "Product";
+            const isProd = voucher.voucher_type == "Product" || voucher.voucher_type == "Products";
 
             return (
               <div

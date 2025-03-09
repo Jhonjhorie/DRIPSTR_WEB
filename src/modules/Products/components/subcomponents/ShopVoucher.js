@@ -14,9 +14,9 @@ const ShopVoucherStream = ({ profile, shop }) => {
     const fetchData = async () => {
       try {
         const { data: claimed2, error: claimed2Error } = await supabase
-          .from("customer_vouchers")
-          .select("vouch_MID, merch:merchant_Id(id, shop_name), isClaim, isUsed")
-          .eq("merch.id", shop.id)
+          .from("customer_shop_vouchers")
+          .select("voucher_id, merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
+          .eq("merchant_Id", shop.id)
           .eq("acc_id", profile?.id)
           .eq("isUsed", true)
           .eq("isClaim", true);
@@ -29,21 +29,20 @@ const ShopVoucherStream = ({ profile, shop }) => {
 
   let { data: voucherData, error: voucherError } = await supabase
   .from("merchant_Vouchers")
-  .select("*, merch:merchant_Id(id, shop_name)")
-  .eq("merch.id", shop.id)
+  .select("*, merchant_Id, merch:merchant_Id(id, shop_name)")
+  .eq("merchant_Id", shop.id)
   .order("id", { ascending: false });
 
 if (idsToExclude) {
-  voucherData = voucherData.filter((voucher) => !claimed2.some((cv) => cv.vouch_MID === voucher.id));
+  voucherData = voucherData.filter((voucher) => !claimed2.some((cv) => cv.voucher_id === voucher.id));
 }
 
 if (voucherError) throw voucherError;
 
-
         const { data: claimedData, error: claimedError } = await supabase
-          .from("customer_vouchers")
-          .select("vouch_MID, merch:merchant_Id(id, shop_name), isClaim, isUsed")
-          .eq("merch.id", shop.id)
+        .from("customer_shop_vouchers")
+        .select("voucher_id, merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
+        .eq("merchant_Id", shop.id)
           .eq("acc_id", profile?.id)
           .eq("isUsed", false)
           .eq("isClaim", true);
@@ -92,7 +91,7 @@ if (voucherError) throw voucherError;
     }
 
     const isAlreadyClaimed = claimedVouchers.some(
-      (cv) => cv.vouch_MID === voucherId && cv.isClaim
+      (cv) => cv.voucher_id === voucherId && cv.isClaim
     );
 
     if (isAlreadyClaimed) {
@@ -101,11 +100,11 @@ if (voucherError) throw voucherError;
     }
 
     try {
-      const { data, error } = await supabase.from("customer_vouchers").insert([
+      const { data, error } = await supabase.from("customer_shop_vouchers").insert([
         {
           acc_id: profile.id,
-          vouch_MID: voucherId,
-          merchant_Id: voucherId.merchant_Id,
+          voucher_id: voucherId,
+          merchant_Id: shop.id,
           isClaim: true,
           isUsed: false,
         },
@@ -124,9 +123,9 @@ if (voucherError) throw voucherError;
         if (voucherError) throw voucherError;
 
         const { data: claimedData, error: claimedError } = await supabase
-          .from("customer_vouchers")
-          .select("vouch_MID, merch:merchant_Id(id, shop_name), isClaim, isUsed")
-          .eq("merch.id", shop.id)
+        .from("customer_shop_vouchers")
+        .select("voucher_id, merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
+        .eq("merchant_Id", shop.id)
           .eq("acc_id", profile.id);
 
         if (claimedError) throw claimedError;
@@ -205,7 +204,7 @@ if (voucherError) throw voucherError;
         </div>
         {vouchers.map((voucher, index) => {
           const isClaimed = claimedVouchers.some(
-            (cv) => cv.vouch_MID === voucher.id && cv.isClaim
+            (cv) => cv.voucher_id === voucher.id && cv.isClaim
           );
 
           return (
@@ -231,7 +230,7 @@ if (voucherError) throw voucherError;
               >
                 <div className="w-full flex flex-col justify-start">
                   <h2 className="text-lg md:text-xl font-bold">
-                    {voucher.name}
+                    {voucher.voucher_name}
                   </h2>
                   <p className="text-xs text-slate-500">
                     Exp: {voucher.expiration}
@@ -239,10 +238,10 @@ if (voucherError) throw voucherError;
                 </div>
                 <div className="flex flex-col w-[50%] items-end">
                   <p className="text-[0.65rem] md:text-xs text-slate-500">
-                    Min: ₱{voucher.min_Spend}
+                    Min: ₱{voucher.condition}
                   </p>
                   <h3 className="text-lg md:text-2xl font-bold">
-                    ₱{voucher.item_Off}
+                    ₱{voucher.discount}
                   </h3>
                 </div>
                 <div className="justify-end z-50">

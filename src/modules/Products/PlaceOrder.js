@@ -28,6 +28,7 @@ function PlaceOrder() {
   const [shippingMethod, setShippingMethod] = useState("Standard");
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState([]);
+  const [shops, setShops] = useState([]);
   const [selectedPostcode, setSelectedPostcode] = useState("");
   const [shippingFee, setShippingFee] = useState(50);
   const [selectedVouchers, setSelectedVouchers] = useState([]);
@@ -118,10 +119,20 @@ function PlaceOrder() {
     }
   };
 
+  useEffect(() => {
+    if (!selectedItems || selectedItems.length === 0) return;
+  
+    const uniqueShops = Array.from(
+      new Map(selectedItems.map((item) => [item.prod.shop.id, item.prod.shop])).values()
+    );
+  
+    setShops(uniqueShops);
+  }, [selectedItems]); 
+
   const groupItemsByShop = (items) => {
     const grouped = {};
     items.forEach((item) => {
-      const shopName = item.prod.shop_Name;
+      const shopName = item.prod.shop.shop_name;
       if (!grouped[shopName]) {
         grouped[shopName] = {
           items: [],
@@ -268,6 +279,7 @@ function PlaceOrder() {
             shipping_status: "To prepare",
             voucher_used: isFirstShop && isFirstItemInShop ? voucherUsed : null,
             estimated_delivery: endDate,
+            shop_id: item.prod.shop.id,
           });
 
           isFirstItemInShop = false;
@@ -384,6 +396,7 @@ function PlaceOrder() {
           profile={profile}
           onClose={closeModalVoucher}
           price={totalPrice}
+         shops={shops}
           onSelectVouchers={handleSelectedVouchers}
         />
         <form method="dialog" className="modal-backdrop">
@@ -705,7 +718,7 @@ function PlaceOrder() {
                     <div
                       key={voucher.id}
                       className={`flex justify-between p-2 rounded border-l-4 ${
-                        voucher.voucher_type === "Product"
+                        voucher.voucher_type == "Product" || voucher.voucher_type == "Products"
                           ? "border-l-primary-color bg-primary-color/5"
                           : "border-l-green-600 bg-green-50"
                       }`}
