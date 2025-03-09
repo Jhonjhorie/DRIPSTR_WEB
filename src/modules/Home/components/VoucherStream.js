@@ -17,7 +17,7 @@ const VoucherStream = ({ profile }) => {
         today.setHours(0, 0, 0, 0);
         const { data: claimed2, error: claimed2Error } = await supabase
           .from("customer_vouchers")
-          .select("voucher_id, isClaim, isUsed")
+          .select("voucher_id, vouch:voucher_id (id, voucher_name, voucher_type, discount, expiration, condition, isDeactivate), isClaim, isUsed")
           .eq("acc_id", profile?.id)
           .eq("isUsed", true)
           .eq("isClaim", true);
@@ -56,6 +56,7 @@ const VoucherStream = ({ profile }) => {
           );
         });
 
+
         const sortedVouchers = validVouchers.sort((a, b) => {
           const aClaimed = claimedData.find((cv) => cv.voucher_id === a.id);
           const bClaimed = claimedData.find((cv) => cv.voucher_id === b.id);
@@ -64,6 +65,8 @@ const VoucherStream = ({ profile }) => {
           if (bClaimed?.isClaim && !bClaimed?.isUsed) return -1;
           return 0;
         });
+
+        
 
         setVouchers(sortedVouchers);
         setClaimedVouchers(claimedData);
@@ -121,16 +124,25 @@ const VoucherStream = ({ profile }) => {
           .eq("acc_id", profile.id);
 
         if (claimedError) throw claimedError;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
         const validVouchers = voucherData.filter((voucher) => {
+          const expirationDate = new Date(voucher.expiration);
+          expirationDate.setHours(23, 59, 59, 999);
+
           const claimedVoucher = claimedData.find(
             (cv) => cv.voucher_id === voucher.id
           );
+
           return (
-            !claimedVoucher ||
-            !(claimedVoucher.isClaim && claimedVoucher.isUsed)
+            expirationDate >= today &&
+            (!claimedVoucher ||
+              !(claimedVoucher.isClaim && claimedVoucher.isUsed))
           );
         });
+
+        
 
         const sortedVouchers = validVouchers.sort((a, b) => {
           const aClaimed = claimedData.find((cv) => cv.voucher_id === a.id);
@@ -172,6 +184,11 @@ const VoucherStream = ({ profile }) => {
 
   return (
     <div className="w-full lg:min-w-[28.25rem] flex-1 rounded-md mx-2 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
+      <div className="absolute -top-[1.2rem] md:-top-[1.3rem] left-4 bg-stone-600 h-6 md:h-6 rounded-t-lg  items-center flex justify-end ">
+          <p className=" text-[1.2rem] md:text-[1.5rem] text-white drop-shadow-md font-bold px-2 ">
+            Vouchers
+          </p>
+        </div>
       {showAlert && (
         <div className="w-[95%] absolute -top-60 justify-center flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
           <AlertDialog
@@ -188,10 +205,11 @@ const VoucherStream = ({ profile }) => {
       >
         &lt;
       </button>
-      <div className="w-full flex gap-1 bg-stone-900 bg-opacity-50 rounded-lg p-0 h-[52px] md:h-[62px] justify-start items-center overflow-hidden">
-        <div className="bg-slate-100 rounded-r-lg">
+      <div className="w-full flex gap-1  bg-stone-600  rounded-lg p-0 h-[52px] md:h-[62px] justify-start items-center overflow-hidden">
+
+        <div className="bg-slate-100 rounded-r-lg z-10">
           <p className="w-[5rem] md:w-[6rem] lg:w-[7rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
-            Claim Vouchers
+            Claim
           </p>
         </div>
         {vouchers.map((voucher, index) => {
@@ -265,9 +283,9 @@ const VoucherStream = ({ profile }) => {
             </div>
           );
         })}
-        <div className="bg-secondary-color text-white absolute right-0.5 top-2.5 rounded-l-lg">
-          <p className="w-[5rem] md:w-[6rem] lg:w-[7rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
-            Start Shopping
+        <div className="bg-secondary-color text-white absolute right-0.5 top-2.5 z-10 rounded-l-lg">
+          <p className="w-[5rem] md:w-[6rem] lg:w-[6.8rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
+            Shop
           </p>
         </div>
       </div>

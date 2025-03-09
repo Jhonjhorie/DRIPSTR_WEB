@@ -13,6 +13,7 @@ const ShopVoucherStream = ({ profile, shop }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        
         const { data: claimed2, error: claimed2Error } = await supabase
           .from("customer_shop_vouchers")
           .select("voucher_id, merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
@@ -179,7 +180,12 @@ if (voucherError) throw voucherError;
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="w-full lg:min-w-[28.25rem] flex-1 rounded-md mx-2 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
+    <div className="w-full lg:min-w-[28.25rem] flex-1 rounded-md mx-1 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
+    <div className="absolute -top-[1.2rem] md:-top-[1.2rem] left-4 bg-stone-600 h-5 rounded-t-lg  items-center flex justify-end ">
+        <p className=" text-[1rem] md:text-[1.2rem] text-white drop-shadow-md font-bold px-2 ">
+          Vouchers
+        </p>
+      </div>
       {showAlert && (
         <div className="w-[95%] absolute -top-60 justify-center flex flex-col gap-2 px-2 lg:px-8 h-[80%] py-4">
           <AlertDialog
@@ -192,14 +198,14 @@ if (voucherError) throw voucherError;
       )}
       <button
         onClick={handlePrev}
-        className="absolute -left-5 sm:top-2.5 top-1.5 transform bg-slate-200 p-2 rounded-lg z-10"
+        className="absolute -left-5 sm:top-2.5 top-1.5 transform bg-slate-100 p-2 rounded-lg z-10"
       >
         &lt;
       </button>
-      <div className="w-full flex gap-1 bg-stone-900 bg-opacity-50 rounded-lg p-0 h-[52px] md:h-[62px] justify-start items-center overflow-hidden">
-        <div className="bg-slate-100 rounded-r-lg">
-          <p className="w-[5rem] md:w-[6rem] lg:w-[7rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
-            Claim Vouchers
+      <div className="w-full mr-2.5 sm:mr-0 flex gap-1  bg-stone-600  rounded-lg p-0 h-[52px] md:h-[62px] justify-start items-center overflow-hidden">
+      <div className="bg-slate-100 rounded-r-lg z-10">
+          <p className="w-[5.5rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
+            Claim
           </p>
         </div>
         {vouchers.map((voucher, index) => {
@@ -232,9 +238,7 @@ if (voucherError) throw voucherError;
                   <h2 className="text-lg md:text-xl font-bold">
                     {voucher.voucher_name}
                   </h2>
-                  <p className="text-xs text-slate-500">
-                    Exp: {voucher.expiration}
-                  </p>
+               
                 </div>
                 <div className="flex flex-col w-[50%] items-end">
                   <p className="text-[0.65rem] md:text-xs text-slate-500">
@@ -270,16 +274,16 @@ if (voucherError) throw voucherError;
             </div>
           );
         })}
-        <div className="bg-secondary-color text-white absolute right-0.5 top-2.5 rounded-l-lg">
-          <p className="w-[5rem] md:w-[6rem] lg:w-[7rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
-            Start Shopping
+          <div className="bg-secondary-color text-white absolute right-0.5 top-2.5 z-10 rounded-l-lg">
+          <p className="w-[5.85rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
+            Shop
           </p>
         </div>
       </div>
 
       <button
         onClick={handleNext}
-        className="absolute -right-5 sm:top-2.5 top-1.5  transform bg-slate-200 p-2 rounded-lg z-10"
+        className="absolute -right-2 lg:-right-5 sm:top-2.5 top-1.5  transform bg-slate-100 p-2 rounded-lg z-10"
       >
         &gt;
       </button>

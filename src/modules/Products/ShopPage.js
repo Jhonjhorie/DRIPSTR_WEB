@@ -267,7 +267,7 @@ function ShopPage() {
         </div>
 
         {/* Ad Banner Section */}
-         <div className="my-6 mx-auto w-full  h-[10rem]">
+         <div className="my-6 mx-1 md:mx-auto w-full h-[10rem]">
           {/* <AdsCarousel ads={shop.shop_Ads}/> */}
         {/* Fallback if you don't have the component: */}
         {/* <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center text-gray-500 border border-dashed border-gray-300">
