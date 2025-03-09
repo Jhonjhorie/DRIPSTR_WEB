@@ -6,21 +6,19 @@ import { faAnglesDown, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import AuthModal from "../../shared/login/Auth";
 // Data
 
-import useProducts from "../Products/hooks/useProducts";
+import useMediaQueryChecker from "../../shared/hooks/useMediaQueryChecker";
 
 function LandingPage() {
   const [showAbout, setShowAbout] = useState(true);
   const [showArt, setShowArt] = useState(false);
   const [showMer, setShowMer] = useState(false);
+  const [actionLog, setActionLog] = useState("");
    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+   const isMobile = useMediaQueryChecker();
   const navigate = useNavigate();
 
   const handleShow = (action) => {
     if (action === "login") {
-      setIsAuthModalOpen(true)
-    }else if (action === "loginArtist") {
-      setIsAuthModalOpen(true)
-    }else if (action === "loginMerchant") {
       setIsAuthModalOpen(true)
     } 
     else if (action === "shop") {
@@ -44,8 +42,10 @@ function LandingPage() {
     if (action === "login") {
       setIsAuthModalOpen(true)
     }else if (action === "loginArtist") {
+      setActionLog(action)
       setIsAuthModalOpen(true)
     }else if (action === "loginMerchant") {
+      setActionLog(action)
       setIsAuthModalOpen(true)
     } 
     // navigate(`/login`, { state: { action } });
@@ -56,11 +56,12 @@ function LandingPage() {
          {isAuthModalOpen && (
         <AuthModal
           isOpen={isAuthModalOpen}
+          actionLog={actionLog}
           onClose={() => setIsAuthModalOpen(false)}
         />
       )}
       {/* Hero Section */}
-      <div className="flex group flex-col-reverse gap-8 md:gap-0 md:flex-row overflow-hidden items-center justify-center px-1 lg:p-4 bg-slate-50 ">
+      <div className="flex group flex-col-reverse gap-8 md:gap-0 md:flex-row overflow-hidden items-center justify-center px-1 lg:p-4 relative bg-slate-50 ">
         <img
           src={require("@/assets/images/home/dripMasa.png")}
           alt="No Images Available"
@@ -69,28 +70,28 @@ function LandingPage() {
         <img
           src={require("@/assets/images/home/DrpTxt.png")}
           alt="No Images Available"
-          className="absolute object-none mb-2 mt-1 w-full z-10 h-[400px] drop-shadow-customViolet right-10 group-hover:right-80 scale-100 group-hover:scale-50 group-hover:drop-shadow-customWhite transition-all duration-300"
+          className="absolute object-contain mb-2 mt-1 w-full z-10 h-[35vw] sm:h-[25vw] max-h-[400px] drop-shadow-customViolet right-0 sm:right-10 group-hover:right-[30rem] md:group-hover:right-80 scale-100 group-hover:scale-50 group-hover:drop-shadow-customWhite transition-all duration-300"
         />
-        <div className="absolute font-[iceland] text-white top-10 text-xl duration-300 transition-all group-hover:text-3xl tracking-[2rem] text-center">
+        <div className="absolute font-[iceland] text-white top-5 sm:top-10 text-xl duration-300 transition-all group-hover:text-3xl tracking-[2rem] text-center">
           <h1>WELCOME</h1>
           <h1>TO</h1>
         </div>
-        <div className="absolute right-40 h-40 w-96 overflow-hidden flex">
-          <p className="font-[iceland] absolute right-[-10rem] w-96 text-white group-hover:right-0 transition-all opacity-0 group-hover:opacity-100 duration-300">
+        <div className="absolute right-10 sm:right-40 h-40 w-96 overflow-hidden flex">
+          <p className="font-[iceland] absolute right-[-10rem] w-96 bg-stone-800 sm:bg-opacity-0 bg-opacity-80 h-40 text-white  group-hover:right-0 transition-all opacity-0 group-hover:opacity-100 duration-300 p-2 rounded-lg">
             <span className="font-bold text-lg text-primary-color">
-              DRIPSTR
-            </span>{" "}
-            provides a unique and immersive online shopping experience by
+              DRIPSTR 
+            </span> {" "}
+             provides a unique and immersive online shopping experience by
             integrating 3D apparel visualization and avatar-based sizing to
             ensure the perfect fit and style. Whether you’re looking for
             custom-designed apparel or exclusive digital assets, DRIPSTR makes
             shopping seamless and enjoyable.
           </p>
         </div>
-        <div className="h-40 w-1 group-hover:drop-shadow-customViolet drop-shadow-custom duration-300 transition-all bg-white absolute right-36 rounded-lg"></div>
+        <div className="h-40 w-1 group-hover:drop-shadow-customViolet drop-shadow-custom duration-300 transition-all bg-white absolute right-8 sm:right-36 rounded-lg"></div>
       </div>
 
-      <div className="flex flex-col-reverse gap-4 md:flex-row justify-evenly bg-slate-50 items-center p-4 h-[39%] lg:h-[38%] font-[iceland]">
+      <div className="flex flex-col gap-10 md:gap-4 md:flex-row justify-evenly bg-slate-50 items-center p-4 h-[39%] lg:h-[38%] font-[iceland]">
         <div className="flex justify-center text-center flex-col gap-2">
           <p className="text-lg">Already have an account?</p>
           <div class="divider my-0">
@@ -105,15 +106,6 @@ function LandingPage() {
         </div>
 
         <div className="flex justify-center text-center flex-col gap-2">
-          <p className="text-lg">Scroll Down to Know more</p>
-          <span
-            onClick={() => handleShow("about")}
-            className="text-secondary-color text-3xl hover:translate-y-4 duration-300 transition-all"
-          >
-            <FontAwesomeIcon icon={faAnglesDown} />
-          </span>
-        </div>
-        <div className="flex justify-center text-center flex-col gap-2">
           <p className="text-lg">Browse Shop as a Guest?</p>
           <div class="divider my-0">
             <FontAwesomeIcon icon={faAngleDown} />
@@ -125,49 +117,64 @@ function LandingPage() {
             Browse Shop
           </button>
         </div>
+        <div className="flex justify-center text-center flex-col gap-2">
+          <p className="text-lg">Scroll Down to Know more</p>
+          <span
+            onClick={() => handleShow("about")}
+            className="text-secondary-color text-3xl hover:translate-y-4 duration-300 transition-all"
+          >
+            <FontAwesomeIcon icon={faAnglesDown} />
+          </span>
+        </div>
       </div>
       <div className="w-full pt-20 px-8 bg-slate-50 flex flex-col gap-4 pb-12">
         {/* Title Section */}
         <div className="text-center ">
-          <h2 className="text-4xl font-bold font-[iceland] text-primary-color">
-            What is Dripstr?
+          <h2 className="text-2xl font-[iceland] ">
+            What is <span className="text-primary-color text-4xl  font-bold">Dripstr?</span>
           </h2>
           <p className="mt-4 text-lg text-slate-600">
             Discover the future of online shopping with Dripstr.
           </p>
         </div>
         <div className="flex flex-col-reverse gap-4 md:flex-col justify-evenly bg-slate-50 items-center mb-8 h-[39%] lg:h-[38%] font-[iceland]">
-          <div className="flex-row flex w-2/3 justify-evenly items-center h-[39%] lg:h-[38%]">
+          <div className="flex-col md:flex-row gap-2 md:gap-0 flex w-2/3 justify-evenly items-center h-[39%] lg:h-[38%]">
             <div className="flex justify-center text-center flex-col gap-2">
-              <p className="text-3xl">As a</p>
+            <p className={`${
+                  isMobile ? "text-xl" : showAbout ? "text-3xl" : "text-xl"} transition-all duration-300`}>As an</p>
               <button
                 onClick={() => handleShow("customer")}
-                className={`btn ${
-                  showAbout ? "bg-primary-color" : "bg-secondary-color"
-                } glass text-white hover:bg-secondary-color drop-shadow-lg font-[iceland] text-2xl w-56`}
+                className={`${
+                  showAbout ? "text-primary-color text-4xl underline" : "text-secondary-color text-2xl"
+                }   hover:text-2xl hover:bg-secondary-color hover:text-white hover:p-1 rounded-lg hover:glass hover:scale-125 duration-300 transition-all drop-shadow-lg font-[iceland] text-2xl w-56`}
               >
                 CUSTOMER
               </button>
+         
             </div>
 
             <div className="flex justify-center text-center flex-col gap-2">
-              <p className="text-3xl">As a</p>
+             {!isMobile && <p className={`${
+                  showMer? "text-3xl" : "text-xl"} transition-all duration-300`}>As an</p>}
               <button
                 onClick={() => handleShow("merchant")}
-                className={`btn ${
-                  showMer ? "bg-primary-color" : "bg-secondary-color"
-                } glass text-white hover:bg-secondary-color drop-shadow-lg font-[iceland] text-2xl w-56`}
+                className={`${
+                  showMer ? "text-primary-color text-4xl underline" : "text-secondary-color text-2xl"
+                }   hover:text-2xl hover:bg-secondary-color hover:text-white hover:p-1 rounded-lg hover:glass hover:scale-125 duration-300 transition-all drop-shadow-lg font-[iceland] text-2xl w-56`}
               >
                 MERCHANT
               </button>
             </div>
             <div className="flex justify-center text-center flex-col gap-2">
-              <p className="text-3xl">As an</p>
+              {!isMobile &&  <p className={`${
+                  showArt ? "text-3xl" : "text-xl"} transition-all duration-300`}>As an</p>
+                  }
+             
               <button
                 onClick={() => handleShow("artist")}
-                className={`btn ${
-                  showArt ? "bg-primary-color" : "bg-secondary-color"
-                } glass text-white hover:bg-secondary-color drop-shadow-lg font-[iceland] text-2xl w-56`}
+                className={`${
+                  showArt ? "text-primary-color text-4xl underline" : "text-secondary-color text-2xl"
+                }   hover:text-2xl hover:bg-secondary-color hover:text-white hover:p-1 rounded-lg hover:glass hover:scale-125 duration-300 transition-all drop-shadow-lg font-[iceland]  w-56`}
               >
                 ARTIST
               </button>
@@ -194,12 +201,7 @@ function LandingPage() {
             </div>
 
             {/* Details Section with Parallax Effect */}
-            <div className="flex flex-row-reverse items-end gap-8">
-              <img
-                src={require("@/assets/emote/mascot.png")}
-                alt="No Images Available"
-                className=" drop-shadow-customViolet  z-0 flex h-96 "
-              />
+            <div className="flex flex-col md:flex-row items-end gap-8">
               <div className="join join-vertical w-full">
                 {/* Accordion Item 1: Browse & Discover Unique Products */}
                 <div className="collapse collapse-arrow join-item border border-base-300">
@@ -422,12 +424,7 @@ function LandingPage() {
   </div>
 
   {/* Details Section with Parallax Effect */}
-  <div className="flex flex-row-reverse items-end gap-8">
-    <img
-      src={require("@/assets/emote/mascot.png")}
-      alt="No Images Available"
-      className="drop-shadow-customViolet z-0 flex h-96"
-    />
+  <div className="flex flex-col md:flex-row items-end gap-8">
     <div className="join join-vertical w-full">
       {/* Accordion Item 1: Sign Up & Set Up Your Artist Portfolio */}
       <div className="collapse collapse-arrow join-item border border-base-300">
@@ -513,12 +510,7 @@ function LandingPage() {
           </div>
         
           {/* Details Section with Parallax Effect */}
-          <div className="flex flex-row-reverse items-end gap-8">
-            <img
-              src={require("@/assets/emote/mascot.png")}
-              alt="No Images Available"
-              className="drop-shadow-customViolet z-0 flex h-96"
-            />
+          <div className="flex flex-col md:flex-row items-end gap-8">
             <div className="join join-vertical w-full">
               {/* Accordion Item 1: Sign Up & Set Up Your Store */}
               <div className="collapse collapse-arrow join-item border border-base-300">

@@ -68,9 +68,9 @@ const ItemOptions = ({
                   onChange={(e) => handleRadioChange(e, "variant", variant)}
                 />
                 <span
-                  className={`peer-checked:bg-primary-color peer-checked:opacity-100 ${
+                  className={`peer-checked:bg-secondary-color peer-checked:opacity-100 ${
                     disab ? "opacity-100" : "opacity-80"
-                  } peer-checked:text-white w-full h-full flex pl-0 items-center hover:bg-primary-color justify-start  rounded-md duration-300 transition-all glass btn`}
+                  } peer-checked:text-white w-full h-full flex pl-0 items-center hover:bg-secondary-color hover:text-white justify-start  rounded-md duration-300 transition-all glass btn`}
                 >
                   {variant.imagePath && (
                     <img
@@ -99,7 +99,7 @@ const ItemOptions = ({
             sizes.map((sizeOption, index) => (
               <label
                 key={index}
-                className="p-0 form-control btn text-xs cursor-pointer flex items-center justify-center duration-300 transition-all min-w-9 min-h-9 h-9 "
+                className="p-0 form-control btn text-xs cursor-pointer flex items-center justify-center duration-300 transition-all min-w-9 min-h-9 h-9 bg-slate-50"
               >
                 <input
                   type="radio"
@@ -110,7 +110,7 @@ const ItemOptions = ({
                   onChange={(e) => handleRadioChange(e, "size", sizeOption)}
                 />
                 <span
-                  className={`peer-checked:bg-primary-color peer-checked:opacity-100 ${
+                  className={`peer-checked:bg-secondary-color peer-checked:opacity-100 ${
                     disab ? "opacity-100" : "opacity-80"
                   } peer-checked:text-white w-full items-center  form-control justify-center rounded-md duration-300 transition-all glass btn min-w-9 min-h-9 h-9 p-0 px-1 font-semibold`}
                 >
@@ -126,7 +126,7 @@ const ItemOptions = ({
       </label>
       <div className="ml-2 mt-1 text-xs  text-slate-400
       ">
-        Stocks: <span className="text-slate-800 font-semibold">{size?.qty}</span>
+        Stocks: <span className="text-slate-800 text-sm font-semibold">{size?.qty}</span>
       </div>
     </div>
   );

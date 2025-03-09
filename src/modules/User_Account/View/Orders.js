@@ -5,6 +5,7 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import useUserProfile from "@/shared/mulletCheck.js";
+import Toast from '../../../shared/alerts';
 
 const Orders = () => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -16,8 +17,9 @@ const Orders = () => {
   const [showRefundModal, setShowRefundModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
-  const tabs = ["All", "To Ship", "To Receive", "Verifying", "Completed", "Cancelled", "Refund"];
+  const tabs = ["All", "Verifying", "To Ship", "To Receive", "Completed", "Cancelled", "Refund"];
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,51 +27,70 @@ const Orders = () => {
 
   const getOrderCounts = () => {
     const counts = {
-      "To Ship": orders.filter(order => order.order_status === "Processing").length,
-      "To Receive": orders.filter(order => order.order_status === "Shipped").length,
-      "Verifying": orders.filter(order => order.approve_Admin === "Pending").length,
-      "Completed": orders.filter(order => order.order_status === "Delivered").length,
-      "Cancelled": orders.filter(order => order.order_status === "Cancelled").length,
+      "To Ship": orders.filter(order => 
+        order.shipping_status === "To prepare" || 
+        order.shipping_status === "to ship"
+      ).length,
+      "To Receive": orders.filter(order => 
+        order.shipping_status === "to deliver"
+      ).length,
+      "Verifying": orders.filter(order => 
+        order.payment_method !== "COD" && 
+        order.payment_status === "Pending to Admin"
+      ).length,
+      "Completed": orders.filter(order =>
+        (order.shipping_status === "delivered" || order.shipping_status === "complete") &&
+        order.refund_status === "Not Requested"
+      ).length,
+      "Cancelled": orders.filter(order => 
+        order.shipping_status === "cancel"
+      ).length,
       "Refund": orders.filter(order => 
-        order.order_status === "Refund Requested" || 
-        order.order_status === "Refund Approved" || 
-        order.order_status === "Refund Rejected"
+        order.refund_status !== "Not Requested"
       ).length
     };
     return counts;
   };
 
-  const handlePayment = (order) => {
-    // TODO: Implement payment logic
-    console.log('Processing payment for order:', order);
-    // Navigate to payment page or show payment modal
-  };
-
   const getFilteredOrders = () => {
     let filtered = [...orders];
     
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(order => 
         order.id.toString().includes(searchQuery) ||
-        order.order_status.toLowerCase().includes(searchQuery.toLowerCase())
+        order.shipping_status?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.payment_status?.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
   
-    // Filter by tab
     switch (selectedTab) {
       case "To Ship":
-        return filtered.filter(order => order.order_status === "Processing");
+        return filtered.filter(order => 
+          order.shipping_status === "To prepare" || 
+          order.shipping_status === "to ship"
+        );
       case "To Receive":
-        return filtered.filter(order => order.order_status === "Shipped");
+        return filtered.filter(order => 
+          order.shipping_status === "to deliver"
+        );
       case "Verifying":
-        return filtered.filter(order => order.approve_Admin === "Pending");
-      case "Completed":
-        return filtered.filter(order => order.order_status === "Delivered");
+        return filtered.filter(order => 
+          order.payment_method !== "COD" && 
+          order.payment_status === "Pending to Admin"
+        );
+        case "Completed":
+          return filtered.filter(order => 
+            (order.shipping_status === "delivered" || order.shipping_status === "complete") &&
+            order.refund_status === "Not Requested"
+          );
       case "Cancelled":
-        return filtered.filter(order => order.order_status === "Cancelled");
+        return filtered.filter(order => 
+          order.shipping_status === "cancel"
+        );
       case "Refund":
-        return filtered.filter(order => order.order_status === "Refund Requested" || order.order_status === "Refund Approved" || order.order_status === "Refund Rejected");
+        return filtered.filter(order => 
+          order.refund_status !== "Not Requested"
+        );
       default:
         return filtered;
     }
@@ -84,7 +105,10 @@ const Orders = () => {
             .select(`
               *,
               order_variation,
-              order_size
+              order_size,
+              shop_Product:prod_num (
+                item_Name
+              )
             `)
             .eq('acc_num', profile.id)
             .order('date_of_order', { ascending: false });
@@ -105,27 +129,34 @@ const Orders = () => {
     }
   }, [profile]); // Add profile as a dependency
 
-  const getStatusDisplay = (status) => {
-    switch (status) {
-      case 'Pending Admin':
-        return 'Pending';
-      case 'Cancelled':
-        return 'Cancelled';
-      case 'Processing':
-        return 'To Ship';
-      case 'Shipped':
-        return 'To Receive';
-      case 'Delivered':
-        return 'Completed';
-      case 'Refund Requested':
-        return 'Refund Requested';
-      case 'Refund Approved':
-        return 'Refund Approved';
-      case 'Refund Rejected':
-        return 'Refund Rejected';
-      default:
-        return status;
+  const getStatusDisplay = (order) => {
+    if (order.refund_status === "Requested") {
+      return "Refund Requested";
     }
+    if (order.refund_status === "Approved") {
+      return "Refunded";
+    }
+    if (order.shipping_status === "cancel") {
+      return "Cancelled";
+    }
+
+    switch (order.shipping_status) {
+      case "preparing":
+        return order.payment_method === "COD" ? "To Pay" : "Verifying Payment";
+      case "to ship":
+        return "To Ship";
+      case "to deliver":
+        return "To Receive";
+      case "delivered":
+      case "complete":
+        return "Completed";
+      default:
+        return order.shipping_status;
+    }
+  };
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
   };
 
   if (error) {
@@ -133,16 +164,18 @@ const Orders = () => {
   }
 
   return (
-    <div className="p-4 bg-slate-200 flex flex-row h-screen overflow-hidden">
+    <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
       <div className="sticky h-full">
         <Sidebar />
       </div>
 
-      <div className="px-5 flex-1 flex flex-col h-full">
+      <div className="flex-1 p-4 px-9">
         {/* Fixed Header Section */}
         <div className="flex-none">
-          <h1 className="text-xl font-bold text-gray-800 mb-6">My Orders</h1>
-          
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+          <i className="fas fa-shopping-bag mr-3 text-primary-color"></i>
+          My Orders
+        </h1>          
           {/* Navigation Tabs */}
           <div className="tabs mb-1 border-b border-gray-300 flex flex-row justify-around">
             {tabs.map((tab) => (
@@ -171,7 +204,7 @@ const Orders = () => {
               placeholder="Search orders..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:border-purple-500"
+              className="w-full pl-10 pr-4 py-2 rounded-md border bg-white border-gray-200 focus:outline-none focus:border-purple-500"
             />
           </div>
         </div>
@@ -192,21 +225,18 @@ const Orders = () => {
                   </h2>
                   <div className="flex flex-col items-end">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      order.order_status === "Cancelled" ? "bg-gray-100 text-gray-800" :
-                      order.approve_Admin === "Pending" ? "bg-purple-100 text-purple-800" :
-                      order.order_status === "Processing" ? "bg-yellow-100 text-yellow-800" :
-                      order.order_status === "Shipped" ? "bg-blue-100 text-blue-800" :
-                      order.order_status === "Refund Requested" ? "bg-orange-100 text-orange-800" :
-                      order.order_status === "Refund Approved" ? "bg-green-100 text-green-800" :
-                      order.order_status === "Refund Rejected" ? "bg-red-100 text-red-800" :
-                      "bg-green-100 text-green-800"
+                      order.refund_status === "Requested" ? "bg-orange-100 text-orange-800" :
+                      order.refund_status === "Approved" ? "bg-green-100 text-green-800" :
+                      order.shipping_status === "cancel" ? "bg-gray-100 text-gray-800" :
+                      order.shipping_status === "preparing" && order.payment_method !== "COD" ? 
+                        "bg-purple-100 text-purple-800" :
+                      order.shipping_status === "to ship" ? "bg-yellow-100 text-yellow-800" :
+                      order.shipping_status === "to deliver" ? "bg-blue-100 text-blue-800" :
+                      (order.shipping_status === "delivered" || order.shipping_status === "complete") ? 
+                        "bg-green-100 text-green-800" :
+                      "bg-gray-100 text-gray-800"
                     }`}>
-                      {order.order_status === "Cancelled" ? 
-                        "Cancelled" : 
-                        order.approve_Admin === "Pending" ? 
-                          "Verifying Payment" : 
-                          `${getStatusDisplay(order.order_status)}${order.payment_method ? ` (${order.payment_method})` : ''}`
-                      }
+                      {getStatusDisplay(order)}
                     </span>
                     <span className="text-sm text-gray-500 mt-1">
                       {new Date(order.date_of_order).toLocaleDateString()}
@@ -222,7 +252,7 @@ const Orders = () => {
                   />
                   <div className="flex-1">
                     <p className="text-gray-800 font-medium mb-1">
-                      Product #{order.prod_num}
+                      {order.shop_Product?.item_Name || `Product #${order.prod_num}`}
                     </p>
                     <p className="text-gray-500 text-sm mb-1">
                       Quantity: {order.quantity} × ₱{order.total_price/order.quantity}
@@ -243,7 +273,10 @@ const Orders = () => {
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        {order.order_status === "Processing" && (
+                        {/* Cancel Button */}
+                        {order.shipping_status !== "delivered" && 
+                          order.shipping_status !== "complete" && 
+                          order.shipping_status !== "cancel" && (
                           <button 
                             className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
                             onClick={() => {
@@ -254,8 +287,11 @@ const Orders = () => {
                             Cancel Order
                           </button>
                         )}
-                        {order.order_status === "Delivered" && 
-                          !order.order_status.includes("Refund") && ( // Add this check
+
+                        {/* Refund Button */}
+                        {(order.payment_status === "Paid" && 
+                          order.shipping_status === "delivered") && order.refund_status === "Not Requested"
+ && (
                           <button 
                             className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
                             onClick={() => {
@@ -280,6 +316,13 @@ const Orders = () => {
           )}
         </div>
       </div>
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ show: false, message: '', type: '' })}
+        />
+      )}
       {showRefundModal && (
         <RefundModal
           isOpen={showRefundModal}
@@ -288,6 +331,7 @@ const Orders = () => {
             setSelectedOrder(null);
           }}
           order={selectedOrder}
+          showToast={showToast} // Add this prop
         />
       )}
       {showCancelModal && (
@@ -298,13 +342,14 @@ const Orders = () => {
             setSelectedOrder(null);
           }}
           order={selectedOrder}
+          showToast={showToast} // Add this prop
         />
       )}
     </div>
   );
 };
 
-const RefundModal = ({ isOpen, onClose, order }) => {
+const RefundModal = ({ isOpen, onClose, order, showToast }) => {
   const [refundReason, setRefundReason] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -406,26 +451,29 @@ const RefundModal = ({ isOpen, onClose, order }) => {
       setError('Please provide a reason for the refund request');
       return;
     }
-
+  
     setIsSubmitting(true);
     setError('');
-
+  
     try {
       const { error: supabaseError } = await supabase
         .from('orders')
         .update({
-          order_status: 'Refund Requested',
           refund_reason: refundReason,
           refund_requested_at: new Date().toISOString(),
-          refund_status: 'Pending',
-          refund_images: images
+          refund_status: 'Requested',
+          refund_images: images,
+          updated_at: new Date().toISOString()
         })
         .eq('id', order.id);
-
+  
       if (supabaseError) throw supabaseError;
       
       onClose();
-      window.location.reload();
+      showToast('Refund request submitted successfully');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (error) {
       console.error('Error requesting refund:', error);
       setError('Failed to submit refund request. Please try again.');
@@ -445,7 +493,7 @@ const RefundModal = ({ isOpen, onClose, order }) => {
         )}
 
         <textarea
-          className="w-full h-32 p-2 border rounded-lg mb-4"
+          className="w-full h-32 p-2 border rounded-lg mb-4 bg-white"
           placeholder="Please explain why you want to request a refund..."
           value={refundReason}
           onChange={(e) => setRefundReason(e.target.value)}
@@ -519,7 +567,7 @@ const RefundModal = ({ isOpen, onClose, order }) => {
   );
 };
 
-const CancelOrderModal = ({ isOpen, onClose, order }) => {
+const CancelOrderModal = ({ isOpen, onClose, order, showToast }) => {
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -537,17 +585,20 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
       const { error: supabaseError } = await supabase
         .from('orders')
         .update({
-          order_status: 'Cancelled',
+          shipping_status: 'cancel',
           cancellation_reason: reason,
           cancellation_requested_at: new Date().toISOString(),
-          cancellation_status: 'Approved'
+          cancellation_status: 'Requested'
         })
         .eq('id', order.id);
 
       if (supabaseError) throw supabaseError;
       
       onClose();
-      window.location.reload();
+      showToast('Cancellation request submitted successfully');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (error) {
       console.error('Error cancelling order:', error);
       setError('Failed to cancel order. Please try again.');
@@ -569,7 +620,7 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
         )}
 
         <textarea
-          className="w-full h-32 p-2 border rounded-lg mb-4"
+          className="w-full h-32 p-2 border rounded-lg mb-4 bg-white"
           placeholder="Please explain why you want to cancel this order..."
           value={reason}
           onChange={(e) => setReason(e.target.value)}
@@ -585,7 +636,7 @@ const CancelOrderModal = ({ isOpen, onClose, order }) => {
             Back
           </button>
           <button
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
             onClick={handleSubmit}
             disabled={!reason.trim() || isSubmitting}
           >

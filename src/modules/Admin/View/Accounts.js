@@ -3,41 +3,68 @@ import Sidebar from "./Shared/Sidebar";
 import AccountTable from "./Components/AccountTable";
 import SearchSortFilter from "./Components/SearchSortFilter";
 import { supabase } from "../../../constants/supabase";
+import Pagination from "./Components/Pagination";
 
 function Accounts() {
   const [fetchedAccounts, setFetchedAccounts] = useState([]);
-  
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7; // Set to 7 items per page
+
   useEffect(() => {
     const fetchAccounts = async () => {
-      const { data, error } = await supabase
-        .from("accounts")
-        .select("id, first_name, last_name, username, email, phone, address");
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("id, username, full_name, email, mobile, address")
+          .eq("isMerchant", false) // Where isMerchant is false
+          .or("isArtist.eq.false,isArtist.is.null"); // Where isArtist is false OR null
 
-      if (error) {
-        console.error("Error fetching accounts:", error.message);
-      } else {
-        setFetchedAccounts(data);
+        if (error) {
+          console.error("Error fetching accounts:", error.message);
+          throw error;
+        }
+
+        console.log("Fetched data:", data); // Debug: Check the returned data
+        setFetchedAccounts(data || []);
+      } catch (error) {
+        console.error("Error in fetchAccounts:", error.message);
+        setFetchedAccounts([]); // Set empty array on error
       }
     };
 
     fetchAccounts();
   }, []);
 
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentAccounts = fetchedAccounts.slice(indexOfFirstItem, indexOfLastItem);
+  const totalItems = fetchedAccounts.length;
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+  const all = fetchedAccounts.length;
+
   return (
-    <div className="flex flex-row">
+    <div className="flex flex-row min-h-screen">
       <Sidebar />
-      <div className="w-full h-screen flex-col">
-        <div className="h-16">
-          <SearchSortFilter />
-        </div>
-        <div className="bg-slate-900 h-5/6 m-5 flex flex-col rounded-3xl p-2 cursor-default">
-          <div className="h-full p-6">
-            <h1 className="text-white text-2xl font-bold mb-4">Accounts</h1>
-            <div className="h-full">
-              {/* Pass fetched accounts data to AccountTable */}
-              <AccountTable accounts={fetchedAccounts} />
-            </div>
+      <div className="flex-1 flex flex-col">
+
+        <div className="flex-1 m-5 bg-slate-900 rounded-3xl p-6">
+          <h1 className="text-white text-2xl font-bold mb-4">Accounts</h1>
+          <p>Total Users: {all}</p> {/* Fixed <p1> to <p> */}
+          <div className="w-full h-full overflow-auto">
+            <AccountTable accounts={currentAccounts} /> {/* Pass paginated data */}
+            <Pagination
+              currentPage={currentPage}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+            />
           </div>
+
         </div>
       </div>
     </div>

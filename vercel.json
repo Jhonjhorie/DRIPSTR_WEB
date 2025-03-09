@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "routes": [
+    { 
+      "handle": "filesystem"
+    },
+    {
+      "src": "/3d/(.*)\\.glb",
+      "dest": "/3d/$1.glb",
+      "headers": {
+        "Content-Type": "model/gltf-binary",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "public": true,
+  "headers": [
+    {
+      "source": "/3d/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Content-Type",
+          "value": "model/gltf-binary"
+        }
+      ]
+    }
+  ]
+}

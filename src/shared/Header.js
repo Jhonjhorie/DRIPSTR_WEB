@@ -131,7 +131,7 @@ const Header = () => {
               />
             </button>
           </div>
-          <div className="drawer-side z-50">
+          <div className="drawer-side z-[999] ">
             <label
               htmlFor="my-drawer-cart"
               aria-label="close sidebar"
@@ -153,7 +153,7 @@ const Header = () => {
               className="text-black hover:text-[--primary-color]"
             />
           ) : (
-            <span className=" text-[--primary-color] hover:text-gray-300 hover:underline ">Login/SignUp</span>
+            <span className=" text-[--primary-color] hover:text-gray-300 hover:underline ">Login/Register</span>
           )}
         </button>
       </div>

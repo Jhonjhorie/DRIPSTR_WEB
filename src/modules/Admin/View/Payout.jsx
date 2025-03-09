@@ -28,7 +28,7 @@ function Payout() {
     const fetchMerchantCashout = async () => {
         const { data, error } = await supabase
             .from('merchant_Cashout')
-            .select('id, created_at, full_Name, owner_Id(mobile), qty, reason, status, revenue(id, revenue)')
+            .select('id, created_at, full_Name, owner_Id(mobile), qty, reason, status, revenue(id, revenue, number)')
             .eq('status', 'Pending');
         if (error) {
             console.error("Error fetching cashout:", error);
@@ -161,7 +161,7 @@ function Payout() {
 
                 {selectedTab === 'Merchants' ? (
                     <div className="container mx-auto p-4">
-                        <h2 className="text-2xl font-bold mb-4 text-white">Pending Merchant Cashouts</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-white">Pending Merchants Cashouts</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {merchantCashout.length > 0 ? (
                                 merchantCashout.map((item) => (
@@ -187,15 +187,21 @@ function Payout() {
                                         <div className="space-y-2">
                                             <p className="text-black">
                                                 <span className="font-medium">Mobile:</span>{' '}
-                                                {item.owner_Id?.mobile || 'None'}
+                                                +63{item.revenue?.number || 'None'}
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Wallet Amount:</span>{' '}
-                                                P{item.revenue?.revenue || 0}.00
+                                                ₱{Number(item.revenue?.revenue || 0).toLocaleString('en-US', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                })}
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Cashout Amount:</span>{' '}
-                                                P{item.qty || 0}.00
+                                                ₱{Number(item.qty || 0).toLocaleString('en-US', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                })}
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Reason:</span>{' '}
@@ -219,7 +225,7 @@ function Payout() {
                     </div>
                 ) : (
                     <div className="container mx-auto p-4">
-                        <h2 className="text-2xl font-bold mb-4 text-white">Pending Merchant Cashouts</h2>
+                        <h2 className="text-2xl font-bold mb-4 text-white">Pending Artists Cashouts</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {artistCashout.length > 0 ? (
                                 artistCashout.map((item) => (
@@ -249,11 +255,17 @@ function Payout() {
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Wallet Amount:</span>{' '}
-                                                P{item.wallet_Id?.revenue || 0}.00
+                                                ₱{Number(item.wallet_Id?.revenue || 0).toLocaleString('en-US', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                })}
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Cashout Amount:</span>{' '}
-                                                P{item.qty || 0}.00
+                                                ₱{Number(item.qty || 0).toLocaleString('en-US', {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2,
+                                                })}
                                             </p>
                                             <p className="text-black">
                                                 <span className="font-medium">Reason:</span>{' '}

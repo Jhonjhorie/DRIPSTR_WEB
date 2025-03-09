@@ -69,7 +69,7 @@ const GcashDialog = ({ onClose, order, total }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="sm:w-full max-w-[60.40rem] h-[27rem] font-[iceland] bg-slate-50 rounded-lg shadow-lg mx-4">
+      <div className="sm:w-full max-w-[60.40rem] h-[35rem] font-[iceland]  md:mr-0 mr-8 pr-2 bg-slate-50 rounded-lg shadow-lg mx-4">
         {mascotR ? (
           <div className="flex flex-col items-center justify-center h-full w-full p-6">
             <img
@@ -82,7 +82,7 @@ const GcashDialog = ({ onClose, order, total }) => {
             </span>
           </div>
         ) : (
-          <div className="flex flex-col md:flex-row h-full">
+          <div className="flex flex-col md:flex-row h-full overflow-y-auto custom-scrollbar rounded-lg ">
             <div className="flex-col w-full md:w-80 relative items-center flex justify-center">
               <p className="font-semibold text-2xl">Scan QR Code</p>
               <img
@@ -139,8 +139,7 @@ const GcashDialog = ({ onClose, order, total }) => {
                   <div className="flex flex-col mt-2">
                   <p className="text-md font-semibold">Preview</p>
                   <div className="flex-col w-40 h-60 rounded-md bg-slate-50 border-t-2 drop-shadow-md border-primary-color relative items-center flex justify-center">
-                 
-                    <img
+                 {image != null ? <img
                       src={
                         image != null
                           ? image
@@ -148,7 +147,15 @@ const GcashDialog = ({ onClose, order, total }) => {
                       }
                       alt={"Preview"}
                       className="w-full h-full object-contain"
-                    />
+                    />:
+                    <div className="h-full w-full flex p-4 items-center justify-center"
+                    >
+                      <p>
+                      Please Upload Proof of Payment</p>
+                    </div>
+                    }
+                    
+                    
                   </div>
                 </div>
               </div>

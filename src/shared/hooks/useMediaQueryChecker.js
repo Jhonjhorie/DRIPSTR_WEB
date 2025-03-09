@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const useMediaQueryChecker = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 724);
 
   const updateScreen = () => {
-    setIsMobile(window.innerWidth <= 724); // Mobile if width <= 724, otherwise desktop
+    setIsMobile(window.innerWidth <= 724); 
   };
 
   useEffect(() => {
@@ -12,11 +12,11 @@ const useMediaQueryChecker = () => {
     window.addEventListener('resize', updateScreen);
 
     return () => {
-      window.removeEventListener('resize', updateScreen); // Remove the listener on cleanup
+      window.removeEventListener('resize', updateScreen); 
     };
   }, []);
 
-  return isMobile; // Return whether it's mobile or not
+  return isMobile; 
 };
 
 export default useMediaQueryChecker;

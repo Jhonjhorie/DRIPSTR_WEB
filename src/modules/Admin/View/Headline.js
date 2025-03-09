@@ -29,6 +29,12 @@ function Headline() {
         setPreviewImage(URL.createObjectURL(file));
     };
 
+    const handleRemovePreview = () => {
+        setSelectedFile(null);
+        setPreviewImage(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
     const uploadImageToSupabase = async (file) => {
         const fileName = `${Date.now()}-${file.name}`;
         const { data, error } = await supabase.storage.from("carousel_images").upload(fileName, file);
@@ -83,7 +89,6 @@ function Headline() {
     };
 
     const handleDeleteSelected = async () => {
-
         const idsToDelete = Array.from(selectedImages);
         const { error } = await supabase
             .from("carousel_images")
@@ -102,9 +107,9 @@ function Headline() {
 
     return (
         <div className="flex">
-            <Sidebar />
-            <div className="w-full h-screen flex flex-col items-center">
-                <div className="bg-slate-900 p-6 rounded-3xl shadow-lg w-full h-full">
+            
+            <div className="w-full flex flex-col items-center">
+                <div className="bg-slate-900 rounded-3xl shadow-lg w-full h-full">
                     <p className="text-white text-2xl font-bold">Upload Headline Image</p>
 
                     <div className="border-dashed border-2 border-gray-400 p-6 flex flex-col items-center justify-center mt-4 w-full">
@@ -114,7 +119,21 @@ function Headline() {
                             className="mt-4 text-white"
                             ref={fileInputRef}
                         />
-                        {previewImage && <img src={previewImage} alt="Preview" className="w-32 h-32 object-cover rounded-md mt-4" />}
+                        {previewImage && (
+                            <div className="relative mt-4">
+                                <img 
+                                    src={previewImage} 
+                                    alt="Preview" 
+                                    className="w-32 h-32 object-cover rounded-md" 
+                                />
+                                <button
+                                    onClick={handleRemovePreview}
+                                    className="absolute top-0 right-0 w-6 h-6 bg-black text-white rounded-full flex items-center justify-center -translate-y-2 translate-x-2 hover:bg-red-700 transition-colors"
+                                >
+                                    X
+                                </button>
+                            </div>
+                        )}
                         <button
                             onClick={handleUploadClick}
                             disabled={uploading}
@@ -128,7 +147,7 @@ function Headline() {
                         {selectedImages.size > 0 && (
                             <button
                                 onClick={() => {
-                                    if (window.confirm(selectedImages.size > 1 ? "Are you sure you want to delete these images?" : "Are you sure you want to delete these image?")) {
+                                    if (window.confirm(selectedImages.size > 1 ? "Are you sure you want to delete these images?" : "Are you sure you want to delete this image?")) {
                                         handleDeleteSelected();
                                     }
                                 }}
@@ -137,7 +156,6 @@ function Headline() {
                                 Delete
                             </button>
                         )}
-
                     </div>
                     <div className="flex flex-row gap-4 mt-4">
                         {uploadedImages.map(({ id, image_url }) => (
@@ -150,10 +168,8 @@ function Headline() {
                                 />
                                 <img src={image_url} alt="Uploaded" className="w-32 h-32 object-cover rounded-md" />
                             </div>
-
                         ))}
                     </div>
-                            
                 </div>
             </div>
         </div>

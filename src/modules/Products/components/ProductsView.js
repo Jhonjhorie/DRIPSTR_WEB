@@ -20,9 +20,14 @@ const ProductsView = ({
 
   const openModal = (item) => {
     setSelectedItem(item);
-    setTimeout(() => {
-      document.getElementById("my_modal_4").showModal();
+    const modal = document.getElementById("my_modal_4");
+    if (modal) {
+      setTimeout(() => {
+      modal.showModal();
     }, 50);
+    }
+   
+    
   };
 
   const closeModal = () => {
@@ -33,8 +38,6 @@ const ProductsView = ({
     }
   };
 
-
- 
   const filteredProducts = products.filter((item) => {
     switch (filter) {
       case 0:
@@ -54,26 +57,31 @@ const ProductsView = ({
     }
   });
 
-  // Filter products based on the selected category
   const filteredProductsC = filteredProducts.filter(
     (item) => categories === "All" || item.item_Category === categories
   );
 
-  // Sort and filter products based on shop filter
+  
   const filteredProductsD =
-    sort === "top"
-      ? filteredProductsC
-          .filter((item) => shopFil === 0 || item.shop_Id === shopFil)
-          .sort((a, b) => {
-            const weightRating = 0.6;
-            const weightOrders = 0.4;
+  sort === "top"
+    ? filteredProductsC
+        .filter((item) =>
+          shopFil === 0 || 
+          (Array.isArray(shopFil) ? shopFil.includes(item.shop_Id) : item.shop_Id === shopFil)
+        )
+        .sort((a, b) => {
+          const weightRating = 0.6;
+          const weightOrders = 0.4;
 
-            const scoreA = a.item_Rating * weightRating + a.item_Orders * weightOrders;
-            const scoreB = b.item_Rating * weightRating + b.item_Orders * weightOrders;
+          const scoreA = a.item_Rating * weightRating + a.item_Orders * weightOrders;
+          const scoreB = b.item_Rating * weightRating + b.item_Orders * weightOrders;
 
-            return scoreB - scoreA;
-          })
-      : filteredProductsC.filter((item) => shopFil === 0 || item.shop_Id === shopFil);
+          return scoreB - scoreA;
+        })
+    : filteredProductsC.filter((item) =>
+        shopFil === 0 || 
+        (Array.isArray(shopFil) ? shopFil.includes(item.shop_Id) : item.shop_Id === shopFil)
+      );
 
   // Calculate placeholders for grid layout
   const totalItems = filteredProductsD.length;
@@ -131,13 +139,13 @@ const ProductsView = ({
       </div>
     );
 
-  return (
-    <div className="w-full flex flex-col items-center justify-center min-h-[15rem]">
+ return (
+    <div className="w-full py-1">
       {/* BuyConfirm Modal */}
       {selectedItem && (
         <dialog
           id="my_modal_4"
-          className="modal modal-bottom sm:modal-middle absolute z-50 right-4 sm:right-0"
+          className="modal modal-bottom sm:modal-middle"
         >
           <BuyConfirm item={selectedItem} onClose={closeModal} />
           <form
@@ -151,36 +159,31 @@ const ProductsView = ({
 
       {/* Product Grid */}
       {filteredProductsD.length > 0 ? (
-        <div
-          className="grid gap-1 items-center justify-center"
-          style={{ gridTemplateColumns: `repeat(${numColumns}, 1fr)` }}
-        >
+        <div className="grid gap-3 px-4" style={{ gridTemplateColumns: `repeat(${isSmall ? numColumns >= 2 ? 3 : numColumns : numColumns}, minmax(0, 1fr))` }}>
           {dataWithPlaceholders.map((item, index) =>
             item.empty ? (
               <div
                 key={`placeholder-${index}`}
-                className="flex flex-col mx-1 max-w-[13.5rem] w-[12.5rem] mb-2 p-2 rounded-md"
-                style={{ visibility: "hidden" }}
+                className="invisible"
               />
             ) : (
               <ProductCard
                 key={item.id || `product-${index}`}
                 item={item}
                 onClick={() => openModal(item)} 
+                isSmall={isSmall}
               />
             )
           )}
         </div>
       ) : (
-        <div className="items-center justify-center min-h-72 flex flex-col">
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
           <img
             src={require("@/assets/emote/sad.png")}
-            alt="Sad"
-            className="object-none mb-2 mt-1 w-[180px] h-[200px] drop-shadow-customViolet animate-pulse"
+            alt="No Products Available"
+            className="w-24 h-24 object-contain drop-shadow-md"
           />
-          <h1 className="top-20 font-[iceland] font-semibold text-3xl bg-slate-100 p-1 rounded-md drop-shadow-lg">
-            No Available Products
-          </h1>
+          <p className="text-xl text-gray-600">No Products Available</p>
         </div>
       )}
     </div>
