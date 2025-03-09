@@ -378,7 +378,7 @@ const Merchants = () => {
                                         src={selectedMerchant.validID || selectedMerchant.valid_id || 'https://via.placeholder.com/150'}
                                         alt={`${selectedMerchant.artist_name || 'Artist'} ID`}
                                         className="w-24 h-24 object-contain rounded-md cursor-pointer"
-                                        onClick={() => handleImageClick(selectedMerchant.validID || selectedMerchant.valid_id)}
+                                        onClick={() => handleImageClick(selectedMerchant.valid_id || selectedMerchant.validID  )}
                                     />
                                 </div>
                                 <div className="flex flex-col items-center">
