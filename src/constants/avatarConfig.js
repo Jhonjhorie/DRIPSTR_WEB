@@ -1,21 +1,18 @@
 // src/constants/avatarConfig.js
 
-const BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://dripstr-web.vercel.app/' 
-  : '';
-
+ 
 const bodyTypeURLs = {
     Boy: {
-      Average: `${BASE_URL}/3d/avatars/guyz/Average.glb`,
-      Muscular: `${BASE_URL}/3d/avatars/guyz/Muscular.glb`,
-      PlusSize: `${BASE_URL}/3d/avatars/guyz/PlusSize.glb`,
-      Petite: `${BASE_URL}/3d/avatars/guyz/Thin.glb`,
+      Average: `/3d/avatars/guyz/Average.glb`,
+      Muscular: `/3d/avatars/guyz/Muscular.glb`,
+      PlusSize: `/3d/avatars/guyz/PlusSize.glb`,
+      Petite: `/3d/avatars/guyz/Thin.glb`,
     },
     Girl: {
-      Average: `${BASE_URL}/3d/avatars/gurlz/Average.glb`,
-      Muscular: `${BASE_URL}/3d/avatars/gurlz/Muscular.glb`,
-      PlusSize: `${BASE_URL}/3d/avatars/gurlz/PlusSize.glb`,
-      Petite: `${BASE_URL}/3d/avatars/gurlz/Thin.glb`,
+      Average: `/3d/avatars/gurlz/Average.glb`,
+      Muscular: `/3d/avatars/gurlz/Muscular.glb`,
+      PlusSize: `/3d/avatars/gurlz/PlusSize.glb`,
+      Petite: `/3d/avatars/gurlz/Thin.glb`,
     },
 };
   
@@ -59,10 +56,10 @@ const shortsURLs = {
   
 const tshirtTextureURLs = {
   Boy: {
-    Average: `${BASE_URL}/3d/uvmap/TexturedMESH.png`,
+    Average: `/3d/uvmap/TexturedMESH.png`,
   },
   Girl: {
-    Average: `${BASE_URL}/3d/wears/guyz/tshirts/Average_Tshirt_Texture.glb`,
+    Average: `/3d/wears/guyz/tshirts/Average_Tshirt_Texture.glb`,
   }
 }
 
