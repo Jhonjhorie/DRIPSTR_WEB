@@ -21,6 +21,8 @@ function Vouchers() {
   const [vouchLabel, setVouchLabel] = useState("");
   const [vouchLimit, setVouchLimit] = useState("");
   const [vouchLimit2, setVouchLimit2] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+
   const [showAlert, setShowAlert] = React.useState(false); // Alert
   const [showAlertNull, setShowAlertNull] = React.useState(false); // Alert
   const [showAlertUpdated, setShowAlertUpdated] = React.useState(false); // Alert Update
@@ -163,7 +165,7 @@ function Vouchers() {
       setError("Please select a shop to create a voucher for.");
       return;
     }
-    if (!vouchLimit.trim() || !vouchLimit2.trim() || !vouchLabel.trim()) {
+    if (!vouchLimit.trim() || !vouchLimit2.trim() || !vouchLabel.trim() || !expiryDate.trim()) {
       console.error("Field Required");
       setShowAlertNull(true);
       setTimeout(() => {
@@ -180,10 +182,11 @@ function Vouchers() {
         .from("merchant_Vouchers")
         .insert([
           {
-            name: vouchLabel,
-            item_Off: parseFloat(vouchLimit),
-            min_Spend: parseFloat(vouchLimit2),
+            voucher_name: vouchLabel,
+            discount: parseFloat(vouchLimit),
+            condition: parseFloat(vouchLimit2),
             merchant_Id: selectedShopId,
+            expiration: expiryDate
           },
         ]);
 
@@ -195,6 +198,7 @@ function Vouchers() {
         setVouchLabel("");
         setVouchLimit("");
         setVouchLimit2("");
+        setExpiryDate("");
         fetchVouchers();
         setShowAlert(true);
         setTimeout(() => {
@@ -216,7 +220,7 @@ function Vouchers() {
     try {
       const { data: vouchers, error } = await supabase
         .from("merchant_Vouchers")
-        .select("id, name, min_Spend, item_Off")
+        .select("id, voucher_name, condition, discount, expiration")
         .eq("merchant_Id", selectedShopId);
 
       if (error) {
@@ -384,7 +388,7 @@ function Vouchers() {
     try {
       const { data: existingVouchers, error: fetchError } = await supabase
         .from("merchant_Vouchers")
-        .select("id, name, min_Spend, item_Off, merchant_Id")
+        .select("id, voucher_name, condition, discount, merchant_Id")
         .eq("merchant_Id", selectedShopId);
 
       if (fetchError) {
@@ -481,7 +485,7 @@ function Vouchers() {
                   onChange={(e) => setVouchLabel(e.target.value)}
                   value={vouchLabel}
                   type="text"
-                  className="bg-slate-50 rounded-md  text-slate-800 text-sm p-1 w-48   border-[1px] border-custom-purple"
+                  className="bg-slate-50 rounded-md  text-slate-800 text-sm p-1 w-40   border-[1px] border-custom-purple"
                 ></input>
               </div>
               <div className="mb-2 gap-3 flex place-items-center mt-2">
@@ -493,7 +497,7 @@ function Vouchers() {
                   onChange={(e) => setVouchLimit(e.target.value)}
                   value={vouchLimit}
                   type="number"
-                  className="bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-48   border-[1px] border-custom-purple"
+                  className="bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-40   border-[1px] border-custom-purple"
                 ></input>
               </div>
               <div className="mb-2 gap-2 flex place-items-center">
@@ -505,8 +509,19 @@ function Vouchers() {
                   onChange={(e) => setVouchLimit2(e.target.value)}
                   value={vouchLimit2}
                   type="number"
-                  className="bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-48 border-[1px] border-custom-purple"
+                  className="bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-40  border-[1px] border-custom-purple"
                 ></input>
+              </div>
+              <div className="mb-2 gap-2 flex place-items-center">
+                <label className="text-slate-800 font-semibold text-sm">
+                  Expiry Date:
+                </label>
+                <input
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                  value={expiryDate}
+                  type="date"
+                  className="bg-slate-50 rounded-md text-slate-800 text-sm p-1 w-40 border-[1px] border-custom-purple"
+                />
               </div>
               <div className="justify-end relative w-full flex  ">
                 <button
@@ -571,68 +586,82 @@ function Vouchers() {
               </div>
             </div>
           </div>
-          <div className="w-full -mt-48 md:mt-0  md:w-3/4 h-[550px] rounded-md bg-slate-200  shadow-inner shadow-slate-500 overflow-hidden overflow-y-scroll">
+          <div className="w-full -mt-48 md:mt-0  md:w-3/4 h-[550px] rounded-md bg-slate-200  shadow-inner shadow-slate-500 overflow-scroll">
             <div className="w-auto grid md:grid-cols-2 relative place-items-center gap-3 p-3">
               {vouchers.length > 0 ? (
                 vouchers.map((voucher) => (
                   <div
                     key={voucher.id}
-                    className="h-14 w-full cursor-pointer shadow-md shadow-primary-color relative bg-slate-800 hover:scale-95 duration-300 mt-1 flex place-items-center rounded-sm"
+                    className="h-16 w-full cursor-pointer border-primary-color border-t-2 shadow-sm shadow-primary-color relative bg-slate-800 hover:scale-95 duration-300 mt-1 flex place-items-center rounded-md"
                     onClick={() => handleCheckboxChange(voucher)}
                   >
-                    <div className="absolute -ml-2">
-                      <div className="bg-slate-200 h-3 w-3 mb-1 rounded-full"></div>
-                      <div className="bg-slate-200 h-3 w-3 rounded-full"></div>
-                    </div>
-                    <div
-                      className="bg-slate-400 md:h-5 md:w-5 h-3 w-3 rounded-full absolute right-3 place-content-center flex place-items-center"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedVouchers.some(
-                          (v) => v.id === voucher.id
-                        )}
-                        className="checkbox rounded-full"
-                        onChange={() => handleCheckboxChange(voucher)}
-                      />
-                    </div>
-                    <div>
-                      <div className="h-10 w-10 rounded-full mx-5">
-                        <img
-                          src={blackLogo}
-                          alt="Shop Logo"
-                          className="drop-shadow-custom object-cover"
+                    <div className="h-full w-full rounded-md relative overflow-hidden bg-slate-100 p-1 px-2">
+                      <div
+                        className="bg-slate-400 md:h-5 md:w-5 h-3 w-3 rounded-full absolute right-5 translate-y-1/2 flex items-center"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedVouchers.some(
+                            (v) => v.id === voucher.id
+                          )}
+                          className="checkbox rounded-full"
+                          onChange={() => handleCheckboxChange(voucher)}
                         />
                       </div>
-                    </div>
-                    <div className="h-full w-full bg-slate-100 p-1 px-2">
-                      <div>
-                        <p className="text-slate-800 font-medium text-sm md:text-lg">
-                          Shop Voucher
-                          <span className="text-custom-purple font-semibold">
+                      <div className="flex gap-1">
+                        <div>
+                          <p className="font-bold iceland-regular absolute text-green-700  opacity-25  text-7xl left-40 -top-2 z-0 drop-shadow-customViolet">
                             {" "}
-                            ₱
-                            {Number(voucher.item_Off).toLocaleString("en-PH", {
-                              minimumFractionDigits: 2,
-                            })}{" "}
-                            OFF
-                          </span>
-                        </p>
-                        <p className="text-slate-800 font-normal text-sm">
-                          Minimum spend of
-                          <span className="text-custom-purple font-semibold">
-                            {" "}
-                            ₱
-                            {Number(voucher.min_Spend).toLocaleString("en-PH", {
-                              minimumFractionDigits: 2,
-                            })}
-                          </span>
-                          <span className="text-violet-600">
-                            {" "}
-                            {voucher.name}{" "}
-                          </span>
-                        </p>
+                            {shopData.shop_name}{" "}
+                          </p>
+                        </div>
+
+                        <div className="w-2/5">
+                          <div className="w-full overflow-hidden">
+                            <span className="text-slate-800 iceland-regular font-semibold text-2xl truncate block">
+                              {voucher.voucher_name}
+                            </span>
+                          </div>
+                          <div className="w-full overflow-hidden">
+                            <span className="text-slate-600 iceland-regular truncate block">
+                              Exp: {voucher.expiration}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="text-right">
+                          <div>
+                            <p className="text-slate-800  iceland-regular ">
+                              Minimum spend of
+                              <span className="text-slate-800 font-semibold">
+                                {" "}
+                                ₱
+                                {Number(voucher.condition).toLocaleString(
+                                  "en-PH",
+                                  {
+                                    minimumFractionDigits: 2,
+                                  }
+                                )}
+                              </span>
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-slate-800 font-medium text-sm md:text-lg">
+                              <span className="text-slate-800 iceland-regular font-semibold text-2xl">
+                                {" "}
+                                ₱
+                                {Number(voucher.discount).toLocaleString(
+                                  "en-PH",
+                                  {
+                                    minimumFractionDigits: 2,
+                                  }
+                                )}{" "}
+                                OFF
+                              </span>
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -678,13 +707,13 @@ function Vouchers() {
                     className="mb-2 text-custom-purple"
                   >
                     <span className="text-violet-600 font-semibold">
-                      "{voucher.name}"
+                      "{voucher.voucher_name}"
                     </span>{" "}
-                    {Number(voucher.item_Off).toLocaleString("en-PH", {
+                    {Number(voucher.discount).toLocaleString("en-PH", {
                       minimumFractionDigits: 2,
                     })}
                     % OFF - Minimum Spend: ₱
-                    {Number(voucher.min_Spend).toLocaleString("en-PH", {
+                    {Number(voucher.condition).toLocaleString("en-PH", {
                       minimumFractionDigits: 2,
                     })}
                   </li>
@@ -792,9 +821,9 @@ function Vouchers() {
                     </label>
                     <input
                       type="text"
-                      value={voucher.name}
+                      value={voucher.voucher_name}
                       onChange={(e) =>
-                        handleLabelChange(index, "name", e.target.value)
+                        handleLabelChange(index, "voucher_name", e.target.value)
                       }
                       className="w-full p-2 border bg-slate-100 rounded-md text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-600"
                     />
@@ -803,11 +832,11 @@ function Vouchers() {
                       <input
                         onKeyDown={blockInvalidChar}
                         type="number"
-                        value={voucher.item_Off}
+                        value={voucher.discount}
                         onChange={(e) =>
                           handleLabelChange(
                             index,
-                            "item_Off",
+                            "discount",
                             Number(e.target.value)
                           )
                         }
@@ -817,11 +846,11 @@ function Vouchers() {
                       <input
                         onKeyDown={blockInvalidChar}
                         type="number"
-                        value={voucher.min_Spend}
+                        value={voucher.condition}
                         onChange={(e) =>
                           handleLabelChange(
                             index,
-                            "min_Spend",
+                            "condition",
                             Number(e.target.value)
                           )
                         }
@@ -866,13 +895,13 @@ function Vouchers() {
                     className="mb-2 text-custom-purple"
                   >
                     <span className="text-violet-600 font-semibold ">
-                      "{voucher.name}"
+                      "{voucher.voucher_name}"
                     </span>{" "}
-                    {Number(voucher.item_Off).toLocaleString("en-PH", {
+                    {Number(voucher.discount).toLocaleString("en-PH", {
                       minimumFractionDigits: 2,
                     })}
                     % OFF - Minimum Spend: ₱
-                    {Number(voucher.min_Spend).toLocaleString("en-PH", {
+                    {Number(voucher.condition).toLocaleString("en-PH", {
                       minimumFractionDigits: 2,
                     })}
                   </li>
@@ -1066,35 +1095,35 @@ function Vouchers() {
       {/* ALLERTS DELETE VOUCHERS */}
       {showAlertDel && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
-        <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
-          <div className="mt-10 ">
-            <img
-              src={successEmote}
-              alt="Success Emote"
-              className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-            />
+          <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span>Selected Voucher Deleted!</span>
           </div>
         </div>
-        <div
-          role="alert"
-          className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-slate-50 font-semibold rounded-md"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            className="h-6 w-6 shrink-0 stroke-current"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            ></path>
-          </svg>
-          <span>Selected Voucher Deleted!</span>
-        </div>
-      </div>
       )}
       {/* ALLERTS DELETE VOUCHERS */}
       {showNoSelectedVoucher && (

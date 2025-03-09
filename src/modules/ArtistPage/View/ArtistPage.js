@@ -841,6 +841,11 @@ function ArtistPage() {
                   </div>
                 )}
               </div>
+              <div>
+                  <div className="badge bg-custom-purple border-2 text-white text-sm border-slate-100">
+                   {artist.art_Type}
+                  </div>
+              </div>
             </div>
             <div className="flex gap-2">
               <div

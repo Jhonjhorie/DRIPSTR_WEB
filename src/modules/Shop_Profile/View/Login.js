@@ -62,6 +62,12 @@ function Login() {
   const [showAlertSF, setShowAlertSF] = useState(false);
   const [showAlertExname, setShowAlertExname] = useState(false);
   const [showAlertExnum, setShowAlertExnum] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(null);
+
+  const handleImageLoad = (event) => {
+    const { naturalWidth, naturalHeight } = event.target;
+    setIsLandscape(naturalWidth > naturalHeight);
+  };
 
   const fetchUserProfile = async () => {
     setLoading(false);
@@ -540,7 +546,6 @@ function Login() {
     handleExactLocationChange,
     setSelected,
   } = useAddressFields(true, false);
-
 
   const handleSetisMerchant = async (e) => {
     e.preventDefault();
@@ -1978,6 +1983,8 @@ function Login() {
           </div>
         </div>
       )}
+
+      {/* Modal for showing selected images */}
       {showImage && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
           <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
@@ -1986,10 +1993,17 @@ function Login() {
                 <img
                   src={selectedImage}
                   alt="Uploaded shop photo"
-                  className="max-w-full max-h-full rounded-sm"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
-                <p className="text-white">Please select an image</p>
+                <p className="text-black">Please select an image</p>
               )}
             </div>
             <div className="flex justify-between w-full mt-2">
@@ -2011,10 +2025,17 @@ function Login() {
                 <img
                   src={selectedImageID}
                   alt="Uploaded shop photo"
-                  className="max-w-full max-h-full rounded-sm"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
-                <p className="text-white">Please select an image</p>
+                <p className="text-black">Please select an image</p>
               )}
             </div>
             <div className="flex justify-between w-full mt-2">
@@ -2036,7 +2057,14 @@ function Login() {
                 <img
                   src={selectedFile}
                   alt="Uploaded file"
-                  className="max-w-full max-h-full"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
                 <p className="text-white">Please select a file</p>
@@ -2061,7 +2089,14 @@ function Login() {
                 <img
                   src={selectedFilegcash}
                   alt="Uploaded file"
-                  className="max-w-full max-h-full"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
                 <p className="text-white">Please select a file</p>
@@ -2086,7 +2121,14 @@ function Login() {
                 <img
                   src={selectedFileSS}
                   alt="Uploaded file"
-                  className="max-w-full max-h-full"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
                 <p className="text-white">Please select a file</p>
@@ -2103,69 +2145,70 @@ function Login() {
           </div>
         </div>
       )}
+      
       {showAlertGC && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
-        <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
-          <div className="mt-10 ">
-            <img
-              src={questionEmote}
-              alt="Success Emote"
-              className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-            />
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Screenshot of your verified Gcash is Required!</span>
           </div>
         </div>
-        <div
-          role="alert"
-          className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 shrink-0 stroke-current"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>Screenshot of your verified Gcash is Required!</span>
-        </div>
-      </div>
       )}
       {showAlertSF && (
-       <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
-       <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
-         <div className="mt-10 ">
-           <img
-             src={questionEmote}
-             alt="Success Emote"
-             className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-           />
-         </div>
-       </div>
-       <div
-         role="alert"
-         className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
-       >
-         <svg
-           xmlns="http://www.w3.org/2000/svg"
-           className="h-6 w-6 shrink-0 stroke-current"
-           fill="none"
-           viewBox="0 0 24 24"
-         >
-           <path
-             strokeLinecap="round"
-             strokeLinejoin="round"
-             strokeWidth="2"
-             d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-           />
-         </svg>
-         <span>Upload your selfie to proceed</span>
-       </div>
-     </div>
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Upload your selfie to proceed</span>
+          </div>
+        </div>
       )}
       {showAlertSuccess && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">

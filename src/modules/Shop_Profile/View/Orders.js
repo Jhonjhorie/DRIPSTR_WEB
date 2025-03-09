@@ -343,7 +343,7 @@ function Orders({ shopOwnerId }) {
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
                     On transit Orders
                   </h2>
-                  {orders.ship.length > 0 ? (
+                  {orders.shipped.length > 0 ? (
                     orders.shipped.map((order) => (
                       <OrderCard
                         key={order.id}
