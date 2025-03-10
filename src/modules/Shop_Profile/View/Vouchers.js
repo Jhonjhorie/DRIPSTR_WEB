@@ -29,8 +29,16 @@ function Vouchers() {
   const [showAlertSent, setShowAlertSent] = React.useState(false); // Alert Sent
   const [showAlertSentNosel, setShowAlertSentNosel] = React.useState(false); // Alert Sent
   const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete
+  const [showAlertDeac, setShowAlertDeac] = React.useState(false); // Alert Deactivate
+  const [showAlertAc, setShowAlertAc] = React.useState(false); // Alert Activate
   const [showNoSelectedVoucher, setShowNoSelDelVocuher] = React.useState(false); // Alert Delete
+  const [showNoSelectedDeacVoucher, setShowNoSelDeacVocuher] =
+    React.useState(false); // Alert Deactivate
+  const [showNoSelectedAcVoucher, setShowNoSelAcVocuher] =
+    React.useState(false); // Alert activate
   const [editVoucher, setEditVoucher] = useState(false);
+  const [deacVoucher, setDeacVoucher] = useState(false);
+  const [acVoucher, setAcVoucher] = useState(false);
   const [showNoSelectedeEditVoucher, setShopEdit] = useState(false);
   const [followersCount, setTotalFollowers] = useState(0); // Initialize with 0
   const [followerDetails, setFollowerDetails] = useState([]); // Initialize followers info
@@ -165,7 +173,12 @@ function Vouchers() {
       setError("Please select a shop to create a voucher for.");
       return;
     }
-    if (!vouchLimit.trim() || !vouchLimit2.trim() || !vouchLabel.trim() || !expiryDate.trim()) {
+    if (
+      !vouchLimit.trim() ||
+      !vouchLimit2.trim() ||
+      !vouchLabel.trim() ||
+      !expiryDate.trim()
+    ) {
       console.error("Field Required");
       setShowAlertNull(true);
       setTimeout(() => {
@@ -186,7 +199,8 @@ function Vouchers() {
             discount: parseFloat(vouchLimit),
             condition: parseFloat(vouchLimit2),
             merchant_Id: selectedShopId,
-            expiration: expiryDate
+            expiration: expiryDate,
+            isDeactivate: false,
           },
         ]);
 
@@ -220,7 +234,9 @@ function Vouchers() {
     try {
       const { data: vouchers, error } = await supabase
         .from("merchant_Vouchers")
-        .select("id, voucher_name, condition, discount, expiration")
+        .select(
+          "id, voucher_name, condition, discount, expiration, isDeactivate"
+        )
         .eq("merchant_Id", selectedShopId);
 
       if (error) {
@@ -355,6 +371,72 @@ function Vouchers() {
     }
   };
 
+  const handleDeacVouchers = async () => {
+    if (!selectedShopId || selectedVouchers.length === 0) {
+      console.error("No shop selected or no vouchers selected for deletion.");
+      return;
+    }
+
+    try {
+      const { error: updateError } = await supabase
+        .from("merchant_Vouchers")
+        .update({ isDeactivate: true })
+        .in(
+          "id",
+          selectedVouchers.map((voucher) => voucher.id)
+        )
+        .eq("merchant_Id", selectedShopId);
+
+      if (updateError) {
+        console.error("Error deleting vouchers:", updateError);
+        setError(updateError.message);
+      } else {
+        console.log("Vouchers deleted successfully");
+        setDeacVoucher(false);
+        setSelectedVouchers([]);
+        fetchVouchers();
+        setShowAlertDeac(true);
+        setTimeout(() => {
+          setShowAlertDeac(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Unexpected error deleting vouchers:", error);
+    }
+  };
+  const handleAcVouchers = async () => {
+    if (!selectedShopId || selectedVouchers.length === 0) {
+      console.error("No shop selected or no vouchers selected for deletion.");
+      return;
+    }
+
+    try {
+      const { error: updateError } = await supabase
+        .from("merchant_Vouchers")
+        .update({ isDeactivate: false })
+        .in(
+          "id",
+          selectedVouchers.map((voucher) => voucher.id)
+        )
+        .eq("merchant_Id", selectedShopId);
+
+      if (updateError) {
+        console.error("Error deleting vouchers:", updateError);
+        setError(updateError.message);
+      } else {
+        console.log("Vouchers deleted successfully");
+        setAcVoucher(false);
+        setSelectedVouchers([]);
+        fetchVouchers();
+        setShowAlertAc(true);
+        setTimeout(() => {
+          setShowAlertAc(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Unexpected error deleting vouchers:", error);
+    }
+  };
   const handleSendToFollowers = () => {
     if (selectedVouchers.length > 0) {
       setShowModal(true);
@@ -427,7 +509,28 @@ function Vouchers() {
       console.error("Unexpected error during voucher update:", error);
     }
   };
-
+  const handleDeacVoucherConfirmations = () => {
+    if (selectedVouchers.length > 0) {
+      setDeacVoucher(true);
+    } else {
+      console.log("No vouchers selected for deletion.");
+      setShowNoSelDeacVocuher(true);
+      setTimeout(() => {
+        setShowNoSelDeacVocuher(false);
+      }, 3000);
+    }
+  };
+  const handleAcVoucherConfirmations = () => {
+    if (selectedVouchers.length > 0) {
+      setAcVoucher(true);
+    } else {
+      console.log("No vouchers selected for deletion.");
+      setShowNoSelAcVocuher(true);
+      setTimeout(() => {
+        setShowNoSelAcVocuher(false);
+      }, 3000);
+    }
+  };
   const handleDelVoucherConfirmations = () => {
     if (selectedVouchers.length > 0) {
       setDelVoucher(true);
@@ -451,6 +554,8 @@ function Vouchers() {
     setShowModal(false);
     setDelVoucher(false);
     setEditVoucher(false);
+    setDeacVoucher(false);
+    setAcVoucher(false);
   };
   const limit = (e) => {
     let value = e.target.value;
@@ -533,7 +638,34 @@ function Vouchers() {
                 </button>
               </div>
             </div>
-            <div className="mt-2 h-[370px] relative">
+            {/* Functions manipulate data */}
+            <div className=" mt-2 h-[370px] relative">
+              <div className="">
+                <button
+                  onClick={handleAcVoucherConfirmations}
+                  className="font-semibold text-slate-800 flex justify-between w-full hover:bg-slate-300 duration-200 rounded-md p-1"
+                >
+                  Activate voucher{" "}
+                  <box-icon
+                    type="solid"
+                    name="coupon"
+                    color="#22C55E"
+                  ></box-icon>{" "}
+                </button>
+              </div>
+              <div>
+                <button
+                  onClick={handleDeacVoucherConfirmations}
+                  className="font-semibold text-slate-800 flex justify-between w-full hover:bg-slate-300 duration-200 rounded-md p-1"
+                >
+                  Deactivate voucher{" "}
+                  <box-icon
+                    type="solid"
+                    name="coupon"
+                    color="#F87171"
+                  ></box-icon>{" "}
+                </button>
+              </div>
               <div className="w-auto">
                 <button
                   onClick={handleSendToFollowers}
@@ -545,31 +677,31 @@ function Vouchers() {
               </div>
               <div>
                 <button
-                  onClick={handleDelVoucherConfirmations}
+                  onClick={handleEditVoucherConfirmations}
                   className="font-semibold text-slate-800 flex justify-between w-full hover:bg-slate-300 duration-200 rounded-md p-1"
                 >
-                  Delete Voucher{" "}
+                  Edit Voucher{" "}
                   <box-icon
                     type="solid"
-                    name="coupon"
+                    name="edit-alt"
                     color="#FAB12F"
                   ></box-icon>{" "}
                 </button>
               </div>
               <div>
                 <button
-                  onClick={handleEditVoucherConfirmations}
+                  onClick={handleDelVoucherConfirmations}
                   className="font-semibold text-slate-800 flex justify-between w-full hover:bg-slate-300 duration-200 rounded-md p-1"
                 >
-                  Edit Vouchers{" "}
+                  Delete Voucher{" "}
                   <box-icon
                     type="solid"
-                    name="coupon"
+                    name="trash"
                     color="#FAB12F"
                   ></box-icon>{" "}
                 </button>
               </div>
-              <div className="md:absolute w-full bottom-10 ">
+              <div className=" w-full bottom-10 ">
                 <div className="w-full flex justify-between">
                   <button
                     onClick={() => navigate("/shop/MerchantDashboard")}
@@ -586,13 +718,18 @@ function Vouchers() {
               </div>
             </div>
           </div>
-          <div className="w-full -mt-48 md:mt-0  md:w-3/4 h-[550px] rounded-md bg-slate-200  shadow-inner shadow-slate-500 overflow-scroll">
+          <div className="w-full -mt-36 md:mt-0  md:w-3/4 h-[550px] rounded-md bg-slate-200  shadow-inner shadow-slate-500 overflow-scroll">
             <div className="w-auto grid md:grid-cols-2 relative place-items-center gap-3 p-3">
               {vouchers.length > 0 ? (
                 vouchers.map((voucher) => (
                   <div
                     key={voucher.id}
-                    className="h-16 w-full cursor-pointer border-primary-color border-t-2 shadow-sm shadow-primary-color relative bg-slate-800 hover:scale-95 duration-300 mt-1 flex place-items-center rounded-md"
+                    className={`h-16 w-full cursor-pointer border-t-2 shadow-sm relative bg-slate-800 hover:scale-95 duration-300 mt-1 flex place-items-center rounded-md
+                    ${
+                      voucher.isDeactivate
+                        ? "border-red-500  shadow-red-500"
+                        : "border-primary-color shadow-primary-color"
+                    }`}
                     onClick={() => handleCheckboxChange(voucher)}
                   >
                     <div className="h-full w-full rounded-md relative overflow-hidden bg-slate-100 p-1 px-2">
@@ -630,9 +767,9 @@ function Vouchers() {
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <div>
-                            <p className="text-slate-800  iceland-regular ">
+                        <div className="text-right ">
+                        <div className="w-full overflow-hidden">
+                            <p className="text-slate-800  iceland-regular  truncate block ">
                               Minimum spend of
                               <span className="text-slate-800 font-semibold">
                                 {" "}
@@ -689,7 +826,6 @@ function Vouchers() {
           </div>
         </div>
       </div>
-
       {/* MODALS CONFIRMATIONS */}
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -801,7 +937,6 @@ function Vouchers() {
           </div>
         </div>
       )}
-
       {/* MODALS EDIT */}
       {editVoucher && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -927,6 +1062,98 @@ function Vouchers() {
           </div>
         </div>
       )}
+      {deacVoucher && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-md shadow-md">
+            <h2 className="text-xl text-center font-bold mb-4 text-slate-800">
+              Deactivate this Vouchers ?
+            </h2>
+            <ul>
+              {selectedVouchers.length > 0 ? (
+                selectedVouchers.map((voucher, index) => (
+                  <li
+                    key={voucher.id || index}
+                    className="mb-2 text-custom-purple"
+                  >
+                    <span className="text-violet-600 font-semibold ">
+                      "{voucher.voucher_name}"
+                    </span>{" "}
+                    {Number(voucher.discount).toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
+                    % OFF - Minimum Spend: ₱
+                    {Number(voucher.condition).toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </li>
+                ))
+              ) : (
+                <li>No vouchers selected.</li>
+              )}
+            </ul>
+            <div className="flex w-full gap-2 justify-between">
+              <button
+                onClick={closeModal}
+                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeacVouchers}
+                className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Deactivate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {acVoucher && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-5 rounded-md shadow-md">
+            <h2 className="text-xl text-center font-bold mb-4 text-slate-800">
+              Activate this Vouchers ?
+            </h2>
+            <ul>
+              {selectedVouchers.length > 0 ? (
+                selectedVouchers.map((voucher, index) => (
+                  <li
+                    key={voucher.id || index}
+                    className="mb-2 text-custom-purple"
+                  >
+                    <span className="text-violet-600 font-semibold ">
+                      "{voucher.voucher_name}"
+                    </span>{" "}
+                    {Number(voucher.discount).toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
+                    % OFF - Minimum Spend: ₱
+                    {Number(voucher.condition).toLocaleString("en-PH", {
+                      minimumFractionDigits: 2,
+                    })}
+                  </li>
+                ))
+              ) : (
+                <li>No vouchers selected.</li>
+              )}
+            </ul>
+            <div className="flex w-full gap-2 justify-between">
+              <button
+                onClick={closeModal}
+                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAcVouchers}
+                className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
+              >
+                Activate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* ALLERTS ADD VOUCHERS */}
       {showAlert && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
@@ -994,7 +1221,6 @@ function Vouchers() {
         </div>
       )}
       {/* ALLERTS SENT VOUCHERS */}
-
       {showAlertSent && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
@@ -1125,7 +1351,137 @@ function Vouchers() {
           </div>
         </div>
       )}
+      {/* ALLERTS DEACTIVATE VOUCHERS */}
+      {showAlertDeac && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span>Selected Voucher Deactivated!</span>
+          </div>
+        </div>
+      )}
+      {/* ALLERTS ACTIVATE VOUCHERS */}
+      {showAlertAc && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 left-28 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span>Selected Voucher Activated!</span>
+          </div>
+        </div>
+      )}
       {/* ALLERTS DELETE VOUCHERS */}
+      {showNoSelectedDeacVoucher && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-52 right-10 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span>Select a Voucher to be Deactivated</span>
+          </div>
+        </div>
+      )}
+      {showNoSelectedAcVoucher && (
+        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-52 right-10 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="h-6 w-6 shrink-0 stroke-current"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span>Select a Voucher to be Activated</span>
+          </div>
+        </div>
+      )}
       {showNoSelectedVoucher && (
         <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-52 left-28 -z-10 justify-items-center content-center">

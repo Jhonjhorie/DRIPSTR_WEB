@@ -10,85 +10,117 @@ const Topartistcom = () => {
   const [artists, setArtists] = useState([]);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
+  const [showAllTopArtists, setShowAllTopArtists] = useState(false);
 
   useEffect(() => {
-    const fetchArtists = async () => {
-      const { data, error } = await supabase.from("artist").select("*");
-      if (error) {
-        console.error("Error fetching artists:", error);
-      } else {
-        setArtists(data);
-      }
-    };
-
-    fetchArtists();
+    fetchArtistsWithLikes();
   }, []);
 
-  //search with filter
-  const filteredArtists = artists.filter((artist) => {
-    const matchesFilter = filter === "All" || artist.art_Type === filter;
-    const name = artist.artist_Name ? artist.artist_Name.toLowerCase() : "";
-    const fullName = artist.full_Name ? artist.full_Name.toLowerCase() : "";
-    const matchesSearch =
-      name.includes(search.toLowerCase()) ||
-      fullName.includes(search.toLowerCase());
+  const fetchArtistsWithLikes = async () => {
+    try {
+      const { data: artistData, error: artistError } = await supabase
+        .from("artist")
+        .select("*");
 
-    return matchesFilter && matchesSearch;
-  });
+      if (artistError) {
+        console.error("Error fetching artists:", artistError);
+        return;
+      }
 
-  const artTypes = [
-    "All",
-    ...new Set(artists.map((artist) => artist.art_Type).filter(Boolean)),
-  ];
+      const { data: artworks, error: artworkError } = await supabase
+        .from("artist_Arts")
+        .select("artist_Id, likes");
+
+      if (artworkError) {
+        console.error("Error fetching artworks:", artworkError);
+        return;
+      }
+
+      const likeCounts = {};
+      artworks.forEach(({ artist_Id, likes }) => {
+        if (artist_Id) {
+          likeCounts[artist_Id] =
+            (likeCounts[artist_Id] || 0) + (likes?.length || 0);
+        }
+      });
+
+      const artistsWithLikes = artistData.map((artist) => ({
+        ...artist,
+        likes: likeCounts[artist.id] || 0,
+      }));
+
+      const sortedArtists = [...artistsWithLikes].sort(
+        (a, b) => b.likes - a.likes
+      );
+
+      setArtists(sortedArtists);
+    } catch (err) {
+      console.error("Unexpected error:", err);
+    }
+  };
+
+  // Search and filter
+  const filteredArtists = artists
+    .filter((artist) => {
+      const matchesFilter = filter === "All" || artist.art_Type === filter;
+      const name = artist.artist_Name ? artist.artist_Name.toLowerCase() : "";
+      const fullName = artist.full_Name ? artist.full_Name.toLowerCase() : "";
+      const matchesSearch =
+        name.includes(search.toLowerCase()) ||
+        fullName.includes(search.toLowerCase());
+
+      return matchesFilter && matchesSearch;
+    })
 
   return (
     <div>
-      <div className="mb-4 flex flex-col md:flex-row items-center justify-between gap-3">
-        {/* Search Bar */}
-        <div>
-          <input
-            type="text"
-            placeholder="Search artist..."
-            className="px-4 py-1 rounded-md input-bordered w-60 bg-white text-black"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div>
-          <select
-            className="px-4 py-1 text-slate-900 border w-56 text-sm rounded-md bg-white shadow-md cursor-pointer"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          >
-            {artTypes.map((type, index) => (
-              <option key={index} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="flex gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Search artists..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="px-4 py-1 text-slate-900 border text-sm rounded-md bg-white shadow-md cursor-pointer"
+        />
+
+        <select
+        className="px-4 py-1 text-slate-900 border text-sm rounded-md bg-white shadow-md cursor-pointer"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        >
+          {[
+            "All",
+            ...new Set(
+              artists.map((artist) => artist.art_Type).filter(Boolean)
+            ),
+          ].map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+
+       
       </div>
 
-      <div className="overflow-x-auto rounded-box p-5  border-base-content/5 bg-base-300 border-2 border-white text-slate-200">
+      <div className="overflow-x-auto rounded-box md:p-5 border-base-content/5 shadow-inner shadow-slate-600 bg-base-300 border-2 border-white text-slate-900">
         <table className="table">
-          {/* head */}
-          <thead className="">
-            <tr className="text-white text-[15px]">
-              <th></th>
+          <thead>
+            <tr className="text-black text-center text-[15px]">
+              <th>Placement</th>
               <th>Name</th>
               <th>Art Type</th>
-              <th>Bio</th>
-              <th></th>
+              <th>Artist Information</th>
+              <th>Likes</th>
+              <th>Details</th>
             </tr>
           </thead>
-          <tbody className="h overflow-hidden">
+          <tbody>
             {filteredArtists.map((artist, index) => (
-              <tr className="h-10" key={artist.id}>
-                <th>
-                  <div className="text-4xl text-white font-thin opacity-30 tabular-nums">
-                    {String(index + 1).padStart(2, "0")}
-                  </div>
-                </th>
+              <tr key={artist.id} className="h-10">
+                <td className="text-4xl text-slate-900 text-center font-thin opacity-75">
+                  {String(index + 1).padStart(2, "0")}
+                </td>
                 <td>
                   <div className="flex items-center gap-3">
                     <div className="avatar">
@@ -101,9 +133,6 @@ const Topartistcom = () => {
                     </div>
                     <div>
                       <div className="font-bold">{artist.artist_Name}</div>
-                      <div className="text-sm opacity-50">
-                        {artist.full_Name}
-                      </div>
                     </div>
                   </div>
                 </td>
@@ -113,8 +142,8 @@ const Topartistcom = () => {
                   <span
                     className={`badge badge-sm ${
                       artist.is_Premium
-                        ? "bg-yellow-500  text-black"
-                        : "bg-gray-200 text-black"
+                        ? "bg-yellow-500 text-black glass"
+                        : "bg-custom-purple text-white glass"
                     }`}
                   >
                     {artist.is_Premium ? "Premium Artist" : "Standard Artist"}
@@ -127,28 +156,22 @@ const Topartistcom = () => {
                       : artist.artist_Bio
                     : "No Bio Available"}
                 </td>
-
-                <th>
+                <td className="text-center font-bold">{artist.likes}</td>
+                <td className="">
                   <button
-                    onClick={() => {
-                      if (artist.id) {
-                        navigate(`/arts/ArtistPage/${artist.id}`);
-                      } else {
-                        console.error(
-                          "Artist ID is undefined! Check if artist_Id exists in your database."
-                        );
-                      }
-                    }}
-                    className="btn btn-ghost btn-xs"
+                   onClick={() => {
+                    sessionStorage.setItem("previousPage", window.location.pathname); 
+                    navigate(`/arts/ArtistPage/${artist.id}`);
+                  }}
+                    className="btn btn-ghost z-20 btn-xs rounded-sm"
                   >
                     Details
                   </button>
-                </th>
+                </td>
+              
               </tr>
             ))}
           </tbody>
-
-          {/* foot */}
         </table>
       </div>
     </div>

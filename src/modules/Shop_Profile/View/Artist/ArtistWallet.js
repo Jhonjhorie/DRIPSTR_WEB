@@ -230,12 +230,12 @@ function ArtistWallet() {
         throw updateWalletError;
       }
       //for expiration date of yhe subs
-      const currentDate = new Date();
-      const expirationDate = new Date();
-      expirationDate.setDate(currentDate.getDate() + 30);
-      const formattedExpirationDate = expirationDate
-        .toISOString()
-        .split("T")[0];
+      // const currentDate = new Date();
+      // const expirationDate = new Date();
+      // expirationDate.setDate(currentDate.getDate() + 30);
+      // const formattedExpirationDate = expirationDate
+      //   .toISOString()
+      //   .split("T")[0];
       // Insert subscription record for Wallet payment
       const { error: subscriptionError } = await supabase
         .from("artist_Subscription")
@@ -246,7 +246,6 @@ function ArtistWallet() {
             payment: "Dripstr Wallet",
             reason: reason,
             status: "Completed",
-            subs_Enddate: formattedExpirationDate,
           },
         ]);
 

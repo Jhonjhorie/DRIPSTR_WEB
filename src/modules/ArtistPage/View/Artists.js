@@ -801,6 +801,7 @@ function Artists() {
                         onClick={() => {
                           console.log("Selected Art Data:", art);
                           if (art.artists && art.artists.id) {
+                            sessionStorage.setItem("previousPage", window.location.pathname); 
                             navigate(`/arts/ArtistPage/${art.artists.id}`);
                           } else {
                             console.error(
@@ -888,6 +889,7 @@ function Artists() {
                             console.log("Artist Data:", art.artist);
 
                             if (art.artists && art.artists.id) {
+                              sessionStorage.setItem("previousPage", window.location.pathname); 
                               navigate(`/arts/ArtistPage/${art.artists.id}`);
                             } else {
                               console.error(
@@ -1002,6 +1004,7 @@ function Artists() {
                   console.log("Artist Data:", selectArt.artist);
 
                   if (selectArt.artists && selectArt.artists.id) {
+                    sessionStorage.setItem("previousPage", window.location.pathname); 
                     navigate(`/arts/ArtistPage/${selectArt.artists.id}`);
                   } else {
                     console.error(

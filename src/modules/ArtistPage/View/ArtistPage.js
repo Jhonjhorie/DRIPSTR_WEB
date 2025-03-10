@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import FormCommision from "../Component/FormCommission";
 import History from "../Component/History";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCrown } from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect } = React;
 
@@ -175,49 +177,48 @@ function ArtistPage() {
   //Fetch artist arts
   useEffect(() => {
     const fetchArtistArts = async () => {
-      if (!id) return; 
-  
+      if (!id) return;
+
       try {
         console.log("Fetching artworks for artist ID:", id);
-  
+
         const { data, error } = await supabase
-          .from("artist_Arts") 
+          .from("artist_Arts")
           .select("*")
           .eq("status", "Approved")
           .eq("artist_Id", id);
-  
+
         if (error) {
           console.error("Error fetching artworks:", error);
         } else {
           console.log("Fetched Artworks (before setting state):", data);
-  
+
           const filteredData = data.filter((art) => art.status === "Approved");
           console.log("Filtered Artworks:", filteredData);
-  
+
           setArtistArts(filteredData || []);
         }
       } catch (err) {
         console.error("Unexpected error:", err);
       }
     };
-  
+
     fetchArtistArts();
   }, [id]);
-  
 
   const handleLike = async (artId, likes = []) => {
     // Ensure likes is an array
     let updatedLikes = Array.isArray(likes) ? likes : [];
-  
+
     updatedLikes = updatedLikes.includes(userId)
-      ? updatedLikes.filter((id) => id !== userId) 
-      : [...updatedLikes, userId]; 
-  
+      ? updatedLikes.filter((id) => id !== userId)
+      : [...updatedLikes, userId];
+
     const { error } = await supabase
       .from("artist_Arts")
       .update({ likes: updatedLikes })
       .eq("id", artId);
-  
+
     if (!error) {
       setArtistArts((prevArts) =>
         prevArts.map((art) =>
@@ -229,7 +230,6 @@ function ArtistPage() {
     }
     fetchTotalLikes();
   };
-  
 
   const handleSelectArtReport = (art2) => {
     if (!art2) {
@@ -381,7 +381,7 @@ function ArtistPage() {
           .select("*")
           .eq("artist_Id", id)
           .eq("status", "Approved");
-          
+
         if (error) {
           console.error("Error fetching artist arts:", error.message);
         } else {
@@ -803,199 +803,210 @@ function ArtistPage() {
     <div className="h-full w-full relative bg-slate-300  ">
       <div className="absolute z-10 top-5 left-5">
         <button
-          onClick={() => navigate("/arts/Artists")}
+          onClick={() => {
+            const previousPage = sessionStorage.getItem("previousPage") || "/arts/Artists"; 
+            navigate(previousPage);
+          }}
           className="hover:scale-90 duration-300"
         >
           {" "}
           <box-icon name="share" type="solid" size="40px"></box-icon>
         </button>
       </div>
-      <div
-        className={`${
-          artist?.is_Premium
-            ? "bg-gradient-to-b from-violet-500 to-gray-200"
-            : "bg-gray-200"
-        } md:flex gap-2 w-full h-auto  justify-center p-2 `}
-      >
+      <div className="px-5 md:px-20 rounded-md ">
         <div
-          className={`h-80 w-80 mt-3 ${
-            artist?.is_Premium ? "bg-yellow-500" : "bg-violet-900"
-          } glass mx-auto md:mx-0 rounded-md shadow-md p-2`}
+          className={`${
+            artist?.is_Premium
+              ? "bg-gradient-to-b from-violet-500 to-gray-900"
+              : "bg-gray-200 "
+          } md:flex gap-2 w-full h-auto relative rounded-b-3xl border-b-2 border-violet-900 justify-center p-2 `}
         >
-          <img
-            src={artist.artist_Image}
-            alt={artist.artist_Name}
-            className="object-cover rounded-sm h-full w-full"
-          />
-        </div>
-        <div className=" gap-2  ">
-          <div className="flex mt-2 md:mt-0 justify-between">
-            <div className="flex gap-2 items-center">
-              <h1 className="text-violet-900 font-bold text-2xl p-2">
-                {artist.artist_Name}
-              </h1>
-              <div>
-                {artist.is_Premium && (
-                  <div className="badge badge-warning border-2 border-slate-100">
-                    DripStar
-                  </div>
-                )}
-              </div>
-              <div>
-                  <div className="badge bg-custom-purple border-2 text-white text-sm border-slate-100">
-                   {artist.art_Type}
-                  </div>
-              </div>
+          <div
+            className={`h-80 w-80 mt-3 ${
+              artist?.is_Premium ? "bg-yellow-500" : "bg-violet-900"
+            } glass mx-auto md:mx-0 relative rounded-md shadow-md p-2`}
+          >
+            <img
+              src={artist.artist_Image || successEmote}
+              alt={artist.artist_Name}
+              className="object-cover rounded-sm h-full w-full"
+            />
+            <div>
+              {artist?.is_Premium && (
+                <div className="absolute z-30 -left-2 -top-2 flex justify-end">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-black text-yellow-400 rounded-full text-sm font-medium">
+                    <FontAwesomeIcon icon={faCrown} /> Premium Artist
+                  </span>
+                </div>
+              )}
             </div>
-            <div className="flex gap-2">
-              <div
-                onClick={async () => {
-                  if (currentUser?.id === artist?.owner_Id) {
-                    setShowAlertYO(true);
-                    setTimeout(() => {
-                      setShowAlertYO(false);
-                    }, 3000);
-                  } else {
-                    setMessageModal(true);
+          </div>
+          <div className=" gap-2   ">
+            <div className="flex mt-2 md:mt-0 justify-between">
+              <div className="flex gap-2 items-center">
+                <h1 className="text-violet-900 font-bold [text-shadow:_1px_1px_1px_white,_-1px_-1px_1px_white,_1px_-1px_1px_white,_-1px_1px_1px_white] text-2xl p-2">
+                  {artist.artist_Name}
+                </h1>
 
-                    // Update message status in Supabase (mark as read)
-                    const { error } = await supabase
-                      .from("artist_Messages")
-                      .update({ message_dot: false })
-                      .eq("sender_Id", currentUser?.id)
-                      .eq("artist_Id", artist?.id);
-
-                    if (error) {
-                      console.error(
-                        "Error updating message status:",
-                        error.message
-                      );
-                    } else {
-                      setMessageStatus(false); // Hide red dot locally
-                    }
-                  }
-                }}
-                className="relative flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
-              >
-                Message
-                <box-icon
-                  name="message-dots"
-                  type="solid"
-                  color="white"
-                ></box-icon>
-                {messageStatus && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                )}
+                <div>
+                  <div className="badge bg-custom-purple border-2 text-white text-sm border-slate-100 ">
+                    {artist.art_Type}
+                  </div>
+                </div>
               </div>
+              <div className="flex gap-2">
+                <div
+                  onClick={async () => {
+                    if (currentUser?.id === artist?.owner_Id) {
+                      setShowAlertYO(true);
+                      setTimeout(() => {
+                        setShowAlertYO(false);
+                      }, 3000);
+                    } else {
+                      setMessageModal(true);
 
-              <button
-                onClick={isFollowing ? handleUnfollow : handleFollow}
-                className={`flex items-center gap-4 rounded-md hover:scale-95 duration-200 cursor-pointer justify-center font-semibold iceland-regular glass px-2 
+                      // Update message status mark as read
+                      const { error } = await supabase
+                        .from("artist_Messages")
+                        .update({ message_dot: false })
+                        .eq("sender_Id", currentUser?.id)
+                        .eq("artist_Id", artist?.id);
+
+                      if (error) {
+                        console.error(
+                          "Error updating message status:",
+                          error.message
+                        );
+                      } else {
+                        setMessageStatus(false); // Hide red dot locally
+                      }
+                    }
+                  }}
+                  className="relative flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
+                >
+                  Message
+                  <box-icon
+                    name="message-dots"
+                    type="solid"
+                    color="white"
+                  ></box-icon>
+                  {messageStatus && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                  )}
+                </div>
+
+                <button
+                  onClick={isFollowing ? handleUnfollow : handleFollow}
+                  className={`flex items-center gap-4 rounded-md hover:scale-95 duration-200 cursor-pointer justify-center font-semibold iceland-regular glass px-2 
     ${
       isFollowing
         ? "bg-slate-800  hover:bg-slate-600 text-white"
         : "bg-violet-800 hover:bg-violet-600 text-slate-100"
     }`}
-              >
-                {isFollowing ? "Unfollow" : "Follow"}
-                <box-icon
-                  name={isFollowing ? "bookmark-minus" : "bookmark-plus"}
-                  type="solid"
-                  color="white"
-                ></box-icon>
-              </button>
+                >
+                  {isFollowing ? "Unfollow" : "Follow"}
+                  <box-icon
+                    name={isFollowing ? "bookmark-minus" : "bookmark-plus"}
+                    type="solid"
+                    color="white"
+                  ></box-icon>
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="h-auto flex flex-col ">
-            <div className=" md:h-32 h-auto mt-2 flex flex-col gap-4 md:flex-row text-slate-900 my-auto relative rounded-t-md bg-slate-100 stats shadow">
-              <div className=" w-full absolute top-0 left-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
-                {" "}
-              </div>
+            <div className="h-auto w-full ">
+              <div className=" md:h-32 h-auto mt-2 flex flex-col gap-4 md:flex-row text-slate-900 my-auto relative rounded-t-md bg-slate-100 stats shadow">
+                <div className=" w-full absolute top-0 left-0 bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+                  {" "}
+                </div>
 
-              <div className="stat  ">
-                <div className="stat-figure text-primary">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    className="inline-block h-8 w-8 stroke-current"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                    ></path>
-                  </svg>
-                </div>
-                <div className="stat-title text-slate-900">Total Likes</div>
-                <div className="stat-value text-primary">{totalLikes}</div>
-                <div className="stat-desc text-slate-900">
-                  Across all artworks
-                </div>
-              </div>
-
-              <div className="stat -mt-7 md:-mt-0">
-                <div className="stat-figure text-secondary">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    className="inline-block h-8 w-8 stroke-current"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
-                    ></path>
-                  </svg>
-                </div>
-                <div className="stat-title text-slate-900">Followers</div>
-                <div className="stat-value text-secondary">
-                  {totalFollowers}
-                </div>
-                <div className="stat-desc text-slate-900">All over DRIPSTR</div>
-              </div>
-
-              <div className="stat -mt-7 md:-mt-0">
-                <div className="stat-figure text-secondary">
-                  <div className="w-20 h-20">
-                    <img src={star} alt="Star Icon" />
+                <div className="stat  ">
+                  <div className="stat-figure text-primary">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      className="inline-block h-8 w-8 stroke-current"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div className="stat-title text-slate-900">Total Likes</div>
+                  <div className="stat-value text-primary">{totalLikes}</div>
+                  <div className="stat-desc text-slate-900">
+                    Across all artworks
                   </div>
                 </div>
 
-                <div className="stat-value">
-                  {artistRank ? (
-                    <div className="flex items-center gap-2">
-                      <span className="text-4xl  font-bold">
-                        #{artistRank.rank}
-                      </span>
-                    </div>
-                  ) : (
-                    <span>Not ranked yet</span>
-                  )}
+                <div className="stat -mt-7 md:-mt-0">
+                  <div className="stat-figure text-secondary">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      className="inline-block h-8 w-8 stroke-current"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div className="stat-title text-slate-900">Followers</div>
+                  <div className="stat-value text-secondary">
+                    {totalFollowers}
+                  </div>
+                  <div className="stat-desc text-slate-900">
+                    All over DRIPSTR
+                  </div>
                 </div>
 
-                <div className="stat-title text-slate-900">
-                  Rank based on Like
-                </div>
-                <div className="stat-desc text-secondary">
-                  <span>Out of {countArtist} artists</span>
+                <div className="stat -mt-7 md:-mt-0">
+                  <div className="stat-figure text-secondary">
+                    <div className="w-20 h-20">
+                      <img src={star} alt="Star Icon" />
+                    </div>
+                  </div>
+
+                  <div className="stat-value">
+                    {artistRank ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-4xl  font-bold">
+                          #{artistRank.rank}
+                        </span>
+                      </div>
+                    ) : (
+                      <span>Not ranked yet</span>
+                    )}
+                  </div>
+
+                  <div className="stat-title text-slate-900">
+                    Rank based on Like
+                  </div>
+                  <div className="stat-desc text-secondary">
+                    <span>Out of {countArtist} artists</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="w-full h-auto p-2 md:p-0 ">
-              <div className="mt-2 w-full md:w-1/2 h-36  overflow-hidden overflow-y-scroll bg-white md:absolute p-2 rounded-md shadow-md">
-                <h1 className="text-slate-800 font-semibold mb-2">
-                  Artist Description:
-                </h1>
-                <p className="text-sm text-slate-800">{artist.artist_Bio}</p>
+              <div className="w-full h-auto p-2 md:p-0 ">
+                <div className="mt-2 w-full md:w-1/2 h-36  overflow-hidden overflow-y-scroll bg-white md:absolute p-2 rounded-md shadow-md">
+                  <h1 className="text-slate-800 font-semibold mb-2">
+                    Artist Description:
+                  </h1>
+                  <p className="text-sm text-slate-800">{artist.artist_Bio}</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
       {/* Artist Arts */}
       <div className="h-auto relative p-2 pb-10 md:px-10 w-full bg-slate-300 ">
         <div className="columns-2 sm:columns-3 mt-5 md:columns-4 gap-2 px-4 pb-10 space-y-2">
