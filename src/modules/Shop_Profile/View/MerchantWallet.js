@@ -26,6 +26,7 @@ function MerchantWallet() {
   const phonedigit = (e) => {
     validateMinLength2(e, 11);
   };
+  const [showWalletModal, setShowWalletModal] = useState(false); // show a wallet for verification
   const fetchUserProfileAndShop = async () => {
     setLoading(true);
 
@@ -48,7 +49,7 @@ function MerchantWallet() {
         const { data: shop, error: shopError } = await supabase
           .from("shop")
           .select(
-            "shop_name, id, address, description, contact_number, shop_image, shop_BusinessPermit"
+            "shop_name, id, address, description, contact_number, shop_image, shop_BusinessPermit, wallet"
           )
           .eq("owner_Id", user.id)
           .single();
@@ -60,6 +61,10 @@ function MerchantWallet() {
         console.log("Fetched shop data:", shop);
         setShopData(shop);
         setMerchantId(shop.id);
+
+        if (!shop.wallet) {
+          setShowWalletModal(true);
+        }
       } else {
         console.log("No user is signed in.");
         setError("No user is signed in.");
@@ -75,6 +80,30 @@ function MerchantWallet() {
   useEffect(() => {
     fetchUserProfileAndShop();
   }, []);
+
+  //insert the id to the shop wallet column
+  const handleConfirmWallet = async () => {
+    if (!walletData || !walletData.id) {
+      console.error("No wallet data found.");
+      return;
+    }
+  
+    try {
+      const { error } = await supabase
+        .from("shop")
+        .update({ wallet: walletData.id }) 
+        .eq("owner_Id", currentUser.id); 
+  
+      if (error) {
+        throw error;
+      }
+  
+      console.log("Wallet ID successfully linked to shop.");
+      setShowWalletModal(false);
+    } catch (error) {
+      console.error("Error updating wallet:", error.message);
+    }
+  };
 
   const fetchWalletData = async () => {
     setLoading(true);
@@ -92,7 +121,7 @@ function MerchantWallet() {
 
     const { data, error } = await supabase
       .from("merchant_Wallet")
-      .select("revenue, owner_Name, owner_ID, number, valid_ID")
+      .select("id, revenue, owner_Name, owner_ID, number, valid_ID")
       .eq("owner_ID", user.id)
       .single();
 
@@ -1249,6 +1278,25 @@ function MerchantWallet() {
               />
             </svg>
             <span>Successfully Avail SUBSCRIPTION!</span>
+          </div>
+        </div>
+      )}
+      {showWalletModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Welcome to Your Merchant Wallet
+            </h2>
+            <p className="mt-3 text-gray-600">
+              Please click <span className="font-bold">"CONFIRM"</span> to set
+              up your wallet information.
+            </p>
+            <button
+              className="mt-5 w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200"
+              onClick={handleConfirmWallet}
+            >
+              Confirm
+            </button>
           </div>
         </div>
       )}

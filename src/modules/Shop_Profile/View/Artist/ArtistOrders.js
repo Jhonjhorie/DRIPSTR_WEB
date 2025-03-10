@@ -10,7 +10,7 @@ import drp from "@/assets/DrpTxt.png";
 import logo from "@/assets/shop/shoplogo.jpg";
 import sample3 from "@/assets/images/samples/5.png";
 import sample2 from "@/assets/images/samples/10.png";
-import hmmmEmote from "@/assets/emote/hmmm.png";
+import hmmmEmote from "@/assets/emote/success.png";
 import { supabase } from "@/constants/supabase";
 
 const { useState, useEffect, useRef } = React;
@@ -355,7 +355,7 @@ function AristOrders() {
                     <img
                       src={
                         message.profiles?.profile_picture ||
-                        "/default-avatar.png"
+                        hmmmEmote
                       }
                       alt={`Profile picture of ${
                         message.profiles?.full_name || "User"
@@ -416,7 +416,8 @@ function AristOrders() {
                     <div className="flex gap-2 place-items-center">
                       <div className="h-12 w-12 border-[2px] border-primary-color rounded-full">
                         <img
-                          src={selectedUser.photo}
+                    
+                          src={selectedUser.photo || hmmmEmote}
                           className="h-full w-full object-cover rounded-full"
                           sizes="100%"
                         />
@@ -461,9 +462,9 @@ function AristOrders() {
                                   <div className="chat-image avatar mr-3">
                                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300">
                                       <img
-                                        src={selectedUser.photo}
+                                        src={selectedUser.photo || hmmmEmote}
                                         alt={
-                                          message.sender?.full_name || "Sender"
+                                          message.sender?.full_name 
                                         }
                                         className="w-full h-full object-cover"
                                       />

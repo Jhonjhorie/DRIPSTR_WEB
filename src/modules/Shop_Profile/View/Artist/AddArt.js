@@ -244,7 +244,7 @@ function ArtistAddArts() {
               className="absolute top-2 right-2 bg-white hover:bg-gray-200 duration-150 rounded-full p-1"
               onClick={closeModal}
             >
-              ❌
+                <box-icon name='x-circle'></box-icon>
             </button>
 
             <div className="h-auto md:w-1/2 w-full rounded-md">
@@ -272,7 +272,7 @@ function ArtistAddArts() {
                 id="artName"
                 value={artName}
                 onChange={(e) => setArtName(e.target.value)}
-                className={`w-full p-1 mb-2 rounded-md bg-slate-300 font-semibold ${isEditable ? "text-custom-purple" : "text-slate-500"
+                className={`w-full p-1 mb-2 rounded-md bg-slate-300 text-sm ${isEditable ? "text-custom-purple" : "text-slate-500"
                   }`}
                 readOnly={!isEditable}
               />
@@ -284,7 +284,7 @@ function ArtistAddArts() {
                 id="artDescription"
                 value={artDescription}
                 onChange={(e) => setArtDescription(e.target.value)} // Update state on change
-                className={`w-full resize-none p-1 rounded-md bg-slate-300 font-semibold ${isEditable ? "text-custom-purple" : "text-slate-500"
+                className={`w-full resize-none p-1 rounded-md bg-slate-300 text-sm ${isEditable ? "text-custom-purple" : "text-slate-500"
                   }`}
                 readOnly={!isEditable}
               />
@@ -370,8 +370,8 @@ function ArtistAddArts() {
               />
             </div>
 
-            <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
-              {selectedArt.art_Name} Page Updated Successfully
+            <h2 className="text-2xl text-center font-bold iceland-regular mb-4 text-slate-900 ">
+              {selectedArt.art_Name} Updated Successfully
             </h2>
             <div
               onClick={closeModal}

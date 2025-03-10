@@ -714,9 +714,10 @@ function Artists() {
                 Premium Arts
               </button>
             </div>
+
             <div
             onClick={() => navigate("/arts/topArtist")}
-            className="flex items-center text-slate-900 cursor-pointer hover:link  justify-center gap-2 text-center font-semibold">
+            className="flex items-center duration-200 hover:bg-yellow-500 hover:scale-95 bg-slate-50 rounded px-2 text-slate-900 cursor-pointer  justify-center gap-2 text-center font-semibold">
               TOP ARTIST
               <box-icon type="solid" name="crown"></box-icon>
             </div>

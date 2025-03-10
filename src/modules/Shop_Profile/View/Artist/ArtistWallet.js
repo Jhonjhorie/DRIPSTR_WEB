@@ -32,6 +32,7 @@ function ArtistWallet() {
   const [showAlertSubscription, setShowSubscription] = useState(false);
   const [activeTabSubs, setActiveTabSubs] = useState("Def");
   const [inquiryText, setInquiryText] = useState("");
+  const [showWalletModal, setShowWalletModal] = useState(false); // show a wallet for verification
   const fetchUserProfileAndArtist = async () => {
     setLoading(true);
 
@@ -54,7 +55,7 @@ function ArtistWallet() {
         const { data: artist, error: artistError } = await supabase
           .from("artist")
           .select(
-            "id, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id, followers_Detail, full_Name, valid_ID"
+            "id, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id, followers_Detail, full_Name, valid_ID, wallet"
           )
           .eq("owner_Id", user.id)
           .single();
@@ -66,6 +67,10 @@ function ArtistWallet() {
         console.log("Fetched artist data:", artist);
         setArtistData(artist);
         setArtistId(artist.id);
+
+        if (!artist.wallet) {
+          setShowWalletModal(true);
+        }
       } else {
         console.log("No user is signed in.");
         setError("No user is signed in.");
@@ -77,6 +82,29 @@ function ArtistWallet() {
       setLoading(false);
     }
   };
+//insert the id to the artist wallet column
+const handleConfirmWallet = async () => {
+  if (!walletData || !walletData.id) {
+    console.error("No wallet data found.");
+    return;
+  }
+
+  try {
+    const { error } = await supabase
+      .from("artist")
+      .update({ wallet: walletData.id }) 
+      .eq("owner_Id", currentUser.id); 
+
+    if (error) {
+      throw error;
+    }
+
+    console.log("Wallet ID successfully linked to shop.");
+    setShowWalletModal(false);
+  } catch (error) {
+    console.error("Error updating wallet:", error.message);
+  }
+};
 
   const fetchWalletData = async () => {
     setLoading(true);
@@ -94,7 +122,7 @@ function ArtistWallet() {
 
     const { data, error } = await supabase
       .from("artist_Wallet")
-      .select("revenue, owner_Name, owner_ID, number, valid_ID")
+      .select("id, revenue, owner_Name, owner_ID, number, valid_ID")
       .eq("owner_ID", user.id)
       .single();
 
@@ -364,6 +392,7 @@ function ArtistWallet() {
   };
   const [transactions, setTransactions] = useState([]);
   const [hasShownExpirationAlert, setHasShownExpirationAlert] = useState(false);
+
   const fetchTransactions = async () => {
     setLoading(true);
 
@@ -1284,6 +1313,25 @@ function ArtistWallet() {
               </div>
             </div>
           )}
+        </div>
+      )}
+       {showWalletModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Welcome to Your Artist Wallet
+            </h2>
+            <p className="mt-3 text-gray-600">
+              Please click <span className="font-bold">"CONFIRM"</span> to set
+              up your wallet information.
+            </p>
+            <button
+              className="mt-5 w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200"
+              onClick={handleConfirmWallet}
+            >
+              Confirm
+            </button>
+          </div>
         </div>
       )}
     </div>
