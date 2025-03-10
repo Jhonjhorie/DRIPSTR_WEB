@@ -62,6 +62,13 @@ function Subscriptions() {
             // Start a transaction-like operation
             setLoading(true);
             
+            // Get the current date and calculate the subs_endDate (30 days from now)
+            const currentDate = new Date();
+            const endDate = new Date(currentDate.setDate(currentDate.getDate() + 30)); // Add 30 days
+            
+            // Format the endDate in ISO string (or any format that your database uses)
+            const formattedEndDate = endDate.toISOString().split('T')[0];
+    
             // Determine if it's an artist or merchant based on activeTab
             if (activeTab === 'Artists') {
                 // 1. Get the artist subscription details first
@@ -81,10 +88,13 @@ function Subscriptions() {
     
                 if (artistError) throw artistError;
     
-                // 3. Update subscription status
+                // 3. Update subscription status and set the end date
                 const { error: statusError } = await supabase
                     .from('artist_Subscription')
-                    .update({ status: 'Completed' })
+                    .update({ 
+                        status: 'Completed',
+                        subs_Enddate: formattedEndDate // Add the end date here
+                    })
                     .eq('id', id);
     
                 if (statusError) throw statusError;
@@ -107,10 +117,13 @@ function Subscriptions() {
     
                 if (merchantError) throw merchantError;
     
-                // 3. Update subscription status
+                // 3. Update subscription status and set the end date
                 const { error: statusError } = await supabase
                     .from('merchant_Subscription')
-                    .update({ status: 'Completed' })
+                    .update({
+                        status: 'Completed',
+                        subs_Enddate: formattedEndDate // Add the end date here
+                    })
                     .eq('id', id);
     
                 if (statusError) throw statusError;
@@ -130,6 +143,7 @@ function Subscriptions() {
             setLoading(false);
         }
     };
+    
     
     
     const declineItem = (id) => console.log(`Declined item with ID: ${id}`);
