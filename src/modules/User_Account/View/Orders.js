@@ -752,15 +752,13 @@ const ReviewModal = ({ isOpen, onClose, order, showToast }) => {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('reviews')
-          .getPublicUrl(filePath);
-
-        return publicUrl;
+        // Get the full path including bucket name
+        const imagePath = `review-images/${order.id}/${fileName}`;
+        return imagePath; // Store the path instead of the public URL
       });
 
-      const uploadedUrls = await Promise.all(uploadPromises);
-      setImages([...images, ...uploadedUrls].slice(0, 3));
+      const uploadedPaths = await Promise.all(uploadPromises);
+      setImages([...images, ...uploadedPaths].slice(0, 3));
     } catch (error) {
       setError(error.message);
     } finally {
@@ -778,7 +776,7 @@ const ReviewModal = ({ isOpen, onClose, order, showToast }) => {
     setError('');
 
     try {
-      // Insert review
+      // Insert review with image paths array
       const { error: reviewError } = await supabase
         .from('reviews')
         .insert({
@@ -787,7 +785,7 @@ const ReviewModal = ({ isOpen, onClose, order, showToast }) => {
           order_id: order.id,
           rating,
           comment: comment.trim(),
-          images,
+          images: images, // This will now be an array of storage paths
           variant_name: order.order_variation?.variant_Name,
           size: order.order_size?.size
         });
@@ -882,10 +880,10 @@ const ReviewModal = ({ isOpen, onClose, order, showToast }) => {
           />
           {images.length > 0 && (
             <div className="mt-2 grid grid-cols-3 gap-2">
-              {images.map((url, index) => (
+              {images.map((path, index) => (
                 <img 
                   key={index}
-                  src={url}
+                  src={`${supabase.storage.from('reviews').getPublicUrl(path).data.publicUrl}`}
                   alt={`Review ${index + 1}`}
                   className="w-full h-24 object-cover rounded"
                 />
