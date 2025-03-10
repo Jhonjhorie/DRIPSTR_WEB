@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";  
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faStar as faStarSolid } from "@fortawesome/free-solid-svg-icons";
+import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
+import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import useUserProfile from "@/shared/mulletCheck.js";
@@ -18,6 +21,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   const tabs = ["All", "Verifying", "To Ship", "To Receive", "Completed", "Cancelled", "Refund"];
 
@@ -159,6 +163,30 @@ const Orders = () => {
     setToast({ show: true, message, type });
   };
 
+  const handleViewProduct = (order) => {
+    const productData = {
+      id: order.prod_num,
+      item_Name: order.shop_Product?.item_Name,
+      item_Variant: [{
+        variant_Name: order.order_variation?.variant_Name,
+        imagePath: order.order_variation?.imagePath,
+        sizes: [{
+          size: order.order_size?.size,
+          price: order.total_price/order.quantity,
+          qty: order.quantity
+        }]
+      }],
+      shop: {
+        shop_Name: order.shop_name,
+        shop_Id: order.shop_id
+      }
+    };
+  
+    navigate(`/product/${productData.item_Name}`, {
+      state: { item: productData }
+    });
+  };
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -218,7 +246,18 @@ const Orders = () => {
             </div>
           ) : getFilteredOrders().length > 0 ? (
             getFilteredOrders().map((order) => (
-              <div key={order.id} className="bg-white rounded-lg p-4 mb-4 shadow-md">
+              <div 
+                key={order.id} 
+                className="bg-white rounded-lg p-4 mb-4 shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer 
+                  group relative hover:scale-[1.01] hover:border-primary-color hover:border"
+                onClick={() => handleViewProduct(order)}
+              >
+                {/* Add a subtle overlay hint */}
+                <div className="absolute inset-0 bg-primary-color/0 group-hover:bg-primary-color/5 transition-colors duration-300 rounded-lg pointer-events-none" />
+                
+                {/* Add a "View Product" hint that appears on hover */}
+  
+
                 <div className="flex justify-between items-start mb-4">
                   <h2 className="text-lg font-bold text-gray-800">
                     Order #{order.id}
@@ -272,7 +311,7 @@ const Orders = () => {
                           Total: ₱{order.final_price}
                         </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                         {/* Cancel Button */}
                         {order.shipping_status !== "delivered" && 
                           order.shipping_status !== "complete" && 
@@ -301,6 +340,27 @@ const Orders = () => {
                           >
                             Request Refund
                           </button>
+                        )}
+
+                        {/* Review Button */}
+                        {(order.shipping_status === "delivered" || order.shipping_status === "complete") && (
+                          order.is_reviewed ? (
+                            <div className="flex items-center text-green-600">
+                              <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
+                              <span className="text-sm">Reviewed</span>
+                            </div>
+                          ) : (
+                            <button 
+                              className="bg-primary-color text-white px-4 py-2 rounded-md hover:bg-primary-color/90"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedOrder(order);
+                                setShowReviewModal(true);
+                              }}
+                            >
+                              Write Review
+                            </button>
+                          )
                         )}
                       </div>
                     </div>
@@ -343,6 +403,17 @@ const Orders = () => {
           }}
           order={selectedOrder}
           showToast={showToast} // Add this prop
+        />
+      )}
+      {showReviewModal && (
+        <ReviewModal
+          isOpen={showReviewModal}
+          onClose={() => {
+            setShowReviewModal(false);
+            setSelectedOrder(null);
+          }}
+          order={selectedOrder}
+          showToast={showToast}
         />
       )}
     </div>
@@ -641,6 +712,202 @@ const CancelOrderModal = ({ isOpen, onClose, order, showToast }) => {
             disabled={!reason.trim() || isSubmitting}
           >
             {isSubmitting ? 'Processing...' : 'Cancel Order'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ReviewModal = ({ isOpen, onClose, order, showToast }) => {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [images, setImages] = useState([]);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e) => {
+    try {
+      setUploading(true);
+      setError('');
+      
+      const files = Array.from(e.target.files);
+      if (files.length > 3) {
+        throw new Error('Maximum 3 images allowed');
+      }
+
+      const uploadPromises = files.map(async (file) => {
+        if (file.size > 2 * 1024 * 1024) {
+          throw new Error('Image size should be less than 2MB');
+        }
+        
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `review-images/${order.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('reviews')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('reviews')
+          .getPublicUrl(filePath);
+
+        return publicUrl;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      setImages([...images, ...uploadedUrls].slice(0, 3));
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!comment.trim()) {
+      setError('Please write a review');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      // Insert review
+      const { error: reviewError } = await supabase
+        .from('reviews')
+        .insert({
+          product_id: order.prod_num,
+          user_id: order.acc_num,
+          order_id: order.id,
+          rating,
+          comment: comment.trim(),
+          images,
+          variant_name: order.order_variation?.variant_Name,
+          size: order.order_size?.size
+        });
+
+      if (reviewError) throw reviewError;
+
+      // Mark order as reviewed
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update({ is_reviewed: true })
+        .eq('id', order.id);
+
+      if (orderError) throw orderError;
+
+      // Update product rating
+      const { data: reviews } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('product_id', order.prod_num);
+
+      const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+
+      const { error: updateError } = await supabase
+        .from('shop_Product')
+        .update({ item_Rating: avgRating })
+        .eq('id', order.prod_num);
+
+      if (updateError) throw updateError;
+
+      onClose();
+      showToast('Review submitted successfully');
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      setError('Failed to submit review. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded-lg shadow-xl w-[500px] max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">Write a Review</h2>
+        <p className="text-gray-600 mb-4">
+          {order.shop_Product?.item_Name} - {order.order_variation?.variant_Name}
+        </p>
+
+        {error && (
+          <p className="text-red-600 text-sm mb-4">{error}</p>
+        )}
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                onClick={() => setRating(star)}
+                className="text-2xl focus:outline-none"
+              >
+                <FontAwesomeIcon 
+                  icon={star <= rating ? faStarSolid : faStarRegular}
+                  className={star <= rating ? "text-yellow-400" : "text-gray-300"}
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <textarea
+          className="w-full h-32 p-2 border rounded-lg mb-4 bg-white"
+          placeholder="Write your review here..."
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+          disabled={isSubmitting}
+        />
+
+        <div className="mb-4">
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={isSubmitting || uploading || images.length >= 3}
+            className="block w-full text-sm text-gray-500
+              file:mr-4 file:py-2 file:px-4
+              file:rounded-full file:border-0
+              file:text-sm file:font-semibold
+              file:bg-purple-50 file:text-purple-700
+              hover:file:bg-purple-100"
+          />
+          {images.length > 0 && (
+            <div className="mt-2 grid grid-cols-3 gap-2">
+              {images.map((url, index) => (
+                <img 
+                  key={index}
+                  src={url}
+                  alt={`Review ${index + 1}`}
+                  className="w-full h-24 object-cover rounded"
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <button
+            className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-4 py-2 bg-primary-color text-white rounded-lg hover:bg-primary-color/90 disabled:opacity-50"
+            onClick={handleSubmitReview}
+            disabled={!comment.trim() || isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit Review'}
           </button>
         </div>
       </div>
