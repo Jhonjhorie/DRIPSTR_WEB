@@ -185,7 +185,7 @@ const VoucherStream = ({ profile }) => {
   return (
     <div className="w-full lg:min-w-[28.25rem] flex-1 rounded-md mx-2 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
       <div className="absolute -top-[1.2rem] md:-top-[1.3rem] left-4 bg-stone-600 h-6 md:h-6 rounded-t-lg  items-center flex justify-end ">
-          <p className=" text-[1.2rem] md:text-[1.5rem] text-white drop-shadow-md font-bold px-2 ">
+          <p className=" text-[1.2rem] md:text-[1.3rem] text-white drop-shadow-md px-2 ">
             Vouchers
           </p>
         </div>
@@ -209,7 +209,7 @@ const VoucherStream = ({ profile }) => {
 
         <div className="bg-slate-100 rounded-r-lg z-10">
           <p className="w-[5rem] md:w-[6rem] lg:w-[7rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
-            Claim
+            Claim Now
           </p>
         </div>
         {vouchers.map((voucher, index) => {
@@ -285,7 +285,7 @@ const VoucherStream = ({ profile }) => {
         })}
         <div className="bg-secondary-color text-white absolute right-0.5 top-2.5 z-10 rounded-l-lg">
           <p className="w-[5rem] md:w-[6rem] lg:w-[6.8rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
-            Shop
+            Shop Now
           </p>
         </div>
       </div>

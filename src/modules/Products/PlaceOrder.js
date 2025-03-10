@@ -17,6 +17,7 @@ import GcashDialog from "./components/GcashDialog.js";
 import TermsCon from "@/shared/products/termsCon";
 import ApplyVoucher from "./components/ApplyVoucher.js";
 import { format, addDays } from "date-fns";
+import ApplyShopVoucher from "./components/ApplyShopVoucher.js";
 
 function PlaceOrder() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -28,10 +29,11 @@ function PlaceOrder() {
   const [shippingMethod, setShippingMethod] = useState("Standard");
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState([]);
-  const [shops, setShops] = useState([]);
+  const [shops, setShops] = useState(null);
   const [selectedPostcode, setSelectedPostcode] = useState("");
   const [shippingFee, setShippingFee] = useState(50);
   const [selectedVouchers, setSelectedVouchers] = useState([]);
+  const [selectedShopVouchers, setSelectedShopVouchers] = useState([]);
   const [estimatedDelivery, setEstimatedDelivery] = useState("");
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalDiscountPrice, setTotalDiscountPrice] = useState(0);
@@ -44,6 +46,9 @@ function PlaceOrder() {
 
   const handleSelectedVouchers = (vouchers) => {
     setSelectedVouchers(vouchers);
+  };
+  const handleSelectedShopVouchers = (vouchers) => {
+    setSelectedShopVouchers(vouchers);
   };
 
   const openModalTerms2 = () => {
@@ -119,24 +124,16 @@ function PlaceOrder() {
     }
   };
 
-  useEffect(() => {
-    if (!selectedItems || selectedItems.length === 0) return;
-  
-    const uniqueShops = Array.from(
-      new Map(selectedItems.map((item) => [item.prod.shop.id, item.prod.shop])).values()
-    );
-  
-    setShops(uniqueShops);
-  }, [selectedItems]); 
-
   const groupItemsByShop = (items) => {
     const grouped = {};
     items.forEach((item) => {
+      const { shop } = item.prod.shop;
       const shopName = item.prod.shop.shop_name;
       if (!grouped[shopName]) {
         grouped[shopName] = {
           items: [],
           shippingFee: shippingFee,
+          shop,
         };
       }
       grouped[shopName].items.push(item);
@@ -349,6 +346,24 @@ function PlaceOrder() {
     }
   };
 
+  const openModalShopVoucher = (shop) => {
+    setShops(shop);
+    const modal = document.getElementById("my_modal_ShopVoucher");
+
+    if (modal) {
+      setTimeout(() => {
+        modal.showModal();
+      }, 50);
+    }
+  };
+
+  const closeModalShopVoucher = () => {
+    const modal = document.getElementById("my_modal_ShopVoucher");
+    if (modal) {
+      modal.close();
+    }
+  };
+
   return (
     <div className="bg-gray-100  min-h-screen py-6 px-4 md:px-6 lg:px-8">
       {/* Modals */}
@@ -396,11 +411,26 @@ function PlaceOrder() {
           profile={profile}
           onClose={closeModalVoucher}
           price={totalPrice}
-         shops={shops}
           onSelectVouchers={handleSelectedVouchers}
         />
         <form method="dialog" className="modal-backdrop">
           <button onClick={closeModalVoucher}></button>
+        </form>
+      </dialog>
+
+      <dialog
+        id="my_modal_ShopVoucher"
+        className="modal modal-bottom sm:modal-middle"
+      >
+        <ApplyShopVoucher
+          profile={profile}
+          onClose={closeModalShopVoucher}
+          price={totalPrice}
+          shop={shops}
+          onSelectVouchers={handleSelectedShopVouchers}
+        />
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={closeModalShopVoucher}></button>
         </form>
       </dialog>
 
@@ -488,8 +518,45 @@ function PlaceOrder() {
             {Object.entries(groupItemsByShop(selectedItems)).map(
               ([shopName, { items, shippingFee }], index) => (
                 <div key={shopName} className="mb-6 last:mb-0">
-                  <div className="flex items-center gap-2 mb-3 pb-2 border-b">
+                  <div className="flex items-center gap-2 mb-3 pb-2 border-b justify-between">
                     <h3 className="font-medium text-gray-800">{shopName}</h3>
+                    <div className="flex items-center justify-center">
+                    <button
+                      className="flex items-center justify-center bg-[#171717] text-white pl-2 py-0 gap-2 text-sm font-medium rounded-md hover:bg-[#111111] duration-300 transition-all hover:px-2"
+                      onClick={() => openModalShopVoucher(items[0].prod.shop)}
+                    >
+                      <p>Select:</p>
+                      {selectedShopVouchers.length > 0 ? selectedShopVouchers
+                      ?.filter(
+                        (voucher) =>
+                          voucher.shopId === items[index]?.prod?.shop?.id
+                      )
+                      ?.map((voucher) => (
+                        <div
+                          key={voucher.id}
+                          className="flex justify-between gap-2 p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50"
+                        >
+                          <div>
+                            <div className=" text-sm w-32 text-left truncate font-medium text-gray-800">
+                              {voucher.voucher_name}:
+                            </div>
+                          </div>
+                          <div className=" text-gray-800 text-sm">
+                            -₱{voucher.discount}
+                          </div>
+                        </div>
+                      )) :  <div
+                      className="flex justify-between p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50"
+                    >
+                      <div>
+                        <div className=" text-sm text-gray-800">
+                          No Voucher Applied
+                        </div>
+                      </div>
+                    </div>}
+                    </button>
+                    
+                    </div>
                   </div>
 
                   {items.map((item) => (
@@ -554,7 +621,16 @@ function PlaceOrder() {
                       />
                       Shipping Fee: ₱{shippingFee}
                     </span>
-
+                    {selectedShopVouchers?.some(
+                      (voucher) =>
+                        voucher.shopId === items[index]?.prod?.shop?.id
+                    ) && (
+                      <span className="text-yellow-600 flex items-center gap-1">
+                        <FontAwesomeIcon icon={faTag} />
+                        Merchant Voucher: -₱
+                        {selectedShopVouchers[0].discount}
+                      </span>
+                    )}
                     {index === 0 && (
                       <>
                         {selectedVouchers.find(
@@ -718,7 +794,8 @@ function PlaceOrder() {
                     <div
                       key={voucher.id}
                       className={`flex justify-between p-2 rounded border-l-4 ${
-                        voucher.voucher_type == "Product" || voucher.voucher_type == "Products"
+                        voucher.voucher_type == "Product" ||
+                        voucher.voucher_type == "Products"
                           ? "border-l-primary-color bg-primary-color/5"
                           : "border-l-green-600 bg-green-50"
                       }`}

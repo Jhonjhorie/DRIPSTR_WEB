@@ -205,7 +205,7 @@ if (voucherError) throw voucherError;
       <div className="w-full mr-2.5 sm:mr-0 flex gap-1  bg-stone-600  rounded-lg p-0 h-[52px] md:h-[62px] justify-start items-center overflow-hidden">
       <div className="bg-slate-100 rounded-r-lg z-10">
           <p className="w-[5.5rem] text-xs px-2 h-8 md:h-10 items-center flex justify-end">
-            Claim
+            Claim Now
           </p>
         </div>
         {vouchers.map((voucher, index) => {
@@ -276,14 +276,14 @@ if (voucherError) throw voucherError;
         })}
           <div className="bg-secondary-color text-white absolute right-0.5 top-2.5 z-10 rounded-l-lg">
           <p className="w-[5.85rem] text-xs md:text-sm px-2 h-8 md:h-10 flex items-center justify-start">
-            Shop
+            Shop Now
           </p>
         </div>
       </div>
 
       <button
         onClick={handleNext}
-        className="absolute -right-2 lg:-right-5 sm:top-2.5 top-1.5  transform bg-slate-100 p-2 rounded-lg z-10"
+        className="absolute -right-2 lg:-right-5 md:top-2.5 top-1.5  transform bg-slate-100 p-2 rounded-lg z-10"
       >
         &gt;
       </button>
