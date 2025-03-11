@@ -39,6 +39,7 @@ const JntTrack = () => {
           user:acc_num (username, full_name, mobile),
           product:prod_num (item_Name, shop_Name)
         `)
+        .not("shipping_status", "eq", "cancel")
         .eq("shop_transaction_id", searchQuery);
 
       if (error) throw error;

@@ -49,15 +49,15 @@ const ApplyShopVoucher = ({
 
       if (voucherError) throw voucherError;
 
-      const validVouchers = cusVoucherData.filter((cv) => {
-        const expirationDate = new Date(cv.vouch.expiration);
+      const validVouchers = cusVoucherData?.filter((cv) => {
+        const expirationDate = new Date(cv.vouch?.expiration);
         expirationDate.setHours(23, 59, 59, 999);
         return (
           expirationDate >= today && cv.isClaim === true && cv.isUsed === false
         );
       });
-      const validVouchers2 = voucherData.filter((cv) => {
-        const expirationDate = new Date(cv.expiration);
+      const validVouchers2 = voucherData?.filter((cv) => {
+        const expirationDate = new Date(cv?.expiration);
         expirationDate.setHours(23, 59, 59, 999);
         return expirationDate >= today;
       });

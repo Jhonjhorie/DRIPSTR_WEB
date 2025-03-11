@@ -29,7 +29,7 @@ const Cart = ({ cartItems2,  closeDrawer }) => {
   const [selectedAction, setSelectedAction] = useState("edit");
 
   const groupedCartItems = cartItems.reduce((acc, item) => {
-    const shopName = item.prod.shop_Name;
+    const shopName = item.prod.shop.shop_name;
     if (!acc[shopName]) {
       acc[shopName] = [];
     }

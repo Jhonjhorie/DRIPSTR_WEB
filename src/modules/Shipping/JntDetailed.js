@@ -1,12 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/constants/supabase"; // Adjust the import path as needed
+import { supabase } from "@/constants/supabase"; 
 
 const JntDetailed = () => {
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch shipments from Supabase
+  const statusOptions = [
+  "To ship",
+   "To deliver",
+   "Fail deliver",
+   "refund",
+   "delivered",
+  ];
+
+  const statusOrder = statusOptions.reduce((acc, item, index) => {
+    acc[item] = index;
+    return acc;
+  }, {});
+
   const fetchShipments = async () => {
     try {
       const { data, error } = await supabase
@@ -16,11 +28,15 @@ const JntDetailed = () => {
           user:acc_num (username, full_name, mobile),
           product:prod_num (item_Name, shop_Name)
         `)
-        .order("estimated_delivery", { ascending: true }) // Sort by estimated_delivery
-        .order("shipping_method", { ascending: true }) // Then by shipping_method
-        .order("created_at", { ascending: true }); // Then by oldest date_of_order
+        .not("shipping_status", "eq", "cancel")
+   
 
       if (error) throw error;
+
+       
+      if (data) {
+        data.sort((a, b) => (statusOrder[a.shipping_status] ?? Infinity) - (statusOrder[b.shipping_status] ?? Infinity));
+      }
 
       setShipments(data);
     } catch (error) {
@@ -30,7 +46,6 @@ const JntDetailed = () => {
     }
   };
 
-  // Fetch shipments on component mount
   useEffect(() => {
     fetchShipments();
   }, []);
@@ -104,11 +119,11 @@ const JntDetailed = () => {
                         <td>
                           <span
                             className={`badge ${
-                              shipment.shipping_status === "Delivered"
+                              shipment.shipping_status === "delivered"
                                 ? "badge-success"
-                                : shipment.shipping_status === "To Prepare"
-                                ? "badge-warning"
-                                : "badge-info"
+                                : shipment.shipping_status === "To prepare"
+                                ? "badge-neutral" 
+                                : shipment.shipping_status === "refund" ? "badge-error" : shipment.shipping_status === "To ship" ? "badge-info": "badge-warning"
                             }`}
                           >
                             {shipment.shipping_status}

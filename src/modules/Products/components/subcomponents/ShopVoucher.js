@@ -16,10 +16,11 @@ const ShopVoucherStream = ({ profile, shop }) => {
         
         const { data: claimed2, error: claimed2Error } = await supabase
           .from("customer_shop_vouchers")
-          .select("voucher_id, merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
+          .select("voucher_id, vouch:voucher_id (id, voucher_name, discount, expiration, condition, isDeactivate), merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
           .eq("merchant_Id", shop.id)
           .eq("acc_id", profile?.id)
           .eq("isUsed", true)
+          .eq("vouch.isDeactivate", false)
           .eq("isClaim", true);
 
         if (claimed2Error) throw claimed2Error;
@@ -32,6 +33,7 @@ const ShopVoucherStream = ({ profile, shop }) => {
   .from("merchant_Vouchers")
   .select("*, merchant_Id, merch:merchant_Id(id, shop_name)")
   .eq("merchant_Id", shop.id)
+  .eq("isDeactivate", false)
   .order("id", { ascending: false });
 
 if (idsToExclude) {
@@ -42,10 +44,11 @@ if (voucherError) throw voucherError;
 
         const { data: claimedData, error: claimedError } = await supabase
         .from("customer_shop_vouchers")
-        .select("voucher_id, merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
+        .select("voucher_id, vouch:voucher_id (id, voucher_name, discount, expiration, condition, isDeactivate), merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
         .eq("merchant_Id", shop.id)
           .eq("acc_id", profile?.id)
           .eq("isUsed", false)
+          .eq("vouch.isDeactivate", false)
           .eq("isClaim", true);
 
         if (claimedError) throw claimedError;
@@ -119,15 +122,19 @@ if (voucherError) throw voucherError;
           .from("merchant_Vouchers")
           .select("*, merch:merchant_Id(id, shop_name)")
           .eq("merch.id", shop.id)
+          .eq("isDeactivate", false)
           .order("id", { ascending: false });
 
         if (voucherError) throw voucherError;
 
         const { data: claimedData, error: claimedError } = await supabase
         .from("customer_shop_vouchers")
-        .select("voucher_id, merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
+        .select("voucher_id, vouch:voucher_id (id, voucher_name, discount, expiration, condition, isDeactivate), merchant_Id, merch:merchant_Id(id, shop_name), isClaim, isUsed")
         .eq("merchant_Id", shop.id)
-          .eq("acc_id", profile.id);
+          .eq("acc_id", profile?.id)
+          .eq("isUsed", false)
+          .eq("vouch.isDeactivate", false)
+    
 
         if (claimedError) throw claimedError;
 

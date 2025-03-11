@@ -38,6 +38,7 @@ function PlaceOrder() {
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalDiscountPrice, setTotalDiscountPrice] = useState(0);
   const [totalShippingFee, setTotalShippingFee] = useState(0);
+  const [shopTotal, setShopTotal] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
   useEffect(() => {
@@ -154,10 +155,12 @@ function PlaceOrder() {
     );
 
     let isFirstShop = true;
+    const newShopTotals = {};
 
     for (const shopName in groupedItems) {
       const { items: shopItems, shippingFee: shopShippingFee } =
         groupedItems[shopName];
+
       let shopTotal = shopItems.reduce(
         (sum, item) =>
           sum +
@@ -168,13 +171,25 @@ function PlaceOrder() {
         0
       );
 
+      const shopVoucher = selectedShopVouchers.find(
+        (v) => v.shopId === shopItems[0].prod.shop.id
+      );
+      if (shopVoucher && shopItems[0].size.price >= shopVoucher.condition) {
+        shopTotal = Math.max(0, shopTotal - shopVoucher.discount);
+      }
+
       totalPrice += shopTotal;
+
       if (isFirstShop && productVouchers.length > 0) {
         shopTotal = Math.max(0, shopTotal - productVouchers[0].discount);
         isFirstShop = false;
       }
+
+      newShopTotals[shopName] = shopTotal;
+      console.log(shopName + ": " + newShopTotals[shopName]);
       holder += shopTotal;
     }
+
     let isFirstShop2 = true;
     for (const shopName in groupedItems) {
       const { items: shopItems, shippingFee: shopShippingFee } =
@@ -196,14 +211,15 @@ function PlaceOrder() {
     }
 
     totalDiscountPrice = holder;
-    const grandTotal =
-      (totalDiscountPrice === 0 ? totalPrice : totalDiscountPrice) +
-      totalShippingFee;
+
+    const grandTotal = totalDiscountPrice + totalShippingFee;
+
     setTotalPrice(totalPrice);
     setTotalDiscountPrice(totalDiscountPrice);
     setTotalShippingFee(totalShippingFee);
     setGrandTotal(grandTotal);
-  }, [selectedItems, selectedVouchers, grandTotal]);
+    setShopTotal(newShopTotals);
+  }, [selectedItems, selectedVouchers, selectedShopVouchers]);
 
   const sendOrder = async (image) => {
     const { startDate, endDate } = calculateEstimatedDelivery();
@@ -221,6 +237,11 @@ function PlaceOrder() {
         (v) => v.voucher_type !== "Shipping"
       );
 
+      const productDiscount =
+        isFirstShop && productVouchers.length > 0
+          ? productVouchers.reduce((sum, v) => sum + v.discount, 0)
+          : 0;
+
       for (const shopName in groupedItems) {
         const { items: shopItems, shippingFee: shopShippingFee } =
           groupedItems[shopName];
@@ -234,12 +255,9 @@ function PlaceOrder() {
           );
         }
 
-        const productDiscount =
-          isFirstShop && productVouchers.length > 0
-            ? productVouchers.reduce((sum, v) => sum + v.discount, 0)
-            : 0;
-
-        const voucherUsed = isFirstShop ? selectedVouchers : null;
+        const shopVoucher = selectedShopVouchers.find(
+          (v) => v.shopId === shopItems[0].prod.shop.id
+        );
 
         for (const item of shopItems) {
           let itemPrice =
@@ -247,17 +265,24 @@ function PlaceOrder() {
               ? item.size.price * (1 - item.prod.discount / 100)
               : item.size.price) * item.qty;
 
-          if (isFirstShop && isFirstItemInShop && productVouchers.length > 0) {
-            itemPrice = Math.max(0, itemPrice - productDiscount);
+          if (isFirstItemInShop) {
+            if (
+              shopVoucher &&
+              shopItems[0].size.price >= shopVoucher.condition
+            ) {
+              itemPrice = Math.max(0, itemPrice - shopVoucher.discount);
+            }
+            if (isFirstShop && productVouchers.length > 0) {
+              itemPrice = Math.max(0, itemPrice - productDiscount);
+            }
           }
-
           const itemShippingFee = isFirstItemInShop ? finalShippingFee : 0;
 
           orders.push({
             acc_num: profile.id,
             prod_num: item.prod.id,
             quantity: item.qty,
-            total_price: item.size.price * item.qty,
+            total_price: itemPrice,
             payment_method: paymentMethod,
             payment_stamp: new Date().toISOString(),
             order_variation: item.variant,
@@ -270,11 +295,12 @@ function PlaceOrder() {
             discount: item.prod.discount || 0,
             final_price: itemPrice + itemShippingFee,
             payment_status:
-              paymentMethod == "COD" ? "To pay" : "Pending to Admin",
+              paymentMethod === "COD" ? "To pay" : "Pending to Admin",
             proof_of_payment: image,
             shop_transaction_id: transactionId,
             shipping_status: "To prepare",
-            voucher_used: isFirstShop && isFirstItemInShop ? voucherUsed : null,
+            voucher_used:
+              isFirstShop && isFirstItemInShop ? selectedVouchers : null,
             estimated_delivery: endDate,
             shop_id: item.prod.shop.id,
           });
@@ -297,6 +323,7 @@ function PlaceOrder() {
         console.log("Orders placed successfully:", data);
         setShowAlert(true);
 
+        // Mark used vouchers as used
         for (const voucher of selectedVouchers) {
           await supabase
             .from("customer_vouchers")
@@ -305,6 +332,7 @@ function PlaceOrder() {
             .eq("acc_id", profile.id);
         }
 
+        // Remove ordered items
         for (const item of selectedItems) {
           await deleteItem(item);
         }
@@ -521,41 +549,38 @@ function PlaceOrder() {
                   <div className="flex items-center gap-2 mb-3 pb-2 border-b justify-between">
                     <h3 className="font-medium text-gray-800">{shopName}</h3>
                     <div className="flex items-center justify-center">
-                    <button
-                      className="flex items-center justify-center bg-[#171717] text-white pl-2 py-0 gap-2 text-sm font-medium rounded-md hover:bg-[#111111] duration-300 transition-all hover:px-2"
-                      onClick={() => openModalShopVoucher(items[0].prod.shop)}
-                    >
-                      <p>Select:</p>
-                      {selectedShopVouchers.length > 0 ? selectedShopVouchers
-                      ?.filter(
-                        (voucher) =>
-                          voucher.shopId === items[index]?.prod?.shop?.id
-                      )
-                      ?.map((voucher) => (
-                        <div
-                          key={voucher.id}
-                          className="flex justify-between gap-2 p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50"
-                        >
-                          <div>
-                            <div className=" text-sm w-32 text-left truncate font-medium text-gray-800">
-                              {voucher.voucher_name}:
-                            </div>
-                          </div>
-                          <div className=" text-gray-800 text-sm">
-                            -₱{voucher.discount}
-                          </div>
-                        </div>
-                      )) :  <div
-                      className="flex justify-between p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50"
-                    >
-                      <div>
-                        <div className=" text-sm text-gray-800">
-                          No Voucher Applied
-                        </div>
-                      </div>
-                    </div>}
-                    </button>
-                    
+                      <button
+                        className="flex items-center justify-center bg-[#171717] text-white pl-2 py-0 gap-2 text-sm font-medium rounded-md hover:bg-[#111111] duration-300 transition-all hover:px-2"
+                        onClick={() => openModalShopVoucher(items[0].prod.shop)}
+                      >
+                        <p>Select:</p>
+                        {selectedShopVouchers?.filter(
+  (voucher) => voucher.shopId === items[index]?.prod?.shop?.id
+).length > 0 ? (
+  selectedShopVouchers
+    ?.filter((voucher) => voucher.shopId === items[index]?.prod?.shop?.id)
+    .map((voucher) => (
+      <div
+        key={voucher.id}
+        className="flex justify-between gap-2 p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50"
+      >
+        <div>
+          <div className="text-sm w-32 text-left truncate font-medium text-gray-800">
+            {voucher.voucher_name}:
+          </div>
+        </div>
+        <div className="text-gray-800 text-sm">-₱{voucher.discount}</div>
+      </div>
+    ))
+) : (
+  <div className="flex justify-between p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50">
+    <div>
+      <div className="text-sm text-gray-800">No Voucher Applied</div>
+    </div>
+  </div>
+)}
+
+                      </button>
                     </div>
                   </div>
 
@@ -621,16 +646,7 @@ function PlaceOrder() {
                       />
                       Shipping Fee: ₱{shippingFee}
                     </span>
-                    {selectedShopVouchers?.some(
-                      (voucher) =>
-                        voucher.shopId === items[index]?.prod?.shop?.id
-                    ) && (
-                      <span className="text-yellow-600 flex items-center gap-1">
-                        <FontAwesomeIcon icon={faTag} />
-                        Merchant Voucher: -₱
-                        {selectedShopVouchers[0].discount}
-                      </span>
-                    )}
+
                     {index === 0 && (
                       <>
                         {selectedVouchers.find(
@@ -656,6 +672,16 @@ function PlaceOrder() {
                             {selectedVouchers
                               .filter((v) => v.voucher_type !== "Shipping")
                               .reduce((sum, v) => sum + v.discount, 0)}
+                          </span>
+                        )}
+                        {selectedShopVouchers?.some(
+                          (voucher) =>
+                            voucher.shopId === items[index]?.prod?.shop?.id
+                        ) && (
+                          <span className="text-yellow-600 flex items-center gap-1">
+                            <FontAwesomeIcon icon={faTag} />
+                            Merchant: -₱
+                            {selectedShopVouchers[0].discount}
                           </span>
                         )}
                       </>
@@ -838,15 +864,32 @@ function PlaceOrder() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal:</span>
-                  <span>₱{totalPrice.toFixed(2)}</span>
+                  <span
+                    className={`${
+                      selectedShopVouchers.length > 0 ? "text-yellow-600" : ""
+                    } font-semibold`}
+                  >
+                    ₱{totalPrice.toFixed(2)}
+                  </span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping Fee:</span>
-                  <span>₱{totalShippingFee.toFixed(2)}</span>
+                  <span>Shipping Fee:</span>
+                  <span
+                    className={` flex justify-between ${
+                      selectedVouchers.filter(
+                        (v) => v.voucher_type == "Shipping"
+                      ).length > 0
+                        ? "text-green-600"
+                        : "text-gray-600"
+                    } font-semibold`}
+                  >
+                    ₱{totalShippingFee.toFixed(2)}
+                  </span>
                 </div>
 
-                {selectedVouchers.length > 0 && (
+                {selectedVouchers.filter((v) => v.voucher_type !== "Shipping")
+                  .length > 0 && (
                   <div className="flex justify-between text-primary-color">
                     <span>Discount:</span>
                     <span>

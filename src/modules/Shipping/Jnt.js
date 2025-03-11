@@ -14,6 +14,8 @@ import {
   faMoneyBill,
   faClock,
   faStore,
+  faTriangleCircleSquare,
+  faTriangleExclamation,
 } from "@fortawesome/free-solid-svg-icons";
 
 const Jnt = () => {
@@ -30,7 +32,12 @@ const Jnt = () => {
           user:acc_num (username, full_name, mobile),
           product:prod_num (item_Name, shop_Name)`
         )
+        .not("shipping_status", "eq", "cancel")
         .order("created_at", { ascending: false });
+
+        if (ordersData) {
+          ordersData.sort((a, b) => (statusOrder[a.shipping_status] ?? Infinity) - (statusOrder[b.shipping_status] ?? Infinity));
+        }
 
       if (ordersError) throw ordersError;
 
@@ -82,12 +89,17 @@ const Jnt = () => {
 
   // Shipping status options
   const statusOptions = [
-    { label: "To Prepare", value: "To Prepare", icon: faBox },
-    { label: "Preparing", value: "Preparing", icon: faSpinner },
-    { label: "To Ship", value: "To Ship", icon: faTruck },
-    { label: "To Deliver", value: "To Deliver", icon: faTruck },
-    { label: "Delivered", value: "Delivered", icon: faCheckCircle },
+    { label: "To Ship", value: "To ship", icon: faTruck },
+    { label: "To Deliver", value: "To deliver", icon: faTruck },
+    { label: "Delivered", value: "delivered", icon: faCheckCircle },
+    { label: "Fail Delivery", value: "Fail deliver", icon: faTriangleExclamation },
+    { label: "To Refund", value: "refund", icon: faMoneyBill },
   ];
+
+  const statusOrder = statusOptions.reduce((acc, item, index) => {
+    acc[item.value] = index;
+    return acc;
+  }, {});
 
   return (
     <div className="bg-gray-100 min-h-screen">
