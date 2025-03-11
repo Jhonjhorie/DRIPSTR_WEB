@@ -25,7 +25,7 @@ export default function RatingSection({ item }) {
     return reviews.filter((review) => min < review.rating && review.rating <= max).length;
   };
 
-  // Update the fetchReviews function
+  // Update the fetchReviews function to properly format image URLs
   const fetchReviews = async () => {
     try {
       const { data, error } = await supabase
@@ -52,7 +52,13 @@ export default function RatingSection({ item }) {
         colorOrder: review.variant_name,
         sizeOrder: review.size,
         note: review.comment,
-        images: review.images || [],
+        images: review.images ? review.images.map(image => {
+          // Get public URL for each image
+          const { data } = supabase.storage
+            .from('reviews')
+            .getPublicUrl(image);
+          return data.publicUrl;
+        }) : [],
         likes: review.likes || 0,
         isEdited: review.is_edited
       }));
@@ -334,15 +340,15 @@ export default function RatingSection({ item }) {
                     <p className="text-gray-800">{review.note}</p>
                     {review.images.length > 0 && (
                       <div className="stack">
-                        {review.images.map((image, index) => (
+                        {review.images.map((imageUrl, index) => (
                           <div
                             key={index}
                             className="border-base-content card bg-base-100 w-36 border text-center"
                           >
                             <div className="card-body">
                               <img
-                                src={`${supabaseBaseUrl}${image}`}
-                                alt={`Review image ${index + 1}`}
+                                src={imageUrl} // Use the complete URL directly
+                                alt={`Review item ${index + 1}`}
                                 onClick={() => openModal(review)}
                                 className="w-full h-24 object-fill rounded-md cursor-pointer"
                               />
@@ -383,8 +389,8 @@ export default function RatingSection({ item }) {
               {selectedItem.images.length > 0 ? (
                 <div className="carousel-item relative w-full justify-center items-center">
                   <img
-                    src={`${supabaseBaseUrl}${selectedItem.images[currentSlide]}`}
-                    alt={`Review Image ${currentSlide}`}
+                    src={selectedItem.images[currentSlide]} // Use the complete URL directly
+                    alt={`Customer review ${currentSlide + 1}`}
                     className="w-[40rem] h-[90%] object-contain"
                   />
                   {selectedItem.images.length > 1 && (

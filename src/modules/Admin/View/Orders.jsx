@@ -1,202 +1,377 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "../../../constants/supabase";
 import Sidebar from './Shared/Sidebar';
-import Pagination from './Components/Pagination';
 
 function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const itemsPerPage = 3;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('Pending');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("orders")
-        .select("id, created_at, acc_num(full_name), prod_num(item_Name, shop_Name), quantity, total_price, payment_method, order_variation, shipping_addr, transaction_id, date_of_order, proof_of_payment, payment_status, shop_id(wallet(id, revenue))")
-        .eq("payment_method", "Gcash")
-        .eq('payment_status', 'Pending to Admin');
+  const tabs = [
+    'All',
+    'GCash Approval',
+    'Preparing',
+    'To Ship',
+    'To Deliver',
+    'Delivered',
+    
+    'Cancellation Requests', 
+    'Refund Requests',
+    'Cancelled'
 
-      if (error) throw error;
-
-      console.log("Fetched data:", data);
-      setOrders(data || []);
-    } catch (error) {
-      console.error("Error in fetchOrders:", error.message);
-      setError(error.message);
-      setOrders([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  ];
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  // Modal handlers
-  const openModal = (imageUrl) => {
-    setSelectedImage(imageUrl);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedImage(null);
-  };
-
-  const handleApprove = async (orderId) => {
+  const fetchOrders = async () => {
     try {
-      // First, get the order details including total_price and shop_id
-      const { data: orderData, error: orderError } = await supabase
+      const { data, error } = await supabase
         .from('orders')
-        .select('total_price, shop_id(wallet(id, revenue))')
-        .eq('id', orderId)
-        .single(); // Get single record
-  
-      if (orderError) throw orderError;
-  
-      // Calculate 97% of total_price
-      const revenueIncrease = Number(orderData.total_price) * 0.97;
-  
-      // Start a transaction-like operation
-      // Update order status
-      const { data: updatedOrder, error: updateError } = await supabase
-        .from('orders')
-        .update({
-          payment_status: 'Paid',
-          isPaid: true
-        })
-        .eq('id', orderId)
-        .select();
-  
-      if (updateError) throw updateError;
-  
-      // Update wallet revenue
-      const currentRevenue = orderData.shop_id?.wallet?.revenue || 0;
-      const newRevenue = currentRevenue + revenueIncrease;
-  
-      const { data: walletData, error: walletError } = await supabase
-        .from('merchant_Wallet')
-        .update({
-          revenue: newRevenue
-        })
-        .eq('id', orderData.shop_id.wallet.id)
-        .select();
-  
-      if (walletError) throw walletError;
+        .select(`
+          *,
+          profiles:acc_num (username, full_name),
+          shop_Product:prod_num (item_Name)
+        `)
+        .order('created_at', { ascending: false });
 
-      setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
-
-      // Then refetch to ensure consistency with database
-      await fetchOrders();
-  
-      console.log('Order updated:', updatedOrder);
-      console.log('Wallet updated:', walletData);
-  
+      if (error) throw error;
+      setOrders(data);
     } catch (error) {
-      console.error('Error in approval process:', error.message);
+      console.error('Error fetching orders:', error);
+    } finally {
+      setLoading(false);
     }
   };
-  // Pagination logic
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentOrders = orders.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(orders.length / itemsPerPage);
+
+  const getFilteredOrders = () => {
+    let filtered = orders;
+
+    if (searchQuery) {
+      filtered = filtered.filter(order => 
+        order.id.toString().includes(searchQuery) ||
+        order.profiles?.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.shop_Product?.item_Name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    switch (selectedTab) {
+      case 'GCash Approval':
+        return filtered.filter(order => 
+          order.payment_method === 'Gcash' && 
+          order.payment_status === 'Pending to Admin'
+        );
+      case 'Cancellation Requests':
+        return filtered.filter(order => 
+          order.cancellation_status === 'Requested' &&
+          order.shipping_status !== 'cancel'
+        );
+      case 'Preparing':
+        return filtered.filter(order => 
+          order.shipping_status === 'To prepare' && 
+          (order.payment_status === 'Paid' || order.payment_method === 'COD')
+        );
+      case 'To Ship':
+        return filtered.filter(order => 
+          order.shipping_status === 'To ship'
+        );
+      case 'To Deliver':
+        return filtered.filter(order => 
+          order.shipping_status === 'To deliver'
+        );
+      case 'Delivered':
+        return filtered.filter(order => 
+          order.shipping_status === 'delivered'
+        );
+      case 'Cancelled':
+        return filtered.filter(order => 
+          order.shipping_status === 'cancel'
+        );
+      case 'Refund Requests':
+        return filtered.filter(order => 
+          order.refund_status === 'Requested'
+        );
+      default:
+        return filtered;
+    }
+  };
+
+  const handlePaymentVerification = async (orderId, isApproved) => {
+    try {
+      const updates = {
+        payment_status: isApproved ? 'Paid' : 'Rejected',
+        shipping_status: isApproved ? 'To prepare' : 'cancel',
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', orderId);
+
+      if (error) throw error;
+      
+      // Reload orders after update
+      fetchOrders();
+      
+      // Show success message (you can add a toast notification here)
+      alert(isApproved ? 'Payment approved successfully' : 'Payment rejected');
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      alert('Error updating payment status');
+    }
+  };
+
+  const handleRefundRequest = async (orderId, isApproved) => {
+    try {
+      const updates = {
+        refund_status: isApproved ? 'Approved' : 'Rejected',
+        refund_processed_at: new Date().toISOString(),
+        shipping_status: isApproved ? 'cancel' : 'delivered',
+        updated_at: new Date().toISOString()
+      };
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', orderId);
+
+      if (error) throw error;
+      
+      // Reload orders after update
+      fetchOrders();
+      
+      // Show success message
+      alert(isApproved ? 'Refund approved successfully' : 'Refund rejected');
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      alert('Error processing refund request');
+    }
+  };
+
+  const handleCancellation = async (orderId, isApproved) => {
+    try {
+      const updates = {
+        cancellation_status: isApproved ? 'Approved' : 'Rejected',
+        shipping_status: isApproved ? 'cancel' : null,
+        updated_at: new Date().toISOString()
+      };
+
+      if (isApproved) {
+        updates.payment_status = 'Cancelled';
+      }
+
+      const { error } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', orderId);
+
+      if (error) throw error;
+      
+      // Reload orders after update
+      fetchOrders();
+      
+      // Show success message
+      alert(isApproved ? 'Cancellation approved successfully' : 'Cancellation rejected');
+    } catch (error) {
+      console.error('Error processing cancellation:', error);
+      alert('Error processing cancellation request');
+    }
+  };
+
+  const handleShippingUpdate = async (orderId, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ shipping_status: newStatus })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      fetchOrders();
+    } catch (error) {
+      console.error('Error updating shipping status:', error);
+    }
+  };
+
+  const ImageModal = ({ imageUrl, onClose }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="relative max-w-4xl max-h-[90vh] bg-gray-800 rounded-lg overflow-hidden">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-white bg-red-600 rounded-full p-2 hover:bg-red-700"
+        >
+          ✕
+        </button>
+        <img
+          src={imageUrl}
+          alt="Proof of Payment"
+          className="w-full h-full object-contain"
+        />
+      </div>
+    </div>
+  );
 
   return (
-    <div className='flex'>
+    <div className="flex">
       <Sidebar />
-      <div className="flex-1 m-5 bg-slate-900 rounded-3xl p-6">
-        <h1 className="text-white text-2xl font-bold mb-4">Orders</h1>
-        <div className="p-4">
-          {loading ? (
-            <p className="text-white">Loading...</p>
-          ) : error ? (
-            <p className="text-red-500">{error}</p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {currentOrders.length === 0 ? (
-                <h1 className="flex justify-center items-center font-bold text-xl text-white">
-                  No Pending Orders
-                </h1>
-              ) : (
-                currentOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="flex flex-row bg-white rounded-md shadow-md overflow-hidden p-3 gap-3"
-                  >
-                    <div className="flex-shrink-0">
-                      <img
-                        src={order.order_variation?.imagePath}
-                        alt="product image"
-                        className="w-24 h-24 object-contain rounded-md"
-                      />
-                    </div>
-                    <div className="flex flex-col w-full text-md text-black">
-                      <div className="flex justify-between items-baseline">
-                        <p className="font-semibold truncate">{order.prod_num?.shop_Name} - {order.prod_num?.item_Name}</p>
-                        <p className="text-right text-sm text-gray-600">
-                          {order.transaction_id} | {new Date(order.date_of_order).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <p className="font-semibold truncate">{order.acc_num?.full_name} - {order.shipping_addr}</p>
-                      <p className="font-semibold text-xsm text-black">
-                        ₱{Number(order.total_price).toLocaleString('en-US')}.00 | Qty: {order.quantity}
-                      </p>
-                      <p className=" text-xsm font-semibold text-black">
-                        {order.payment_status}
-                      </p>
-                      <p
-                        className="font-semibold text-blue-700 text-sm underline cursor-pointer"
-                        onClick={() => openModal(order.proof_of_payment)}
-                      >
-                        Proof of payment
-                      </p>
-                      <button
-                        onClick={() => handleApprove(order.id)}
-                        className="flex-1 w-20 mt-2 p-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-200 text-sm font-medium"
-                      >
-                        Approve
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
-          <Pagination
-            currentPage={currentPage}
-            totalItems={orders.length}
-            itemsPerPage={itemsPerPage}
-            onPageChange={setCurrentPage}
-          />
+      <div className="flex-1 p-8 bg-gray-900 min-h-screen">
+        <h1 className="text-3xl font-bold text-white mb-6">Order Management</h1>
+        
+        {/* Tabs */}
+        <div className="flex space-x-4 mb-6 border-b border-gray-700">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setSelectedTab(tab)}
+              className={`py-2 px-4 ${
+                selectedTab === tab
+                  ? 'text-violet-400 border-b-2 border-violet-400'
+                  : 'text-gray-400 hover:text-violet-300'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-4 rounded-lg max-w-2xl max-h-[90vh] overflow-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Proof of Payment</h2>
-                <button
-                  onClick={closeModal}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
+
+        {/* Search Bar */}
+        <input
+          type="text"
+          placeholder="Search orders..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full p-2 mb-6 bg-gray-800 text-white rounded border border-gray-700"
+        />
+
+        {/* Orders List */}
+        {loading ? (
+          <div className="text-white text-center">Loading...</div>
+        ) : (
+          <div className="space-y-4">
+            {getFilteredOrders().map((order) => (
+              <div key={order.id} className="bg-gray-800 p-4 rounded-lg">
+                <div className="flex justify-between items-start mb-4">
+                  <div> 
+                    <h3 className="text-white text-lg font-semibold">
+                      Order #{order.id}
+                    </h3>
+                    <p className="text-gray-400">
+                      Customer: {order.profiles?.full_name || 'N/A'}
+                    </p>
+                    <p className="text-gray-400">
+                      Product: {order.shop_Product?.item_Name || 'N/A'}
+                    </p>
+                    <p className="text-gray-400">
+                      Payment Method: {order.payment_method}
+                    </p>
+                    {order.payment_method === 'Gcash' && order.proof_of_payment && (
+                      <div className="mt-2">
+                        <p className="text-gray-400 mb-2">Proof of Payment:</p>
+                        <img
+                          src={order.proof_of_payment}
+                          alt="Proof of Payment"
+                          className="w-24 h-24 object-cover rounded cursor-pointer hover:opacity-80"
+                          onClick={() => {
+                            setSelectedImage(order.proof_of_payment);
+                            setShowImageModal(true);
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-violet-400 font-bold">
+                      ₱{order.final_price}
+                    </p>
+                    <p className="text-gray-400">
+                      {new Date(order.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  {order.payment_method === 'Gcash' && 
+                   order.payment_status === 'Pending to Admin' && (
+                    <>
+                      <button
+                        onClick={() => handlePaymentVerification(order.id, true)}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                      >
+                        Approve Payment
+                      </button>
+                      <button
+                        onClick={() => handlePaymentVerification(order.id, false)}
+                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                      >
+                        Reject Payment
+                      </button>
+                    </>
+                  )}
+
+                  {order.refund_status === 'Requested' && (
+                    <>
+                      <button
+                        onClick={() => handleRefundRequest(order.id, true)}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                      >
+                        Approve Refund
+                      </button>
+                      <button
+                        onClick={() => handleRefundRequest(order.id, false)}
+                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                      >
+                        Reject Refund
+                      </button>
+                    </>
+                  )}
+
+                  {order.cancellation_status === 'Requested' && (
+                    <>
+                      <button
+                        onClick={() => handleCancellation(order.id, true)}
+                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                      >
+                        Approve Cancellation
+                      </button>
+                      <button
+                        onClick={() => handleCancellation(order.id, false)}
+                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                      >
+                        Reject Cancellation
+                      </button>
+                    </>
+                  )}
+
+                  {['To prepare', 'To ship', 'To deliver'].includes(order.shipping_status) && (
+                    <select
+                      onChange={(e) => handleShippingUpdate(order.id, e.target.value)}
+                      value={order.shipping_status}
+                      className="px-4 py-2 bg-gray-700 text-white rounded"
+                    >
+                      <option value="To prepare">Preparing</option>
+                      <option value="To ship">To Ship</option>
+                      <option value="To deliver">To Deliver</option>
+                      <option value="delivered">Delivered</option>
+                    </select>
+                  )}
+                </div>
               </div>
-              {selectedImage && (
-                <img
-                  src={selectedImage}
-                  alt="Proof of payment"
-                  className="max-w-full max-h-[70vh] object-contain"
-                />
-              )}
-            </div>
+            ))}
           </div>
+        )}
+        {showImageModal && (
+          <ImageModal
+            imageUrl={selectedImage}
+            onClose={() => {
+              setShowImageModal(false);
+              setSelectedImage(null);
+            }}
+          />
         )}
       </div>
     </div>
