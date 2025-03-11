@@ -544,151 +544,164 @@ function PlaceOrder() {
 
           <div className="max-h-96 overflow-y-auto p-4">
             {Object.entries(groupItemsByShop(selectedItems)).map(
-              ([shopName, { items, shippingFee }], index) => (
-                <div key={shopName} className="mb-6 last:mb-0">
-                  <div className="flex items-center gap-2 mb-3 pb-2 border-b justify-between">
-                    <h3 className="font-medium text-gray-800">{shopName}</h3>
-                    <div className="flex items-center justify-center">
-                      <button
-                        className="flex items-center justify-center bg-[#171717] text-white pl-2 py-0 gap-2 text-sm font-medium rounded-md hover:bg-[#111111] duration-300 transition-all hover:px-2"
-                        onClick={() => openModalShopVoucher(items[0].prod.shop)}
-                      >
-                        <p>Select:</p>
-                        {selectedShopVouchers?.filter(
-  (voucher) => voucher.shopId === items[index]?.prod?.shop?.id
-).length > 0 ? (
-  selectedShopVouchers
-    ?.filter((voucher) => voucher.shopId === items[index]?.prod?.shop?.id)
-    .map((voucher) => (
-      <div
-        key={voucher.id}
-        className="flex justify-between gap-2 p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50"
-      >
-        <div>
-          <div className="text-sm w-32 text-left truncate font-medium text-gray-800">
-            {voucher.voucher_name}:
-          </div>
-        </div>
-        <div className="text-gray-800 text-sm">-₱{voucher.discount}</div>
-      </div>
-    ))
-) : (
-  <div className="flex justify-between p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50">
-    <div>
-      <div className="text-sm text-gray-800">No Voucher Applied</div>
-    </div>
-  </div>
-)}
+              ([shopName, { items, shippingFee }], index) => {
+                const shopId = items[0]?.prod?.shop?.id;
 
-                      </button>
-                    </div>
-                  </div>
-
-                  {items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex flex-wrap md:flex-nowrap items-center gap-4 py-3 border-b last:border-b-0"
-                    >
-                      <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 overflow-hidden">
-                        <img
-                          src={
-                            item.variant.imagePath ||
-                            require("@/assets/emote/success.png")
+                return (
+                  <div key={shopName} className="mb-6 last:mb-0">
+                    <div className="flex items-center gap-2 mb-3 pb-2 border-b justify-between">
+                      <h3 className="font-medium text-gray-800">{shopName}</h3>
+                      <div className="flex items-center justify-center">
+                        <button
+                          className="flex items-center justify-center bg-[#171717] text-white pl-2 py-0 gap-2 text-sm font-medium rounded-md hover:bg-[#111111] duration-300 transition-all hover:px-2"
+                          onClick={() =>
+                            openModalShopVoucher(items[0].prod.shop)
                           }
-                          alt={item.variant.variant_Name}
-                          className="h-full w-full object-contain"
-                        />
-                      </div>
-
-                      <div className="flex-grow min-w-0">
-                        <h4 className="font-medium text-gray-800 truncate">
-                          {item.prod.item_Name}
-                        </h4>
-                        <div className="flex flex-wrap gap-x-4 text-sm text-gray-600">
-                          <span>Variant: {item.variant.variant_Name}</span>
-                          <span>Size: {item.size.size}</span>
-                          <span>Qty: {item.qty}</span>
-                        </div>
-                      </div>
-
-                      <div className="ml-auto text-right">
-                        <div className="text-sm text-gray-600">Unit Price</div>
-                        <div className="font-medium">
-                          ₱
-                          {item.prod.discount
-                            ? Number(
-                                item.size.price * (1 - item.prod.discount / 100)
-                              ).toFixed(2)
-                            : Number(item.size.price).toFixed(2)}
-                        </div>
-                      </div>
-
-                      <div className="text-right min-w-20">
-                        <div className="text-sm text-gray-600">Subtotal</div>
-                        <div className="font-semibold text-lg">
-                          ₱
-                          {Number(
-                            item.prod.discount
-                              ? item.size.price *
-                                  (1 - Number(item.prod.discount) / 100)
-                              : item.size.price * item.qty
-                          ).toFixed(2)}
-                        </div>
+                        >
+                          <p>Select:</p>
+                          {selectedShopVouchers.some(
+                            (voucher) => voucher.shopId === shopId
+                          ) ? (
+                            selectedShopVouchers
+                              .filter((voucher) => voucher.shopId === shopId)
+                              .map((voucher) => (
+                                <div
+                                  key={voucher.id}
+                                  className="flex justify-between gap-2 p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50"
+                                >
+                                  <div>
+                                    <div className="text-sm w-32 text-left truncate font-medium text-gray-800">
+                                      {voucher.voucher_name}:
+                                    </div>
+                                  </div>
+                                  <div className="text-gray-800 text-sm">
+                                    -₱{voucher.discount}
+                                  </div>
+                                </div>
+                              ))
+                          ) : (
+                            <div className="flex justify-between p-1 rounded border-l-4 border-l-yellow-600 bg-yellow-50">
+                              <div>
+                                <div className="text-sm text-gray-800">
+                                  No Voucher Applied
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </button>
+                      
                       </div>
                     </div>
-                  ))}
 
-                  <div className="flex flex-wrap justify-end gap-3 items-center mt-3 text-sm">
-                    <span className="flex items-center gap-1">
-                      <FontAwesomeIcon
-                        icon={faTruckFast}
-                        className="text-gray-600"
-                      />
-                      Shipping Fee: ₱{shippingFee}
-                    </span>
-
-                    {index === 0 && (
-                      <>
-                        {selectedVouchers.find(
-                          (v) => v.voucher_type === "Shipping"
-                        ) && (
-                          <span className="text-green-600 flex items-center gap-1">
-                            <FontAwesomeIcon icon={faTag} />
-                            Shipping: -₱
-                            {
-                              selectedVouchers.find(
-                                (v) => v.voucher_type === "Shipping"
-                              ).discount
+                    {items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex flex-wrap md:flex-nowrap items-center gap-4 py-3 border-b last:border-b-0"
+                      >
+                        <div className="w-16 h-16 bg-gray-100 rounded flex-shrink-0 overflow-hidden">
+                          <img
+                            src={
+                              item.variant.imagePath ||
+                              require("@/assets/emote/success.png")
                             }
-                          </span>
-                        )}
+                            alt={item.variant.variant_Name}
+                            className="h-full w-full object-contain"
+                          />
+                        </div>
 
-                        {selectedVouchers.filter(
-                          (v) => v.voucher_type !== "Shipping"
-                        ).length > 0 && (
-                          <span className="text-primary-color flex items-center gap-1">
-                            <FontAwesomeIcon icon={faTag} />
-                            Product: -₱
-                            {selectedVouchers
-                              .filter((v) => v.voucher_type !== "Shipping")
-                              .reduce((sum, v) => sum + v.discount, 0)}
-                          </span>
-                        )}
-                        {selectedShopVouchers?.some(
-                          (voucher) =>
-                            voucher.shopId === items[index]?.prod?.shop?.id
-                        ) && (
-                          <span className="text-yellow-600 flex items-center gap-1">
-                            <FontAwesomeIcon icon={faTag} />
-                            Merchant: -₱
-                            {selectedShopVouchers[0].discount}
-                          </span>
-                        )}
-                      </>
-                    )}
+                        <div className="flex-grow min-w-0">
+                          <h4 className="font-medium text-gray-800 truncate">
+                            {item.prod.item_Name}
+                          </h4>
+                          <div className="flex flex-wrap gap-x-4 text-sm text-gray-600">
+                            <span>Variant: {item.variant.variant_Name}</span>
+                            <span>Size: {item.size.size}</span>
+                            <span>Qty: {item.qty}</span>
+                          </div>
+                        </div>
+
+                        <div className="ml-auto text-right">
+                          <div className="text-sm text-gray-600">
+                            Unit Price
+                          </div>
+                          <div className="font-medium">
+                            ₱
+                            {item.prod.discount
+                              ? Number(
+                                  item.size.price *
+                                    (1 - item.prod.discount / 100)
+                                ).toFixed(2)
+                              : Number(item.size.price).toFixed(2)}
+                          </div>
+                        </div>
+
+                        <div className="text-right min-w-20">
+                          <div className="text-sm text-gray-600">Subtotal</div>
+                          <div className="font-semibold text-lg">
+                            ₱
+                            {Number(
+                              item.prod.discount
+                                ? item.size.price *
+                                    (1 - Number(item.prod.discount) / 100)
+                                : item.size.price * item.qty
+                            ).toFixed(2)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    <div className="flex flex-wrap justify-end gap-3 items-center mt-3 text-sm">
+                      <span className="flex items-center gap-1">
+                        <FontAwesomeIcon
+                          icon={faTruckFast}
+                          className="text-gray-600"
+                        />
+                        Shipping Fee: ₱{shippingFee}
+                      </span>
+
+                      {index === 0 && (
+                        <>
+                          {selectedVouchers.find(
+                            (v) => v.voucher_type === "Shipping"
+                          ) && (
+                            <span className="text-green-600 flex items-center gap-1">
+                              <FontAwesomeIcon icon={faTag} />
+                              Shipping: -₱
+                              {
+                                selectedVouchers.find(
+                                  (v) => v.voucher_type === "Shipping"
+                                ).discount
+                              }
+                            </span>
+                          )}
+
+                          {selectedVouchers.filter(
+                            (v) => v.voucher_type !== "Shipping"
+                          ).length > 0 && (
+                            <span className="text-primary-color flex items-center gap-1">
+                              <FontAwesomeIcon icon={faTag} />
+                              Product: -₱
+                              {selectedVouchers
+                                .filter((v) => v.voucher_type !== "Shipping")
+                                .reduce((sum, v) => sum + v.discount, 0)}
+                            </span>
+                          )}
+                      
+                        </>
+                      )}
+                           {
+                            selectedShopVouchers
+                              .filter((voucher) => voucher.shopId === shopId)
+                              .map((voucher) => (
+                        <span key={voucher.id} className="text-yellow-600 flex items-center gap-1">
+                              <FontAwesomeIcon icon={faTag} />
+                              Merchant: -₱
+                              {voucher.discount}
+                            </span>))}
+                    </div>
                   </div>
-                </div>
-              )
+                );
+              }
             )}
           </div>
         </section>

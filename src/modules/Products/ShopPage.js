@@ -267,13 +267,16 @@ function ShopPage() {
         </div>
 
         {/* Ad Banner Section */}
-         <div className="my-6 mx-1 md:mx-auto w-full h-[10rem]">
-          {/* <AdsCarousel ads={shop.shop_Ads}/> */}
+         <div className="my-6 mx-1 flex flex-col gap-4 md:mx-auto w-full">
+         
         {/* Fallback if you don't have the component: */}
         {/* <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center text-gray-500 border border-dashed border-gray-300">
             Advertisement Space
           </div> */}
           <ShopVoucherStream profile={profile} shop={shop}/>
+          <div className="flex justify-center items-center h-1/3 w-1/2">
+          <AdsCarousel shop={shop} /> 
+          </div>
         </div> 
 
         {/* Categories Section */}
