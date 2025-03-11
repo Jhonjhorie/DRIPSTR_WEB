@@ -3,6 +3,7 @@ import ArtistSideBar from "../../Component/ArtistSB";
 import { useNavigate } from "react-router-dom";
 import successEmote from "../../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../../src/assets/emote/question.png";
+import hmmmEmote from "../../../../../src/assets/emote/hmmm.png";
 import {
   blockInvalidChar,
   validateMinLength2,
@@ -21,6 +22,8 @@ function ArtistCommision() {
   const [selectedCommission, setSelectedCommission] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalOpenRefImage, setModalOpenRefImage] = useState(false);
+  const [filteredCommissions, setFilteredCommissions] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState("Confirmed");
 
   //Fetch current User = Artist
   useEffect(() => {
@@ -35,53 +38,55 @@ function ArtistCommision() {
     fetchUser();
   }, []);
   //Fetch Commissions
-  useEffect(() => {
-    const fetchNewCommissions = async () => {
-      if (!userId) return;
 
-      try {
-        const { data: artistData, error: artistError } = await supabase
-          .from("artist")
-          .select("id")
-          .eq("owner_Id", userId)
-          .single();
+  const fetchNewCommissions = async () => {
+    if (!userId) return;
 
-        if (artistError || !artistData) {
-          console.error("Artist not found:", artistError?.message);
-          return;
-        }
+    try {
+      const { data: artistData, error: artistError } = await supabase
+        .from("artist")
+        .select("id")
+        .eq("owner_Id", userId)
+        .single();
 
-        const artistId = artistData.id;
-
-        const { data: commissions, error: commissionError } = await supabase
-          .from("art_Commision")
-          .select(
-            `
-          id, title, description, deadline, image, payment, commission_Status,
-          client_Id,
-          profiles(full_name, profile_picture)
-        `
-          )
-          .eq("artist_Id", artistId);
-
-        if (commissionError) {
-          console.error("Error fetching commissions:", commissionError.message);
-          return;
-        }
-
-        const formattedCommissions = commissions.map((commission) => ({
-          ...commission,
-          senderName: commission.profiles?.full_name || "Unknown",
-          senderProfile:
-            commission.profiles?.profile_picture || "/default-avatar.png",
-        }));
-        setNewCommissions(formattedCommissions);
-        console.log("New Commissions:", commissions);
-      } catch (error) {
-        console.error("Unexpected error:", error.message);
+      if (artistError || !artistData) {
+        console.error("Artist not found:", artistError?.message);
+        return;
       }
-    };
 
+      const artistId = artistData.id;
+
+      const { data: commissions, error: commissionError } = await supabase
+        .from("art_Commision")
+        .select(
+          `id, title, description, deadline, image, payment, commission_Status,
+            client_Id,
+            profiles(full_name, profile_picture)`
+        )
+        .eq("artist_Id", artistId);
+
+      if (commissionError) {
+        console.error("Error fetching commissions:", commissionError.message);
+        return;
+      }
+
+      const formattedCommissions = commissions.map((commission) => ({
+        ...commission,
+        senderName: commission.profiles?.full_name || "Unknown",
+        senderProfile: commission.profiles?.profile_picture || successEmote,
+      }));
+
+      setNewCommissions(formattedCommissions);
+      setFilteredCommissions(
+        formattedCommissions.filter(
+          (commission) => commission.commission_Status !== "Completed"
+        )
+      ); // Default to pending
+    } catch (error) {
+      console.error("Unexpected error:", error.message);
+    }
+  };
+  useEffect(() => {
     if (userId) fetchNewCommissions();
   }, [userId]);
 
@@ -89,7 +94,19 @@ function ArtistCommision() {
     setModalOpen(false);
     setSelectedCommission(null);
   };
-
+  //filter if pending and completed
+  const filterCommissions = (status) => {
+    setSelectedStatus(status);
+    setFilteredCommissions(
+      newCommissions.filter(
+        (commission) =>
+          (status === "Completed" &&
+            commission.commission_Status === "Completed") ||
+          (status === "Confirmed" &&
+            commission.commission_Status !== "Completed")
+      )
+    );
+  };
   const updateCommissionStatus = async (commissionId) => {
     setLoading(true);
 
@@ -110,6 +127,7 @@ function ArtistCommision() {
 
       console.log(`Commission ${commissionId} marked as done.`);
       closeModal();
+      fetchNewCommissions();
     } catch (error) {
       console.error("Unexpected error updating status:", error.message);
     } finally {
@@ -125,27 +143,54 @@ function ArtistCommision() {
       <div className=" p-5 text-xl md:text-3xl font-bold  text-custom-purple flex justify-center">
         ART COMMISIONS
       </div>
-      <div className="bg-slate-100 rounded-md p-5 shadow-inner overflow-hidden overflow-scroll shadow-slate-500 h-[80%] ">
-        <div className=" bg-slate-100">
-          {loading ? (
-            <p className="text-gray-500">Loading...</p>
-          ) : newCommissions.length === 0 ? (
-            <p className="text-gray-500">No pending commissions.</p>
+      <div className="bg-slate-100 rounded-md p-5 shadow-inner overflow-scroll shadow-slate-500 h-[80%]">
+        <div className="bg-slate-100">
+          {/* Buttons for filtering commissions */}
+          <div className="flex gap-4 mb-4">
+            <button
+              onClick={() => filterCommissions("Confirmed")}
+              className={`px-4 text-sm py-2 rounded-md ${
+                selectedStatus === "Confirmed"
+                  ? "bg-custom-purple text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              Pending Commissions
+            </button>
+            <button
+              onClick={() => filterCommissions("Completed")}
+              className={`px-4 text-sm py-2 rounded-md ${
+                selectedStatus === "Completed"
+                  ? "bg-custom-purple text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              Completed Art
+            </button>
+          </div>
+
+          {filteredCommissions.length === 0 ? (
+            <div className="w-full h-full  mt-10 place-items-center justify-items-center">
+              <img src={hmmmEmote} className="h-20 " />
+              <p className="text-slate-800 text-sm">
+                No {selectedStatus.toLowerCase()} commissions.
+              </p>
+            </div>
           ) : (
-            <div className=" bg-white rounded-md w-auto h-auto">
-              <table className="w-full text-left">
+            <div className="bg-white rounded-md w-auto h-auto">
+              <table className="w-full text-left ">
                 <thead>
-                  <tr className="border-b text-slate-100  bg-custom-purple glass">
-                    <th className="py-2 px-4">Sender Name</th>
-                    <th className="py-2 px-4">Reference Image</th>
-                    <th className="py-2 px-4">Deadline</th>
-                    <th className="py-2 px-4">Payment</th>
-                    <th className="py-2 px-4">Status</th>
-                    <th className="py-2 px-4">Action</th>
+                  <tr className="border-b text-slate-100 bg-custom-purple rounded-t-md  glass">
+                    <th className="py-2 px-4 font-normal">Sender Name</th>
+                    <th className="py-2 px-4 font-normal">Reference Image</th>
+                    <th className="py-2 px-4 font-normal">Deadline</th>
+                    <th className="py-2 px-4 font-normal">Payment</th>
+                    <th className="py-2 px-4 font-normal">Status</th>
+                    <th className="py-2 px-4 font-normal">Action</th>
                   </tr>
                 </thead>
                 <tbody className="w-full shadow-md rounded-md bg-slate-100">
-                  {newCommissions.map((commission) => (
+                  {filteredCommissions.map((commission) => (
                     <tr
                       key={commission.id}
                       className="hover:bg-gray-100 w-full bg-slate-100 text-slate-900"
@@ -242,18 +287,23 @@ function ArtistCommision() {
               </div>
             </div>
 
-            <button
-              onClick={() => updateCommissionStatus(selectedCommission.id)}
-              className="bg-custom-purple glass text-white px-4 py-2 rounded-md w-full mb-2 hover:bg-primary-color mt-2 transition"
-            >
-              Mark as Done
-            </button>
-            <button
-              onClick={closeModal}
-              className="bg-gray-400 text-white px-4 py-2 rounded-md w-full hover:bg-gray-500 transition"
-            >
-              Close
-            </button>
+            <div className="w-full flex justify-end gap-3 p-3">
+              <button
+                onClick={closeModal}
+                className="bg-gray-500 text-sm text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50 "
+              >
+                Close
+              </button>
+
+              {selectedCommission.commission_Status !== "Completed" && (
+                <button
+                  onClick={() => updateCommissionStatus(selectedCommission.id)}
+                  className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Mark as Done
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}

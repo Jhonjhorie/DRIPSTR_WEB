@@ -596,11 +596,11 @@ function MerchantDashboard() {
               <div></div>
             </div>
 
-            <div className="flex gap-1 mt-1 md:mt-0 md:gap-5">
+            <div className="flex gap-1 mt-1 bg-custom-purple p-1 shadow-inner shadow-slate-800 rounded-md md:mt-0 md:gap-5">
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
-                    <div className="text-2xl text-slate-100"> {totLikes}</div>
+                    <div className="text-xl md:text-2xl text-slate-100 "> {totLikes}</div>
                     <div className="pt-1">
                       {" "}
                       <box-icon color="white" size="100%" type='solid' name='like'></box-icon>
@@ -613,7 +613,7 @@ function MerchantDashboard() {
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
-                    <div className="text-2xl text-slate-100"> {totalFollowers}</div>
+                    <div className="text-xl md:text-2xl text-slate-100"> {totalFollowers}</div>
                     <div className="pt-1">
                       {" "}
                       <box-icon
@@ -631,7 +631,7 @@ function MerchantDashboard() {
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
-                    <div className="text-2xl text-slate-100">
+                    <div className="text-xl md:text-2xl text-slate-100">
                       {totalArtsCount}
                     </div>
                     <div className="pt-1">

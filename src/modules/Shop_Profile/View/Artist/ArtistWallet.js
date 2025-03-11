@@ -7,6 +7,9 @@ import successEmote from "../../../../../src/assets/emote/success.png";
 import sadEmote from "../../../../../src/assets/emote/error.png";
 import hmmEmote from "../../../../../src/assets/emote/hmmm.png";
 import qrCode from "@/assets/qr.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCrown } from "@fortawesome/free-solid-svg-icons";
+
 
 const { useState, useEffect } = React;
 function ArtistWallet() {
@@ -82,29 +85,29 @@ function ArtistWallet() {
       setLoading(false);
     }
   };
-//insert the id to the artist wallet column
-const handleConfirmWallet = async () => {
-  if (!walletData || !walletData.id) {
-    console.error("No wallet data found.");
-    return;
-  }
-
-  try {
-    const { error } = await supabase
-      .from("artist")
-      .update({ wallet: walletData.id }) 
-      .eq("owner_Id", currentUser.id); 
-
-    if (error) {
-      throw error;
+ //insert the id to the artist wallet column
+  const handleConfirmWallet = async () => {
+    if (!walletData || !walletData.id) {
+      console.error("No wallet data found.");
+      return;
     }
 
-    console.log("Wallet ID successfully linked to shop.");
-    setShowWalletModal(false);
-  } catch (error) {
-    console.error("Error updating wallet:", error.message);
-  }
-};
+    try {
+      const { error } = await supabase
+        .from("artist")
+        .update({ wallet: walletData.id }) 
+        .eq("owner_Id", currentUser.id); 
+
+      if (error) {
+        throw error;
+      }
+
+      console.log("Wallet ID successfully linked to shop.");
+      setShowWalletModal(false);
+    } catch (error) {
+      console.error("Error updating wallet:", error.message);
+    }
+  };
 
   const fetchWalletData = async () => {
     setLoading(true);
@@ -610,6 +613,15 @@ const handleConfirmWallet = async () => {
                 : ""
             }`}
           >
+                  <div>
+              {isPremium && (
+                <div className="absolute z-10 -left-2 -top-2 flex justify-end">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-black text-yellow-400 rounded-full text-sm font-medium">
+                    <FontAwesomeIcon icon={faCrown} /> Premium Artist
+                  </span>
+                </div>
+              )}
+            </div>
             {/* Wallet Icon and Name */}
             <div className="absolute bottom-2 right-2">
               <img src={logo} className="h-20 w-20 blur-sm" />

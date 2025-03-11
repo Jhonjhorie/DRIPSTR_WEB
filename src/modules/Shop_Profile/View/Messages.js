@@ -89,7 +89,16 @@ function Messages() {
       setLoading(false);
       return;
     }
-
+    const formattedMessages = data.map((msg) => ({
+      ...msg,
+      profiles: {
+        ...msg.profiles,
+        profile_picture: msg.profiles?.profile_picture || successEmote,
+      },
+    }));
+  
+    console.log("Fetched Messages:", formattedMessages);
+    setMessages(formattedMessages);
     console.log("Fetched Messages:", data);
     setMessages(data);
 
