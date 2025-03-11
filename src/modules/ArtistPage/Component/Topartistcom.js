@@ -136,14 +136,14 @@ const Topartistcom = () => {
                     </div>
                   </div>
                 </td>
-                <td className="text-center">
+                <td className="text-center w-3/4">
                   {artist.art_Type || "N/A"}
                   <br />
                   <span
-                    className={`badge badge-sm ${
+                    className={`badge  ${
                       artist.is_Premium
-                        ? "bg-yellow-500 text-black glass"
-                        : "bg-custom-purple text-white glass"
+                        ? "bg-yellow-500 text-sm text-black glass"
+                        : "bg-custom-purple text-sm text-white glass"
                     }`}
                   >
                     {artist.is_Premium ? "Premium Artist" : "Standard Artist"}

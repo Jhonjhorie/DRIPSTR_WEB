@@ -118,21 +118,21 @@ function ArtistCommision() {
   };
 
   return (
-    <div className="h-full w-full bg-slate-300 px-10 ">
+    <div className="h-full w-full bg-slate-300 px-2 md:px-10 ">
       <div className="absolute mx-3 right-0 z-20">
         <ArtistSideBar />
       </div>
       <div className=" p-5 text-xl md:text-3xl font-bold  text-custom-purple flex justify-center">
         ART COMMISIONS
       </div>
-      <div className="bg-slate-100 rounded-md p-5 shadow-inner overflow-hidden overflow-y-auto shadow-slate-500 h-[80%] ">
-        <div className="p-4 bg-slate-100">
+      <div className="bg-slate-100 rounded-md p-5 shadow-inner overflow-hidden overflow-scroll shadow-slate-500 h-[80%] ">
+        <div className=" bg-slate-100">
           {loading ? (
             <p className="text-gray-500">Loading...</p>
           ) : newCommissions.length === 0 ? (
             <p className="text-gray-500">No pending commissions.</p>
           ) : (
-            <div className=" bg-white shadow-md rounded-md w-auto h-auto">
+            <div className=" bg-white rounded-md w-auto h-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b text-slate-100  bg-custom-purple glass">
@@ -144,11 +144,11 @@ function ArtistCommision() {
                     <th className="py-2 px-4">Action</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="w-full shadow-md rounded-md bg-slate-100">
                   {newCommissions.map((commission) => (
                     <tr
                       key={commission.id}
-                      className="hover:bg-gray-100 text-slate-900"
+                      className="hover:bg-gray-100 w-full bg-slate-100 text-slate-900"
                     >
                       <td className="py-4 text-slate-900 px-4 flex items-center gap-2">
                         <img
@@ -201,12 +201,12 @@ function ArtistCommision() {
       </div>
 
       {modalOpen && selectedCommission && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black p-2 z-50 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white relative text-slate-900 p-6 rounded-md shadow-lg w-auto">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
             </div>
-            <div className="flex w-full gap-2">
+            <div className=" w-full gap-2">
               <div>
                 <h3 className="text-2xl font-bold mb-2 ">
                   {selectedCommission.title}
@@ -219,10 +219,10 @@ function ArtistCommision() {
                   {selectedCommission.commission_Status}
                 </p>
                 <p className="mb-2">
-                  <strong>Status:</strong> {selectedCommission.description}
+                  <strong>Description:</strong> {selectedCommission.description}
                 </p>
                 <p className="mb-2">
-                  <strong>Status:</strong> {selectedCommission.deadline}
+                  <strong>Deadline:</strong> {selectedCommission.deadline}
                 </p>
               </div>
               <div
@@ -230,7 +230,7 @@ function ArtistCommision() {
                   setSelectedCommission(selectedCommission);
                   setModalOpenRefImage(true);
                 }}
-                className="rounded-md cursor-pointer p-2 bg-custom-purple glass"
+                className="rounded-md cursor-pointer place-items-center  p-2 md:h-[400px] h-[200px] bg-custom-purple glass"
               >
                 {selectedCommission.image && (
                   <img
@@ -258,7 +258,7 @@ function ArtistCommision() {
         </div>
       )}
       {modalOpenRefImage && selectedCommission && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black z-50 p-2 bg-opacity-50 flex justify-center items-center">
           <div className="bg-custom-purple relative text-slate-900 p-4 rounded-md shadow-lg w-auto">
             <button
               onClick={() => {

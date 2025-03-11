@@ -598,11 +598,11 @@ const handleConfirmWallet = async () => {
       <div className="absolute mx-3 right-0 z-20">
         <SideBar />
       </div>
-      <div className="text-3xl text-custom-purple font-bold py-4">
+      <div className="text-xl md:ml-0 -ml-2 md:text-3xl font-semibold w-full text-start  text-custom-purple p-3">
         <h1>Your Artist Wallet</h1>
       </div>
-      <div className="flex gap-2 w-full h-auto">
-        <div className="w-1/3  h-full flex flex-col items-center">
+      <div className="md:flex  mt-3 md:mt-0 gap-2 w-full h-auto">
+      <div className="md:w-1/3 w-full justify-items-center h-full md:flex flex-col items-center">
           <div
             className={`bg-gradient-to-r relative mt-2 from-violet-600 to-indigo-600 h-[180px] w-[330px] shadow-lg shadow-slate-700 rounded-xl p-5 flex flex-col justify-between text-white ${
               isPremium
@@ -650,10 +650,10 @@ const handleConfirmWallet = async () => {
           </div>
         </div>
 
-        <div className="w-2/3 h-full p-4 flex flex-col justify-between">
+        <div className="w-full md:w-2/3 h-full p-4 flex flex-col justify-between">
           {/* Header */}
           <div className="">
-            <div className="text-slate-800 text-xl font-semibold">
+          <div className="text-slate-900 md:text-start text-center text-xl font-semibold">
               {" "}
               {walletData?.owner_Name || "Loading"}
             </div>
@@ -703,10 +703,10 @@ const handleConfirmWallet = async () => {
         </div>
       </div>
       <div className=" w-full border-b-2 border-slate-400 shadow-lg h-1 mt-2 "></div>
-      <div className="w-full h-auto  justify-items-center">
+      <div className="w-full h-auto  justify-items-center mb-20 md:mb-0">
         {/* Content Display */}
         {activeTab === "cashout" && (
-          <div className="flex-grow relative bg-white w-1/2 px-6  p-4 rounded-lg shadow-md mt-4">
+         <div className="flex-grow relative bg-white w-full md:w-1/2 px-6  p-4 rounded-lg shadow-md mt-4">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
             </div>
@@ -732,7 +732,7 @@ const handleConfirmWallet = async () => {
         )}
 
         {activeTab === "history" && (
-          <div className="flex-grow relative bg-white w-1/2 p-4 rounded-lg shadow-md mt-4">
+          <div className="flex-grow relative bg-white w-full md:w-1/2 px-6  p-4 rounded-lg shadow-md mt-4">
             <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
             <div className="w-full text-slate-900 relative p-2">
               <h3 className="text-lg font-semibold mb-2">
@@ -779,7 +779,7 @@ const handleConfirmWallet = async () => {
         )}
 
         {activeTab === "inquiry" && (
-          <div className="flex-grow relative bg-white w-1/2 p-4 rounded-lg shadow-md mt-4">
+          <div className="flex-grow relative bg-white w-full md:w-1/2 px-6  p-4 rounded-lg shadow-md mt-4">
             <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
 
             <h3 className="text-lg font-semibold mb-2 text-custom-purple text-center">
@@ -788,7 +788,7 @@ const handleConfirmWallet = async () => {
 
             {/* Info Display */}
             <div className="h-[300px] w-full shadow-inner shadow-slate-400 rounded-md overflow-y-auto bg-slate-300 p-4">
-              <div className="max-w-3xl mx-auto px-6">
+            <div className="max-w-3xl mx-auto px-6">
                 <div className="space-y-6">
                   <div className="p-4 bg-gray-100 rounded-lg shadow-md">
                     <h2 className="text-lg text-black font-semibold">
@@ -883,7 +883,7 @@ const handleConfirmWallet = async () => {
         )}
       </div>
       {isModalOpenCO && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 p-2 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
             <h3 className="text-lg text-center font-semibold text-slate-900 mb-4">
               Are you sure you want to submit this cashout request?
@@ -977,8 +977,8 @@ const handleConfirmWallet = async () => {
         </div>
       )}
       {showAlertExpiredSubs && (
-        <div className="fixed  inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white relative p-6 rounded-lg shadow-lg w-1/3">
+        <div className="fixed p-2 inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white relative p-6 rounded-lg shadow-lg w-full md:w-1/3">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
             </div>
@@ -1069,8 +1069,8 @@ const handleConfirmWallet = async () => {
         </div>
       )}
       {showAlertSubscription && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-5 w-[600px] rounded-md shadow-md relative">
+        <div className="fixed inset-0 p-2 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-5 w-full md:w-[600px] rounded-md shadow-md relative">
             {/* Gradient Header Line */}
             <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
 
@@ -1315,7 +1315,7 @@ const handleConfirmWallet = async () => {
           )}
         </div>
       )}
-       {showWalletModal && (
+      {showWalletModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
             <h2 className="text-xl font-semibold text-gray-800">

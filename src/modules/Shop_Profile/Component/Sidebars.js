@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../../../assets/shop/shoplogo.jpg";
+import successEmote from "../../../assets/emote/success.png";
 import { supabase } from "../../../constants/supabase";
 
 function SideBar() {
@@ -74,17 +75,12 @@ function SideBar() {
         className="dropdown  dropdown-bottom dropdown-end bg-slate-100 shadow-md border-2 border-primary-color 
     shadow-primary-color h-12 w-20 mt-2 rounded-md -ml-36 "
       >
-        {shopImageUrl ? (
           <img
-            src={shopImageUrl}
+            src={shopImageUrl || successEmote}
             alt="Shop Profile"
             className="object-cover h-full w-full rounded-sm"
           />
-        ) : (
-          <div className="h-full w-full flex items-center justify-center">
-            <span>Loading...</span>
-          </div>
-        )}
+     
       </div>
 
       {/* Navbar */}
@@ -109,7 +105,7 @@ function SideBar() {
           <div className="h-24 w-full rounded-md bg-slate-900">
             <div className="bg-slate-100 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-full border-[3px]  border-slate-800 ">
               <img
-                src={shopImageUrl}
+                src={shopImageUrl || successEmote} 
                 alt="Shop Logo"
                 className="drop-shadow-custom object-cover rounded-full h-[135px] w-full"
               />

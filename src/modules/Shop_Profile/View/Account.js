@@ -310,8 +310,8 @@ function Account() {
         </div>
         {/* ALLERTS ADD Item SUCCESS */}
         {showAlertEdit && (
-          <div className="fixed inset-0 z-20 bg-gray-800 bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white h-2/3 overflow-y-scroll overflow-hidden  md:h-auto mt-5 md:mt-8 w-h-full md:w-[50%]  justify-items-center rounded-md shadow-md relative">
+          <div className="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 p-2 flex justify-center items-center">
+            <div className="bg-white  md:h-auto mt-5 md:mt-8 w-full md:w-[50%]  justify-items-center rounded-md shadow-md relative">
               <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
                 {" "}
               </div>
@@ -319,7 +319,7 @@ function Account() {
                 Edit Account Information
               </h1>
               <div></div>
-              <div className="md:flex gap-2 w-full px-2 md:px-10">
+              <div className="md:flex gap-2 w-full h-[500px] overflow-y-scroll overflow-hidden px-5 md:px-10 ">
                 <div className=" w-full md:w-1/2 h-auto ">
                   <div className=" p-2 w-full flex justify-center">
                     <div className="bg-slate-100 relative h-44 w-60 border-2 p-1 border-custom-purple rounded-md">

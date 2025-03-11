@@ -151,6 +151,7 @@ function Orders({ shopOwnerId }) {
           `
         )
         .in("prod_num", productIds)
+        .eq("payment_status", "Paid")
         .order("id", { ascending: true });
 
       if (orderError) throw orderError;
@@ -366,13 +367,24 @@ function Orders({ shopOwnerId }) {
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
                     Cancelled Orders
                   </h2>
-                  {orders.cancelled.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
+
+                  {orders.cancelled.length > 0 ? (
+                    orders.cancelled.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        refreshOrders={refreshOrders}
+                      />
+                    ))
+                  ) : (
+                    <div className="justify-items-center mt-28">
+                      <img src={questionEmote} className="h-20 " />
+                      <div className="text-slate-800">
+                        No cancelled to deliver.
+                      </div>
+                    </div>
+                  )}
+          
                 </div>
               )}
               {activeTab === "completed" && (

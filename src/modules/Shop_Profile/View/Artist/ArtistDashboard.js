@@ -555,10 +555,10 @@ function MerchantDashboard() {
       <div className="absolute mx-3 right-0 z-20">
         <ArtistSideBar />
       </div>
-      <div className="w-full h-20  sticky top-0 z-10 bg-violet-600 shadow-md pr-20 px-16 ">
-        <div className="w-full h-full flex gap-3 p-2">
-          <div className="flex justify-between w-full ">
-            <div className="flex gap-2">
+      <div className="w-full md:h-20  md:sticky top-0 z-10 bg-violet-600 shadow-md md:pr-20 px-2 md:px-16 ">
+        <div className="w-full h-full md:flex gap-3 p-2">
+          <div className="md:flex justify-between w-full ">
+            <div className="flex gap-2 items-center">
               <div className="h-full w-24 relative rounded-md border bg-gradient-to-br from-violet-500 to-fuchsia-500 p-1">
                 {imageLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-custom-purple rounded-md ">
@@ -596,7 +596,7 @@ function MerchantDashboard() {
               <div></div>
             </div>
 
-            <div className="flex gap-5">
+            <div className="flex gap-1 mt-1 md:mt-0 md:gap-5">
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
@@ -672,11 +672,12 @@ function MerchantDashboard() {
           </div>
         </div>
       </div>
+      {/* Art display */}
       <div className=" flex w-full h-full bg-slate-300 overflow-hidden">
         <div className="p-2 w-full">
-          <div className="bg-slate-300 h-[545px]  z-0 rounded-md w-full overflow-hidden  overflow-y-scroll p-5">
+          <div className="bg-slate-300 h-[545px]  z-0 rounded-md w-full overflow-hidden  overflow-y-scroll p-1 md:p-5">
             {artistArts && artistArts.length > 0 ? (
-              <div className="columns-2 sm:columns-3 md:columns-4 gap-2 px-4 space-y-2">
+              <div className="columns-2 sm:columns-3 md:columns-4 gap-2 px-1 md:px-4 space-y-2">
                 {artistArts
                   .slice()
                   .reverse()
@@ -748,13 +749,13 @@ function MerchantDashboard() {
 
       {/* ALLERTS ADD Item SUCCESS */}
       {showAddArt && (
-        <div className="fixed inset-0 z-20 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white h-auto  w-[60%]  justify-items-center rounded-md shadow-md relative">
+        <div className="fixed inset-0 z-50 bg-gray-600 bg-opacity-50 flex justify-center items-center p-2 md:p-0">
+          <div className="bg-white h-auto w-full md:w-[60%]  justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
             </div>
             <div className=" p-2 w-full">
-              <div className="pb-1 px-5 h-auto w-full ">
+              <div className="pb-1 px-2 md:px-5 h-auto w-full ">
                 <div className="font-medium text-slate-800 py-2 w-full flex justify-between place-items-center  ">
                   <span className="font-bold text-[20px] md:text-2xl">
                     Add Art to your Gallery
@@ -815,7 +816,7 @@ function MerchantDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-[180px] h-2/3 md:w-full md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
+                  <div className="w-full h-2/3  md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
                     <div className="bg-slate-100 h-[200px] md:h-full rounded-sm shadow-md place-items-center flex place-content-center">
                       {imageSrcArt ? (
                         <img

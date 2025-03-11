@@ -135,6 +135,7 @@ function ArtistAddArts() {
 
       setIsEditable(false);
       setShowAlertSuccessEdit(true);
+      setShowAlertSuccessEditCON(false);
     } catch (error) {
       console.error("Error during update:", error.message);
       setError("An error occurred while updating art.");
@@ -178,12 +179,12 @@ function ArtistAddArts() {
         <ArtistSideBar></ArtistSideBar>
       </div>
       <div className=" h-full w-full">
-        <h1 className="text-3xl text-custom-purple font-bold text-center py-5 p-2">
+        <h1 className="text-3xl text-custom-purple font-bold text-left ml-2 md:ml-0 md:text-center py-5 p-2">
           MANAGE ARTS
         </h1>
-        <div className="w-full h-auto px-16">
+        <div className="w-full h-auto px-2 md:px-16">
           <div className="bg-slate-100 shadow-inner shadow-slate-500 rounded-md overflow-hidden overflow-y-scroll p-4 h-[500px] w-full">
-            <div className="columns-3 md:columns-4 lg:columns-5 gap-3 space-y-5">
+            <div className="columns-2 md:columns-4 lg:columns-5 gap-3 space-y-5">
               {artistArts.map((art) => (
                 <div
                   key={art.id}
@@ -237,11 +238,11 @@ function ArtistAddArts() {
         </div>
       </div>
       {selectedImage && selectedArt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 p-10 md:p-0 flex justify-center items-center">
-          <div className="bg-white h-auto w-[800px] md:flex p-5 rounded-lg shadow-lg relative">
+        <div className="fixed z-50 inset-0 bg-black bg-opacity-50 p-2 md:p-0 flex justify-center items-center">
+          <div className="bg-white h-auto md:w-[800px] w-full md:flex  p-5 rounded-lg shadow-lg relative">
             <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
             <button
-              className="absolute top-2 right-2 bg-white hover:bg-gray-200 duration-150 rounded-full p-1"
+              className="absolute top-2 z-20 right-2 bg-white hover:bg-gray-200 duration-150 rounded-full p-1"
               onClick={closeModal}
             >
                 <box-icon name='x-circle'></box-icon>
@@ -320,7 +321,7 @@ function ArtistAddArts() {
             </div>
           </div>
           {showAlertSuccessEditCon && (
-            <div className="fixed z-20 inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div className="fixed z-20 p-2 inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
                 <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
                   {" "}
@@ -333,20 +334,20 @@ function ArtistAddArts() {
                   />
                 </div>
 
-                <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
+                <h2 className="text-2xl font-bold text-center iceland-regular mb-4 text-slate-900 ">
                   Update {selectedArt.artName} Information?
                 </h2>
                 <div className="w-full flex justify-between">
                   <div
                     onClick={closeConfirmEditCon}
-                    className="bg-gray-300 px-4 py-2 font-medium text-sm text-slate-900 rounded hover:bg-gray-400"
+                    className="bg-gray-300 cursor-pointer px-4 py-2 font-medium text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </div>
 
                   <div
                     onClick={handleSaveClick}
-                    className="bg-blue-500  font-medium text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
+                    className="bg-blue-500 cursor-pointer font-medium text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
                     Confirm
                   </div>
@@ -357,7 +358,7 @@ function ArtistAddArts() {
         </div>
       )}
       {showAlertSuccessEdit && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 z-50 p-2 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
