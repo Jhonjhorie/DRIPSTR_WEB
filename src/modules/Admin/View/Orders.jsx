@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "../../../constants/supabase";
 import Sidebar from './Shared/Sidebar';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faImages } from '@fortawesome/free-solid-svg-icons';
 
 function Orders() {
   const [orders, setOrders] = useState([]);
@@ -17,8 +19,7 @@ function Orders() {
     'To Ship',
     'To Deliver',
     'Delivered',
-    
-    'Cancellation Requests', 
+ 
     'Refund Requests',
     'Cancelled'
 
@@ -65,11 +66,7 @@ function Orders() {
           order.payment_method === 'Gcash' && 
           order.payment_status === 'Pending to Admin'
         );
-      case 'Cancellation Requests':
-        return filtered.filter(order => 
-          order.cancellation_status === 'Requested' &&
-          order.shipping_status !== 'cancel'
-        );
+ 
       case 'Preparing':
         return filtered.filter(order => 
           order.shipping_status === 'To prepare' && 
@@ -89,7 +86,7 @@ function Orders() {
         );
       case 'Cancelled':
         return filtered.filter(order => 
-          order.shipping_status === 'cancel'
+          order.shipping_status === 'cancel' 
         );
       case 'Refund Requests':
         return filtered.filter(order => 
@@ -131,8 +128,11 @@ function Orders() {
       const updates = {
         refund_status: isApproved ? 'Approved' : 'Rejected',
         refund_processed_at: new Date().toISOString(),
-        shipping_status: isApproved ? 'cancel' : 'delivered',
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        // Set payment_status to Refunded if approved
+        payment_status: isApproved ? 'Refunded' : 'Paid',
+        // Set shipping_status to complete if approved
+        shipping_status: isApproved ? 'complete' : 'delivered'
       };
 
       const { error } = await supabase
@@ -215,6 +215,29 @@ function Orders() {
     </div>
   );
 
+  const RefundImagesModal = ({ images, onClose }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="relative max-w-4xl max-h-[90vh] bg-gray-800 rounded-lg p-4">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-white bg-red-600 rounded-full p-2 hover:bg-red-700"
+        >
+          ✕
+        </button>
+        <div className="grid grid-cols-2 gap-4 mt-8">
+          {images.map((url, index) => (
+            <img
+              key={index}
+              src={url}
+              alt={`Refund Evidence ${index + 1}`}
+              className="w-full h-64 object-cover rounded"
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex">
       <Sidebar />
@@ -293,6 +316,28 @@ function Orders() {
                   </div>
                 </div>
 
+                {order.refund_status === 'Requested' && (
+                  <div className="mt-4 p-4 bg-gray-700 rounded">
+                    <h4 className="text-white font-semibold mb-2">Refund Request Details</h4>
+                    <p className="text-gray-300">Reason: {order.refund_reason}</p>
+                    <p className="text-gray-300">
+                      Requested at: {new Date(order.refund_requested_at).toLocaleString()}
+                    </p>
+                    {order.refund_images && order.refund_images.length > 0 && (
+                      <button
+                        onClick={() => {
+                          setSelectedImage(order.refund_images);
+                          setShowImageModal(true);
+                        }}
+                        className="flex items-center gap-2 text-violet-400 hover:text-violet-300 mt-2"
+                      >
+                        <FontAwesomeIcon icon={faImages} />
+                        View Evidence ({order.refund_images.length} images)
+                      </button>
+                    )}
+                  </div>
+                )}
+
                 {/* Action Buttons */}
                 <div className="flex gap-2">
                   {order.payment_method === 'Gcash' && 
@@ -365,13 +410,23 @@ function Orders() {
           </div>
         )}
         {showImageModal && (
-          <ImageModal
-            imageUrl={selectedImage}
-            onClose={() => {
-              setShowImageModal(false);
-              setSelectedImage(null);
-            }}
-          />
+          Array.isArray(selectedImage) ? (
+            <RefundImagesModal
+              images={selectedImage}
+              onClose={() => {
+                setShowImageModal(false);
+                setSelectedImage(null);
+              }}
+            />
+          ) : (
+            <ImageModal
+              imageUrl={selectedImage}
+              onClose={() => {
+                setShowImageModal(false);
+                setSelectedImage(null);
+              }}
+            />
+          )
         )}
       </div>
     </div>

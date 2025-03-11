@@ -23,7 +23,7 @@ const Orders = () => {
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const [showReviewModal, setShowReviewModal] = useState(false);
 
-  const tabs = ["All", "Verifying", "To Ship", "To Receive", "Completed", "Cancelled", "Refund"];
+  const tabs = ["All", "Verifying", "To Ship", "To Receive", "Completed", "Returns & Cancellations"];
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,25 +31,24 @@ const Orders = () => {
 
   const getOrderCounts = () => {
     const counts = {
-      "To Ship": orders.filter(order => 
-        order.shipping_status === "To prepare" || 
-        order.shipping_status === "to ship"
+      "To Ship": orders.filter(order =>         
+        (order.shipping_status === "To ship" || 
+        order.shipping_status === "preparing" ||
+        order.shipping_status === "To prepare") &&
+        order.payment_status === 'Paid'
       ).length,
       "To Receive": orders.filter(order => 
-        order.shipping_status === "to deliver"
+        order.shipping_status === 'To deliver'
       ).length,
       "Verifying": orders.filter(order => 
         order.payment_method !== "COD" && 
         order.payment_status === "Pending to Admin"
       ).length,
       "Completed": orders.filter(order =>
-        (order.shipping_status === "delivered" || order.shipping_status === "complete") &&
-        order.refund_status === "Not Requested"
+        (order.shipping_status === "delivered" || order.shipping_status === "complete") 
       ).length,
-      "Cancelled": orders.filter(order => 
-        order.shipping_status === "cancel"
-      ).length,
-      "Refund": orders.filter(order => 
+      "Returns & Cancellations": orders.filter(order => 
+        order.shipping_status === "cancel" || 
         order.refund_status !== "Not Requested"
       ).length
     };
@@ -70,12 +69,16 @@ const Orders = () => {
     switch (selectedTab) {
       case "To Ship":
         return filtered.filter(order => 
-          order.shipping_status === "To prepare" || 
-          order.shipping_status === "to ship"
+          (order.shipping_status === "To ship" || 
+            order.shipping_status === "preparing" ||
+            order.shipping_status === "To prepare") &&
+            order.payment_status === 'Paid'
+
         );
       case "To Receive":
         return filtered.filter(order => 
-          order.shipping_status === "to deliver"
+          order.shipping_status === 'To deliver' || 
+          order.shipping_status === 'to deliver'
         );
       case "Verifying":
         return filtered.filter(order => 
@@ -84,16 +87,12 @@ const Orders = () => {
         );
         case "Completed":
           return filtered.filter(order => 
-            (order.shipping_status === "delivered" || order.shipping_status === "complete") &&
-            order.refund_status === "Not Requested"
+            (order.shipping_status === "delivered" || order.shipping_status === "complete")
           );
-      case "Cancelled":
+      case "Returns & Cancellations":
         return filtered.filter(order => 
-          order.shipping_status === "cancel"
-        );
-      case "Refund":
-        return filtered.filter(order => 
-          order.refund_status !== "Not Requested"
+          (order.shipping_status === "cancel" || 
+          order.refund_status !== "Not Requested") 
         );
       default:
         return filtered;
@@ -134,6 +133,10 @@ const Orders = () => {
   }, [profile]); // Add profile as a dependency
 
   const getStatusDisplay = (order) => {
+    if (order.payment_method !== "COD" && order.payment_status === "Pending to Admin") {
+      return "Verifying Payment";
+    }
+    
     if (order.refund_status === "Requested") {
       return "Refund Requested";
     }
@@ -146,11 +149,11 @@ const Orders = () => {
 
     switch (order.shipping_status) {
       case "preparing":
-        return order.payment_method === "COD" ? "To Pay" : "Verifying Payment";
-      case "to ship":
+      case "To prepare":
+      case "To ship":
         return "To Ship";
-      case "to deliver":
-        return "To Receive";
+      case "To deliver":
+         return "To Receive";
       case "delivered":
       case "complete":
         return "Completed";
@@ -252,12 +255,8 @@ const Orders = () => {
                   group relative hover:scale-[1.01] hover:border-primary-color hover:border"
                 onClick={() => handleViewProduct(order)}
               >
-                {/* Add a subtle overlay hint */}
-                <div className="absolute inset-0 bg-primary-color/0 group-hover:bg-primary-color/5 transition-colors duration-300 rounded-lg pointer-events-none" />
-                
-                {/* Add a "View Product" hint that appears on hover */}
-  
-
+                 <div className="absolute inset-0 bg-primary-color/0 group-hover:bg-primary-color/5 transition-colors duration-300 rounded-lg pointer-events-none" />
+                 
                 <div className="flex justify-between items-start mb-4">
                   <h2 className="text-lg font-bold text-gray-800">
                     Order #{order.id}
@@ -303,7 +302,7 @@ const Orders = () => {
                       <div>
                         <p className="text-gray-500 text-sm">
                           Payment: {order.payment_method}
-                          {order.payment_method !== 'COD' && order.isPaid && 
+                          {((order.payment_method !== 'COD' && order.isPaid) || (order.payment_status === "Paid")) && 
                             <span className="ml-2 text-green-600">(Paid)</span>
                           }
                         </p>
@@ -315,29 +314,39 @@ const Orders = () => {
                         {/* Cancel Button */}
                         {order.shipping_status !== "delivered" && 
                           order.shipping_status !== "complete" && 
+                          order.shipping_status !== "To deliver" && 
                           order.shipping_status !== "cancel" && (
                           <button 
-                            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                            className="text-gray-600 hover:text-red-600 px-4 py-2 rounded-md border border-gray-300 
+                            hover:border-red-200 transition-all duration-300 text-sm font-medium bg-white 
+                            hover:bg-red-50 flex items-center gap-2"
                             onClick={() => {
                               setSelectedOrder(order);
                               setShowCancelModal(true);
                             }}
                           >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                             Cancel Order
                           </button>
                         )}
 
                         {/* Refund Button */}
                         {(order.payment_status === "Paid" && 
-                          order.shipping_status === "delivered") && order.refund_status === "Not Requested"
- && (
+                          order.shipping_status === "delivered") && order.refund_status === "Not Requested" && (
                           <button 
-                            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
+                            className="text-gray-600 hover:text-orange-600 px-4 py-2 rounded-md border border-gray-300 
+                            hover:border-orange-200 transition-all duration-300 text-sm font-medium bg-white 
+                            hover:bg-orange-50 flex items-center gap-2"
                             onClick={() => {
                               setSelectedOrder(order);
                               setShowRefundModal(true);
                             }}
                           >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 15v-1a4 4 0 00-4-4H8m4 0l3 3m0 0l3-3m-3 3v-6" />
+                            </svg>
                             Request Refund
                           </button>
                         )}
