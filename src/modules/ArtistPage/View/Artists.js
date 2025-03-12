@@ -556,18 +556,27 @@ function Artists() {
             );
           })}
         </div>
-        <img
-          src={drplogo}
-          alt="Artist"
-          className="h-80  blur-sm w-80  rounded-md absolute top-14 md:bottom-2 right-2"
-        />
-        <div className="">
-          <img
-            src={drplogo}
-            alt="Artist"
-            className="h-80  blur-sm w-80 -scale-x-100 rounded-md top-14 absolute md:bottom-2 left-2"
-          />
-        </div>
+
+        {!loading && (
+          <div className="">
+            <img
+              src={drplogo}
+              alt="Artist"
+              className="h-80 blur-sm w-80 rounded-md absolute top-14 md:bottom-2 right-2"
+            />
+            <img
+              src={drplogo}
+              alt="Artist"
+              className="h-80 blur-sm w-80 -scale-x-100 rounded-md top-14 absolute md:bottom-2 left-2"
+            />
+          </div>
+        )}
+
+        {loading && (
+          <div className="flex justify-center items-center">
+            <span className="loading loading-spinner loading-lg"></span>
+          </div>
+        )}
 
         {topArtists.map((artist, index) => (
           <div
@@ -716,8 +725,9 @@ function Artists() {
             </div>
 
             <div
-            onClick={() => navigate("/arts/topArtist")}
-            className="flex items-center z-10 duration-200 hover:bg-yellow-500 hover:scale-95 bg-slate-50 rounded px-2 text-slate-900 cursor-pointer  justify-center gap-2 text-center font-semibold">
+              onClick={() => navigate("/arts/topArtist")}
+              className="flex items-center shadow-md z-10 duration-200 hover:bg-yellow-500 hover:scale-95 bg-slate-50 rounded px-2 text-slate-900 cursor-pointer  justify-center gap-2 text-center font-semibold"
+            >
               TOP ARTIST
               <box-icon type="solid" name="crown"></box-icon>
             </div>
@@ -802,7 +812,10 @@ function Artists() {
                         onClick={() => {
                           console.log("Selected Art Data:", art);
                           if (art.artists && art.artists.id) {
-                            sessionStorage.setItem("previousPage", window.location.pathname); 
+                            sessionStorage.setItem(
+                              "previousPage",
+                              window.location.pathname
+                            );
                             navigate(`/arts/ArtistPage/${art.artists.id}`);
                           } else {
                             console.error(
@@ -890,7 +903,10 @@ function Artists() {
                             console.log("Artist Data:", art.artist);
 
                             if (art.artists && art.artists.id) {
-                              sessionStorage.setItem("previousPage", window.location.pathname); 
+                              sessionStorage.setItem(
+                                "previousPage",
+                                window.location.pathname
+                              );
                               navigate(`/arts/ArtistPage/${art.artists.id}`);
                             } else {
                               console.error(
@@ -1005,7 +1021,10 @@ function Artists() {
                   console.log("Artist Data:", selectArt.artist);
 
                   if (selectArt.artists && selectArt.artists.id) {
-                    sessionStorage.setItem("previousPage", window.location.pathname); 
+                    sessionStorage.setItem(
+                      "previousPage",
+                      window.location.pathname
+                    );
                     navigate(`/arts/ArtistPage/${selectArt.artists.id}`);
                   } else {
                     console.error(

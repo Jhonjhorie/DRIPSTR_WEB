@@ -32,7 +32,7 @@ function MerchantDashboard() {
   const [imageOrientations, setImageOrientations] = useState({});
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
   const [imageLoading, setImageLoading] = useState(true);
-  const [totLikes, setTotalLikesAll] = useState([]);
+  const [totLikes, setTotalLikesAll] = useState(0);
   const [totalArtsCount, setTotalArtsCount] = useState(0);
   const [totalFollowers, setTotalFollowersCount] = useState(0);
   const [selectArt, setSelectArt] = useState(null);
@@ -596,7 +596,7 @@ function MerchantDashboard() {
               <div></div>
             </div>
 
-            <div className="flex gap-1 mt-1 bg-custom-purple p-1 shadow-inner shadow-slate-800 rounded-md md:mt-0 md:gap-5">
+            <div className="flex justify-center gap-1 mt-1 bg-custom-purple p-1 shadow-inner shadow-slate-800 rounded-md md:mt-0 md:gap-5">
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">

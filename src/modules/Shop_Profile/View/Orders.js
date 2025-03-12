@@ -151,7 +151,6 @@ function Orders({ shopOwnerId }) {
           `
         )
         .in("prod_num", productIds)
-        .eq("payment_status", "Paid")
         .order("id", { ascending: true });
 
       if (orderError) throw orderError;
