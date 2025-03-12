@@ -27,6 +27,7 @@ function Followers() {
   const [otherReason, setOtherReason] = useState("");
   const [merchantId, setMerchantId] = useState(null);
   const [showAlert, setShowAlert] = React.useState(false);
+  const [showAlertDel, setShowAlertDel] = React.useState(false);
 
   const handleReportClick = (customer) => {
     setSelectedCustomer(customer);
@@ -51,7 +52,7 @@ function Followers() {
 
     if (error) {
       console.error("Error submitting report:", error.message);
-      alert("Failed to report customer.");
+      console.log("Failed to report customer.");
     } else {
       setIsReportModalOpen(false);
       setReportReason("");
@@ -220,7 +221,8 @@ function Followers() {
       }
 
       console.log("Follower removed successfully");
-      alert("Followers has been removed successfully!");
+      setShowAlertDel(true);
+      setTimeout(() => setShowAlertDel(false), 3000);
       setSelectedUser(null);
       setIsModalOpen3(false);
       fetchData();
@@ -796,6 +798,41 @@ function Followers() {
             <span>
               {" "}
               Customer {selectedCustomer?.full_name || "Unknown"} reported
+            </span>
+          </div>
+        </div>
+      )}
+      {showAlertDel && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>
+              {" "}
+              Selected follower successfully remove
             </span>
           </div>
         </div>

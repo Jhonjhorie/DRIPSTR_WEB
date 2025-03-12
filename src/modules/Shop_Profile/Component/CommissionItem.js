@@ -16,7 +16,10 @@ function CommissionItem() {
   const [selectedRecordId, setSelectedRecordId] = useState(null);
   const [selectedRecordName, setSelectedRecordName] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
-
+  const [isModalOpen, setIsModalOpen] = useState(false); //Print order report
+  const contentRef = useRef(null);
+  const handlePrint = useReactToPrint({ contentRef });
+  const [selectedCommission, setSelectedCommission] = useState(null);
   useEffect(() => {
     const fetchUserProfileAndShop = async () => {
       try {
@@ -49,22 +52,32 @@ function CommissionItem() {
 
     fetchUserProfileAndShop();
   }, []);
+  const handleOpenModal = (commission) => {
+    setSelectedCommission(commission);
+    setIsModalOpen(true);
+  };
 
   const fetchMerchantCommissions = async () => {
     if (!shopId) return;
 
-    const { data, error } = await supabase
-      .from("merchant_Commission")
-      .select("*")
-      .eq("status", "Accepted")
-      .eq("merchantId", shopId);
+    try {
+      const { data, error } = await supabase
+        .from("merchant_Commission")
+        .select(
+          "id, client_Id, fullName, image, description, pricing, status, merchantId, filePath, receipt, notes, shpping_status"
+        )
+        .eq("status", "Accepted")
+        .eq("merchantId", shopId);
 
-    if (error) {
-      console.error("Error fetching merchant commissions:", error);
-      return;
+      if (error) {
+        console.error("Error fetching merchant commissions:", error);
+        return;
+      }
+
+      setRecords(data);
+    } catch (err) {
+      console.error("Unexpected error fetching merchant commissions:", err);
     }
-
-    setRecords(data);
   };
 
   useEffect(() => {
@@ -76,7 +89,7 @@ function CommissionItem() {
 
     const { error } = await supabase
       .from("merchant_Commission")
-      .update({ status: "Accepted" })
+      .update({ status: "To deliver", shipping_status: "Shipped" })
       .eq("id", selectedRecordId);
 
     if (error) {
@@ -94,7 +107,7 @@ function CommissionItem() {
         <table className="table">
           {/* head */}
           <thead className="w-full bg-custom-purple glass">
-            <tr className="text-sm ">
+            <tr className="text-sm text-center ">
               <th></th>
               <th className="text-white">Name</th>
               <th className="text-white">Image</th>
@@ -105,12 +118,12 @@ function CommissionItem() {
             </tr>
           </thead>
           {records.length > 0 ? (
-            <tbody className="bg-slate-100 text-black">
+            <tbody className="bg-slate-100 text-center text-black">
               {records.map((record, index) => (
-                <tr key={record.id}>
+                <tr key={record.id} className="text-center">
                   <th>{index + 1}</th>
                   <td>{record.fullName}</td>
-                  <td>
+                  <td className="justify-center flex">
                     <img
                       src={record.image || successEmote}
                       onClick={() => setSelectedImage(record.image)}
@@ -126,16 +139,30 @@ function CommissionItem() {
                   <td>{record.pricing}</td>
                   <td>{record.status || "Accept"}</td>
                   <td>
+                    <div className="gap-2 flex justify-center">
                     <button
                       onClick={() => {
-                        setShowModalComplete(true);
+                        setIsModalOpen(true);
+                        setSelectedRecordId(record.id);
+                        setSelectedRecordName(record.fullName);
+                        setSelectedCommission(record);
+                      }}
+                      className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 "
+                    >
+                      Print
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowModalComplete(true)
                         setSelectedRecordId(record.id);
                         setSelectedRecordName(record.fullName);
                       }}
-                      className="text-white hover:scale-95 duration-200 shadow-sm shadow-slate-800 px-2 p-1 bg-custom-purple glass rounded"
+                      className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                     >
-                      Done
+                      Set to ship
                     </button>
+                    </div>
+                   
                   </td>
                 </tr>
               ))}
@@ -158,6 +185,97 @@ function CommissionItem() {
           )}
         </table>
       </div>
+      {/* Print */}
+      {isModalOpen && selectedCommission && (
+        <dialog
+          id="print"
+          className="fixed inset-0 w-full h-full py-10 bg-black bg-opacity-70 md:flex justify-center items-center z-50"
+        >
+          <div className="bg-slate-200 p-4 text-slate-800 rounded shadow-lg w-auto">
+            <div
+              ref={contentRef}
+              className="max-w-md mx-auto bg-white shadow-lg border border-gray-300 px-5 py-4 rounded-lg"
+            >
+              {/* Header */}
+              <div className="text-center border-b pb-4">
+                <div className="h-7 justify-items-center">
+                  <img
+                    src={logoName}
+                    alt="Dripstr Logo"
+                    className="h-full w-auto"
+                  />
+                </div>
+                <p className="text-sm text-gray-600">
+                  Transaction ID:{" "}
+                  <span className="font-medium">{selectedCommission.id}</span>
+                </p>
+              </div>
+
+              {/* Commission Details */}
+              <div className="flex gap-4 mt-4">
+                <div className="p-1 rounded-md shadow-md h-36 w-36 bg-slate-800">
+                  <img
+                    src={selectedCommission.image || "placeholder.jpg"}
+                    alt="Commission Image"
+                    className="h-full w-full object-cover rounded-md"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <p className="text-sm text-slate-800">
+                    <strong>Client:</strong>{" "}
+                    {selectedCommission.fullName || "N/A"}
+                  </p>
+                 
+                  <p className="text-sm text-slate-800">
+                    <strong>Price:</strong> ₱
+                    {selectedCommission.pricing?.toFixed(2) || "N/A"}
+                  </p>
+                  <p className="text-sm text-slate-800">
+                    <strong>Status:</strong>{" "}
+                    {selectedCommission.status || "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Receipt & Notes */}
+              <div className="mt-4 border-t pt-4">
+                <h3 className="text-md font-semibold text-slate-900">
+                  Additional Details
+                </h3>
+                <p className="text-sm mt-2 text-slate-800">
+                    <strong>Description:</strong>{" "}
+                    {selectedCommission.description || "N/A"}
+                  </p>
+                <p className="text-sm text-slate-800 mt-2">
+                  <strong>Notes:</strong> {selectedCommission.notes || "No notes for this order."}
+                </p>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center text-xs text-gray-500 mt-4 border-t pt-2">
+                <p>Thank you for shopping with Dripstr!</p>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                className="bg-gray-500 px-4 py-2 text-white text-sm rounded hover:bg-gray-600"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-custom-purple duration-200 text-white text-sm px-4 py-2 rounded hover:bg-primary-color"
+                onClick={handlePrint}
+              >
+                Print Receipt
+              </button>
+            </div>
+          </div>
+        </dialog>
+      )}
 
       {showModalComplete && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -205,8 +323,6 @@ function CommissionItem() {
           </div>
         </div>
       )}
-
-      
     </div>
   );
 }

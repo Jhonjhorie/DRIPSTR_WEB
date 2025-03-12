@@ -66,7 +66,6 @@ function FormCommision() {
     fetchMerchantCommissions();
   }, []);
 
-
   const handleAccept = async () => {
     if (!selectedRecordId) return;
 
@@ -89,7 +88,7 @@ function FormCommision() {
         <table className="table h-auto w-full bg-slate-100">
           {/* head */}
           <thead className="w-full bg-custom-purple glass">
-            <tr className="text-sm ">
+            <tr className="text-sm text-center ">
               <th></th>
               <th className="text-white">Name</th>
               <th className="text-white">Image</th>
@@ -100,12 +99,12 @@ function FormCommision() {
             </tr>
           </thead>
           {records.length > 0 ? (
-            <tbody className="bg-slate-100 text-black">
+            <tbody className="bg-slate-100 text-center text-black">
               {records.map((record, index) => (
-                <tr key={record.id}>
+                <tr key={record.id} className="text-center">
                   <th>{index + 1}</th>
                   <td>{record.fullName}</td>
-                  <td>
+                  <td className="justify-center flex">
                     <img
                       src={record.image || successEmote}
                       onClick={() => setSelectedImage(record.image)}
@@ -127,7 +126,7 @@ function FormCommision() {
                         setSelectedRecordId(record.id);
                         setSelectedRecordName(record.fullName);
                       }}
-                      className="text-white hover:scale-95 duration-200 shadow-sm shadow-slate-800 px-2 p-1 bg-custom-purple glass rounded-md"
+                      className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                     >
                       Accept
                     </button>
