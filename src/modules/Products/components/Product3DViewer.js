@@ -112,7 +112,7 @@ const Model = ({ avatarData, productData, color }) => {
 
 // Add Platform component after the Model component
 function Platform() {
-  const geometry = useMemo(() => new THREE.CircleGeometry(100, 64), []);
+  const geometry = useMemo(() => new THREE.CircleGeometry(15, 64), []);
   
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
@@ -201,7 +201,7 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
       {/* 3D Canvas */}
       <div className={className}>
         <Canvas 
-          camera={{ position: [0, 100, 200], fov: 75 }}
+          camera={{ position: [0, 0, 0], fov: 75 }}
           shadows
         > 
           
@@ -236,11 +236,11 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
           </Suspense>
           
           <OrbitControls 
-            target={[0, 80, 0]}
+            target={[0, 15, 0]}
             minPolarAngle={0}
             maxPolarAngle={Math.PI}
-            minDistance={80}
-            maxDistance={300}
+            minDistance={10}
+            maxDistance={35}
             enablePan={true}
             panSpeed={0.5}
             rotateSpeed={0.5}

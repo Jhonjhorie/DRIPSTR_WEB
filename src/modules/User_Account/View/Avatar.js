@@ -150,7 +150,7 @@ function Part({ url, position, color, texture }) {
 
 // Add after the Part component in Avatar.js
 function Platform() {
-  const geometry = useMemo(() => new THREE.CircleGeometry(100, 64), []);
+  const geometry = useMemo(() => new THREE.CircleGeometry(15, 64), []);
   
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
@@ -182,7 +182,7 @@ function CameraController({ view }) {
         });
         gsap.to(camera.lookAt, {
           x: 0,
-          y: 140, // Look up at head/chest area
+          y: 160, // Look up at head/chest area
           z: 0,
           duration: 0.8,
           ease: "power2.inOut"
@@ -192,14 +192,14 @@ function CameraController({ view }) {
         // Pan camera downward to focus on lower body
         gsap.to(camera.position, {
           x: 0,
-          y: 40,
-          z: 150,
+          y: 20,
+          z: 100,
           duration: 0.8,
           ease: "power2.inOut"
         });
         gsap.to(camera.lookAt, {
           x: 0,
-          y: 20, // Look down at legs area
+          y: -60,  
           z: 0,
           duration: 0.8,
           ease: "power2.inOut"
@@ -217,7 +217,7 @@ function CameraController({ view }) {
         });
         gsap.to(camera.lookAt, {
           x: 0,
-          y: 80,
+          y: 0,
           z: 0,
           duration: 0.8,
           ease: "power2.inOut"
@@ -311,7 +311,7 @@ const CharacterCustomization = () => {
   const [gender, setGender] = useState("Boy");
   const [selectedBodyType, setSelectedBodyType] = useState("Average");
   const [selectedHair, setSelectedHair] = useState(null);
-  const [skincolor, setSkinColor] = useState("#f5c9a6");
+  const [skincolor, setSkinColor] = useState("");
   const [haircolor, setHairColor] = useState("#000000");
   const [name, setName] = useState("");
   const [originalAvatar, setOriginalAvatar] = useState({});
@@ -719,7 +719,12 @@ const CharacterCustomization = () => {
                   : "bg-gray-100 border-gray-300 cursor-not-allowed"
               }`}
               value={selectedBodyType}
-              onChange={(e) => setSelectedBodyType(e.target.value)}
+              onChange={(e) => {
+                setSelectedBodyType(e.target.value);
+                console.log('Current Body Type:', selectedBodyType);
+                console.log('Current Gender:', gender);
+                console.log('Body URL:', bodyTypeURLs[gender][selectedBodyType]);
+              }}
               disabled={!isEditing}
             >
               {Object.keys(bodyTypeURLs[gender]).map((type) => (
@@ -735,6 +740,7 @@ const CharacterCustomization = () => {
             <label className="block text-gray-700 font-semibold mb-2">Skin Color</label>
             <div className="flex space-x-2">
               {[
+                { label: "Bright", color: "" },
                 { label: "Light", color: "#f5c9a6" },
                 { label: "Medium", color: "#d2a77d" },
                 { label: "Tan", color: "#a67c5b" },
@@ -862,7 +868,7 @@ const CharacterCustomization = () => {
       }>
         <ThreeDErrorBoundary>
           <Canvas 
-            camera={{ position: [0, 100, 200] }}
+            camera={{ position: [0, 0, 0] }}
             shadows
             onError={(error) => {
               console.error('Canvas error:', error);
@@ -896,12 +902,14 @@ const CharacterCustomization = () => {
               <Platform />
               {selectedHair && hairURLs[selectedHair] && (
                 <Part 
+                  key={`hair-${selectedHair}-${haircolor}`} 
                   url={hairURLs[selectedHair]} 
-                  position={[0, 0.85, 0]} 
+                  position={[0, 0, 0]} 
                   color={haircolor} 
                 />
               )}
               <Part 
+                key={`body-${gender}-${selectedBodyType}`} 
                 url={bodyTypeURLs[gender][selectedBodyType]} 
                 position={[0, 0, 0]} 
                 color={skincolor} 
@@ -925,11 +933,11 @@ const CharacterCustomization = () => {
             </group>
       
             <OrbitControls 
-              target={[0, 80, 0]}
+              target={[0, 15, 0]}
               minPolarAngle={0}
               maxPolarAngle={Math.PI}
-              minDistance={80}
-              maxDistance={300}
+              minDistance={10}
+              maxDistance={35}
               enablePan={true}
               panSpeed={0.5}
               rotateSpeed={0.5}
