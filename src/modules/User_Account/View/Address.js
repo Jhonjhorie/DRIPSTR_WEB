@@ -5,6 +5,39 @@ import { v4 as uuidv4 } from "uuid";
 import { useAddressFields } from '../../../shared/login/hooks/useAddressFields';
 import hmmmEmote from '../../../assets/emote/hmmm.png';   
 
+const getLVMCategory = (region) => {
+  const luzonRegions = [
+    'Ilocos Region',
+    'Cagayan Valley',
+    'Central Luzon',
+    'CALABARZON',
+    'MIMAROPA Region',
+    'Bicol Region',
+    'NCR',
+    'CAR'
+  ];
+
+  const visayasRegions = [
+    'Western Visayas',
+    'Central Visayas',
+    'Eastern Visayas'
+  ];
+
+  const mindanaoRegions = [
+    'Zamboanga Peninsula',
+    'Northern Mindanao',
+    'Davao Region',
+    'SOCCSKSARGEN',
+    'Caraga',
+    'BARMM'
+  ];
+
+  if (luzonRegions.includes(region)) return 'Luzon';
+  if (visayasRegions.includes(region)) return 'Visayas';
+  if (mindanaoRegions.includes(region)) return 'Mindanao';
+  return null;
+};
+
 const Address = () => {
   const [addresses, setAddresses] = useState([]);
   const [defaultAddress, setDefaultAddress] = useState(null);
@@ -89,7 +122,8 @@ const Address = () => {
       exact_location: newAddressData.exact_location,
       postcode: newAddressData.postcode,
       full_address: `${newAddressData.exact_location}, ${fullAddress}`,
-      is_default_shipping: false
+      is_default_shipping: false,
+      lvm: getLVMCategory(selectedRegion)
     }]);
 
     if (error) {
@@ -125,7 +159,8 @@ const Address = () => {
       barangay: selectedBarangay,
       exact_location: editAddressData.exact_location,
       postcode: editAddressData.postcode,
-      full_address: `${editAddressData.exact_location}, ${fullAddress}`
+      full_address: `${editAddressData.exact_location}, ${fullAddress}`,
+      lvm: getLVMCategory(selectedRegion)
     }).eq("id", editAddressId);
 
     if (error) {

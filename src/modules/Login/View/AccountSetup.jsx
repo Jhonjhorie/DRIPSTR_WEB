@@ -6,6 +6,39 @@ import { v4 as uuidv4 } from 'uuid';
 import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { ReactComponent as Logo } from '../../../assets/images/BlackLongLogo.svg'; // Adjust path as needed
 
+const getLVMCategory = (region) => {
+  const luzonRegions = [
+    'Ilocos Region',
+    'Cagayan Valley',
+    'Central Luzon',
+    'CALABARZON',
+    'MIMAROPA Region',
+    'Bicol Region',
+    'NCR',
+    'CAR'
+  ];
+
+  const visayasRegions = [
+    'Western Visayas',
+    'Central Visayas',
+    'Eastern Visayas'
+  ];
+
+  const mindanaoRegions = [
+    'Zamboanga Peninsula',
+    'Northern Mindanao',
+    'Davao Region',
+    'SOCCSKSARGEN',
+    'Caraga',
+    'BARMM'
+  ];
+
+  if (luzonRegions.includes(region)) return 'Luzon';
+  if (visayasRegions.includes(region)) return 'Visayas';
+  if (mindanaoRegions.includes(region)) return 'Mindanao';
+  return null;
+};
+
 const AccountSetup = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -122,8 +155,6 @@ const AccountSetup = () => {
       const { error: addressError } = await supabase
         .from('addresses')
         .insert([{  
-
-          
           id: uuidv4(),
           user_id: user.id,
           region: selectedRegion,
@@ -132,7 +163,8 @@ const AccountSetup = () => {
           exact_location: addressData.exact_location,
           postcode: addressData.postcode,
           full_address: `${addressData.exact_location}, ${fullAddress}`,
-          is_default_shipping: true
+          is_default_shipping: true,
+          lvm: getLVMCategory(selectedRegion) // Add this line
         }]);
 
       if (addressError) throw addressError;
