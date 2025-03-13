@@ -1,56 +1,53 @@
 // src/constants/avatarConfig.js
 
- 
 const bodyTypeURLs = {
     Boy: {
-      Average: `/3d/avatars/guyz/Average.glb`,
-      Muscular: `/3d/avatars/guyz/Muscular.glb`,
-      PlusSize: `/3d/avatars/guyz/PlusSize.glb`,
-      Petite: `/3d/avatars/guyz/Thin.glb`,
+      Petite: `/3d/avatar/MEN/Body/Petite/Body.glb`,
+      Slim: `/3d/avatar/MEN/Body/Slim/Body.glb`,
+      Average: `/3d/avatar/MEN/Body/Average/Body.glb`,
+      Broad: `/3d/avatar/MEN/Body/Broad/Body.glb`,
+      PlusSize: `/3d/avatar/MEN/Body/Plus/Body.glb`,
     },
     Girl: {
-      Average: `/3d/avatars/gurlz/Average.glb`,
-      Muscular: `/3d/avatars/gurlz/Muscular.glb`,
-      PlusSize: `/3d/avatars/gurlz/PlusSize.glb`,
-      Petite: `/3d/avatars/gurlz/Thin.glb`,
+      Petite: `/3d/avatar/WOMEN/Body/Petite/Body.glb`,
+      Slim: `/3d/avatar/WOMEN/Body/Slim/Body.glb`,
+      Average: `/3d/avatar/WOMEN/Body/Average/Body.glb`,
+      Broad: `/3d/avatar/WOMEN/Body/Broad/Body.glb`,
+      PlusSize: `/3d/avatar/WOMEN/Body/Plus/Body.glb`,
     },
-};
-  
-const hairURLs = {
-    Barbers: `/3d/hair/man/ManHair1.glb`,
-    PogiCut: `/3d/hair/man/ManHair2.glb`,
-    DoublePonytail: `/3d/hair/woman/GirlHair1.glb`,
-    Short: `/3d/hair/woman/GirlHair2.glb`,
-    Kulot: `/3d/hair/woman/GirlHair3.glb`,
 };
 
 const tshirURLs = {
     Boy: {
-      Average: `/3d/uvmap/average.glb`,
-      Muscular: `/3d/wears/guyz/tshirts/Muscular_Tshirt.glb`,
-      Petite: `/3d/wears/guyz/tshirts/Petite_Tshirt.glb`,
-      PlusSize: `/3d/wears/guyz/tshirts/PlusSize_Tshirt.glb`,
+      Petite: `/3d/avatar/MEN/Body/Petite/Shirt.glb`,
+      Slim: `/3d/avatar/MEN/Body/Slim/Shirt.glb`,
+      Average: `/3d/avatar/MEN/Body/Average/Shirt.glb`,
+      Broad: `/3d/avatar/MEN/Body/Broad/Shirt.glb`,
+      PlusSize: `/3d/avatar/MEN/Body/Plus/Shirt.glb`,
     },
     Girl: {
-      Average: `/3d/wears/gurlz/tshirts/Average_Tshirt.glb`,
-      Muscular: `/3d/wears/gurlz/tshirts/Muscular_Tshirt.glb`,
-      Petite: `/3d/wears/gurlz/tshirts/Petite_Tshirt.glb`,
-      PlusSize: `/3d/wears/gurlz/tshirts/PlusSize_Tshirt.glb`,
+      Petite: `/3d/avatar/WOMEN/Body/Petite/Shirt.glb`,
+      Slim: `/3d/avatar/WOMEN/Body/Slim/Shirt.glb`,
+      Average: `/3d/avatar/WOMEN/Body/Average/Shirt.glb`,
+      Broad: `/3d/avatar/WOMEN/Body/Broad/Shirt.glb`,
+      PlusSize: `/3d/avatar/WOMEN/Body/Plus/Shirt.glb`,
     }
 };
 
 const shortsURLs = {
     Boy: {
-      Average: `/3d/wears/guyz/shorts/Average_Short.glb`,
-      Muscular: `/3d/wears/guyz/shorts/Muscular_Short.glb`,
-      Petite: `/3d/wears/guyz/shorts/Petite_Short.glb`,
-      PlusSize: `/3d/wears/guyz/shorts/PlusSize_Short.glb`,
+      Petite: `/3d/avatar/MEN/Body/Petite/Shorts.glb`,
+      Slim: `/3d/avatar/MEN/Body/Slim/Shorts.glb`,
+      Average: `/3d/avatar/MEN/Body/Average/Shorts.glb`,
+      Broad: `/3d/avatar/MEN/Body/Broad/Shorts.glb`,
+      PlusSize: `/3d/avatar/MEN/Body/Plus/Shorts.glb`,
     },
     Girl: {
-      Average: `/3d/wears/gurlz/shorts/Average_Short.glb`,
-      Muscular: `/3d/wears/gurlz/shorts/Muscular_Short.glb`,
-      Petite: `/3d/wears/gurlz/shorts/Petite_Short.glb`,
-      PlusSize: `/3d/wears/gurlz/shorts/PlusSize_Short.glb`,
+      Petite: `/3d/avatar/WOMEN/Body/Petite/Shorts.glb`,
+      Slim: `/3d/avatar/WOMEN/Body/Slim/Shorts.glb`,
+      Average: `/3d/avatar/WOMEN/Body/Average/Shorts.glb`,
+      Broad: `/3d/avatar/WOMEN/Body/Broad/Shorts.glb`,
+      PlusSize: `/3d/avatar/WOMEN/Body/Plus/Shorts.glb`,
     }
 };
   
@@ -59,8 +56,17 @@ const tshirtTextureURLs = {
     Average: `/3d/uvmap/TexturedMESH.png`,
   },
   Girl: {
-    Average: `/3d/wears/guyz/tshirts/Average_Tshirt_Texture.glb`,
+    Average: `/3d/wears/guyz/tshirts/Average_Shirt_Texture.glb`,
   }
 }
+
+const hairURLs = {
+  Barbers: `/3d/avatar/MEN/Hair/Hair.glb`,
+  PogiCut: `/3d/avatar/MEN/Hair/Hair2.glb`,
+  Elvis: `/3d/avatar/MEN/Hair/Hair3.glb`,
+  Long: `/3d/avatar/WOMEN/Hair/Hair1.glb`,
+  DoublePonyTail: `/3d/avatar/WOMEN/Hair/Hair2.glb`,
+  Burst: `/3d/avatar/WOMEN/Hair/Hair3.glb`,
+};
 
 export { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs, tshirtTextureURLs };

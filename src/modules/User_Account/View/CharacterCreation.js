@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
-import { bodyTypeURLs, hairURLs } from "../../../constants/avatarConfig";
+import { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs } from "../../../constants/avatarConfig";
 import Toast from '../../../shared/alerts';
+import * as THREE from 'three';
 
 function Part({ url, position, color }) {
   const gltf = useGLTF(url);
@@ -21,6 +22,39 @@ function Part({ url, position, color }) {
   }, [clonedScene, color]);
 
   return <primitive object={clonedScene} position={position} />;
+}
+
+function Platform() {
+  const geometry = useMemo(() => new THREE.CircleGeometry(15, 64), []);
+  
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
+      <primitive object={geometry} />
+      <meshStandardMaterial 
+        color="#202020"
+        metalness={0.2}
+        roughness={0.5}
+        opacity={0.7}
+        transparent
+      />
+    </mesh>
+  );
+}
+
+function RotatingGroup({ children }) {
+  const groupRef = useRef();
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += 0.005;
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 0, 0]}>
+      {children}
+    </group>
+  );
 }
 
 const CharacterCustomization = () => {
@@ -137,22 +171,70 @@ const CharacterCustomization = () => {
               <div className="h-[calc(100vh-12rem)] rounded-lg overflow-hidden shadow-lg">
                 <div className="relative w-full h-full">
                   <Canvas 
-                    camera={{ position: [0, -20, 120] }}
+                    camera={{ 
+                      position: [0, 50, 150],
+                      fov: 45,
+                      near: 0.1,
+                      far: 1000
+                    }}
+                    shadows
                     style={{ background: "linear-gradient(to top, #1e3a8a, #3b82f6)" }}
                   >
                     <ambientLight intensity={0.8} />
                     <hemisphereLight intensity={1} />
-                    <directionalLight intensity={1.2} position={[0, 0, 1]} />
-                    <group>
+                    <directionalLight 
+                      castShadow
+                      position={[2, 4, 1]}
+                      intensity={1.5}
+                      shadow-mapSize-width={1024}
+                      shadow-mapSize-height={1024}
+                    />
+                    <spotLight
+                      position={[-2, 4, -1]}
+                      intensity={0.5}
+                      angle={0.5}
+                      penumbra={1}
+                    />
+                    
+                    <RotatingGroup>
+                      <Platform />
                       {selectedHair && hairURLs[selectedHair] && (
-                        <Part url={hairURLs[selectedHair]} position={[0, 0.85, 0]} color={haircolor} />
+                        <Part 
+                          url={hairURLs[selectedHair]} 
+                          position={[0, 0, 0]} 
+                          color={haircolor} 
+                        />
                       )}
-                      <Part url={currentBody} position={[0, 0, 0]} color={skincolor} />
-                    </group>
+                      <Part 
+                        url={currentBody} 
+                        position={[0, 0, 0]} 
+                        color={skincolor} 
+                      />
+                      {/* Add default clothes */}
+                      <Part 
+                        url={tshirURLs[gender][selectedBodyType]} 
+                        position={[0, 0, 0]}
+                        color="#ffffff"
+                      />
+                      <Part 
+                        url={shortsURLs[gender][selectedBodyType]} 
+                        position={[0, 0, 0]}
+                        color="#000000"
+                      />
+                    </RotatingGroup>
+
+                    <Environment preset="city" />
                     <OrbitControls 
-                      target={[0, 110, 0]} 
-                      minPolarAngle={Math.PI / 2} 
-                      maxPolarAngle={Math.PI / 2} 
+                        target={[0, 15, 0]}
+                        minPolarAngle={0}
+                        maxPolarAngle={Math.PI}
+                        minDistance={10}
+                        maxDistance={70}
+                        enablePan={true}
+                        panSpeed={0.5}
+                        rotateSpeed={0.5}
+                        enableDamping={true}
+                        dampingFactor={0.05}
                     />
                   </Canvas>
                 </div>
@@ -202,6 +284,7 @@ const CharacterCustomization = () => {
                       </label>
                       <div className="flex gap-4">
                         {[
+                          { label: "Bright", color: "" },
                           { label: "Light", color: "#f5c9a6" },
                           { label: "Medium", color: "#d2a77d" },
                           { label: "Tan", color: "#a67c5b" },
