@@ -186,16 +186,27 @@ const BuyConfirm = ({ item, onClose }) => {
                       selectedColor={selectedColor}
                       productData={item}
                     />
-                    <button
-                      onClick={() => setShow3DView(false)}
-                      className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110 z-10 border border-slate-400 hover:border-slate-800"
-                      title="Close 3D View"
-                    >
-                      <FontAwesomeIcon
-                        icon={faX}
-                        className="text-slate-400 hover:text-slate-800 text-lg"
-                      />
-                    </button>
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      {item.is3D && (
+                        <ClosetButton
+                          profile={profile}
+                          item={item}
+                          isLoggedIn={isLoggedIn}
+                          selectedColor={selectedColor}
+                          className="bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110 z-10 border border-slate-400 hover:border-slate-800"
+                        />
+                      )}
+                      <button
+                        onClick={() => setShow3DView(false)}
+                        className="bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110 z-10 border border-slate-400 hover:border-slate-800"
+                        title="Close 3D View"
+                      >
+                        <FontAwesomeIcon
+                          icon={faX}
+                          className="text-slate-400 hover:text-slate-800 text-lg"
+                        />
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <>
@@ -275,22 +286,14 @@ const BuyConfirm = ({ item, onClose }) => {
                         item={item}
                         isLoggedIn={isLoggedIn}
                       />
-                        {item.is3D && ( // Only render ClosetButton if item.is3D is true
-                        <ClosetButton
-                            profile={profile}
-                            item={item}
-                            isLoggedIn={isLoggedIn}
-                            selectedColor={selectedColor}
-                          />
-                      )}
-                      {isLoggedIn && (
-                        <button
-                          onClick={mulletReport}
-                          className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
-                        >
-                          <FontAwesomeIcon icon={faTriangleExclamation} />
-                        </button>
-                      )}
+                        {isLoggedIn && (
+                          <button
+                            onClick={mulletReport}
+                            className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+                          >
+                            <FontAwesomeIcon icon={faTriangleExclamation} />
+                          </button>
+                        )}
                       <button
                         onClick={onClose}
                         class="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"

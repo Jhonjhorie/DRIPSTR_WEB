@@ -35,7 +35,7 @@ const Orders = () => {
         (order.shipping_status === "To ship" || 
         order.shipping_status === "preparing" ||
         order.shipping_status === "To prepare") &&
-        order.payment_status === 'Paid'
+        order.payment_status !== 'Pending to Admin'
       ).length,
       "To Receive": orders.filter(order => 
         order.shipping_status === 'To deliver'
@@ -72,7 +72,7 @@ const Orders = () => {
           (order.shipping_status === "To ship" || 
             order.shipping_status === "preparing" ||
             order.shipping_status === "To prepare") &&
-            order.payment_status === 'Paid'
+            order.payment_status !== 'Pending to Admin'
 
         );
       case "To Receive":
