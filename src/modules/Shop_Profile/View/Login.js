@@ -141,6 +141,40 @@ function Login() {
   const handleMiddleNameChange = (e) => setMiddleName(e.target.value);
   const handleLastNameChange = (e) => setLastName(e.target.value);
 
+
+  const getLVMCategory = (region) => {
+  const luzonRegions = [
+    'Ilocos Region',
+    'Cagayan Valley',
+    'Central Luzon',
+    'CALABARZON',
+    'MIMAROPA Region',
+    'Bicol Region',
+    'NCR',
+    'CAR'
+  ];
+
+  const visayasRegions = [
+    'Western Visayas',
+    'Central Visayas',
+    'Eastern Visayas'
+  ];
+
+  const mindanaoRegions = [
+    'Zamboanga Peninsula',
+    'Northern Mindanao',
+    'Davao Region',
+    'SOCCSKSARGEN',
+    'Caraga',
+    'BARMM'
+  ];
+
+  if (luzonRegions.includes(region)) return 'Luzon';
+  if (visayasRegions.includes(region)) return 'Visayas';
+  if (mindanaoRegions.includes(region)) return 'Mindanao';
+  return null;
+};
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -155,7 +189,7 @@ function Login() {
     const findBarangay =
       barangays?.find((b) => b.code === selected.barangay)?.name ||
       "Unknown Barangay";
-
+    const lvmCategory = getLVMCategory(findRegion); 
     const fullAddress = `${selected.exactLocation}, ${findBarangay}, ${findCity}, ${findRegion}`;
     console.log("Final Full Address:", fullAddress);
 
@@ -459,6 +493,7 @@ function Login() {
                 full_Name: fullName,
                 gcash: uploadedGcash || null,
                 selfie: uploadedSS || null,
+                lvm: lvmCategory, 
               },
             ])
             .single();

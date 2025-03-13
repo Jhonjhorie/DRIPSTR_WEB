@@ -20,6 +20,31 @@ function CommissionItem() {
   const contentRef = useRef(null);
   const handlePrint = useReactToPrint({ contentRef });
   const [selectedCommission, setSelectedCommission] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [clientAddress, setClientAddress] = useState(null);
+
+  useEffect(() => {
+    if (selectedCommission?.client_Id) {
+      const fetchClientAddress = async () => {
+        const { data: addresses, error } = await supabase
+          .from("addresses")
+          .select("*")
+          .eq("user_id", selectedCommission.client_Id)
+          .eq("is_default_shipping", true)
+          .single();
+
+        if (error) {
+          console.error("Error fetching address:", error);
+          setClientAddress(null);
+        } else {
+          setClientAddress(addresses);
+        }
+      };
+
+      fetchClientAddress();
+    }
+  }, [selectedCommission]);
+
   useEffect(() => {
     const fetchUserProfileAndShop = async () => {
       try {
@@ -38,13 +63,14 @@ function CommissionItem() {
 
         const { data: shops, error: shopError } = await supabase
           .from("shop")
-          .select("id")
+          .select("id, address, shop_name")
           .eq("owner_Id", user.id)
           .single();
 
         if (shopError) throw shopError;
 
         setShopId(shops?.id || null);
+        setSdata(shops);
       } catch (error) {
         console.error("Error fetching shop data:", error.message);
       }
@@ -60,13 +86,16 @@ function CommissionItem() {
   const fetchMerchantCommissions = async () => {
     if (!shopId) return;
 
+    setIsLoading(true);
+
     try {
       const { data, error } = await supabase
         .from("merchant_Commission")
         .select(
-          "id, client_Id, fullName, image, description, pricing, status, merchantId, filePath, receipt, notes, shpping_status"
+          `id, client_Id, fullName, image, description, pricing, status, merchantId, filePath, receipt, notes,
+        profiles:client_Id(id, mobile)`
         )
-        .eq("status", "Accepted")
+        .eq("status", "To prepare")
         .eq("merchantId", shopId);
 
       if (error) {
@@ -77,6 +106,8 @@ function CommissionItem() {
       setRecords(data);
     } catch (err) {
       console.error("Unexpected error fetching merchant commissions:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,7 +120,7 @@ function CommissionItem() {
 
     const { error } = await supabase
       .from("merchant_Commission")
-      .update({ status: "To deliver", shipping_status: "Shipped" })
+      .update({ status: "To ship" })
       .eq("id", selectedRecordId);
 
     if (error) {
@@ -117,7 +148,18 @@ function CommissionItem() {
               <th className="text-white">Action</th>
             </tr>
           </thead>
-          {records.length > 0 ? (
+          {isLoading ? (
+            <tbody>
+              <tr>
+                <td colSpan="7" className="text-center py-10">
+                  <span className="loading loading-dots loading-lg"></span>
+                  <p className="text-slate-800 mt-3">
+                    Loading client commissions...
+                  </p>
+                </td>
+              </tr>
+            </tbody>
+          ) : records.length > 0 ? (
             <tbody className="bg-slate-100 text-center text-black">
               {records.map((record, index) => (
                 <tr key={record.id} className="text-center">
@@ -135,34 +177,32 @@ function CommissionItem() {
                   <td className="whitespace-pre-line break-words max-w-[200px]">
                     {record.description}
                   </td>
-
                   <td>{record.pricing}</td>
                   <td>{record.status || "Accept"}</td>
                   <td>
                     <div className="gap-2 flex justify-center">
-                    <button
-                      onClick={() => {
-                        setIsModalOpen(true);
-                        setSelectedRecordId(record.id);
-                        setSelectedRecordName(record.fullName);
-                        setSelectedCommission(record);
-                      }}
-                      className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 "
-                    >
-                      Print
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowModalComplete(true)
-                        setSelectedRecordId(record.id);
-                        setSelectedRecordName(record.fullName);
-                      }}
-                      className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                    >
-                      Set to ship
-                    </button>
+                      <button
+                        onClick={() => {
+                          setIsModalOpen(true);
+                          setSelectedRecordId(record.id);
+                          setSelectedRecordName(record.fullName);
+                          setSelectedCommission(record);
+                        }}
+                        className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 "
+                      >
+                        Print
+                      </button>
+                      {/* <button
+                        onClick={() => {
+                          setShowModalComplete(true);
+                          setSelectedRecordId(record.id);
+                          setSelectedRecordName(record.fullName);
+                        }}
+                        className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        Set to ship
+                      </button> */}
                     </div>
-                   
                   </td>
                 </tr>
               ))}
@@ -177,7 +217,7 @@ function CommissionItem() {
                     alt="No Orders"
                   />
                   <div className="text-slate-800">
-                    No client commisions orders yet.
+                    No client commissions orders yet.
                   </div>
                 </td>
               </tr>
@@ -185,6 +225,7 @@ function CommissionItem() {
           )}
         </table>
       </div>
+
       {/* Print */}
       {isModalOpen && selectedCommission && (
         <dialog
@@ -226,30 +267,76 @@ function CommissionItem() {
                     <strong>Client:</strong>{" "}
                     {selectedCommission.fullName || "N/A"}
                   </p>
-                 
-                  <p className="text-sm text-slate-800">
-                    <strong>Price:</strong> ₱
-                    {selectedCommission.pricing?.toFixed(2) || "N/A"}
+                  <p className="text-sm mt-1 text-slate-800">
+                    <strong>Shop:</strong> {sData?.shop_name || "N/A"}
+                  </p>
+                  <p className="text-sm mt-1 text-slate-800">
+                    <strong>Shop Address:</strong> {sData?.address || "N/A"}
                   </p>
                   <p className="text-sm text-slate-800">
-                    <strong>Status:</strong>{" "}
-                    {selectedCommission.status || "N/A"}
+                    <strong>Order type:</strong>{" "} Customize
                   </p>
                 </div>
               </div>
 
               {/* Receipt & Notes */}
               <div className="mt-4 border-t pt-4">
+                {/* Receipt & Notes */}
+
                 <h3 className="text-md font-semibold text-slate-900">
-                  Additional Details
+                  Shipping Details
                 </h3>
-                <p className="text-sm mt-2 text-slate-800">
-                    <strong>Description:</strong>{" "}
-                    {selectedCommission.description || "N/A"}
-                  </p>
-                <p className="text-sm text-slate-800 mt-2">
-                  <strong>Notes:</strong> {selectedCommission.notes || "No notes for this order."}
+                <p className="text-sm  mt-1 text-slate-800">
+                  <strong>Client:</strong>{" "}
+                  {selectedCommission.fullName || "N/A"}
                 </p>
+                <p className="text-sm text-slate-800">
+                  <strong>Client Phone:</strong>{" "}
+                  {selectedCommission?.profiles?.mobile || "N/A"}
+                </p>
+
+                {/* Display Address */}
+                <p className="text-sm text-slate-800">
+                  <strong>Shipping Address: </strong>
+                  {clientAddress
+                    ? `${clientAddress.full_address}, ${clientAddress.city}, ${clientAddress.province}, ${clientAddress.region}`
+                    : "No address found"}
+                </p>
+
+                <p className="text-sm  text-slate-800">
+                  <strong>Description:</strong>{" "}
+                  {selectedCommission.description || "N/A"}
+                </p>
+
+                <p className="text-sm text-slate-800 ">
+                  <strong>Notes:</strong>{" "}
+                  {selectedCommission.notes || "No notes for this order."}
+                </p>
+              </div>
+              <div className="mt-4 border-t pt-4">
+                {/* Receipt & Notes */}
+
+                <h3 className="text-md font-semibold text-slate-900">
+                  Order Summary
+                </h3>
+                <p className="text-sm text-slate-800">
+                  <strong>Subtotal: </strong> ₱
+                  {selectedCommission.pricing - 50 || "N/A"}
+                </p>
+                <p className="text-sm text-slate-800">
+                  <strong>Shipping fee:</strong> ₱50
+                </p>
+                <p className="text-sm text-slate-800">
+                  <strong>Shipping method:</strong> Standard
+                </p>
+                <div className="flex justify-end gap-2 items-center mt-2 font-semibold text-lg">
+                  <span className="text-slate-800 text-sm">Total Price:</span>
+                  <span className="text-xl text-custom-purple">
+                    ₱{selectedCommission.pricing}
+                  </span>
+                </div>
+
+                {/* Display Address */}
               </div>
 
               {/* Footer */}

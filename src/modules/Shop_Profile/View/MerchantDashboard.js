@@ -724,11 +724,7 @@ function MerchantDashboard() {
             className="bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
           >
-            <box-icon
-              name="add-to-queue"
-              type="solid"
-              color="#563A9C"
-            ></box-icon>
+            <box-icon type="solid" name="component" color="#4D077C"></box-icon>
             <div className="text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs ">
               Manage product
             </div>
@@ -751,11 +747,7 @@ function MerchantDashboard() {
             className="bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
           >
-            <box-icon
-              name="add-to-queue"
-              type="solid"
-              color="#563A9C"
-            ></box-icon>
+            <box-icon type='solid' name='printer'   color="#563A9C"></box-icon>
             <div className="text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs ">
               <PrintSales></PrintSales>
             </div>

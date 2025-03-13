@@ -401,7 +401,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <strong>Receiver:</strong> {order.buyerName || "N/A"}
                 </p>
                 <p className="text-sm text-slate-800">
-                  <strong>Address:</strong> {order.buyerAddress || "N/A"}
+                  <strong>Address:</strong> {order.shipping_addr || "N/A"}
                 </p>
                 <p className="text-sm text-slate-800">
                   <strong>Mobile number:</strong> {order.buyerPhone || "N/A"}

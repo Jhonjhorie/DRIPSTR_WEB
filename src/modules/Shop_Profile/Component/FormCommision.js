@@ -14,74 +14,162 @@ function FormCommision() {
   const [showModalComplete, setShowModalComplete] = useState(false);
   const [selectedRecordId, setSelectedRecordId] = useState(null);
   const [selectedRecordName, setSelectedRecordName] = useState("");
-
+  const [isLoading, setIsLoading] = useState(true);
+  const [ownerId, setOwnerId] = useState(null);
+  const [shopId, setShopId] = useState(null);
+ 
+  
   useEffect(() => {
     const fetchUserProfileAndShop = async () => {
       try {
         // Get current authenticated user
-        const { data: userData, error: authError } =
-          await supabase.auth.getUser();
+        const { data: userData, error: authError } = await supabase.auth.getUser();
         if (authError) {
           console.error("Auth Error:", authError.message);
           return;
         }
-
+  
         const user = userData?.user;
         if (!user) {
           console.error("No user is signed in.");
           return;
         }
-
+  
         // Fetch the shop owned by the current user
         const { data: shops, error: shopError } = await supabase
           .from("shop")
-          .select("id")
+          .select("id, owner_Id")
           .eq("owner_Id", user.id);
-
+  
         if (shopError) throw shopError;
-        setSdata(shops);
+  
+        if (shops.length > 0) {
+          const shop = shops[0]; 
+          setSdata(shop); 
+          setOwnerId(shop.owner_Id); 
+          setShopId(shop.id); 
+        }
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
     };
-
+  
     fetchUserProfileAndShop();
   }, []);
-
-  //fetch orders commisions
-  const fetchMerchantCommissions = async () => {
-    const { data, error } = await supabase
-      .from("merchant_Commission")
-      .select("*")
-      .eq("status", "Confirmed");
-
-    if (error) {
-      console.error("Error fetching merchant commissions:", error);
+  
+  useEffect(() => {
+    if (sData?.id) {
+      fetchMerchantCommissions(sData.owner_Id, sData.id);
+    }
+  }, [sData]); 
+  
+  const fetchMerchantCommissions = async (ownerId, shopId) => {
+    if (!ownerId || !shopId) {
+      console.error("fetchMerchantCommissions: Missing ownerId or shopId.");
       return;
     }
-
-    setRecords(data.filter((record) => record.status === "Confirmed"));
+  
+    setIsLoading(true);
+  
+    try {
+      // Fetch the shop owner's LVM
+      const { data: shopData, error: shopError } = await supabase
+        .from("shop")
+        .select("lvm")
+        .eq("id", shopId)
+        .single();
+  
+      if (shopError) {
+        console.error("Error fetching shop LVM:", shopError);
+        return;
+      }
+  
+      const shopLvm = shopData?.lvm;
+      if (!shopLvm) {
+        console.warn("No LVM found for shop.");
+        return;
+      }
+  
+      const { data: clientProfiles, error: profileError } = await supabase
+        .from("profiles")
+        .select("id, full_name") 
+        .neq("id", ownerId); 
+  
+      if (profileError) {
+        console.error("Error fetching client profiles:", profileError);
+        return;
+      }
+      const clientIds = clientProfiles.map((profile) => profile.id);
+  
+      // Fetch client addresses where `is_default_shipping = true`
+      const { data: addressData, error: addressError } = await supabase
+        .from("addresses")
+        .select("user_id, lvm")
+        .eq("is_default_shipping", true)
+        .in("user_id", clientIds); 
+  
+      if (addressError) {
+        console.error("Error fetching client addresses:", addressError);
+        return;
+      }
+  
+      const clientLvmMap = addressData.reduce((acc, address) => {
+        acc[address.user_id] = address.lvm;
+        return acc;
+      }, {});
+  
+      // Fetch all merchant commissions where `status = Confirmed`
+      const { data: commissions, error: commissionError } = await supabase
+        .from("merchant_Commission")
+        .select("id, client_Id, image, fullName, pricing, status, description")
+        .eq("status", "Confirmed")
+        .in("client_Id", clientIds); 
+  
+      if (commissionError) {
+        console.error("Error fetching merchant commissions:", commissionError);
+        return;
+      }
+  
+      const filteredCommissions = commissions.filter((record) => {
+        return clientLvmMap[record.client_Id] === shopLvm;
+      });
+  
+      setRecords(filteredCommissions);
+    } catch (error) {
+      console.error("Unexpected error:", error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
-  useEffect(() => {
-    fetchMerchantCommissions();
-  }, []);
+  
+  
+  
 
   const handleAccept = async () => {
     if (!selectedRecordId) return;
-
+  
     const { error } = await supabase
       .from("merchant_Commission")
-      .update({ status: "Accepted" })
+      .update({ status: "To prepare" })
       .eq("id", selectedRecordId);
-
+  
     if (error) {
       console.error("Error updating record:", error);
       return;
     }
-
+  
     setShowModalComplete(false);
-    fetchMerchantCommissions();
+  
+    if (!ownerId || !shopId) {
+      console.error("Error: Missing ownerId or shopId in handleAccept.");
+      return;
+    }
+  
+    fetchMerchantCommissions(ownerId, shopId);
   };
+  
+
+
   return (
     <div>
       <div className="overflow-x-auto rounded-md border border-base-content/5 bg-base-200">
@@ -94,11 +182,19 @@ function FormCommision() {
               <th className="text-white">Image</th>
               <th className="text-white">Description</th>
               <th className="text-white">Pricing</th>
-              <th className="text-white">Status</th>
               <th className="text-white">Action</th>
             </tr>
           </thead>
-          {records.length > 0 ? (
+          {isLoading ? (
+            <tbody>
+              <tr>
+                <td colSpan="7" className="text-center py-10">
+                 <span className="loading loading-dots loading-lg"></span>
+                  <p className="text-slate-800 mt-3">Loading commissions...</p>
+                </td>
+              </tr>
+            </tbody>
+          ) : records.length > 0 ? (
             <tbody className="bg-slate-100 text-center text-black">
               {records.map((record, index) => (
                 <tr key={record.id} className="text-center">
@@ -116,9 +212,7 @@ function FormCommision() {
                   <td className="whitespace-pre-line break-words max-w-[200px]">
                     {record.description}
                   </td>
-
                   <td>{record.pricing}</td>
-                  <td>{record.status || "Accept"}</td>
                   <td>
                     <button
                       onClick={() => {
@@ -144,7 +238,7 @@ function FormCommision() {
                     alt="No Orders"
                   />
                   <div className="text-slate-800">
-                    No commisions orders yet.
+                    No commissions orders yet.
                   </div>
                 </td>
               </tr>
