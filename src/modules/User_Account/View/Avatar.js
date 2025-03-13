@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, Suspense } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
+import React, { useState, useEffect, useMemo, Suspense, useRef } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls, useGLTF, Environment } from "@react-three/drei";
 import { SkeletonUtils } from "three-stdlib";
 import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
@@ -166,6 +166,23 @@ function Platform() {
   );
 }
 
+// Add this new component after the Platform component
+function RotatingGroup({ children }) {
+  const groupRef = useRef();
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += 0.005; // Adjust speed by changing this value
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 0, 0]}>
+      {children}
+    </group>
+  );
+}
+
 function CameraController({ view }) {
   const { camera } = useThree();
 
@@ -192,14 +209,14 @@ function CameraController({ view }) {
         // Pan camera downward to focus on lower body
         gsap.to(camera.position, {
           x: 0,
-          y: 20,
+          y: 0,
           z: 100,
           duration: 0.8,
           ease: "power2.inOut"
         });
         gsap.to(camera.lookAt, {
           x: 0,
-          y: -60,  
+          y: 0,  
           z: 0,
           duration: 0.8,
           ease: "power2.inOut"
@@ -210,14 +227,14 @@ function CameraController({ view }) {
         // Reset to full body view
         gsap.to(camera.position, {
           x: 0,
-          y: 100,
-          z: 200,
+          y: 50,
+          z: 100,
           duration: 0.8,
           ease: "power2.inOut"
         });
         gsap.to(camera.lookAt, {
           x: 0,
-          y: 0,
+          y: 50,
           z: 0,
           duration: 0.8,
           ease: "power2.inOut"
@@ -666,21 +683,6 @@ const CharacterCustomization = () => {
             </span>
           </div>
 
-          {/* Name Field 
-          <div>
-            <label className="block text-gray-700 font-semibold mb-2">Name</label>
-            <input
-              type="text"
-              className={`w-full p-2 border rounded transition-all ${
-                isEditing
-                  ? "bg-white border-blue-500 focus:ring-2 focus:ring-blue-500"
-                  : "bg-gray-100 border-gray-300 cursor-not-allowed"
-              }`}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={!isEditing}
-            />
-          </div>  */}
 
           {/* Gender Field */}
           <div className="mt-4">
@@ -868,7 +870,7 @@ const CharacterCustomization = () => {
       }>
         <ThreeDErrorBoundary>
           <Canvas 
-            camera={{ position: [0, 0, 0] }}
+            camera={{ position: [0, 0, 100] }}
             shadows
             onError={(error) => {
               console.error('Canvas error:', error);
@@ -897,8 +899,8 @@ const CharacterCustomization = () => {
             {/* Environment */}
             <Environment preset="city" />
             
-            {/* Platform and Models */}
-            <group position={[0, 0, 0]}>
+            {/* Wrap the models in the RotatingGroup */}
+            <RotatingGroup>
               <Platform />
               {selectedHair && hairURLs[selectedHair] && (
                 <Part 
@@ -930,8 +932,8 @@ const CharacterCustomization = () => {
                   color="#000000"
                 />
               )}
-            </group>
-      
+            </RotatingGroup>
+
             <OrbitControls 
               target={[0, 15, 0]}
               minPolarAngle={0}

@@ -1,5 +1,5 @@
 import React, { Suspense, useState, useEffect, useMemo } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, Stage, Environment, Html } from '@react-three/drei';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -8,6 +8,7 @@ import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { supabase } from '../../../constants/supabase';
 import { bodyTypeURLs, tshirURLs, shortsURLs, hairURLs } from '../../../constants/avatarConfig';
+import { useRef } from 'react';
 
 const Model = ({ avatarData, productData, color }) => {
   const [error, setError] = useState(null);
@@ -128,6 +129,23 @@ function Platform() {
   );
 }
 
+// Add this new component after the Platform component
+function RotatingGroup({ children }) {
+  const groupRef = useRef();
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += 0.005; // Adjust speed by changing this value
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 0, 0]}>
+      {children}
+    </group>
+  );
+}
+
 const Product3DViewer = ({ category, onClose, className, selectedColor, productData }) => {
   const [avatarData, setAvatarData] = useState(null);
 
@@ -201,8 +219,8 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
       {/* 3D Canvas */}
       <div className={className}>
         <Canvas 
-          camera={{ position: [0, 0, 0], fov: 75 }}
-          shadows
+            camera={{ position: [0, 100, 200] }}
+            shadows
         > 
           
           <Suspense fallback={<LoadingSpinner />}>
@@ -223,29 +241,29 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
               penumbra={1}
             />
             
-            <group position={[0, 0, 0]}>
+            <RotatingGroup>
               <Platform />
               <Model 
                 avatarData={avatarData}
                 productData={productData}
                 color={getColorValue(selectedColor?.variant_Name)}
               />
-            </group>
+            </RotatingGroup>
 
             <Environment preset="city" />
           </Suspense>
           
           <OrbitControls 
-            target={[0, 15, 0]}
-            minPolarAngle={0}
-            maxPolarAngle={Math.PI}
-            minDistance={10}
-            maxDistance={35}
-            enablePan={true}
-            panSpeed={0.5}
-            rotateSpeed={0.5}
-            enableDamping={true}
-            dampingFactor={0.05}
+              target={[0, 15, 0]}
+              minPolarAngle={0}
+              maxPolarAngle={Math.PI}
+              minDistance={10}
+              maxDistance={35}
+              enablePan={true}
+              panSpeed={0.5}
+              rotateSpeed={0.5}
+              enableDamping={true}
+              dampingFactor={0.05}
           />
         </Canvas>
       </div>

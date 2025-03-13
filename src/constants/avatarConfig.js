@@ -63,11 +63,10 @@ const tshirtTextureURLs = {
 const hairURLs = {
   Barbers: `/3d/avatar/MEN/Hair/Hair.glb`,
   PogiCut: `/3d/avatar/MEN/Hair/Hair2.glb`,
-  DoublePonytail: `/3d/avatar/MEN/Hair/Hair3.glb`,
-  Short: `/3d/avatar/MEN/Hair/Hair4.glb`,
-  Kulot: `/3d/avatar/WOMEN/Hair/Hair1.glb`,
-  Burst: `/3d/avatar/WOMEN/Hair/Hair2.glb`,
-  Long: `/3d/avatar/WOMEN/Hair/Hair3.glb`,
+  Elvis: `/3d/avatar/MEN/Hair/Hair3.glb`,
+  Long: `/3d/avatar/WOMEN/Hair/Hair1.glb`,
+  DoublePonyTail: `/3d/avatar/WOMEN/Hair/Hair2.glb`,
+  Burst: `/3d/avatar/WOMEN/Hair/Hair3.glb`,
 };
 
 export { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs, tshirtTextureURLs };
