@@ -48,7 +48,6 @@ function MerchantDashboard() {
           return;
         }
 
-        console.log("Current user:", user);
 
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
@@ -64,7 +63,6 @@ function MerchantDashboard() {
         }
 
         if (!shops || shops.length === 0) {
-          console.log("No shops found for the user");
           setError("No shops found for the user");
           setLoading(false);
           return;
@@ -105,14 +103,12 @@ function MerchantDashboard() {
           ).length,
         }));
 
-        console.log("Product counts by shop:", productCountByShop);
         setProductCounts(productCountByShop);
 
         const totalProductCount = productCountByShop.reduce(
           (acc, shop) => acc + shop.productCount,
           0
         );
-        console.log("Total product count:", totalProductCount);
         setTotalProductCount(totalProductCount);
 
         let totalOrders = 0;
@@ -207,9 +203,6 @@ function MerchantDashboard() {
             setMonthlyOrderLabels(sortedMonths);
             setMonthlyOrderData(monthlyOrderCounts);
 
-            console.log("Final Monthly Orders:", monthlyOrders);
-            console.log("Sorted Months:", sortedMonths);
-            console.log("Monthly Order Data:", monthlyOrderCounts);
           }
         } else {
           console.log("No products found for the shops");
@@ -231,7 +224,6 @@ function MerchantDashboard() {
           setError(followerError.message);
         } else {
           const totalFollowers = followers.length;
-          console.log("Total Followers:", totalFollowers);
           setTotalFollowers(totalFollowers);
         }
 
@@ -246,7 +238,6 @@ function MerchantDashboard() {
           console.error("Error fetching wallet:", walletError.message);
           setError(walletError.message);
         } else {
-          console.log("User's wallet:", wallet);
           setWalletData(wallet || { revenue: "0.00" });
         }
       } catch (err) {
@@ -328,7 +319,7 @@ function MerchantDashboard() {
             "prod_num",
             products.map((product) => product.id)
           )
-          .eq("order_status", "Delivered");
+          .eq("shipping_status", "Completed");
 
         if (incomeError) {
           console.error("Error fetching income:", incomeError.message);
@@ -409,7 +400,6 @@ function MerchantDashboard() {
         setUData(monthlyIncomeData);
         setMonthlyOrderLabels(sortedMonths);
 
-        console.log("Monthly Income Data:", monthlyIncomeData);
       } catch (err) {
         console.error("Unexpected error:", err.message);
       }
@@ -457,12 +447,11 @@ function MerchantDashboard() {
         const { data: orders, error: ordersError } = await supabase
           .from("orders")
           .select("prod_num")
-          .eq("order_status", "Delivered");
+          .eq("shipping_status", "Completed");
 
         if (ordersError) throw ordersError;
 
         if (!orders || orders.length === 0) {
-          console.log("No completed orders found.");
           setChartData([]);
           return;
         }
@@ -504,7 +493,7 @@ function MerchantDashboard() {
           })
           .sort((a, b) => b.value - a.value);
 
-        console.log("Top Selling Products:", sortedProducts);
+   
 
         // Update chart data
         setChartData(sortedProducts);

@@ -53,7 +53,6 @@ function SideBar() {
         }
 
         if (data) {
-          console.log("Shop data:", data);
           setShopImageUrl(data.shop_image);
           setShopName(data.shop_name);
         } else {

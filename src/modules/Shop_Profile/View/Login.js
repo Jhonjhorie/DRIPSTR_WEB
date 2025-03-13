@@ -367,7 +367,7 @@ function Login() {
 
           if (data?.path) {
             const { data: publicUrlData, error: urlError } = supabase.storage
-              .from("pdfs")
+              .from("shop_profile")
               .getPublicUrl(data.path);
             if (urlError) {
               console.error("Error fetching PDF URL:", urlError.message);
@@ -377,6 +377,7 @@ function Login() {
             console.log("PDF uploaded successfully:", uploadedPdfUrl);
           }
         }
+
         let uploadedGcash = null;
         if (gcashFile) {
           const uniquePdfName = `gcash/${Date.now()}-${Math.random()
@@ -393,7 +394,7 @@ function Login() {
 
           if (data?.path) {
             const { data: publicUrlData, error: urlError } = supabase.storage
-              .from("gcash")
+              .from("shop_profile")
               .getPublicUrl(data.path);
             if (urlError) {
               console.error("Error fetching PDF URL:", urlError.message);
@@ -403,6 +404,7 @@ function Login() {
             console.log("PDF uploaded successfully:", uploadedGcash);
           }
         }
+
         let uploadedSS = null;
         if (selfieFile) {
           const uniquePdfName = `selfie/${Date.now()}-${Math.random()
@@ -419,7 +421,7 @@ function Login() {
 
           if (data?.path) {
             const { data: publicUrlData, error: urlError } = supabase.storage
-              .from("selfie")
+              .from("shop_profile")
               .getPublicUrl(data.path);
             if (urlError) {
               console.error("Error fetching PDF URL:", urlError.message);
@@ -2145,7 +2147,7 @@ function Login() {
           </div>
         </div>
       )}
-      
+
       {showAlertGC && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
@@ -2241,7 +2243,7 @@ function Login() {
         </div>
       )}
       {TermsandCondition && (
-        <div className="fixed inset-0 md:p-0 p-2 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 z-30 md:p-0 p-2 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white w-full overflow-hidden h-[400px] md:h-auto  md:w-auto p-5   justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}

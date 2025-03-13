@@ -83,7 +83,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
     setIsModalOpenToPrepare(false);
   };
   const handleConfirm = () => {
-    updateOrderStatus(order.id, "To deliver");
+    updateOrderStatus(order.id, "To ship");
     setIsModalOpenToDeliver(false);
   };
   const handleCancel = () => {
@@ -167,11 +167,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 <div>
                   <p className="text-sm text-slate-700">
                     Cancelation reason:{" "}
-                    <span  className={`font-medium ${
+                    <span
+                      className={`font-medium ${
                         order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                      }`}>
+                      }`}
+                    >
                       {order.cancellation_reason || "none"}
                     </span>
                   </p>
@@ -201,11 +203,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 <div>
                   <p className="text-sm text-slate-700">
                     Cancelation reason:{" "}
-                    <span  className={`font-medium ${
+                    <span
+                      className={`font-medium ${
                         order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                      }`}>
+                      }`}
+                    >
                       {order.cancellation_reason || "none"}
                     </span>
                   </p>
@@ -231,7 +235,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   </p>
                 </div>
               )}
-         
             </div>
           </div>
         </div>
@@ -266,33 +269,39 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-end mt-4">
+      <div className=" mt-4">
         {order.shipping_status === "To prepare" && (
-          <div className="flex gap-2">
-            <button
-              className="bg-gray-500 text-sm text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50 ml-2"
-              onClick={() => setIsModalOpenToCancel(true)}
-              disabled={loading}
-            >
-              {loading ? "Updating..." : "Cancel order"}
-            </button>
-            <button
-              className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-              onClick={() => setIsModalOpenToPrepare(true)}
-              disabled={loading}
-            >
-              {loading ? "Updating..." : "Mark as to ship"}
-            </button>
+          <div className="flex gap-2 w-full justify-between">
+            <div>
+              <button
+                className="bg-gray-500 text-sm text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50 ml-2"
+                onClick={() => setIsModalOpenToCancel(true)}
+                disabled={loading}
+              >
+                {loading ? "Updating..." : "Cancel order"}
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 "
+                onClick={() => setIsModalOpen(true)}
+              >
+                {loading ? "Updating..." : "Print"}
+              </button>
+              {/* <button
+                className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                onClick={() => setIsModalOpenToPrepare(true)}
+                disabled={loading}
+              >
+                {loading ? "Updating..." : "Mark as to ship"}
+              </button> */}
+            </div>
           </div>
         )}
-        {order.shipping_status === "To ship" && (
+        {/* {order.shipping_status === "To ship" && (
           <div className="flex gap-2">
-            <button
-              className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 "
-              onClick={() => setIsModalOpen(true)}
-            >
-              {loading ? "Updating..." : "Print"}
-            </button>
+      
             <button
               className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
               onClick={() => setIsModalOpenToDeliver(true)}
@@ -301,10 +310,10 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               {loading ? "Updating..." : "Set to deliver"}
             </button>
           </div>
-        )}
+        )} */}
         {order.shipping_status === "To deliver" && (
           <button
-            className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="bg-blue-500 text-sm text-white justify-end px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
             onClick={handleOpenDeliveryInfo}
             disabled={loading}
           >
@@ -450,7 +459,10 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         <div className="fixed inset-0 flex z-10 items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
-              Confirm Deliver Order <span className="text-custom-purple">{order.productName || "N/A"}</span>
+              Confirm Deliver Order{" "}
+              <span className="text-custom-purple">
+                {order.productName || "N/A"}
+              </span>
             </p>
             <p className="text-sm text-gray-800">
               Are you sure you want to set this order to "To deliver"?
@@ -504,7 +516,10 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
-              Confirm to ship <span className="text-custom-purple">{order.productName || "N/A"}</span>
+              Confirm to ship{" "}
+              <span className="text-custom-purple">
+                {order.productName || "N/A"}
+              </span>
             </p>
             <p className="text-sm text-gray-800">
               Are you sure you want to set this order to "To ship"?
@@ -531,7 +546,10 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-4 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
-              Confirm cancel order <span className="text-custom-purple">{order.productName || "N/A"}</span>
+              Confirm cancel order{" "}
+              <span className="text-custom-purple">
+                {order.productName || "N/A"}
+              </span>
             </p>
             <p className="text-sm text-gray-800">
               Are you sure you want to cancel this order?
