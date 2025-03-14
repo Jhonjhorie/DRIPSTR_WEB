@@ -9,6 +9,7 @@ import { SkeletonUtils } from 'three-stdlib';
 import { supabase } from '../../../constants/supabase';
 import { bodyTypeURLs, tshirURLs, shortsURLs, hairURLs } from '../../../constants/avatarConfig';
 import { useRef } from 'react';
+import { gsap } from 'gsap';
 
 const Model = ({ avatarData, productData, color }) => {
   const [error, setError] = useState(null);
@@ -146,8 +147,77 @@ function RotatingGroup({ children }) {
   );
 }
 
+// Add this new component for showing only the t-shirt
+const TshirtOnly = ({ productData, color }) => {
+  const { scene: tshirtGLTF } = useGLTF(tshirURLs.Boy.Average);
+  const tshirtScene = useMemo(() => SkeletonUtils.clone(tshirtGLTF), [tshirtGLTF]);
+
+  useEffect(() => {
+    if (tshirtScene && productData?.texture_3D) {
+      tshirtScene.traverse((node) => {
+        if (node.isMesh) {
+          node.material = node.material.clone();
+          const texture = new TextureLoader().load(productData.texture_3D, (tex) => {
+            tex.wrapS = tex.wrapT = RepeatWrapping;
+            tex.minFilter = NearestFilter;
+            node.material.map = tex;
+            node.material.color = new THREE.Color(color);
+            node.material.roughness = 0.7;
+            node.material.metalness = 0.0;
+            node.material.needsUpdate = true;
+            node.material.map.flipY = false;
+            node.material.map.needsUpdate = true;
+          });
+        }
+      });
+    }
+  }, [tshirtScene, color, productData]);
+
+  return (
+    <primitive object={tshirtScene} scale={1} position={[0, 0, 0]} />
+  );
+};
+
+// Add this new component for camera controls
+function CameraController({ viewMode }) {
+  const { camera } = useThree();
+
+  useEffect(() => {
+    const cameraPositions = {
+      tshirt: {
+        position: { x: 0, y: 25, z: 15 },
+        target: { x: 0, y: 16, z: 0 }
+      },
+      wear: {
+        position: { x: 0, y: 100, z: 200 },
+        target: { x: 0, y: 50, z: 0 }
+      }
+    };
+
+    const targetPosition = cameraPositions[viewMode].position;
+    const targetLookAt = cameraPositions[viewMode].target;
+
+    // Animate camera position
+    gsap.to(camera.position, {
+      x: targetPosition.x,
+      y: targetPosition.y,
+      z: targetPosition.z,
+      duration: 1,
+      ease: "power2.inOut",
+      onUpdate: () => {
+        camera.lookAt(targetLookAt.x, targetLookAt.y, targetLookAt.z);
+      }
+    });
+
+  }, [viewMode, camera]);
+
+  return null;
+}
+
+// Modify the main Product3DViewer component
 const Product3DViewer = ({ category, onClose, className, selectedColor, productData }) => {
   const [avatarData, setAvatarData] = useState(null);
+  const [viewMode, setViewMode] = useState('tshirt'); // 'tshirt' or 'wear'
 
   useEffect(() => {
     const fetchAvatarData = async () => {
@@ -204,61 +274,122 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
 
   return (
     <div className="relative w-full h-full">
-      {/* Background Image */}
+      {/* Improved layered background */}
       <div 
-        className="absolute inset-0 bg-black bg-opacity-80"
+        className="absolute inset-0"
         style={{ 
-          backgroundImage: "url('/3d/canvasBG/Closet.jpg')", 
-          backgroundSize: "cover", 
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          filter: "brightness(30%) blur(4px)",
-         }} 
+          background: 'radial-gradient(circle at 50% 50%, #141e30 0%, #060606 100%)',
+          opacity: 1
+        }} 
+      />
+      {/* Accent gradient layer */}
+      <div 
+        className="absolute inset-0"
+        style={{ 
+          background: 'linear-gradient(135deg, rgba(20, 30, 48, 0.5) 0%, rgba(36, 59, 85, 0.1) 100%)',
+          mixBlendMode: 'soft-light'
+        }} 
+      />
+      {/* Grid overlay */}
+      <div 
+        className="absolute inset-0 opacity-10"
+        style={{ 
+          backgroundImage: `
+            linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)
+          `,
+          backgroundSize: '20px 20px',
+          backgroundPosition: '-1px -1px'
+        }} 
       />
       
+      {/* Add view mode toggle buttons */}
+      <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
+        <button
+          onClick={() => setViewMode('tshirt')}
+          className={`px-3 py-2 text-sm rounded-full shadow-lg transition-all duration-300 ${
+            viewMode === 'tshirt' 
+              ? 'bg-slate-800 text-white' 
+              : 'bg-white/90 text-slate-800 hover:bg-white'
+          } border border-slate-400 hover:border-slate-800`}
+        >
+          View T-shirt
+        </button>
+        <button
+          onClick={() => setViewMode('wear')}
+          className={`px-3 py-2 text-sm rounded-full shadow-lg transition-all duration-300 ${
+            viewMode === 'wear' 
+              ? 'bg-slate-800 text-white' 
+              : 'bg-white/90 text-slate-800 hover:bg-white'
+          } border border-slate-400 hover:border-slate-800`}
+        >
+          Try On
+        </button>
+      </div>
+
       {/* 3D Canvas */}
       <div className={className}>
         <Canvas 
-            camera={{ position: [0, 100, 200] }}
-            shadows
+            camera={{ 
+              position: viewMode === 'tshirt' 
+                ? [0, 25, 0]  // Closer and lower for t-shirt
+                : [0, 50, 200]  // Higher and further for avatar
+            }}
+            style={{ 
+              background: 'transparent',
+              boxShadow: 'inset 0 0 150px rgba(20, 30, 48, 0.95)'
+            }} 
         > 
           
           <Suspense fallback={<LoadingSpinner />}>
-            {/* Lights */}
             <ambientLight intensity={0.4} />
-            <hemisphereLight intensity={0.7} />
+            <hemisphereLight 
+              intensity={0.5}
+              color="#ffffff"
+              groundColor="#141e30"
+            />
             <directionalLight
               castShadow
               position={[2, 4, 1]}
-              intensity={1.5}
+              intensity={1.0}
               shadow-mapSize-width={1024}
               shadow-mapSize-height={1024}
             />
             <spotLight
               position={[-2, 4, -1]}
-              intensity={0.5}
+              intensity={0.3}
               angle={0.5}
               penumbra={1}
+              color="#4a6fa1"
             />
+            
+            <CameraController viewMode={viewMode} />
             
             <RotatingGroup>
               <Platform />
-              <Model 
-                avatarData={avatarData}
-                productData={productData}
-                color={getColorValue(selectedColor?.variant_Name)}
-              />
+              {viewMode === 'tshirt' ? (
+                <TshirtOnly 
+                  productData={productData}
+                  color={getColorValue(selectedColor?.variant_Name)}
+                />
+              ) : (
+                <Model 
+                  avatarData={avatarData}
+                  productData={productData}
+                  color={getColorValue(selectedColor?.variant_Name)}
+                />
+              )}
             </RotatingGroup>
 
             <Environment preset="city" />
           </Suspense>
           
           <OrbitControls 
-              target={[0, 15, 0]}
-              minPolarAngle={0}
-              maxPolarAngle={Math.PI}
-              minDistance={10}
-              maxDistance={35}
+              target={[0, viewMode === 'tshirt' ? 25 : 20, 0]} // Adjust target height
+              minPolarAngle={viewMode === 'tshirt' ? Math.PI / 4 : 0} // Limit minimum angle for t-shirt
+              maxPolarAngle={viewMode === 'tshirt' ? Math.PI / 1.5 : Math.PI} // Limit maximum angle for t-shirt
+              minDistance={viewMode === 'tshirt' ? 10 : 16} // Closer minimum distance for t-shirt
+              maxDistance={viewMode === 'tshirt' ? 30 : 30} // Shorter maximum distance for t-shirt
               enablePan={true}
               panSpeed={0.5}
               rotateSpeed={0.5}
@@ -272,11 +403,10 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
 };
 
 const LoadingSpinner = () => (
-  <Html center>
-    <div className="text-slate-400">
-      <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl" />
+  <Html center position={[0, 0, 0]} style={{ transform: 'translate3d(-50%, -50%, 0)' }}>
+    <div className="text-slate-400 flex items-center justify-center pb-52">
+      <FontAwesomeIcon icon={faSpinner} className="animate-spin text-3xl" />
     </div>
   </Html>
 );
-
 export default Product3DViewer;

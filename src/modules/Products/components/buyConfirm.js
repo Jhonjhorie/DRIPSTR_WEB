@@ -186,7 +186,7 @@ const BuyConfirm = ({ item, onClose }) => {
                       selectedColor={selectedColor}
                       productData={item}
                     />
-                    <div className="absolute top-2 right-2 flex gap-2">
+                    <div className="absolute top-4 right-4 flex items-center gap-2">
                       {item.is3D && (
                         <ClosetButton
                           profile={profile}
@@ -203,7 +203,7 @@ const BuyConfirm = ({ item, onClose }) => {
                       >
                         <FontAwesomeIcon
                           icon={faX}
-                          className="text-slate-400 hover:text-slate-800 text-lg"
+                          className="text-slate-400 hover:text-slate-800 text-base"
                         />
                       </button>
                     </div>
