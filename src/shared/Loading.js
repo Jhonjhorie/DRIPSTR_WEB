@@ -10,7 +10,7 @@ function LoadingMullet() {
           alt="No Images Available"
           className="object-none mb-2 mt-1 max-w-[180px] max-h-[200px] drop-shadow-customViolet animate-pulse"
         />
-        <h1 className="top-20 bg-primary-color p-4 rounded-md drop-shadow-lg text-slate-50">
+        <h1 className="top-20  p-4 rounded-md drop-shadow-lg bg-slate-50  text-secondary-color">
           Loading...
         </h1>
         

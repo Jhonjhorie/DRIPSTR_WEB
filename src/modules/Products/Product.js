@@ -268,7 +268,7 @@ function Product() {
                 <div>
                   <div className="justify-start flex flex-col ">
                     <div className="flex justify-between gap-5 pl-2">
-                      <div className="flex items-end justify-center gap-2">
+                    <div className="flex items-end justify-center gap-2">
                         <label className="form-control w-20 max-w-xs">
                           <div className="label">
                             <span className="label-text">Quantity:</span>
@@ -278,17 +278,17 @@ function Product() {
                             value={quantity}
                             onChange={handleInputChange}
                             placeholder="How many"
-                            className="input input-bordered input-primary w-full max-w-xs"
+                            className="input input-bordered bg-white input-neutral w-full max-w-xs"
                           />
                         </label>
                         <button
-                          className="btn btn-success"
+                          className="btn  text-white w-5 btn-outline hover:bg-secondary-color hover:text-white bg-stone-800 bg-opacity-50"
                           onClick={handleIncrement}
                         >
                           +
                         </button>
                         <button
-                          className="btn btn-error"
+                          className="btn text-white w-5 hover:bg-secondary-color hover:text-white bg-stone-800 bg-opacity-50"
                           onClick={handleDecrement}
                         >
                           -
@@ -348,14 +348,14 @@ function Product() {
                     <button
                       onClick={handleAddToCart}
                       className="h-10 px-6 font-semibold rounded-md bg-secondary-color border-black border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
-                      disabled={!item.isOwner}
+                      
                     >
                       Add to Cart
                     </button>
                     <button
                       onClick={onConfirm}
                       className="h-10 px-6 font-semibold rounded-md bg-primary-color border-secondary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
-                      disabled={!item.isOwner}
+                     
                     >
                       Place Order
                     </button>

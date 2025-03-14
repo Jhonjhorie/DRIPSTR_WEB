@@ -5,12 +5,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 import useUserProfile from "@/shared/mulletCheck.js";
 import LoginFirst from "@/shared/mulletFirst";
-import { supabase } from "../../../constants/supabase.js";  // Adjust path as needed
+import { supabase } from "../../../constants/supabase.js"; // Adjust path as needed
 
 export default function RatingSection({ item }) {
-  const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public/";
+  const supabaseBaseUrl =
+    "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public/";
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
-  
+
   const [likesData, setLikesData] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -21,10 +22,11 @@ export default function RatingSection({ item }) {
   // Safe itemR calculation
   const itemR = (min, max) => {
     if (!reviews || reviews.length === 0) return 0;
-    return reviews.filter((review) => min < review.rating && review.rating <= max).length;
+    return reviews.filter(
+      (review) => min < review.rating && review.rating <= max
+    ).length;
   };
 
-  // Update the fetchReviews function to properly format image URLs
   const fetchReviews = async () => {
     try {
       const { data, error } = await supabase
@@ -39,9 +41,9 @@ export default function RatingSection({ item }) {
         .eq('product_id', item.id)
         .eq('is_hidden', false)
         .order('created_at', { ascending: false });
-
+  
       if (error) throw error;
-
+  
       const formattedReviews = data.map(review => ({
         id: review.id,
         userName: review.user?.full_name || 'Anonymous',
@@ -58,19 +60,12 @@ export default function RatingSection({ item }) {
             .getPublicUrl(image);
           return data.publicUrl;
         }) : [],
-        likes: review.likes || 0,
+        likes: review.likes || [], 
         isEdited: review.is_edited
       }));
-
+  
       setReviews(formattedReviews);
-      
-      // Initialize likesData after fetching reviews
-      const initialLikesData = formattedReviews.reduce((acc, review) => {
-        acc[review.id] = { likes: review.likes || 0, isLiked: false };
-        return acc;
-      }, {});
-      setLikesData(initialLikesData);
-
+  
     } catch (error) {
       console.error('Error fetching reviews:', error);
     } finally {
@@ -78,14 +73,13 @@ export default function RatingSection({ item }) {
     }
   };
 
-  // Initialize data when component mounts or item changes
   useEffect(() => {
     if (item?.id) {
       fetchReviews();
     }
   }, [item?.id]);
 
-  // Calculate average rating safely
+
   const calculateAverageRating = () => {
     if (!reviews || reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, review) => acc + review.rate, 0);
@@ -97,28 +91,43 @@ export default function RatingSection({ item }) {
       document.getElementById('login_Modal').showModal();
       return;
     }
-
+  
     try {
-      const updatedData = { ...likesData };
-      const isLiked = updatedData[reviewId].isLiked;
-      const newLikesCount = isLiked ? 
-        updatedData[reviewId].likes - 1 : 
-        updatedData[reviewId].likes + 1;
-
-      setLikesData(prev => ({
-        ...prev,
-        [reviewId]: {
-          isLiked: !isLiked,
-          likes: newLikesCount
-        }
-      }));
-
-      const { error } = await supabase
+      // Fetch the current likes data for the review
+      const { data: review, error: fetchError } = await supabase
         .from('reviews')
-        .update({ likes: newLikesCount })
+        .select('likes')
+        .eq('id', reviewId)
+        .single();
+  
+      if (fetchError) throw fetchError;
+  
+      // Check if the user has already liked the review
+      const likesArray = review.likes || []; // Default to an empty array if likes is null
+      const isLiked = likesArray.includes(profile.id);
+  
+      let newLikesArray;
+  
+      if (isLiked) {
+     
+        newLikesArray = likesArray.filter(id => id !== profile.id);
+     
+      } else {
+    
+        newLikesArray = [...likesArray, profile.id];
+    
+      }
+  
+      const { error: updateError } = await supabase
+        .from('reviews')
+        .update({ likes: newLikesArray })
         .eq('id', reviewId);
-
-      if (error) throw error;
+  
+      if (updateError) throw updateError;
+  
+   
+      await fetchReviews();
+  
     } catch (error) {
       console.error('Error updating likes:', error);
     }
@@ -126,7 +135,10 @@ export default function RatingSection({ item }) {
 
   const handlePrevSlide = () => {
     if (selectedItem?.images.length > 0) {
-      setCurrentSlide((prev) => (prev - 1 + selectedItem.images.length) % selectedItem.images.length);
+      setCurrentSlide(
+        (prev) =>
+          (prev - 1 + selectedItem.images.length) % selectedItem.images.length
+      );
     }
   };
 
@@ -149,23 +161,28 @@ export default function RatingSection({ item }) {
   };
 
   const closeModalL = () => {
-    document.getElementById('login_Modal').close();
+    document.getElementById("login_Modal").close();
   };
 
-  // Add this function at the top of your component
   const getRatingCount = (rating) => {
     if (!reviews || reviews.length === 0) return 0;
-    return reviews.filter(review => Math.floor(review.rate) === rating).length;
+    return reviews.filter((review) => Math.floor(review.rate) === rating)
+      .length;
   };
 
   return (
     <div className="flex flex-col mt-4 w-full z-10 px-4">
-      {!isLoggedIn && <dialog id="login_Modal" className="modal modal-bottom sm:modal-middle absolute right-4 sm:right-0">
-        <LoginFirst />
-        <form method="dialog" className="modal-backdrop">
-          <button onClick={closeModalL}></button>
-        </form>
-      </dialog>}
+      {!isLoggedIn && (
+        <dialog
+          id="login_Modal"
+          className="modal modal-bottom sm:modal-middle absolute right-4 sm:right-0"
+        >
+          <LoginFirst />
+          <form method="dialog" className="modal-backdrop">
+            <button onClick={closeModalL}></button>
+          </form>
+        </dialog>
+      )}
       <div className="my-0 divider"></div>
       <p className="text-2xl font-bold">Rating & Reviews</p>
 
@@ -173,9 +190,7 @@ export default function RatingSection({ item }) {
         <p className="text-2xl font-bold">Rating</p>
         <div className="flex items-center gap-12">
           <div className="flex items-end gap-1">
-            <h1 className="text-5xl font-bold">
-              {calculateAverageRating()}
-            </h1>
+            <h1 className="text-5xl font-bold">{calculateAverageRating()}</h1>
             <p className="text-3xl font-semibold opacity-75 text-secondary-color">
               /5
             </p>
@@ -186,7 +201,7 @@ export default function RatingSection({ item }) {
         </div>
         <div className="flex flex-col sm:flex-row gap-5 items-start">
           <div className="border-primary-color p-2 flex border-2 rounded-md w-fit">
-            <RateSymbol item={averageRate(item.reviews)} size={28} />
+            <RateSymbol item={item.averageRating} size={28} />
           </div>
           <div className="flex flex-col w-full">
             {/* 5 stars */}
@@ -281,11 +296,9 @@ export default function RatingSection({ item }) {
             {loading ? (
               <div className="text-center py-4">Loading reviews...</div>
             ) : reviews.length > 0 ? (
+              
               reviews.map((review) => {
-                const { likes, isLiked } = likesData[review.id] || {
-                  likes: review.likes,
-                  isLiked: false,
-                };
+                const isLiked = review.likes.includes(profile.id); 
                 return (
                   <div
                     key={review.id}
@@ -302,12 +315,14 @@ export default function RatingSection({ item }) {
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                             <span className="text-gray-500 text-sm">
-                              {review.userName ? review.userName.charAt(0).toUpperCase() : 'A'}
+                              {review.userName
+                                ? review.userName.charAt(0).toUpperCase()
+                                : "A"}
                             </span>
                           </div>
                         )}
                         <h3 className="text-xl font-semibold">
-                          {review.userName || 'Anonymous'}
+                          {review.userName || "Anonymous"}
                         </h3>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -317,7 +332,9 @@ export default function RatingSection({ item }) {
                       <div className="flex items-center gap-2">
                         <p className="text-gray-600 text-sm">{review.date}</p>
                         {review.isEdited && (
-                          <span className="text-xs text-gray-500">(edited)</span>
+                          <span className="text-xs text-gray-500">
+                            (edited)
+                          </span>
                         )}
                       </div>
                     </div>
@@ -356,19 +373,17 @@ export default function RatingSection({ item }) {
                         ))}
                       </div>
                     )}
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => toggleLike(review.id)}
-                        className={`flex items-center gap-1 px-2 py-1 rounded ${
-                          likesData[review.id]?.isLiked
-                            ? 'text-primary-color'
-                            : 'text-gray-600'
-                        }`}
-                      >
-                        <FontAwesomeIcon icon={faThumbsUp} />
-                        <span>{likesData[review.id]?.likes || 0}</span>
-                      </button>
-                    </div>
+                     <div className="flex items-center gap-2">
+          <button
+            onClick={() => toggleLike(review.id)}
+            className={`flex items-center gap-1 px-2 py-1 rounded ${
+              isLiked ? 'text-primary-color' : 'text-gray-600'
+            }`}
+          >
+            <FontAwesomeIcon icon={faThumbsUp} />
+            <span>{review.likes.length}</span> 
+          </button>
+        </div>
                   </div>
                 );
               })
@@ -394,10 +409,16 @@ export default function RatingSection({ item }) {
                   />
                   {selectedItem.images.length > 1 && (
                     <div className="absolute left-5 right-5 top-1/2 flex -translate-y-1/2 transform justify-between">
-                      <button onClick={handlePrevSlide} className="btn btn-circle">
+                      <button
+                        onClick={handlePrevSlide}
+                        className="btn btn-circle"
+                      >
                         ❮
                       </button>
-                      <button onClick={handleNextSlide} className="btn btn-circle">
+                      <button
+                        onClick={handleNextSlide}
+                        className="btn btn-circle"
+                      >
                         ❯
                       </button>
                     </div>
@@ -410,7 +431,8 @@ export default function RatingSection({ item }) {
                         className={`h-2 rounded-full drop-shadow-lg transition-all duration-300 ${
                           currentSlide === index
                             ? "bg-slate-50 w-4"
-                            : currentSlide === index - 1 || currentSlide === index + 1
+                            : currentSlide === index - 1 ||
+                              currentSlide === index + 1
                             ? "bg-primary-color w-3"
                             : "bg-secondary-color w-2"
                         }`}

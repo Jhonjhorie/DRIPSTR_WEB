@@ -25,6 +25,8 @@ import MerchantFollow from "./components/subcomponents/MerchantFollow.js";
 import AdsBanner from "../Home/components/AdsBanner.js";
 import AdsCarousel from "./components/subcomponents/AdsCarousel.js";
 import ShopVoucherStream from "./components/subcomponents/ShopVoucher.js";
+import ReviewStream from "./components/subcomponents/reviewsStream.js";
+import useReviews from "./hooks/useShopReview.js";
 
 function ShopPage() {
   const location = useLocation();
@@ -36,6 +38,7 @@ function ShopPage() {
   const [filMall, setFilMall] = useState(0);
   const [filCat, setFilCat] = useState(categories[0]?.label || "");
   const { products, loading, error } = useProducts(profile);
+  const {reviews, loadingRev, shopRating, fetchReviews} = useReviews(shop.id);
 
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -83,7 +86,7 @@ function ShopPage() {
 
   return (
     <div
-      className={`w-full font-[iceland] relative bg-white flex flex-col ${
+      className={`w-full  relative bg-white flex flex-col ${
         isPremium ? "" : ""
       } bg-gradient-to-b from-gray-50 to-gray-100`}
     >
@@ -117,11 +120,11 @@ function ShopPage() {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 relative">
+      <div className="max-w-7xl mx-auto w-full flex flex-col gap-1 px-4 sm:px-6 lg:px-8 py-6 relative">
         {/* Premium Badge */}
         {isPremium && (
-          <div className="absolute top-4 left-5 flex justify-end">
-            <span className="inline-flex items-center gap-1 px-3 py-1 bg-black text-yellow-400 rounded-full text-sm font-medium">
+          <div className="absolute top-4 left-5 flex justify-end z-50">
+            <span className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r to-gray-700 from-yellow-800 text-yellow-400 rounded-full text-sm font-medium">
               <FontAwesomeIcon icon={faCrown} /> Premium Merchant
             </span>
           </div>
@@ -129,19 +132,23 @@ function ShopPage() {
 
         {/* Shop Header Section */}
         <div
-          className={`rounded-lg overflow-hidden ${
+          className={`rounded-lg overflow-hidden  ${
             isPremium ? "bg-black bg-opacity-90 shadow-lg" : "bg-white shadow"
-          } p-4 sm:p-6`}
+          } px-4 sm:px-6 py-4 sm:py-6 relative`}
         >
-          <div className="flex flex-col md:flex-row gap-6">
+          {isPremium && (
+            <>
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-500 rounded-full opacity-20 blur-3xl"></div>
+              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-indigo-500 rounded-full opacity-20 blur-3xl"></div>
+            </>
+          )}
+          <div className="flex flex-col items-center justify-center md:flex-row gap-6">
             {/* Shop Image */}
-            <div className="flex-shrink-0 w-full md:w-64 h-64">
+            <div className="flex-shrink-0 w-full md:w-64 h-full max-h-80 flex flex-col gap-1">
               {imagePreview ? (
                 <div
-                  className={`relative h-full w-full overflow-hidden rounded-md ${
-                    isPremium
-                      ? "border-2 border-yellow-400"
-                      : "border border-primary-color"
+                  className={`relative h-[17rem] w-full overflow-hidden rounded-md ${
+                    isPremium ? "border-2 border-yellow-400" : "border "
                   }`}
                 >
                   <img
@@ -162,13 +169,22 @@ function ShopPage() {
                   </p>
                 </div>
               )}
+              <button
+                className={`btn btn-outline p-1 h-7 min-h-7 rounded-md ${
+                  isPremium
+                    ? "text-yellow-400 hover:bg-yellow-400 hover:text-black border-yellow-400"
+                    : ""
+                }`}
+              >
+                Message Us
+              </button>
             </div>
 
             {/* Shop Info */}
             <div className="flex-1 flex flex-col">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
                 <h1
-                  className={`text-3xl sm:text-4xl font-bold ${
+                  className={`text-3xl sm:text-4xl font-bold font-[iceland] ${
                     isPremium ? "text-gray-50" : "text-secondary-color"
                   } line-clamp-2`}
                 >
@@ -185,11 +201,11 @@ function ShopPage() {
                     }  rounded-full`}
                   >
                     <FontAwesomeIcon icon={faStar} />
-                    <span className="font-bold">{shop.shop_Rating || "0"}</span>
+                    <span className="font-bold">{shopRating || "0"}</span>
                   </div>
                   {/* Action buttons */}
                   {isLoggedIn && (
-                    <div className="flex gap-2 mt-auto">
+                    <div className="flex gap-2 font-[iceland] mt-auto">
                       <MerchantFollow
                         profile={profile}
                         shop={shop}
@@ -220,46 +236,56 @@ function ShopPage() {
               </div>
 
               {/* Shop description */}
-              <div className="border-t border-b border-gray-200 py-4 mb-4">
+              <div className="border-t border-b border-gray-200 overflow-y-auto custom-scrollbar pr-3  h-40 py-1 mb-4">
                 <p
-                  className={`${isPremium ? "text-gray-400" : "text-gray-700"}`}
+                  className={`${
+                    isPremium ? "text-gray-400" : "text-gray-700"
+                  } font-[iceland] text-justify`}
                 >
                   {shop.description || "No description available."}
                 </p>
               </div>
 
               {/* Stats Section */}
-              <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="text-center p-2 rounded-md bg-gray-50 flex w-full h-full justify-center items-center">
-                  <FontAwesomeIcon
-                    icon={faBox}
-                    className="text-primary-color text-xl md:text-3xl"
-                  />
-                          <div className="divider max-w-1  divider-horizontal "></div>
-                  <div className="text-center">
-                  <p className="text-sm text-gray-500">Products</p>
-                  <p className="font-bold text-base md:text-2xl">{stats.totalProducts}</p></div>
-                </div>
+              <div className="grid grid-cols-3 gap-4 mb-4 ">
                 <div className="text-center p-2 rounded-md bg-gray-50 flex w-full h-full justify-center items-center">
                   <FontAwesomeIcon
-                    icon={faShoppingBag}
-                    className="text-primary-color text-xl md:text-3xl"
+                    icon={faBox}
+                    className="text-primary-color text-xl md:text-3xl hidden md:flex"
                   />
-                          <div className="divider max-w-1 divider-horizontal "></div>
+                  <div className="divider max-w-1  divider-horizontal hidden md:flex "></div>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Products</p>
+                    <p className="font-bold text-base md:text-2xl">
+                      {stats.totalProducts}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-center p-2 rounded-md bg-gray-50 flex w-full h-full justify-center items-center ">
+                  <FontAwesomeIcon
+                    icon={faShoppingBag}
+                    className="text-primary-color text-xl md:text-3xl hidden md:flex"
+                  />
+                  <div className="divider max-w-1 divider-horizontal hidden md:flex"></div>
                   <div className="text-center">
                     <p className="text-sm text-gray-500">Sold</p>
-                    <p className="font-bold text-base md:text-2xl">{stats.totalSold}</p>
+                    <p className="font-bold text-base md:text-2xl">
+                      {stats.totalSold}
+                    </p>
                   </div>
                 </div>
                 <div className="text-center p-2 rounded-md bg-gray-50 flex w-full h-full justify-center items-center">
                   <FontAwesomeIcon
                     icon={faUsers}
-                    className="text-primary-color text-xl md:text-3xl"
+                    className="text-primary-color text-xl md:text-3xl hidden md:flex"
                   />
-                  <div className="divider max-w-1 divider-horizontal "></div>
+                  <div className="divider max-w-1 divider-horizontal hidden md:flex"></div>
                   <div className="text-center">
-                  <p className="text-sm text-gray-500">Followers</p>
-                  <p className="font-bold text-base md:text-2xl">{stats.totalFollowers}</p></div>
+                    <p className="text-sm text-gray-500">Followers</p>
+                    <p className="font-bold text-base md:text-2xl">
+                      {stats.totalFollowers}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -267,27 +293,24 @@ function ShopPage() {
         </div>
 
         {/* Ad Banner Section */}
-         <div className="my-6 mx-1 flex flex-col gap-4 md:mx-auto w-full">
-         
-        {/* Fallback if you don't have the component: */}
-        {/* <div className="w-full h-full bg-gray-200 rounded-md flex items-center justify-center text-gray-500 border border-dashed border-gray-300">
-            Advertisement Space
-          </div> */}
-          <ShopVoucherStream profile={profile} shop={shop}/>
-          <div className="flex justify-center items-center h-1/3 w-1/2">
-          <AdsCarousel shop={shop} /> 
+        <div className="my-6 mx-1 flex flex-col gap-4 md:mx-auto   h-full w-full">
+        
+          <ShopVoucherStream profile={profile} shop={shop} />
+          <div className="flex flex-col md:flex-row justify-between  h-full  items-center gap-2">
+            <AdsCarousel shop={shop} />
+            <ReviewStream fetchReviews={fetchReviews} reviews={reviews} loading={loadingRev} />
           </div>
-        </div> 
+        </div>
 
         {/* Categories Section */}
         <div
           className={`${
             isPremium ? "bg-gray-900 bg-opacity-5" : "bg-gray-100"
-          } flex w-full px-4 py-3 justify-center rounded-lg p-4 mb-6`}
+          } flex w-full md:px-4  justify-center rounded-lg  mb-6`}
         >
           <button
             onClick={() => navigate("/")}
-            className="w-12 px-8  rounded-md bg-slate-50 flex items-center justify-center text-2xl"
+            className="w-4 px-2 sm:w-12  rounded-md bg-slate-50 flex items-center justify-center text-base sm:text-lg"
           >
             <FontAwesomeIcon icon={faAnglesLeft} />
           </button>
@@ -308,7 +331,7 @@ function ShopPage() {
           } rounded-lg p-4`}
         >
           <h2
-            className={`text-2xl font-bold mb-4 ${
+            className={`text-xl md:text-2xl font-bold mb-4 ${
               isPremium ? "text-gray-900" : "text-secondary-color"
             }`}
           >

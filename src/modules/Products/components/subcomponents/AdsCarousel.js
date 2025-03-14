@@ -38,7 +38,7 @@ const AdsCarousel = ({ shop }) => {
  if(images){
   return (
     
-    <div className="h-full w-full relative rounded-md bg-slate-200 drop-shadow-lg group overflow-hidden">
+    <div className="h-full md:min-w-[32rem] w-full md:w-1/2 relative rounded-md bg-slate-200 drop-shadow-lg group overflow-hidden">
       {/* Two Images Side by Side */}
       <div className="w-full h-full flex">
         {/* First Image */}

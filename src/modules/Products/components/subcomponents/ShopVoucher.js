@@ -199,7 +199,7 @@ const ShopVoucherStream = ({ profile, shop }) => {
     <div className="w-full lg:min-w-[28.25rem] flex-1 rounded-md mx-1 md:mx-5 flex gap-2 text-secondary-color font-[iceland] relative">
       <div className="absolute -top-[1.2rem] md:-top-[1.2rem] left-4 bg-stone-600 h-5 rounded-t-lg  items-center flex justify-end ">
         <p className=" text-[1rem] md:text-[1.2rem] text-white drop-shadow-md font-bold px-2 ">
-          Vouchers
+          Shop Vouchers
         </p>
       </div>
       {showAlert && (
@@ -291,9 +291,9 @@ const ShopVoucherStream = ({ profile, shop }) => {
             );
           })
         ) : (
-          <div className="flex items-center justify-center ml-[14vw] md:ml-[32vw] text-white ">
+          <div className="flex items-center justify-center md:ml-[32vw] text-white ">
             {" "}
-            <h1 className="text-center">No Voucher Available</h1>{" "}
+            <h1 className="text-center text-sm md:text-base">No Voucher Available</h1>{" "}
           </div>
         )}
         <div className="bg-secondary-color text-white absolute right-0 top-2.5 z-10 rounded-l-lg">

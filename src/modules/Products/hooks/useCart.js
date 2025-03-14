@@ -20,7 +20,7 @@ const useCarts = () => {
         .select(
           `
             id, qty, variant, size, acc_id, prod_id, to_order,
-            prod:prod_id (id, item_Name, item_Variant, shop_Name, reviews, item_Orders, discount, shop:shop_Id (id, shop_name)),
+            prod:prod_id (id, item_Name, item_Variant, shop_Name, reviews, item_Orders, discount, shop:shop_Id (*)),
             profile:acc_id (id)
           `
         )

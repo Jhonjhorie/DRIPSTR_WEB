@@ -315,7 +315,7 @@ function Home() {
       </dialog>
 
       {/* Footer */}
-      <footer className="bg-slate-50 border-t w-full border-gray-200 mb-8 md:mb-0 py-4">
+      <footer className="bg-slate-50 border-t w-[90%] mx-auto rounded-t-md border-gray-200 mb-8 md:mb-0 py-4">
         <div className="container mx-auto px-4 flex flex-row justify-between items-center">
           <div className="flex items-center md:mb-0">
             <img

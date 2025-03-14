@@ -88,10 +88,10 @@ function PlaceOrder() {
     fetchAddresses();
   }, [profile]);
 
-  const calculateEstimatedDelivery = () => {
+  const calculateEstimatedDelivery = (daysToAddStart, daysToAddEnd) => {
     const today = new Date();
-    const start = addDays(today, 5);
-    const end = addDays(today, 7);
+    const start = addDays(today, daysToAddStart);
+    const end = addDays(today, daysToAddEnd);
 
     const formattedStartDate = format(start, "MMM dd");
     const formattedEndDate = format(end, "dd, yyyy");
@@ -127,40 +127,88 @@ function PlaceOrder() {
 
   const groupItemsByShop = (items) => {
     const grouped = {};
+  
     items.forEach((item) => {
-      const { shop } = item.prod.shop;
       const shopName = item.prod.shop.shop_name;
+      const shopLvm = item.prod.shop?.lvm;
+      const profileLvm = selectedAddress?.lvm;
+      console.log("shop object:", item.prod.shop);
+      console.log("shop: "+ shopName)
+      console.log("shop: "+ shopLvm)
+      console.log("prof: "+ profileLvm)
+  
+
+      let shippingFee = 100;
+      let daysToAddStart = 7;
+      let daysToAddEnd = 12;
+  
+      if (profileLvm === shopLvm) {
+        shippingFee = 50;
+        daysToAddStart = 4;
+        daysToAddEnd = 8;
+      } else if (
+        (profileLvm === "Luzon" && shopLvm === "Visayas") ||
+        (profileLvm === "Visayas" && shopLvm === "Luzon") ||
+        (profileLvm === "Visayas" && shopLvm === "Mindanao") ||
+        (profileLvm === "Mindanao" && shopLvm === "Visayas")
+      ) {
+        shippingFee = 100;
+        daysToAddStart = 7;
+        daysToAddEnd = 12;
+      } else if (
+        (profileLvm === "Luzon" && shopLvm === "Mindanao") ||
+        (profileLvm === "Mindanao" && shopLvm === "Luzon")
+      ) {
+        shippingFee = 150;
+        daysToAddStart = 7;
+        daysToAddEnd = 12;
+      }
+  
+      const today = new Date();
+      const startDate = addDays(today, daysToAddStart);
+      const endDate = addDays(today, daysToAddEnd);
+      const endDateF = format(endDate, "yyyy-MM-dd");
+     
+      const estDeliveryDays = `${format(startDate, "MMM dd")}-${format(endDate, "dd, yyyy")}`;
+     
       if (!grouped[shopName]) {
         grouped[shopName] = {
           items: [],
           shippingFee: shippingFee,
-          shop,
+          estDeliveryDays: estDeliveryDays, 
+          endDate: endDateF,
+          shop: item.prod.shop,
         };
       }
+  
       grouped[shopName].items.push(item);
     });
+  
     return grouped;
   };
 
   useEffect(() => {
     const groupedItems = groupItemsByShop(selectedItems);
+    const firstShopKey = Object.keys(groupedItems)[0];
+  const endDate = groupedItems[firstShopKey]?.endDate;
 
     let totalPrice = 0;
     let totalDiscountPrice = 0;
     let totalShippingFee = 0;
     let holder = 0;
-
+  
     const productVouchers = selectedVouchers.filter(
       (v) => v.voucher_type === "Product"
     );
-
+  
     let isFirstShop = true;
     const newShopTotals = {};
-
+  
+    
     for (const shopName in groupedItems) {
       const { items: shopItems, shippingFee: shopShippingFee } =
         groupedItems[shopName];
-
+  
       let shopTotal = shopItems.reduce(
         (sum, item) =>
           sum +
@@ -170,59 +218,55 @@ function PlaceOrder() {
             item.qty,
         0
       );
-
+  
       const shopVoucher = selectedShopVouchers.find(
         (v) => v.shopId === shopItems[0].prod.shop.id
       );
       if (shopVoucher && shopItems[0].size.price >= shopVoucher.condition) {
         shopTotal = Math.max(0, shopTotal - shopVoucher.discount);
       }
-
+  
       totalPrice += shopTotal;
-
+  
       if (isFirstShop && productVouchers.length > 0) {
         shopTotal = Math.max(0, shopTotal - productVouchers[0].discount);
         isFirstShop = false;
       }
-
+  
       newShopTotals[shopName] = shopTotal;
       console.log(shopName + ": " + newShopTotals[shopName]);
       holder += shopTotal;
     }
-
+  
+    // Calculate total shipping fee
     let isFirstShop2 = true;
     for (const shopName in groupedItems) {
-      const { items: shopItems, shippingFee: shopShippingFee } =
-        groupedItems[shopName];
-
+      const { shippingFee: shopShippingFee } = groupedItems[shopName];
+  
       const shippingVoucher = selectedVouchers.find(
         (v) => v.voucher_type === "Shipping"
       );
-
+  
       if (isFirstShop2 && shippingVoucher) {
-        totalShippingFee += Math.max(
-          0,
-          shopShippingFee - shippingVoucher.discount
-        );
+        totalShippingFee += Math.max(0, shopShippingFee - shippingVoucher.discount);
         isFirstShop2 = false;
       } else {
         totalShippingFee += shopShippingFee;
       }
     }
-
+  
     totalDiscountPrice = holder;
-
+  
     const grandTotal = totalDiscountPrice + totalShippingFee;
-
+  
     setTotalPrice(totalPrice);
     setTotalDiscountPrice(totalDiscountPrice);
     setTotalShippingFee(totalShippingFee);
     setGrandTotal(grandTotal);
     setShopTotal(newShopTotals);
-  }, [selectedItems, selectedVouchers, selectedShopVouchers]);
+  }, [selectedItems, selectedVouchers, selectedShopVouchers, selectedAddress]);
 
   const sendOrder = async (image) => {
-    const { startDate, endDate } = calculateEstimatedDelivery();
 
     try {
       const groupedItems = groupItemsByShop(selectedItems);
@@ -243,7 +287,7 @@ function PlaceOrder() {
           : 0;
 
       for (const shopName in groupedItems) {
-        const { items: shopItems, shippingFee: shopShippingFee } =
+        const { items: shopItems, shippingFee: shopShippingFee, endDate } =
           groupedItems[shopName];
         let isFirstItemInShop = true;
 
@@ -332,7 +376,6 @@ function PlaceOrder() {
             .eq("acc_id", profile.id);
         }
 
-        // Remove ordered items
         for (const item of selectedItems) {
           await deleteItem(item);
         }
@@ -347,10 +390,6 @@ function PlaceOrder() {
       alert("Failed to place order. Please try again.");
     }
   };
-
-  useEffect(() => {
-    calculateEstimatedDelivery();
-  }, []);
 
   const handlePlaceOrder = async () => {
     if (paymentMethod === "COD") {
@@ -544,7 +583,7 @@ function PlaceOrder() {
 
           <div className="max-h-96 overflow-y-auto p-4">
             {Object.entries(groupItemsByShop(selectedItems)).map(
-              ([shopName, { items, shippingFee }], index) => {
+              ([shopName, { items, shippingFee, estDeliveryDays }], index) => {
                 const shopId = items[0]?.prod?.shop?.id;
 
                 return (
@@ -589,7 +628,6 @@ function PlaceOrder() {
                             </div>
                           )}
                         </button>
-                      
                       </div>
                     </div>
 
@@ -650,17 +688,30 @@ function PlaceOrder() {
                       </div>
                     ))}
 
-                    <div className="flex flex-wrap justify-end gap-3 items-center mt-3 text-sm">
-                      <span className="flex items-center gap-1">
-                        <FontAwesomeIcon
-                          icon={faTruckFast}
-                          className="text-gray-600"
-                        />
-                        Shipping Fee: ₱{shippingFee}
-                      </span>
-
+                    <div className="flex flex-wrap justify-between gap-3 items-center mt-1 text-sm">
+                    <div className="flex-wrap flex gap-2">
+                            <span className="flex items-center gap-1 text-sm text-gray-600">
+                              <img
+                                src={require("@/assets/jnt.png")}
+                                alt="Jnt"
+                                className="h-8 w-12 object-contain"
+                              />
+                              Shipping Fee:
+                              <span className="font-medium">
+                           {shippingFee}
+                              </span>
+                              /
+                            </span>
+                            <span className="flex items-center gap-1 text-sm text-gray-600">
+                              Estimated Delivery:
+                              <span className="font-medium">
+                             {estDeliveryDays}
+                              </span>
+                            </span>
+                          </div>
                       {index === 0 && (
                         <>
+                          
                           {selectedVouchers.find(
                             (v) => v.voucher_type === "Shipping"
                           ) && (
@@ -686,18 +737,20 @@ function PlaceOrder() {
                                 .reduce((sum, v) => sum + v.discount, 0)}
                             </span>
                           )}
-                      
                         </>
                       )}
-                           {
-                            selectedShopVouchers
-                              .filter((voucher) => voucher.shopId === shopId)
-                              .map((voucher) => (
-                        <span key={voucher.id} className="text-yellow-600 flex items-center gap-1">
-                              <FontAwesomeIcon icon={faTag} />
-                              Merchant: -₱
-                              {voucher.discount}
-                            </span>))}
+                      {selectedShopVouchers
+                        .filter((voucher) => voucher.shopId === shopId)
+                        .map((voucher) => (
+                          <span
+                            key={voucher.id}
+                            className="text-yellow-600 flex items-center gap-1"
+                          >
+                            <FontAwesomeIcon icon={faTag} />
+                            Merchant: -₱
+                            {voucher.discount}
+                          </span>
+                        ))}
                     </div>
                   </div>
                 );

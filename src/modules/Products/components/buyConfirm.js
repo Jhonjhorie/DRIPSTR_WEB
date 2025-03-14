@@ -419,14 +419,14 @@ const BuyConfirm = ({ item, onClose }) => {
                     <button
                       onClick={handleAddToCart}
                       className="h-10 px-6 font-semibold rounded-md bg-secondary-color border-black border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
-                      disabled={!item.isOwner}
+                    
                     >
                       Add to Cart
                     </button>
                     <button
                       onClick={onConfirm}
                       className="h-10 px-6 font-semibold rounded-md bg-primary-color border-secondary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
-                      disabled={!item.isOwner}
+                   
                     >
                       Place Order
                     </button>
