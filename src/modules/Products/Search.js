@@ -4,6 +4,9 @@ import CategoriesRibbon from "./components/CategoriesRibbon";
 import MallRibbon from "./components/MallRibbon";
 import ProductsView from "./components/ProductsView";
 import useProducts from "./hooks/useProducts";
+import SectionWrapper from "../Home/components/SectionWrapper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 
 // Data
 import { MallItems } from "@/constants/mallItems.ts";
@@ -43,17 +46,34 @@ function Search() {
           Search Results for "{query}"
         </h1>
       </div>
-
-         <div className="flex flex-col-reverse w-full gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
+<SectionWrapper
+            title="Discounted Mall"
+            icon={faSearch}
+            filterM={3}
+            buttonText="See More"
+          >
+            <ProductsView
+              shopFil={0}
+              sort="top"
+              isSmall={true}
+              products={filteredProducts}
+          categories={filCat}
+          filter={filMall}
+          loading={loading}
+          error={error}
+            showItem={0}
+            />
+          </SectionWrapper>
+         {/* <div className="flex flex-col-reverse w-full gap-8 md:gap-0 md:flex-row-reverse items-center justify-center px-1 lg:px-2 mt-1 ">
         <CategoriesRibbon
           active={filCat}
           categories={categories}
           onItemClick={(label) => setFilCat(label)}
         />
-      </div> 
+      </div>  */}
 
       
-      <div className="flex flex-wrap justify-center mb-4 mt-0 md:mt-2 p-4 gap-2">
+      {/* <div className="flex flex-wrap justify-center mb-4 mt-0 md:mt-2 p-4 gap-2">
         <ProductsView
           products={filteredProducts}
           categories={filCat}
@@ -63,7 +83,7 @@ function Search() {
             showItem={0}
             shopFil={0}
         />
-      </div>
+      </div> */}
     </div>
   );
 }

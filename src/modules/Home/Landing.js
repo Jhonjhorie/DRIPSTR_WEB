@@ -72,13 +72,13 @@ function LandingPage() {
           alt="No Images Available"
           className="absolute object-contain mb-2 mt-1 w-full z-10 h-[35vw] sm:h-[25vw] max-h-[400px] drop-shadow-customViolet right-0 sm:right-10 group-hover:right-[30rem] md:group-hover:right-80 scale-100 group-hover:scale-50 group-hover:drop-shadow-customWhite transition-all duration-300"
         />
-        <div className="absolute font-[iceland] text-white top-5 sm:top-10 text-xl duration-300 transition-all group-hover:text-3xl tracking-[2rem] text-center">
+        <div className="absolute font-[iceland] text-white top-10 left-12 sm:left-auto sm:top-10 text-lg sm:text-xl duration-300 transition-all group-hover:text-xl sm:group-hover:text-3xl tracking-[2rem] text-center">
           <h1>WELCOME</h1>
           <h1>TO</h1>
         </div>
         <div className="absolute right-10 sm:right-40 h-40 w-96 overflow-hidden flex">
-          <p className="font-[iceland] absolute right-[-10rem] w-96 bg-stone-800 sm:bg-opacity-0 bg-opacity-80 h-40 text-white  group-hover:right-0 transition-all opacity-0 group-hover:opacity-100 duration-300 p-2 rounded-lg">
-            <span className="font-bold text-lg text-primary-color">
+          <p className="font-[iceland] absolute right-[-10rem] w-72 sm:w-96 bg-stone-800 sm:bg-opacity-0 bg-opacity-80 h-40 text-white  group-hover:right-0 transition-all text-sm sm:text-base opacity-0 group-hover:opacity-100 duration-300 p-2 rounded-lg">
+            <span className="font-bold text-base sm:text-lg  text-primary-color">
               DRIPSTR 
             </span> {" "}
              provides a unique and immersive online shopping experience by
@@ -394,7 +394,7 @@ function LandingPage() {
                     onClick={() => {
                       handleShow("login");
                     }}
-                    className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
+                    className="btn glass bg-primary-color w-3/4 sm:w-full text-white hover:text-secondary-color"
                   >
                     Login
                   </button>
@@ -402,7 +402,7 @@ function LandingPage() {
                     onClick={() => {
                       handleShow("shop");
                     }}
-                    className="btn glass bg-primary-color w-full text-white hover:text-secondary-color"
+                    className="btn glass bg-primary-color w-3/4 sm:w-full text-white hover:text-secondary-color"
                   >
                     Browse as Guest
                   </button>
