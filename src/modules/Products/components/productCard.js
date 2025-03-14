@@ -49,9 +49,9 @@ const ProductCard = ({ item, onClick, isSmall }) => {
       {/* Image container */}
       <div className="relative h-48">
         {/* Voucher badge */}
-        {item.vouchers && (
-          <span className="absolute right-2 top-2 text-xs bg-white border border-primary-color px-1 py-0.5 text-primary-color font-medium z-10">
-            VOUCHER
+        {item.isOwner && (
+          <span className="absolute left-2 top-2 text-xs bg-white bg-opacity-20 border border-secondary-color px-1 py-0.5 text-secondary-color rounded-md font-medium z-10">
+            My Shop
           </span>
         )}
         
@@ -103,10 +103,13 @@ const ProductCard = ({ item, onClick, isSmall }) => {
         {!isSmall && <>
         {/* Ratings and orders */}
         <div className="flex items-center gap-1 text-xs">
-          <span className="text-gray-700">{averageRate(item.reviews)}</span>
-          <RateSymbol item={averageRate(item.reviews)} size="4" />
+          <div className='flex items-center'>
+        <RateSymbol item={item.averageRating} size="4" />
+          <span className="text-gray-700">{item.averageRating}</span>
+          </div>
           <span className="text-gray-500">• {item.item_Orders} sold</span>
         </div>
+        
         
         {/* Location */}
         

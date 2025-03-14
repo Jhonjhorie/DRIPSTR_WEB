@@ -249,9 +249,9 @@ function Product() {
                     </h2>
                     <div className="flex gap-1 items-center">
                       <h2 className="text-xs md:text-base font-medium text-primary-color">
-                        {averageRate(item.reviews) || "N/A"}
+                        {item.averageRating || "0"}
                       </h2>
-                      <RateSymbol item={item.rate} size={"4"} />
+                      <RateSymbol item={item.averageRating} size={"4"} />
                     </div>
                   </div>
                 </div>
@@ -342,23 +342,31 @@ function Product() {
 
             <div>
               <div className="justify-end gap-2  items-center flex">
-                <button
-                  onClick={handleAddToCart}
-                  className="h-10 px-6 font-semibold rounded-md bg-secondary-color border-black border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
-                >
-                  Add to Cart
-                </button>
-                <button
-                  onClick={onConfirm}
-                  className="h-10 px-6 font-semibold rounded-md bg-primary-color border-secondary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
-                >
-                  Place Order
-                </button>
+              {!item.isOwner &&
+
+                    <>
+                    <button
+                      onClick={handleAddToCart}
+                      className="h-10 px-6 font-semibold rounded-md bg-secondary-color border-black border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
+                      disabled={!item.isOwner}
+                    >
+                      Add to Cart
+                    </button>
+                    <button
+                      onClick={onConfirm}
+                      className="h-10 px-6 font-semibold rounded-md bg-primary-color border-secondary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
+                      disabled={!item.isOwner}
+                    >
+                      Place Order
+                    </button>
+                    </> || <p className="h-10 px-2 font-semibold rounded-md bg-secondary-color  border-primary-color border-b-2 border-r-2 text-white text-center flex items-center cursor-not-allowed duration-300 transition-all" >Owner can't Order their Products</p>
+                      }
               </div>
             </div>
           </div>
         </div>
       </div>
+      
       <div className="flex flex-col z-10 w-full px-4">
         <div className="my-0 divider"></div>
         <p className="text-xl md:text-2xl font-bold">Product Description</p>

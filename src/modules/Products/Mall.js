@@ -31,10 +31,10 @@ function Mall({ title2 }) {
       <div className="w-full px-4 py-3 flex justify-center">
       <button 
                   onClick={() => navigate("/")}
-                  className="w-12 px-8  rounded-md bg-slate-50 flex items-center justify-center text-2xl"
+                  className="w-4 px-2 sm:w-12  rounded-md bg-slate-50 flex items-center justify-center text-base sm:text-lg"
                 >
                   <FontAwesomeIcon icon={faAnglesLeft} />
-                </button>
+                </button> 
                 <div className="w-full max-w-4xl">
         <CategoriesRibbon
           active={activeCategory}

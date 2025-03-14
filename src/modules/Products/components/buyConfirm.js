@@ -69,6 +69,7 @@ const BuyConfirm = ({ item, onClose }) => {
 
   const handleProductClick = () => {
     navigate(`/product/${item.item_Name}`, { state: { item } });
+    
   };
 
   const handleShopClick = () => {
@@ -173,10 +174,18 @@ const BuyConfirm = ({ item, onClose }) => {
             </span>
           </div>
         ) : (
-          <div className="flex flex-col md:flex-row  h-full  md:pr-0 pr-4 justify-center items-center">
+          <div className="flex flex-col md:flex-row  h-full  md:pr-0 pr-4 justify-center items-center relative">
+             {item.isOwner && (
+          <span className="absolute left-2 top-2 text-xs bg-white bg-opacity-20 border border-secondary-color px-1 py-0.5 text-secondary-color rounded-md font-medium z-10">
+            My Shop
+          </span>
+        )}
             {/* Image Section */}
             <div className="w-full flex-none md:w-80 relative items-center flex justify-center">
+              
+              
               <div className="relative group">
+                
                 {show3DView ? (
                   <div className="w-full h-[300px] md:h-[400px] relative">
                     <Product3DViewer
@@ -228,6 +237,7 @@ const BuyConfirm = ({ item, onClose }) => {
                         onClick={() => setShow3DView(true)}
                         className="absolute bottom-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transform transition-all duration-300 hover:scale-110 opacity-0 group-hover:opacity-100 border border-slate-400 hover:border-slate-800"
                         title="View 3D Model"
+                        
                       >
                         <FontAwesomeIcon
                           icon={faCube}
@@ -263,12 +273,16 @@ const BuyConfirm = ({ item, onClose }) => {
                       <div className="flex gap-1">
                         <div className="flex gap-1 items-center">
                           <h2 className="text-xs font-medium">
-                            {averageRate(item.reviews) != 1
-                              ? `${averageRate(item.reviews)} Reviews`
-                              : `${averageRate(item.reviews)} Review`}
+                          <span className="text-slate-400 font-normal">
+                            Rating: 
+                          </span>
+                             {" "}
+                            {item.averageRating != 1
+                              ? `${item.averageRating}`
+                              : `${item.averageRating}`}
                           </h2>
                           <RateSymbol
-                            item={averageRate(item.reviews)}
+                            item={item.averageRating}
                             size={"4"}
                           />
                         </div>
@@ -399,19 +413,27 @@ const BuyConfirm = ({ item, onClose }) => {
                     >
                       More Detail
                     </button>
+                    {!item.isOwner &&
+
+                    <>
                     <button
                       onClick={handleAddToCart}
                       className="h-10 px-6 font-semibold rounded-md bg-secondary-color border-black border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
+                      disabled={!item.isOwner}
                     >
                       Add to Cart
                     </button>
                     <button
                       onClick={onConfirm}
                       className="h-10 px-6 font-semibold rounded-md bg-primary-color border-secondary-color border-b-2 border-r-2 text-white hover:text-primary-color hover:bg-slate-50 duration-300 transition-all"
+                      disabled={!item.isOwner}
                     >
                       Place Order
                     </button>
+                    </> || <p className="h-10 px-2 font-semibold rounded-md bg-secondary-color  border-primary-color border-b-2 border-r-2 text-white text-center flex items-center cursor-not-allowed duration-300 transition-all" >Owner can't Order their Products</p>
+                      }
                   </div>
+              
                 </div>
               </div>
             </div>

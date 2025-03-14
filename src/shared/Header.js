@@ -38,6 +38,7 @@ const Header = () => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(""); 
     }
   };
 
@@ -49,25 +50,26 @@ const Header = () => {
 
   const handleAuth = () => {
     if (!user) {
-      setIsAuthModalOpen(true); // Open the auth modal if user is not logged in
+      setIsAuthModalOpen(true); 
     } else {
-      navigate("/account"); // Redirect to /account if user is logged in
+      navigate("/account"); 
     }
   };
 
   const handleCartClick = async () => {
-    await fetchDataCart(); // Fetch the latest cart data
-    drawerCheckboxRef.current.checked = true; // Open the cart drawer
+    await fetchDataCart(); 
+    drawerCheckboxRef.current.checked = true; 
   };
 
   const handleHomeClick = () => {
-    setSearchQuery(""); // Reset the search query
-    navigate("/"); // Navigate to the home page
+    setSearchQuery(""); 
+    navigate("/"); 
   };
 
   if (location.pathname.startsWith('/admin')) {
-    return null; // Don't render anything if the route is "/admin/*"
+    return null; 
   }
+
   return (
     <div className="flex items-center gap-2 h-16 sm:h-20 px-4 sm:px-8 md:px-16 py-4 sm:py-8 md:py-12 bg-slate-50 sticky top-0 z-30">
       <div className="hidden sm:flex">
@@ -78,7 +80,6 @@ const Header = () => {
         </Link>
       </div>
 
-      {/* Search Bar and Button */}
       <form onSubmit={handleSearch} className="flex flex-1 items-center justify-end gap-4">
         <div
           className={`group relative flex items-center bg-slate-200 rounded-md pl-3 flex-1 sm:flex-none transition-all duration-300 ${
@@ -88,14 +89,19 @@ const Header = () => {
           }`}
         >
           <input
-            type="text"
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            className="flex-1 text-black bg-transparent outline-none"
-          />
+  type="text"
+  placeholder="Search..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  onFocus={() => setIsFocused(true)}
+  onBlur={() => setIsFocused(false)}
+  onKeyDown={(e) => {
+    if (e.key === 'Enter') {
+      handleSearch(e); 
+    }
+  }}
+  className="flex-1 text-black bg-transparent outline-none"
+/>
           <button
             type="submit"
             className="w-10 h-10 flex items-center justify-center bg-slate-200 group-hover:bg-primary-color rounded-r-md transition-all duration-300"
@@ -158,10 +164,9 @@ const Header = () => {
         </button>
       </div>
 
-      {/* Chat Messages */}
       {openChat && <ChatMessages />}
 
-      {/* Auth Modal */}
+   
       {isAuthModalOpen && (
         <AuthModal
           isOpen={isAuthModalOpen}

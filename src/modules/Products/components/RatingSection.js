@@ -11,7 +11,6 @@ export default function RatingSection({ item }) {
   const supabaseBaseUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public/";
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   
-  // Initialize likesData safely
   const [likesData, setLikesData] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
   const [currentSlide, setCurrentSlide] = useState(0);
