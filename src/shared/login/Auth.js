@@ -11,10 +11,10 @@ const modalTransitionClass = "transition-all duration-300 ease-in-out";
 const formTransitionClass = "transition-all duration-500 ease-in-out transform";
 
 const LOADING_ANIMATIONS = {
-  DOTS: 'loading-dots',
-  SPINNER: 'loading-spinner',
-  RING: 'loading-ring',
-  BALL: 'loading-ball'
+  DOTS: 'loading loading-dots loading-sm',
+  SPINNER: 'loading loading-spinner loading-sm',
+  RING: 'loading loading-ring loading-sm',
+  BALL: 'loading loading-ball loading-sm'
 };
 
 const getErrorMessage = (error) => {
@@ -263,7 +263,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                       onClick={() => setShowPassword(prev => ({...prev, signUp: !prev.signUp}))}
                     >
-                      <i className={`fas ${showPassword.signUp ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                      <i className={`fas ${showPassword.signUp ? 'fa-eye-slash' : 'fa-eye'} text-sm`}></i>
                     </button>
                   </div>
                   <div className="text-xs text-gray-500 space-y-1">
@@ -294,7 +294,7 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                       onClick={() => setShowPassword(prev => ({...prev, signIn: !prev.signIn}))}
                     >
-                      <i className={`fas ${showPassword.signIn ? "fa-eye-slash" : "fa-eye"}`}></i>
+                      <i className={`fas ${showPassword.signIn ? "fa-eye-slash" : "fa-eye"} text-sm`}></i>
                     </button>
                   </div>
                   <button onClick={() => setIsForgotPasswordOpen(true)} className="text-sm text-purple-600 hover:text-purple-700 self-end">Forgot Password?</button>
@@ -304,24 +304,25 @@ const AuthModal = ({ isOpen, onClose, actionLog, item }) => {
 
             <button 
               className={`
-                btn w-full bg-purple-600 hover:bg-purple-700 border-none mt-6 
+                btn btn-primary w-full bg-purple-600 hover:bg-purple-700 border-none mt-6 
                 ${formTransitionClass} 
-                ${(isSignIn ? isLoading.signIn : isLoading.signUp) ? `loading ${LOADING_ANIMATIONS.DOTS}` : ''}
               `}
               onClick={isSignIn ? handleSignIn : handleSignUp}
               disabled={isSignIn ? isLoading.signIn : isLoading.signUp}
             >
-              {!isLoading.signIn && !isLoading.signUp && (
-                <span className="inline-flex items-center">
+              {(isSignIn ? isLoading.signIn : isLoading.signUp) ? (
+                <span className={LOADING_ANIMATIONS.SPINNER}></span>
+              ) : (
+                <span className="inline-flex items-center justify-center">
                   {isSignIn ? (
                     <>
-                      <i className="fas fa-sign-in-alt mr-2"></i>
-                      Login
+                      <i className="fas fa-sign-in-alt text-sm mr-2"></i>
+                      <span>Login</span>
                     </>
                   ) : (
                     <>
-                      <i className="fas fa-user-plus mr-2"></i>
-                      Register
+                      <i className="fas fa-user-plus text-sm mr-2"></i>
+                      <span>Register</span>
                     </>
                   )}
                 </span>

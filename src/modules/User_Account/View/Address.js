@@ -3,9 +3,42 @@ import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
 import { v4 as uuidv4 } from "uuid";
 import { useAddressFields } from '../../../shared/login/hooks/useAddressFields';
+import hmmmEmote from '../../../assets/emote/hmmm.png';   
+
+const getLVMCategory = (region) => {
+  const luzonRegions = [
+    'Ilocos Region',
+    'Cagayan Valley',
+    'Central Luzon',
+    'CALABARZON',
+    'MIMAROPA Region',
+    'Bicol Region',
+    'NCR',
+    'CAR'
+  ];
+
+  const visayasRegions = [
+    'Western Visayas',
+    'Central Visayas',
+    'Eastern Visayas'
+  ];
+
+  const mindanaoRegions = [
+    'Zamboanga Peninsula',
+    'Northern Mindanao',
+    'Davao Region',
+    'SOCCSKSARGEN',
+    'Caraga',
+    'BARMM'
+  ];
+
+  if (luzonRegions.includes(region)) return 'Luzon';
+  if (visayasRegions.includes(region)) return 'Visayas';
+  if (mindanaoRegions.includes(region)) return 'Mindanao';
+  return null;
+};
 
 const Address = () => {
-  // Existing states
   const [addresses, setAddresses] = useState([]);
   const [defaultAddress, setDefaultAddress] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -16,7 +49,6 @@ const Address = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
 
-  // New states for address fields
   const [newAddressData, setNewAddressData] = useState({
     region: '',
     city: '',
@@ -33,7 +65,6 @@ const Address = () => {
     postcode: ''
   });
 
-  // Use the existing address fields hook
   const {
     addressData,
     selected,
@@ -72,12 +103,10 @@ const Address = () => {
     setLoading(false);
   };
 
-  // Modified addAddress function
   const addAddress = async () => {
     if (!userId || !newAddressData.exact_location || !newAddressData.postcode) return;
     setLoading(true);
 
-    // Get the names from the selected options
     const selectedRegion = addressData.regions.find(r => r.code === selected.region)?.name;
     const selectedCity = addressData.cities.find(c => c.code === selected.city)?.name;
     const selectedBarangay = addressData.barangays.find(b => b.code === selected.barangay)?.name;
@@ -93,7 +122,8 @@ const Address = () => {
       exact_location: newAddressData.exact_location,
       postcode: newAddressData.postcode,
       full_address: `${newAddressData.exact_location}, ${fullAddress}`,
-      is_default_shipping: false
+      is_default_shipping: false,
+      lvm: getLVMCategory(selectedRegion)
     }]);
 
     if (error) {
@@ -113,12 +143,10 @@ const Address = () => {
     setShowAddModal(false);
   };
 
-  // Modified updateAddress function
   const updateAddress = async () => {
     if (!editAddressId) return;
     setLoading(true);
 
-    // Get the names from the selected options
     const selectedRegion = addressData.regions.find(r => r.code === selected.region)?.name;
     const selectedCity = addressData.cities.find(c => c.code === selected.city)?.name;
     const selectedBarangay = addressData.barangays.find(b => b.code === selected.barangay)?.name;
@@ -131,7 +159,8 @@ const Address = () => {
       barangay: selectedBarangay,
       exact_location: editAddressData.exact_location,
       postcode: editAddressData.postcode,
-      full_address: `${editAddressData.exact_location}, ${fullAddress}`
+      full_address: `${editAddressData.exact_location}, ${fullAddress}`,
+      lvm: getLVMCategory(selectedRegion)
     }).eq("id", editAddressId);
 
     if (error) {
@@ -178,7 +207,6 @@ const Address = () => {
     setLoading(false);
   };
 
-  // Update the address modal JSX
   const addressModal = (isEdit = false) => (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
       <div className="bg-white py-2 px-6 rounded-lg shadow-lg w-[500px]">
@@ -292,115 +320,151 @@ const Address = () => {
 
   return (
     <div className="p-4 bg-slate-200 flex flex-row h-full overflow-hidden">
-      <div className="sticky h-full ">
+      <div className="sticky h-full">
         <Sidebar />
       </div>
-      <div className="px-5 flex-1">
-        <div className="p-4 bg-slate-200">
-        <div className="flex flex-1 justify-between align-bottom flex-row">
 
-          <h1 className="text-xl font-bold text-gray-800 mb-4">Address Book</h1>
-          <button className="text-violet-600 px-4 rounded-lg mb-2 hover:underline" onClick={() => setShowAddModal(true)}>
-              Add New Address
+      <div className="flex-1 p-4 px-9">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+            <i className="fas fa-map-marker-alt mr-3 text-primary-color"></i>
+            Address Book
+          </h1>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 text-primary-color hover:text-primary-color/80 transition-colors"
+          >
+            <i className="fas fa-plus"></i>
+            <span>Add New Address</span>
           </button>
         </div>
 
-
-          <div className="bg-gray-100   p-4 rounded-lg shadow">
-
-   
-            <h3 className="text-l font-bold text-gray-700">Default Address</h3>
-
-
-           {loading ? (
-            <div className="flex flex-col items-center justify-center">
-              <img src="/emote/hmmm.png" alt="Loading..." className="w-32 h-32" />
-              <label>Loading...</label>
-            </div>
-          ) : defaultAddress ? (
-
-            
-            <table className="w-full border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
-              <thead className="shadow-sm  text-gray-500  border-1">
-                <tr>
-                  <th className="px-3 py-2">Full Address</th>
-                  <th className="px-3 py-2">Region</th>
-                  <th className="px-3 py-2">City</th>
-                  <th className="px-3 py-2">Postcode</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="px-3 py-2">{defaultAddress.full_address}</td>
-                  <td className="px-3 py-2">{defaultAddress.region}</td>
-                  <td className="px-3 py-2">{defaultAddress.city}</td>
-                  <td className="px-3 py-2">{defaultAddress.postcode}</td>
-                </tr>
-              </tbody>
-            </table>
-          ) : <p>No default address set.</p>}
-                    </div>
-
-
-          <div className="divider p-2"></div>
-          <div className="bg-gray-100   p-4 rounded-lg shadow">
- 
-          <h3 className="text-l font-bold text-gray-700">Address</h3>
-
-          {loading ? (
-          <div className="flex flex-col justify-center items-center">
-            <img src="/emote/hmmm.png" alt="Loading..." className="w-32 h-32" />
-            <label>Loading...</label>
+        {loading ? (
+          <div className="flex mt-36 flex-col h-100 justify-center items-center">
+            <img src={hmmmEmote} alt="Loading..." className="w-24 h-24 mb-4 animate-bounce" />
+            <p className="mt-4 text-gray-600">Loading your addresses...</p>
           </div>
         ) : (
-          <table className="w-full border-1 border-gray-300 bg-white shadow-md rounded-lg mt-2">
-              <thead className="shadow-sm  text-gray-500  border-1">
-              <tr>
-                <th className="px-4 py-2">Full Address</th>
-                <th className="px-4 py-2">Region</th>
-                <th className="px-4 py-2">City</th>
-                <th className="px-4 py-2">Postcode</th>
-                <th className="px-4 py-2 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {addresses.map((address) => (
-                <tr key={address.id} className="border-b">
-                  <td className="px-4 py-2">{address.full_address}</td>
-                  <td className="px-4 py-2">{address.region}</td>
-                  <td className="px-4 py-2">{address.city}</td>
-                  <td className="px-4 py-2">{address.postcode}</td>
-                  <td className="px-4 py-2 text-center">
-                    <button className=" mr-3 hover:text-green-500" onClick={() => setDefaultAddressHandler(address.id)}> Set Default </button> 
-                    <button className=" mr-3 hover:text-yellow-500" onClick={() => openEditModal(address)}>Edit </button>
-                    <button className=" hover:text-red-500" onClick={() => confirmDeleteAddress(address.id)} title="Delete this address?"> Delete</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}          </div>
+          <div className="space-y-6">
+            <div className="bg-white p-6 rounded-xl relative shadow-md hover:shadow-lg transition-shadow duration-300">
+              <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-xl"></div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <i className="fas fa-star mr-2 text-primary-color"></i>
+                Default Address
+              </h2>
 
-
-          {showAddModal && addressModal()}
-
-
-          {showEditModal && addressModal(true)}
-
-
-          {showDeleteModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <img src="/emote/question.png" alt="Warning" className="w-25 h-25 mx-auto" />
-                <p className="text-center font-bold">Are you sure?</p>
-                <div className="flex justify-center mt-4">
-                  <button className="bg-red-500 text-white px-4 py-2 rounded-lg mr-2" onClick={deleteAddress}>Yes</button>
-                  <button className="bg-gray-300 px-4 py-2 rounded-lg" onClick={() => setShowDeleteModal(false)}>No</button>
+              {defaultAddress ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Full Address</th>
+                        <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Region</th>
+                        <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">City</th>
+                        <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Postcode</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-t border-gray-100">
+                        <td className="px-6 py-4 text-gray-800">{defaultAddress.full_address}</td>
+                        <td className="px-6 py-4 text-gray-600">{defaultAddress.region}</td>
+                        <td className="px-6 py-4 text-gray-600">{defaultAddress.city}</td>
+                        <td className="px-6 py-4 text-gray-600">{defaultAddress.postcode}</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
+              ) : (
+                <div className="text-center py-8">
+                  <i className="fas fa-home text-4xl text-gray-300 mb-3"></i>
+                  <p className="text-gray-500">No default address set</p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white p-6 rounded-xl relative shadow-md hover:shadow-lg transition-shadow duration-300">
+              <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-xl"></div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <i className="fas fa-list mr-2 text-primary-color"></i>
+                Other Addresses
+              </h2>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Full Address</th>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Region</th>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">City</th>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Postcode</th>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {addresses.map((address) => (
+                      <tr key={address.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4 text-gray-800">{address.full_address}</td>
+                        <td className="px-6 py-4 text-gray-600">{address.region}</td>
+                        <td className="px-6 py-4 text-gray-600">{address.city}</td>
+                        <td className="px-6 py-4 text-gray-600">{address.postcode}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-3">
+                            <button
+                              onClick={() => setDefaultAddressHandler(address.id)}
+                              className="text-blue-600 hover:text-blue-700 transition-colors"
+                              title="Set as Default"
+                            >
+                              <i className="fas fa-star"></i>
+                            </button>
+                            <button
+                              onClick={() => openEditModal(address)}
+                              className="text-yellow-600 hover:text-yellow-700 transition-colors"
+                              title="Edit"
+                            >
+                              <i className="fas fa-edit"></i>
+                            </button>
+                            <button
+                              onClick={() => confirmDeleteAddress(address.id)}
+                              className="text-red-600 hover:text-red-700 transition-colors"
+                              title="Delete"
+                            >
+                              <i className="fas fa-trash"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        {showAddModal && addressModal()}
+        {showEditModal && addressModal(true)}
+        {showDeleteModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+            <div className="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full mx-4">
+              <img src="/emote/question.png" alt="Warning" className="w-24 h-24 mx-auto mb-4" />
+              <p className="text-center text-lg font-semibold mb-6">Are you sure you want to delete this address?</p>
+              <div className="flex justify-center gap-4">
+                <button
+                  className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  onClick={deleteAddress}
+                >
+                  Yes, Delete
+                </button>
+                <button
+                  className="px-6 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

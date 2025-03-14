@@ -45,9 +45,9 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "next build && cp -r public/3d .next/static/",
+    "build": "craco build",
     "test": "craco test",
-    "vercel-build": "npm run build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
