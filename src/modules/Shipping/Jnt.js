@@ -116,8 +116,8 @@ const Jnt = () => {
     <div className="bg-gray-100 min-h-screen">
       {/* Navbar */}
       <nav className="bg-red-600 shadow-md p-4 flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-white">J&T Express</h1>
-        <ul className="flex space-x-6">
+        <h1 className="text-2xl md:text-4xl font-bold text-white">J&T Express</h1>
+        <ul className="flex space-x-4 md:space-x-6">
           <li>
             <Link to="/jnt" className="text-black font-semibold hover:underline">
               Home
@@ -125,29 +125,25 @@ const Jnt = () => {
           </li>
           <li>
             <Link to="/jnt/track" className="text-black font-semibold hover:underline">
-              Track a Shipment
+              Track
             </Link>
           </li>
           <li>
             <Link to="/jnt/detailed" className="text-black font-semibold hover:underline">
-              Detailed List
+              Detailed
             </Link>
           </li>
         </ul>
       </nav>
 
       {/* Tabs */}
-      <div className="container mx-auto p-6">
-        <div role="tablist" className="flex space-x-4 mb-6 overflow-x-auto tabs tabs-lift ">
+      <div className="container mx-auto px-0.5 py-4 md:p-6">
+        <div role="tablist" className="tabs tabs-box tabs-xs md:tabs-md ">
           {tabs.map((tab) => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
-              className={`px-4 py-2 rounded-lg ${
-                activeTab === tab.value
-                  ? "bg-red-600 text-white"
-                  : "bg-white text-gray-700"
-              }`}
+              className={`tab ${activeTab === tab.value ? "tab-active" : ""}`}
             >
               {tab.label}
             </button>
@@ -159,8 +155,8 @@ const Jnt = () => {
           <div className="flex justify-center items-center h-64">
             <FontAwesomeIcon icon={faSpinner} className="fa-spin text-4xl text-red-600" />
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        ) : Object.values(groupedOrders).length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             {Object.values(groupedOrders).map((group) => {
               const nextStatus = getNextStatus(group.shipping_status);
 
@@ -169,10 +165,10 @@ const Jnt = () => {
                   key={group.shop_transaction_id}
                   className="card bg-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow duration-300"
                 >
-                  <div className="card-body p-6">
+                  <div className="card-body p-4 md:p-6">
                     {/* Order ID and Status */}
                     <div className="flex justify-between items-center mb-4">
-                      <h2 className="card-title text-2xl font-bold">
+                      <h2 className="card-title text-xl font-bold">
                         Order: {group.shop_transaction_id}
                       </h2>
                       <div className="flex items-center space-x-2">
@@ -280,6 +276,10 @@ const Jnt = () => {
                 </div>
               );
             })}
+          </div>
+        ) : (
+          <div className="flex justify-center items-center h-64">
+            <p className="text-gray-600 text-xl">No orders found.</p>
           </div>
         )}
       </div>
