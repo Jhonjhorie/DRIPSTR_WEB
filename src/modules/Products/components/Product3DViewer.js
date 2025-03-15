@@ -218,6 +218,18 @@ const Model = ({ avatarData, productData, color }) => {
   );
 };
 
+// Helper function to determine clothing category
+const getClothingCategory = (category) => {
+  const categories = {
+    tops: ['Tshirt', 'Jersey', 'Longsleeves'],
+    bottoms: ['Pants', 'Shorts', 'Skirt'],
+    footwear: ['Shoes', 'Boots']
+  };
+
+  return Object.entries(categories).find(([_, items]) => 
+    items.includes(category))?.[0] || 'other';
+};
+
 // Add Platform component after the Model component
 function Platform() {
   const geometry = useMemo(() => new THREE.CircleGeometry(15, 64), []);
@@ -316,23 +328,55 @@ const ProductMesh = ({ productData, color }) => {
 };
 
 // Add this new component for camera controls
-function CameraController({ viewMode }) {
+function CameraController({ viewMode, productData }) {
   const { camera } = useThree();
+  const lastPosition = useRef({ x: 0, y: 25, z: 15 });
 
   useEffect(() => {
+    const getClothingCategory = (category) => {
+      const categories = {
+        tops: ['Tshirt', 'Jersey', 'Longsleeves'],
+        bottoms: ['Pants', 'Shorts', 'Skirt'],
+        footwear: ['Shoes', 'Boots']
+      };
+      return Object.entries(categories).find(([_, items]) => 
+        items.includes(category))?.[0] || 'other';
+    };
+
     const cameraPositions = {
       tshirt: {
-        position: { x: 0, y: 25, z: 15 },
-        target: { x: 0, y: 16, z: 0 }
+        tops: {
+          position: { x: 0, y: 25, z: 15 },
+          target: { x: 0, y: 16, z: 0 }
+        },
+        bottoms: {
+          position: { x: 0, y: 25, z: 20 },
+          target: { x: 0, y: 8, z: 0 }
+        },
+        footwear: {
+          position: { x: 0, y: 5, z: 15 },
+          target: { x: 0, y: 0, z: 0 }
+        }
       },
       wear: {
-        position: { x: 0, y: 100, z: 200 },
-        target: { x: 0, y: 50, z: 0 }
+        tops: {
+          position: { x: 0, y: 100, z: 200 },
+          target: { x: 0, y: 50, z: 0 }
+        },
+        bottoms: {
+          position: { x: 0, y: 80, z: 200 },
+          target: { x: 0, y: 30, z: 0 }
+        },
+        footwear: {
+          position: { x: 0, y: 40, z: 200 },
+          target: { x: 0, y: 10, z: 0 }
+        }
       }
     };
 
-    const targetPosition = cameraPositions[viewMode].position;
-    const targetLookAt = cameraPositions[viewMode].target;
+    const category = getClothingCategory(productData?.item_Category);
+    const targetPosition = cameraPositions[viewMode][category || 'tops'].position;
+    const targetLookAt = cameraPositions[viewMode][category || 'tops'].target;
 
     // Animate camera position
     gsap.to(camera.position, {
@@ -343,10 +387,13 @@ function CameraController({ viewMode }) {
       ease: "power2.inOut",
       onUpdate: () => {
         camera.lookAt(targetLookAt.x, targetLookAt.y, targetLookAt.z);
+      },
+      onComplete: () => {
+        lastPosition.current = targetPosition;
       }
     });
 
-  }, [viewMode, camera]);
+  }, [viewMode, camera, productData]);
 
   return null;
 }
@@ -500,7 +547,7 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
               color="#4a6fa1"
             />
             
-            <CameraController viewMode={viewMode} />
+            <CameraController viewMode={viewMode} productData={productData} />
             
             <RotatingGroup>
               <Platform />
@@ -522,16 +569,27 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
           </Suspense>
           
           <OrbitControls 
-              target={[0, viewMode === 'tshirt' ? 25 : 20, 0]} // Adjust target height
-              minPolarAngle={viewMode === 'tshirt' ? Math.PI / 4 : 0} // Limit minimum angle for t-shirt
-              maxPolarAngle={viewMode === 'tshirt' ? Math.PI / 1.5 : Math.PI} // Limit maximum angle for t-shirt
-              minDistance={viewMode === 'tshirt' ? 10 : 16} // Closer minimum distance for t-shirt
-              maxDistance={viewMode === 'tshirt' ? 30 : 30} // Shorter maximum distance for t-shirt
-              enablePan={true}
-              panSpeed={0.5}
-              rotateSpeed={0.5}
-              enableDamping={true}
-              dampingFactor={0.05}
+            target={[0, 
+              getClothingCategory(productData?.item_Category) === 'bottoms' ? 8 : 
+              getClothingCategory(productData?.item_Category) === 'footwear' ? 0 : 
+              viewMode === 'tshirt' ? 25 : 20, 
+              0
+            ]}
+            minPolarAngle={viewMode === 'tshirt' ? Math.PI / 4 : 0}
+            maxPolarAngle={Math.PI}
+            minDistance={
+              getClothingCategory(productData?.item_Category) === 'footwear' ? 5 :
+              viewMode === 'tshirt' ? 10 : 16
+            }
+            maxDistance={
+              getClothingCategory(productData?.item_Category) === 'footwear' ? 20 :
+              viewMode === 'tshirt' ? 30 : 30
+            }
+            enablePan={true}
+            panSpeed={0.5}
+            rotateSpeed={0.5}
+            enableDamping={true}
+            dampingFactor={0.05}
           />
         </Canvas>
       </div>
