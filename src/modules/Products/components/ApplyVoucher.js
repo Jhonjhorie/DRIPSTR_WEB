@@ -146,7 +146,7 @@ const ApplyVoucher = ({ profile, onClose, onSelectVouchers, price }) => {
       setShowAlert(true);
       setTimeout(() => {
         setShowAlert(false);
-      }, 5000);
+      }, 3000);
     }
   };
 

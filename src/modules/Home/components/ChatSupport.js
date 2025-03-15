@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faX } from "@fortawesome/free-solid-svg-icons";
+import { faX, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import React, { useState, useEffect, useRef } from "react";
 import { supabase } from "@/constants/supabase";
 import chatSupportData from "@/constants/chatSupportData.json";
@@ -9,9 +9,10 @@ const ChatSupport = ({ onClose, profile }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [isBotTyping, setIsBotTyping] = useState(false); 
+  const [isBotTyping, setIsBotTyping] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const chatContainerRef = useRef(null);
-  const inputRef = useRef(null); 
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (profile?.id) {
@@ -21,28 +22,28 @@ const ChatSupport = ({ onClose, profile }) => {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages, currentQuestion, isBotTyping]);
 
   useEffect(() => {
-    // Focus on the input field when the component mounts
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
 
   const closeModalHelp = () => {
-    const modal =  document.getElementById("my_modal_Help");
+    const modal = document.getElementById("my_modal_Help");
     if (modal) {
-    modal.close()}
+      modal.close();
+    }
   };
 
   const openModalHelp = () => {
-    const modal =  document.getElementById("my_modal_Help");
+    const modal = document.getElementById("my_modal_Help");
     if (modal) {
-      modal.showModal()};
+      modal.showModal();
+    }
   };
 
   const fetchChatHistory = async () => {
@@ -81,12 +82,10 @@ const ChatSupport = ({ onClose, profile }) => {
     await saveMessage(input, false);
     setInput("");
 
-    // Focus on the input field after sending a message
     if (inputRef.current) {
       inputRef.current.focus();
     }
 
-    // Simulate bot typing
     setIsBotTyping(true);
 
     setTimeout(async () => {
@@ -107,16 +106,14 @@ const ChatSupport = ({ onClose, profile }) => {
         setCurrentQuestion(response);
       } else {
         const defaultMessage = {
-          message:
-            "I'm sorry, I didn't understand that. Can you please rephrase?",
+          message: "I'm sorry, I didn't understand that. Can you please rephrase?",
           is_bot: true,
         };
         await saveMessage(defaultMessage.message, true);
       }
 
-      
       setIsBotTyping(false);
-    }, 3000); 
+    }, 1500);
   };
 
   const handleStartOver = () => {
@@ -134,6 +131,10 @@ const ChatSupport = ({ onClose, profile }) => {
     return `${formattedHours}:${formattedMinutes}`;
   };
 
+  const toggleSuggestions = () => {
+    setShowSuggestions(!showSuggestions);
+  };
+
   const renderMessages = () => {
     if (messages.length > 0) {
       return messages.map((msg, index) => {
@@ -142,11 +143,11 @@ const ChatSupport = ({ onClose, profile }) => {
         return (
           <div
             key={index}
-            className={`chat ${msg.is_bot ? "chat-start" : "chat-end"}`}
+            className={`chat ${msg.is_bot ? "chat-start" : "chat-end"} mb-2`}
           >
             {msg.is_bot && (
               <div className="chat-image avatar">
-                <div className="w-10 rounded-full">
+                <div className="w-8 h-8 rounded-full">
                   <img
                     alt="DripCat"
                     src={require("@/assets/emote/success.png")}
@@ -155,16 +156,16 @@ const ChatSupport = ({ onClose, profile }) => {
                 </div>
               </div>
             )}
-            <div className="chat-header">
+            <div className="chat-header text-xs">
               {msg.is_bot ? "DripCat" : "You"}
-              <time className="text-xs opacity-50 ml-2">{formattedTime}</time>
+              <time className="text-xs opacity-50 ml-1">{formattedTime}</time>
             </div>
             <div
-              className={`chat-bubble ${
+              className={`chat-bubble text-sm ${
                 msg.is_bot
                   ? "bg-primary-color text-white"
                   : "bg-secondary-color text-white"
-              }`}
+              } max-w-[85%]`}
             >
               {msg.message}
             </div>
@@ -173,15 +174,15 @@ const ChatSupport = ({ onClose, profile }) => {
       });
     } else {
       return (
-        <div className="flex h-full w-full items-center justify-center text-3xl font-bold flex-col gap-4">
-          <div className="h-40 w-40 rounded-full">
+        <div className="flex h-full w-full items-center justify-center text-xl font-bold flex-col gap-4">
+          <div className="h-24 w-24 rounded-full">
             <img
               alt="DripCat"
               src={require("@/assets/emote/success.png")}
               className="object-contain"
             />
           </div>
-          Need Support? DripCat is Here
+          <p className="text-center px-4">Need Support? DripCat is Here</p>
         </div>
       );
     }
@@ -193,12 +194,12 @@ const ChatSupport = ({ onClose, profile }) => {
       : chatSupportData || [];
 
     return (
-      <>
+      <div className={`flex flex-wrap gap-1 ${questions.length > 0 ? "mb-2" : ""}`}>
         {questions.map((q, index) => (
           <button
             key={index}
             onClick={() => setInput(q.question)}
-            className="btn btn-outline btn-sm m-1"
+            className="btn btn-outline btn-xs px-2 py-1 text-xs"
           >
             {q.question}
           </button>
@@ -206,44 +207,48 @@ const ChatSupport = ({ onClose, profile }) => {
         {currentQuestion && (
           <button
             onClick={handleStartOver}
-            className="btn btn-outline btn-sm m-1"
+            className="btn btn-outline btn-xs px-2 py-1 text-xs"
           >
             Start Over
           </button>
         )}
-      </>
+      </div>
     );
   };
 
   return (
-    <div className="fixed flex items-center justify-center bg-opacity-50 z-50 font-[iceland]">
-      <div className="sm:w-full max-w-[60.40rem] h-[40rem] bg-slate-50 rounded-lg shadow-lg mx-4 flex flex-col overflow-hidden">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 font-[iceland]">
+      <div className="w-full h-full sm:h-[90vh] sm:w-[90vw] sm:max-w-lg bg-slate-50 rounded-lg shadow-lg flex flex-col overflow-hidden">
+        {/* Header */}
         <div className="flex justify-between items-center p-2 border-b border-gray-200 bg-white">
-          <div className="flex flex-col items-center justify-center h-6 w-6">
-            <img
-              src={require("@/assets/images/blackLogo.png")}
-              alt="Dripstr"
-              className="object-contain"
-            />
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center h-6 w-6">
+              <img
+                src={require("@/assets/images/blackLogo.png")}
+                alt="Dripstr"
+                className="object-contain"
+              />
+            </div>
+            <h2 className="text-lg font-semibold text-gray-800">Chat Support</h2>
           </div>
-          <h2 className="text-xl font-semibold text-gray-800">Chat Support</h2>
           <button
             onClick={onClose}
-            className="flex-none flex items-center justify-center w-8 h-8 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
+            className="flex items-center justify-center w-7 h-7 rounded-md text-slate-400 hover:text-slate-800 duration-300 transition-all border border-slate-400 hover:border-slate-800"
           >
-            <FontAwesomeIcon icon={faX} />
+            <FontAwesomeIcon icon={faX} size="xs" />
           </button>
         </div>
 
+        {/* Chat area */}
         <div
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto custom_scrollbar p-4 bg-gray-100"
+          className="flex-1 overflow-y-auto custom_scrollbar p-3 bg-gray-100"
         >
           {renderMessages()}
           {isBotTyping && (
-            <div className="chat chat-start">
+            <div className="chat chat-start mb-2">
               <div className="chat-image avatar">
-                <div className="w-10 rounded-full">
+                <div className="w-8 h-8 rounded-full">
                   <img
                     alt="DripCat"
                     src={require("@/assets/emote/success.png")}
@@ -251,57 +256,72 @@ const ChatSupport = ({ onClose, profile }) => {
                   />
                 </div>
               </div>
-              <div className="chat-header">DripCat</div>
-              <div className="chat-bubble bg-primary-color p-2 text-white">
+              <div className="chat-header text-xs">DripCat</div>
+              <div className="chat-bubble bg-primary-color p-2 text-white max-w-[85%]">
                 <Typing />
               </div>
             </div>
           )}
         </div>
 
-        <div className="p-4 bg-gray-200 flex items-end justify-between">
-          <div className="flex flex-wrap">{renderSuggestedQuestions()}</div>
-          <button 
-          onClick={() => {openModalHelp()}}
-          className="btn btn-outline btn-sm m-1">Help/Submit Ticket</button>
+        {/* Suggestions and help section */}
+        <div className="px-3 py-2 bg-gray-100 border-t border-gray-200">
+          <div className="flex justify-between items-center mb-1">
+            <button
+              onClick={toggleSuggestions}
+              className="text-xs text-primary-color font-medium"
+            >
+              {showSuggestions ? "Hide suggestions" : "Show suggestions"}
+            </button>
+            <button
+              onClick={() => {openModalHelp()}}
+              className="btn btn-outline btn-xs py-1 px-2"
+            >
+              Help/Ticket
+            </button>
+          </div>
+          {showSuggestions && renderSuggestedQuestions()}
         </div>
 
-        <div className="p-4 border-t border-gray-200 bg-white">
-          <div className="flex gap-2">
+        {/* Input area */}
+        <div className="p-2 border-t border-gray-200 bg-white">
+          <div className="flex gap-1 items-center">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
               placeholder="Type your message..."
-              className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary-color"
-              ref={inputRef} // Ref for the input field
+              className="flex-1 p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-primary-color"
+              ref={inputRef}
             />
             <button
               onClick={handleSendMessage}
-              className="btn bg-primary-color text-white hover:bg-primary-color-dark"
+              className="btn btn-sm h-9 w-9 rounded-full bg-primary-color text-white hover:bg-primary-color-dark"
             >
-              Send
+              <FontAwesomeIcon icon={faPaperPlane} size="sm" />
             </button>
           </div>
         </div>
       </div>
+
+      {/* Help Modal */}
       <dialog
-              id="my_modal_Help"
-              className="modal modal-bottom sm:modal-middle absolute z-[80] right-4 sm:right-0"
-            >
-              <ReportDialog
-                onClose={closeModalHelp}
-                accId={profile.id}
-                type={"admin"}
-              />
-              <form
-                method="dialog"
-                className="modal-backdrop min-h-full min-w-full absolute "
-              >
-                <button onClick={closeModalHelp}></button>
-              </form>
-            </dialog>
+        id="my_modal_Help"
+        className="modal modal-bottom sm:modal-middle absolute z-[80] right-0 left-0 m-auto"
+      >
+        <ReportDialog
+          onClose={closeModalHelp}
+          accId={profile.id}
+          type={"admin"}
+        />
+        <form
+          method="dialog"
+          className="modal-backdrop min-h-full min-w-full absolute"
+        >
+          <button onClick={closeModalHelp}></button>
+        </form>
+      </dialog>
     </div>
   );
 };
@@ -309,9 +329,9 @@ const ChatSupport = ({ onClose, profile }) => {
 export default ChatSupport;
 
 const Typing = () => (
-  <div className="flex items-center h-6 space-x-1">
-    <div className="w-2 h-2 drop-shadow-md bg-white rounded-full animate-bounce transition-all"></div>
-    <div className="w-2 h-2 drop-shadow-md bg-white rounded-full animate-bounce transition-all delay-300"></div>
-    <div className="w-2 h-2 drop-shadow-md bg-white rounded-full animate-bounce transition-all delay-500"></div>
+  <div className="flex items-center h-4 space-x-1">
+    <div className="w-1.5 h-1.5 drop-shadow-md bg-white rounded-full animate-bounce transition-all"></div>
+    <div className="w-1.5 h-1.5 drop-shadow-md bg-white rounded-full animate-bounce transition-all delay-300"></div>
+    <div className="w-1.5 h-1.5 drop-shadow-md bg-white rounded-full animate-bounce transition-all delay-500"></div>
   </div>
 );

@@ -12,7 +12,7 @@ import {
   faReceipt,
 } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from "@/constants/supabase";
-import SuccessAlert from "./components/alertDialog.js";
+import AlertDialog from "./components/alertDialog2.js";
 import GcashDialog from "./components/GcashDialog.js";
 import TermsCon from "@/shared/products/termsCon";
 import ApplyVoucher from "./components/ApplyVoucher.js";
@@ -451,8 +451,11 @@ function PlaceOrder() {
       </dialog>
 
       {showAlert && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <SuccessAlert />
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
+         <AlertDialog
+                    emote={require("@/assets/emote/success.png")}
+                    text={"Your purchase has been confirmed!"}
+                  />
         </div>
       )}
 
