@@ -5,7 +5,11 @@ import { SkeletonUtils } from "three-stdlib";
 import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
 import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
-import { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs } from "../../../constants/avatarConfig";
+import { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs,  jerseyURLs, 
+  longsleevesURLs,
+  pantsURLs,
+  footwearsURLs,
+  skirtURLs } from "../../../constants/avatarConfig";
 import { gsap } from "gsap";
 import * as THREE from 'three';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,9 +18,21 @@ import { useNavigate } from "react-router-dom";
 import Toast from '../../../shared/alerts';
 import { Link } from 'react-router-dom';
 
+
 // Add to top of Avatar.js
 useGLTF.preload(Object.values(bodyTypeURLs.Boy).flat());
 useGLTF.preload(Object.values(bodyTypeURLs.Girl).flat());
+
+// Add this helper function near the top
+const getClothingCategory = (category) => {
+  const categories = {
+    tops: ['Tshirt', 'Jersey', 'Longsleeves'],
+    bottoms: ['Pants', 'Shorts', 'Skirt'],
+    footwear: ['Shoes', 'Boots']
+  };
+  return Object.entries(categories).find(([_, items]) => 
+    items.includes(category))?.[0] || 'other';
+};
 
 // Add this component near the top of your file
 const BodyTypeInfoModal = ({ isOpen, onClose }) => {
@@ -363,7 +379,6 @@ const CharacterCustomization = () => {
   const [cameraView, setCameraView] = useState('full');
   const [closetItems, setClosetItems] = useState([]);
   const [loadingCloset, setLoadingCloset] = useState(true);
-  const [selectedTexture, setSelectedTexture] = useState(null);
   const [alertConfig, setAlertConfig] = useState({
     isOpen: false,
     message: '',
@@ -374,6 +389,11 @@ const CharacterCustomization = () => {
   const [isBodyTypeInfoOpen, setIsBodyTypeInfoOpen] = useState(false);
   const [showLeftPanel, setShowLeftPanel] = useState(false);
   const [showRightPanel, setShowRightPanel] = useState(false);
+  const [selectedItems, setSelectedItems] = useState({
+    tops: null,
+    bottoms: null,
+    footwear: null
+  });
 
   useEffect(() => {
     const fetchAvatar = async () => {
@@ -575,7 +595,11 @@ const CharacterCustomization = () => {
   };
 
   const handleTextureSelect = (item) => {
-    setSelectedTexture(item.product.texture_3D);
+    const category = getClothingCategory(item.product?.item_Category);
+    setSelectedItems(prev => ({
+      ...prev,
+      [category]: item
+    }));
   };
 
   const handleRemoveFromCloset = async (itemId) => {
@@ -929,6 +953,13 @@ const CharacterCustomization = () => {
             {/* Wrap the models in the RotatingGroup */}
             <RotatingGroup>
               <Platform />
+              {/* Avatar and Hair are always visible */}
+              <Part 
+                key={`body-${gender}-${selectedBodyType}`} 
+                url={bodyTypeURLs[gender][selectedBodyType]} 
+                position={[0, 0, 0]} 
+                color={skincolor} 
+              />
               {selectedHair && hairURLs[selectedHair] && (
                 <Part 
                   key={`hair-${selectedHair}-${haircolor}`} 
@@ -937,26 +968,48 @@ const CharacterCustomization = () => {
                   color={haircolor} 
                 />
               )}
-              <Part 
-                key={`body-${gender}-${selectedBodyType}`} 
-                url={bodyTypeURLs[gender][selectedBodyType]} 
-                position={[0, 0, 0]} 
-                color={skincolor} 
-              />
-              {getTShirtURL() && (
+
+              {/* Top Wear */}
+              {selectedItems.tops ? (
                 <Part 
-                  key={`tshirt-${gender}-${selectedBodyType}`} 
+                  key={`selected-top-${selectedItems.tops.product.texture_3D}`}
+                  url={getModelURLForCategory(selectedItems.tops.product.item_Category, gender, selectedBodyType)}
+                  position={[0, 0, 0]}
+                  texture={selectedItems.tops.product.texture_3D}
+                />
+              ) : (
+                <Part 
+                  key="default-tshirt"
                   url={getTShirtURL()} 
                   position={[0, 0, 0]}
-                  texture={selectedTexture} // Pass selected texture
+                  color="#FFFFFF"
                 />
               )}
-              {getShortsURL() && (
+
+              {/* Bottom Wear */}
+              {selectedItems.bottoms ? (
                 <Part 
-                  key={`shorts-${gender}-${selectedBodyType}`} 
+                  key={`selected-bottom-${selectedItems.bottoms.product.texture_3D}`}
+                  url={getModelURLForCategory(selectedItems.bottoms.product.item_Category, gender, selectedBodyType)}
+                  position={[0, 0, 0]}
+                  texture={selectedItems.bottoms.product.texture_3D}
+                />
+              ) : (
+                <Part 
+                  key="default-shorts"
                   url={getShortsURL()} 
                   position={[0, 0, 0]}
                   color="#000000"
+                />
+              )}
+
+              {/* Footwear if needed */}
+              {selectedItems.footwear && (
+                <Part 
+                  key={`selected-footwear-${selectedItems.footwear.product.texture_3D}`}
+                  url={getModelURLForCategory(selectedItems.footwear.product.item_Category, gender, selectedBodyType)}
+                  position={[0, 0, 0]}
+                  texture={selectedItems.footwear.product.texture_3D}
                 />
               )}
             </RotatingGroup>
@@ -1042,44 +1095,42 @@ const CharacterCustomization = () => {
               <div className="text-center text-gray-500">No items in closet</div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
-                {closetItems.map((item) => (
-                  <div key={`${item.product_id}-${item.variant?.variant?.variant_Name}`}
-                    className={`relative group p-2 rounded-lg border-2 transition-all ${
-                      selectedTexture === item.product.texture_3D
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-200 hover:border-purple-300'
-                    }`}
-                  >
-                    <button
-                      onClick={() => handleTextureSelect(item)}
-                      className="w-full text-left"
+                {closetItems.map((item) => {
+                  const itemCategory = getClothingCategory(item.product?.item_Category);
+                  const isSelected = selectedItems[itemCategory]?.product?.texture_3D === item.product.texture_3D;
+              
+                  return (
+                    <div
+                      key={`${item.product_id}-${item.variant?.variant?.variant_Name}`}
+                      className={`relative group p-2 rounded-lg border-2 transition-all ${
+                        isSelected
+                          ? 'border-purple-600 bg-purple-50'
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
                     >
-                      <img 
-                        src={item.variant?.imagePath || '/placeholder.png'} 
-                        alt={item.product?.item_Name}
-                        className="w-full h-24 object-contain mb-2"
-                      />
-                      <p className="text-xs font-medium truncate">
-                        {item.product?.item_Name}
-                      </p>
-                    </button>
-                    
-                    <div className="mt-2 flex flex-col gap-1">
                       <button
-                        onClick={() => handleViewProduct(item)}
-                        className="w-full px-2 py-1 text-xs text-center bg-purple-100 text-purple-600 rounded hover:bg-purple-200 transition-colors"
+                        onClick={() => handleTextureSelect(item)}
+                        className="w-full text-left"
                       >
-                        View Product
+                        <img 
+                          src={item.variant?.imagePath || '/placeholder.png'} 
+                          alt={item.product?.item_Name}
+                          className="w-full h-24 object-contain mb-2"
+                        />
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium truncate">
+                            {item.product?.item_Name}
+                          </p>
+                          <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                            {item.product?.item_Category}
+                          </span>
+                        </div>
                       </button>
-                      <button
-                        onClick={() => handleRemoveFromCloset(item.id)}
-                        className="w-full px-2 py-1 text-xs text-center bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                      >
-                        Remove
-                      </button>
+                      
+                      {/* Rest of the item buttons */}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
         </div>
@@ -1093,3 +1144,19 @@ const CharacterCustomization = () => {
 };
 
 export default CharacterCustomization;
+
+const getModelURLForCategory = (category, gender, bodyType) => {
+  const urlMaps = {
+    'Tshirt': tshirURLs,
+    'Jersey': jerseyURLs,
+    'Longsleeves': longsleevesURLs,
+    'Shorts': shortsURLs,
+    'Pants': pantsURLs,
+    'Skirt': skirtURLs,
+    'Shoes': footwearsURLs?.[gender]?.Shoes,
+    'Boots': footwearsURLs?.[gender]?.Boots1,
+  };
+
+  const urlMap = urlMaps[category];
+  return urlMap?.[gender]?.[bodyType];
+};
