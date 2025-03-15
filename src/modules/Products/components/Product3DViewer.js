@@ -7,20 +7,48 @@ import * as THREE from 'three';
 import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { supabase } from '../../../constants/supabase';
-import { bodyTypeURLs, tshirURLs, shortsURLs, hairURLs } from '../../../constants/avatarConfig';
+import { bodyTypeURLs, hairURLs } from '../../../constants/avatarConfig';
 import { useRef } from 'react';
 import { gsap } from 'gsap';
+
+// First, import all necessary URL configurations
+import { 
+  tshirURLs, 
+  jerseyURLs, 
+  longsleevesURLs,
+  shortsURLs,
+  pantsURLs,
+  footwearsURLs,
+  skirtURLs
+} from '../../../constants/avatarConfig';
 
 const Model = ({ avatarData, productData, color }) => {
   const [error, setError] = useState(null);
 
-  // Get correct model paths from avatar config
+  // Get correct model paths based on category
+  const getModelURL = (category, gender, bodyType) => {
+    const urlMaps = {
+      'Tshirt': tshirURLs,
+      'Jersey': jerseyURLs,
+      'Longsleeves': longsleevesURLs,
+      'Shorts': shortsURLs,
+      'Pants': pantsURLs,
+      'Skirt': skirtURLs,
+      'Shoes': footwearsURLs?.[gender]?.Shoes,
+      'Boots': footwearsURLs?.[gender]?.Boots1,
+    };
+
+    const urlMap = urlMaps[category];
+    return urlMap?.[gender]?.[bodyType];
+  };
+
+  // Get avatar paths
   const avatarPath = avatarData?.gender && avatarData?.bodytype ? 
     bodyTypeURLs[avatarData.gender][avatarData.bodytype] : 
     bodyTypeURLs.Boy.Average;
 
-  const tshirtPath = avatarData?.gender && avatarData?.bodytype ? 
-    tshirURLs[avatarData.gender][avatarData.bodytype] : 
+  const productPath = avatarData?.gender && avatarData?.bodytype ? 
+    getModelURL(productData?.item_Category, avatarData.gender, avatarData.bodytype) : 
     tshirURLs.Boy.Average;
 
   const shortsPath = avatarData?.gender && avatarData?.bodytype ? 
@@ -31,22 +59,45 @@ const Model = ({ avatarData, productData, color }) => {
     hairURLs[avatarData.hair] : 
     hairURLs.Barbers;
 
-  // Load models using GLTF
+  // Load models
   const { scene: avatarGLTF } = useGLTF(avatarPath);
-  const { scene: tshirtGLTF } = useGLTF(tshirtPath);
+  const { scene: productGLTF } = useGLTF(productPath);
   const { scene: shortsGLTF } = useGLTF(shortsPath);
   const { scene: hairGLTF } = useGLTF(hairPath);
 
-  // Clone scenes for independent material manipulation
+  // Clone scenes
   const avatarScene = useMemo(() => SkeletonUtils.clone(avatarGLTF), [avatarGLTF]);
-  const tshirtScene = useMemo(() => SkeletonUtils.clone(tshirtGLTF), [tshirtGLTF]);
+  const productScene = useMemo(() => SkeletonUtils.clone(productGLTF), [productGLTF]);
   const shortsScene = useMemo(() => SkeletonUtils.clone(shortsGLTF), [shortsGLTF]);
   const hairScene = useMemo(() => SkeletonUtils.clone(hairGLTF), [hairGLTF]);
 
+  // Helper function to determine clothing category
+  const getClothingCategory = (category) => {
+    const categories = {
+      tops: ['Tshirt', 'Jersey', 'Longsleeves'],
+      bottoms: ['Pants', 'Shorts', 'Skirt'],
+      footwear: ['Shoes', 'Boots']
+    };
+
+    return Object.entries(categories).find(([_, items]) => 
+      items.includes(category))?.[0] || 'other';
+  };
+
+  // Get default top path for when trying on bottoms
+  const defaultTopPath = avatarData?.gender && avatarData?.bodytype ? 
+    tshirURLs[avatarData.gender][avatarData.bodytype] : 
+    tshirURLs.Boy.Average;
+
+  // Load default top for bottom wear
+  const { scene: defaultTopGLTF } = useGLTF(defaultTopPath);
+  const defaultTopScene = useMemo(() => 
+    SkeletonUtils.clone(defaultTopGLTF), [defaultTopGLTF]
+  );
+
   useEffect(() => {
-    // Handle T-shirt texture and material
-    if (tshirtScene && productData?.texture_3D) {
-      tshirtScene.traverse((node) => {
+    // Handle product texture and material
+    if (productScene && productData?.texture_3D) {
+      productScene.traverse((node) => {
         if (node.isMesh) {
           node.material = node.material.clone();
           const texture = new TextureLoader().load(productData.texture_3D, (tex) => {
@@ -96,7 +147,31 @@ const Model = ({ avatarData, productData, color }) => {
         });
       }
     });
-  }, [avatarScene, tshirtScene, hairScene, shortsScene, color, productData, avatarData]);
+
+    // Handle default top material when showing bottoms
+    if (getClothingCategory(productData?.item_Category) === 'bottoms') {
+      defaultTopScene.traverse((node) => {
+        if (node.isMesh) {
+          node.material = new THREE.MeshStandardMaterial({
+            color: new THREE.Color('#FFFFFF'),
+            roughness: 0.7,
+            metalness: 0.0,
+          });
+        }
+      });
+    }
+  }, [avatarScene, productScene, hairScene, shortsScene, defaultTopScene, color, productData, avatarData]);
+
+  // Get position based on category
+  const getPosition = (category) => {
+    switch (category) {
+      case 'Shoes':
+      case 'Boots':
+        return [0, -0.5, 0];
+      default:
+        return [0, 0, 0];
+    }
+  };
 
   if (error) {
     return <Html center><div className="text-red-500">Error loading model</div></Html>;
@@ -105,9 +180,40 @@ const Model = ({ avatarData, productData, color }) => {
   return (
     <group>
       <primitive object={avatarScene} scale={1} />
-      <primitive object={tshirtScene} scale={1} />
-      <primitive object={shortsScene} scale={1} />
       <primitive object={hairScene} scale={1} />
+
+      {/* Handle tops and bottoms rendering */}
+      {getClothingCategory(productData?.item_Category) === 'tops' ? (
+        <>
+          <primitive 
+            object={productScene} 
+            scale={1} 
+            position={getPosition(productData?.item_Category)} 
+          />
+          <primitive object={shortsScene} scale={1} />
+        </>
+      ) : getClothingCategory(productData?.item_Category) === 'bottoms' ? (
+        <>
+          <primitive 
+            object={defaultTopScene} 
+            scale={1} 
+          />
+          <primitive 
+            object={productScene} 
+            scale={1} 
+            position={getPosition(productData?.item_Category)} 
+          />
+        </>
+      ) : (
+        <>
+          <primitive 
+            object={productScene} 
+            scale={1} 
+            position={getPosition(productData?.item_Category)} 
+          />
+          <primitive object={shortsScene} scale={1} />
+        </>
+      )}
     </group>
   );
 };
@@ -147,14 +253,30 @@ function RotatingGroup({ children }) {
   );
 }
 
-// Add this new component for showing only the t-shirt
-const TshirtOnly = ({ productData, color }) => {
-  const { scene: tshirtGLTF } = useGLTF(tshirURLs.Boy.Average);
-  const tshirtScene = useMemo(() => SkeletonUtils.clone(tshirtGLTF), [tshirtGLTF]);
+// Rename TshirtOnly to ProductMesh for better clarity
+const ProductMesh = ({ productData, color }) => {
+  const getModelURL = (category, gender = 'Boy', bodyType = 'Average') => {
+    const urlMaps = {
+      'Tshirt': tshirURLs,
+      'Jersey': jerseyURLs,
+      'Longsleeves': longsleevesURLs,
+      'Shorts': shortsURLs,
+      'Pants': pantsURLs,
+      'Shoes': footwearsURLs?.[gender]?.Shoes,
+      'Boots': footwearsURLs?.[gender]?.Boots1,
+    };
+
+    const urlMap = urlMaps[category];
+    return urlMap?.[gender]?.[bodyType] || urlMaps['Tshirt'][gender][bodyType];
+  };
+
+  const modelURL = getModelURL(productData?.item_Category);
+  const { scene: modelGLTF } = useGLTF(modelURL);
+  const modelScene = useMemo(() => SkeletonUtils.clone(modelGLTF), [modelGLTF]);
 
   useEffect(() => {
-    if (tshirtScene && productData?.texture_3D) {
-      tshirtScene.traverse((node) => {
+    if (modelScene && productData?.texture_3D) {
+      modelScene.traverse((node) => {
         if (node.isMesh) {
           node.material = node.material.clone();
           const texture = new TextureLoader().load(productData.texture_3D, (tex) => {
@@ -171,10 +293,25 @@ const TshirtOnly = ({ productData, color }) => {
         }
       });
     }
-  }, [tshirtScene, color, productData]);
+  }, [modelScene, color, productData]);
+
+  // Adjust position based on category
+  const getPosition = (category) => {
+    switch (category) {
+      case 'Shoes':
+      case 'Boots':
+        return [0, -0.5, 0];
+      default:
+        return [0, 0, 0];
+    }
+  };
 
   return (
-    <primitive object={tshirtScene} scale={1} position={[0, 0, 0]} />
+    <primitive 
+      object={modelScene} 
+      scale={1} 
+      position={getPosition(productData?.item_Category)} 
+    />
   );
 };
 
@@ -313,7 +450,7 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
               : 'bg-white/90 text-slate-800 hover:bg-white'
           } border border-slate-400 hover:border-slate-800`}
         >
-          View T-shirt
+          View
         </button>
         <button
           onClick={() => setViewMode('wear')}
@@ -368,7 +505,7 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
             <RotatingGroup>
               <Platform />
               {viewMode === 'tshirt' ? (
-                <TshirtOnly 
+                <ProductMesh 
                   productData={productData}
                   color={getColorValue(selectedColor?.variant_Name)}
                 />
