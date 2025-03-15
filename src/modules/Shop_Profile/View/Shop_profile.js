@@ -206,7 +206,7 @@ function Shop_profile() {
         <div className="w-full h-auto ">
           <div className="bg-slate-50 rounded-md p-3  mb-5">
             <div className="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1/2 w-full rounded-sm shadow-md ">
-              <div className="lg:flex w-[30%] h-[70%] place-items-center justify-center  ">
+              <div className="flex  w-full md:w-[30%] h-[70%] place-items-center justify-center  ">
                 <div className=" p-2 h-1/2 lg:h-[120px] w-1/2 lg:w-[120px]">
                   <div className="rounded-md bg-primary-color p-1 h-full w-full">
                     {shopImageUrl ? (

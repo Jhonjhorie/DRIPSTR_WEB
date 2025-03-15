@@ -12,6 +12,7 @@ function FormCommision() {
   const [accepted, setAccepted] = useState(false);
   const { id } = useParams();
   const [opencommisionQR, setCommissioncloseQR] = useState(false);
+  const [alertCommision, setAlertCommision] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [deadline, setDeadline] = useState("");
@@ -178,11 +179,14 @@ function FormCommision() {
     fetchCommission();
   }, [currentUser?.id, id]);
 
+  const closeConfirmAdd = () => {
+      setAlertCommision(false);
+  };
   return (
     <div className="bg-white relative w-auto h-auto rounded-sm p-2">
-      <div className="   ">
+      <div className=" w-full  ">
         {commission?.commission_Status === "Pending" ? (
-          <div className="w-[500px] h-[400px]">
+          <div className=" md:w-[500px] h-[400px]">
             <h2 className="text-3xl font-bold iceland-regular text-center text-gray-800">
               Commission Details
             </h2>
@@ -204,17 +208,22 @@ function FormCommision() {
                 <strong>Status:</strong> {commission.commission_Status}
               </p>
             </div>
-      
-              <div className="flex flex-col justify-center items-center">
-              <p className="text-slate-700 text-center"><strong>Reference Image:</strong></p>
+
+            <div className="flex flex-col justify-center items-center">
+              <p className="text-slate-700 text-center">
+                <strong>Reference Image:</strong>
+              </p>
               <div className="flex justify-center">
-                <img src={commission.image} alt="Reference" className="w-auto object-cover h-44 rounded-md" />
+                <img
+                  src={commission.image}
+                  alt="Reference"
+                  className="w-auto object-cover h-44 rounded-md"
+                />
               </div>
             </div>
-         
           </div>
         ) : !accepted ? (
-          <div className="px-4 py-2 w-[500px] h-[400px]">
+          <div className=" px-1 md:px-4 py-2  md:w-[500px] h-[400px]">
             <div className="w-full text-center h-auto">
               <h1 className="iceland-regular text-2xl font-bold text-custom-purple">
                 Terms and Conditions
@@ -267,14 +276,14 @@ function FormCommision() {
           </div>
         ) : (
           <form
-            className="flex flex-col gap-4 p-4 overflow-hidden overflow-y-scroll w-[500px] h-[500px]"
+            className="flex flex-col gap-4 p-1 md:p-4 overflow-hidden overflow-y-scroll md:w-[500px] h-[500px]"
             onSubmit={handleSubmit}
           >
             <label className="text-sm font-semibold text-gray-700">
               Commission Title
               <input
                 type="text"
-                className="w-full p-2 mt-1  font-normal bg-slate-300 border rounded-md"
+                className="w-full p-2 mt-1 text-sm font-normal bg-slate-300 border rounded-md"
                 placeholder="Enter title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -282,10 +291,10 @@ function FormCommision() {
               />
             </label>
 
-            <label className="text-sm font-semibolf text-gray-700">
+            <label className="text-sm font-semibold text-gray-700">
               Description
               <textarea
-                className="w-full p-2 mt-1  font-normal bg-slate-300 border rounded-md"
+                className="w-full p-2 mt-1 text-sm font-normal bg-slate-300 border rounded-md"
                 rows="3"
                 placeholder="Describe your request"
                 value={description}
@@ -298,7 +307,7 @@ function FormCommision() {
               Deadline
               <input
                 type="date"
-                className="w-full p-2 mt-1 bg-slate-300  font-normal border rounded-md"
+                className="w-full p-2 mt-1 text-sm bg-slate-300  font-normal border rounded-md"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
                 required
@@ -309,7 +318,7 @@ function FormCommision() {
               Pay in Full (₱)
               <input
                 type="number"
-                className="w-full p-2 mt-1  font-normal bg-slate-300 border rounded-md"
+                className="w-full p-2 mt-1 text-sm font-normal bg-slate-300 border rounded-md"
                 placeholder="Enter budget"
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
@@ -373,6 +382,32 @@ function FormCommision() {
             >
               &times;
             </button>
+          </div>
+        </div>
+      )}
+      {alertCommision && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+          <div className="bg-white w-80  justify-items-center rounded-md shadow-md relative">
+            <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
+              {" "}
+            </div>
+            <div className="p-5">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1  drop-shadow-customViolet"
+              />
+            </div>
+
+            <h2 className="md:text-2xl text-sm text-center font-medium md:font-bold iceland-regular mb-4 text-slate-900 ">
+              Art Commission Successfully Initiated
+            </h2>
+            <div
+              onClick={closeConfirmAdd}
+              className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+            >
+              Confirm
+            </div>
           </div>
         </div>
       )}

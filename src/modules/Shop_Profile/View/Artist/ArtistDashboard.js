@@ -32,7 +32,7 @@ function MerchantDashboard() {
   const [imageOrientations, setImageOrientations] = useState({});
   const [showAlertSuccess, setShowAlertSuccess] = React.useState(false); // Alert Success
   const [imageLoading, setImageLoading] = useState(true);
-  const [totLikes, setTotalLikesAll] = useState([]);
+  const [totLikes, setTotalLikesAll] = useState(0);
   const [totalArtsCount, setTotalArtsCount] = useState(0);
   const [totalFollowers, setTotalFollowersCount] = useState(0);
   const [selectArt, setSelectArt] = useState(null);
@@ -99,69 +99,69 @@ function MerchantDashboard() {
   });
   const fetchUserProfileAndArt = async () => {
     setLoading(true);
-  
+
     try {
       // Get the current authenticated user
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-  
+
       if (authError) {
         setError(authError.message);
         setLoading(false);
         return;
       }
-  
+
       if (!user) {
         console.log("No user is signed in.");
         setError("No user is signed in.");
         setLoading(false);
         return;
       }
-  
+
       console.log("Current user:", user);
-  
+
       // Fetch artist profile associated with the logged-in user
       const { data: artist, error: artistError } = await supabase
         .from("artist")
         .select("id, artist_Name, artist_Bio, art_Type, artist_Image, followers_Detail")
         .eq("owner_Id", user.id)
         .single();
-  
+
       if (artistError || !artist) {
         console.log("No artist account found.");
         setError("No artist account found.");
         setLoading(false);
         return;
       }
-  
+
       setArtistData(artist);
       setSelectedArtistId(artist.id);
       console.log("Artist Name:", artist.artist_Name);
       console.log("Artist ID:", artist.id);
-  
+
       const totalFollowers = Array.isArray(artist.followers_Detail)
         ? artist.followers_Detail.length
         : 0;
-  
+
       setTotalFollowersCount(totalFollowers);
       console.log("Total followers count:", totalFollowers);
-  
+
       // Fetch only arts linked to this artist
       const { data: arts, error: artsError } = await supabase
         .from("artist_Arts")
         .select("id, art_Name, art_Description, art_Image, likes, comments, status")
         .eq("artist_Id", artist.id)
         .eq("status", "Approved");
-  
+
       if (artsError) {
         console.error("Error fetching arts:", artsError.message);
         setError("Error fetching arts.");
         setLoading(false);
         return;
       }
-  
+
       setArtistArts(arts);
       setTotalArtsCount(arts.length);
       console.log("Total arts count:", arts.length);
@@ -172,8 +172,8 @@ function MerchantDashboard() {
       setLoading(false);
     }
   };
-  
-  
+
+
 
   useEffect(() => {
     fetchUserProfileAndArt();
@@ -410,12 +410,12 @@ function MerchantDashboard() {
       );
 
       setNewComment("");
-      await fetchCommentsWithUsers(artId);  
+      await fetchCommentsWithUsers(artId);
 
     } catch (error) {
       console.error(error.message);
     }
-    
+
   };
 
   const fetchCommentsWithUsers = async (artId) => {
@@ -494,53 +494,53 @@ function MerchantDashboard() {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser();
-  
+
       if (authError) {
         console.error("Error fetching user:", authError.message);
         return;
       }
-  
+
       if (!user) {
         console.log("No user is signed in.");
         return;
       }
-  
+
       // Fetch artist ID linked to the user
       const { data: artist, error: artistError } = await supabase
         .from("artist")
         .select("id")
         .eq("owner_Id", user.id)
         .single();
-  
+
       if (artistError || !artist) {
         console.log("No artist account found.");
         return;
       }
-  
+
       // Fetch all artworks of the current artist
       const { data: artworks, error: artsError } = await supabase
         .from("artist_Arts")
         .select("likes")
         .eq("artist_Id", artist.id);
-  
+
       if (artsError) {
         console.error("Error fetching likes:", artsError.message);
         return;
       }
-  
+
       // Calculate total likes across all artworks
       const totalLikes = artworks.reduce(
         (sum, art) => sum + (Array.isArray(art.likes) ? art.likes.length : 0),
         0
       );
-  
+
       setTotalLikesAll(totalLikes); // Update the state
       console.log("Total likes across all arts:", totalLikes);
     } catch (err) {
       console.error("Unexpected error:", err.message);
     }
   };
-  
+
   useEffect(() => {
     fetchTotalLikes();
   }, []);
@@ -555,10 +555,10 @@ function MerchantDashboard() {
       <div className="absolute mx-3 right-0 z-20">
         <ArtistSideBar />
       </div>
-      <div className="w-full h-20  sticky top-0 z-10 bg-violet-600 shadow-md pr-20 px-16 ">
-        <div className="w-full h-full flex gap-3 p-2">
-          <div className="flex justify-between w-full ">
-            <div className="flex gap-2">
+      <div className="w-full md:h-20  md:sticky top-0 z-10 bg-violet-600 shadow-md md:pr-20 px-2 md:px-16 ">
+        <div className="w-full h-full md:flex gap-3 p-2">
+          <div className="md:flex justify-between w-full ">
+            <div className="flex gap-2 items-center">
               <div className="h-full w-24 relative rounded-md border bg-gradient-to-br from-violet-500 to-fuchsia-500 p-1">
                 {imageLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-custom-purple rounded-md ">
@@ -570,9 +570,8 @@ function MerchantDashboard() {
                   <img
                     src={artistData.artist_Image}
                     alt={artistData.artist_Name}
-                    className={`drop-shadow-custom h-full w-full object-cover rounded-md ${
-                      imageLoading ? "opacity-0" : "opacity-100"
-                    } transition-opacity duration-300`}
+                    className={`drop-shadow-custom h-full w-full object-cover rounded-md ${imageLoading ? "opacity-0" : "opacity-100"
+                      } transition-opacity duration-300`}
                     onLoad={() => setImageLoading(false)}
                     onError={() => setImageLoading(false)}
                   />
@@ -597,14 +596,14 @@ function MerchantDashboard() {
               <div></div>
             </div>
 
-            <div className="flex gap-5">
-            <div className="h-full w-20 ">
+            <div className="flex justify-center gap-1 mt-1 bg-custom-purple p-1 shadow-inner shadow-slate-800 rounded-md md:mt-0 md:gap-5">
+              <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
-                    <div className="text-2xl text-slate-100"> {totLikes}</div>
+                    <div className="text-xl md:text-2xl text-slate-100 "> {totLikes}</div>
                     <div className="pt-1">
                       {" "}
-                      <box-icon  color="white" size="100%" type='solid' name='like'></box-icon>
+                      <box-icon color="white" size="100%" type='solid' name='like'></box-icon>
                     </div>
                   </div>
 
@@ -614,7 +613,7 @@ function MerchantDashboard() {
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
-                    <div className="text-2xl text-slate-100"> {totalFollowers}</div>
+                    <div className="text-xl md:text-2xl text-slate-100"> {totalFollowers}</div>
                     <div className="pt-1">
                       {" "}
                       <box-icon
@@ -632,7 +631,7 @@ function MerchantDashboard() {
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
                   <div className="flex align-middle gap-2  justify-center ">
-                    <div className="text-2xl text-slate-100">
+                    <div className="text-xl md:text-2xl text-slate-100">
                       {totalArtsCount}
                     </div>
                     <div className="pt-1">
@@ -668,16 +667,17 @@ function MerchantDashboard() {
                   <div className="text-slate-50  text-sm">Post Art</div>
                 </div>
               </div>
-             
+
             </div>
           </div>
         </div>
       </div>
+      {/* Art display */}
       <div className=" flex w-full h-full bg-slate-300 overflow-hidden">
         <div className="p-2 w-full">
-          <div className="bg-slate-300 h-[545px]  z-0 rounded-md w-full overflow-hidden  overflow-y-scroll p-5">
+          <div className="bg-slate-300 h-[545px]  z-0 rounded-md w-full overflow-hidden  overflow-y-scroll p-1 md:p-5">
             {artistArts && artistArts.length > 0 ? (
-              <div className="columns-2 sm:columns-3 md:columns-4 gap-2 px-4 space-y-2">
+              <div className="columns-2 sm:columns-3 md:columns-4 gap-2 px-1 md:px-4 space-y-2">
                 {artistArts
                   .slice()
                   .reverse()
@@ -749,13 +749,13 @@ function MerchantDashboard() {
 
       {/* ALLERTS ADD Item SUCCESS */}
       {showAddArt && (
-        <div className="fixed inset-0 z-20 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white h-auto  w-[60%]  justify-items-center rounded-md shadow-md relative">
+        <div className="fixed inset-0 z-50 bg-gray-600 bg-opacity-50 flex justify-center items-center p-2 md:p-0">
+          <div className="bg-white h-auto w-full md:w-[60%]  justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
             </div>
             <div className=" p-2 w-full">
-              <div className=" p-5 h-auto w-full ">
+              <div className="pb-1 px-2 md:px-5 h-auto w-full ">
                 <div className="font-medium text-slate-800 py-2 w-full flex justify-between place-items-center  ">
                   <span className="font-bold text-[20px] md:text-2xl">
                     Add Art to your Gallery
@@ -816,7 +816,7 @@ function MerchantDashboard() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-[180px] h-2/3 md:w-full md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
+                  <div className="w-full h-2/3  md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
                     <div className="bg-slate-100 h-[200px] md:h-full rounded-sm shadow-md place-items-center flex place-content-center">
                       {imageSrcArt ? (
                         <img
@@ -833,16 +833,16 @@ function MerchantDashboard() {
 
                 <div className="flex justify-between w-full">
                   <button
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                    className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                     onClick={handleCloseModal}
                   >
-                    Close
+                    Cancel
                   </button>
                   <button
-                    className="bg-green-500  text-white px-4 py-2 rounded hover:bg-green-700"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                     onClick={handleAddAd}
                   >
-                    Add
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -853,7 +853,7 @@ function MerchantDashboard() {
       {/* Image Modal */}
       {selectArt && (
         <div
-          className="fixed inset-0 overflow-y-scroll bg-black bg-opacity-70 md:flex justify-center items-center z-50"
+          className="fixed inset-0 z-10 overflow-y-scroll bg-black bg-opacity-70 md:flex justify-center items-center z-50"
           onClick={() => {
             setSelectArt(null);
             setComments([]);
@@ -881,11 +881,10 @@ function MerchantDashboard() {
               <img
                 src={selectArt.art_Image}
                 alt="Expanded Art"
-                className={`overflow-hidden cursor-pointer rounded-md border shadow-md border-custom-purple ${
-                  imageOrientations[selectArt.id] === "landscape"
+                className={`overflow-hidden cursor-pointer rounded-md border shadow-md border-custom-purple ${imageOrientations[selectArt.id] === "landscape"
                     ? "w-full h-[550px] flex justify-center"
                     : "w-auto h-[550px] mx-auto"
-                }`}
+                  }`}
               />
             )}
             <div className="bg-violet-500 text-white px-3 text-xl iceland-bold py-2 rounded-md absolute top-2 left-2">
@@ -946,11 +945,10 @@ function MerchantDashboard() {
                       }
                       alt="User"
                       className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
-                    ${
-                      cmt.isArtist
-                        ? "bg-purple-500 border-purple-900 rounded-md drop-shadow-customViolet"
-                        : "bg-white"
-                    }`}
+                    ${cmt.isArtist
+                          ? "bg-purple-500 border-purple-900 rounded-md drop-shadow-customViolet"
+                          : "bg-white"
+                        }`}
                     />
 
                     <div>
@@ -961,11 +959,10 @@ function MerchantDashboard() {
                       </div>
                       <span
                         className={`w-12 h-12 rounded-md object-cover border-2 border-gray-100 
-                    ${
-                      cmt.isArtist
-                        ? "bg-purple-500 px-2 text-slate-100  rounded-md "
-                        : "bg-white text-slate-900 px-1"
-                    }`}
+                    ${cmt.isArtist
+                            ? "bg-purple-500 px-2 text-slate-100  rounded-md "
+                            : "bg-white text-slate-900 px-1"
+                          }`}
                       >
                         {cmt.text}
                       </span>
@@ -1085,7 +1082,7 @@ function MerchantDashboard() {
         </div>
       )}
       {showAlertSuccess && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div className="fixed z-10 inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
@@ -1099,7 +1096,7 @@ function MerchantDashboard() {
             </div>
 
             <h2 className="text-2xl font-bold iceland-regular mb-4 text-slate-900 ">
-              New Art Successfully Added.
+              Art added wait for admin approval.
             </h2>
             <div
               onClick={handleCloseArtAddModal}

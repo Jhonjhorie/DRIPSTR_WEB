@@ -10,7 +10,7 @@ import drp from "@/assets/DrpTxt.png";
 import logo from "@/assets/shop/shoplogo.jpg";
 import sample3 from "@/assets/images/samples/5.png";
 import sample2 from "@/assets/images/samples/10.png";
-import hmmmEmote from "@/assets/emote/hmmm.png";
+import hmmmEmote from "@/assets/emote/success.png";
 import { supabase } from "@/constants/supabase";
 
 const { useState, useEffect, useRef } = React;
@@ -19,18 +19,13 @@ function AristOrders() {
   const [selectedUser, setSelectedUser] = React.useState(null);
   const [isClosing, setIsClosing] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
-  const [userId, setUserId] = useState(null);
   const [artist, setArtist] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
-  const [selectedArtistId, setSelectedArtistId] = useState(null);
-  const [selectedMessage, setSelectedMessage] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [messageContent, setMessageContent] = useState("");
   const [imageFile, setImageFile] = useState(null);
-  const [artistId, setArtistId] = useState(null);
-  const [selectedImage2, setSelectedImage2] = useState(null);
   const [imageOrientation, setImageOrientation] = useState("landscape");
   useEffect(() => {
     const fetchUser = async () => {
@@ -322,15 +317,15 @@ function AristOrders() {
   };
 
   return (
-    <div className="h-full w-full overflow-hidden bg-slate-300">
+    <div className="h-full w-full  bg-slate-300">
       <div className="absolute mx-3 right-0 z-20">
         <ArtistSideBar />
       </div>
 
       <div className="w-full h-full overflow-hidden bg-slate-300 md:px-10 lg:px-16">
-        <div className="w-full h-full bg-slate-100 flex">
+        <div className="w-full h-full bg-slate-100 md:flex">
           {/* Left Sidebar with Customer Data */}
-          <div className="w-2/5 bg-gradient-to-br relative from-violet-500 to-fuchsia-500 p-1 h-auto shadow-black">
+          <div className="w-full md:w-2/5 bg-gradient-to-br relative from-violet-500 to-fuchsia-500 p-1 h-auto shadow-black">
             <div className="text-2xl font-semibold p-2 py-5 text-white flex items-center justify-between">
               <label>Messages</label>
               <box-icon
@@ -360,7 +355,7 @@ function AristOrders() {
                     <img
                       src={
                         message.profiles?.profile_picture ||
-                        "/default-avatar.png"
+                        hmmmEmote
                       }
                       alt={`Profile picture of ${
                         message.profiles?.full_name || "User"
@@ -387,23 +382,23 @@ function AristOrders() {
             </div>
           </div>
           {/* Right Chat Window */}
-          <div className="w-full relative bg-gradient-to-bl from-violet-500 to-fuchsia-500 h-full">
+          <div className="w-full absolute md:top-0 top-32 md:relative bg-gradient-to-bl from-violet-500 to-fuchsia-500 md:h-full">
             {/* Background Images */}
-            <div className="absolute z-10 top-0 right-0">
+            <div className="hidden md:absolute md:block  z-10 top-0 right-0">
               <img
                 src={streetBG}
                 className="drop-shadow-customWhite h-full w-full object-cover rounded-full"
                 sizes="100%"
               />
             </div>
-            <div className="absolute z-0 bottom-0 left-0">
+            <div className="hidden md:absolute md:block z-0 bottom-0 left-0">
               <img
                 src={starBG}
                 className="drop-shadow-customWhite h-full w-full object-cover rounded-full"
                 sizes="100%"
               />
             </div>
-            <div className="absolute top-32 z-0">
+            <div className="hidden md:absolute md:block  top-32 z-0">
               <img
                 src={drp}
                 className="drop-shadow-customWhite h-full w-full object-cover rounded-full"
@@ -412,7 +407,7 @@ function AristOrders() {
             </div>
             {selectedUser && (
               <div
-                className={`w-full h-full relative z-10 bg-custom-purple glass flex ${
+              className={`w-full md:h-full relative z-10 md:mb-0 mb-16 bg-custom-purple glass flex ${
                   isClosing ? "fade-out" : "fade-in"
                 }`}
               >
@@ -421,7 +416,8 @@ function AristOrders() {
                     <div className="flex gap-2 place-items-center">
                       <div className="h-12 w-12 border-[2px] border-primary-color rounded-full">
                         <img
-                          src={selectedUser.photo}
+                    
+                          src={selectedUser.photo || hmmmEmote}
                           className="h-full w-full object-cover rounded-full"
                           sizes="100%"
                         />
@@ -466,9 +462,9 @@ function AristOrders() {
                                   <div className="chat-image avatar mr-3">
                                     <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-300">
                                       <img
-                                        src={selectedUser.photo}
+                                        src={selectedUser.photo || hmmmEmote}
                                         alt={
-                                          message.sender?.full_name || "Sender"
+                                          message.sender?.full_name 
                                         }
                                         className="w-full h-full object-cover"
                                       />

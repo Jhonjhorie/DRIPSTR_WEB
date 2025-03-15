@@ -5,38 +5,18 @@ import logo from "../../../assets/shop/logoBlack.png";
 import sample1 from "../../../assets/images/samples/5.png";
 import { supabase } from "@/constants/supabase";
 import OrderCard from "../Component/OrderCard";
-
+import questionEmote from "../../../assets/emote/success.png";
+import hmmmEmote from "../../../assets/emote/hmmm.png";
 function Orders({ shopOwnerId }) {
-  const [activeTab, setActiveTab] = useState("new-orders");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalOpen2, setIsModalOpen2] = useState(false);
-  const [isModalOpen3, setIsModalOpen3] = useState(false);
-  const [isModalOpen4, setIsModalOpen4] = useState(false);
-  const [isModalOpen5, setIsModalOpen5] = useState(false);
-  const [shopId, setShopId] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [activeTab, setActiveTab] = useState("preparing");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handlePrepare = () => {
-    setIsModalOpen2(true);
-  };
-  const handleDeliver = () => {
-    setIsModalOpen3(true);
-  };
-  const handleCancelled = () => {
-    setIsModalOpen4(true);
-  };
-  const handleCompleted = () => {
-    setIsModalOpen5(true);
-  };
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setIsModalOpen2(false);
-    setIsModalOpen3(false);
-    setIsModalOpen4(false);
-    setIsModalOpen5(false);
-    setSelectedOrder(null);
+  const handleFetchOrders = async () => {
+    setIsLoading(true);
+    await fetchOrdersForMerchant();
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
   };
 
   useEffect(() => {
@@ -93,8 +73,8 @@ function Orders({ shopOwnerId }) {
 
   //setting order status
   const [orders, setOrders] = useState({
-    newOrders: [],
     preparing: [],
+    ship: [],
     shipped: [],
     cancelled: [],
     completed: [],
@@ -149,26 +129,36 @@ function Orders({ shopOwnerId }) {
           `
           id, 
           transaction_id, 
-          order_status, 
           prod_num, 
           quantity, 
           total_price, 
           final_price, 
           shipping_fee, 
           acc_num, 
+          cancellation_reason,
+          cancellation_requested_at,
+          refund_status,
           order_variation, 
           order_size, 
+          shipping_status,
+          shipping_postcode,
+          shipping_method,
+          shipping_addr,
+          estimated_delivery,
+          payment_method,
+          payment_status,
           profiles:acc_num (full_name, mobile, profile_picture, address)
           `
         )
-        .in("prod_num", productIds);
+        .in("prod_num", productIds)
+        .order("id", { ascending: true });
 
       if (orderError) throw orderError;
 
       // Process orders and categorize them by status
       const categorizedOrders = {
-        newOrders: [],
         preparing: [],
+        ship: [],
         shipped: [],
         cancelled: [],
         completed: [],
@@ -201,15 +191,19 @@ function Orders({ shopOwnerId }) {
           buyerAddress: order.profiles?.address || "Address not set",
         };
 
-        if (order.order_status === "To pay") {
-          categorizedOrders.newOrders.push(enrichedOrder);
-        } else if (order.order_status === "To ship") {
+        // if (order.order_status === "To pay") {
+        //   categorizedOrders.newOrders.push(enrichedOrder);
+        // } else
+
+        if (order.shipping_status === "To prepare") {
           categorizedOrders.preparing.push(enrichedOrder);
-        } else if (order.order_status === "Shipped") {
+        } else if (order.shipping_status === "To ship") {
+          categorizedOrders.ship.push(enrichedOrder);
+        } else if (order.shipping_status === "To deliver") {
           categorizedOrders.shipped.push(enrichedOrder);
-        } else if (order.order_status === "Cancelled") {
+        } else if (order.shipping_status === "Cancel") {
           categorizedOrders.cancelled.push(enrichedOrder);
-        } else if (order.order_status === "Delivered") {
+        } else if (order.shipping_status === "Delivered") {
           categorizedOrders.completed.push(enrichedOrder);
         }
       });
@@ -229,10 +223,6 @@ function Orders({ shopOwnerId }) {
     fetchOrdersForMerchant();
   }, []);
 
-  const Name = "Jane Doe";
-  const Address = "54 Barangay Bagong Silangyatas, Quezon City ";
-  const Phone = "09295374051";
-
   return (
     <div className="h-full w-full bg-slate-300 p-2 ">
       <div className="absolute mx-3 right-0 z-20">
@@ -248,16 +238,16 @@ function Orders({ shopOwnerId }) {
             <div className="w-full z-10 sticky top-0 h-auto pt-2 glass bg-custom-purple rounded-t-md">
               <ul className="flex justify-around place-items-center  text-slate-300 cursor-pointer">
                 <li
-                  className={activeTab === "new-orders" ? "active-tab" : ""}
-                  onClick={() => setActiveTab("new-orders")}
-                >
-                  <span className="text-sm md:text-lg">New Orders</span>
-                </li>
-                <li
                   className={activeTab === "preparing" ? "active-tab" : ""}
                   onClick={() => setActiveTab("preparing")}
                 >
                   <span className="text-sm md:text-lg">Preparing</span>
+                </li>
+                <li
+                  className={activeTab === "ship" ? "active-tab" : ""}
+                  onClick={() => setActiveTab("ship")}
+                >
+                  <span className="text-sm md:text-lg">To ship</span>
                 </li>
                 <li
                   className={activeTab === "shipped" ? "active-tab" : ""}
@@ -280,76 +270,141 @@ function Orders({ shopOwnerId }) {
               </ul>
             </div>
             <div className="w-full h-full bg-slate-200 p-4 ">
-              {activeTab === "new-orders" && (
-                <div>
-                  <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    New Orders
-                  </h2>
-                  {orders.newOrders.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={fetchOrdersForMerchant}
-                    />
-                  ))}
-                </div>
-              )}
-
               {activeTab === "preparing" && (
-                <div>
-                  <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    Preparing Orders
-                  </h2>
-                  {orders.preparing.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
+                <div className="pb-5">
+                  <div className="flex justify-between w-full">
+                    <div className="flex justify-between mb-4 w-full">
+                      <h2 className="text-xl text-custom-purple font-bold">
+                        Preparing Orders
+                      </h2>
+                      <div
+                        onClick={isLoading ? null : handleFetchOrders}
+                        className={`justify-items-center place-items-center text-sm text-slate-600 cursor-pointer rounded group 
+                hover:text-white bg-white hover:bg-custom-purple glass duration-300 ease-in-out h-auto px-2 flex gap-2
+                ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                      >
+                        <div className="justify-items-center place-items-center flex">
+                          {isLoading ? (
+                            <span className="loading loading-spinner loading-xs"></span>
+                          ) : (
+                            <box-icon name="refresh"></box-icon>
+                          )}
+                        </div>
+                        {isLoading ? "Refreshing..." : "Refresh"}
+                      </div>
+                    </div>
+                    {/* <div>
+                      <button className="text-sm bg-custom-purple rounded p-2 glass text-white font-normal mb-2">
+                        Print all Orders
+                      </button>
+                    </div> */}
+                  </div>
+                  <div>
+                    {orders.preparing.length > 0 ? (
+                      orders.preparing.map((order) => (
+                        <OrderCard
+                          key={order.id}
+                          order={order}
+                          refreshOrders={refreshOrders}
+                        />
+                      ))
+                    ) : (
+                      <div className="justify-items-center mt-28">
+                        <img src={hmmmEmote} className="h-20 " />
+                        <div className="text-slate-800">No orders yet.</div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
-
+              {activeTab === "ship" && (
+                <div className="pb-5">
+                  <h2 className="text-xl text-custom-purple font-bold mb-4">
+                    To ship Orders
+                  </h2>
+                  {orders.ship.length > 0 ? (
+                    orders.ship.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        refreshOrders={refreshOrders}
+                      />
+                    ))
+                  ) : (
+                    <div className="justify-items-center mt-28">
+                      <img src={hmmmEmote} className="h-20 " />
+                      <div className="text-slate-800">No ship orders.</div>
+                    </div>
+                  )}
+                </div>
+              )}
               {activeTab === "shipped" && (
-                <div>
+                <div className="pb-5">
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
                     On transit Orders
                   </h2>
-                  {orders.shipped.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
+                  {orders.shipped.length > 0 ? (
+                    orders.shipped.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        refreshOrders={refreshOrders}
+                      />
+                    ))
+                  ) : (
+                    <div className="justify-items-center mt-28">
+                      <img src={hmmmEmote} className="h-20 " />
+                      <div className="text-slate-800">
+                        No orders to deliver.
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               {activeTab === "cancelled" && (
-                <div>
+                <div className="pb-5">
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
                     Cancelled Orders
                   </h2>
-                  {orders.cancelled.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
+
+                  {orders.cancelled.length > 0 ? (
+                    orders.cancelled.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        refreshOrders={refreshOrders}
+                      />
+                    ))
+                  ) : (
+                    <div className="justify-items-center mt-28">
+                      <img src={questionEmote} className="h-20 " />
+                      <div className="text-slate-800">
+                        No cancelled to deliver.
+                      </div>
+                    </div>
+                  )}
+          
                 </div>
               )}
               {activeTab === "completed" && (
-                <div>
+                <div className="pb-5">
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
                     Completed Orders
                   </h2>
-                  {orders.completed.map((order) => (
-                    <OrderCard
-                      key={order.id}
-                      order={order}
-                      refreshOrders={refreshOrders}
-                    />
-                  ))}
+                  {orders.completed.length > 0 ? (
+                    orders.completed.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        refreshOrders={refreshOrders}
+                      />
+                    ))
+                  ) : (
+                    <div className="justify-items-center mt-28">
+                      <img src={hmmmEmote} className="h-20 " />
+                      <div className="text-slate-800">No completed orders.</div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -357,362 +412,7 @@ function Orders({ shopOwnerId }) {
         </div>
       </div>
 
-      {/* TO DELIVER */}
-      {isModalOpen2 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <h2 className="font-medium text-slate-800 py-2  ">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Information
-              </span>
-            </h2>
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={sample1}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto  p-2 relative ">
-                <div className=" flex w-full  justify-between place-items-center ">
-                  <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
-                    Viscount Black
-                  </div>
-                  <div className=" text-xl font-semibold text-slate-950  ">
-                    ID: 10
-                  </div>
-                </div>
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Name: <span className="text-slate-900"> {Name} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Address: <span className="text-slate-900"> {Address} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Phone number:{" "}
-                  <span className="text-slate-900"> {Phone} </span>{" "}
-                </a>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800"> Blue </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size: <span className="text-sm text-slate-800"> XL </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800"> 20% off </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800"> ₱140 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800"> ₱30 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Changed mind Reason:{" "}
-                  <span className="text-sm text-slate-800">
-                    {" "}
-                    Mistakenly order{" "}
-                  </span>
-                </div>
-                <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
-                  PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-              <div className=" flex gap-2 md:gap-4">
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  onClick={handleCloseModal}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-                  onClick={handleCloseModal}
-                >
-                  SHIP
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* OTW */}
-      {isModalOpen3 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <h2 className="font-medium text-slate-800 py-2  ">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Information
-              </span>
-            </h2>
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={sample1}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto  p-2 relative ">
-                <div className=" flex w-full  justify-between place-items-center ">
-                  <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
-                    Viscount Black
-                  </div>
-                  <div className=" text-xl font-semibold text-slate-950  ">
-                    ID: 10
-                  </div>
-                </div>
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Name: <span className="text-slate-900"> {Name} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Address: <span className="text-slate-900"> {Address} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Phone number:{" "}
-                  <span className="text-slate-900"> {Phone} </span>{" "}
-                </a>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800"> Blue </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size: <span className="text-sm text-slate-800"> XL </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800"> 20% off </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800"> ₱140 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800"> ₱30 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Status:{" "}
-                  <span className="text-sm text-slate-800"> In Transit </span>
-                </div>
-                <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
-                  PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-              <button className="bg-green-500 cursor-not-allowed text-white px-4 py-2 rounded hover:bg-green-700">
-                Completed
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* CANCELLED */}
-      {isModalOpen4 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <h2 className="font-medium text-slate-800 py-2  ">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Cancelled
-              </span>
-            </h2>
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={sample1}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto  p-2 relative ">
-                <div className=" flex w-full  justify-between place-items-center ">
-                  <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
-                    Viscount Black
-                  </div>
-                  <div className=" text-xl font-semibold text-slate-950  ">
-                    ID: 10
-                  </div>
-                </div>
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Name: <span className="text-slate-900"> {Name} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Address: <span className="text-slate-900"> {Address} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Phone number:{" "}
-                  <span className="text-slate-900"> {Phone} </span>{" "}
-                </a>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800"> Blue </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size: <span className="text-sm text-slate-800"> XL </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800"> 20% off </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800"> ₱140 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800"> ₱30 </span>
-                </div>
-                <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
-                  PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* COMPLETED */}
-      {isModalOpen5 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-5 w-full md:w-1/2 lg:w-1/2 m-2 md:m-0 auto">
-            <h2 className="font-medium text-slate-800 py-2  ">
-              <span className="font-bold text-[20px] md:text-2xl">
-                Order Completed
-              </span>
-            </h2>
-            <div className="h-auto w-full bg-slate-200 relative rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
-              <div className="z-0 h-20 w-20 blur-sm justify-end bottom-0 right-0 absolute">
-                <img
-                  src={logo}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-1/3 h-full bg-slate-100">
-                <img
-                  src={sample1}
-                  alt="Shop Logo"
-                  className="drop-shadow-custom h-full w-full object-cover rounded-md"
-                  sizes="100%"
-                />
-              </div>
-              <div className="w-full md:w-2/3 h-auto  p-2 relative ">
-                <div className=" flex w-full  justify-between place-items-center ">
-                  <div className=" text-lg md:text-3xl font-bold text-slate-950  ">
-                    Viscount Black
-                  </div>
-                  <div className=" text-xl font-semibold text-slate-950  ">
-                    ID: 10
-                  </div>
-                </div>
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Name: <span className="text-slate-900"> {Name} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Address: <span className="text-slate-900"> {Address} </span>{" "}
-                </a>{" "}
-                <br />
-                <a className="text-sm text-custom-purple font-semibold ">
-                  Phone number:{" "}
-                  <span className="text-slate-900"> {Phone} </span>{" "}
-                </a>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Variant:{" "}
-                  <span className="text-sm text-slate-800"> Blue </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Size: <span className="text-sm text-slate-800"> XL </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Vouchers:{" "}
-                  <span className="text-sm text-slate-800"> 20% off </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Item Price:{" "}
-                  <span className="text-sm text-slate-800"> ₱140 </span>
-                </div>
-                <div className="text-custom-purple text-sm font-semibold">
-                  Delivery fee:{" "}
-                  <span className="text-sm text-slate-800"> ₱30 </span>
-                </div>
-                <div className="text-xl font-semibold right-2  text-slate-900 bottom-0 absolute">
-                  PRICE: <span className="text-yellow-600 text-3xl"> ₱150</span>{" "}
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Alert */}
     </div>
   );
 }

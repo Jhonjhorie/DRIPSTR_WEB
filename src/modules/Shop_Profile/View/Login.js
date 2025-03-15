@@ -62,6 +62,12 @@ function Login() {
   const [showAlertSF, setShowAlertSF] = useState(false);
   const [showAlertExname, setShowAlertExname] = useState(false);
   const [showAlertExnum, setShowAlertExnum] = useState(false);
+  const [isLandscape, setIsLandscape] = useState(null);
+
+  const handleImageLoad = (event) => {
+    const { naturalWidth, naturalHeight } = event.target;
+    setIsLandscape(naturalWidth > naturalHeight);
+  };
 
   const fetchUserProfile = async () => {
     setLoading(false);
@@ -135,6 +141,40 @@ function Login() {
   const handleMiddleNameChange = (e) => setMiddleName(e.target.value);
   const handleLastNameChange = (e) => setLastName(e.target.value);
 
+
+  const getLVMCategory = (region) => {
+  const luzonRegions = [
+    'Ilocos Region',
+    'Cagayan Valley',
+    'Central Luzon',
+    'CALABARZON',
+    'MIMAROPA Region',
+    'Bicol Region',
+    'NCR',
+    'CAR'
+  ];
+
+  const visayasRegions = [
+    'Western Visayas',
+    'Central Visayas',
+    'Eastern Visayas'
+  ];
+
+  const mindanaoRegions = [
+    'Zamboanga Peninsula',
+    'Northern Mindanao',
+    'Davao Region',
+    'SOCCSKSARGEN',
+    'Caraga',
+    'BARMM'
+  ];
+
+  if (luzonRegions.includes(region)) return 'Luzon';
+  if (visayasRegions.includes(region)) return 'Visayas';
+  if (mindanaoRegions.includes(region)) return 'Mindanao';
+  return null;
+};
+
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -149,7 +189,7 @@ function Login() {
     const findBarangay =
       barangays?.find((b) => b.code === selected.barangay)?.name ||
       "Unknown Barangay";
-
+    const lvmCategory = getLVMCategory(findRegion); 
     const fullAddress = `${selected.exactLocation}, ${findBarangay}, ${findCity}, ${findRegion}`;
     console.log("Final Full Address:", fullAddress);
 
@@ -361,7 +401,7 @@ function Login() {
 
           if (data?.path) {
             const { data: publicUrlData, error: urlError } = supabase.storage
-              .from("pdfs")
+              .from("shop_profile")
               .getPublicUrl(data.path);
             if (urlError) {
               console.error("Error fetching PDF URL:", urlError.message);
@@ -371,6 +411,7 @@ function Login() {
             console.log("PDF uploaded successfully:", uploadedPdfUrl);
           }
         }
+
         let uploadedGcash = null;
         if (gcashFile) {
           const uniquePdfName = `gcash/${Date.now()}-${Math.random()
@@ -387,7 +428,7 @@ function Login() {
 
           if (data?.path) {
             const { data: publicUrlData, error: urlError } = supabase.storage
-              .from("gcash")
+              .from("shop_profile")
               .getPublicUrl(data.path);
             if (urlError) {
               console.error("Error fetching PDF URL:", urlError.message);
@@ -397,6 +438,7 @@ function Login() {
             console.log("PDF uploaded successfully:", uploadedGcash);
           }
         }
+
         let uploadedSS = null;
         if (selfieFile) {
           const uniquePdfName = `selfie/${Date.now()}-${Math.random()
@@ -413,7 +455,7 @@ function Login() {
 
           if (data?.path) {
             const { data: publicUrlData, error: urlError } = supabase.storage
-              .from("selfie")
+              .from("shop_profile")
               .getPublicUrl(data.path);
             if (urlError) {
               console.error("Error fetching PDF URL:", urlError.message);
@@ -451,6 +493,7 @@ function Login() {
                 full_Name: fullName,
                 gcash: uploadedGcash || null,
                 selfie: uploadedSS || null,
+                lvm: lvmCategory, 
               },
             ])
             .single();
@@ -540,7 +583,6 @@ function Login() {
     handleExactLocationChange,
     setSelected,
   } = useAddressFields(true, false);
-
 
   const handleSetisMerchant = async (e) => {
     e.preventDefault();
@@ -1978,6 +2020,8 @@ function Login() {
           </div>
         </div>
       )}
+
+      {/* Modal for showing selected images */}
       {showImage && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
           <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
@@ -1986,10 +2030,17 @@ function Login() {
                 <img
                   src={selectedImage}
                   alt="Uploaded shop photo"
-                  className="max-w-full max-h-full rounded-sm"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
-                <p className="text-white">Please select an image</p>
+                <p className="text-black">Please select an image</p>
               )}
             </div>
             <div className="flex justify-between w-full mt-2">
@@ -2011,10 +2062,17 @@ function Login() {
                 <img
                   src={selectedImageID}
                   alt="Uploaded shop photo"
-                  className="max-w-full max-h-full rounded-sm"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
-                <p className="text-white">Please select an image</p>
+                <p className="text-black">Please select an image</p>
               )}
             </div>
             <div className="flex justify-between w-full mt-2">
@@ -2036,7 +2094,14 @@ function Login() {
                 <img
                   src={selectedFile}
                   alt="Uploaded file"
-                  className="max-w-full max-h-full"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
                 <p className="text-white">Please select a file</p>
@@ -2061,7 +2126,14 @@ function Login() {
                 <img
                   src={selectedFilegcash}
                   alt="Uploaded file"
-                  className="max-w-full max-h-full"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
                 <p className="text-white">Please select a file</p>
@@ -2086,7 +2158,14 @@ function Login() {
                 <img
                   src={selectedFileSS}
                   alt="Uploaded file"
-                  className="max-w-full max-h-full"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
                 />
               ) : (
                 <p className="text-white">Please select a file</p>
@@ -2103,69 +2182,70 @@ function Login() {
           </div>
         </div>
       )}
+
       {showAlertGC && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
-        <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
-          <div className="mt-10 ">
-            <img
-              src={questionEmote}
-              alt="Success Emote"
-              className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-            />
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Screenshot of your verified Gcash is Required!</span>
           </div>
         </div>
-        <div
-          role="alert"
-          className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 shrink-0 stroke-current"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>Screenshot of your verified Gcash is Required!</span>
-        </div>
-      </div>
       )}
       {showAlertSF && (
-       <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
-       <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
-         <div className="mt-10 ">
-           <img
-             src={questionEmote}
-             alt="Success Emote"
-             className="object-contain rounded-lg p-1 drop-shadow-customViolet"
-           />
-         </div>
-       </div>
-       <div
-         role="alert"
-         className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
-       >
-         <svg
-           xmlns="http://www.w3.org/2000/svg"
-           className="h-6 w-6 shrink-0 stroke-current"
-           fill="none"
-           viewBox="0 0 24 24"
-         >
-           <path
-             strokeLinecap="round"
-             strokeLinejoin="round"
-             strokeWidth="2"
-             d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-           />
-         </svg>
-         <span>Upload your selfie to proceed</span>
-       </div>
-     </div>
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto fixed transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Upload your selfie to proceed</span>
+          </div>
+        </div>
       )}
       {showAlertSuccess && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -2198,7 +2278,7 @@ function Login() {
         </div>
       )}
       {TermsandCondition && (
-        <div className="fixed inset-0 md:p-0 p-2 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div className="fixed inset-0 z-30 md:p-0 p-2 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white w-full overflow-hidden h-[400px] md:h-auto  md:w-auto p-5   justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
