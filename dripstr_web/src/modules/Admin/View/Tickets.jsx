@@ -16,7 +16,7 @@ function Tickets() {
       setLoading(true);
       const { data, error } = await supabase
         .from('reported_Tickets')
-        .select('*')
+        .select('*, acc_id(full_name)')
         .eq('action', status);
 
       if (error) throw error;
@@ -83,6 +83,7 @@ function Tickets() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket by</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
@@ -93,6 +94,9 @@ function Tickets() {
               <tr key={ticket.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(ticket.created_at).toLocaleString()}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {ticket.acc_id?.full_name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {ticket.reason || 'No title'}
