@@ -10,6 +10,7 @@ import { supabase } from '../../../constants/supabase';
 import { bodyTypeURLs, hairURLs } from '../../../constants/avatarConfig';
 import { useRef } from 'react';
 import { gsap } from 'gsap';
+import { useNavigate } from "react-router-dom";
 
 // First, import all necessary URL configurations
 import { 
@@ -21,6 +22,9 @@ import {
   footwearsURLs,
   skirtURLs
 } from '../../../constants/avatarConfig';
+
+// Add these imports at the top
+import AuthModal from '../../../shared/login/Auth';
 
 const Model = ({ avatarData, productData, color }) => {
   const [error, setError] = useState(null);
@@ -398,15 +402,42 @@ function CameraController({ viewMode, productData }) {
   return null;
 }
 
+// Add this near the top with other state declarations
+const defaultAvatarData = {
+  gender: 'Boy',
+  bodytype: 'Average',
+  skincolor: '#f5c9a6',
+  haircolor: '#000000',
+  hair: 'Barbers'
+};
+
 // Modify the main Product3DViewer component
 const Product3DViewer = ({ category, onClose, className, selectedColor, productData }) => {
+  const navigate = useNavigate();
   const [avatarData, setAvatarData] = useState(null);
   const [viewMode, setViewMode] = useState('tshirt'); // 'tshirt' or 'wear'
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
+  // Add this function to handle avatar button click
+  const handleAvatarClick = async () => {
+    const { data: session } = await supabase.auth.getSession();
+    if (!session?.session?.user) {
+      setShowAuthModal(true);
+    } else {
+      navigate('/account/avatar');
+    }
+  };
+
+  // Modify the useEffect for fetching avatar data
   useEffect(() => {
     const fetchAvatarData = async () => {
       const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user?.id) return;
+      
+      if (!session?.session?.user?.id) {
+        // Use default avatar data if not logged in
+        setAvatarData(defaultAvatarData);
+        return;
+      }
 
       const { data, error } = await supabase
         .from('avatars')
@@ -416,10 +447,12 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
 
       if (error) {
         console.error('Error fetching avatar:', error);
+        // Fallback to default avatar data on error
+        setAvatarData(defaultAvatarData);
         return;
       }
 
-      setAvatarData(data);
+      setAvatarData(data || defaultAvatarData);
     };
 
     fetchAvatarData();
@@ -487,7 +520,7 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
         }} 
       />
       
-      {/* Add view mode toggle buttons */}
+      {/* View mode and Avatar buttons */}
       <div className="absolute top-4 left-4 z-10 flex items-center gap-2">
         <button
           onClick={() => setViewMode('tshirt')}
@@ -509,7 +542,23 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
         >
           Try On
         </button>
-      </div>
+           
+       </div>
+       <button
+            onClick={handleAvatarClick}
+            className="absolute bottom-2 left-4 px-3 py-2 text-sm rounded-full shadow-lg transition-all duration-300 
+              bg-purple-600 text-white hover:bg-purple-700 border border-purple-400 
+              flex items-center gap-2 z-50 "
+          >
+            <i className="fas fa-user-circle"></i>
+            Go to Avatar
+          </button>
+      {/* Add AuthModal */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        actionLog="login"
+      />
 
       {/* 3D Canvas */}
       <div className={className}>
@@ -558,7 +607,7 @@ const Product3DViewer = ({ category, onClose, className, selectedColor, productD
                 />
               ) : (
                 <Model 
-                  avatarData={avatarData}
+                  avatarData={avatarData || defaultAvatarData}
                   productData={productData}
                   color={getColorValue(selectedColor?.variant_Name)}
                 />
