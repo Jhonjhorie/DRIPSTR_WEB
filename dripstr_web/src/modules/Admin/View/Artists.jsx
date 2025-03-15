@@ -298,6 +298,7 @@ function Artists() {
                 {selectedArtist.artist_name || selectedArtist.artist_Name || 'Unnamed Artist'}'s Identification
               </h2>
               <div className="grid grid-cols-3 gap-4 mb-4">
+                {/* Selfie */}
                 <div className="flex flex-col items-center">
                   <p className="text-black font-medium mb-2">Selfie</p>
                   <img
@@ -307,6 +308,7 @@ function Artists() {
                     onClick={() => handleImageClick(selectedArtist.selfie)}
                   />
                 </div>
+                {/* Valid ID */}
                 <div className="flex flex-col items-center">
                   <p className="text-black font-medium mb-2">Valid ID</p>
                   <img
@@ -316,6 +318,7 @@ function Artists() {
                     onClick={() => handleImageClick(selectedArtist.valid_id || selectedArtist.valid_ID)}
                   />
                 </div>
+                {/* GCash */}
                 <div className="flex flex-col items-center">
                   <p className="text-black font-medium mb-2">GCash</p>
                   <img
@@ -325,17 +328,24 @@ function Artists() {
                     onClick={() => handleImageClick(selectedArtist.gcash)}
                   />
                 </div>
-                <div className="flex flex-col items-center justify-center">
-                  <p className="text-black font-medium mb-2">Sample Art</p>
-                  <img
-                    src={selectedArtist.sample_art1 || 'https://via.placeholder.com/150'}
-                    alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} GCash`}
-                    className="w-24 h-24 object-contain rounded-md cursor-pointer"
-                    onClick={() => handleImageClick(selectedArtist.sample_art1)}
-                  />
-
+                {/* Sample Arts - Spanning across bottom center */}
+                <div className="col-span-3 flex flex-col items-center mt-4">
+                  <p className="text-black font-medium mb-2">Sample Arts</p>
+                  <div className="flex flex-row gap-2 items-center">
+                    <img
+                      src={selectedArtist.sample_art1 || selectedArtist.sample_art || 'https://via.placeholder.com/150'}
+                      alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} Sample Art 1`}
+                      className="w-24 h-24 object-contain rounded-md cursor-pointer"
+                      onClick={() => handleImageClick(selectedArtist.sample_art1)}
+                    />
+                    <img
+                      src={selectedArtist.sample_art2 || 'https://via.placeholder.com/150'}
+                      alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} Sample Art 2`}
+                      className="w-24 h-24 object-contain rounded-md cursor-pointer"
+                      onClick={() => handleImageClick(selectedArtist.sample_art2)}
+                    />
+                  </div>
                 </div>
-
               </div>
               <button
                 onClick={closeModal}
