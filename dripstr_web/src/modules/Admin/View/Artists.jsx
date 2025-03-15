@@ -51,7 +51,7 @@ function Artists() {
       try {
         const { data, error } = await supabase
           .from('artist')
-          .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID, gcash, wallet');
+          .select('id, created_at, artist_Name, artist_Bio, art_Type, artist_Image, contact_number, owner_Id(full_name), followers_Detail, full_Name, is_Premium, selfie, valid_ID, gcash, wallet, sample_art1, sample_art2');
         if (error) throw error;
         setArtists(data || []);
       } catch (error) {
@@ -183,18 +183,7 @@ function Artists() {
     setEnlargedImage(null);
   };
 
-  const getSampleArtUrls = (sampleArt) => {
-    try {
-      if (!sampleArt) return [];
-      // Parse the sampleArt if it is a string
-      const parsedArt = JSON.parse(sampleArt);
-      // Ensure it's an array before returning
-      return Array.isArray(parsedArt) ? parsedArt : [];
-    } catch (error) {
-      console.error("Error parsing sample_art:", error.message);
-      return [];
-    }
-  };
+
 
   const filteredArtists = artists.filter(artist => {
     const searchLower = searchQuery.toLowerCase();
@@ -336,24 +325,15 @@ function Artists() {
                     onClick={() => handleImageClick(selectedArtist.gcash)}
                   />
                 </div>
-                <div className="flex flex-col gap-2">
-                  {getSampleArtUrls(selectedArtist.sample_art).length > 0 ? (
-                    getSampleArtUrls(selectedArtist.sample_art).map((url, index) => (
-                      <img
-                        key={index}
-                        src={url || 'https://via.placeholder.com/150'}
-                        alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} Sample Art ${index + 1}`}
-                        className="w-24 h-24 object-contain rounded-md cursor-pointer"
-                        onClick={() => handleImageClick(url)}
-                      />
-                    ))
-                  ) : (
-                    <img
-                      src="https://via.placeholder.com/150"
-                      alt="No Sample Art"
-                      className="w-24 h-24 object-contain rounded-md cursor-pointer"
-                    />
-                  )}
+                <div className="flex flex-col items-center justify-center">
+                  <p className="text-black font-medium mb-2">Sample Art</p>
+                  <img
+                    src={selectedArtist.sample_art1 || 'https://via.placeholder.com/150'}
+                    alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} GCash`}
+                    className="w-24 h-24 object-contain rounded-md cursor-pointer"
+                    onClick={() => handleImageClick(selectedArtist.sample_art1)}
+                  />
+
                 </div>
 
               </div>
