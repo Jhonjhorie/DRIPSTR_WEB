@@ -46,8 +46,8 @@ function Tickets() {
   if (error) return <div className="text-red-500 text-center py-4">Error: {error}</div>;
 
   return (
-    <div className="container mx-auto px-4">
-      <h2 className="text-2xl font-bold  text-white">Ticket Management</h2>
+    <div className="container mx-auto px-4 py-8">
+      <h2 className="text-2xl font-bold mb-6 text-white">Ticket Management</h2>
       
       {/* Tabs */}
       <div className="mb-6">
@@ -86,7 +86,9 @@ function Tickets() {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket by</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+              {activeTab === 'Pending Review' && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -96,22 +98,32 @@ function Tickets() {
                   {new Date(ticket.created_at).toLocaleString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {ticket.acc_id?.full_name}
+                  {ticket.acc_id?.full_name || 'Unknown'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {ticket.reason || 'No title'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{ticket.action}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  {activeTab === 'Pending Review' && (
+                  <span
+                    className={`${
+                      ticket.action === 'Resolved'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    } px-2 py-1 rounded`}
+                  >
+                    {ticket.action}
+                  </span>
+                </td>
+                {activeTab === 'Pending Review' && (
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
                     <button
                       onClick={() => handleResolve(ticket.id)}
                       className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-200"
                     >
                       Resolve
                     </button>
-                  )}
-                </td>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
