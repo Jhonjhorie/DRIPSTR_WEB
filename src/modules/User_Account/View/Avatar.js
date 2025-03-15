@@ -560,11 +560,13 @@ const CharacterCustomization = () => {
   }, []);
 
   const getTShirtURL = () => {
-    return tshirURLs[gender][selectedBodyType] || null;
+    console.log('Getting TShirt URL for:', { gender, selectedBodyType });
+    return tshirURLs[gender][selectedBodyType];
   };
 
   const getShortsURL = () => {
-    return shortsURLs[gender][selectedBodyType] || null;
+    console.log('Getting Shorts URL for:', { gender, selectedBodyType });
+    return shortsURLs[gender][selectedBodyType];
   };
 
   const handleUpdate = async (e) => {
@@ -1066,38 +1068,28 @@ const CharacterCustomization = () => {
               )}
 
               {/* Top Wear */}
-              {selectedItems.tops ? (
-                <Part 
-                  key={`selected-top-${selectedItems.tops.product.texture_3D}`}
-                  url={getModelURLForCategory(selectedItems.tops.product.item_Category, gender, selectedBodyType)}
-                  position={[0, 0, 0]}
-                  texture={selectedItems.tops.product.texture_3D}
-                />
-              ) : (
-                <Part 
-                  key="default-tshirt"
-                  url={getTShirtURL()} 
-                  position={[0, 0, 0]}
-                  color="#FFFFFF"
-                />
-              )}
+              <Part 
+                key={`top-${selectedBodyType}-${selectedItems.tops ? selectedItems.tops.product.texture_3D : 'default'}`}
+                url={selectedItems.tops 
+                  ? getModelURLForCategory(selectedItems.tops.product.item_Category, gender, selectedBodyType)
+                  : getTShirtURL()
+                }
+                position={[0, 0, 0]}
+                texture={selectedItems.tops?.product.texture_3D}
+                color={!selectedItems.tops ? "#FFFFFF" : undefined}
+              />
 
               {/* Bottom Wear */}
-              {selectedItems.bottoms ? (
-                <Part 
-                  key={`selected-bottom-${selectedItems.bottoms.product.texture_3D}`}
-                  url={getModelURLForCategory(selectedItems.bottoms.product.item_Category, gender, selectedBodyType)}
-                  position={[0, 0, 0]}
-                  texture={selectedItems.bottoms.product.texture_3D}
-                />
-              ) : (
-                <Part 
-                  key="default-shorts"
-                  url={getShortsURL()} 
-                  position={[0, 0, 0]}
-                  color="#000000"
-                />
-              )}
+              <Part 
+                key={`bottom-${selectedBodyType}-${selectedItems.bottoms ? selectedItems.bottoms.product.texture_3D : 'default'}`}
+                url={selectedItems.bottoms
+                  ? getModelURLForCategory(selectedItems.bottoms.product.item_Category, gender, selectedBodyType)
+                  : getShortsURL()
+                }
+                position={[0, 0, 0]}
+                texture={selectedItems.bottoms?.product.texture_3D}
+                color={!selectedItems.bottoms ? "#000000" : undefined}
+              />
 
               {/* Footwear if needed */}
               {selectedItems.footwear && (
@@ -1287,6 +1279,8 @@ const CharacterCustomization = () => {
 export default CharacterCustomization;
 
 const getModelURLForCategory = (category, gender, bodyType) => {
+  console.log('Getting model for:', { category, gender, bodyType });
+  
   const urlMaps = {
     'Tshirt': tshirURLs,
     'Jersey': jerseyURLs,
@@ -1298,6 +1292,8 @@ const getModelURLForCategory = (category, gender, bodyType) => {
     'Boots': footwearsURLs?.[gender]?.Boots1,
   };
 
-  const urlMap = urlMaps[category];
-  return urlMap?.[gender]?.[bodyType];
+  // Get the appropriate model URL based on category, gender and body type
+  const modelURL = urlMaps[category]?.[gender]?.[bodyType];
+  console.log('Selected model URL:', modelURL);
+  return modelURL;
 };
