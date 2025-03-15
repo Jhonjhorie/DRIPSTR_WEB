@@ -17,7 +17,8 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Toast from '../../../shared/alerts';
 import { Link } from 'react-router-dom';
-
+import useCarts from '../../../modules/Products/hooks/useCart';
+import useUserProfile from '../../../shared/mulletCheck';
 
 // Add to top of Avatar.js
 useGLTF.preload(Object.values(bodyTypeURLs.Boy).flat());
@@ -399,6 +400,62 @@ const CharacterCustomization = () => {
     bottoms: true,
     footwear: true
   });
+  const [addingToCart, setAddingToCart] = useState(false);
+
+  // Add cart integration hooks
+  const { addToCart } = useCarts();
+  const { profile } = useUserProfile();
+
+  const handleAddSelectedToCart = async () => {
+    if (!profile) {
+      setToast({
+        show: true,
+        message: "Please log in to add items to cart",
+        type: 'warning'
+      });
+      return;
+    }
+
+    setAddingToCart(true);
+    try {
+      // Filter out null values and create array of selected items
+      const itemsToAdd = Object.values(selectedItems).filter(item => item);
+      
+      // Add each item to cart
+      for (const item of itemsToAdd) {
+        const variantInfo = item.variant;
+        const sizeInfo = variantInfo?.sizes?.[0]; // Get first size or implement size selection
+
+        if (!sizeInfo) {
+          console.error('No size information available for item:', item);
+          continue;
+        }
+
+        await addToCart(
+          item.product.id,
+          1, // Default quantity
+          variantInfo,
+          sizeInfo
+        );
+      }
+
+      setToast({
+        show: true,
+        message: `${itemsToAdd.length} item(s) added to cart successfully!`,
+        type: 'success'
+      });
+
+    } catch (error) {
+      console.error('Error adding items to cart:', error);
+      setToast({
+        show: true,
+        message: 'Failed to add items to cart',
+        type: 'error'
+      });
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAvatar = async () => {
@@ -503,11 +560,13 @@ const CharacterCustomization = () => {
   }, []);
 
   const getTShirtURL = () => {
-    return tshirURLs[gender][selectedBodyType] || null;
+    console.log('Getting TShirt URL for:', { gender, selectedBodyType });
+    return tshirURLs[gender][selectedBodyType];
   };
 
   const getShortsURL = () => {
-    return shortsURLs[gender][selectedBodyType] || null;
+    console.log('Getting Shorts URL for:', { gender, selectedBodyType });
+    return shortsURLs[gender][selectedBodyType];
   };
 
   const handleUpdate = async (e) => {
@@ -923,6 +982,33 @@ const CharacterCustomization = () => {
         </button>
       </div>
 
+      {/* Add after the camera control buttons */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-10 flex gap-2">
+        <button
+          onClick={handleAddSelectedToCart}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all
+            ${Object.values(selectedItems).some(item => item) 
+              ? 'bg-purple-600 text-white hover:bg-purple-700' 
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+          disabled={!Object.values(selectedItems).some(item => item) || addingToCart}
+          title={!Object.values(selectedItems).some(item => item) ? "Select items to add to cart" : ""}
+        >
+          {addingToCart ? (
+            <>
+              <i className="fas fa-spinner fa-spin"></i>
+              Adding to Cart...
+            </>
+          ) : (
+            <>
+              <i className="fas fa-shopping-cart"></i>
+              {Object.values(selectedItems).some(item => item) 
+                ? `Add ${Object.values(selectedItems).filter(item => item).length} Item${Object.values(selectedItems).filter(item => item).length > 1 ? 's' : ''} to Cart`
+                : 'No Items Selected'}
+            </>
+          )}
+        </button>
+      </div>
+
       <Suspense fallback={
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
@@ -982,38 +1068,28 @@ const CharacterCustomization = () => {
               )}
 
               {/* Top Wear */}
-              {selectedItems.tops ? (
-                <Part 
-                  key={`selected-top-${selectedItems.tops.product.texture_3D}`}
-                  url={getModelURLForCategory(selectedItems.tops.product.item_Category, gender, selectedBodyType)}
-                  position={[0, 0, 0]}
-                  texture={selectedItems.tops.product.texture_3D}
-                />
-              ) : (
-                <Part 
-                  key="default-tshirt"
-                  url={getTShirtURL()} 
-                  position={[0, 0, 0]}
-                  color="#FFFFFF"
-                />
-              )}
+              <Part 
+                key={`top-${selectedBodyType}-${selectedItems.tops ? selectedItems.tops.product.texture_3D : 'default'}`}
+                url={selectedItems.tops 
+                  ? getModelURLForCategory(selectedItems.tops.product.item_Category, gender, selectedBodyType)
+                  : getTShirtURL()
+                }
+                position={[0, 0, 0]}
+                texture={selectedItems.tops?.product.texture_3D}
+                color={!selectedItems.tops ? "#FFFFFF" : undefined}
+              />
 
               {/* Bottom Wear */}
-              {selectedItems.bottoms ? (
-                <Part 
-                  key={`selected-bottom-${selectedItems.bottoms.product.texture_3D}`}
-                  url={getModelURLForCategory(selectedItems.bottoms.product.item_Category, gender, selectedBodyType)}
-                  position={[0, 0, 0]}
-                  texture={selectedItems.bottoms.product.texture_3D}
-                />
-              ) : (
-                <Part 
-                  key="default-shorts"
-                  url={getShortsURL()} 
-                  position={[0, 0, 0]}
-                  color="#000000"
-                />
-              )}
+              <Part 
+                key={`bottom-${selectedBodyType}-${selectedItems.bottoms ? selectedItems.bottoms.product.texture_3D : 'default'}`}
+                url={selectedItems.bottoms
+                  ? getModelURLForCategory(selectedItems.bottoms.product.item_Category, gender, selectedBodyType)
+                  : getShortsURL()
+                }
+                position={[0, 0, 0]}
+                texture={selectedItems.bottoms?.product.texture_3D}
+                color={!selectedItems.bottoms ? "#000000" : undefined}
+              />
 
               {/* Footwear if needed */}
               {selectedItems.footwear && (
@@ -1203,6 +1279,8 @@ const CharacterCustomization = () => {
 export default CharacterCustomization;
 
 const getModelURLForCategory = (category, gender, bodyType) => {
+  console.log('Getting model for:', { category, gender, bodyType });
+  
   const urlMaps = {
     'Tshirt': tshirURLs,
     'Jersey': jerseyURLs,
@@ -1214,6 +1292,8 @@ const getModelURLForCategory = (category, gender, bodyType) => {
     'Boots': footwearsURLs?.[gender]?.Boots1,
   };
 
-  const urlMap = urlMaps[category];
-  return urlMap?.[gender]?.[bodyType];
+  // Get the appropriate model URL based on category, gender and body type
+  const modelURL = urlMaps[category]?.[gender]?.[bodyType];
+  console.log('Selected model URL:', modelURL);
+  return modelURL;
 };
