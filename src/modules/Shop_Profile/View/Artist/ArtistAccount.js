@@ -220,11 +220,11 @@ function ArtistAccount() {
       <div className="absolute mx-3 right-0 z-10">
         <ArtistSideBar></ArtistSideBar>
       </div>
-      <div className="text-3xl font-bold w-full text-center text-custom-purple p-3">
+      <div className="text-3xl font-bold w-full text-left md:text-center text-custom-purple p-3">
         MANAGE ACCOUNT
       </div>
-      <div className=" h-auto  w-full  px-10 flex justify-center ">
-        <div className="w-1/2 h-auto bg-slate-50 relative justify-items-center p-7 shadow-lg rounded-md">
+      <div className=" h-auto  w-full px-2 md:px-10 flex justify-center ">
+        <div className="w-full md:w-1/2 mb-16  h-auto bg-slate-50 relative justify-items-center p-7 shadow-lg rounded-md">
           <div className="absolute top-2 right-2">
             <div
               onClick={setShowEdit}
@@ -234,9 +234,9 @@ function ArtistAccount() {
               <box-icon color="black" type="solid" name="edit"></box-icon>
             </div>
           </div>
-          <div className="w-full flex gap-5">
+          <div className="w-full md:flex gap-5">
             <div>
-              <div className="bg-slate-100 relative h-44 w-60 border-2 p-1 border-custom-purple rounded-md">
+              <div className="bg-slate-100 relative h-44 place-self-center w-60 border-2 p-1 border-custom-purple rounded-md">
                 {imageLoading && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
                     <span className="loading loading-bars loading-lg"></span>
@@ -278,8 +278,8 @@ function ArtistAccount() {
       </div>
       {/* ALLERTS ADD Item SUCCESS */}
       {showAlertEdit && (
-        <div className="fixed inset-0 z-20 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white h-auto mt-8 w-[50%]  justify-items-center rounded-md shadow-md relative">
+        <div className="fixed inset-0 z-50 bg-gray-600 p-2 bg-opacity-50  flex justify-center items-center">
+          <div className="bg-white md:h-auto mt-8 w-full md:w-[50%]  justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
             </div>
@@ -287,8 +287,8 @@ function ArtistAccount() {
               Edit Account Information
             </h1>
               <div></div>
-              <div className="flex gap-2 w-full  px-10">
-                <div className=" w-1/2 h-auto ">
+              <div className="md:flex gap-2 w-full h-[500px] overflow-y-scroll overflow-hidden px-5 md:px-10 ">
+                <div className="w-full md:w-1/2 h-auto ">
                   <div className=" p-2 w-full flex justify-center">
                     <div className="bg-slate-100 relative h-44 w-60 border-2 p-1 border-custom-purple rounded-md">
                       {imageLoading && (
@@ -354,7 +354,7 @@ function ArtistAccount() {
                     ></input>
                   </div>
                 </div>
-                <div className="w-1/2 h-auto p-2">
+                <div className="w-full md:w-1/2 h-auto p-2">
                   <input
                     type="file"
                     accept="image/*"

@@ -581,7 +581,7 @@ function ArtistCreate() {
     fetchUserProfile();
   };
 
-  const handleSetisMerchant = async (e) => {
+  const handleSetisArtist = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -722,12 +722,12 @@ function ArtistCreate() {
                   Start the journey now!
                 </h2>
                 <div
-                  onClick={handleSetisMerchant}
+                  onClick={handleSetisArtist}
                   className="p-4 bg-custom-purple cursor-pointer hover:scale-95 duration-200 text-white rounded flex items-center justify-center"
                 >
                   {" "}
                   <span className="iceland-regular text-2xl ">
-                    Enter Dripstr Merchant
+                    Enter Dripstr Artist
                   </span>{" "}
                 </div>
               </div>

@@ -5,18 +5,9 @@ const { useState, useEffect } = React;
 
 function MessagesArtist() {
   const [selectedMessage, setSelectedMessage] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [messageModal, setMessageModal] = useState(false);
-  const [messageContent, setMessageContent] = useState("");
   const [messages, setMessages] = useState([]);
-  const [imageFile, setImageFile] = useState(null);
-  const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [artistData, setArtistData] = useState(null);
   const [selectedArtistId, setSelectedArtistId] = useState(null);
-  const [artistArts, setArtistArts] = useState([]);
-  const [totalArtsCount, setTotalArtsCount] = useState(0);
   const [currentUser, setCurrentUser] = useState(null);
   const [artist, setArtist] = useState(null);
 

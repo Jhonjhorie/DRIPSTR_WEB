@@ -137,7 +137,11 @@ function ArtistSB() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Messages
             </a>
-            <box-icon name="basket" type="solid" color="#4D077C"></box-icon>
+            <box-icon
+              type="solid"
+              name="message-dots"
+              color="#4D077C"
+            ></box-icon>
           </li>
 
           <li

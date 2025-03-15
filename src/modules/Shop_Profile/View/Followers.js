@@ -6,6 +6,7 @@ import store2 from "../../../assets/shop/store2.jpg";
 import blackLogo from "../../../assets/logoWhite.png";
 import { supabase } from "../../../constants/supabase";
 import sadEmote from "../../../../src/assets/emote/sad.png";
+import successEmote from "../../../assets/emote/success.png";
 
 function Followers() {
   const [selectedOption, setSelectedOption] = useState("");
@@ -20,14 +21,50 @@ function Followers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [reportReason, setReportReason] = useState("");
+  const [otherReason, setOtherReason] = useState("");
+  const [merchantId, setMerchantId] = useState(null);
+  const [showAlert, setShowAlert] = React.useState(false);
+  const [showAlertDel, setShowAlertDel] = React.useState(false);
+
+  const handleReportClick = (customer) => {
+    setSelectedCustomer(customer);
+    setIsReportModalOpen(true);
+  };
+  const handleReportSubmit = async () => {
+    const finalReason = reportReason === "Others" ? otherReason : reportReason;
+
+    if (!finalReason.trim()) {
+      alert("Please provide a reason for reporting.");
+      return;
+    }
+
+    const { data, error } = await supabase.from("customer_Report").insert([
+      {
+        cust_Id: selectedCustomer?.id,
+        merchant_Id: merchantId,
+        reason: finalReason,
+        status: "Pending",
+      },
+    ]);
+
+    if (error) {
+      console.error("Error submitting report:", error.message);
+      console.log("Failed to report customer.");
+    } else {
+      setIsReportModalOpen(false);
+      setReportReason("");
+      setOtherReason("");
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    }
+  };
 
   const handleChange = (event) => {
     setSelectedOption(event.target.value);
     setSelectedOption2(event.target.value);
-  };
-
-  const handleReportSelect = (event) => {
-    setSelectedReport(event.target.value);
   };
 
   const handleCloseModal = () => {
@@ -51,11 +88,6 @@ function Followers() {
   const handleVoucherClick = (user) => {
     setSelectedUser(user);
     setIsModalOpen2(true);
-  };
-
-  const handleReportClick = (user) => {
-    setSelectedUser(user);
-    setIsModalOpen4(true);
   };
 
   const fetchData = async () => {
@@ -104,6 +136,9 @@ function Followers() {
       }
 
       console.log("Fetched shops:", shops);
+
+      // Store the current shop's merchant_Id
+      setMerchantId(shops[0].id);
 
       // Fetch followers
       const { data: followers, error: followerError } = await supabase
@@ -165,6 +200,7 @@ function Followers() {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchData();
   }, []); // Run once on mount
@@ -185,7 +221,8 @@ function Followers() {
       }
 
       console.log("Follower removed successfully");
-      alert("Followers has been removed successfully!")
+      setShowAlertDel(true);
+      setTimeout(() => setShowAlertDel(false), 3000);
       setSelectedUser(null);
       setIsModalOpen3(false);
       fetchData();
@@ -203,47 +240,47 @@ function Followers() {
 
   // Filter followers
   const filteredFollowers = followerDetails
-  .filter((follower) => {
-    const nameMatch =
-      searchTerm.trim() === "" ||
-      follower.profile?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
-      const joinDateString = follower.created_at;   
+    .filter((follower) => {
+      const nameMatch =
+        searchTerm.trim() === "" ||
+        follower.profile?.full_name
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+      const joinDateString = follower.created_at;
       if (!joinDateString) return true;
-      const joinDate = new Date(joinDateString);     
-      if (isNaN(joinDate.getTime())) return true;   
+      const joinDate = new Date(joinDateString);
+      if (isNaN(joinDate.getTime())) return true;
 
-    const now = new Date();
-    let dateMatch = true;
+      const now = new Date();
+      let dateMatch = true;
 
-    switch (selectedOption2) {
-      case "option3": // Month ago
-        dateMatch = now - joinDate >= 30 * 24 * 60 * 60 * 1000;
-        break;
-      case "option4": // Year ago
-        dateMatch = now - joinDate >= 365 * 24 * 60 * 60 * 1000;
-        break;
-      case "option5":
-      case "option2":
-      case "option1":
-      default:
-        dateMatch = true;
-        break;
-    }
+      switch (selectedOption2) {
+        case "option3": // Month ago
+          dateMatch = now - joinDate >= 30 * 24 * 60 * 60 * 1000;
+          break;
+        case "option4": // Year ago
+          dateMatch = now - joinDate >= 365 * 24 * 60 * 60 * 1000;
+          break;
+        case "option5":
+        case "option2":
+        case "option1":
+        default:
+          dateMatch = true;
+          break;
+      }
 
-    return nameMatch && dateMatch;
-  })
-  .sort((a, b) => {
-    const dateA = new Date(a.created_at || "");
-    const dateB = new Date(b.created_at|| "");
+      return nameMatch && dateMatch;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.created_at || "");
+      const dateB = new Date(b.created_at || "");
 
-    if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0;
-    if (selectedOption2 === "option2") return dateB - dateA; 
-    if (selectedOption2 === "option5") return dateA - dateB; 
+      if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) return 0;
+      if (selectedOption2 === "option2") return dateB - dateA;
+      if (selectedOption2 === "option5") return dateA - dateB;
 
-    return 0;
-});
-
-
+      return 0;
+    });
 
   return (
     <div className="h-full w-full  bg-slate-300 md:flex">
@@ -302,8 +339,7 @@ function Followers() {
                         <div className="rounded-md bg-white h-full w-10">
                           <img
                             src={
-                              follower.profile?.profile_picture ||
-                              "/default-avatar.png"
+                              follower.profile?.profile_picture || successEmote
                             }
                             alt={`Profile picture of ${
                               follower.profile?.full_name || "Unknown"
@@ -334,7 +370,7 @@ function Followers() {
                           name="user-x"
                           color="#FF2929"
                         ></box-icon>
-                        {/* <box-icon
+                        <box-icon
                           onClick={() => handleReportClick(follower.profile)}
                           onMouseEnter={(e) =>
                             e.currentTarget.setAttribute("color", "#FFF")
@@ -345,9 +381,8 @@ function Followers() {
                           type="solid"
                           name="message-alt-error"
                           color="#4335A7"
-                        ></box-icon> */}
-                        <box-icon
-                          onClick={() => handleVoucherClick(follower.profile)}
+                        ></box-icon>
+                        {/* <box-icon
                           onMouseEnter={(e) =>
                             e.currentTarget.setAttribute("color", "#FFF")
                           }
@@ -357,7 +392,7 @@ function Followers() {
                           type="solid"
                           name="coupon"
                           color="#FAB12F"
-                        ></box-icon>
+                        ></box-icon> */}
                       </div>
                     </div>
                   ))
@@ -628,21 +663,24 @@ function Followers() {
       {/* Remove followers */}
       {isModalOpen3 && (
         <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-6 w-full md:w-1/2 lg:w-1/4 m-2 md:m-0 auto">
+          <div className="bg-white rounded p-4 w-full md:w-1/2 lg:w-1/4 m-2 md:m-0 auto">
             <h2 className="text-lg font-medium text-slate-800 mb-4 text-center ">
-              <span className="font-bold text-2xl">REMOVE FOLLOWERS</span>
+              <span className="font-semibold text-xl">REMOVE FOLLOWERS</span>
               <br />
-              user: {selectedUser?.full_name || "Unknown"}
+
+              <span className="text-sm ">
+                user: {selectedUser?.full_name || "Unknown"}
+              </span>
             </h2>
             <div className="flex justify-between w-full">
               <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="bg-gray-400 px-4 py-2 text-white text-sm rounded hover:bg-gray-500"
                 onClick={handleCloseModal}
               >
-                Close
+                Cancel
               </button>
               <button
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+                className="bg-blue-500 px-4 py-2 text-white text-sm rounded hover:bg-blue-700"
                 onClick={handleRemoveFollower}
               >
                 Remove
@@ -653,57 +691,149 @@ function Followers() {
       )}
 
       {/* Report followers */}
-      {isModalOpen4 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
-          <div className="bg-white rounded-lg p-6 w-full m-2 md:m-0 md:w-1/3">
-            <h2 className="text-lg font-medium text-slate-800 mb-4 text-center ">
-              <span className="font-bold text-2xl">
-                REPORT TO <a className="text-primary-color">DRIPSTR</a>
-              </span>
-              <br />
-              user: {selectedUser?.full_name || "Unknown"}
-            </h2>
+      {isReportModalOpen && selectedCustomer && (
+        <div
+          onClick={() => setIsReportModalOpen(false)}
+          className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-50"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-96 h-auto rounded-md relative bg-slate-100"
+          >
+            <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-2 rounded-t-md"></div>
 
-            <div className="text-slate-800 text-sm font-semibold">
-              Select Report Case
+            <div className="text-violet-900 flex justify-center px-3 text-2xl iceland-bold py-2 rounded-md">
+              Report {selectedCustomer?.full_name || "Unknown"}?
             </div>
 
-            <select
-              id="optionsReports"
-              value={selectedReport}
-              onChange={handleReportSelect}
-              className="w-full bg-slate-300 text-slate-800  border py-1 px-2 rounded-sm text-sm"
+            <div className="w-full h-auto bg-slate-300 rounded-b-md overflow-hidden overflow-y-scroll p-4">
+              <p className="text-gray-900 font-semibold">Select a reason:</p>
+
+              {/* Report Options */}
+              <div className="mt-2 flex text-sm flex-col gap-2">
+                {[
+                  "Fraudulent Activity",
+                  "Harassment",
+                  "Inappropriate Behavior",
+                  "Scam or Misleading",
+                  "Threats or Violence",
+                  "Spam or Fake Account",
+                  "Hate Speech",
+                ].map((reason, index) => (
+                  <label
+                    key={index}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <input
+                      type="radio"
+                      name="reportReason"
+                      value={reason}
+                      className="form-radio text-violet-500"
+                      onChange={() => setReportReason(reason)}
+                    />
+                    <span className="text-gray-800">{reason}</span>
+                  </label>
+                ))}
+
+                {/* Other reason option */}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="reportReason"
+                    value="Others"
+                    className="form-radio text-violet-500"
+                    onChange={() => setReportReason("Others")}
+                  />
+                  <span className="text-gray-800">Others</span>
+                </label>
+
+                {reportReason === "Others" && (
+                  <textarea
+                    className="w-full mt-2 p-2 border bg-slate-50 text-slate-900 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    placeholder="Please describe your concern..."
+                    onChange={(e) => setOtherReason(e.target.value)}
+                  />
+                )}
+              </div>
+
+              {/* Submit Button */}
+              <button
+                className="mt-4 w-full bg-violet-500 text-white py-2 rounded-md hover:bg-violet-600 transition"
+                onClick={handleReportSubmit}
+              >
+                Submit Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAlert && selectedCustomer && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
             >
-              <option value="option1">Hate Speech</option>
-              <option value="option2">Spamming Order Cancelations</option>
-              <option value="option3">Payment Incomplete</option>
-              <option value="option4">Rejected on delivery</option>
-              <option value="option5">
-                Others please specify to comments.
-              </option>
-            </select>
-            <div className="text-slate-800 text-sm font-semibold mt-2">
-              Add comments
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>
+              {" "}
+              Customer {selectedCustomer?.full_name || "Unknown"} reported
+            </span>
+          </div>
+        </div>
+      )}
+      {showAlertDel && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
             </div>
-            <textarea
-              placeholder="Type your comment here..."
-              className="custom-scrollbar bg-slate-300 h-20 w-full mt-1 text-slate-900 text-sm p-1"
-            ></textarea>
-
-            <div className="flex justify-between w-full">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
-                onClick={handleCloseModal}
-              >
-                Close
-              </button>
-              <button
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-                onClick={handleCloseModal}
-              >
-                Report
-              </button>
-            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>
+              {" "}
+              Selected follower successfully remove
+            </span>
           </div>
         </div>
       )}

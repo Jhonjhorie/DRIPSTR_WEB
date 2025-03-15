@@ -1,8 +1,4 @@
 import SideBar from "../Component/Sidebars";
-import logo from "../../../assets/shop/shoplogo.jpg";
-import boy from "../../../assets/shop/sample2.jpg";
-import girl from "../../../assets/shop/erica.jpg";
-import drip from "../../../assets/shop/drip.png";
 import logo2 from "../../../assets/shop/logoWhite.png";
 import "../../../assets/shop/fonts/font.css";
 import { BarChart } from "@mui/x-charts/BarChart";
@@ -11,6 +7,8 @@ import PrintSales from "../Component/PrintSales";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBox, faBoxesPacking, faCoins, faLayerGroup, faPrint, faTicket, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 
 function MerchantDashboard() {
   const navigate = useNavigate();
@@ -48,7 +46,6 @@ function MerchantDashboard() {
           return;
         }
 
-        console.log("Current user:", user);
 
         // Fetch shop data for the current user
         const { data: shops, error: shopError } = await supabase
@@ -64,7 +61,6 @@ function MerchantDashboard() {
         }
 
         if (!shops || shops.length === 0) {
-          console.log("No shops found for the user");
           setError("No shops found for the user");
           setLoading(false);
           return;
@@ -105,14 +101,12 @@ function MerchantDashboard() {
           ).length,
         }));
 
-        console.log("Product counts by shop:", productCountByShop);
         setProductCounts(productCountByShop);
 
         const totalProductCount = productCountByShop.reduce(
           (acc, shop) => acc + shop.productCount,
           0
         );
-        console.log("Total product count:", totalProductCount);
         setTotalProductCount(totalProductCount);
 
         let totalOrders = 0;
@@ -207,9 +201,6 @@ function MerchantDashboard() {
             setMonthlyOrderLabels(sortedMonths);
             setMonthlyOrderData(monthlyOrderCounts);
 
-            console.log("Final Monthly Orders:", monthlyOrders);
-            console.log("Sorted Months:", sortedMonths);
-            console.log("Monthly Order Data:", monthlyOrderCounts);
           }
         } else {
           console.log("No products found for the shops");
@@ -231,7 +222,6 @@ function MerchantDashboard() {
           setError(followerError.message);
         } else {
           const totalFollowers = followers.length;
-          console.log("Total Followers:", totalFollowers);
           setTotalFollowers(totalFollowers);
         }
 
@@ -246,7 +236,6 @@ function MerchantDashboard() {
           console.error("Error fetching wallet:", walletError.message);
           setError(walletError.message);
         } else {
-          console.log("User's wallet:", wallet);
           setWalletData(wallet || { revenue: "0.00" });
         }
       } catch (err) {
@@ -328,7 +317,7 @@ function MerchantDashboard() {
             "prod_num",
             products.map((product) => product.id)
           )
-          .eq("order_status", "Delivered");
+          .eq("shipping_status", "Completed");
 
         if (incomeError) {
           console.error("Error fetching income:", incomeError.message);
@@ -409,7 +398,6 @@ function MerchantDashboard() {
         setUData(monthlyIncomeData);
         setMonthlyOrderLabels(sortedMonths);
 
-        console.log("Monthly Income Data:", monthlyIncomeData);
       } catch (err) {
         console.error("Unexpected error:", err.message);
       }
@@ -457,12 +445,11 @@ function MerchantDashboard() {
         const { data: orders, error: ordersError } = await supabase
           .from("orders")
           .select("prod_num")
-          .eq("order_status", "Delivered");
+          .eq("shipping_status", "Completed");
 
         if (ordersError) throw ordersError;
 
         if (!orders || orders.length === 0) {
-          console.log("No completed orders found.");
           setChartData([]);
           return;
         }
@@ -504,7 +491,7 @@ function MerchantDashboard() {
           })
           .sort((a, b) => b.value - a.value);
 
-        console.log("Top Selling Products:", sortedProducts);
+   
 
         // Update chart data
         setChartData(sortedProducts);
@@ -541,14 +528,8 @@ function MerchantDashboard() {
                 {" "}
                 {totalOrderCount}{" "}
               </div>
-              <div className="absolute bottom-0 right-0 blur-[2px] -z-10">
-                <box-icon
-                  name="package"
-                  type="solid"
-                  size="70px"
-                  color="white"
-                  className=""
-                ></box-icon>
+              <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-4 blur-[2px] -z-10">
+              <FontAwesomeIcon icon={faBox} /> 
               </div>
             </div>
             <div className="bg-custom-purple glass rounded-md h-20 md:h-28 w-40 md:w-44 p-1">
@@ -563,14 +544,8 @@ function MerchantDashboard() {
                 {" "}
                 {totalProductCount}{" "}
               </div>
-              <div className="absolute bottom-0 right-0 blur-[2px] -z-10 ">
-                <box-icon
-                  type="solid"
-                  name="category"
-                  size="70px"
-                  color="white"
-                  className=""
-                ></box-icon>
+              <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-3 blur-[2px] -z-10">
+              <FontAwesomeIcon icon={faLayerGroup} /> 
               </div>
             </div>
             <div className="bg-custom-purple glass rounded-md h-20 md:h-28 w-40 md:w-44 p-1">
@@ -585,15 +560,10 @@ function MerchantDashboard() {
                 {" "}
                 {followersCouunt}{" "}
               </div>
-              <div className="absolute bottom-0 right-0 blur-[2px] -z-10">
-                <box-icon
-                  name="group"
-                  type="solid"
-                  size="70px"
-                  color="#F3F3E0"
-                  className=""
-                ></box-icon>
+              <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-3 blur-[2px] -z-10">
+               <FontAwesomeIcon icon={faUserGroup} /> 
               </div>
+             
             </div>
             <div
               onClick={() => navigate("/shop/MerchantWallet")}
@@ -611,13 +581,8 @@ function MerchantDashboard() {
                 <span className="text-3xl">₱</span>
                 {formatRevenue(walletrevenue?.revenue || "0.00")}
               </div>
-              <div className="absolute bottom-0 right-0 blur-[2px] -z-10">
-                <box-icon
-                  type="solid"
-                  name="coin-stack"
-                  size="70px"
-                  color="white"
-                ></box-icon>
+              <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-3 blur-[2px] -z-10">
+              <FontAwesomeIcon icon={faCoins} /> 
               </div>
             </div>
           </div>
@@ -647,6 +612,7 @@ function MerchantDashboard() {
           <div className=" md:w-full mb-2 w-auto bg-slate-200 glass shadow-md p-1.5 rounded-md h-[70%] md:h-[75%]">
             <div className="w-full bg-slate-50 h-full rounded-md place-items-center">
               <BarChart
+              className="text-sm"
                 series={[
                   {
                     data: pData,
@@ -718,7 +684,7 @@ function MerchantDashboard() {
                 ))
               ) : (
                 <li className="text-slate-500 text-center py-2">
-                  No data available
+                  No items rated yet
                 </li>
               )}
             </ul>
@@ -734,11 +700,7 @@ function MerchantDashboard() {
             className="bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
           >
-            <box-icon
-              name="add-to-queue"
-              type="solid"
-              color="#563A9C"
-            ></box-icon>
+             <FontAwesomeIcon icon={faBoxesPacking} /> 
             <div className="text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs ">
               Manage product
             </div>
@@ -748,11 +710,7 @@ function MerchantDashboard() {
             className="bg-slate-100 h-10 w-48 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
           >
-            <box-icon
-              type="solid"
-              name="purchase-tag-alt"
-              color="#563A9C"
-            ></box-icon>
+             <FontAwesomeIcon icon={faTicket} /> 
             <div className="text-slate-800 font-semibold h-full w-full md:pl-2 py-3 md:py-0 md:text-[15px]  text-[11px] ">
               Manage Vouchers{" "}
             </div>
@@ -761,11 +719,7 @@ function MerchantDashboard() {
             className="bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
           >
-            <box-icon
-              name="add-to-queue"
-              type="solid"
-              color="#563A9C"
-            ></box-icon>
+              <FontAwesomeIcon icon={faPrint} /> 
             <div className="text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs ">
               <PrintSales></PrintSales>
             </div>

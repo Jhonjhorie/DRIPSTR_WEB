@@ -14,6 +14,8 @@ import successEmote from "../../../../src/assets/emote/success.png";
 import sadEmote from "../../../../src/assets/emote/error.png";
 import hmmEmote from "../../../../src/assets/emote/hmmm.png";
 import qrCode from "@/assets/qr.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCrown } from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect } = React;
 function MerchantWallet() {
@@ -26,6 +28,7 @@ function MerchantWallet() {
   const phonedigit = (e) => {
     validateMinLength2(e, 11);
   };
+  const [showWalletModal, setShowWalletModal] = useState(false); // show a wallet for verification
   const fetchUserProfileAndShop = async () => {
     setLoading(true);
 
@@ -48,7 +51,7 @@ function MerchantWallet() {
         const { data: shop, error: shopError } = await supabase
           .from("shop")
           .select(
-            "shop_name, id, address, description, contact_number, shop_image, shop_BusinessPermit"
+            "shop_name, id, address, description, contact_number, shop_image, shop_BusinessPermit, wallet"
           )
           .eq("owner_Id", user.id)
           .single();
@@ -60,6 +63,10 @@ function MerchantWallet() {
         console.log("Fetched shop data:", shop);
         setShopData(shop);
         setMerchantId(shop.id);
+
+        if (!shop.wallet) {
+          setShowWalletModal(true);
+        }
       } else {
         console.log("No user is signed in.");
         setError("No user is signed in.");
@@ -75,6 +82,30 @@ function MerchantWallet() {
   useEffect(() => {
     fetchUserProfileAndShop();
   }, []);
+
+  //insert the id to the shop wallet column
+  const handleConfirmWallet = async () => {
+    if (!walletData || !walletData.id) {
+      console.error("No wallet data found.");
+      return;
+    }
+  
+    try {
+      const { error } = await supabase
+        .from("shop")
+        .update({ wallet: walletData.id }) 
+        .eq("owner_Id", currentUser.id); 
+  
+      if (error) {
+        throw error;
+      }
+  
+      console.log("Wallet ID successfully linked to shop.");
+      setShowWalletModal(false);
+    } catch (error) {
+      console.error("Error updating wallet:", error.message);
+    }
+  };
 
   const fetchWalletData = async () => {
     setLoading(true);
@@ -92,7 +123,7 @@ function MerchantWallet() {
 
     const { data, error } = await supabase
       .from("merchant_Wallet")
-      .select("revenue, owner_Name, owner_ID, number, valid_ID")
+      .select("id, revenue, owner_Name, owner_ID, number, valid_ID")
       .eq("owner_ID", user.id)
       .single();
 
@@ -117,9 +148,10 @@ function MerchantWallet() {
   const [showAlertBL, setIsModalOpenBL] = useState(false); //CASHOUT CONFIRMATION
   const [showAlertSend, setIsModalOpenSend] = useState(false); //CASHOUT CONFIRMATION
   const [showAlertMin, setIsModalOpenMin] = useState(false); //CASHOUT CONFIRMATION
+
   const handleSubmitCashout = async () => {
-    if (!amount || !reason) {
-      setMessage("Please enter both amount and reason.");
+    if (!amount) {
+      console.log("Please enter both amount and reason.");
       return;
     }
 
@@ -129,13 +161,13 @@ function MerchantWallet() {
         full_Name: walletData.owner_Name,
         owner_Id: walletData.owner_ID,
         qty: amount,
-        reason: reason,
+        reason: "Cashout",
         status: "Pending",
       },
     ]);
 
     if (error) {
-      setMessage("Error submitting request. Try again.");
+      console.log("Error submitting request. Try again.");
     } else {
       setAmount("");
       setReason("");
@@ -147,13 +179,13 @@ function MerchantWallet() {
     setLoading(false);
   };
   const handleSubmitCashoutcONF = async () => {
-    if (!amount || !reason) {
-      setMessage("Please enter both amount and reason.");
+    if (!amount) {
+      console.log("Please enter both amount and reason.");
       return;
     }
 
     if (!walletData) {
-      setMessage("Wallet data not available.");
+      console.log("Wallet data not available.");
       return;
     }
     if (parseFloat(amount) < 100) {
@@ -224,7 +256,6 @@ function MerchantWallet() {
   const [hasShownExpirationAlert, setHasShownExpirationAlert] = useState(false);
   const [showAlertExpiredSubs, setIsModalOpenExpired] = useState(false); //Expired CONFIRMATION
   const [showAlertSuccessSubs, setShowSubs] = useState(false);
-
 
   const handleSubmitWalletSubscription = async () => {
     if (!currentUser || !merchantId) {
@@ -578,6 +609,13 @@ function MerchantWallet() {
                 : ""
             }`}
           >
+              {isPremium && (
+                <div className="absolute z-10 -left-2 -top-2 flex justify-end">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-black text-yellow-400 rounded-full text-sm font-medium">
+                    <FontAwesomeIcon icon={faCrown} /> Premium Artist
+                  </span>
+                </div>
+              )}
             {/* Wallet Icon and Name */}
             <div className="absolute bottom-2 right-2">
               <img src={logo} className="h-20 w-20 blur-sm" />
@@ -594,7 +632,13 @@ function MerchantWallet() {
                 <p className="text-2xl font-bold">Loading...</p>
               ) : (
                 <p className="text-3xl font-bold">
-                  ₱{walletData?.revenue || "0.00"}
+                  ₱
+                  {walletData?.revenue
+                    ? Number(walletData.revenue).toLocaleString("en-PH", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })
+                    : "0.00"}
                 </p>
               )}
             </div>
@@ -677,12 +721,12 @@ function MerchantWallet() {
                 onInput={phonedigit}
                 className="w-full p-2 border text-sm text-slate-800 bg-slate-300 rounded-md mb-2"
               />
-              <textarea
+              {/* <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Reason for Cashout"
                 className="w-full p-2 border text-sm text-slate-800 rounded-md bg-slate-300"
-              ></textarea>
+              ></textarea> */}
               <button
                 onClick={handleSubmitCashoutcONF}
                 className="mt-3 bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg w-full"
@@ -713,7 +757,7 @@ function MerchantWallet() {
                     key={transaction.id}
                     className="p-2 border-b flex justify-between"
                   >
-                    <span>
+                    <span className="text-sm">
                       ₱{transaction.qty} - {transaction.reason}
                     </span>
                     <span
@@ -745,78 +789,101 @@ function MerchantWallet() {
             <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md"></div>
 
             <h3 className="text-lg font-semibold mb-2 text-custom-purple text-center">
-              DRIPSTR FAQS CASHOUT
+              DRIPSTR FAQs: CASHOUT
             </h3>
 
             {/* Info Display */}
             <div className="h-[300px] w-full shadow-inner shadow-slate-400 rounded-md overflow-y-auto bg-slate-300 p-4">
-              {inquiryText ? (
-                <p className="whitespace-pre-line text-slate-700">
-                  {inquiryText}
-                </p>
-              ) : (
-                <p className="text-gray-500 text-center">Select an inquiry</p>
-              )}
-            </div>
+              <div className="max-w-3xl mx-auto px-6">
+                <div className="space-y-6">
+                  <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-lg text-black font-semibold">
+                      1. What is the only accepted cash out method?
+                    </h2>
+                    <p className="text-gray-800 text-sm">
+                      We currently only support GCash for cash out. You must
+                      have a valid GCash account to withdraw your funds.
+                    </p>
+                  </div>
 
-            {/* Buttons for Quick Inquiry Messages */}
-            <div className="mt-3 place-content-center w-full  md:flex flex-wrap gap-2">
-              {/* PAYMENT METHODS */}
-              <div>
-                <button
-                  className="bg-purple-600 w-full hover:bg-purple-700 text-sm text-white px-4 py-2 rounded-lg flex-1 mt-1"
-                  onClick={() =>
-                    setInquiryText(`💳 **Accepted Payment Methods**:
-            
-• **Credit/Debit Cards**: Visa, Mastercard, American Express
-• **E-Wallets**: GCash, PayMaya
-• **Bank Transfers**: BPI, BDO, UnionBank
-• **Cash on Delivery (COD)**: Available in selected locations
+                  <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-lg text-black font-semibold">
+                      2. Is there a minimum cash out amount?
+                    </h2>
+                    <p className="text-gray-800 text-sm">
+                      Yes. The minimum cash out amount is ₱100. You’ll be
+                      notified if your balance is below this threshold.
+                    </p>
+                  </div>
 
-✅ **Secure Transactions**: All payments are encrypted & secure.
-📧 **Confirmation**: You'll receive an email once payment is processed.`)
-                  }
-                >
-                  Payment Methods
-                </button>
+                  <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-lg text-black font-semibold">
+                      3. How long does it take to process a GCash cash out?
+                    </h2>
+                    <p className="text-gray-800 text-sm">
+                      Cash out requests are usually processed within 3-5
+                      business days. You will receive a confirmation email once
+                      your request is completed.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-lg text-black font-semibold">
+                      4. Are there any fees for cashing out to GCash?
+                    </h2>
+                    <p className="text-gray-800 text-sm">
+                      A small transaction fee may apply. You’ll see a breakdown
+                      of any fees before confirming your request.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-lg text-black font-semibold">
+                      5. How do I request a GCash cash out?
+                    </h2>
+                    <ul className="list-disc pl-6 text-gray-800 text-sm">
+                      <li>Go to your Merchant/Artist Dashboard.</li>
+                      <li>Select “Request Cash Out.”</li>
+                      <li>Choose GCash as your payment method.</li>
+                      <li>Enter the amount you wish to withdraw.</li>
+                      <li>Click “Confirm” to finalize your request.</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-lg text-black font-semibold">
+                      6. Is my transaction secure?
+                    </h2>
+                    <p className="text-gray-800 text-sm">
+                      Absolutely. We use encryption and secure payment gateways
+                      to protect your information and ensure safe transactions.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-lg text-black font-semibold">
+                      7. How will I know if my cash out is successful?
+                    </h2>
+                    <p className="text-gray-800 text-sm">
+                      You’ll receive an email notification once your cash out
+                      has been processed. You can also check your transaction
+                      history in your dashboard for real-time status updates.
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-gray-100 rounded-lg shadow-md">
+                    <h2 className="text-lg text-black font-semibold">
+                      8. What if I encounter issues or delays?
+                    </h2>
+                    <p className="text-gray-800 text-sm">
+                      If you haven’t received your funds within the stated
+                      timeframe or have any other concerns, please contact our
+                      Support Team. Provide your cash out reference number to
+                      help us resolve your issue quickly.
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div>
-                {/* REFUNDS & EXCHANGES */}
-                <button
-                  className="bg-purple-600 w-full hover:bg-purple-700 text-sm text-white px-4 py-2 rounded-lg flex-1 mt-1"
-                  onClick={() =>
-                    setInquiryText(`🔄 **Refund & Exchange Policy**:
-            
-📆 **Refunds**: Within **7 days** if the item is defective or not as described.
-🔄 **Exchanges**: Within **14 days** for size or color changes.
-📦 **Condition**: Items must be unused with original tags/packaging.
-
-📩 **To request a refund/exchange, email**: support@dripstr.com`)
-                  }
-                >
-                  Refunds & Exchanges
-                </button>
-              </div>
-              <div>
-                {/* SHIPPING TIME */}
-                <button
-                  className="bg-purple-600 w-full hover:bg-purple-700 text-sm text-white px-4 py-2 rounded-lg flex-1 mt-1"
-                  onClick={() =>
-                    setInquiryText(`🚚 **Shipping Time Estimates**:
-            
-📍 **Metro Manila**: 2-5 business days
-📍 **Luzon Areas**: 5-7 business days
-📍 **Visayas & Mindanao**: 7-10 business days
-🌎 **International Shipping**: 10-20 business days
-
-🔗 **Tracking**: You’ll receive an email with a tracking number when your order ships.`)
-                  }
-                >
-                  Shipping Time
-                </button>
-              </div>
-
-              {/* STORE LOCATION */}
             </div>
           </div>
         )}
@@ -824,28 +891,30 @@ function MerchantWallet() {
       {isModalOpenCO && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">
+            <h3 className="text-lg font-semibold text-center text-slate-900 mb-4">
               Are you sure you want to submit this cashout request?
             </h3>
-            <span className="text-custom-purple font-semibold">Amount:</span>
+            <span className="text-custom-purple text-sm font-semibold">
+              Amount:
+            </span>
             <input
               type="number"
               value={amount}
               placeholder="Enter Amount"
-              className="w-full disabled p-2  text-slate-800 bg-slate-300 rounded-md mb-2"
+              className="w-full disabled p-2 text-sm text-slate-800 bg-slate-300 rounded-md mb-2"
             />
             <div className="flex justify-end gap-4">
               <button
                 onClick={() => setIsModalOpenCO(false)}
-                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg"
+                className="bg-gray-400 hover:bg-gray-500 text-white text-sm  px-4 py-2 rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitCashout}
-                className="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg"
+                className="bg-violet-600 hover:bg-violet-700 text-white text-sm px-4 py-2 rounded"
               >
-                Yes, Submit
+                Submit
               </button>
             </div>
           </div>
@@ -1218,6 +1287,25 @@ function MerchantWallet() {
               />
             </svg>
             <span>Successfully Avail SUBSCRIPTION!</span>
+          </div>
+        </div>
+      )}
+      {showWalletModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80 text-center">
+            <h2 className="text-xl font-semibold text-gray-800">
+              Welcome to Your Merchant Wallet
+            </h2>
+            <p className="mt-3 text-gray-600">
+              Please click <span className="font-bold">"CONFIRM"</span> to set
+              up your wallet information.
+            </p>
+            <button
+              className="mt-5 w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200"
+              onClick={handleConfirmWallet}
+            >
+              Confirm
+            </button>
           </div>
         </div>
       )}

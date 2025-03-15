@@ -36,7 +36,6 @@ const SideBar = () => {
         if (error) {
           console.error("Error fetching profile data:", error);
         } else {
-          console.log("Profile data:", profiles);
           setIsMerchant(profiles?.isMerchant || false); // Set the isMerchant state
           setIsArtist(profiles?.isArtist || false); // Set the isArtist state
         }

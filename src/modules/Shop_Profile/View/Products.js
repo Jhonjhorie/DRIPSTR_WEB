@@ -7,6 +7,9 @@ import { blockInvalidChar } from "../Hooks/ValidNumberInput";
 import sadEmote from "../../../../src/assets/emote/sad.png";
 import successEmote from "../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../src/assets/emote/question.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfo  } from "@fortawesome/free-solid-svg-icons";
+
 const { useState, useEffect } = React;
 
 function Products() {
@@ -682,37 +685,39 @@ function Products() {
         <div className=" text-2xl md:text-4xl text-custom-purple font-semibold p-2 py-3">
           Manage Products
         </div>
-        <div className="h-[550px] mt-2 mb-20 md:mt-0 md:mb-0   p-5 w-full overflow-hidden rounded-md shadow-md bg-slate-100">
+        <div className="h-[550px] mt-2 mb-20 md:mt-0 md:mb-0   p-2 w-full overflow-hidden rounded-md shadow-md bg-slate-100">
           <div className=" w-full flex gap-5 place-items-center justify-between mb-2">
-            <div className="md:flex md:gap-2 font-semibold text-slate-400">
+            <div className="md:flex md:gap-2  text-slate-400">
               <div
                 className={
                   activeTabs === "manage-products"
-                    ? "active-tabs"
-                    : "mb-2 md:mb-0"
+                    ? "bg-custom-purple text-white  px-4 py-2 rounded-md"
+                    : "bg-gray-300 text-slate-700  px-4 py-2 rounded-md"
                 }
                 onClick={() => setActiveTab("manage-products")}
               >
-                <span className=" rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-custom-purple glass p-1  md:p-3">
+                <span className=" rounded-md duration-300 cursor-pointer  ">
                   Manage Products
                 </span>
               </div>
               <div
                 className={
-                  activeTabs === "manage-adds" ? "active-tabs" : "mt-2 md:mt-0"
+                  activeTabs === "manage-adds"
+                    ? "bg-custom-purple text-white  px-4 py-2 rounded-md"
+                    : "bg-gray-300 text-slate-700  px-4 py-2 rounded-md"
                 }
                 onClick={() => setActiveTab("manage-adds")}
               >
-                <span className=" rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-custom-purple glass p-1 md:p-3">
+                <span className=" rounded-md duration-300 cursor-pointer  ">
                   Manage Ads
                 </span>
               </div>
             </div>
 
-            <div className="flex  md:gap-2 text-slate-50 rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-gradient-to-r from-violet-500 to-fuchsia-500 glass p-1 md:p-2">
+            {/* <div className="flex  md:gap-2 text-slate-50 rounded-md hover:scale-95 duration-300 cursor-pointer text-sm md:text-lg bg-gradient-to-r from-violet-500 to-fuchsia-500 glass p-1 md:p-2">
               Create New Design
               <box-icon type="solid" color="#e2e8f0" name="palette"></box-icon>
-            </div>
+            </div> */}
           </div>
           <div className="w-full h-full custom-scrollbar bg-slate-200 shadow-inner rounded-md p-4 overflow-y-scroll overflow-x-auto">
             {activeTabs === "manage-products" && (
@@ -725,8 +730,8 @@ function Products() {
                       data-tip=" Once the Item is added, it doesn't mean it automatically added to the shop preview, but it will
                         only store to this page, you can still have the decision to post it. "
                     >
-                      <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
-                        <box-icon color="#FFFFFF" name="info-circle"></box-icon>
+                      <button className="hover:bg-slate-600 glass bg-custom-purple p-1 text-sm px-2 text-white duration-300 shadow-md place-items-center flex rounded-full">
+                      <FontAwesomeIcon icon={faInfo} />
                       </button>
                     </div>
                   </h2>
@@ -849,8 +854,8 @@ function Products() {
                       className="tooltip tooltip-bottom"
                       data-tip=" Maximum advertisement photos to be posted is 3 to 5 Images only."
                     >
-                      <button className="hover:bg-slate-600 glass bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
-                        <box-icon color="#FFFFFF" name="info-circle"></box-icon>
+                      <button className="hover:bg-slate-600 glass p-1 text-sm px-2 text-white bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
+                      <FontAwesomeIcon icon={faInfo} />
                       </button>
                     </div>
                   </h2>
@@ -933,7 +938,7 @@ function Products() {
       </div>
       {/* Add Advertisement Modal */}
       {isModalOpenAds && (
-        <div className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
           <div className="bg-white relative rounded-md p-5 h-auto w-full md:w-3/4 pt-2 lg:w-1/2 m-2 md:m-0 auto">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
@@ -982,7 +987,7 @@ function Products() {
                   </div>
                 </div>
               </div>
-              <div className="w-[180px] h-2/3 md:w-full md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
+              <div className="w-full h-2/3 md:w-full md:h-64 bg-custom-purple shadow-md glass rounded-sm p-2">
                 <div className="bg-slate-100 h-[200px] md:h-full rounded-sm shadow-md place-items-center flex place-content-center">
                   {imageSrcAds ? (
                     <img
@@ -999,13 +1004,13 @@ function Products() {
 
             <div className="flex justify-between w-full">
               <button
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                 onClick={handleCloseModalAD}
               >
-                Close
+                Cancel
               </button>
               <button
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center justify-center gap-2"
+                className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                 onClick={handleAddAd}
                 disabled={loading}
               >
@@ -1014,7 +1019,7 @@ function Products() {
                     <span className="loading loading-dots loading-sm"></span>
                   </>
                 ) : (
-                  "Add"
+                  "Confirm"
                 )}
               </button>
             </div>
@@ -1186,11 +1191,14 @@ function Products() {
       {/* EDIT, VIEW, POST, REMOVE ITEM */}
       {selectedItem && (
         <div
-        onClick={() => setSelectedItem(false)}
-        className="fixed inset-0 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2">
-          <div onClick={(e) => e.stopPropagation()}
-           className="bg-white rounded-lg  md:w-1/2 h-2/3 w-full ">
-            <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 w-full rounded-t-md  " />
+          onClick={() => setSelectedItem(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-lg  md:w-1/2 h-3/4 -mt-14 md:mt-0 md:h-2/3 w-full "
+          >
+            <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 w-full rounded-t-md  " />
             <div className=" flex justify-between items-center pr-2 ">
               <div className="text-custom-purple font-semibold iceland-regular text-2xl p-2">
                 ITEM INFORMATION
@@ -1496,11 +1504,14 @@ function Products() {
           </div>
           {/* Post Variant Confirmation */}
           {showAlert2 && (
-            <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center"
+            >
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800">
-                  Post this Item{" "}
-                  <span className="font-bold text-primary-color">
+                  Are you sure you want to post this Item{" "}
+                  <span className="font-semibold text-primary-color">
                     {selectedItem.item_Name}
                   </span>
                   ?
@@ -1508,15 +1519,15 @@ function Products() {
                 <div className="flex w-full gap-2 justify-between">
                   <button
                     onClick={handleClosePostItem}
-                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                    className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={PostNotify}
-                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -1524,11 +1535,14 @@ function Products() {
           )}
           {/* Unpost Variant Confirmation */}
           {showAlertUnP && (
-            <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center"
+            >
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
-                  Are you sure you want to Unpost this <br />
-                  <span className="font-bold text-primary-color">
+                  Are you sure you want to unpost this <br />
+                  <span className="font-semibold text-primary-color">
                     {selectedItem.item_Name}
                   </span>
                   ?
@@ -1536,15 +1550,15 @@ function Products() {
                 <div className="flex w-full gap-2 justify-between">
                   <button
                     onClick={handleClosePostItem}
-                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                    className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={unPostNotify}
-                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -1552,11 +1566,14 @@ function Products() {
           )}
           {/* Delete Variant Confirmation */}
           {showAlertDelCon && (
-            <div onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center"
+            >
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
                   Are you sure you want to Delete this <br />
-                  <span className="font-bold text-primary-color">
+                  <span className="font-semibold text-primary-color">
                     {selectedItem.item_Name}
                   </span>
                   ?
@@ -1564,15 +1581,15 @@ function Products() {
                 <div className="flex w-full gap-2 justify-between">
                   <button
                     onClick={handleClosePostItem}
-                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                    className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={DeleteItem}
-                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -1580,11 +1597,14 @@ function Products() {
           )}
           {/* Delete Variant Confirmation */}
           {ConfirmUpdate && (
-            <div  onClick={(e) => e.stopPropagation()} className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 flex justify-center items-center"
+            >
               <div className="bg-white p-5 rounded-md shadow-md">
                 <h2 className="text-xl font-semibold mb-4 text-slate-800 text-center">
                   Are you sure you want to Update this <br />
-                  <span className="font-bold text-primary-color">
+                  <span className="font-semibold text-primary-color">
                     {selectedItem.item_Name}
                   </span>
                   ?
@@ -1611,15 +1631,15 @@ function Products() {
                       setCurrentVariantIndex(null);
                       toggleEdit(currentVariantIndex);
                     }}
-                    className="mt-4 p-2 hover:bg-red-700 duration-300 bg-red-500 text-white rounded-md"
+                    className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleConfirmedUpdate}
-                    className="mt-4 p-2 hover:bg-green-700 duration-300 bg-green-500 text-white rounded-md"
+                    className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
                   >
-                    Okay
+                    Confirm
                   </button>
                 </div>
               </div>
@@ -1627,7 +1647,10 @@ function Products() {
           )}
           {/* Alert Update Variant Confirmation */}
           {showAlertEditDone && (
-            <div  onClick={(e) => e.stopPropagation()}className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100"
+            >
               <div
                 role="alert"
                 className="alert alert-success shadow-md flex items-center p-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-slate-50 font-semibold rounded-md"
@@ -1742,14 +1765,14 @@ function Products() {
             <div className="flex justify-between mt-2">
               <button
                 onClick={() => setIsViewModalOpen(false)}
-                className="duration-200  bg-custom-purple glass hover:bg-primary-color text-white  px-2 py-1 rounded"
+                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
               >
                 Close
               </button>
 
               <button
                 onClick={handleDeleteAd}
-                className="duration-200  hover:bg-red-700 glass text-white bg-red-500 px-2 py-1 rounded"
+                className="duration-200  hover:bg-red-700  text-slate-900 bg-red-500 px-2 py-1 rounded"
               >
                 Delete
               </button>

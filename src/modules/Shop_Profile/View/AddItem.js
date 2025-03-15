@@ -396,7 +396,7 @@ const AddItem = () => {
                 <br />
                 <input
                   type="text"
-                  className=" bg-slate-50 p-2 rounded-sm  mt-2 font-semibold text-slate-800 w-full shadow-md"
+                  className=" bg-slate-50 p-2 rounded-sm  mt-2 text-sm text-slate-800 w-full shadow-md"
                   placeholder="Item Name "
                   name="itemTitle"
                   value={formData.itemTitle}
@@ -409,7 +409,7 @@ const AddItem = () => {
                 </label>
                 <br />
                 <textarea
-                  className=" bg-slate-50 p-2 rounded-sm h-28 mt-2 font-semibold text-slate-800 w-full shadow-md resize-none"
+                  className=" bg-slate-50 p-2 rounded-sm h-28 mt-2 text-sm text-slate-800 w-full shadow-md resize-none"
                   placeholder="Type your Item Description "
                   value={formData.itemDescription}
                   onChange={handleChange}
@@ -420,11 +420,11 @@ const AddItem = () => {
                 Item Category:
               </label>
               <div className="">
-                <div className="dropdown dropdown-top w-full">
+                <div className="dropdown dropdown-right w-full">
                   <div
                     tabIndex={0}
                     role="button"
-                    className="bg-custom-purple glass hover:scale-95 duration-300 rounded-md text-center text-slate-100 p-2 mt-2 w-full"
+                    className="bg-custom-purple   glass hover:scale-95 duration-300 rounded-md text-center text-slate-100 p-2 w-full"
                   >
                     {selectedCategory || "Choose a Category"}
                   </div>
@@ -433,11 +433,11 @@ const AddItem = () => {
                     className="dropdown-content menu border-2 border-primary-color bg-slate-100 text-slate-900 font-semibold rounded-md w-full z-[1] p-1 shadow"
                   >
                     {[
-                      "Top",
-                      "Bottom",
+                      "Jersey",
+                      "Shorts",
                       "Tshirt",
                       "Longsleeves",
-                      "Sando",
+                      "Pants",
                       "Tumbler",
                       "Mug",
                       "Shoes",
@@ -518,7 +518,7 @@ const AddItem = () => {
                   ></input>{" "}
                 </div>
               </div>
-              <div className="mb-5 md:mb-0 -mt-2">
+              {/* <div className="mb-5 md:mb-0 -mt-2">
                 <label className="text-slate-950 font-semibold mr-2 text-[15px]">
                   Enable 3D Preview:
                 </label>
@@ -550,7 +550,7 @@ const AddItem = () => {
                     </p>
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
             <div className="w-full h-full md:-mt-0 mt-2 p-2 ">
               <div
@@ -967,7 +967,7 @@ const AddItem = () => {
                   onClick={closeConfirmAdd}
                   className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
                 >
-                  Okay!
+                  Confirm
                 </div>
               </div>
             </div>
