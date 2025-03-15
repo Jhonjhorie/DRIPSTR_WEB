@@ -394,6 +394,11 @@ const CharacterCustomization = () => {
     bottoms: null,
     footwear: null
   });
+  const [expandedCategories, setExpandedCategories] = useState({
+    tops: true,
+    bottoms: true,
+    footwear: true
+  });
 
   useEffect(() => {
     const fetchAvatar = async () => {
@@ -677,6 +682,13 @@ const CharacterCustomization = () => {
         type: 'error'
       });
     }
+  };
+
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
   };
 
   return (
@@ -1086,19 +1098,46 @@ const CharacterCustomization = () => {
       `}
     >
       <div className="flex-1 bg-white rounded-lg shadow-lg p-4 overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-3">My Closet</h2>
-            {loadingCloset ? (
-              <div className="flex items-center justify-center h-full">
-                <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-gray-400" />
+  <h2 className="text-lg font-semibold mb-3">My Closet</h2>
+  {loadingCloset ? (
+    <div className="flex items-center justify-center h-full">
+      <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-gray-400" />
+    </div>
+  ) : closetItems.length === 0 ? (
+    <div className="text-center text-gray-500">No items in closet</div>
+  ) : (
+    <div className="space-y-4">
+      {['tops', 'bottoms', 'footwear'].map((category) => {
+        const categoryItems = closetItems.filter(
+          item => getClothingCategory(item.product?.item_Category) === category
+        );
+
+        if (categoryItems.length === 0) return null;
+
+        return (
+          <div key={category} className="border rounded-lg overflow-hidden">
+            <button
+              onClick={() => toggleCategory(category)}
+              className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-semibold capitalize">{category}</span>
+                <span className="text-xs text-gray-500">({categoryItems.length})</span>
               </div>
-            ) : closetItems.length === 0 ? (
-              <div className="text-center text-gray-500">No items in closet</div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {closetItems.map((item) => {
-                  const itemCategory = getClothingCategory(item.product?.item_Category);
-                  const isSelected = selectedItems[itemCategory]?.product?.texture_3D === item.product.texture_3D;
-              
+              <i className={`fas fa-chevron-${expandedCategories[category] ? 'down' : 'right'} 
+                text-gray-400 transition-transform duration-200`}
+              />
+            </button>
+
+            <div className={`transition-all duration-300 ${
+              expandedCategories[category] 
+                ? 'max-h-[1000px] opacity-100' 
+                : 'max-h-0 opacity-0 overflow-hidden'
+            }`}>
+              <div className="grid grid-cols-2 gap-3 p-3">
+                {categoryItems.map((item) => {
+                  const isSelected = selectedItems[category]?.product?.texture_3D === item.product.texture_3D;
+                  
                   return (
                     <div
                       key={`${item.product_id}-${item.variant?.variant?.variant_Name}`}
@@ -1127,13 +1166,31 @@ const CharacterCustomization = () => {
                         </div>
                       </button>
                       
-                      {/* Rest of the item buttons */}
+                      <div className="mt-2 flex flex-col gap-1">
+                        <button
+                          onClick={() => handleViewProduct(item)}
+                          className="w-full px-2 py-1 text-xs text-center bg-purple-100 text-purple-600 rounded hover:bg-purple-200 transition-colors"
+                        >
+                          View Product
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFromCloset(item.id)}
+                          className="w-full px-2 py-1 text-xs text-center bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
               </div>
-            )}
-        </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
     </div>
   </div>
 </div>
