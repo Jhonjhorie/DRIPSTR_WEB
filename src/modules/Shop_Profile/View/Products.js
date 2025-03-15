@@ -8,7 +8,7 @@ import sadEmote from "../../../../src/assets/emote/sad.png";
 import successEmote from "../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../src/assets/emote/question.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfo  } from "@fortawesome/free-solid-svg-icons";
+import { faInfo, faImages  } from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect } = React;
 
@@ -947,7 +947,7 @@ function Products() {
               <span className="font-bold text-[20px] md:text-2xl">
                 Add Shop Advertisement Photo
               </span>
-              <box-icon name="images" color="#4D077C"></box-icon>
+              <FontAwesomeIcon icon={faImages} />
             </div>
             <div className="h-auto w-full bg-slate-200 place-items-center md:place-items-start  rounded-md shadow-sm mb-2 p-2 md:flex gap-2">
               <div className="md:w-1/2 h-auto p-2">

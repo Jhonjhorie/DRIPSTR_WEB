@@ -150,7 +150,7 @@ function FormCommision() {
   
     const { error } = await supabase
       .from("merchant_Commission")
-      .update({ status: "To prepare" })
+      .update({ status: "To prepare", merchantId: shopId })
       .eq("id", selectedRecordId);
   
     if (error) {

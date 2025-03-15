@@ -64,6 +64,8 @@ function Login() {
   const [showAlertExnum, setShowAlertExnum] = useState(false);
   const [isLandscape, setIsLandscape] = useState(null);
 
+  const [declineReason, setDeclineReason] = useState(null);
+
   const handleImageLoad = (event) => {
     const { naturalWidth, naturalHeight } = event.target;
     setIsLandscape(naturalWidth > naturalHeight);
@@ -86,7 +88,7 @@ function Login() {
       if (user) {
         const { data: shopData, error: shopError } = await supabase
           .from("merchantRegistration")
-          .select("is_Approved")
+          .select("is_Approved, decline_reason")
           .eq("id", user.id);
 
         if (shopError) {
@@ -99,6 +101,7 @@ function Login() {
             setStatus("approved");
           } else if (firstShop.is_Approved === false) {
             setStatus("declined");
+            setDeclineReason(firstShop.decline_reason)
           } else {
             setStatus("pending");
           }
@@ -121,7 +124,9 @@ function Login() {
   useEffect(() => {
     fetchUserProfile();
   }, []);
+  
 
+  
   const phonedigit = (e) => {
     let value = e.target.value;
     value = value.replace(/[^0-9]/g, "").slice(0, 11);
@@ -993,9 +998,9 @@ function Login() {
                     className="object-contain rounded-lg p-1  drop-shadow-customViolet"
                   />
                 </div>
-
+                <p className="text-slate-800 text-center font-medium">Reason:</p>
                 <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
-                  Create new registration? or Contact our support.
+                 {declineReason}
                 </h2>
                 <div
                   onClick={handleRedo}
@@ -1472,7 +1477,7 @@ function Login() {
                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span>Shop Name is already in use. Please try another.</span>
+            <span>Shop Name is already in use. Please try another one.</span>
           </div>
         </div>
       )}
@@ -1504,7 +1509,7 @@ function Login() {
                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span>Contact Number is already in use. Please try another.</span>
+            <span>Contact Number is already in use. Please try another one.</span>
           </div>
         </div>
       )}

@@ -4,7 +4,7 @@ import logo from "../../../assets/shop/shoplogo.jpg";
 import successEmote from "../../../assets/emote/success.png";
 import { supabase } from "../../../constants/supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faBookBookmark, faBoxesPacking, faBoxesStacked, faEye, faMessage, faPeopleGroup, faUserEdit, faWallet } from "@fortawesome/free-solid-svg-icons";
+import { faBell, faBookBookmark, faBoxesPacking, faBoxesStacked, faEye, faBolt, faMessage, faPeopleGroup, faUserEdit, faWallet } from "@fortawesome/free-solid-svg-icons";
 
 function SideBar() {
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
@@ -72,7 +72,7 @@ function SideBar() {
 
   return (
     <div className="relative flex  md:mr-0" ref={navbarRef}>
-      <div
+      {/* <div
         className="dropdown  dropdown-bottom dropdown-end bg-slate-100 shadow-md border-2 border-primary-color 
     shadow-primary-color h-12 w-20 mt-2 rounded-md -ml-36 "
       >
@@ -82,7 +82,7 @@ function SideBar() {
             className="object-cover h-full w-full rounded-sm"
           />
      
-      </div>
+      </div> */}
 
       {/* Navbar */}
       <button
@@ -129,12 +129,12 @@ function SideBar() {
 
           <li
             onClick={() => navigate("/shop/MerchantDashboard")}
-            className="flex justify-between p-1 hover:bg-slate-300 mt-4 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between items-center p-1 hover:bg-slate-300 mt-4 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
-            <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
+            <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer -pr-1">
               Dashboard
             </a>
-            <box-icon type="solid" name="dashboard"></box-icon>
+            <FontAwesomeIcon icon={faBolt} /> 
           </li>
 
           <li

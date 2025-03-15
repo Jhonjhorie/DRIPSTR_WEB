@@ -15,7 +15,7 @@ import sadEmote from "../../../../src/assets/emote/error.png";
 import hmmEmote from "../../../../src/assets/emote/hmmm.png";
 import qrCode from "@/assets/qr.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrown } from "@fortawesome/free-solid-svg-icons";
+import { faCrown, faWallet } from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect } = React;
 function MerchantWallet() {
@@ -621,7 +621,7 @@ function MerchantWallet() {
               <img src={logo} className="h-20 w-20 blur-sm" />
             </div>
             <div className="flex justify-between items-center">
-              <box-icon type="solid" name="wallet"></box-icon>
+            <FontAwesomeIcon icon={faWallet} /> 
               <span className="text-lg font-semibold">Dripstr Wallet</span>
             </div>
 
@@ -689,12 +689,7 @@ function MerchantWallet() {
       animate-none hover:animate-[shake_1s_ease-in-out_infinite]  flex items-center gap-2"
               >
                 SUBSCRIPTION
-                <box-icon
-                  type="solid"
-                  name="crown"
-                  size="md"
-                  color="gold "
-                ></box-icon>
+                <FontAwesomeIcon icon={faCrown} className="text-yellow-500"/>
               </h1>
             </div>
           </div>

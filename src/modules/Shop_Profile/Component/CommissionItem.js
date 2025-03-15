@@ -299,7 +299,7 @@ function CommissionItem() {
                 <p className="text-sm text-slate-800">
                   <strong>Shipping Address: </strong>
                   {clientAddress
-                    ? `${clientAddress.full_address}, ${clientAddress.postcode}, Philippines`
+                    ? `${clientAddress.full_address}, ${clientAddress.postcode}`
                     : "No address found"}
                 </p>
 

@@ -6,6 +6,9 @@ import { supabase } from "../../../../constants/supabase";
 import successEmote from "../../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../../src/assets/emote/question.png";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleXmark} from "@fortawesome/free-solid-svg-icons";
+
 function ArtistAddArts() {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
@@ -245,7 +248,7 @@ function ArtistAddArts() {
               className="absolute top-2 z-20 right-2 bg-white hover:bg-gray-200 duration-150 rounded-full p-1"
               onClick={closeModal}
             >
-                <box-icon name='x-circle'></box-icon>
+                 <FontAwesomeIcon icon={faCircleXmark} /> 
             </button>
 
             <div className="h-auto md:w-1/2 w-full rounded-md">

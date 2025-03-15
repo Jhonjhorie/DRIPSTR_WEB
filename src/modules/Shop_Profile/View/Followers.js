@@ -7,6 +7,8 @@ import blackLogo from "../../../assets/logoWhite.png";
 import { supabase } from "../../../constants/supabase";
 import sadEmote from "../../../../src/assets/emote/sad.png";
 import successEmote from "../../../assets/emote/success.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell, faShield, faUserMinus } from "@fortawesome/free-solid-svg-icons";
 
 function Followers() {
   const [selectedOption, setSelectedOption] = useState("");
@@ -357,31 +359,10 @@ function Followers() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2 place-items-center">
-                        <box-icon
-                          onClick={() => handleRemoveClick(follower.profile)}
-                          onMouseEnter={(e) =>
-                            e.currentTarget.setAttribute("color", "#FFF")
-                          }
-                          onMouseLeave={(e) =>
-                            e.currentTarget.setAttribute("color", "#FF2929")
-                          }
-                          type="solid"
-                          name="user-x"
-                          color="#FF2929"
-                        ></box-icon>
-                        <box-icon
-                          onClick={() => handleReportClick(follower.profile)}
-                          onMouseEnter={(e) =>
-                            e.currentTarget.setAttribute("color", "#FFF")
-                          }
-                          onMouseLeave={(e) =>
-                            e.currentTarget.setAttribute("color", "#4335A7")
-                          }
-                          type="solid"
-                          name="message-alt-error"
-                          color="#4335A7"
-                        ></box-icon>
+                      <div className="flex gap-2 place-items-center ">
+                        <FontAwesomeIcon className="text-slate-800 hover:text-slate-100" icon={faUserMinus }  onClick={() => handleRemoveClick(follower.profile)}/> 
+    
+                        <FontAwesomeIcon className="text-yellow-500 hover:text-slate-100"  icon={faShield}  onClick={() => handleReportClick(follower.profile)}/> 
                         {/* <box-icon
                           onMouseEnter={(e) =>
                             e.currentTarget.setAttribute("color", "#FFF")

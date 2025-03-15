@@ -705,7 +705,7 @@ function Artists() {
         )}
         <div className="px-1 md:px-4 mb-20 justify-center space-y-6">
           <div className=" flex w-full z-10 justify-between">
-            <div className="flex justify-center mb-4 gap-4">
+            <div className="flex justify-center mb-4 gap-1 md:gap-4">
               <button
                 className={`px-4 py-2 text-sm rounded glass font-semibold ${
                   showPremium
@@ -730,7 +730,7 @@ function Artists() {
 
             <div
               onClick={() => navigate("/arts/topArtist")}
-              className="flex items-center shadow-md z-10 duration-200 hover:bg-yellow-500 hover:scale-95 bg-slate-50 rounded px-2 text-slate-900 cursor-pointer  justify-center gap-2 text-center font-semibold"
+              className="flex items-center shadow-md z-10 duration-200 hover:bg-yellow-500 hover:scale-95 bg-slate-50 rounded px-1 md:px-2 text-slate-900 text-sm cursor-pointer  justify-center gap-2 text-center font-semibold"
             >
               TOP ARTIST
               <FontAwesomeIcon icon={faCrown} />
