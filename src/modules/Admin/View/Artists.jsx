@@ -16,7 +16,12 @@ function Artists() {
   const [selectedArtist, setSelectedArtist] = useState(null);
   const [currentPage, setCurrentPage] = useState(1); // Pagination state
   const [enlargedImage, setEnlargedImage] = useState(null)
+  const [declineModal, setDeclineModal] = useState(false);  // For the decline modal
+  const [declineReason, setDeclineReason] = useState('');  // Selected decline reason
+  const [otherReason, setOtherReason] = useState('');  // Text input for "Others" reason
+  const [searchQuery, setSearchQuery] = useState(''); // New state for search
   const itemsPerPage = 3; // Adjust as needed
+
 
   useEffect(() => {
     const fetchArtistRegistration = async () => {
@@ -24,7 +29,7 @@ function Artists() {
       try {
         const { data, error } = await supabase
           .from('artist_registration')
-          .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash')
+          .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash, decline_reason, sample_art')
           .is('is_approved', null);
         if (error) throw error;
         setRegister(data || []);
@@ -121,17 +126,43 @@ function Artists() {
   };
 
 
-  const handleDecline = async (id) => {
+  // Decline an artist with reason
+  const declineArtist = async (artistId, reason) => {
     try {
       const { error } = await supabase
         .from('artist_registration')
-        .update({ is_approved: false })
-        .eq('id', id);
+        .update({ is_approved: false, decline_reason: reason })
+        .eq('id', artistId);
       if (error) throw error;
-      setRegister(prev => prev.filter(artist => artist.id !== id));
+      setRegister(prev => prev.filter((artist) => artist.id !== artistId));
+      setDeclineModal(false);
     } catch (error) {
       setError(error.message);
     }
+  };
+
+  // Open the decline modal and set selected artist
+  const handleDecline = (artist) => {
+    setSelectedArtist(artist);
+    setDeclineModal(true);
+  };
+
+  // Close the decline modal
+  const closeDeclineModal = () => {
+    setDeclineModal(false);
+    setDeclineReason('');
+    setOtherReason('');
+    setSelectedArtist(null);
+  };
+
+  // Handle confirm decline (with selected reason)
+  const confirmDecline = () => {
+    const reasonToUse = declineReason === 'Others' && otherReason ? otherReason : declineReason;
+    if (!reasonToUse) {
+      alert('Please select or enter a reason for declining.');
+      return;
+    }
+    declineArtist(selectedArtist.id, reasonToUse);
   };
 
   const handleId = (artist) => {
@@ -165,12 +196,22 @@ function Artists() {
     }
   };
 
+  const filteredArtists = artists.filter(artist => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      artist.artist_Name?.toLowerCase().includes(searchLower) ||
+      artist.full_Name?.toLowerCase().includes(searchLower) ||
+      artist.owner_Id?.full_name?.toLowerCase().includes(searchLower) ||
+      artist.art_Type?.toLowerCase().includes(searchLower) ||
+      artist.contact_number?.toLowerCase().includes(searchLower)
+    );
+  });
 
 
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentArtists = artists.slice(indexOfFirstItem, indexOfLastItem);
+  const currentArtists = filteredArtists.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="flex">
@@ -192,8 +233,13 @@ function Artists() {
           </button>
           <input
             type="text"
-            placeholder="Search"
-            className="px-4 py-2 border rounded bg-white text-black"
+            placeholder="Search artists..."
+            className="px-4 py-2 border rounded bg-white text-black w-64"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1); // Reset to first page when searching
+            }}
           />
         </div>
 
@@ -242,7 +288,7 @@ function Artists() {
                           Accept
                         </button>
                         <button
-                          onClick={() => handleDecline(artist.id)}
+                          onClick={() => handleDecline(artist)}
                           className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                         >
                           Decline
@@ -340,6 +386,51 @@ function Artists() {
           </div>
         )}
 
+        {declineModal && selectedArtist && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+              <h2 className="text-xl font-semibold mb-4 text-black">Reason for Declining Artist</h2>
+              <div className="space-y-4 mb-6">
+                {['Invalid ID', 'Credentials not Match', 'ID Expired', 'Blurry Photos'].map((reason) => (
+                  <div key={reason} className="flex items-center">
+                    <input
+                      type="radio"
+                      id={reason}
+                      name="declineReason"
+                      value={reason}
+                      checked={declineReason === reason}
+                      onChange={(e) => {
+                        setDeclineReason(e.target.value);
+                        setOtherReason(''); // Clear text box when radio is selected
+                      }}
+                      className="mr-2"
+                    />
+                    <label htmlFor={reason} className="text-black">{reason}</label>
+                  </div>
+                ))}
+                <div className="flex flex-col">
+                  <h1 className="text-black">Others:</h1>
+                  <input
+                    type="text"
+                    placeholder="Please specify other reason"
+                    value={otherReason}
+                    onChange={(e) => {
+                      setOtherReason(e.target.value);
+                      setDeclineReason('Others'); // Set to 'Others' when typing
+                    }}
+                    className="mt-2 px-2 py-1 border rounded w-full text-black bg-white"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button onClick={closeDeclineModal} className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Cancel</button>
+                <button onClick={confirmDecline} className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Confirm Decline</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+
         {status === 'artists' && (
           <div>
             {loading ? (
@@ -351,7 +442,7 @@ function Artists() {
                 <div className="space-y-6">
                   {currentArtists.length === 0 ? (
                     <h1 className="text-center font-bold text-3xl text-white">
-                      No Artists
+                      {searchQuery ? 'No matching artists found' : 'No Artists'}
                     </h1>
                   ) : (
                     currentArtists.map((artist) => (
@@ -373,7 +464,7 @@ function Artists() {
                               </div>
                             )}
                           </h2>
-                          <h3 className="text-md font-medium text-white cursor-pointer">
+                          <h3 className="text-md font-medium text-white">
                             {artist.full_Name || artist.owner_Id?.full_name || 'Unnamed Artist'}
                           </h3>
                           <p className="text-white text-sm">

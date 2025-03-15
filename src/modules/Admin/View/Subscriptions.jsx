@@ -3,25 +3,23 @@ import { supabase } from '../../../constants/supabase';
 import Sidebar from './Shared/Sidebar';
 
 function Subscriptions() {
-    const [activeTab, setActiveTab] = useState('Artists'); // Default tab
+    const [activeTab, setActiveTab] = useState('Artists');
     const [artists, setArtists] = useState([]);
     const [merchants, setMerchants] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [selectedScreenshot, setSelectedScreenshot] = useState(null); // New state for modal
 
-    // Fetch Artists
+    // Fetch functions remain unchanged
     const fetchArtists = async () => {
         try {
             const { data, error } = await supabase
                 .from('artist_Subscription')
-                .select('*, artist_Id(artist_Name, contact_number, is_Premium)')
+                .select('*, artist_Id(artist_Name, contact_number, is_Premium), user_Id(full_name)')
                 .eq('status', 'Pending')
-                .eq('payment', 'Gcash')
-
+                .eq('payment', 'Gcash');
 
             if (error) throw error;
-
-            console.log('Fetched artists:', data);
             setArtists(data || []);
         } catch (error) {
             console.error('Error fetching artists:', error.message);
@@ -32,17 +30,15 @@ function Subscriptions() {
         }
     };
 
-    // Fetch Merchants (assuming a 'merchants' table exists)
     const fetchMerchants = async () => {
         try {
             const { data, error } = await supabase
-                .from('merchants') // Replace with your actual table name
-                .select('*, merchant_Id(merchant_Name)') // Adjust fields as needed
+                .from('merchant_Subscription')
+                .select('*, merchant_Id(shop_name, contact_number, is_Premium), user_Id(full_name)')
+                .eq('payment', 'Gcash')
                 .eq('status', 'Pending');
 
             if (error) throw error;
-
-            console.log('Fetched merchants:', data);
             setMerchants(data || []);
         } catch (error) {
             console.error('Error fetching merchants:', error.message);
@@ -61,16 +57,112 @@ function Subscriptions() {
         }
     }, [activeTab]);
 
-    // Placeholder action functions (replace with actual logic)
-    const approveItem = (id) => console.log(`Approved item with ID: ${id}`);
+    const approveItem = async (id) => {
+        try {
+            // Start a transaction-like operation
+            setLoading(true);
+            
+            // Get the current date and calculate the subs_endDate (30 days from now)
+            const currentDate = new Date();
+            const endDate = new Date(currentDate.setDate(currentDate.getDate() + 30)); // Add 30 days
+            
+            // Format the endDate in ISO string (or any format that your database uses)
+            const formattedEndDate = endDate.toISOString().split('T')[0];
+    
+            // Determine if it's an artist or merchant based on activeTab
+            if (activeTab === 'Artists') {
+                // 1. Get the artist subscription details first
+                const { data: subscription, error: fetchError } = await supabase
+                    .from('artist_Subscription')
+                    .select('artist_Id')
+                    .eq('id', id)
+                    .single();
+    
+                if (fetchError) throw fetchError;
+    
+                // 2. Update artist's is_Premium status
+                const { error: artistError } = await supabase
+                    .from('artist')
+                    .update({ is_Premium: true })
+                    .eq('id', subscription.artist_Id);
+    
+                if (artistError) throw artistError;
+    
+                // 3. Update subscription status and set the end date
+                const { error: statusError } = await supabase
+                    .from('artist_Subscription')
+                    .update({ 
+                        status: 'Completed',
+                        subs_Enddate: formattedEndDate // Add the end date here
+                    })
+                    .eq('id', id);
+    
+                if (statusError) throw statusError;
+    
+            } else if (activeTab === 'Merchants') {
+                // 1. Get the merchant subscription details first
+                const { data: subscription, error: fetchError } = await supabase
+                    .from('merchant_Subscription')
+                    .select('merchant_Id')
+                    .eq('id', id)
+                    .single();
+    
+                if (fetchError) throw fetchError;
+    
+                // 2. Update merchant's is_Premium status
+                const { error: merchantError } = await supabase
+                    .from('shop') // Assuming the table name is 'shop' for merchants
+                    .update({ is_Premium: true })
+                    .eq('id', subscription.merchant_Id);
+    
+                if (merchantError) throw merchantError;
+    
+                // 3. Update subscription status and set the end date
+                const { error: statusError } = await supabase
+                    .from('merchant_Subscription')
+                    .update({
+                        status: 'Completed',
+                        subs_Enddate: formattedEndDate // Add the end date here
+                    })
+                    .eq('id', id);
+    
+                if (statusError) throw statusError;
+            }
+    
+            // Refresh the data after successful update
+            if (activeTab === 'Artists') {
+                await fetchArtists();
+            } else {
+                await fetchMerchants();
+            }
+    
+        } catch (error) {
+            console.error('Error approving item:', error.message);
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    
+    
     const declineItem = (id) => console.log(`Declined item with ID: ${id}`);
+
+    // Function to open modal
+    const openModal = (screenshot) => {
+        setSelectedScreenshot(screenshot);
+    };
+
+    // Function to close modal
+    const closeModal = () => {
+        setSelectedScreenshot(null);
+    };
 
     return (
         <div className="flex">
             <Sidebar />
             <div className="flex-1 p-4 bg-slate-900 rounded-lg">
                 <h1 className='text-white text-2xl font-semibold mb-4'>Subscription</h1>
-                {/* Tab Navigation */}
                 <div className="flex space-x-4 mb-4">
                     <button
                         className={`px-4 py-2 rounded-md font-medium ${activeTab === 'Artists' ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300'}`}
@@ -88,17 +180,9 @@ function Subscriptions() {
 
                 <h1 className="text-2xl font-bold mb-4 text-white">{activeTab}</h1>
 
-                {/* Loading State */}
-                {loading && (
-                    <p className="text-gray-500">Loading...</p>
-                )}
+                {loading && <p className="text-gray-500">Loading...</p>}
+                {error && <p className="text-red-500">Error: {error}</p>}
 
-                {/* Error State */}
-                {error && (
-                    <p className="text-red-500">Error: {error}</p>
-                )}
-
-                {/* Data Display */}
                 {!loading && !error && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 bg-slate-900">
                         {(activeTab === 'Artists' ? artists : merchants).length === 0 ? (
@@ -111,29 +195,36 @@ function Subscriptions() {
                                     key={item.id}
                                     className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col"
                                 >
-
-                                    {/* Details Section */}
                                     <div className="p-5 flex-1 flex flex-col justify-between">
                                         <div className="space-y-1">
                                             <h3 className="text-xl font-semibold text-gray-800 truncate">
-                                                {item.artist_Id?.artist_Name}
+                                                {item.artist_Id?.artist_Name || item.merchant_Id?.shop_name}
                                             </h3>
+                                            <p className="text-sm text-gray-600 line-clamp-2">
+                                                {item.user_Id?.full_name}
+                                            </p>
                                             <h3 className="text-xl font-semibold text-gray-800 truncate">
-                                            {item.artist_Id?.contact_number}
+                                                {item.artist_Id?.contact_number || item.merchant_Id?.contact_number}
                                             </h3>
                                             <p className="text-gray-700">
-                                                    {new Date(item.created_at).toLocaleDateString()}
-                                                </p>
+                                                {new Date(item.created_at).toLocaleDateString()}
+                                            </p>
                                             <p className="text-sm text-gray-600 line-clamp-2">
-                                                {item.reason}
+                                                {item.reason || 'N/A'}
                                             </p>
-                                            <div className="text-sm text-white bg-orange-500 rounded-md w-[3.5rem]  ">
-                                            <p className="text-sm text-white text-center">
-                                                {item.status}
+                                            {/* Updated screenshot display */}
+                                            <p 
+                                                className="text-sm text-blue-600 cursor-pointer hover:underline"
+                                                onClick={() => openModal(item.screenshot)}
+                                            >
+                                                Proof
                                             </p>
+                                            <div className="text-sm text-white bg-orange-500 rounded-md w-[3.5rem]">
+                                                <p className="text-sm text-white text-center">
+                                                    {item.status}
+                                                </p>
                                             </div>
                                         </div>
-                                        {/* Buttons Section */}
                                         <div className="mt-4 flex gap-3">
                                             <button
                                                 onClick={() => approveItem(item.id)}
@@ -146,6 +237,28 @@ function Subscriptions() {
                                 </div>
                             ))
                         )}
+                    </div>
+                )}
+
+                {/* Modal */}
+                {selectedScreenshot && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg p-4 w-[20rem">
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold">Payment Proof</h2>
+                                <button
+                                    onClick={closeModal}
+                                    className="text-gray-600 hover:text-gray-800"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                            <img
+                                src={selectedScreenshot}
+                                alt="Payment Proof"
+                                className="w-full h-auto max-h-[70vh] object-contain"
+                            />
+                        </div>
                     </div>
                 )}
             </div>
