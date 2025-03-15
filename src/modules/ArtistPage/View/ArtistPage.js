@@ -12,7 +12,7 @@ import { useParams } from "react-router-dom";
 import FormCommision from "../Component/FormCommission";
 import History from "../Component/History";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrown } from "@fortawesome/free-solid-svg-icons";
+import { faCrown, faMessage, faUserPlus, faLeftLong, faShieldHalved, faHeart, faFileImage, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect } = React;
 
@@ -807,10 +807,10 @@ function ArtistPage() {
             const previousPage = sessionStorage.getItem("previousPage") || "/arts/Artists"; 
             navigate(previousPage);
           }}
-          className="hover:scale-90 duration-300"
+          className="hover:scale-90 text-3xl duration-300"
         >
           {" "}
-          <box-icon name="share" type="solid" size="40px"></box-icon>
+          <FontAwesomeIcon icon={faLeftLong} />
         </button>
       </div>
       <div className="px-5 md:px-20 rounded-md ">
@@ -882,14 +882,10 @@ function ArtistPage() {
                       }
                     }
                   }}
-                  className="relative flex items-center gap-4 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass px-1"
+                  className="relative flex items-center gap-4 px-2 rounded-md hover:scale-95 hover:bg-violet-600 duration-200 cursor-pointer justify-center bg-violet-800 text-slate-100 font-semibold iceland-regular glass "
                 >
                   Message
-                  <box-icon
-                    name="message-dots"
-                    type="solid"
-                    color="white"
-                  ></box-icon>
+                  <FontAwesomeIcon icon={faMessage} />
                   {messageStatus && (
                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                   )}
@@ -905,11 +901,7 @@ function ArtistPage() {
     }`}
                 >
                   {isFollowing ? "Unfollow" : "Follow"}
-                  <box-icon
-                    name={isFollowing ? "bookmark-minus" : "bookmark-plus"}
-                    type="solid"
-                    color="white"
-                  ></box-icon>
+                  <FontAwesomeIcon icon={faUserPlus} />
                 </button>
               </div>
             </div>
@@ -1037,26 +1029,18 @@ function ArtistPage() {
                 {/* Like and Actions */}
                 <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2 gap-2">
                   <div
-                    className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold"
+                    className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-slate-800 font-bold"
                     onClick={() => handleLike(art.id, art.likes)}
                   >
                     {art.likes?.length || 0}
-                    <box-icon
-                      name="heart"
-                      type="solid"
-                      color={art.likes?.includes(userId) ? "red" : "gray"}
-                    ></box-icon>
+                    <FontAwesomeIcon icon={faHeart}  color={art.likes?.includes(userId) ? "red" : "gray"}/>
                   </div>
                   <div
                     onClick={() => handleSelectArtReport(art)}
-                    className="tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500"
+                    className="tooltip tooltip-left flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500"
                     data-tip="Report this Post"
                   >
-                    <box-icon
-                      name="shield-x"
-                      type="solid"
-                      color="gold"
-                    ></box-icon>
+                   <FontAwesomeIcon icon={faShieldHalved}  />
                   </div>
                 </div>
               </div>
@@ -1612,20 +1596,16 @@ function ArtistPage() {
                   id="message-image-input"
                 />
                 <label htmlFor="message-image-input" className="cursor-pointer">
-                  <box-icon
-                    type="solid"
-                    color="black"
-                    name="file-image"
-                  ></box-icon>
+                <FontAwesomeIcon icon={faFileImage} />
                 </label>
               </div>
             </div>
-            <div className="w-2/12 flex justify-center items-center hover:bg-primary-color glass bg-custom-purple rounded-r-md hover:scale-95 duration-150 cursor-pointer h-full">
+            <div className="w-2/12 flex justify-center text-2xl text-slate-200 items-center hover:bg-primary-color glass bg-custom-purple rounded-r-md hover:scale-95 duration-150 cursor-pointer h-full">
               <div
                 onClick={handleSendMessage}
                 className="px-4 py-2 place-content-center"
               >
-                <box-icon type="solid" name="send" size="30px"></box-icon>
+                <FontAwesomeIcon icon={faPaperPlane} />
               </div>
             </div>
           </div>

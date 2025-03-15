@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import logo from "../../../assets/shop/shoplogo.jpg";
 import successEmote from "../../../assets/emote/success.png";
 import { supabase } from "../../../constants/supabase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell, faBookBookmark, faBoxesPacking, faBoxesStacked, faEye, faMessage, faPeopleGroup, faUserEdit, faWallet } from "@fortawesome/free-solid-svg-icons";
 
 function SideBar() {
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
@@ -109,8 +111,8 @@ function SideBar() {
                 className="drop-shadow-custom object-cover rounded-full h-[135px] w-full"
               />
             </div>
-            <div  onClick={() => navigate("/shop/Account")} data-tip="Edit Merchant Account" className="  p-2 tooltip tooltip-left duration-200 cursor-pointer">
-              <box-icon type="solid" color="white" name="edit"></box-icon>
+            <div  onClick={() => navigate("/shop/Account")} data-tip="Edit Merchant Account" className=" text-white  p-2 tooltip tooltip-left duration-200 cursor-pointer">
+            <FontAwesomeIcon icon={faUserEdit} /> 
             </div>
           </div>
 
@@ -132,93 +134,85 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Dashboard
             </a>
-            <box-icon type="solid" name="dashboard" color="#4D077C"></box-icon>
+            <box-icon type="solid" name="dashboard"></box-icon>
           </li>
 
           <li
             onClick={() => navigate("/shop/MerchantProducts")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Products
             </a>
-            <box-icon type="solid" name="component" color="#4D077C"></box-icon>
+            <FontAwesomeIcon icon={faBoxesPacking} /> 
           </li>
 
           <li
             onClick={() => navigate("/shop/MerchantOrders")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Orders
             </a>
-            <box-icon name="basket" type="solid" color="#4D077C"></box-icon>
+            <FontAwesomeIcon icon={faBoxesStacked} /> 
           </li>
 
           <li
             onClick={() => navigate("/shop/MerchantMessages")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Messages
             </a>
-            <box-icon
-              type="solid"
-              name="message-dots"
-              color="#4D077C"
-            ></box-icon>
+            <FontAwesomeIcon icon={faMessage} /> 
           </li>
 
           <li
             onClick={() => navigate("/shop/MerchantNotifications")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Notifications
             </a>
-            <box-icon type="solid" name="bell" color="#4D077C"></box-icon>
+            <FontAwesomeIcon icon={faBell} /> 
           </li>
 
           <li
             onClick={() => navigate("/shop/MerchantFollowers")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Followers
             </a>
-            <box-icon type="solid" name="group" color="#4D077C"></box-icon>
+            <FontAwesomeIcon icon={faPeopleGroup} /> 
           </li>
 
           <li
             onClick={() => navigate("/shop/Shop_profile")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Merchant Preview
             </a>
-            <box-icon
-              type="solid"
-              name="shopping-bags"
-              color="#4D077C"
-            ></box-icon>
+            <FontAwesomeIcon icon={faEye} /> 
           </li>
           <li
             onClick={() => navigate("/shop/MerchantWallet")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Merchant Wallet
             </a>
-            <box-icon type='solid' color="#4D077C" name='wallet'></box-icon>
+            <FontAwesomeIcon icon={faWallet} /> 
           </li>
           <li
             onClick={() => navigate("/shop/CommissionPage")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Commissions
             </a>
-            <box-icon type='solid' color="#4D077C" name='bookmark-heart'></box-icon>
+            <FontAwesomeIcon icon={faBookBookmark} /> 
           </li>
         </ul>
       </div>

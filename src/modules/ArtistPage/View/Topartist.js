@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHistory } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from "@/constants/supabase";
 import Topartistcom from "../Component/Topartistcom";
 import des from "../../../assets/emote/Group10.png";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faLeftLong } from "@fortawesome/free-solid-svg-icons";
+
+
+
 const Topartist = () => {
   const navigate = useNavigate();
 
@@ -13,8 +17,8 @@ const Topartist = () => {
       {/* Floating Button */}
       <div
         onClick={() => navigate("/arts/artists")}
-      className="hover:scale-90 duration-300 cursor-pointer absolute top-5 left-5">
-        <box-icon name="share" type="solid" size="40px"></box-icon>
+      className="hover:scale-90 duration-300 cursor-pointer absolute top-5 text-3xl left-5">
+          <FontAwesomeIcon icon={faLeftLong} />
       </div>
       
       <h1 className="text-slate-900 pt-2 text-5xl text-center font-semibold iceland-regular">

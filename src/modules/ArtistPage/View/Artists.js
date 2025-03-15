@@ -7,8 +7,12 @@ import questionEmote from "@/assets/emote/question.png";
 import { supabase } from "@/constants/supabase";
 import { useNavigate } from "react-router-dom";
 import { useMemo } from "react";
-const { useState, useEffect } = React;
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCrown, faHeart, faCircleUser, faShieldHalved } from "@fortawesome/free-solid-svg-icons";
+
+
+const { useState, useEffect } = React;
 function Artists() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -729,7 +733,7 @@ function Artists() {
               className="flex items-center shadow-md z-10 duration-200 hover:bg-yellow-500 hover:scale-95 bg-slate-50 rounded px-2 text-slate-900 cursor-pointer  justify-center gap-2 text-center font-semibold"
             >
               TOP ARTIST
-              <box-icon type="solid" name="crown"></box-icon>
+              <FontAwesomeIcon icon={faCrown} />
             </div>
           </div>
 
@@ -796,15 +800,10 @@ function Artists() {
                     <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2 gap-2">
                       <div
                         onClick={() => handleLike(art.id, art.likes)}
-                        className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold"
+                        className="flex items-center hover:scale-105 cursor-pointer  hover:text-red-700 duration-200 gap-1 text-slate-800 font-bold"
                       >
                         {art.likes?.length || 0}
-                        <box-icon
-                          name="heart"
-                          color={art.likes?.includes(userId) ? "red" : "gray"}
-                          className="cursor-pointer"
-                          type="solid"
-                        ></box-icon>
+                        <FontAwesomeIcon icon={faHeart}  color={art.likes?.includes(userId) ? "red" : "gray"}/>
                       </div>
 
                       {/* Visit Artist */}
@@ -824,26 +823,18 @@ function Artists() {
                           }
                         }}
                         data-tip="Visit Artist"
-                        className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm text-slate-800"
+                        className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200  text-slate-800"
                       >
-                        <box-icon
-                          type="solid"
-                          name="user-pin"
-                          color="blue"
-                        ></box-icon>
+                        <FontAwesomeIcon icon={faCircleUser}  />
                       </div>
 
                       {/* Report Post */}
                       <div
                         onClick={() => handleSelectArtReport(art)}
                         data-tip="Report this Post"
-                        className="tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500"
+                        className="tooltip tooltip-left flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500"
                       >
-                        <box-icon
-                          name="shield-x"
-                          type="solid"
-                          color="gold"
-                        ></box-icon>
+                       <FontAwesomeIcon icon={faShieldHalved}  />
                       </div>
                     </div>
                   </div>
@@ -889,13 +880,7 @@ function Artists() {
                       <div className="flex items-center absolute top-0 right-0 glass bg-transparent rounded-bl-2xl px-2  gap-2">
                         <div className="flex items-center hover:scale-105 cursor-pointer hover:text-red-700 duration-200 gap-1 text-sm text-slate-800 font-bold">
                           {art.likes?.length || 0}
-                          <box-icon
-                            name="heart"
-                            color={art.likes?.includes(userId) ? "red" : "gray"}
-                            onClick={() => handleLike(art.id, art.likes)}
-                            className="cursor-pointer "
-                            type="solid"
-                          ></box-icon>
+                             <FontAwesomeIcon icon={faHeart}  onClick={() => handleLike(art.id, art.likes)}  color={art.likes?.includes(userId) ? "red" : "gray"}/>
                         </div>
                         <div
                           onClick={() => {
@@ -915,24 +900,16 @@ function Artists() {
                             }
                           }}
                           data-tip="Visit Artist"
-                          className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-sm  text-slate-800 "
+                          className="flex tooltip tooltip-bottom items-center gap-1 cursor-pointer hover:scale-105 duration-200  text-slate-800 "
                         >
-                          <box-icon
-                            type="solid"
-                            name="user-pin"
-                            color="blue"
-                          ></box-icon>
+                          <FontAwesomeIcon icon={faCircleUser}  />
                         </div>
                         <div
                           onClick={() => handleSelectArtReport(art)}
                           data-tip="Report this Post"
-                          className=" tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
+                          className=" tooltip tooltip-left  flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500 "
                         >
-                          <box-icon
-                            name="shield-x"
-                            type="solid"
-                            color="gold"
-                          ></box-icon>
+                         <FontAwesomeIcon icon={faShieldHalved}  />
                         </div>
                       </div>
                     </div>

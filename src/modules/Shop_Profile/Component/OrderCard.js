@@ -439,7 +439,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
             <div className="flex justify-end gap-2 mt-4">
               <button
-                className="bg-gray-500 px-4 py-2 text-white text-sm rounded hover:bg-gray-600"
+                className="hover:bg-gray-500 px-4 py-2 text-white text-sm rounded bg-gray-600"
                 onClick={() => setIsModalOpen(false)}
               >
                 Cancel

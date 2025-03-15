@@ -173,7 +173,7 @@ function FormCommision() {
   return (
     <div>
       <div className="overflow-x-auto rounded-md border border-base-content/5 bg-base-200">
-        <table className="table h-auto w-full bg-slate-100">
+        <table className="table h-auto w-full bg-slate-200">
           {/* head */}
           <thead className="w-full bg-custom-purple glass">
             <tr className="text-sm text-center ">

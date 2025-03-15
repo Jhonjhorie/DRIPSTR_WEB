@@ -287,7 +287,7 @@ function ArtistCommision() {
               </div>
             </div>
 
-            <div className="w-full flex justify-end gap-3 p-3">
+            <div className="w-full flex justify-end gap-3 py-3">
               <button
                 onClick={closeModal}
                 className="bg-gray-500 text-sm text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50 "
@@ -300,7 +300,7 @@ function ArtistCommision() {
                   onClick={() => updateCommissionStatus(selectedCommission.id)}
                   className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                 >
-                  Mark as Done
+                  Mark as Completed
                 </button>
               )}
             </div>

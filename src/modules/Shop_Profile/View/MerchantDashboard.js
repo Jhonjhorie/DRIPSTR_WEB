@@ -1,8 +1,4 @@
 import SideBar from "../Component/Sidebars";
-import logo from "../../../assets/shop/shoplogo.jpg";
-import boy from "../../../assets/shop/sample2.jpg";
-import girl from "../../../assets/shop/erica.jpg";
-import drip from "../../../assets/shop/drip.png";
 import logo2 from "../../../assets/shop/logoWhite.png";
 import "../../../assets/shop/fonts/font.css";
 import { BarChart } from "@mui/x-charts/BarChart";
@@ -11,6 +7,8 @@ import PrintSales from "../Component/PrintSales";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBox, faBoxesPacking, faCoins, faLayerGroup, faPrint, faTicket, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 
 function MerchantDashboard() {
   const navigate = useNavigate();
@@ -530,14 +528,8 @@ function MerchantDashboard() {
                 {" "}
                 {totalOrderCount}{" "}
               </div>
-              <div className="absolute bottom-0 right-0 blur-[2px] -z-10">
-                <box-icon
-                  name="package"
-                  type="solid"
-                  size="70px"
-                  color="white"
-                  className=""
-                ></box-icon>
+              <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-4 blur-[2px] -z-10">
+              <FontAwesomeIcon icon={faBox} /> 
               </div>
             </div>
             <div className="bg-custom-purple glass rounded-md h-20 md:h-28 w-40 md:w-44 p-1">
@@ -552,14 +544,8 @@ function MerchantDashboard() {
                 {" "}
                 {totalProductCount}{" "}
               </div>
-              <div className="absolute bottom-0 right-0 blur-[2px] -z-10 ">
-                <box-icon
-                  type="solid"
-                  name="category"
-                  size="70px"
-                  color="white"
-                  className=""
-                ></box-icon>
+              <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-3 blur-[2px] -z-10">
+              <FontAwesomeIcon icon={faLayerGroup} /> 
               </div>
             </div>
             <div className="bg-custom-purple glass rounded-md h-20 md:h-28 w-40 md:w-44 p-1">
@@ -574,15 +560,10 @@ function MerchantDashboard() {
                 {" "}
                 {followersCouunt}{" "}
               </div>
-              <div className="absolute bottom-0 right-0 blur-[2px] -z-10">
-                <box-icon
-                  name="group"
-                  type="solid"
-                  size="70px"
-                  color="#F3F3E0"
-                  className=""
-                ></box-icon>
+              <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-3 blur-[2px] -z-10">
+               <FontAwesomeIcon icon={faUserGroup} /> 
               </div>
+             
             </div>
             <div
               onClick={() => navigate("/shop/MerchantWallet")}
@@ -600,13 +581,8 @@ function MerchantDashboard() {
                 <span className="text-3xl">₱</span>
                 {formatRevenue(walletrevenue?.revenue || "0.00")}
               </div>
-              <div className="absolute bottom-0 right-0 blur-[2px] -z-10">
-                <box-icon
-                  type="solid"
-                  name="coin-stack"
-                  size="70px"
-                  color="white"
-                ></box-icon>
+              <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-3 blur-[2px] -z-10">
+              <FontAwesomeIcon icon={faCoins} /> 
               </div>
             </div>
           </div>
@@ -708,7 +684,7 @@ function MerchantDashboard() {
                 ))
               ) : (
                 <li className="text-slate-500 text-center py-2">
-                  No data available
+                  No items rated yet
                 </li>
               )}
             </ul>
@@ -724,7 +700,7 @@ function MerchantDashboard() {
             className="bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
           >
-            <box-icon type="solid" name="component" color="#4D077C"></box-icon>
+             <FontAwesomeIcon icon={faBoxesPacking} /> 
             <div className="text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs ">
               Manage product
             </div>
@@ -734,11 +710,7 @@ function MerchantDashboard() {
             className="bg-slate-100 h-10 w-48 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
           >
-            <box-icon
-              type="solid"
-              name="purchase-tag-alt"
-              color="#563A9C"
-            ></box-icon>
+             <FontAwesomeIcon icon={faTicket} /> 
             <div className="text-slate-800 font-semibold h-full w-full md:pl-2 py-3 md:py-0 md:text-[15px]  text-[11px] ">
               Manage Vouchers{" "}
             </div>
@@ -747,7 +719,7 @@ function MerchantDashboard() {
             className="bg-slate-100 h-10 w-48 pl-1 md:p-2 rounded-md hover:bg-slate-400 cursor-pointer
            hover:duration-300 glass shadow-md flex place-items-center justify-center  "
           >
-            <box-icon type='solid' name='printer'   color="#563A9C"></box-icon>
+              <FontAwesomeIcon icon={faPrint} /> 
             <div className="text-slate-800 font-semibold h-full w-full md:pl-2 md:py-1 py-2.5 md:text-[15px]  text-xs ">
               <PrintSales></PrintSales>
             </div>

@@ -134,7 +134,7 @@ function CommissionItem() {
 
   return (
     <div>
-      <div className="overflow-x-auto rounded-md border border-base-content/5 bg-base-200">
+      <div className="overflow-x-auto rounded-md border border-base-content/5 bg-slate-200">
         <table className="table">
           {/* head */}
           <thead className="w-full bg-custom-purple glass">
@@ -291,7 +291,7 @@ function CommissionItem() {
                   {selectedCommission.fullName || "N/A"}
                 </p>
                 <p className="text-sm text-slate-800">
-                  <strong>Client Phone:</strong>{" "}
+                  <strong>Phone Number:</strong>{" "}
                   {selectedCommission?.profiles?.mobile || "N/A"}
                 </p>
 
@@ -299,7 +299,7 @@ function CommissionItem() {
                 <p className="text-sm text-slate-800">
                   <strong>Shipping Address: </strong>
                   {clientAddress
-                    ? `${clientAddress.full_address}, ${clientAddress.city}, ${clientAddress.province}, ${clientAddress.region}`
+                    ? `${clientAddress.full_address}, ${clientAddress.postcode}, Philippines`
                     : "No address found"}
                 </p>
 
@@ -308,10 +308,10 @@ function CommissionItem() {
                   {selectedCommission.description || "N/A"}
                 </p>
 
-                <p className="text-sm text-slate-800 ">
+                {/* <p className="text-sm text-slate-800 ">
                   <strong>Notes:</strong>{" "}
                   {selectedCommission.notes || "No notes for this order."}
-                </p>
+                </p> */}
               </div>
               <div className="mt-4 border-t pt-4">
                 {/* Receipt & Notes */}
@@ -348,7 +348,7 @@ function CommissionItem() {
             {/* Buttons */}
             <div className="flex justify-end gap-2 mt-4">
               <button
-                className="bg-gray-500 px-4 py-2 text-white text-sm rounded hover:bg-gray-600"
+                className="hover:bg-gray-500 px-4 py-2 text-white text-sm rounded bg-gray-600"
                 onClick={() => setIsModalOpen(false)}
               >
                 Cancel
