@@ -36,7 +36,7 @@ const SectionWrapper = ({
         )}
       </div>
       
-      <div className="p-3 md:p-4">
+      <div className="py-2 px-1 md:p-4">
         {children}
       </div>
     </div>

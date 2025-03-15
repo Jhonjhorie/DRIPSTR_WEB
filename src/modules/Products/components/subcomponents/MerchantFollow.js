@@ -3,60 +3,11 @@ import { faHeart } from "@fortawesome/free-solid-svg-icons";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/constants/supabase";
 
-const MerchantFollow = ({ profile, shop, isLoggedIn }) => {
-  const [isInWishlist, setIsInWishlist] = useState(false);
-
-  useEffect(() => {
-    if (isLoggedIn && profile?.id && shop?.id) {
-      fetchWishlist();
-    }
-  }, [isLoggedIn, profile, shop]);
-
-  const fetchWishlist = async () => {
-    const { data, error } = await supabase
-      .from("merchant_Followers")
-      .select("*")
-      .eq("acc_id", profile.id)
-      .eq("shop_id", shop.id);
-
-    if (error) {
-      console.error("Error fetching Followers:", error);
-    } else {
-      setIsInWishlist(data.length > 0);
-    }
-  };
-
-  const toggleWishlist = async () => {
-    if (!isLoggedIn || !profile?.id || !shop?.id) return;
-
-    if (isInWishlist) {
-      const { error } = await supabase
-        .from("merchant_Followers")
-        .delete()
-        .eq("acc_id", profile.id)
-        .eq("shop_id", shop.id);
-
-      if (error) {
-        console.error("Error removing from Followers:", error);
-      } else {
-        setIsInWishlist(false);
-      }
-    } else {
-      const { error } = await supabase
-        .from("merchant_Followers")
-        .insert([{ acc_id: profile.id, shop_id: shop.id }]);
-
-      if (error) {
-        console.error("Error adding to Followers:", error);
-      } else {
-        setIsInWishlist(true);
-      }
-    }
-  };
+const MerchantFollow = ({ toggleWishlist, isInWishlist }) => {
 
   return (
     <>
-      {isLoggedIn && (
+      
         <button
           onClick={toggleWishlist}
         
@@ -68,7 +19,6 @@ const MerchantFollow = ({ profile, shop, isLoggedIn }) => {
         >
           <FontAwesomeIcon icon={faHeart} /> {isInWishlist ? "Followed" : "Follow"}
         </button>
-      )}
     </>
   );
 };

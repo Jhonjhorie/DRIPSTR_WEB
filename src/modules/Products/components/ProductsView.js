@@ -90,7 +90,7 @@ const ProductsView = ({
 
   let dataWithPlaceholders;
 
-  if (isSmall && totalItems < 2) {
+  if (isSmall && totalItems < 2 && numColumns < 2 ) {
     dataWithPlaceholders = [
       { empty: true },
       filteredProductsD[0] || { empty: true },
@@ -159,7 +159,7 @@ const ProductsView = ({
 
       {/* Product Grid */}
       {filteredProductsD.length > 0 ? (
-        <div className="grid gap-3 px-4" style={{ gridTemplateColumns: `repeat(${isSmall ? numColumns >= 2 ? 3 : numColumns : numColumns}, minmax(0, 1fr))` }}>
+        <div className="grid gap-3 px-4" style={{ gridTemplateColumns: `repeat(${isSmall ? numColumns > 2 ? 3 : numColumns : numColumns}, minmax(0, 1fr))` }}>
           {dataWithPlaceholders.map((item, index) =>
             item.empty ? (
               <div

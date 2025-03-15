@@ -45,7 +45,7 @@ function Mall({ title2 }) {
       </div>
       
       {/* Main content */}
-      <div className="flex-1 px-4 pb-6">
+      <div className="flex-1 sm:px-4 pb-6">
         <SectionWrapper
           title ={title}
           icon={icon}

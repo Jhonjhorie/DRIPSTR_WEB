@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/constants/supabase"; 
+import { supabase } from "@/constants/supabase";
 
 const JntDetailed = () => {
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTable, setActiveTable] = useState("orders"); // Track active table
 
   const statusOptions = [
-  "To ship",
-   "To deliver",
-   "Fail deliver",
-   "refund",
-   "delivered",
+    "To prepare",
+    "To ship",
+    "To receive",
+    "delivered",
+    "completed",
+    "returning",
+    "returned",
   ];
 
   const statusOrder = statusOptions.reduce((acc, item, index) => {
@@ -21,21 +24,37 @@ const JntDetailed = () => {
 
   const fetchShipments = async () => {
     try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select(`
-          *,
-          user:acc_num (username, full_name, mobile),
-          product:prod_num (item_Name, shop_Name)
-        `)
-        .not("shipping_status", "eq", "cancel")
-   
+      let query;
+      if (activeTable === "orders") {
+        query = supabase
+          .from("orders")
+          .select(
+            `*,
+            user:acc_num (username, full_name, mobile),
+            product:prod_num (item_Name, shop_Name)`
+          )
+          .not("shipping_status", "eq", "cancel");
+      } else {
+        query = supabase
+          .from("merchant_Commission")
+          .select(
+            `*,
+            client:client_Id (username, full_name, mobile),
+            merchant:merchantId (shop_name, contact_number, address)`
+          )
+          .not("status", "eq", "cancel");
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
-       
       if (data) {
-        data.sort((a, b) => (statusOrder[a.shipping_status] ?? Infinity) - (statusOrder[b.shipping_status] ?? Infinity));
+        data.sort(
+          (a, b) =>
+            (statusOrder[a.shipping_status || a.status] ?? Infinity) -
+            (statusOrder[b.shipping_status || b.status] ?? Infinity)
+        );
       }
 
       setShipments(data);
@@ -48,31 +67,76 @@ const JntDetailed = () => {
 
   useEffect(() => {
     fetchShipments();
-  }, []);
+  }, [activeTable]);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "To prepare":
+        return "bg-blue-100 text-blue-800";
+      case "To ship":
+        return "bg-purple-100 text-purple-800";
+      case "To receive":
+        return "bg-amber-100 text-amber-800";
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "returning":
+        return "bg-orange-100 text-orange-800";
+      case "returned":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   return (
-    <div className="bg-gray-100 min-h-screen text-gray-900">
+    <div className="bg-gray-50 min-h-screen text-gray-900">
       {/* Navbar */}
       <nav className="bg-red-600 shadow-md p-4 flex justify-between items-center">
         <h1 className="text-4xl font-bold text-white">J&T Express</h1>
         <ul className="flex space-x-6">
           <li>
-            <Link to="/jnt" className="text-black font-semibold hover:underline">
+            <Link to="/jnt" className="text-white font-semibold hover:underline">
               Home
             </Link>
           </li>
           <li>
-            <Link to="/jnt/track" className="text-black font-semibold hover:underline">
+            <Link to="/jnt/track" className="text-white font-semibold hover:underline">
               Track a Shipment
             </Link>
           </li>
           <li>
-            <Link to="/jnt/detailed" className="text-black font-semibold hover:underline">
+            <Link to="/jnt/detailed" className="text-white font-semibold hover:underline">
               Detailed List
             </Link>
           </li>
         </ul>
       </nav>
+
+      {/* Table Selection Tabs */}
+      <div className="container mx-auto px-2 py-4">
+        <div className="flex rounded-lg overflow-hidden shadow-sm mb-4">
+          <button
+            onClick={() => setActiveTable("orders")}
+            className={`flex-1 py-2 text-center text-sm font-medium transition-colors 
+              ${activeTable === "orders" 
+                ? "bg-red-600 text-white" 
+                : "bg-white text-gray-700 hover:bg-gray-100"}`}
+          >
+            Orders
+          </button>
+          <button
+            onClick={() => setActiveTable("merchant_Commission")}
+            className={`flex-1 py-2 text-center text-sm font-medium transition-colors
+              ${activeTable === "merchant_Commission" 
+                ? "bg-red-600 text-white" 
+                : "bg-white text-gray-700 hover:bg-gray-100"}`}
+          >
+            Commissions
+          </button>
+        </div>
+      </div>
 
       {/* Shipment Details */}
       <div className="p-6">
@@ -92,8 +156,7 @@ const JntDetailed = () => {
                     <tr>
                       <th>Order ID</th>
                       <th>Customer</th>
-                      <th>Product</th>
-                      <th>Shop</th>
+                      <th>{activeTable === "orders" ? "Product" : "Shop"}</th>
                       <th>Quantity</th>
                       <th>Total Price</th>
                       <th>Shipping Method</th>
@@ -107,26 +170,29 @@ const JntDetailed = () => {
                   <tbody>
                     {shipments.map((shipment) => (
                       <tr key={shipment.id} className="hover:bg-gray-50">
-                        <td>{shipment.shop_transaction_id}</td>
-                        <td>{shipment.user?.username || shipment.user?.full_name}</td>
-                        <td>{shipment.product?.item_Name}</td>
-                        <td>{shipment.product?.shop_Name}</td>
+                        <td>{shipment.shop_transaction_id || shipment.transaction_id}</td>
+                        <td>
+                          {activeTable === "orders"
+                            ? shipment.user?.username || shipment.user?.full_name
+                            : shipment.client?.username || shipment.client?.full_name}
+                        </td>
+                        <td>
+                          {activeTable === "orders"
+                            ? shipment.product?.item_Name
+                            : shipment.merchant?.shop_name}
+                        </td>
                         <td>{shipment.quantity}</td>
-                        <td>₱{shipment.final_price.toFixed(2)}</td>
-                        <td>{shipment.shipping_method}</td>
+                        <td>₱{(shipment.final_price || shipment.pricing || 0).toFixed(2)}</td>
+                        <td>{shipment.shipping_method || "N/A"}</td>
                         <td>{shipment.estimated_delivery || "N/A"}</td>
                         <td>{new Date(shipment.created_at).toLocaleDateString()}</td>
                         <td>
                           <span
-                            className={`badge ${
-                              shipment.shipping_status === "delivered"
-                                ? "badge-success"
-                                : shipment.shipping_status === "To prepare"
-                                ? "badge-neutral" 
-                                : shipment.shipping_status === "refund" ? "badge-error" : shipment.shipping_status === "To ship" ? "badge-info": "badge-warning"
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              getStatusColor(shipment.shipping_status || shipment.status)
                             }`}
                           >
-                            {shipment.shipping_status}
+                            {shipment.shipping_status || shipment.status}
                           </span>
                         </td>
                       </tr>

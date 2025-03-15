@@ -26,6 +26,7 @@ import AdsBanner from "../Home/components/AdsBanner.js";
 import AdsCarousel from "./components/subcomponents/AdsCarousel.js";
 import ShopVoucherStream from "./components/subcomponents/ShopVoucher.js";
 import ReviewStream from "./components/subcomponents/reviewsStream.js";
+import { supabase } from "../../constants/supabase.js";
 import useReviews from "./hooks/useShopReview.js";
 
 function ShopPage() {
@@ -33,6 +34,7 @@ function ShopPage() {
   const navigate = useNavigate();
   const shop = location.state?.shop || {};
   const [showAlert, setShowAlert] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
   const { fetchDataCart } = useCarts();
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const [filMall, setFilMall] = useState(0);
@@ -45,24 +47,111 @@ function ShopPage() {
     totalSold: 0,
     totalFollowers: 0,
   });
-
+  
   useEffect(() => {
-    // Calculate stats based on available products
-    if (products && products.length) {
-      const shopProducts = products.filter((p) => p.shop_id === shop.id);
-      const soldCount = shopProducts.reduce(
-        (acc, product) => acc + (product.sold_count || 0),
-        0
-      );
-
-      setStats({
-        totalProducts: shopProducts.length,
-        totalSold: soldCount,
-        totalFollowers: shop.followers_count || 0,
-      });
+    if (isLoggedIn && profile?.id && shop?.id) {
+      fetchWishlist();
     }
+  }, [isLoggedIn, profile, shop]);
+  
+  const fetchWishlist = async () => {
+    const { data, error } = await supabase
+      .from("merchant_Followers")
+      .select("*")
+      .eq("acc_id", profile.id)
+      .eq("shop_id", shop.id);
+  
+    if (error) {
+      console.error("Error fetching Followers:", error);
+    } else {
+      setIsInWishlist(data.length > 0);
+    }
+  };
+  
+  const fetchFollowers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("merchant_Followers")
+        .select("shop_id")
+        .eq("shop_id", shop.id);
+  
+      if (error) {
+        console.error("Error fetching followers:", error);
+        return 0;
+      }
+  
+      return data.length;
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      return 0;
+    }
+  };
+  
+  const toggleWishlist = async () => {
+    if (!isLoggedIn || !profile?.id || !shop?.id) return;
+  
+    if (isInWishlist) {
+      const { error } = await supabase
+        .from("merchant_Followers")
+        .delete()
+        .eq("acc_id", profile.id)
+        .eq("shop_id", shop.id);
+  
+      if (error) {
+        console.error("Error removing from Followers:", error);
+      } else {
+        setIsInWishlist(false);
+        updateFollowersCount(-1); 
+      }
+    } else {
+      const { error } = await supabase
+        .from("merchant_Followers")
+        .insert([{ acc_id: profile.id, shop_id: shop.id }]);
+  
+      if (error) {
+        console.error("Error adding to Followers:", error);
+      } else {
+        setIsInWishlist(true);
+        updateFollowersCount(1); 
+      }
+    }
+  };
+  
+  const updateFollowersCount = async (change) => {
+    setStats((prevStats) => ({
+      ...prevStats,
+      totalFollowers: prevStats.totalFollowers + change,
+    }));
+  };
+  
+  useEffect(() => {
+    const updateStats = async () => {
+      const followers = await fetchFollowers();
+  
+      if (products && products.length) {
+        const shopProducts = products.filter((p) => p.shop_Id === shop.id);
+        const soldCount = shopProducts.reduce(
+          (acc, product) => acc + (product.item_Orders || 0),
+          0
+        );
+  
+        setStats({
+          totalProducts: shopProducts.length,
+          totalSold: soldCount,
+          totalFollowers: followers,
+        });
+      } else {
+        setStats((prevStats) => ({
+          ...prevStats,
+          totalFollowers: followers,
+        }));
+      }
+    };
+  
+    updateStats();
   }, [products, shop]);
-
+  
+  
   const closeModalRepS = () => {
     document.getElementById("my_modal_reportS").close();
   };
@@ -207,9 +296,9 @@ function ShopPage() {
                   {isLoggedIn && (
                     <div className="flex gap-2 font-[iceland] mt-auto">
                       <MerchantFollow
-                        profile={profile}
-                        shop={shop}
-                        isLoggedIn={isLoggedIn}
+                      toggleWishlist={toggleWishlist}
+                 
+                      isInWishlist={isInWishlist}
                         customClassName={
                           isPremium
                             ? "border-black hover:bg-black hover:text-white"
@@ -294,10 +383,10 @@ function ShopPage() {
 
         {/* Ad Banner Section */}
         <div className="my-6 mx-1 flex flex-col gap-4 md:mx-auto   h-full w-full">
-        
-          <ShopVoucherStream profile={profile} shop={shop} />
+                  {profile &&  <ShopVoucherStream profile={profile} shop={shop} />}
+         
           <div className="flex flex-col md:flex-row justify-between  h-full  items-center gap-2">
-            <AdsCarousel shop={shop} />
+            {/* <AdsCarousel shop={shop} /> */}
             <ReviewStream fetchReviews={fetchReviews} reviews={reviews} loading={loadingRev} />
           </div>
         </div>
