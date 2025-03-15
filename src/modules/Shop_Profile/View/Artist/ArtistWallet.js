@@ -1274,8 +1274,8 @@ function ArtistWallet() {
           {openScan && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
               <div className="relative bg-custom-purple h-auto w-auto p-2 rounded-md ">
-                <div className="h-80 w-80">
-                  <img src={qrCode}></img>
+                <div className="h-80 w-64">
+                  <img src={qrCode} className="h-full w-full object-fill"/>
                 </div>
                 <button
                   onClick={() => {

@@ -187,7 +187,7 @@ function SideBar() {
             <FontAwesomeIcon icon={faPeopleGroup} /> 
           </li>
 
-          <li
+          {/* <li
             onClick={() => navigate("/shop/Shop_profile")}
             className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
@@ -195,7 +195,7 @@ function SideBar() {
               Merchant Preview
             </a>
             <FontAwesomeIcon icon={faEye} /> 
-          </li>
+          </li> */}
           <li
             onClick={() => navigate("/shop/MerchantWallet")}
             className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "

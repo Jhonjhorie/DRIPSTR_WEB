@@ -8,7 +8,15 @@ import sadEmote from "../../../../src/assets/emote/sad.png";
 import successEmote from "../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../src/assets/emote/question.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfo, faImages  } from "@fortawesome/free-solid-svg-icons";
+import {
+  faInfo,
+  faImages,
+  faStar,
+  faXmark,
+  faChevronLeft,
+  faChevronRight,
+  faThumbsUp,
+} from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect } = React;
 
@@ -219,6 +227,90 @@ function Products() {
     fetchUserProfileAndShop();
   }, []);
 
+  const [productReviews, setProductReviews] = useState([]);
+  const [selectedImage2, setSelectedImage2] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedImages, setSelectedImages] = useState([]); // Store all images
+  const [isRevImage, setIsRevImage] = useState(false);
+
+  // Close modal
+  const closeRevImage = () => {
+    setIsRevImage(false);
+    setSelectedImages([]);
+    setSelectedImageIndex(0);
+  };
+
+  // Show next image
+  const showNextImage = () => {
+    setSelectedImageIndex((prevIndex) =>
+      prevIndex < selectedImages.length - 1 ? prevIndex + 1 : 0
+    );
+  };
+
+  // Show previous image
+  const showPrevImage = () => {
+    setSelectedImageIndex((prevIndex) =>
+      prevIndex > 0 ? prevIndex - 1 : selectedImages.length - 1
+    );
+  };
+
+  const fetchProductReviews = async (productId) => {
+    if (!productId) {
+      console.error("No product ID provided.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { data: reviews, error } = await supabase
+        .from("reviews")
+        .select(
+          `id, created_at, user_id, rating, comment, images, variant_name, size, is_edited, is_hidden, likes,
+          profiles(full_name, profile_picture)`
+        )
+        .eq("product_id", productId)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      console.log("Fetched reviews:", reviews);
+
+      // Fetch public URLs for each image
+      const updatedReviews = await Promise.all(
+        reviews.map(async (review) => {
+          let imagePaths = Array.isArray(review.images) ? review.images : [];
+
+          const imageUrls = await Promise.all(
+            imagePaths.map(async (imgPath) => {
+              const { data } = supabase.storage
+                .from("reviews")
+                .getPublicUrl(imgPath);
+
+              return data?.publicUrl || null;
+            })
+          );
+
+          return {
+            ...review,
+            images: imageUrls.filter(Boolean),
+            totalLikes: review.likes?.length || 0,
+          };
+        })
+      );
+
+      console.log("Updated Reviews with Image URLs:", updatedReviews);
+      setProductReviews(updatedReviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error.message);
+      setProductReviews([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleEdit = (variantIndex) => {
     setEditableVariants((prev) => ({
       ...prev,
@@ -257,49 +349,7 @@ function Products() {
       console.error("Error updating the variant:", error);
     }
   };
-  // const handleDeleteVarInfo = async (variantIndex, sizeIndex) => {
-  //   try {
-  //     // Ensure `selectedItem` and `item_Variant` exist
-  //     if (!selectedItem || !selectedItem.item_Variant) {
-  //       console.error("Selected item or item_Variant is undefined.");
-  //       alert("No item selected.");
-  //       return;
-  //     }
 
-  //     // Copy the `item_Variant` array
-  //     const updatedVariants = [...selectedItem.item_Variant];
-
-  //     // Get the specific variant
-  //     const targetVariant = updatedVariants[variantIndex];
-
-  //     if (!targetVariant || !targetVariant.sizes) {
-  //       console.error("Target variant or sizes is undefined.");
-  //       alert("Invalid variant or size.");
-  //       return;
-  //     }
-
-  //     // Remove the specific size
-  //     targetVariant.sizes = targetVariant.sizes.filter(
-  //       (_, idx) => idx !== sizeIndex
-  //     );
-
-  //     // Update the database
-  //     const { error } = await supabase
-  //       .from("shop_Product")
-  //       .update({ item_Variant: updatedVariants })
-  //       .eq("id", selectedItem.id);
-
-  //     if (error) {
-  //       console.error("Error deleting the variant:", error);
-  //       alert("Failed to delete the size.");
-  //     } else {
-  //       setShowAlertEditDone(true);
-  //       setTimeout(() => setShowAlertEditDone(false), 3000);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error deleting the size:", error);
-  //   }
-  // };
   const PostNotify = async () => {
     try {
       // Check if selected item has variants with size info
@@ -499,9 +549,12 @@ function Products() {
     setShowAlertUnpost(false);
     setShowAlertUnP(false);
   };
-  const handleViewClick = (item) => {
+  const handleViewClick = async (item) => {
     setSelectedItem(item);
     console.log("Viewing item:", item);
+    if (item.id) {
+      await fetchProductReviews(item.id);
+    }
   };
   const handleAddSize = (variantIndex) => {
     const updatedVariants = [...selectedItem.item_Variant];
@@ -731,7 +784,7 @@ function Products() {
                         only store to this page, you can still have the decision to post it. "
                     >
                       <button className="hover:bg-slate-600 glass bg-custom-purple p-1 text-sm px-2 text-white duration-300 shadow-md place-items-center flex rounded-full">
-                      <FontAwesomeIcon icon={faInfo} />
+                        <FontAwesomeIcon icon={faInfo} />
                       </button>
                     </div>
                   </h2>
@@ -855,7 +908,7 @@ function Products() {
                       data-tip=" Maximum advertisement photos to be posted is 3 to 5 Images only."
                     >
                       <button className="hover:bg-slate-600 glass p-1 text-sm px-2 text-white bg-custom-purple duration-300 shadow-md place-items-center flex rounded-full">
-                      <FontAwesomeIcon icon={faInfo} />
+                        <FontAwesomeIcon icon={faInfo} />
                       </button>
                     </div>
                   </h2>
@@ -1498,10 +1551,130 @@ function Products() {
                   ))}
                 </div>
 
-                <div className="h-52 w-full bg-slate-500"> </div>
+                <div className="h-auto w-full bg-slate-200 overflow-y-auto p-4">
+                  {productReviews.length > 0 ? (
+                    productReviews.map((review) => (
+                      <div
+                        key={review.id}
+                        className="bg-white p-3 mb-2 rounded shadow"
+                      >
+                        {/* Profile Image & Name */}
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex gap-1 items-center">
+                            <img
+                              src={
+                                review.profiles?.profile_picture || successEmote
+                              }
+                              alt="User Profile"
+                              className="h-10 w-10 object-cover rounded-full border border-gray-300"
+                            />
+                            <p className="font-semibold">
+                              {review.profiles?.full_name || "Customer"}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-1 mt-2 text-gray-600">
+                          {review.totalLikes} <FontAwesomeIcon icon={faThumbsUp} />
+                          </div>
+                        </div>
+
+                        {/* Review Details */}
+                        <p className="text-sm text-gray-600">
+                          {new Date(review.created_at).toLocaleString()}
+                        </p>
+                        <p className="font-semibold">
+                          Rating: <FontAwesomeIcon icon={faStar} />{" "}
+                          {review.rating}
+                        </p>
+                        <p className="text-gray-800 text-sm">
+                          {review.comment}
+                        </p>
+
+                        {/* Review Images */}
+                        {review.images && review.images.length > 0 && (
+                          <div className="flex gap-2 mt-2">
+                            {review.images.map((img, index) =>
+                              img ? (
+                                <img
+                                  key={index}
+                                  src={img}
+                                  onClick={() => {
+                                    setSelectedImages(review.images);
+                                    setSelectedImageIndex(index);
+                                    setIsRevImage(true);
+                                  }}
+                                  alt="Review Image"
+                                  className="h-20 w-20 object-cover cursor-pointer rounded-md border border-gray-300"
+                                  onError={(e) =>
+                                    (e.target.style.display = "none")
+                                  }
+                                />
+                              ) : null
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-400">No reviews yet.</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
+          {isRevImage && (
+            <div
+              className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50"
+              onClick={closeRevImage}
+            >
+              <div
+                className="relative p-2 bg-white rounded-lg shadow-lg max-w-lg"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close Button */}
+                <button
+                  className="absolute top-1 right-1 text-slate-950 bg-white rounded-full p-1 px-2"
+                  onClick={closeRevImage}
+                >
+                  <FontAwesomeIcon icon={faXmark} />
+                </button>
+
+                {/* Left Arrow */}
+                {selectedImages.length > 1 && (
+                  <button
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      showPrevImage();
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faChevronLeft} />
+                  </button>
+                )}
+
+                {/* Display Image */}
+                <img
+                  src={selectedImages[selectedImageIndex]}
+                  alt="Full Image"
+                  className="w-full h-auto object-contain rounded"
+                />
+
+                {/* Right Arrow */}
+                {selectedImages.length > 1 && (
+                  <button
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      showNextImage();
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faChevronRight} />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Post Variant Confirmation */}
           {showAlert2 && (
             <div

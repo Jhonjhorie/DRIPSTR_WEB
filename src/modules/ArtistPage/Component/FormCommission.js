@@ -180,7 +180,7 @@ function FormCommision() {
   }, [currentUser?.id, id]);
 
   const closeConfirmAdd = () => {
-      setAlertCommision(false);
+    setAlertCommision(false);
   };
   return (
     <div className="bg-white relative w-auto h-auto rounded-sm p-2">
@@ -371,8 +371,8 @@ function FormCommision() {
       {opencommisionQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
           <div className="relative bg-custom-purple h-auto w-auto p-2 rounded-md ">
-            <div className="h-80 w-80">
-              <img src={qrCode}></img>
+            <div className="h-80 w-64">
+              <img src={qrCode} className="h-full w-full object-fill" />
             </div>
             <button
               onClick={() => {

@@ -15,7 +15,7 @@ import sadEmote from "../../../../src/assets/emote/error.png";
 import hmmEmote from "../../../../src/assets/emote/hmmm.png";
 import qrCode from "@/assets/qr.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrown, faWallet } from "@fortawesome/free-solid-svg-icons";
+import { faCrown, faQrcode, faWallet } from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect } = React;
 function MerchantWallet() {
@@ -256,7 +256,7 @@ function MerchantWallet() {
   const [hasShownExpirationAlert, setHasShownExpirationAlert] = useState(false);
   const [showAlertExpiredSubs, setIsModalOpenExpired] = useState(false); //Expired CONFIRMATION
   const [showAlertSuccessSubs, setShowSubs] = useState(false);
-
+  const [showAlertIBL, setIsModalOpenIBL] = useState(false); //CASHOUT CONFIRMATION
   const handleSubmitWalletSubscription = async () => {
     if (!currentUser || !merchantId) {
       setError("User or shop ID not found.");
@@ -342,6 +342,7 @@ function MerchantWallet() {
         throw cashoutError;
       }
       checkSubscriptionStatus();
+      
       fetchTransactions();
       fetchUserProfileAndShop();
       fetchWalletData();
@@ -352,7 +353,8 @@ function MerchantWallet() {
     } catch (err) {
       console.error("Wallet Subscription error:", err.message);
       console.log("Alert error:", err.message);
-      alert(err.message);
+      setIsModalOpenIBL(true);
+      setTimeout(() =>  setIsModalOpenIBL(false), 3000);
     } finally {
       setLoading(false);
     }
@@ -366,11 +368,7 @@ function MerchantWallet() {
     }
     setLoading(true);
     try {
-      // For GCash, the user enters an amount and uploads a proof of payment.
-      const amount = gcashAmount; // from state
-      if (!amount) {
-        throw new Error("Please enter an amount.");
-      }
+
       if (!gcashProof) {
         throw new Error("Please upload proof of payment.");
       }
@@ -416,7 +414,7 @@ function MerchantWallet() {
         throw updateShopError;
       }
 
-      alert("Subscription request sent via GCash!");
+      checkSubscriptionStatus();
     } catch (err) {
       console.error("GCash Subscription error:", err.message);
       setError(err.message);
@@ -947,6 +945,38 @@ function MerchantWallet() {
           </div>
         </div>
       )}
+       {showAlertIBL && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-40 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={sadEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-yellow-600 shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <span>Insuffecient Balance is Low!</span>
+          </div>
+        </div>
+      )}
       {showAlertSend && (
         <div className="md:bottom-5  w-auto px-10 bottom-10 z-10 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
@@ -1135,9 +1165,10 @@ function MerchantWallet() {
                           <div
                             onClick={() => setOpenscan(true)}
                             data-tip="Scan here"
-                            className="tooltip-right tooltip w-auto h-auto cursor-pointer"
+                            className="tooltip-right tooltip w-auto h-auto cursor-pointer flex gap-1"
                           >
-                            <box-icon name="qr" color="black"></box-icon>
+                             <FontAwesomeIcon icon={faQrcode} className="text-yellow-500 text-xl"/>
+                             <p className="text-sm text-slate-800">(scan here)</p>
                           </div>
                         </div>
                         <label className="text-sm text-slate-800">
@@ -1209,8 +1240,8 @@ function MerchantWallet() {
           {openScan && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
               <div className="relative bg-custom-purple h-auto w-auto p-2 rounded-md ">
-                <div className="h-80 w-80">
-                  <img src={qrCode}></img>
+                <div className="h-80 w-64">
+                  <img src={qrCode} className="h-full w-full object-fill"/>
                 </div>
                 <button
                   onClick={() => {
