@@ -34,26 +34,53 @@ const BodyTypeInfoModal = ({ isOpen, onClose }) => {
             <i className="fas fa-times"></i>
           </button>
         </div>
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-semibold text-purple-600">XS (Petite)</h4>
-            <p className="text-gray-600">Small frame, shorter height, narrow shoulders, slim waist and hips.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-purple-600">S (Slim/Athletic)</h4>
-            <p className="text-gray-600">Lean build with slightly more muscle definition, narrow to medium shoulders, and a balanced waist-to-hip ratio.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-purple-600">M (Average/Regular)</h4>
-            <p className="text-gray-600">Well-proportioned frame, moderate muscle definition, and slightly broader shoulders compared to waist and hips.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-purple-600">L (Curvy/Broad)</h4>
-            <p className="text-gray-600">Fuller figure with broader shoulders, a more defined waist, and wider hips or chest.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-purple-600">XL (Fuller/Plus)</h4>
-            <p className="text-gray-600">Larger frame with a more generous proportion across the chest, waist, and hips, offering more room for comfort and movement.</p>
+
+        {/* Measurements Table */}
+        <div className="mt-6">
+          <h4 className="font-semibold  mb-3">Size Measurements</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead className="bg-purple-50">
+                <tr>
+                  <th className="px-4 py-2 border-b text-left text-purple-600">Size</th>
+                  <th className="px-4 py-2 border-b text-left text-purple-600">Bust</th>
+                  <th className="px-4 py-2 border-b text-left text-purple-600">Waist</th>
+                  <th className="px-4 py-2 border-b text-left text-purple-600">Hips</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">XS (Petite)</td>
+                  <td className="px-4 py-2 border-b">30-32"</td>
+                  <td className="px-4 py-2 border-b">22-24"</td>
+                  <td className="px-4 py-2 border-b">32-34"</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">S (Slim/Athletic)</td>
+                  <td className="px-4 py-2 border-b">32-34"</td>
+                  <td className="px-4 py-2 border-b">24-26"</td>
+                  <td className="px-4 py-2 border-b">34-36"</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">M (Average/Regular)</td>
+                  <td className="px-4 py-2 border-b">34-36"</td>
+                  <td className="px-4 py-2 border-b">27-29"</td>
+                  <td className="px-4 py-2 border-b">37-39"</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">L (Curvy/Broad)</td>
+                  <td className="px-4 py-2 border-b">37-40"</td>
+                  <td className="px-4 py-2 border-b">30-33"</td>
+                  <td className="px-4 py-2 border-b">40-43"</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">XL (Fuller/Plus)</td>
+                  <td className="px-4 py-2 border-b">41-44"</td>
+                  <td className="px-4 py-2 border-b">34-38"</td>
+                  <td className="px-4 py-2 border-b">44-48"</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -956,17 +983,17 @@ const CharacterCustomization = () => {
 
 
           {/* Action Buttons */}
-          <div className="flex justify-center space-x-2 p-4">
+          <div className="flex justify-center space-x-2 p-4 z-50">
             {isEditing ? (
               <>
                 <button
-                  className="p-2 w-40 bg-gray-500 text-white rounded hover:bg-gray-600 transition-all"
+                  className="p-2 w-40 bg-gray-500 text-white rounded hover:bg-gray-600 transition-all z-50"
                   onClick={handleCancel}
                 >
                   Cancel
                 </button>
                 <button
-                  className="p-2 w-40 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
+                  className="p-2 w-40 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all z-50"
                   onClick={handleUpdate}
                 >
                   Save Changes

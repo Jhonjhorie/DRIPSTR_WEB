@@ -434,13 +434,15 @@ const AddItem = () => {
                   >
                     {[
                       "Jersey",
-                      "Shorts",
                       "Tshirt",
                       "Longsleeves",
+                      "Shorts",
+                      "Skirt",
                       "Pants",
                       "Tumbler",
                       "Mug",
                       "Shoes",
+                      "Boots",
                       "Totebag",
                       "Others",
                     ].map((category) => (
