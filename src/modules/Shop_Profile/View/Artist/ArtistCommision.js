@@ -104,47 +104,50 @@ function ArtistCommision() {
     );
   };
 
-  const updateCommissionStatus = async (
-    commissionId,
-    status,
-    cancelReason = null
-  ) => {
+  const updateCommissionStatus = async (commissionId, status, cancelReason = null) => {
     setLoading(true);
-
+  
     try {
       const updateData = { commission_Status: status };
-
-      // Include cancel_reason only if it's a cancellation
+  
       if (status === "Cancelled" && cancelReason) {
         updateData.cancel_reason = cancelReason;
       }
-
-      const { error } = await supabase
+  
+      const { data, error } = await supabase
         .from("art_Commision")
         .update(updateData)
-        .eq("id", commissionId);
-
+        .eq("id", commissionId)
+        .select(); 
+  
       if (error) {
         console.error("Error updating commission status:", error.message);
         return;
       }
-
-      // Remove from new commissions only if marked as Completed
+  
+      console.log("Updated commission:", data);
+  
+      // Update the UI immediately
+      setSelectedCommission((prev) => ({
+        ...prev,
+        commission_Status: status,
+      }));
+  
       if (status === "Completed") {
         setNewCommissions((prev) =>
           prev.filter((commission) => commission.id !== commissionId)
         );
       }
-
-      console.log(`Commission ${commissionId} marked as ${status}.`);
+  
       closeModal();
-      fetchNewCommissions();
+      await fetchNewCommissions();
     } catch (error) {
       console.error("Unexpected error updating status:", error.message);
     } finally {
       setLoading(false);
     }
   };
+  
 
   const [showModal, setShowModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
@@ -174,7 +177,7 @@ function ArtistCommision() {
           {/* Buttons for filtering commissions */}
           <div className="flex gap-4 mb-4">
             <button
-              onClick={() => filterCommissions("Confirmed")}
+              onClick={() => {filterCommissions("Confirmed"); fetchNewCommissions();}}
               className={`px-4 text-sm py-2 rounded-md ${
                 selectedStatus === "Confirmed"
                   ? "bg-custom-purple text-white"
@@ -334,7 +337,7 @@ function ArtistCommision() {
       )}
       {modalOpen && selectedCommission && (
         <div className="fixed inset-0 bg-black p-2 z-30 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white relative text-slate-900 p-4 rounded-md shadow-lg w-auto">
+          <div className="bg-white relative text-slate-900 p-4 rounded-md shadow-lg w-full md:w-[600px]">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
             </div>
@@ -343,20 +346,20 @@ function ArtistCommision() {
                 <h3 className="text-2xl font-bold mb-2 ">
                   {selectedCommission.title}
                 </h3>
-                <p className="mb-2 mt-5 ">
+                <p className="mb-1 mt-3 ">
                   <strong>Sender:</strong> {selectedCommission.senderName}
                 </p>
-                <p className="mb-2">
+                <p className="mb-1">
                   <strong>Status:</strong>{" "}
                   {selectedCommission.commission_Status}
                 </p>
-                <p>
+                <p  className="mb-1">
                   <strong>Payment:</strong> ₱{selectedCommission.payment}
                 </p>
-                <p className="mb-2">
+                <p className="mb-1">
                   <strong>Description:</strong> {selectedCommission.description}
                 </p>
-                <p className="mb-2">
+                <p className="mb-1">
                   <strong>Deadline:</strong> {selectedCommission.deadline}
                 </p>
 
@@ -373,13 +376,13 @@ function ArtistCommision() {
                   setSelectedCommission(selectedCommission);
                   setModalOpenRefImage(true);
                 }}
-                className="rounded-md cursor-pointer place-items-center  p-2 md:h-[400px] h-[200px] bg-custom-purple glass"
+                className="rounded-md cursor-pointer place-items-center  p-2 md:h-[350px] h-[200px] bg-custom-purple glass"
               >
                 {selectedCommission.image && (
                   <img
                     src={selectedCommission.image}
                     alt="Reference"
-                    className="w-52 h-full object-cover rounded-md mb-3"
+                    className="w-auto h-full object-cover rounded-md mb-3"
                   />
                 )}
               </div>
@@ -403,9 +406,7 @@ function ArtistCommision() {
                       Cancel order
                     </button>
                     <button
-                      onClick={() =>
-                        updateCommissionStatus(selectedCommission.id)
-                      }
+                       onClick={() => updateCommissionStatus(selectedCommission.id, "Completed")}
                       className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                     >
                       Mark as Completed

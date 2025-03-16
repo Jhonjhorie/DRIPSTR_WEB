@@ -7,7 +7,11 @@ import successEmote from "../../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../../src/assets/emote/question.png";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleXmark} from "@fortawesome/free-solid-svg-icons";
+import {
+  faBullhorn,
+  faCircleXmark,
+  faInfoCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 function ArtistAddArts() {
   const navigate = useNavigate();
@@ -146,27 +150,39 @@ function ArtistAddArts() {
       setLoading(false);
     }
   };
+  //delete function
   const DeleteArt = async () => {
     try {
-      const { error } = await supabase
+      const { error: reportError } = await supabase
+        .from("reported_Art")
+        .delete()
+        .eq("art_Id", selectedArt.id);
+
+      if (reportError) throw reportError;
+
+      const { error: artError } = await supabase
         .from("artist_Arts")
         .delete()
         .eq("id", selectedArt.id);
+
+      if (artError) throw artError;
+
       setSelectedImage(null);
       setSelectedArt(null);
-      fetchUserProfileAndArt();
       setArtName("");
+      setArtDescription("");
+      fetchUserProfileAndArt();
       setShowAlertDel(true);
       setTimeout(() => {
         setShowAlertDel(false);
       }, 3000);
-      setArtDescription("");
-      if (error) throw error;
+
       console.log("Item deleted:", selectedArt);
     } catch (error) {
-      console.error("Error updating the post status:", error);
+      console.error("Error deleting art:", error.message || error);
     }
   };
+
   const handleCon = () => {
     setShowAlertSuccessEditCON(true);
   };
@@ -175,6 +191,29 @@ function ArtistAddArts() {
     setIsEditable(false);
     setShowAlertSuccessEdit(false);
   };
+
+  //on select view all the reports
+  const [showReportsModal, setShowReportsModal] = useState(false);
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      if (!selectedArt) return;
+      try {
+        const { data, error } = await supabase
+          .from("reported_Art")
+          .select("*")
+          .eq("art_Id", selectedArt.id);
+
+        if (error) throw error;
+        setReports(data);
+      } catch (err) {
+        console.error("Error fetching reports:", err.message || err);
+      }
+    };
+
+    fetchReports();
+  }, [selectedArt]);
 
   return (
     <div className="h-full w-full bg-slate-300 ">
@@ -248,7 +287,7 @@ function ArtistAddArts() {
               className="absolute top-2 z-20 right-2 bg-white hover:bg-gray-200 duration-150 rounded-full p-1"
               onClick={closeModal}
             >
-                 <FontAwesomeIcon icon={faCircleXmark} /> 
+              <FontAwesomeIcon icon={faCircleXmark} />
             </button>
 
             <div className="h-auto md:w-1/2 w-full rounded-md">
@@ -276,8 +315,9 @@ function ArtistAddArts() {
                 id="artName"
                 value={artName}
                 onChange={(e) => setArtName(e.target.value)}
-                className={`w-full p-1 mb-2 rounded-md bg-slate-300 text-sm ${isEditable ? "text-custom-purple" : "text-slate-500"
-                  }`}
+                className={`w-full p-1 mb-2 rounded-md bg-slate-300 text-sm ${
+                  isEditable ? "text-custom-purple" : "text-slate-500"
+                }`}
                 readOnly={!isEditable}
               />
 
@@ -288,8 +328,9 @@ function ArtistAddArts() {
                 id="artDescription"
                 value={artDescription}
                 onChange={(e) => setArtDescription(e.target.value)} // Update state on change
-                className={`w-full resize-none p-1 rounded-md bg-slate-300 text-sm ${isEditable ? "text-custom-purple" : "text-slate-500"
-                  }`}
+                className={`w-full resize-none p-1 rounded-md bg-slate-300 text-sm ${
+                  isEditable ? "text-custom-purple" : "text-slate-500"
+                }`}
                 readOnly={!isEditable}
               />
 
@@ -321,8 +362,76 @@ function ArtistAddArts() {
                   Delete
                 </button>
               </div>
+              {reports.length > 0 && (
+                <button
+                  onClick={() => setShowReportsModal(true)}
+                  className="mt-4 px-4 py-2 text-sm hover:bg-red-700 bg-red-500 duration-150 text-slate-50 rounded w-full"
+                >
+                  View All Reports ({reports.length}){" "}
+                  <FontAwesomeIcon icon={faBullhorn} />
+                </button>
+              )}
             </div>
           </div>
+          {showReportsModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div className="bg-white w-[400px] md:w-[600px] p-5 rounded-lg shadow-lg relative">
+                <button
+                  className="absolute top-2 right-2  hover:bg-gray-300 duration-150 rounded-full px-1"
+                  onClick={() => setShowReportsModal(false)}
+                >
+                  <FontAwesomeIcon icon={faCircleXmark} />
+                </button>
+
+                <div className="relative  gap-2 flex  items-center justify-center ">
+                  <div className="text-2xl font-bold text-slate-800 text-center mb-2">
+                    Reports for {selectedArt?.artName}
+                  </div>
+
+                  <div className="relative group flex items-center">
+                    <div
+                      className="tooltip text-slate-500 cursor-pointer flex items-center justify-center"
+                      data-tip="If the report reason is proven, the artwork will be unposted."
+                    >
+                      <button className="btn">
+                        <FontAwesomeIcon icon={faInfoCircle} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="max-h-[300px] overflow-y-auto">
+                  {reports.length > 0 ? (
+                    <ul className="list-disc pl-5 space-y-3">
+                      {reports.map((report) => (
+                        <li
+                          key={report.id}
+                          className="text-slate-800 border-b pb-2"
+                        >
+                          <strong>Reason:</strong> {report.reason} <br />
+                          <strong>Action Taken:</strong>{" "}
+                          {report.action || "No action yet"} <br />
+                          <span className="text-gray-500 text-sm">
+                            Reported on:{" "}
+                            {new Intl.DateTimeFormat("en-US", {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }).format(new Date(report.created_at))}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500 text-center">
+                      No reports found.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {showAlertSuccessEditCon && (
             <div className="fixed z-20 p-2 inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
               <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">

@@ -18,82 +18,90 @@ function PrintSales() {
     const [totalIncome, setTotalIncome] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
     const [loading, setLoading] = useState(true);
-  
+    const [totalReturnItems, setTotalReturnItems] = useState(0);
+
+//fetch the info
     useEffect(() => {
-        const fetchUserProfileAndShop = async () => {
-          try {
-            // Get current authenticated user
-            const { data: userData, error: authError } = await supabase.auth.getUser();
-            if (authError) {
-              console.error("Auth Error:", authError.message);
-              return;
-            }
-      
-            const user = userData?.user;
-            if (!user) {
-              console.error("No user is signed in.");
-              return;
-            }
-      
-            // Fetch the shop owned by the current user
-            const { data: shop, error: shopError } = await supabase
-              .from("shop")
-              .select("id, shop_name, shop_Rating")
-              .eq("owner_Id", user.id)
-              .single(); 
-      
-            if (shopError) throw shopError;
-      
-            if (shop) {
-              setShopName(shop.shop_name || "Unknown Shop");
-              setShopRating(shop.shop_Rating || 0);
-      
-              // Fetch all products for the shop
-              const { data: products, error: productError } = await supabase
-                .from("shop_Product")
-                .select("id")
-                .eq("shop_Id", shop.id);
-      
-              if (productError) {
-                console.error("Error fetching products:", productError.message);
-                return;
-              }
-      
-              const productIds = products.map((p) => p.id);
-              console.log("Fetched product IDs:", productIds);
-      
-              if (productIds.length > 0) {
-                // Fetch total orders related to these products
-                const { data: orders, error: orderError } = await supabase
-                  .from("orders")
-                  .select("id")
-                  .in("prod_num", productIds);
-      
-                if (!orderError && orders) {
-                  setTotalOrders(orders.length || 0);
-                }
-              }
-      
-              // Fetch total income from the merchant's wallet
-              const { data: wallet, error: walletError } = await supabase
-                .from("merchant_Wallet")
-                .select("revenue")
-                .eq("owner_ID", user.id)
-                .single();
-      
-              if (!walletError && wallet) {
-                setTotalIncome(wallet.revenue || 0);
-              }
-            }
-          } catch (error) {
-            console.error("Error fetching data:", error.message);
-          } finally {
-            setLoading(false);
+      const fetchUserProfileAndShop = async () => {
+        try {
+          // Get current authenticated user
+          const { data: userData, error: authError } = await supabase.auth.getUser();
+          if (authError) {
+            console.error("Auth Error:", authError.message);
+            return;
           }
-        };
-      
-        fetchUserProfileAndShop();
-      }, []);
+    
+          const user = userData?.user;
+          if (!user) {
+            console.error("No user is signed in.");
+            return;
+          }
+    
+          // Fetch the shop owned by the current user
+          const { data: shop, error: shopError } = await supabase
+            .from("shop")
+            .select("id, shop_name, shop_Rating")
+            .eq("owner_Id", user.id)
+            .single();
+    
+          if (shopError) throw shopError;
+    
+          if (shop) {
+            setShopName(shop.shop_name || "Unknown Shop");
+            setShopRating(shop.shop_Rating || 0);
+    
+            const shopId = shop.id; 
+    
+            // Get the first and last day of the current month
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+            const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString();
+    
+            // Fetch total orders and income for this month
+            const { data: orders, error: orderError } = await supabase
+              .from("orders")
+              .select("quantity, final_price, shipping_status")
+              .eq("shop_id", shopId)
+              .gte("date_of_order", firstDay)
+              .lte("date_of_order", lastDay);
+    
+            if (orderError) {
+              console.error("Error fetching orders:", orderError.message);
+              return;
+            }
+    
+            if (!orders || orders.length === 0) {
+              setTotalOrders(0);
+              setTotalIncome(0);
+              setTotalReturnItems(0);
+            } else {
+              let totalSales = 0;
+              let totalReturns = 0;
+              let totalOrders = 0;
+    
+              orders.forEach(order => {
+                totalOrders += order.quantity;
+                totalSales += order.final_price || 0;
+                if (order.shipping_status === "Returned") {
+                  totalReturns += order.quantity;
+                }
+              });
+    
+              setTotalOrders(totalOrders);
+              setTotalIncome(totalSales);
+              setTotalReturnItems(totalReturns);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching data:", error.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      fetchUserProfileAndShop();
+    }, []);
+    
       
 
 
@@ -137,7 +145,7 @@ function PrintSales() {
                             <div className='p-1 text-slate-950 text-sm font-semibold'>Ratings : <span className='font-normal text-sm'>{shopRating}</span></div>    
                             <div className='p-1 text-slate-950 text-sm font-semibold'>Total Income : <span className='font-normal text-sm'>{totalIncome}</span></div>    
                             <div className='p-1 text-slate-950 text-sm font-semibold'>Total Orders : <span className='font-normal text-sm'>{totalOrders}</span></div>    
-                            <div className='p-1 text-slate-950 text-sm font-semibold mb-3'>No. of Return Item : <span className='font-normal text-sm'>{TotalReturnItems}</span></div>                 
+                            <div className='p-1 text-slate-950 text-sm font-semibold mb-3'>No. of Return Item : <span className='font-normal text-sm'>{totalReturnItems}</span></div>                 
                             <div className='p-1 text-slate-950 text-sm font-semibold'>Most Possitive Feedback : <br/> <span className='font-normal text-sm'>{PossitiveFB}</span></div>    
                             <div className='p-1 text-slate-950 text-sm font-semibold mb-10'>Least Likely Feedback : <br/><span className='font-normal text-sm'>{NegativeFB}</span></div>    
                             <div className='p-1 text-slate-950 text-sm font-semibold  '>
@@ -147,8 +155,8 @@ function PrintSales() {
                     </div>
                     <div className='w-full h-0.5 rounded-full bg-custom-purple'></div>
                     
-                        <div className='bg-slate-900 w-[27%] h-0.5 absolute right-7 bottom-24'></div>
-                        <div className=' text-sm text-slate-900  absolute right-14 bottom-20  '>Approved by:</div>
+                        {/* <div className='bg-slate-900 w-[27%] h-0.5 absolute right-7 bottom-24'></div>
+                        <div className=' text-sm text-slate-900  absolute right-14 bottom-20  '>Approved by:</div> */}
                     
                   
                     <div className=' w-full z-10 bg-slate-400 '>   

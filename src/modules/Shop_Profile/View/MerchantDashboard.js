@@ -91,7 +91,6 @@ function MerchantDashboard() {
           return;
         }
 
-        console.log("Fetched products:", products);
 
         // Count products by shop
         const productCountByShop = shops.map((shop) => ({
@@ -410,98 +409,82 @@ function MerchantDashboard() {
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
-    const fetchTopSellingProducts = async () => {
+    const fetchReturnedItems = async () => {
       try {
-        const { data: userData, error: authError } =
-          await supabase.auth.getUser();
-        if (authError) {
-          console.error("Authentication error:", authError.message);
-          return;
-        }
-
-        const user = userData.user;
-        if (!user) {
-          console.log("No user is signed in");
-          return;
-        }
-
-        // Fetch the shop ID of the authenticated user
-        const { data: shops, error: shopError } = await supabase
-          .from("shop")
-          .select("id")
-          .eq("owner_Id", user.id);
-
-        if (shopError || !shops || shops.length === 0) {
-          console.error(
-            "Error fetching shops:",
-            shopError?.message || "No shops found"
-          );
-          return;
-        }
-
-        const shopId = shops[0].id; // Assuming the user has only one shop
-
-        // Fetch completed orders for the user's shop
-        const { data: orders, error: ordersError } = await supabase
+        // Ensure shops are loaded first
+        if (!shopData || shopData.length === 0) return;
+  
+        // Extract all shop IDs
+        const shopIds = shopData.map(shop => shop.id);
+  
+        const { data: returnedOrders, error: returnError } = await supabase
           .from("orders")
-          .select("prod_num")
-          .eq("shipping_status", "Completed");
-
-        if (ordersError) throw ordersError;
-
-        if (!orders || orders.length === 0) {
-          setChartData([]);
+          .select("shop_id, refund_processed_at, quantity")
+          .in("shop_id", shopIds) 
+          .eq("shipping_status", "Returned"); 
+  
+        if (returnError) {
+          console.error("Error fetching returned items:", returnError.message);
+          setError(returnError.message);
           return;
         }
-
-        // Count occurrences of each product
-        const productCount = {};
-        orders.forEach((order) => {
-          productCount[order.prod_num] =
-            (productCount[order.prod_num] || 0) + 1;
+  
+        if (!returnedOrders || returnedOrders.length === 0) {
+          console.log("No returned items found.");
+          setXLabels([]);
+          setRData([]);
+          return;
+        }
+  
+        console.log("Fetched returned orders:", returnedOrders);
+  
+        // Aggregate return data by month
+        let returnsByMonth = {};
+        let allMonths = new Set();
+  
+        returnedOrders.forEach((order) => {
+          const date = new Date(order.refund_processed_at);
+          const monthLabel = `${date.getFullYear()}-${date.toLocaleString(
+            "en-US",
+            { month: "short" }
+          )}`;
+  
+          returnsByMonth[monthLabel] = (returnsByMonth[monthLabel] || 0) + order.quantity;
+          allMonths.add(monthLabel);
         });
-
-        const productIds = Object.keys(productCount);
-        if (productIds.length === 0) {
-          setChartData([]);
-          return;
-        }
-
-        // Fetch product names and sort by order count in descending order
-        const { data: products, error: productError } = await supabase
-          .from("shop_Product")
-          .select("id, item_Name, item_Variant")
-          .in("id", productIds)
-          .eq("shop_Id", shopId);
-
-        if (productError) throw productError;
-
-        // Map product names to order counts
-        const sortedProducts = products
-          .map((product) => {
-            const variants = product.item_Variant || []; // Ensure it's an array
-            const firstVariant = variants.length > 0 ? variants[0] : null;
-
-            return {
-              id: product.id,
-              label: product.item_Name,
-              value: productCount[product.id] || 0,
-              image: firstVariant ? firstVariant.imagePath : null,
-            };
-          })
-          .sort((a, b) => b.value - a.value);
-
-   
-
-        // Update chart data
-        setChartData(sortedProducts);
+  
+        // Sort months for consistency
+        const sortedMonths = Array.from(allMonths).sort((a, b) => {
+          const [yearA, monthA] = a.split("-");
+          const [yearB, monthB] = b.split("-");
+  
+          const monthNames = [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+          ];
+          return (
+            yearA - yearB ||
+            monthNames.indexOf(monthA) - monthNames.indexOf(monthB)
+          );
+        });
+  
+        // Update state
+        setXLabels(sortedMonths);
+        setRData(sortedMonths.map((month) => returnsByMonth[month] || 0));
+  
       } catch (err) {
-        console.error("Error fetching top-selling products:", err);
+        console.error("Unexpected error:", err.message);
+        setError("An unexpected error occurred while fetching returned items.");
       }
     };
+  
+    fetchReturnedItems();
+  }, [shopData]); 
+  
+  
+  
+  
 
-    fetchTopSellingProducts();
-  }, []);
 
   return (
     <div className="h-full w-full bg-slate-300 pb-5 ">
