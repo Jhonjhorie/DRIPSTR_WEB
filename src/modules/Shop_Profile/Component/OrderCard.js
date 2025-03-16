@@ -320,14 +320,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             {loading ? "Updating..." : "Status"}
           </button>
         )}
-        {order.shipping_status === "Completed" && (
-          <button
-            className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 ml-2"
-            disabled={loading}
-          >
-            {loading ? "Updating..." : "Okay"}
-          </button>
-        )}
       </div>
 
       {/* Modal Print Report */}

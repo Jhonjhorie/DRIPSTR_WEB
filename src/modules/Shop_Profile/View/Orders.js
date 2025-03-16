@@ -219,7 +219,7 @@ function Orders({ shopOwnerId }) {
           categorizedOrders.receive.push(enrichedOrder);
         } else if (order.shipping_status === "Cancel") {
           categorizedOrders.cancelled.push(enrichedOrder);
-        } else if (order.shipping_status === "Delivered") {
+        } else if (order.shipping_status === "Completed") {
           categorizedOrders.completed.push(enrichedOrder);
         } else if (order.shipping_status === "Returned") {
           categorizedOrders.refunded.push(enrichedOrder);

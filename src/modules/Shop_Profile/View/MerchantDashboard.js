@@ -22,22 +22,23 @@ function MerchantDashboard() {
   const [shopRating, setShopRating] = useState(0);
   const [monthlyOrderLabels, setMonthlyOrderLabels] = useState([]);
   const [monthlyOrderData, setMonthlyOrderData] = useState([]);
+  const [totalOrderQuantity, setTotalOrderQuantity] = useState(0);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-
+  
       try {
         // Fetch the current user
-        const { data: userData, error: authError } =
-          await supabase.auth.getUser();
-
+        const { data: userData, error: authError } = await supabase.auth.getUser();
+  
         if (authError) {
           console.error("Authentication error:", authError.message);
           setError(authError.message);
           setLoading(false);
           return;
         }
-
+  
         const user = userData.user;
         if (!user) {
           console.log("No user is signed in");
@@ -45,37 +46,35 @@ function MerchantDashboard() {
           setLoading(false);
           return;
         }
-
-
-        // Fetch shop data for the current user
+  
+        // Fetch shop data
         const { data: shops, error: shopError } = await supabase
           .from("shop")
           .select("id, shop_name, shop_Rating")
           .eq("owner_Id", user.id);
-
+  
         if (shopError) {
           console.error("Error fetching shops:", shopError.message);
           setError(shopError.message);
           setLoading(false);
           return;
         }
-
+  
         if (!shops || shops.length === 0) {
           setError("No shops found for the user");
           setLoading(false);
           return;
         }
-
+  
         setShopData(shops);
-        console.log("Fetched shops:", shops);
-
-        // Calculate and set the average shop rating
+  
+        // Calculate average shop rating
         const averageRating =
           shops.reduce((acc, shop) => acc + (shop.shop_Rating || 0), 0) /
           shops.length;
         setShopRating(averageRating || 0);
-
-        // Fetch all products for the shops
+  
+        // Fetch products for the shops
         const { data: products, error: productError } = await supabase
           .from("shop_Product")
           .select("id, shop_Id")
@@ -83,62 +82,52 @@ function MerchantDashboard() {
             "shop_Id",
             shops.map((shop) => shop.id)
           );
-
+  
         if (productError) {
           console.error("Error fetching products:", productError.message);
           setError(productError.message);
           setLoading(false);
           return;
         }
-
-
-        // Count products by shop
-        const productCountByShop = shops.map((shop) => ({
-          shopId: shop.id,
-          productCount: products.filter(
-            (product) => product.shop_Id === shop.id
-          ).length,
-        }));
-
-        setProductCounts(productCountByShop);
-
-        const totalProductCount = productCountByShop.reduce(
-          (acc, shop) => acc + shop.productCount,
-          0
-        );
+  
+        const totalProductCount = products.length;
         setTotalProductCount(totalProductCount);
-
+  
         let totalOrders = 0;
+        let totalOrderQuantity = 0;
         let monthlyOrders = {};
-
+        let monthlyReturns = {};
+        let monthlySales = {};
+  
         // Fetch total orders based on products
         if (products.length > 0) {
           const { data: orders, error: orderError } = await supabase
             .from("orders")
-            .select("id, prod_num, date_of_order")
+            .select("id, prod_num, date_of_order, shipping_status, quantity, total_price")
             .in(
               "prod_num",
               products.map((product) => product.id)
             );
-
+  
           if (orderError) {
             console.error("Error fetching orders:", orderError.message);
             setError(orderError.message);
           } else {
             console.log("Fetched orders:", orders);
-            totalOrders = orders.length;
-
-            // Step 1: Get all unique years from the dataset
+  
+            // Filter out cancelled orders
+            const validOrders = orders.filter(order => order.shipping_status !== "Cancel");
+  
+            totalOrders = validOrders.length;
+            totalOrderQuantity = validOrders.reduce((acc, order) => acc + order.quantity, 0);
+  
             let years = new Set();
-            orders.forEach((order) => {
+            validOrders.forEach((order) => {
               const orderYear = new Date(order.date_of_order).getFullYear();
               years.add(orderYear);
             });
-
-            // Step 2: Initialize all months for each year
-            let monthlyOrders = {};
+  
             let allMonths = [];
-
             years.forEach((year) => {
               for (let i = 0; i < 12; i++) {
                 const month = new Date(year, i);
@@ -147,67 +136,73 @@ function MerchantDashboard() {
                   { month: "short" }
                 )}`;
                 monthlyOrders[monthLabel] = 0;
+                monthlyReturns[monthLabel] = 0;
+                monthlySales[monthLabel] = 0;
                 allMonths.push(monthLabel);
               }
             });
-
-            // Step 3: Fill monthly order counts
-            orders.forEach((order) => {
+  
+            validOrders.forEach((order) => {
               const date = new Date(order.date_of_order);
               const monthLabel = `${date.getFullYear()}-${date.toLocaleString(
                 "en-US",
                 { month: "short" }
               )}`;
-
+  
               if (monthlyOrders.hasOwnProperty(monthLabel)) {
-                monthlyOrders[monthLabel]++;
+                monthlyOrders[monthLabel] += order.quantity;
               }
+  
+              if (order.shipping_status === "Returned") {
+                monthlyReturns[monthLabel] += order.quantity;
+              }
+  
+              if (order.shipping_status === "Completed" && order.total_price) {
+                const adjustedPrice = order.total_price * 0.97; 
+                monthlySales[monthLabel] += adjustedPrice;
+              }
+              
             });
-
-            // Step 4: Sort months correctly
+  
             const sortedMonths = allMonths.sort((a, b) => {
               const [yearA, monthA] = a.split("-");
               const [yearB, monthB] = b.split("-");
-
+  
               const monthNames = [
-                "Jan",
-                "Feb",
-                "Mar",
-                "Apr",
-                "May",
-                "Jun",
-                "Jul",
-                "Aug",
-                "Sep",
-                "Oct",
-                "Nov",
-                "Dec",
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
               ];
               return (
                 yearA - yearB ||
                 monthNames.indexOf(monthA) - monthNames.indexOf(monthB)
               );
             });
-
-            // Step 5: Convert to arrays for the chart
+  
             const monthlyOrderCounts = sortedMonths.map(
               (month) => monthlyOrders[month]
             );
-
-            // Step 6: Set states
+            const monthlyReturnCounts = sortedMonths.map(
+              (month) => monthlyReturns[month]
+            );
+            const monthlySalesData = sortedMonths.map(
+              (month) => monthlySales[month]
+            );
+  
             setTotalOrderCount(totalOrders);
             setPData(monthlyOrderCounts);
             setMonthlyOrderLabels(sortedMonths);
             setMonthlyOrderData(monthlyOrderCounts);
-
+            setXLabels(sortedMonths);
+            setRData(monthlyReturnCounts);
+            setUData(monthlySalesData);
           }
         } else {
           console.log("No products found for the shops");
           setTotalOrderCount(0);
           setPData([]);
         }
-
-        //shop followers
+  
+        // Shop followers
         const { data: followers, error: followerError } = await supabase
           .from("merchant_Followers")
           .select("id")
@@ -215,7 +210,7 @@ function MerchantDashboard() {
             "shop_id",
             shops.map((shop) => shop.id)
           );
-
+  
         if (followerError) {
           console.error("Error fetching followers:", followerError.message);
           setError(followerError.message);
@@ -223,20 +218,9 @@ function MerchantDashboard() {
           const totalFollowers = followers.length;
           setTotalFollowers(totalFollowers);
         }
-
-        // Fetch wallet data
-        const { data: wallet, error: walletError } = await supabase
-          .from("merchant_Wallet")
-          .select("revenue")
-          .eq("owner_ID", user.id)
-          .single();
-
-        if (walletError) {
-          console.error("Error fetching wallet:", walletError.message);
-          setError(walletError.message);
-        } else {
-          setWalletData(wallet || { revenue: "0.00" });
-        }
+  
+        setTotalOrderQuantity(totalOrderQuantity);
+  
       } catch (err) {
         console.error("Unexpected error:", err.message);
         setError("An unexpected error occurred. Please try again.");
@@ -244,9 +228,11 @@ function MerchantDashboard() {
         setLoading(false);
       }
     };
-
+  
     fetchData();
-  }, []); // Run once on mount
+  }, []);
+
+  
 
   const [walletrevenue, setWalletData] = useState(0);
   const formatRevenue = (revenue) => {
@@ -262,224 +248,50 @@ function MerchantDashboard() {
   const [rData, setRData] = useState([0]); // Return items data
   const [xLabels, setXLabels] = useState(["Orders"]); // X-axis labels
 
-  const [totalIncome, setTotalIncome] = useState(0);
+  const [walletRevenue, setWalletRevenue] = useState("0.00");
 
   useEffect(() => {
-    const fetchIncome = async () => {
+    const fetchWalletRevenue = async () => {
       try {
-        const { data: userData, error: authError } =
-          await supabase.auth.getUser();
+        const { data: userData, error: authError } = await supabase.auth.getUser();
         if (authError) {
           console.error("Authentication error:", authError.message);
           return;
         }
-
+  
         const user = userData.user;
         if (!user) {
           console.log("No user is signed in");
           return;
         }
-
-        const { data: shops, error: shopError } = await supabase
-          .from("shop")
-          .select("id")
-          .eq("owner_Id", user.id);
-
-        if (shopError || !shops || shops.length === 0) {
-          console.error(
-            "Error fetching shops:",
-            shopError?.message || "No shops found"
-          );
+  
+        // Fetch revenue from wallet_merchant
+        const { data: wallet, error: walletError } = await supabase
+          .from("merchant_Wallet")
+          .select("revenue")
+          .eq("owner_Id", user.id)
+          .single();
+  
+        if (walletError) {
+          console.error("Error fetching wallet revenue:", walletError.message);
           return;
         }
-
-        const { data: products, error: productError } = await supabase
-          .from("shop_Product")
-          .select("id")
-          .in(
-            "shop_Id",
-            shops.map((shop) => shop.id)
-          );
-
-        if (productError || !products || products.length === 0) {
-          console.error(
-            "Error fetching products:",
-            productError?.message || "No products found"
-          );
-          return;
-        }
-
-        const { data: incomeData, error: incomeError } = await supabase
-          .from("orders")
-          .select("total_price, date_of_order")
-          .in(
-            "prod_num",
-            products.map((product) => product.id)
-          )
-          .eq("shipping_status", "Completed");
-
-        if (incomeError) {
-          console.error("Error fetching income:", incomeError.message);
-          return;
-        }
-
-        if (!incomeData || incomeData.length === 0) {
-          console.log("No delivered orders found");
-          setUData([]); // Reset chart data
-          return;
-        }
-
-        // Step 1: Get all unique years from the dataset
-        let years = new Set();
-        incomeData.forEach((order) => {
-          const orderYear = new Date(order.date_of_order).getFullYear();
-          years.add(orderYear);
-        });
-
-        // Step 2: Initialize all months for each year
-        let monthlyIncome = {};
-        let allMonths = [];
-
-        years.forEach((year) => {
-          for (let i = 0; i < 12; i++) {
-            const month = new Date(year, i);
-            const monthLabel = `${month.getFullYear()}-${month.toLocaleString(
-              "en-US",
-              { month: "short" }
-            )}`;
-            monthlyIncome[monthLabel] = 0;
-            allMonths.push(monthLabel);
-          }
-        });
-
-        // Step 3: Fill monthly income data
-        incomeData.forEach((order) => {
-          const date = new Date(order.date_of_order);
-          const monthLabel = `${date.getFullYear()}-${date.toLocaleString(
-            "en-US",
-            { month: "short" }
-          )}`;
-          if (monthlyIncome.hasOwnProperty(monthLabel)) {
-            monthlyIncome[monthLabel] += (order.total_price || 0) * 0.97; // Deduct 3%
-          }
-        });
-
-        // Step 4: Sort months correctly
-        const sortedMonths = allMonths.sort((a, b) => {
-          const [yearA, monthA] = a.split("-");
-          const [yearB, monthB] = b.split("-");
-          const monthNames = [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-          ];
-          return (
-            yearA - yearB ||
-            monthNames.indexOf(monthA) - monthNames.indexOf(monthB)
-          );
-        });
-
-        // Step 5: Convert to arrays for the chart
-        const monthlyIncomeData = sortedMonths.map(
-          (month) => monthlyIncome[month]
-        );
-
-        // Step 6: Update states
-        setUData(monthlyIncomeData);
-        setMonthlyOrderLabels(sortedMonths);
-
+  
+        setWalletRevenue(wallet?.revenue || "0.00");
       } catch (err) {
         console.error("Unexpected error:", err.message);
       }
     };
-
-    fetchIncome();
+  
+    fetchWalletRevenue();
   }, []);
-
+  
+  
   const [topProduct, setTopProduct] = useState(null);
   const [chartData, setChartData] = useState([]);
 
-  useEffect(() => {
-    const fetchReturnedItems = async () => {
-      try {
-        // Ensure shops are loaded first
-        if (!shopData || shopData.length === 0) return;
+
   
-        // Extract all shop IDs
-        const shopIds = shopData.map(shop => shop.id);
-  
-        const { data: returnedOrders, error: returnError } = await supabase
-          .from("orders")
-          .select("shop_id, refund_processed_at, quantity")
-          .in("shop_id", shopIds) 
-          .eq("shipping_status", "Returned"); 
-  
-        if (returnError) {
-          console.error("Error fetching returned items:", returnError.message);
-          setError(returnError.message);
-          return;
-        }
-  
-        if (!returnedOrders || returnedOrders.length === 0) {
-          console.log("No returned items found.");
-          setXLabels([]);
-          setRData([]);
-          return;
-        }
-  
-        console.log("Fetched returned orders:", returnedOrders);
-  
-        // Aggregate return data by month
-        let returnsByMonth = {};
-        let allMonths = new Set();
-  
-        returnedOrders.forEach((order) => {
-          const date = new Date(order.refund_processed_at);
-          const monthLabel = `${date.getFullYear()}-${date.toLocaleString(
-            "en-US",
-            { month: "short" }
-          )}`;
-  
-          returnsByMonth[monthLabel] = (returnsByMonth[monthLabel] || 0) + order.quantity;
-          allMonths.add(monthLabel);
-        });
-  
-        // Sort months for consistency
-        const sortedMonths = Array.from(allMonths).sort((a, b) => {
-          const [yearA, monthA] = a.split("-");
-          const [yearB, monthB] = b.split("-");
-  
-          const monthNames = [
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-          ];
-          return (
-            yearA - yearB ||
-            monthNames.indexOf(monthA) - monthNames.indexOf(monthB)
-          );
-        });
-  
-        // Update state
-        setXLabels(sortedMonths);
-        setRData(sortedMonths.map((month) => returnsByMonth[month] || 0));
-  
-      } catch (err) {
-        console.error("Unexpected error:", err.message);
-        setError("An unexpected error occurred while fetching returned items.");
-      }
-    };
-  
-    fetchReturnedItems();
-  }, [shopData]); 
   
   
   
@@ -509,7 +321,7 @@ function MerchantDashboard() {
                 style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.5)" }}
               >
                 {" "}
-                {totalOrderCount}{" "}
+                {totalOrderQuantity}{" "}
               </div>
               <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-4 blur-[2px] -z-10">
               <FontAwesomeIcon icon={faBox} /> 
@@ -562,7 +374,7 @@ function MerchantDashboard() {
               >
                 {" "}
                 <span className="text-3xl">₱</span>
-                {formatRevenue(walletrevenue?.revenue || "0.00")}
+                {formatRevenue(walletRevenue?.revenue || "0.00")}
               </div>
               <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-3 blur-[2px] -z-10">
               <FontAwesomeIcon icon={faCoins} /> 

@@ -728,6 +728,49 @@ function Products() {
     document.getElementById("imageInput").value = "";
   };
 
+  //isCustomizable?
+  const [isAlertUpdateCustomize, setShowIsCustomize] = useState(false);
+  const [isCustomizable, setIsCustomizable] = useState(false);
+  useEffect(() => {
+    if (!selectedItem || !selectedItem.id) return; 
+
+    const fetchCustomizationStatus = async () => {
+      const { data, error } = await supabase
+        .from("shop_Product")
+        .select("isCustomizable")
+        .eq("id", selectedItem.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching isCustomizable:", error.message);
+      } else {
+        setIsCustomizable(data?.isCustomizable || false); 
+      }
+    };
+
+    fetchCustomizationStatus();
+  }, [selectedItem]); 
+
+  const handleToggle = async (event) => {
+    if (!selectedItem || !selectedItem.id) return; 
+
+    const newValue = event.target.checked;
+
+    const { error } = await supabase
+      .from("shop_Product")
+      .update({ isCustomizable: newValue })
+      .eq("id", selectedItem.id);
+
+    if (error) {
+      console.error("Error updating isCustomizable:", error.message);
+    } else {
+      setIsCustomizable(newValue);
+      setShowIsCustomize(true);
+      setTimeout(() => setShowIsCustomize(false), 3000);
+    }
+  };
+
+
   return (
     <div className="h-full w-full  bg-slate-300 px-2 md:px-10 lg:px-20 ">
       <div className="absolute mx-3 right-0 z-10">
@@ -1245,11 +1288,11 @@ function Products() {
       {selectedItem && (
         <div
           onClick={() => setSelectedItem(false)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2"
+          className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900 bg-opacity-75 p-2"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-lg  md:w-1/2 h-3/4 -mt-14 md:mt-0 md:h-2/3 w-full "
+            className="bg-white rounded-lg  md:w-2/3 h-3/4 -mt-14 md:mt-0 md:h-2/3 w-full "
           >
             <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 w-full rounded-t-md  " />
             <div className=" flex justify-between items-center pr-2 ">
@@ -1314,7 +1357,21 @@ function Products() {
                   >
                     REMOVE
                   </div>
+                  {/* Set to customize */}
+                  <div className="text-sm text-center mt-2 text-slate-800 bg-slate-100 shadow-sm shadow-slate-500 p-1 rounded">
+                    <div>Allow customize request?</div>
+                    <div className="mt-1 flex justify-center items-center gap-1">
+                      no{" "}
+                      <input
+                        type="checkbox"
+                        className="toggle"
+                        checked={isCustomizable}
+                        onChange={handleToggle}
+                      />{" "}yes
+                    </div>
+                  </div>
                 </div>
+
                 <div
                   onClick={handleCloseModal}
                   className="bg-custom-purple w-full md:bottom-2 scale-95 p-1 justify-center flex iceland-regular rounded-sm glass 
@@ -1574,7 +1631,8 @@ function Products() {
                           </div>
 
                           <div className="flex items-center gap-1 mt-2 text-gray-600">
-                          {review.totalLikes} <FontAwesomeIcon icon={faThumbsUp} />
+                            {review.totalLikes}{" "}
+                            <FontAwesomeIcon icon={faThumbsUp} />
                           </div>
                         </div>
 
@@ -1633,7 +1691,7 @@ function Products() {
               >
                 {/* Close Button */}
                 <button
-                  className="absolute top-1 right-1 text-slate-950 bg-white rounded-full p-1 px-2"
+                  className="absolute top-1 right-1 text-slate-950 bg-white rounded-full p-1 px-2.5"
                   onClick={closeRevImage}
                 >
                   <FontAwesomeIcon icon={faXmark} />
@@ -1982,6 +2040,39 @@ function Products() {
               />
             </svg>
             <span>Advertisement is Successfully Deleted.</span>
+          </div>
+        </div>
+      )}
+      {/* Update to allow customize */}
+      {isAlertUpdateCustomize && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-40 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Allow customize request updated.</span>
           </div>
         </div>
       )}
