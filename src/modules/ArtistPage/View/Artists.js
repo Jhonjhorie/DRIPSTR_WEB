@@ -791,7 +791,7 @@ function Artists() {
                         alt="Logo"
                         className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 rounded-md"
                       />
-                      <span className="truncate max-w-[120px] sm:max-w-[150px] md:max-w-[200px]">
+                      <span className="truncate text-sm max-w-[120px] sm:max-w-[150px] md:max-w-[200px]">
                         {art.art_Name}
                       </span>
                     </div>

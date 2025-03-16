@@ -7,6 +7,16 @@ import { supabase } from "@/constants/supabase";
 import OrderCard from "../Component/OrderCard";
 import questionEmote from "../../../assets/emote/success.png";
 import hmmmEmote from "../../../assets/emote/hmmm.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faBox,
+  faTruck,
+  faHome,
+  faCheckCircle,
+  faBoxOpen,
+  faBan,
+} from "@fortawesome/free-solid-svg-icons";
+
 function Orders({ shopOwnerId }) {
   const [activeTab, setActiveTab] = useState("preparing");
   const [isLoading, setIsLoading] = useState(false);
@@ -75,9 +85,11 @@ function Orders({ shopOwnerId }) {
   const [orders, setOrders] = useState({
     preparing: [],
     ship: [],
+    receive: [],
     shipped: [],
     cancelled: [],
     completed: [],
+    refunded: [],
   });
   const fetchOrdersForMerchant = async () => {
     try {
@@ -159,9 +171,11 @@ function Orders({ shopOwnerId }) {
       const categorizedOrders = {
         preparing: [],
         ship: [],
+        receive: [],
         shipped: [],
         cancelled: [],
         completed: [],
+        refunded: [],
       };
 
       ordersData.forEach((order) => {
@@ -199,13 +213,18 @@ function Orders({ shopOwnerId }) {
           categorizedOrders.preparing.push(enrichedOrder);
         } else if (order.shipping_status === "To ship") {
           categorizedOrders.ship.push(enrichedOrder);
-        } else if (order.shipping_status === "To deliver") {
+        } else if (order.shipping_status === "Delivered") {
           categorizedOrders.shipped.push(enrichedOrder);
+        } else if (order.shipping_status === "To receive") {
+          categorizedOrders.receive.push(enrichedOrder);
         } else if (order.shipping_status === "Cancel") {
           categorizedOrders.cancelled.push(enrichedOrder);
         } else if (order.shipping_status === "Delivered") {
           categorizedOrders.completed.push(enrichedOrder);
+        } else if (order.shipping_status === "Returned") {
+          categorizedOrders.refunded.push(enrichedOrder);
         }
+        
       });
 
       setOrders(categorizedOrders);
@@ -232,40 +251,55 @@ function Orders({ shopOwnerId }) {
         {" "}
         Manage Orders{" "}
       </div>
-      <div className="w-full h-auto px-2 md:px-20 place-items-center ">
+      <div className="w-full h-auto px-2 md:px-10 place-items-center ">
         <div className="w-full rounded-md shadow-md mb-20 md:mb-0 h-[550px] bg-slate-100 p-2">
           <div className="w-full oveflow-hidden overflow-y-scroll custom-scrollbar relative h-full bg-slate-200 rounded-sm">
             <div className="w-full z-10 sticky top-0 h-auto pt-2 glass bg-custom-purple rounded-t-md">
               <ul className="flex justify-around place-items-center  text-slate-300 cursor-pointer">
                 <li
                   className={activeTab === "preparing" ? "active-tab" : ""}
-                  onClick={() => setActiveTab("preparing")}
+                  onClick={() => {
+                    setActiveTab("preparing");
+                    fetchOrdersForMerchant();
+                  }}
                 >
-                  <span className="text-sm md:text-lg">Preparing</span>
+                  <span className="text-sm md:text-lg">  <FontAwesomeIcon icon={faBoxOpen} />{" "}Preparing</span>
                 </li>
                 <li
                   className={activeTab === "ship" ? "active-tab" : ""}
-                  onClick={() => setActiveTab("ship")}
+                  onClick={() => {setActiveTab("ship"); fetchOrdersForMerchant(); }}
+                > 
+                  <span className="text-sm md:text-lg"> <FontAwesomeIcon icon={faBox} />{" "}To ship</span>
+                </li>
+                <li
+                  className={activeTab === "receive" ? "active-tab" : ""}
+                  onClick={() => {setActiveTab("receive"); fetchOrdersForMerchant();}}
                 >
-                  <span className="text-sm md:text-lg">To ship</span>
+                  <span className="text-sm md:text-lg"> <FontAwesomeIcon icon={faTruck} />{" "}To Receive</span>
                 </li>
                 <li
                   className={activeTab === "shipped" ? "active-tab" : ""}
-                  onClick={() => setActiveTab("shipped")}
+                  onClick={() => {setActiveTab("shipped"); fetchOrdersForMerchant(); }}
                 >
-                  <span className="text-sm md:text-lg">To Deliver</span>
-                </li>
-                <li
-                  className={activeTab === "cancelled" ? "active-tab" : ""}
-                  onClick={() => setActiveTab("cancelled")}
-                >
-                  <span className="text-sm md:text-lg">Cancelled</span>
+                  <span className="text-sm md:text-lg"> <FontAwesomeIcon icon={faHome} />{" "}Delivered</span>
                 </li>
                 <li
                   className={activeTab === "completed" ? "active-tab" : ""}
-                  onClick={() => setActiveTab("completed")}
+                  onClick={() => {setActiveTab("completed"); fetchOrdersForMerchant(); }}
                 >
-                  <span className="text-sm md:text-lg">Completed</span>
+                  <span className="text-sm md:text-lg"><FontAwesomeIcon icon={faCheckCircle} />{" "}Completed</span>
+                </li>
+                <li
+                  className={activeTab === "cancelled" ? "active-tab" : ""}
+                  onClick={() => {setActiveTab("cancelled"); fetchOrdersForMerchant(); }}
+                >
+                  <span className="text-sm md:text-lg"> <FontAwesomeIcon icon={faBan} />{" "}Cancelled</span>
+                </li>
+                <li
+                  className={activeTab === "refunded" ? "active-tab" : ""}
+                  onClick={() => {setActiveTab("refunded"); fetchOrdersForMerchant(); }}
+                >
+                  <span className="text-sm md:text-lg"> <FontAwesomeIcon icon={faBoxOpen} />{" "}Returned</span>
                 </li>
               </ul>
             </div>
@@ -341,7 +375,7 @@ function Orders({ shopOwnerId }) {
               {activeTab === "shipped" && (
                 <div className="pb-5">
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    On transit Orders
+                    Orders delivered
                   </h2>
                   {orders.shipped.length > 0 ? (
                     orders.shipped.map((order) => (
@@ -356,6 +390,29 @@ function Orders({ shopOwnerId }) {
                       <img src={hmmmEmote} className="h-20 " />
                       <div className="text-slate-800">
                         No orders to deliver.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {activeTab === "receive" && (
+                <div className="pb-5">
+                  <h2 className="text-xl text-custom-purple font-bold mb-4">
+                    On transit Orders
+                  </h2>
+                  {orders.receive.length > 0 ? (
+                    orders.receive.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        refreshOrders={refreshOrders}
+                      />
+                    ))
+                  ) : (
+                    <div className="justify-items-center mt-28">
+                      <img src={hmmmEmote} className="h-20 " />
+                      <div className="text-slate-800">
+                        No orders to receive.
                       </div>
                     </div>
                   )}
@@ -403,6 +460,27 @@ function Orders({ shopOwnerId }) {
                     <div className="justify-items-center mt-28">
                       <img src={hmmmEmote} className="h-20 " />
                       <div className="text-slate-800">No completed orders.</div>
+                    </div>
+                  )}
+                </div>
+              )}
+               {activeTab === "refunded" && (
+                <div className="pb-5">
+                  <h2 className="text-xl text-custom-purple font-bold mb-4">
+                    Retuned Orders
+                  </h2>
+                  {orders.refunded.length > 0 ? (
+                    orders.refunded.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        refreshOrders={refreshOrders}
+                      />
+                    ))
+                  ) : (
+                    <div className="justify-items-center mt-28">
+                      <img src={questionEmote} className="h-20 " />
+                      <div className="text-slate-800">No orders return.</div>
                     </div>
                   )}
                 </div>

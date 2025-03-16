@@ -145,7 +145,7 @@ function FormCommision() {
       console.error("Error submitting commission:", error.message);
       alert("Failed to submit commission.");
     } else {
-      alert("Commission submitted successfully!");
+      setAlertCommision(true);
       setTitle("");
       setDescription("");
       setDeadline("");
@@ -167,26 +167,87 @@ function FormCommision() {
         .select("*")
         .eq("client_Id", currentUser.id)
         .eq("artist_Id", Number(id))
-        .single();
-      if (!error) setCommission(data);
+
+  
+      if (error) throw error;
+      setCommission(data);
     } catch (err) {
-      console.error("Unexpected error fetching commissions:", err);
+      console.error("Error fetching commission:", err.message || err);
+      setCommission(null);
     }
     setLoading(false);
   };
-
+  
   useEffect(() => {
-    fetchCommission();
+    if (currentUser?.id && id) {
+      fetchCommission();
+    }
   }, [currentUser?.id, id]);
+  
+  
 
   const closeConfirmAdd = () => {
     setAlertCommision(false);
+    fetchCommission();
   };
+
+  const [isCancelable, setIsCancelable] = useState(false);
+  const [cancelalert, commisionCancelalert] = useState(false);
+  useEffect(() => {
+    if (commission?.created_at) {
+      const createdAtDate = new Date(commission.created_at);
+      const currentDate = new Date();
+
+      // Extract only the date part (YYYY-MM-DD) to compare
+      const createdAtDay = new Date(
+        createdAtDate.getFullYear(),
+        createdAtDate.getMonth(),
+        createdAtDate.getDate()
+      );
+
+      const currentDay = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate()
+      );
+
+      // Allow cancellation only if today is before or on the created_at date
+      setIsCancelable(currentDay <= createdAtDay);
+    }
+  }, [commission?.created_at]);
+
+  //cancel trigger
+  const cancelCommission = async (commissionId) => {
+    try {
+      const { error } = await supabase
+        .from("art_Commision")
+        .update({
+          commission_Status: "Cancelled",
+          cancel_reason: "Change of mind",
+        })
+        .eq("id", commissionId);
+
+      if (error) {
+        console.error("Error cancelling commission:", error.message);
+      } else {
+        commisionCancelalert(true);
+        setTimeout(() => {
+          commisionCancelalert(false);
+        }, 3000);
+        fetchCommission();
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
   return (
     <div className="bg-white relative w-auto h-auto rounded-sm p-2">
       <div className=" w-full  ">
-        {commission?.commission_Status === "Pending" ? (
-          <div className=" md:w-[500px] h-[400px]">
+        {commission?.commission_Status &&
+        (commission?.commission_Status === "Pending" ||
+          commission?.commission_Status === "Confirmed") ? (
+          <div className=" md:w-[500px] h-auto">
             <h2 className="text-3xl font-bold iceland-regular text-center text-gray-800">
               Commission Details
             </h2>
@@ -199,7 +260,20 @@ function FormCommision() {
                 <strong>Description:</strong> {commission.description}
               </p>
               <p>
-                <strong>Deadline:</strong> {commission.deadline}
+                <strong>Requested on:</strong>{" "}
+                {new Intl.DateTimeFormat("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }).format(new Date(commission.created_at))}
+              </p>
+              <p>
+                <strong>Deadline:</strong>{" "}
+                {new Intl.DateTimeFormat("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }).format(new Date(commission.deadline))}
               </p>
               <p>
                 <strong>Payment:</strong> ₱{commission.payment}
@@ -220,6 +294,19 @@ function FormCommision() {
                   className="w-auto object-cover h-44 rounded-md"
                 />
               </div>
+            </div>
+            <div className="w-full flex place-content-center ">
+              <button
+                onClick={() => cancelCommission(commission.id)}
+                disabled={!isCancelable}
+                className={`mt-4 px-4 py-2 rounded place-items-end ${
+                  isCancelable
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+              >
+                Cancel commission
+              </button>
             </div>
           </div>
         ) : !accepted ? (
@@ -367,7 +454,38 @@ function FormCommision() {
           </form>
         )}
       </div>
-
+      {cancelalert && (
+        <div className=" fixed bottom-10 right-10 z-50 px-4 py-2  shadow-md rounded-md transition-opacity duration-1000 ease-in-out">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span> Art commission cancelled </span>
+          </div>
+        </div>
+      )}
       {opencommisionQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
           <div className="relative bg-custom-purple h-auto w-auto p-2 rounded-md ">

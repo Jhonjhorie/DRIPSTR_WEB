@@ -60,7 +60,7 @@ function ArtistCommision() {
         .from("art_Commision")
         .select(
           `id, title, description, deadline, image, payment, commission_Status,
-            client_Id,
+            cancel_reason, client_Id,
             profiles(full_name, profile_picture)`
         )
         .eq("artist_Id", artistId);
@@ -76,16 +76,16 @@ function ArtistCommision() {
         senderProfile: commission.profiles?.profile_picture || successEmote,
       }));
 
-      setNewCommissions(formattedCommissions);
-      setFilteredCommissions(
-        formattedCommissions.filter(
-          (commission) => commission.commission_Status !== "Completed"
-        )
-      ); // Default to pending
+      setNewCommissions(formattedCommissions); // Store all commissions
+
+      // Default: Show "Confirmed" commissions when first loading
+      filterCommissions("Confirmed", formattedCommissions);
     } catch (error) {
       console.error("Unexpected error:", error.message);
     }
   };
+
+  // Only fetch data when userId changes
   useEffect(() => {
     if (userId) fetchNewCommissions();
   }, [userId]);
@@ -95,25 +95,33 @@ function ArtistCommision() {
     setSelectedCommission(null);
   };
   //filter if pending and completed
-  const filterCommissions = (status) => {
+  const filterCommissions = (status, commissions = newCommissions) => {
     setSelectedStatus(status);
     setFilteredCommissions(
-      newCommissions.filter(
-        (commission) =>
-          (status === "Completed" &&
-            commission.commission_Status === "Completed") ||
-          (status === "Confirmed" &&
-            commission.commission_Status !== "Completed")
+      commissions.filter(
+        (commission) => commission.commission_Status === status
       )
     );
   };
-  const updateCommissionStatus = async (commissionId) => {
+
+  const updateCommissionStatus = async (
+    commissionId,
+    status,
+    cancelReason = null
+  ) => {
     setLoading(true);
 
     try {
+      const updateData = { commission_Status: status };
+
+      // Include cancel_reason only if it's a cancellation
+      if (status === "Cancelled" && cancelReason) {
+        updateData.cancel_reason = cancelReason;
+      }
+
       const { error } = await supabase
         .from("art_Commision")
-        .update({ commission_Status: "Completed" })
+        .update(updateData)
         .eq("id", commissionId);
 
       if (error) {
@@ -121,11 +129,14 @@ function ArtistCommision() {
         return;
       }
 
-      setNewCommissions((prev) =>
-        prev.filter((commission) => commission.id !== commissionId)
-      );
+      // Remove from new commissions only if marked as Completed
+      if (status === "Completed") {
+        setNewCommissions((prev) =>
+          prev.filter((commission) => commission.id !== commissionId)
+        );
+      }
 
-      console.log(`Commission ${commissionId} marked as done.`);
+      console.log(`Commission ${commissionId} marked as ${status}.`);
       closeModal();
       fetchNewCommissions();
     } catch (error) {
@@ -133,6 +144,21 @@ function ArtistCommision() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const [showModal, setShowModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [otherReason, setOtherReason] = useState("");
+
+  const handleCancelOrder = () => {
+    if (!cancelReason) {
+      return;
+    }
+
+    const finalReason = cancelReason === "Others" ? otherReason : cancelReason;
+
+    updateCommissionStatus(selectedCommission.id, "Cancelled", finalReason);
+    setShowModal(false); // Close modal after submission
   };
 
   return (
@@ -165,13 +191,26 @@ function ArtistCommision() {
                   : "bg-gray-300 text-gray-700"
               }`}
             >
-              Completed Art
+              Completed Arts
+            </button>
+            <button
+              onClick={() => filterCommissions("Cancelled")}
+              className={`px-4 text-sm py-2 rounded-md ${
+                selectedStatus === "Cancelled"
+                  ? "bg-custom-purple text-white"
+                  : "bg-gray-300 text-gray-700"
+              }`}
+            >
+              Cancelled Commissions
             </button>
           </div>
 
           {filteredCommissions.length === 0 ? (
-            <div className="w-full h-full  mt-10 place-items-center justify-items-center">
-              <img src={hmmmEmote} className="h-20 " />
+            <div className="w-full h-full mt-10 place-items-center justify-items-center">
+              <img
+                src={selectedStatus === "Cancelled" ? successEmote : hmmmEmote}
+                className="h-20"
+              />
               <p className="text-slate-800 text-sm">
                 No {selectedStatus.toLowerCase()} commissions.
               </p>
@@ -244,10 +283,58 @@ function ArtistCommision() {
           )}
         </div>
       </div>
+      {/* Cancel commsiion */}
+      {showModal && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-gray-800 bg-opacity-50">
+          <div className="bg-white p-6 rounded-md w-96">
+            <h2 className="text-xl font-bold mb-4">Cancel Commission</h2>
+            <p>Select a reason for cancellation:</p>
 
+            {/* Reason Selection */}
+            <select
+              className="w-full p-2 border text-sm bg-slate-100 rounded mt-2"
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+            >
+              <option value="">Select Reason</option>
+              <option value="Client Changed Mind">Client Changed Mind</option>
+              <option value="Artist Unavailable">Artist Unavailable</option>
+              <option value="Lack of Material">Lack of Material</option>
+              <option value="Others">Others</option>
+            </select>
+
+            {/* Show input if "Others" is selected */}
+            {cancelReason === "Others" && (
+              <input
+                type="text"
+                className="w-full p-2 bg-slate-200 text-sm border rounded mt-2"
+                placeholder="Enter your reason"
+                value={otherReason}
+                onChange={(e) => setOtherReason(e.target.value)}
+              />
+            )}
+
+            {/* Buttons */}
+            <div className="flex justify-end mt-4 gap-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="bg-gray-400 px-4 py-2 rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCancelOrder}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700"
+              >
+                Confirm Cancellation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {modalOpen && selectedCommission && (
-        <div className="fixed inset-0 bg-black p-2 z-50 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white relative text-slate-900 p-6 rounded-md shadow-lg w-auto">
+        <div className="fixed inset-0 bg-black p-2 z-30 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white relative text-slate-900 p-4 rounded-md shadow-lg w-auto">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
             </div>
@@ -263,12 +350,23 @@ function ArtistCommision() {
                   <strong>Status:</strong>{" "}
                   {selectedCommission.commission_Status}
                 </p>
+                <p>
+                  <strong>Payment:</strong> ₱{selectedCommission.payment}
+                </p>
                 <p className="mb-2">
                   <strong>Description:</strong> {selectedCommission.description}
                 </p>
                 <p className="mb-2">
                   <strong>Deadline:</strong> {selectedCommission.deadline}
                 </p>
+
+                {selectedCommission.commission_Status === "Cancelled" &&
+                  selectedCommission.cancel_reason && (
+                    <p className="mb-2 text-red-500">
+                      <strong>Cancellation Reason:</strong>{" "}
+                      {selectedCommission.cancel_reason}
+                    </p>
+                  )}
               </div>
               <div
                 onClick={() => {
@@ -295,14 +393,25 @@ function ArtistCommision() {
                 Close
               </button>
 
-              {selectedCommission.commission_Status !== "Completed" && (
-                <button
-                  onClick={() => updateCommissionStatus(selectedCommission.id)}
-                  className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-                >
-                  Mark as Completed
-                </button>
-              )}
+              {selectedCommission.commission_Status !== "Completed" &&
+                selectedCommission.commission_Status !== "Cancelled" && (
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => setShowModal(true)}
+                      className="bg-red-500 text-sm text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
+                    >
+                      Cancel order
+                    </button>
+                    <button
+                      onClick={() =>
+                        updateCommissionStatus(selectedCommission.id)
+                      }
+                      className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      Mark as Completed
+                    </button>
+                  </div>
+                )}
             </div>
           </div>
         </div>
