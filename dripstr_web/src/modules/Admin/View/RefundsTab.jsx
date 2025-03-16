@@ -14,7 +14,7 @@ function RefundsTab() {
       const { data, error } = await supabase
         .from('orders')
         .select(
-          'id, acc_num(full_name, mobile), prod_num(item_Name, shop_Name), *'
+          'id, acc_num(full_name, mobile), prod_num(item_Name, shop_Name), shop_id(wallet(id, revenue)), *'
         )
         .eq('refund_status', 'Requested');
 
@@ -48,15 +48,61 @@ function RefundsTab() {
       const now = new Date();
       const phtOffset = 8 * 60 * 60 * 1000; // 8 hours in milliseconds for PHT
       const phtTime = new Date(now.getTime() + phtOffset).toISOString();
-      const { error } = await supabase
+  
+      // 1. Get the order details including shop_id and its wallet relationship
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .update({ refund_status: 'Approved', refund_processed_at: phtTime })
-        .eq('id', orderId);
-
-      if (error) throw error;
+        .select(`
+          total_price,
+          shop_id (
+            wallet (
+              id,
+              revenue
+            )
+          )
+        `)
+        .eq('id', orderId)
+        .single();
+  
+      if (orderError) throw orderError;
+  
+      // 2. Get the wallet data from the nested relationship
+      const walletData = orderData.shop_id?.wallet;
+      if (!walletData || !walletData.id) {
+        throw new Error('Wallet not found for this shop');
+      }
+  
+      // 3. Calculate 97% of total_price
+      const refundAmount = Number(orderData.total_price) * 0.97;
+  
+      // 4. Calculate new revenue
+      const newRevenue = Number(walletData.revenue) - refundAmount;
+  
+      // 5. Start a transaction to update both tables atomically
+      await Promise.all([
+        // Update order refund status
+        supabase
+          .from('orders')
+          .update({ 
+            refund_status: 'Approved', 
+            refund_processed_at: phtTime,
+            payment_status: 'Refunded'
+          })
+          .eq('id', orderId),
+  
+        // Update shop wallet revenue
+        supabase
+          .from('merchant_Wallet')
+          .update({ 
+            revenue: newRevenue,
+          })
+          .eq('id', walletData.id)
+      ]);
+  
       await fetchRefunds(); // Refetch data after update
     } catch (error) {
       console.error('Error approving refund:', error.message);
+      setError(error.message); // Optional: show error to user
     }
   };
 
