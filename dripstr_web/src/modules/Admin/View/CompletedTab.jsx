@@ -49,12 +49,63 @@ function OrdersTab() {
 
   const updateOrderStatus = async (orderId) => {
     try {
-      const { error: updateError } = await supabase
+      const now = new Date();
+      const phtOffset = 8 * 60 * 60 * 1000; // 8 hours in milliseconds for PHT
+      const phtTime = new Date(now.getTime() + phtOffset).toISOString();
+  
+      // 1. Get order details including shop wallet info
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .update({ payment_status: 'Paid', isPaid: true })
-        .eq('id', orderId);
-
-      if (updateError) throw updateError;
+        .select(`
+          total_price,
+          shop_id (
+            wallet (
+              id,
+              revenue
+            )
+          )
+        `)
+        .eq('id', orderId)
+        .single();
+  
+      if (orderError) throw orderError;
+  
+      // 2. Get wallet data
+      const walletData = orderData.shop_id?.wallet;
+      if (!walletData || !walletData.id) {
+        throw new Error('Wallet not found for this shop');
+      }
+  
+      // 3. Calculate 97% of total_price to add
+      const revenueAmount = Number(orderData.total_price) * 0.97;
+  
+      // 4. Calculate new revenue
+      const newRevenue = Number(walletData.revenue) + revenueAmount;
+  
+      // 5. Execute updates atomically
+      const [orderUpdate, walletUpdate] = await Promise.all([
+        // Update order status
+        supabase
+          .from('orders')
+          .update({ 
+            payment_status: 'Processed', 
+            isPaid: true,
+            updated_at: phtTime // Optional: track when it was updated
+          })
+          .eq('id', orderId),
+  
+        // Update shop wallet revenue
+        supabase
+          .from('merchant_Wallet')
+          .update({ 
+            revenue: newRevenue,
+          })
+          .eq('id', walletData.id)
+      ]);
+  
+      if (orderUpdate.error) throw orderUpdate.error;
+      if (walletUpdate.error) throw walletUpdate.error;
+  
       return true;
     } catch (error) {
       console.error('Error updating order status:', error.message);
@@ -83,7 +134,7 @@ function OrdersTab() {
         ) : error ? (
           <p className="text-red-500 text-center">{error}</p>
         ) : currentOrders.length === 0 ? (
-          <p className="text-white text-center font-semibold">No Pending Orders</p>
+          <p className="text-white text-center font-semibold">No Completed Orders</p>
         ) : (
           <div className="space-y-2 overflow-auto">
             {currentOrders.map((order) => (

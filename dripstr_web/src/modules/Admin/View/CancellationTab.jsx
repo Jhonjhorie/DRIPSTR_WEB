@@ -55,15 +55,15 @@ function CancellationTab() {
             const { data: orderData, error: orderError } = await supabase
                 .from('orders')
                 .select(`
-          total_price,
-          payment_method,
-          shop_id (
-            wallet (
-              id,
-              revenue
-            )
-          )
-        `)
+                        total_price,
+                        payment_method,
+                        shop_id (
+                            wallet (
+                                    id,
+                                 revenue
+                            )
+                        )
+                        `)
                 .eq('id', orderId)
                 .single();
 
