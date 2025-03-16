@@ -86,7 +86,8 @@ function RefundsTab() {
           .update({ 
             refund_status: 'Approved', 
             refund_processed_at: phtTime,
-            payment_status: 'Refunded'
+            payment_status: 'Refunded',
+            shipping_status: 'Refunded'
           })
           .eq('id', orderId),
   
