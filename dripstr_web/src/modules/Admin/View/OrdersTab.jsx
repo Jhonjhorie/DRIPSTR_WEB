@@ -148,7 +148,7 @@ function OrdersTab() {
           </div>
         )}
       </div>
-      <div className="mt-2">
+      <div className="p-3 border-t border-gray-700">
         <Pagination
           currentPage={currentPage}
           totalItems={orders.length}

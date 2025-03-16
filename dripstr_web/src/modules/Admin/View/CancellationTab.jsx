@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../constants/supabase';
+import Pagination from './Components/Pagination';
 
 function CancellationTab() {
   const [cancellations, setCancellations] = useState([]);
@@ -7,6 +8,8 @@ function CancellationTab() {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const itemsPerPage = 3; // Same as OrdersTab
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchCancellations = async () => {
     try {
@@ -14,7 +17,7 @@ function CancellationTab() {
       const { data, error } = await supabase
         .from('orders')
         .select(
-          'id, acc_num(full_name), prod_num(item_Name, shop_Name), *'
+          'id, acc_num(full_name), prod_num(item_Name, shop_Name), quantity, total_price, order_variation, shipping_addr, transaction_id, date_of_order, cancellation_status, payment_method, proof_of_payment, cancellation_reason, shipping_status'
         )
         .eq('cancellation_status', 'Requested');
 
@@ -51,7 +54,7 @@ function CancellationTab() {
         .eq('id', orderId);
 
       if (error) throw error;
-      await fetchCancellations(); // Refetch data after update
+      await fetchCancellations();
     } catch (error) {
       console.error('Error approving cancellation:', error.message);
     }
@@ -65,25 +68,30 @@ function CancellationTab() {
         .eq('id', orderId);
 
       if (error) throw error;
-      await fetchCancellations(); // Refetch data after update
+      await fetchCancellations();
     } catch (error) {
       console.error('Error rejecting cancellation:', error.message);
     }
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCancellations = cancellations.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(cancellations.length / itemsPerPage);
+
   return (
-    <div className="p-3 flex flex-col h-full">
-      <div className="flex-1 overflow-auto">
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-auto p-3">
         <h2 className="text-xl font-semibold text-white mb-2">Cancellations</h2>
         {loading ? (
           <p className="text-white text-center">Loading...</p>
         ) : error ? (
           <p className="text-red-500 text-center">{error}</p>
-        ) : cancellations.length === 0 ? (
+        ) : currentCancellations.length === 0 ? (
           <p className="text-white text-center font-semibold">No Cancellation Requests</p>
         ) : (
           <div className="space-y-2">
-            {cancellations.map((cancellation) => (
+            {currentCancellations.map((cancellation) => (
               <div
                 key={cancellation.id}
                 className="flex items-center bg-white rounded-lg shadow-sm p-2 gap-2 hover:bg-gray-50 transition"
@@ -99,8 +107,8 @@ function CancellationTab() {
                       {cancellation.prod_num?.shop_Name} - {cancellation.prod_num?.item_Name}
                     </span>
                     <span className="text-xs text-gray-500">
-                     {cancellation.id} |{''} {cancellation.transaction_id} |{' '}
-                      {new Date(cancellation.cancellation_requested_at).toLocaleDateString()}
+                      {cancellation.id} | {cancellation.transaction_id} |{' '}
+                      {new Date(cancellation.date_of_order).toLocaleDateString()}
                     </span>
                   </div>
                   <p className="text-gray-600 line-clamp-2">
@@ -152,6 +160,14 @@ function CancellationTab() {
             ))}
           </div>
         )}
+      </div>
+      <div className="p-3 border-t border-gray-700">
+        <Pagination
+          currentPage={currentPage}
+          totalItems={cancellations.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
       </div>
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
