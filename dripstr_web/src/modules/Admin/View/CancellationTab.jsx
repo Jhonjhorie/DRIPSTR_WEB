@@ -48,15 +48,71 @@ function CancellationTab() {
 
   const handleApproveCancellation = async (orderId) => {
     try {
-      const { error } = await supabase
+  
+      // 1. Get order details including payment_method
+      const { data: orderData, error: orderError } = await supabase
         .from('orders')
-        .update({ cancellation_status: 'Approved', shipping_status: 'Cancelled' })
-        .eq('id', orderId);
-
-      if (error) throw error;
-      await fetchCancellations();
+        .select(`
+          total_price,
+          payment_method,
+          shop_id (
+            wallet (
+              id,
+              revenue
+            )
+          )
+        `)
+        .eq('id', orderId)
+        .single();
+  
+      if (orderError) throw orderError;
+  
+      // 2. Prepare the basic update for all cases
+      const updates = [
+        supabase
+          .from('orders')
+          .update({ 
+            cancellation_status: 'Approved', 
+            shipping_status: 'Cancelled',
+            payment_status: 'Cancelled',
+            isPaid: false
+          })
+          .eq('id', orderId)
+      ];
+  
+      // 3. If payment method is Gcash, handle wallet deduction
+      if (orderData.payment_method === 'Gcash') {
+        // Get wallet data
+        const walletData = orderData.shop_id?.wallet;
+        if (!walletData || !walletData.id) {
+          throw new Error('Wallet not found for this shop');
+        }
+  
+        // Calculate 97% of total_price
+        const refundAmount = Number(orderData.total_price) * 0.97;
+        
+        // Calculate new revenue
+        const newRevenue = Number(walletData.revenue) - refundAmount;
+  
+        // Add wallet update to the transaction
+        updates.push(
+          supabase
+            .from('merchant_Wallet')
+            .update({ 
+              revenue: newRevenue,
+            })
+            .eq('id', walletData.id)
+        );
+      }
+  
+      // 4. Execute all updates atomically
+      await Promise.all(updates);
+  
+      await fetchCancellations(); // Refetch data after update
     } catch (error) {
       console.error('Error approving cancellation:', error.message);
+      // Optionally set an error state to show to user
+      // setError(error.message);
     }
   };
 
