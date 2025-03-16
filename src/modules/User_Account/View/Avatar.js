@@ -750,6 +750,57 @@ const CharacterCustomization = () => {
     }));
   };
 
+  // Update the useEffect for gender/bodyType changes
+  useEffect(() => {
+    // Only run if gender or bodyType changes
+    if (!gender || !selectedBodyType) return;
+  
+    // Get URLs for default clothing
+    const defaultTop = getTShirtURL();
+    const defaultBottom = getShortsURL();
+    console.log('Default clothing URLs:', { defaultTop, defaultBottom });
+  
+    // Update selected items while preserving existing selections
+    setSelectedItems(prev => ({
+      // Handle tops
+      tops: prev.tops ? {
+        ...prev.tops,
+        product: {
+          ...prev.tops.product,
+          // Update the URL based on new gender/bodyType
+          type3D: getModelURLForCategory(
+            prev.tops.product.item_Category,
+            gender,
+            selectedBodyType
+          )
+        },
+        key: `${gender}-${selectedBodyType}-${Date.now()}`
+      } : null,
+  
+      // Handle bottoms
+      bottoms: prev.bottoms ? {
+        ...prev.bottoms,
+        product: {
+          ...prev.bottoms.product,
+          // Update the URL based on new gender/bodyType
+          type3D: getModelURLForCategory(
+            prev.bottoms.product.item_Category,
+            gender,
+            selectedBodyType
+          )
+        },
+        key: `${gender}-${selectedBodyType}-${Date.now()}`
+      } : null,
+  
+      // Handle footwear
+      footwear: prev.footwear ? {
+        ...prev.footwear,
+        key: `${gender}-${selectedBodyType}-${Date.now()}`
+      } : null
+    }));
+  
+  }, [gender, selectedBodyType]);
+
   return (
     <>
       {toast.show && (
@@ -1067,9 +1118,9 @@ const CharacterCustomization = () => {
                 />
               )}
 
-              {/* Top Wear */}
+              {/* Top Wear with combined key */}
               <Part 
-                key={`top-${selectedBodyType}-${selectedItems.tops ? selectedItems.tops.product.texture_3D : 'default'}`}
+                key={`top-${gender}-${selectedBodyType}-${selectedItems.tops?.key || 'default'}-${Date.now()}`}
                 url={selectedItems.tops 
                   ? getModelURLForCategory(selectedItems.tops.product.item_Category, gender, selectedBodyType)
                   : getTShirtURL()
@@ -1079,9 +1130,9 @@ const CharacterCustomization = () => {
                 color={!selectedItems.tops ? "#FFFFFF" : undefined}
               />
 
-              {/* Bottom Wear */}
+              {/* Bottom Wear with combined key */}
               <Part 
-                key={`bottom-${selectedBodyType}-${selectedItems.bottoms ? selectedItems.bottoms.product.texture_3D : 'default'}`}
+                key={`bottom-${gender}-${selectedBodyType}-${selectedItems.bottoms?.key || 'default'}-${Date.now()}`}
                 url={selectedItems.bottoms
                   ? getModelURLForCategory(selectedItems.bottoms.product.item_Category, gender, selectedBodyType)
                   : getShortsURL()
@@ -1091,10 +1142,10 @@ const CharacterCustomization = () => {
                 color={!selectedItems.bottoms ? "#000000" : undefined}
               />
 
-              {/* Footwear if needed */}
+              {/* Footwear if selected */}
               {selectedItems.footwear && (
                 <Part 
-                  key={`selected-footwear-${selectedItems.footwear.product.texture_3D}`}
+                  key={`footwear-${gender}-${selectedBodyType}-${selectedItems.footwear?.key || 'default'}-${Date.now()}`}
                   url={getModelURLForCategory(selectedItems.footwear.product.item_Category, gender, selectedBodyType)}
                   position={[0, 0, 0]}
                   texture={selectedItems.footwear.product.texture_3D}
