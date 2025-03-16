@@ -45,7 +45,7 @@ const Orders = () => {
         order.payment_status === "Pending to Admin"
       ).length,
       "Completed": orders.filter(order =>
-        (order.shipping_status === "delivered" || order.shipping_status === "complete") 
+        (order.shipping_status === "delivered" || order.shipping_status === "Delivered" || order.shipping_status === "complete") 
       ).length,
       "Returns & Cancellations": orders.filter(order => 
         order.shipping_status === "cancel" || 
@@ -87,7 +87,7 @@ const Orders = () => {
         );
         case "Completed":
           return filtered.filter(order => 
-            (order.shipping_status === "delivered" || order.shipping_status === "complete")
+            (order.shipping_status === "delivered" || order.shipping_status === "Delivered" || order.shipping_status === "complete") 
           );
       case "Returns & Cancellations":
         return filtered.filter(order => 
@@ -334,7 +334,7 @@ const Orders = () => {
 
                         {/* Refund Button */}
                         {(order.payment_status === "Paid" && 
-                          order.shipping_status === "delivered") && order.refund_status === "Not Requested" && (
+                          (order.shipping_status === "delivered" || order.shipping_status === "Delivered")) && order.refund_status === "Not Requested" && (
                           <button 
                             className="text-gray-600 hover:text-orange-600 px-4 py-2 rounded-md border border-gray-300 
                             hover:border-orange-200 transition-all duration-300 text-sm font-medium bg-white 
@@ -352,7 +352,7 @@ const Orders = () => {
                         )}
 
                         {/* Review Button */}
-                        {(order.shipping_status === "delivered" || order.shipping_status === "complete") && (
+                        {(order.shipping_status === "delivered" || order.shipping_status === "Delivered" || order.shipping_status === "complete") && (
                           order.is_reviewed ? (
                             <div className="flex items-center text-green-600">
                               <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
