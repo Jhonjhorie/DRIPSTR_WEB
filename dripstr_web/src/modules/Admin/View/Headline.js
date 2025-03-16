@@ -107,18 +107,25 @@ function Headline() {
 
     return (
         <div className="flex">
-            
             <div className="w-full flex flex-col items-center">
-                <div className="bg-slate-900 rounded-3xl shadow-lg w-full h-full">
+                <div className="bg-slate-900 rounded-3xl shadow-lg w-full h-full p-6">
                     <p className="text-white text-2xl font-bold">Upload Headline Image</p>
 
                     <div className="border-dashed border-2 border-gray-400 p-6 flex flex-col items-center justify-center mt-4 w-full">
-                        <input
-                            type="file"
-                            onChange={handleFileChange}
-                            className="mt-4 text-white"
-                            ref={fileInputRef}
-                        />
+                        <div className="flex flex-col items-center gap-4">
+                            <label className="bg-violet-600 text-white px-4 py-2 rounded-lg cursor-pointer hover:bg-violet-700 transition-colors">
+                                Choose File
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                    ref={fileInputRef}
+                                />
+                            </label>
+                            {!selectedFile && (
+                                <span className="text-gray-400 text-sm">No file chosen</span>
+                            )}
+                        </div>
                         {previewImage && (
                             <div className="relative mt-4">
                                 <img 
