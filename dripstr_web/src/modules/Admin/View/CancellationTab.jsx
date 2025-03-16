@@ -14,7 +14,7 @@ function CancellationTab() {
       const { data, error } = await supabase
         .from('orders')
         .select(
-          `id, acc_num(full_name), prod_num(item_Name, shop_Name),*`
+          'id, acc_num(full_name), prod_num(item_Name, shop_Name), *'
         )
         .eq('cancellation_status', 'Requested');
 
@@ -41,6 +41,34 @@ function CancellationTab() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedImage(null);
+  };
+
+  const handleApproveCancellation = async (orderId) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ cancellation_status: 'Approved', shipping_status: 'Cancelled' })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      await fetchCancellations(); // Refetch data after update
+    } catch (error) {
+      console.error('Error approving cancellation:', error.message);
+    }
+  };
+
+  const handleRejectCancellation = async (orderId) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ cancellation_status: 'Rejected' })
+        .eq('id', orderId);
+
+      if (error) throw error;
+      await fetchCancellations(); // Refetch data after update
+    } catch (error) {
+      console.error('Error rejecting cancellation:', error.message);
+    }
   };
 
   return (
@@ -71,7 +99,7 @@ function CancellationTab() {
                       {cancellation.prod_num?.shop_Name} - {cancellation.prod_num?.item_Name}
                     </span>
                     <span className="text-xs text-gray-500">
-                      {cancellation.transaction_id} |{' '}
+                     {cancellation.id} |{''} {cancellation.transaction_id} |{' '}
                       {new Date(cancellation.cancellation_requested_at).toLocaleDateString()}
                     </span>
                   </div>
@@ -101,9 +129,23 @@ function CancellationTab() {
                         | Qty: {cancellation.quantity}
                       </span>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded bg-red-100 text-red-800">
-                      {cancellation.cancellation_status}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs px-2 py-1 rounded bg-red-100 text-red-800">
+                        {cancellation.cancellation_status}
+                      </span>
+                      <button
+                        onClick={() => handleApproveCancellation(cancellation.id)}
+                        className="bg-green-500 text-white text-xs px-3 py-1 rounded hover:bg-green-600 transition"
+                      >
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => handleRejectCancellation(cancellation.id)}
+                        className="bg-red-500 text-white text-xs px-3 py-1 rounded hover:bg-red-600 transition"
+                      >
+                        Reject
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
