@@ -47,39 +47,26 @@ function OrdersTab() {
     setSelectedImage(null);
   };
 
-  const handleApprove = async (orderId) => {
+  const updateOrderStatus = async (orderId) => {
     try {
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .select('total_price, shop_id(wallet(id, revenue))')
-        .eq('id', orderId)
-        .single();
-
-      if (orderError) throw orderError;
-
-      const revenueIncrease = Number(orderData.total_price) * 0.97;
-
       const { error: updateError } = await supabase
         .from('orders')
         .update({ payment_status: 'Paid', isPaid: true })
         .eq('id', orderId);
 
       if (updateError) throw updateError;
+      return true;
+    } catch (error) {
+      console.error('Error updating order status:', error.message);
+      return false;
+    }
+  };
 
-      const currentRevenue = orderData.shop_id?.wallet?.revenue || 0;
-      const newRevenue = currentRevenue + revenueIncrease;
-
-      const { error: walletError } = await supabase
-        .from('merchant_Wallet')
-        .update({ revenue: newRevenue })
-        .eq('id', orderData.shop_id.wallet.id);
-
-      if (walletError) throw walletError;
-
+  const handleApprove = async (orderId) => {
+    const success = await updateOrderStatus(orderId);
+    if (success) {
       setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
       await fetchOrders();
-    } catch (error) {
-      console.error('Error in approval process:', error.message);
     }
   };
 
@@ -89,82 +76,86 @@ function OrdersTab() {
   const totalPages = Math.ceil(orders.length / itemsPerPage);
 
   return (
-    <div className="p-3">
-      {loading ? (
-        <p className="text-white text-center">Loading...</p>
-      ) : error ? (
-        <p className="text-red-500 text-center">{error}</p>
-      ) : currentOrders.length === 0 ? (
-        <p className="text-white text-center font-semibold">No Pending Orders</p>
-      ) : (
-        <div className="space-y-2">
-          {currentOrders.map((order) => (
-            <div
-              key={order.id}
-              className="flex items-center bg-white rounded-lg shadow-sm p-2 gap-2 hover:bg-gray-50 transition"
-            >
-              <img
-                src={order.order_variation?.imagePath}
-                alt="product"
-                className="w-16 h-16 object-contain rounded"
-              />
-              <div className="flex-1 text-sm text-gray-800">
-                <div className="flex justify-between">
-                  <span className="font-semibold truncate">
-                    {order.prod_num?.shop_Name} - {order.prod_num?.item_Name}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {order.transaction_id} |{' '}
-                    {new Date(order.date_of_order).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="text-gray-600 truncate">
-                  {order.acc_num?.full_name} - {order.shipping_addr}
-                </p>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <span className="font-medium">
-                      ₱{Number(order.total_price).toLocaleString('en-US')}{' '}
+    <div className="p-3 flex flex-col h-full">
+      <div className="flex-1 flex flex-col min-h-0">
+        {loading ? (
+          <p className="text-white text-center">Loading...</p>
+        ) : error ? (
+          <p className="text-red-500 text-center">{error}</p>
+        ) : currentOrders.length === 0 ? (
+          <p className="text-white text-center font-semibold">No Pending Orders</p>
+        ) : (
+          <div className="space-y-2 overflow-auto">
+            {currentOrders.map((order) => (
+              <div
+                key={order.id}
+                className="flex items-center bg-white rounded-lg shadow-sm p-2 gap-2 hover:bg-gray-50 transition"
+              >
+                <img
+                  src={order.order_variation?.imagePath}
+                  alt="product"
+                  className="w-16 h-16 object-contain rounded"
+                />
+                <div className="flex-1 text-sm text-gray-800">
+                  <div className="flex justify-between">
+                    <span className="font-semibold truncate">
+                      {order.prod_num?.shop_Name} - {order.prod_num?.item_Name}
                     </span>
                     <span className="text-xs text-gray-500">
-                      | Qty: {order.quantity}
+                      {order.id} |{' '}{order.transaction_id} |{' '}
+                      {new Date(order.date_of_order).toLocaleDateString()}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        order.payment_status === 'Pending to Admin'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      {order.payment_status}
-                    </span>
-                    <button
-                      onClick={() => openModal(order.proof_of_payment)}
-                      className="text-blue-600 text-xs underline hover:text-blue-800"
-                    >
-                      Proof
-                    </button>
-                    <button
-                      onClick={() => handleApprove(order.id)}
-                      className="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 transition"
-                    >
-                      Approve
-                    </button>
+                  <p className="text-gray-600 truncate">
+                    {order.acc_num?.full_name} - {order.shipping_addr}
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="font-medium">
+                        ₱{Number(order.total_price).toLocaleString('en-US')}{' '}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        | Qty: {order.quantity}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          order.payment_status === 'Pending to Admin'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-green-100 text-green-800'
+                        }`}
+                      >
+                        {order.payment_status}
+                      </span>
+                      <button
+                        onClick={() => openModal(order.proof_of_payment)}
+                        className="text-blue-600 text-xs underline hover:text-blue-800"
+                      >
+                        Proof
+                      </button>
+                      <button
+                        onClick={() => handleApprove(order.id)}
+                        className="bg-blue-500 text-white text-xs px-3 py-1 rounded hover:bg-blue-600 transition"
+                      >
+                        Approve
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-      <Pagination
-        currentPage={currentPage}
-        totalItems={orders.length}
-        itemsPerPage={itemsPerPage}
-        onPageChange={setCurrentPage}
-      />
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="mt-2">
+        <Pagination
+          currentPage={currentPage}
+          totalItems={orders.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={setCurrentPage}
+        />
+      </div>
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-3 rounded-lg max-w-lg max-h-[80vh] overflow-auto">

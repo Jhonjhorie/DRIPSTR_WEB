@@ -1,11 +1,138 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../../../constants/supabase';
 
 function CancellationTab() {
+  const [cancellations, setCancellations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const fetchCancellations = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select(
+          `id, acc_num(full_name), prod_num(item_Name, shop_Name),*`
+        )
+        .eq('cancellation_status', 'Requested');
+
+      if (error) throw error;
+      setCancellations(data || []);
+    } catch (error) {
+      console.error('Error in fetchCancellations:', error.message);
+      setError(error.message);
+      setCancellations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCancellations();
+  }, []);
+
+  const openModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImage(null);
+  };
+
   return (
-    <div className="p-4 text-white">
-      <h2 className="text-xl font-semibold">Cancellations</h2>
-      <p>No cancellations available yet.</p>
-      {/* Add content for cancellations here */}
+    <div className="p-3 flex flex-col h-full">
+      <div className="flex-1 overflow-auto">
+        <h2 className="text-xl font-semibold text-white mb-2">Cancellations</h2>
+        {loading ? (
+          <p className="text-white text-center">Loading...</p>
+        ) : error ? (
+          <p className="text-red-500 text-center">{error}</p>
+        ) : cancellations.length === 0 ? (
+          <p className="text-white text-center font-semibold">No Cancellation Requests</p>
+        ) : (
+          <div className="space-y-2">
+            {cancellations.map((cancellation) => (
+              <div
+                key={cancellation.id}
+                className="flex items-center bg-white rounded-lg shadow-sm p-2 gap-2 hover:bg-gray-50 transition"
+              >
+                <img
+                  src={cancellation.order_variation?.imagePath}
+                  alt="product"
+                  className="w-16 h-16 object-contain rounded"
+                />
+                <div className="flex-1 text-sm text-gray-800">
+                  <div className="flex justify-between">
+                    <span className="font-semibold truncate">
+                      {cancellation.prod_num?.shop_Name} - {cancellation.prod_num?.item_Name}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {cancellation.transaction_id} |{' '}
+                      {new Date(cancellation.cancellation_requested_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 line-clamp-2">
+                    {cancellation.acc_num?.full_name} - {cancellation.shipping_addr}
+                  </p>
+                  <p className="text-gray-600 line-clamp-2">
+                    Payment Method: {cancellation.payment_method}
+                  </p>
+                  <p className="text-gray-600 line-clamp-2">
+                    Reason: {cancellation.cancellation_reason}
+                  </p>
+                  {cancellation.payment_method === 'Gcash' && (
+                    <p
+                      className="text-blue-600 text-xs underline cursor-pointer hover:text-blue-800"
+                      onClick={() => openModal(cancellation.proof_of_payment)}
+                    >
+                      Proof of Payment
+                    </p>
+                  )}
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="font-medium">
+                        ₱{Number(cancellation.total_price).toLocaleString('en-US')}{' '}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        | Qty: {cancellation.quantity}
+                      </span>
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded bg-red-100 text-red-800">
+                      {cancellation.cancellation_status}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-3 rounded-lg max-w-lg max-h-[80vh] overflow-auto">
+            <div className="flex justify-between items-center mb-2">
+              <h2 className="text-md font-semibold">Proof of Payment</h2>
+              <button
+                onClick={closeModal}
+                className="text-gray-500 hover:text-gray-700 text-lg"
+              >
+                ✕
+              </button>
+            </div>
+            {selectedImage && (
+              <img
+                src={selectedImage}
+                alt="Proof of payment"
+                className="max-w-full max-h-[60vh] object-contain"
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

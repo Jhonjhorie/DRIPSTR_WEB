@@ -9,9 +9,9 @@ function Orders() {
   const [activeTab, setActiveTab] = useState('Orders');
 
   return (
-    <div className="flex">
+    <div className="flex h-screen">
       <Sidebar />
-      <div className="flex-1 m-5 bg-slate-900 rounded-3xl p-6">
+      <div className="flex-1 m-5 bg-slate-900 rounded-3xl p-6 flex flex-col">
         <h1 className="text-white text-2xl font-bold mb-4">Orders Management</h1>
         {/* Tab Buttons */}
         <div className="flex space-x-4 mb-4">
@@ -49,10 +49,12 @@ function Orders() {
           </button>
         </div>
         {/* Tab Content */}
-        {activeTab === 'Orders' && <OrdersTab />}
-        {activeTab === 'Completed' && <CompletedTab />}
-        {activeTab === 'Refunds' && <RefundsTab />}
-        {activeTab === 'Cancellation' && <CancellationTab />}
+        <div className="flex-1 flex flex-col">
+          {activeTab === 'Orders' && <OrdersTab />}
+          {activeTab === 'Completed' && <CompletedTab />}
+          {activeTab === 'Refunds' && <RefundsTab />}
+          {activeTab === 'Cancellation' && <CancellationTab />}
+        </div>
       </div>
     </div>
   );
