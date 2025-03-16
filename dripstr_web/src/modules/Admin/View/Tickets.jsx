@@ -46,13 +46,11 @@ function Tickets() {
   if (error) return <div className="text-red-500 text-center py-4">Error: {error}</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-bold mb-6 text-white">Ticket Management</h2>
-      
+    <div className="">
       {/* Tabs */}
       <div className="mb-6">
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="flex space-x-8">
             <button
               onClick={() => setActiveTab('Pending Review')}
               className={`${

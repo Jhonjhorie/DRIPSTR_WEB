@@ -45,7 +45,7 @@ function Orders() {
               activeTab === 'Cancellation' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
             }`}
           >
-            Cancellation
+            Cancellations
           </button>
         </div>
         {/* Tab Content */}
