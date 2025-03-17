@@ -138,7 +138,7 @@ const tshirtTextureURLs = {
 
 const hairURLs = {
   Barbers: `/3d/avatar/MEN/Hair/Hair.glb`,
-  PogiCut: `/3d/avatar/MEN/Hair/Hair2.glb`,
+  Mohawk: `/3d/avatar/MEN/Hair/Hair2.glb`,
   Elvis: `/3d/avatar/MEN/Hair/Hair3.glb`,
   Long: `/3d/avatar/WOMEN/Hair/Hair1.glb`,
   DoublePonyTail: `/3d/avatar/WOMEN/Hair/Hair2.glb`,

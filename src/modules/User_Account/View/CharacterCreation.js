@@ -244,7 +244,7 @@ const CharacterCustomization = () => {
               <div className="space-y-4 h-[calc(100vh-12rem)] overflow-y-auto">
                 <div className="card bg-base-100 shadow-lg">
                   <div className="card-body">
-                    <h2 className="card-title mb-4">Customize Your Avatar</h2>
+                    <h2 className="card-title mb-4">Create Your Avatar</h2>
 
                     {/* Gender Selection */}
                     <div className="form-control">
