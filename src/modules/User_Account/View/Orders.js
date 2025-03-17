@@ -40,7 +40,7 @@ const Orders = () => {
       ).length,
       "To Receive": orders.filter(order => 
         order.shipping_status === 'To deliver' || 
-        order.shipping_status === 'to deliver'
+        order.shipping_status === 'To receive'
       ).length,
       "Verifying": orders.filter(order => 
         order.payment_method !== "COD" && 
@@ -86,7 +86,7 @@ const Orders = () => {
       case "To Receive":
         return filtered.filter(order => 
           order.shipping_status === 'To deliver' || 
-          order.shipping_status === 'to deliver'
+          order.shipping_status === 'To receive'
         );
       case "Verifying":
         return filtered.filter(order => 
