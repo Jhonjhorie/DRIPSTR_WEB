@@ -145,7 +145,7 @@ function FormCommision() {
       console.error("Error submitting commission:", error.message);
       alert("Failed to submit commission.");
     } else {
-      alert("Commission submitted successfully!");
+      setAlertCommision(true);
       setTitle("");
       setDescription("");
       setDeadline("");
@@ -166,27 +166,114 @@ function FormCommision() {
         .from("art_Commision")
         .select("*")
         .eq("client_Id", currentUser.id)
-        .eq("artist_Id", Number(id))
-        .single();
-      if (!error) setCommission(data);
+        .eq("artist_Id", Number(id));
+  
+      if (error) throw error;
+  
+      // Find a commission that is Pending or Confirmed
+      const activeCommission = data.find(
+        (commission) =>
+          commission.commission_Status === "Pending" ||
+          commission.commission_Status === "Confirmed"
+      );
+      const cancelledCommission = data.find(
+        (commission) => commission.commission_Status === "Cancelled"
+      );
+      setCommission(activeCommission || cancelledCommission || null);
     } catch (err) {
-      console.error("Unexpected error fetching commissions:", err);
+      console.error("Error fetching commission:", err.message || err);
+      setCommission(null);
     }
     setLoading(false);
   };
-
+  
+  
   useEffect(() => {
-    fetchCommission();
+    if (currentUser?.id && id) {
+      fetchCommission();
+    }
   }, [currentUser?.id, id]);
+  
+  const deleteCommission = async () => {
+    if (!commission?.id) return;
+  
+    const { error } = await supabase
+      .from("art_Commision")
+      .delete()
+      .eq("id", commission.id);
+  
+    if (error) {
+      console.error("Error deleting commission:", error.message);
+      return;
+    }
+    fetchCommission();
+    setCommission(null); 
+  };
 
   const closeConfirmAdd = () => {
-      setAlertCommision(false);
+    setAlertCommision(false);
+    fetchCommission();
   };
+
+  const [isCancelable, setIsCancelable] = useState(false);
+  const [cancelalert, commisionCancelalert] = useState(false);
+  useEffect(() => {
+    if (commission?.created_at) {
+      const createdAtDate = new Date(commission.created_at);
+      const currentDate = new Date();
+
+      // Extract only the date part (YYYY-MM-DD) to compare
+      const createdAtDay = new Date(
+        createdAtDate.getFullYear(),
+        createdAtDate.getMonth(),
+        createdAtDate.getDate()
+      );
+
+      const currentDay = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate()
+      );
+
+      // Allow cancellation only if today is before or on the created_at date
+      setIsCancelable(currentDay <= createdAtDay);
+    }
+  }, [commission?.created_at]);
+
+  //cancel trigger
+  const cancelCommission = async (commissionId) => {
+    try {
+      const { error } = await supabase
+        .from("art_Commision")
+        .update({
+          commission_Status: "Cancelled",
+          cancel_reason: "Change of mind",
+        })
+        .eq("id", commissionId);
+
+      if (error) {
+        console.error("Error cancelling commission:", error.message);
+      } else {
+        commisionCancelalert(true);
+        setTimeout(() => {
+          commisionCancelalert(false);
+        }, 3000);
+        fetchCommission();
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  //getting las
+  const [latestCancelledCommission, setLatestCancelledCommission] = useState(null);
+
   return (
     <div className="bg-white relative w-auto h-auto rounded-sm p-2">
       <div className=" w-full  ">
-        {commission?.commission_Status === "Pending" ? (
-          <div className=" md:w-[500px] h-[400px]">
+        {commission?.commission_Status &&
+        (commission?.commission_Status === "Pending" ||
+          commission?.commission_Status === "Confirmed") ? (
+          <div className=" md:w-[500px] h-auto">
             <h2 className="text-3xl font-bold iceland-regular text-center text-gray-800">
               Commission Details
             </h2>
@@ -199,7 +286,20 @@ function FormCommision() {
                 <strong>Description:</strong> {commission.description}
               </p>
               <p>
-                <strong>Deadline:</strong> {commission.deadline}
+                <strong>Requested on:</strong>{" "}
+                {new Intl.DateTimeFormat("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }).format(new Date(commission.created_at))}
+              </p>
+              <p>
+                <strong>Deadline:</strong>{" "}
+                {new Intl.DateTimeFormat("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }).format(new Date(commission.deadline))}
               </p>
               <p>
                 <strong>Payment:</strong> ₱{commission.payment}
@@ -221,6 +321,39 @@ function FormCommision() {
                 />
               </div>
             </div>
+            <div className="w-full flex place-content-center ">
+              <button
+                onClick={() => cancelCommission(commission.id)}
+                disabled={!isCancelable}
+                className={`mt-4 px-4 py-2 rounded place-items-end ${
+                  isCancelable
+                    ? "bg-red-500 text-white"
+                    : "bg-gray-400 cursor-not-allowed"
+                }`}
+              >
+                Cancel commission
+              </button>
+            </div>
+          </div>
+        ) : commission?.commission_Status === "Cancelled" ? (
+          <div className="md:w-[500px] h-auto bg-slate-100 border justify-items-center border-red-400 rounded-md p-4">
+            <h2 className="text-3xl font-semibold text-center text-red-700">Commission Cancelled</h2>
+            <div className="mt-2 text-slate-700">
+              <p><strong>Title:</strong> {commission.title}</p>
+              <p><strong>Description:</strong> {commission.description}</p>
+              <p><strong>Requested on:</strong> {new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(new Date(commission.created_at))}</p>
+              <p><strong>Deadline:</strong> {new Intl.DateTimeFormat("en-US", { year: "numeric", month: "long", day: "numeric" }).format(new Date(commission.deadline))}</p>
+              <p><strong>Payment:</strong> ₱{commission.payment}</p>
+              <p><strong>Status:</strong> {commission.commission_Status}</p>
+              <p className="text-red-600"><strong>Reason for Cancellation:</strong> {commission.cancel_reason || "No reason provided."}</p>
+            </div>
+            <button   
+              disabled={!commission.cancel_refund} 
+              onClick={deleteCommission} 
+              className={`text-sm mt-2 px-4 py-2 rounded ml-2 text-white transition-all ${
+                commission.cancel_refund ? "bg-gray-500 hover:bg-gray-700" : "bg-gray-300 cursor-not-allowed"
+              }`}>Create new commission
+            </button>
           </div>
         ) : !accepted ? (
           <div className=" px-1 md:px-4 py-2  md:w-[500px] h-[400px]">
@@ -331,7 +464,7 @@ function FormCommision() {
               <input
                 type="file"
                 className="w-full p-2 mt-1 border rounded-md"
-                onChange={(e) => setRef(e.target.files[0])}
+                onChange={(e) => setReceipt(e.target.files[0])}
                 accept="image/*"
                 required
               />
@@ -342,7 +475,7 @@ function FormCommision() {
                 <input
                   type="file"
                   className="w-full p-2 mt-1 border rounded-md"
-                  onChange={(e) => setReceipt(e.target.files[0])}
+                  onChange={(e) => setRef(e.target.files[0])}
                   accept="image/*"
                   required
                 />
@@ -367,12 +500,43 @@ function FormCommision() {
           </form>
         )}
       </div>
-
+      {cancelalert && (
+        <div className=" fixed bottom-10 right-10 z-50 px-4 py-2  shadow-md rounded-md transition-opacity duration-1000 ease-in-out">
+          <div className="absolute -top-48 right-16   -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert bg-custom-purple shadow-md flex items-center p-4 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span> Art commission cancelled </span>
+          </div>
+        </div>
+      )}
       {opencommisionQR && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
           <div className="relative bg-custom-purple h-auto w-auto p-2 rounded-md ">
-            <div className="h-80 w-80">
-              <img src={qrCode}></img>
+            <div className="h-80 w-64">
+              <img src={qrCode} className="h-full w-full object-fill" />
             </div>
             <button
               onClick={() => {

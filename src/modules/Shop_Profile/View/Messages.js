@@ -12,13 +12,13 @@ import "../Component/Style.css";
 import logo from "../../../assets/shop/shoplogo.jpg";
 import sample3 from "../../../assets/images/samples/5.png";
 import sample2 from "../../../assets/images/samples/10.png";
-import successEmote from "../../../assets/emote/success.png"
+import successEmote from "../../../assets/emote/success.png";
 import { supabase } from "@/constants/supabase";
 
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleXmark, faMessage } from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect, useRef } = React;
-
 
 function Messages() {
   const [selectedUser, setSelectedUser] = React.useState(null);
@@ -96,7 +96,7 @@ function Messages() {
         profile_picture: msg.profiles?.profile_picture || successEmote,
       },
     }));
-  
+
     console.log("Fetched Messages:", formattedMessages);
     setMessages(formattedMessages);
     console.log("Fetched Messages:", data);
@@ -170,7 +170,7 @@ function Messages() {
     try {
       const { data, error } = await supabase
         .from("messages")
-        .update({  is_readM: true })
+        .update({ is_readM: true })
         .eq("id", message.id);
 
       if (error) {
@@ -180,9 +180,7 @@ function Messages() {
 
         setMessages((prevMessages) =>
           prevMessages.map((msg) =>
-            msg.id === message.id
-              ? { ...msg, is_read: true }
-              : msg
+            msg.id === message.id ? { ...msg, is_read: true } : msg
           )
         );
 
@@ -299,7 +297,7 @@ function Messages() {
     try {
       const { data, error } = await supabase
         .from("messages")
-        .update({ content: updatedContent, is_read: false})
+        .update({ content: updatedContent, is_read: false })
         .match({ id: selectedUser.id });
 
       if (error) {
@@ -330,9 +328,6 @@ function Messages() {
       console.error("Error updating message:", error);
     }
   };
-  
-
-
 
   return (
     <div className="h-full w-full bg-slate-300  ">
@@ -346,57 +341,56 @@ function Messages() {
           <div className="md:w-2/5 w-full bg-gradient-to-br relative from-violet-500 to-fuchsia-500 p-1 h-auto shadow-black">
             <div className="text-2xl font-semibold p-2 py-5 text-white flex items-center justify-between">
               <label>Messages</label>
-              <box-icon
-                type="solid"
-                color="#4D077C"
-                name="message-square-dots"
-              />
+              <FontAwesomeIcon icon={faMessage} />
             </div>
             <div className="h-[500px] overflow-hidden overflow-y-scroll rounded-md bg-slate-100 bg-opacity-40 glass shadow-black w-full shadow-inner md:pt-2 p-2 md:p-0 md:pl-2">
-              {messages.map((message, index) => (
-                <div
-                  key={index}
-                  onClick={() => handleChatClick(message)}
-                  className={`relative hover:scale-95 duration-300 cursor-pointer items-center mb-1 flex gap-2 p-1 rounded-md shadow-md ${
-                    message.status === false
-                      ? "bg-violet-500 text-white"
-                      : "bg-white"
-                  }`}
-                >
+              {messages.length === 0 ? (
+                <div className="text-center text-gray-100 p-4">
+                  No messages yet.
+                </div>
+              ) : (
+                messages.map((message, index) => (
                   <div
-                    className={`h-12 w-12 ${
+                    key={index}
+                    onClick={() => handleChatClick(message)}
+                    className={`relative hover:scale-95 duration-300 cursor-pointer items-center mb-1 flex gap-2 p-1 rounded-md shadow-md ${
                       message.status === false
-                        ? "border-[2px] border-violet-500 rounded-full"
-                        : "border-[2px] border-slate-400 rounded-full"
+                        ? "bg-violet-500 text-white"
+                        : "bg-white"
                     }`}
                   >
-                    <img
-                      src={
-                        message.profiles?.profile_picture ||
-                        successEmote
-                      }
-                      alt={`Profile picture of ${
-                        message.profiles?.full_name || "User"
-                      }`}
-                      className="h-full w-full object-cover rounded-full"
-                    />
-                  </div>
-                  <div>
                     <div
-                      className={`font-semibold ${
+                      className={`h-12 w-12 ${
                         message.status === false
-                          ? "text-white"
-                          : "text-slate-700"
+                          ? "border-[2px] border-violet-500 rounded-full"
+                          : "border-[2px] border-slate-400 rounded-full"
                       }`}
                     >
-                      {message.profiles?.full_name || "Unknown User"}
+                      <img
+                        src={message.profiles?.profile_picture || successEmote}
+                        alt={`Profile picture of ${
+                          message.profiles?.full_name || "User"
+                        }`}
+                        className="h-full w-full object-cover rounded-full"
+                      />
+                    </div>
+                    <div>
+                      <div
+                        className={`font-semibold ${
+                          message.status === false
+                            ? "text-white"
+                            : "text-slate-700"
+                        }`}
+                      >
+                        {message.profiles?.full_name || "Unknown User"}
+                      </div>
+                    </div>
+                    <div className="absolute top-1 text-sm right-2">
+                      {new Date(message.created_at).toLocaleTimeString()}
                     </div>
                   </div>
-                  <div className="absolute top-1 text-sm right-2">
-                    {new Date(message.created_at).toLocaleTimeString()}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
           {/* Right Chat Window */}
@@ -445,9 +439,9 @@ function Messages() {
                     </div>
                     <div
                       onClick={handleCloseChat}
-                      className="hover:scale-95 duration-300 md:pr-20 cursor-pointer rounded-md p-1 justify-center flex"
+                      className="hover:scale-105 text-xl duration-300  cursor-pointer text-slate-800 rounded-md p-1 justify-center flex"
                     >
-                      <box-icon name="message-square-x" color="#000"></box-icon>
+                         <FontAwesomeIcon icon={faCircleXmark} />
                     </div>
                   </div>
 

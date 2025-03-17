@@ -66,7 +66,7 @@ function ArtistCreate() {
       if (user) {
         const { data: artData, error: artError } = await supabase
           .from("artist_registration")
-          .select("is_approved")
+          .select("is_approved, decline_reason")
           .eq("acc_id", user.id);
 
         if (artError) {
@@ -79,6 +79,7 @@ function ArtistCreate() {
             setStatus("approved");
           } else if (artsShop.is_approved === false) {
             setStatus("declined");
+            setDeclineReason(artsShop.decline_reason);
           } else {
             setStatus("pending");
           }
@@ -106,15 +107,6 @@ function ArtistCreate() {
     setPhoneNumber(value);
   };
 
-  const [imageFileSELFIE, setImageFileSELFIE] = useState(null);
-  const [selectedImageSELFIE, setSelectedImageSELFIE] = useState(null);
-  const [imageFileGCASH, setImageFileGCASH] = useState(null);
-  const [selectedImageGCASH, setSelectedImageGCASH] = useState(null);
-  const [selectedImageUP1, setSelectedImageUP1] = useState(null);
-  const [selectedImageUP2, setSelectedImageUP2] = useState(null);
-  const [imageFileUP1, setImageFileUP1] = useState(null);
-  const [imageFileUP2, setImageFileUP2] = useState(null);
-
   const [showAlert11, setShowAlert11] = useState(false);
   const [showAlert22, setShowAlert22] = useState(false);
   const [showAlert33, setShowAlert33] = useState(false);
@@ -122,107 +114,12 @@ function ArtistCreate() {
   const [showAlert55, setShowAlert55] = useState(false);
   const [showAlert66, setShowAlert66] = useState(false);
   const maxSize = 2 * 1024 * 1024;
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-
-    if (file) {
-      if (file.size > maxSize) {
-        setShowAlert11(true);
-        setTimeout(() => setShowAlert11(false), 3000);
-        console.log("Selected file:", file);
-        event.target.value = "";
-        return;
-      }
-      // Only set the file if it meets the size limit
-      setImageFile(file);
-      setSelectedImage(URL.createObjectURL(file));
-      console.log("Selected file:", file);
-    }
-  };
-  const handleFileChangeID = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.size > maxSize) {
-        setShowAlert44(true);
-        setTimeout(() => setShowAlert44(false), 3000);
-        console.log("Selected file:", file);
-        event.target.value = "";
-        return;
-      }
-      // Only set the file if it meets the size limit
-      setImageFileID(file);
-      setSelectedImageID(URL.createObjectURL(file));
-      console.log("Selected file:", file);
-    }
-  };
-  const handleFileChangeGCASH = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.size > maxSize) {
-        setShowAlert22(true);
-        setTimeout(() => setShowAlert22(false), 3000);
-        console.log("Selected file:", file);
-        event.target.value = "";
-        return;
-      }
-      // Only set the file if it meets the size limit
-      setImageFileGCASH(file);
-      setSelectedImageGCASH(URL.createObjectURL(file));
-      console.log("Selected file:", file);
-    }
-  };
-  const handleFileChangeSELFIE = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.size > maxSize) {
-        setShowAlert33(true);
-        setTimeout(() => setShowAlert33(false), 3000);
-        console.log("Selected file:", file);
-        event.target.value = "";
-        return;
-      }
-      // Only set the file if it meets the size limit
-      setImageFileSELFIE(file);
-      setSelectedImageSELFIE(URL.createObjectURL(file));
-      console.log("Selected file:", file);
-    }
-  };
-  const handleFileChangeUP1 = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.size > maxSize) {
-        setShowAlert55(true);
-        setTimeout(() => setShowAlert55(false), 3000);
-        console.log("Selected file:", file);
-        event.target.value = "";
-        return;
-      }
-      // Only set the file if it meets the size limit
-      setImageFileUP1(file);
-      setSelectedImageUP1(URL.createObjectURL(file));
-      console.log("Selected file:", file);
-    }
-  };
-  const handleFileChangeUP2 = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.size > maxSize) {
-        setShowAlert66(true);
-        setTimeout(() => setShowAlert66(false), 3000);
-        console.log("Selected file:", file);
-        event.target.value = "";
-        return;
-      }
-      // Only set the file if it meets the size limit
-      setImageFileUP2(file);
-      setSelectedImageUP2(URL.createObjectURL(file));
-      console.log("Selected file:", file);
-    }
-  };
 
   const handleFirstNameChange = (e) => setFirstName(e.target.value);
   const handleMiddleNameChange = (e) => setMiddleName(e.target.value);
   const handleLastNameChange = (e) => setLastName(e.target.value);
+
+  const [declineReason, setDeclineReason] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -391,10 +288,8 @@ function ArtistCreate() {
             mobile_number: phoneNumber,
             artist_profilePic: uploadedImageUrl || null,
             gcash: uploadedImageUrlGCASH || null,
-            sample_art: JSON.stringify([
-              uploadedImageUP1 || null,
-              uploadedImageUP2 || null,
-            ]),
+            sample_art: uploadedImageUP1,
+            sample_art2: uploadedImageUP2,
           },
         ])
         .single();
@@ -675,8 +570,374 @@ function ArtistCreate() {
       setIsSubmitting(false);
     }
   };
+
+  //MODAL FOR IMAGES
+  const handleCloseModal = () => {
+    setshowImage(false);
+    setshowImageG(false);
+    setshowImageSS(false);
+    setshowImageID(false);
+    setshowImageS1(false);
+    setshowImageS2(false);
+  };
+  const [imageFileSELFIE, setImageFileSELFIE] = useState(null);
+  const [selectedImageSELFIE, setSelectedImageSELFIE] = useState(null);
+  const [imageFileGCASH, setImageFileGCASH] = useState(null);
+  const [selectedImageGCASH, setSelectedImageGCASH] = useState(null);
+  const [selectedImageUP1, setSelectedImageUP1] = useState(null);
+  const [selectedImageUP2, setSelectedImageUP2] = useState(null);
+  const [imageFileUP1, setImageFileUP1] = useState(null);
+  const [imageFileUP2, setImageFileUP2] = useState(null);
+  const handleImageLoad = (event) => {
+    const { naturalWidth, naturalHeight } = event.target;
+    setIsLandscape(naturalWidth > naturalHeight);
+  };
+
+  const [showImage, setshowImage] = React.useState(false); //Show image modal
+  const [showImageG, setshowImageG] = React.useState(false); //Show image modal
+  const [showImageSS, setshowImageSS] = React.useState(false); //Show image modal
+  const [showImageID, setshowImageID] = React.useState(false); //Show image modal
+  const [showImageS1, setshowImageS1] = React.useState(false); //Show image modal
+  const [showImageS2, setshowImageS2] = React.useState(false); //Show image modal
+  const [isLandscape, setIsLandscape] = useState(null);
+
+  //modals images
+  const handleOpenImage = () => {
+    if (selectedImage) {
+      setshowImage(true);
+    } else {
+      console.log("Please select a file");
+    }
+  };
+  const handleOpenImageG = () => {
+    if (selectedImageGCASH) {
+      setshowImageG(true);
+    } else {
+      console.log("Please select a file");
+    }
+  };
+  const handleOpenImageSS = () => {
+    if (selectedImageSELFIE) {
+      setshowImageSS(true);
+    } else {
+      console.log("Please select a file");
+    }
+  };
+  const handleOpenImageID = () => {
+    if (selectedImageID) {
+      setshowImageID(true);
+    } else {
+      console.log("Please select a file");
+    }
+  };
+  const handleOpenImageS1 = () => {
+    if (selectedImageUP1) {
+      setshowImageS1(true);
+    } else {
+      console.log("Please select a file");
+    }
+  };
+  const handleOpenImageS2 = () => {
+    if (selectedImageUP2) {
+      setshowImageS2(true);
+    } else {
+      console.log("Please select a file");
+    }
+  };
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      if (file.size > maxSize) {
+        console.error("File size exceeds 2MB limit.");
+        setShowAlert11(true);
+        setTimeout(() => setShowAlert11(false), 3000);
+        event.target.value = "";
+        return;
+      }
+
+      setImageFile(file);
+      setSelectedImage(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChangeID = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert44(true);
+        setTimeout(() => setShowAlert44(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileID(file);
+      setSelectedImageID(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChangeGCASH = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert22(true);
+        setTimeout(() => setShowAlert22(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileGCASH(file);
+      setSelectedImageGCASH(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChangeSELFIE = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert33(true);
+        setTimeout(() => setShowAlert33(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileSELFIE(file);
+      setSelectedImageSELFIE(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChangeUP1 = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert55(true);
+        setTimeout(() => setShowAlert55(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileUP1(file);
+      setSelectedImageUP1(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+  const handleFileChangeUP2 = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      if (file.size > maxSize) {
+        setShowAlert66(true);
+        setTimeout(() => setShowAlert66(false), 3000);
+        console.log("Selected file:", file);
+        event.target.value = "";
+        return;
+      }
+      // Only set the file if it meets the size limit
+      setImageFileUP2(file);
+      setSelectedImageUP2(URL.createObjectURL(file));
+      console.log("Selected file:", file);
+    }
+  };
+
   return (
     <div className="h-full w-full">
+      {/* Modal for showing selected images */}
+      {showImage && (
+        <div className="fixed z-10 inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
+              {selectedImage ? (
+                <img
+                  src={selectedImage}
+                  alt="Uploaded shop photo"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
+                />
+              ) : (
+                <p className="text-black">Please select an image</p>
+              )}
+            </div>
+            <div className="flex justify-between w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showImageG && (
+        <div className="fixed z-10 inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
+              {selectedImageGCASH ? (
+                <img
+                  src={selectedImageGCASH}
+                  alt="Uploaded shop photo"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
+                />
+              ) : (
+                <p className="text-black">Please select an image</p>
+              )}
+            </div>
+            <div className="flex justify-between w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showImageSS && (
+        <div className="fixed z-10 inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
+              {selectedImageSELFIE ? (
+                <img
+                  src={selectedImageSELFIE}
+                  alt="Uploaded shop photo"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
+                />
+              ) : (
+                <p className="text-black">Please select an image</p>
+              )}
+            </div>
+            <div className="flex justify-between w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showImageID && (
+        <div className="fixed z-10 inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
+              {selectedImageID ? (
+                <img
+                  src={selectedImageID}
+                  alt="Uploaded shop photo"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
+                />
+              ) : (
+                <p className="text-black">Please select an image</p>
+              )}
+            </div>
+            <div className="flex justify-between w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showImageS1 && (
+        <div className="fixed z-10 inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
+              {selectedImageUP1 ? (
+                <img
+                  src={selectedImageUP1}
+                  alt="Uploaded shop photo"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
+                />
+              ) : (
+                <p className="text-black">Please select an image</p>
+              )}
+            </div>
+            <div className="flex justify-between w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showImageS2 && (
+        <div className="fixed z-10 inset-0 flex items-center justify-center bg-slate-900 bg-opacity-50">
+          <div className="bg-white rounded-lg p-5 h-auto lg:w-auto md:m-0 auto">
+            <div className="flex items-center justify-center border-custom-purple border-2 bg-slate-100 rounded-md p-2">
+              {selectedImageUP2 ? (
+                <img
+                  src={selectedImageUP2}
+                  alt="Uploaded shop photo"
+                  onLoad={handleImageLoad}
+                  className={`rounded-sm object-cover ${
+                    isLandscape === null
+                      ? "w-[250px] h-[250px]"
+                      : isLandscape
+                      ? "w-[500px] h-[400px]"
+                      : "w-[300px] h-[300px]"
+                  }`}
+                />
+              ) : (
+                <p className="text-black">Please select an image</p>
+              )}
+            </div>
+            <div className="flex justify-between w-full mt-2">
+              <button
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-700"
+                onClick={handleCloseModal}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="h-full w-full lg:flex justify-center items-center bg-slate-300 p-1  ">
         {/* FIRST CONTAINER */}
         {loadings ? (
@@ -787,8 +1048,11 @@ function ArtistCreate() {
                   />
                 </div>
 
+                <p className="text-slate-800 text-center font-medium">
+                  Reason:
+                </p>
                 <h2 className="text-2xl font-bold iceland-regular text-center mb-4 text-slate-900 ">
-                  Create new registration? or Contact our support.
+                  {declineReason}
                 </h2>
                 <div
                   onClick={handleRedo}
@@ -906,7 +1170,7 @@ function ArtistCreate() {
                               Select your Artist Photo
                             </span>
                           </div>
-                          <div className="h-auto w-full flex justify-center ">
+                          <div className="h-auto w-full gap-1 flex justify-center ">
                             <input
                               type="file"
                               accept="image/*"
@@ -914,6 +1178,16 @@ function ArtistCreate() {
                               placeholder={fileName || "Choose a file..."}
                               className="file-input text-sm rounded bg-slate-200 border-violet-950 border   bottom-0 file-input-bordered w-full"
                             />
+                            <div
+                              onClick={handleOpenImage}
+                              className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                            >
+                              <box-icon
+                                type="solid"
+                                name="image-alt"
+                                color="#FFFFFF"
+                              ></box-icon>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1103,31 +1377,55 @@ function ArtistCreate() {
                   </label>
                 </div>
 
-                <label className="form-control md:w-1/2 mt- w-full">
+                <div className="md:w-1/2 h-auto  w-full">
                   <span className="label-text text-slate-900 font-semibold px-1">
                     Screenshot of verified Gcash account
                   </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChangeGCASH}
-                    className="file-input mt-2 bg-slate-200 border-violet-950 border rounded w-full"
-                  />
-                </label>
+                  <div className="flex gap-1 mt-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChangeGCASH}
+                      className="file-input bg-slate-200 border-violet-950 border rounded w-full"
+                    />
+                    <div
+                      onClick={handleOpenImageG}
+                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                    >
+                      <box-icon
+                        type="solid"
+                        name="image-alt"
+                        color="#FFFFFF"
+                      ></box-icon>
+                    </div>
+                  </div>
+                </div>
               </div>
               {/* Upload Valid ID */}
               <div className="w-full gap-3 px-2 mt-4 md:flex">
-                <label className="form-control md:w-1/2 w-full">
+                <div className=" md:w-1/2 h-auto w-full">
                   <span className="label-text text-slate-900 font-semibold px-1">
                     Upload a selfie of you
                   </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChangeSELFIE}
-                    className="file-input mt-2 bg-slate-200 border-violet-950 border rounded w-full"
-                  />
-                </label>
+                  <div className="flex mt-1 gap-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChangeSELFIE}
+                      className="file-input  bg-slate-200 border-violet-950 border rounded w-full"
+                    />
+                    <div
+                      onClick={handleOpenImageSS}
+                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                    >
+                      <box-icon
+                        type="solid"
+                        name="image-alt"
+                        color="#FFFFFF"
+                      ></box-icon>
+                    </div>
+                  </div>
+                </div>
                 <div className="w-full md:w-1/2 -mt-1.5 rounded-md">
                   <div className="flex items-center gap-3">
                     <label className="label-text font-semibold text-slate-900">
@@ -1159,12 +1457,24 @@ function ArtistCreate() {
                     </div>
                     {/* File Upload */}
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChangeID}
-                    className="file-input mt-1 bg-slate-200 border-violet-950 border rounded w-full"
-                  />
+                  <div className="flex mt-1 gap-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChangeID}
+                      className="file-input bg-slate-200 border-violet-950 border rounded w-full"
+                    />
+                    <div
+                      onClick={handleOpenImageID}
+                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                    >
+                      <box-icon
+                        type="solid"
+                        name="image-alt"
+                        color="#FFFFFF"
+                      ></box-icon>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1173,64 +1483,88 @@ function ArtistCreate() {
                 Supporting Art
               </div>
               <div className="md:flex w-full px-2 gap-3 mt-5">
-                <label className="form-control md:w-1/2 mt- w-full">
+                <div className=" md:w-1/2  w-full">
                   <span className="label-text text-slate-900 font-semibold px-1">
                     Upload you art 1
                   </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChangeUP1}
-                    className="file-input mt-2 bg-slate-200 border-violet-950 border rounded w-full"
-                  />
-                </label>
+                  <div className="flex mt-1 gap-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChangeUP1}
+                      className="file-input bg-slate-200 border-violet-950 border rounded w-full"
+                    />
+                    <div
+                      onClick={handleOpenImageS1}
+                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                    >
+                      <box-icon
+                        type="solid"
+                        name="image-alt"
+                        color="#FFFFFF"
+                      ></box-icon>
+                    </div>
+                  </div>
+                </div>
 
-                <label className="form-control md:w-1/2 mt- w-full">
+                <div className=" md:w-1/2 w-full">
                   <span className="label-text text-slate-900 font-semibold px-1">
                     Upload you art 2
                   </span>
+                  <div className="flex mt-1  gap-1">
                   <input
                     type="file"
                     accept="image/*"
                     onChange={handleFileChangeUP2}
-                    className="file-input mt-2 bg-slate-200 border-violet-950 border rounded w-full"
+                    className="file-input  bg-slate-200 border-violet-950 border rounded w-full"
                   />
-                </label>
+                    <div
+                      onClick={handleOpenImageS2}
+                      className="p-2 place-content-center cursor-pointer hover:scale-95 duration-200 bg-violet-900 rounded-md"
+                    >
+                      <box-icon
+                        type="solid"
+                        name="image-alt"
+                        color="#FFFFFF"
+                      ></box-icon>
+                    </div>
+                  </div>
+                
+                </div>
               </div>
             </div>
 
-           
             <button
-                type="submit"
-                className="btn  justify-center w-full md:w-auto md:justify-center place-self-center mt-10 flex glass bg-custom-purple md:mr-7 md:px-10 iceland-regular tracking-wide text-lg text-white md:items-center "
-                disabled={loading} 
-              >
-                {loading ? (
-                  <span className="flex items-center">
-                    <svg
-                      className="animate-spin h-5 w-5 mr-2 text-white"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v8H4z"
-                      ></path>
-                    </svg>
-                    Loading...
-                  </span>
-                ) : (
-                  "SUBMIT"
-                )}
-              </button>
+              type="submit"
+              className="btn  justify-center w-full md:w-auto md:justify-center place-self-center mt-10 flex glass bg-custom-purple md:mr-7 md:px-10 iceland-regular tracking-wide text-lg text-white md:items-center "
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center">
+                  <svg
+                    className="animate-spin h-5 w-5 mr-2 text-white"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8H4z"
+                    ></path>
+                  </svg>
+                  Loading...
+                </span>
+              ) : (
+                "SUBMIT"
+              )}
+            </button>
           </form>
         )}
       </div>
