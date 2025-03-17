@@ -53,7 +53,7 @@ const Merchants = () => {
             try {
                 const { data, error } = await supabase
                     .from('merchantRegistration')
-                    .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, full_Name, validID, selfie, gcash')
+                    .select('id, shop_name, description, address, shop_image, contact_number, shop_BusinessPermit, is_Approved, full_Name, validID, selfie, gcash, lvm')
                     .is('is_Approved', null);
 
                 if (error) throw error;
@@ -103,7 +103,8 @@ const Merchants = () => {
                     is_Premium: null,
                     valid_id: merchantData.validID,
                     selfie: merchantData.selfie,
-                    gcash: merchantData.gcash
+                    gcash: merchantData.gcash,
+                    lvm: merchantData.lvm
                 }]);
 
             await supabase
@@ -258,7 +259,7 @@ const Merchants = () => {
                                             <h2 className="text-xl font-semibold text-black">{merchant.shop_name || 'Unnamed Shop'}</h2>
                                             <h2 className="text-md font-semibold text-black">{merchant.full_Name || merchant.id?.full_name || 'No Name'}</h2>
                                             <p className="text-gray-700">{merchant.description || 'No description'}</p>
-                                            <p className="text-gray-500">{merchant.address || 'No address'}</p>
+                                            <p className="text-gray-500">{merchant.address || 'No address'} {merchant.lvm}</p>
                                             <p className="text-gray-500">{merchant.contact_number || 'N/A'}</p>
                                             <p
                                                 className="text-black underline cursor-pointer hover:text-blue-500 mb-4"

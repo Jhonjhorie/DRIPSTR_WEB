@@ -104,7 +104,7 @@ function Arts() {
                 {!loading && !error && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 bg-slate-900">
                         {currentArts.length === 0 ? (
-                            <p className="text-gray-400 text-center col-span-full py-10">No items found</p>
+                            <p className="text-gray-400 text-center col-span-full py-10">No pending arts found</p>
                         ) : (
                             currentArts.map((art) => (
                                 <div key={art.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col">
