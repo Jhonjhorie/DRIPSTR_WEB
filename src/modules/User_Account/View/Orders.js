@@ -23,12 +23,13 @@ const Orders = () => {
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const [showReviewModal, setShowReviewModal] = useState(false);
 
-  const tabs = ["All", "Verifying", "To Ship", "To Receive", "Completed", "Returns & Cancellations"];
+  const tabs = ["All", "Verifying", "To Ship", "To Receive", "To Review", "Returns & Cancellations"];
 
   const location = useLocation();
   const navigate = useNavigate();
   const { item } = location.state || {}; // Retrieve the passed product details
 
+  // Fix the getOrderCounts function
   const getOrderCounts = () => {
     const counts = {
       "To Ship": orders.filter(order =>         
@@ -38,14 +39,21 @@ const Orders = () => {
         order.payment_status !== 'Pending to Admin'
       ).length,
       "To Receive": orders.filter(order => 
-        order.shipping_status === 'To deliver'
+        order.shipping_status === 'To deliver' || 
+        order.shipping_status === 'to deliver'
       ).length,
       "Verifying": orders.filter(order => 
         order.payment_method !== "COD" && 
         order.payment_status === "Pending to Admin"
       ).length,
-      "Completed": orders.filter(order =>
-        (order.shipping_status === "delivered" || order.shipping_status === "Delivered" || order.shipping_status === "complete") 
+      "To Review": orders.filter(order =>
+        // Show delivered or completed orders that haven't been reviewed yet
+        ((order.shipping_status === "delivered" || 
+        order.shipping_status === "Delivered" || 
+        order.shipping_status === "complete" || 
+        order.shipping_status === "Complete") && 
+        order.refund_status !== "Approved" && 
+        order.refund_status !== "Requested")
       ).length,
       "Returns & Cancellations": orders.filter(order => 
         order.shipping_status === "cancel" || 
@@ -85,10 +93,18 @@ const Orders = () => {
           order.payment_method !== "COD" && 
           order.payment_status === "Pending to Admin"
         );
-        case "Completed":
-          return filtered.filter(order => 
-            (order.shipping_status === "delivered" || order.shipping_status === "Delivered" || order.shipping_status === "complete") 
-          );
+        // Fix the getFilteredOrders function case for Completed
+
+      case "To Review":
+        return filtered.filter(order => 
+          // Show both delivered and completed orders that need reviews
+          ((order.shipping_status === "delivered" || 
+            order.shipping_status === "Delivered"|| 
+            order.shipping_status === "complete"|| 
+            order.shipping_status === "Complete") && 
+          order.refund_status !== "Approved" && 
+          order.refund_status !== "Requested")
+        );
       case "Returns & Cancellations":
         return filtered.filter(order => 
           (order.shipping_status === "cancel" || 
@@ -153,8 +169,10 @@ const Orders = () => {
       case "To ship":
         return "To Ship";
       case "To deliver":
-         return "To Receive";
+        return "To Receive";
       case "delivered":
+      case "Delivered":
+        return "Delivered";
       case "complete":
         return "Completed";
       default:
@@ -188,6 +206,31 @@ const Orders = () => {
     navigate(`/product/${productData.item_Name}`, {
       state: { item: productData }
     });
+  };
+
+  // Add this new function in the Orders component
+  const handleMarkAsComplete = async (orderId) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ 
+          shipping_status: 'complete',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', orderId);
+  
+      if (error) throw error;
+  
+      showToast('Order marked as completed');
+      // Refresh orders list
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+  
+    } catch (error) {
+      console.error('Error marking order as complete:', error);
+      showToast('Failed to mark order as complete', 'error');
+    }
   };
 
   if (error) {
@@ -258,19 +301,34 @@ const Orders = () => {
                  <div className="absolute inset-0 bg-primary-color/0 group-hover:bg-primary-color/5 transition-colors duration-300 rounded-lg pointer-events-none" />
                  
                 <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-lg font-bold text-gray-800">
-                    Order #{order.id}
-                  </h2>
+                  <div className="flex flex-col">
+                    <h2 className="text-lg font-bold text-gray-800">
+                      Order #{order.id}
+                    </h2>
+                    {order.transaction_id && (
+                      <span className="text-sm text-gray-500">
+                        Transaction ID: {order.shop_transaction_id}
+                      </span>
+                    )}
+                  </div>
                   <div className="flex flex-col items-end">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      order.refund_status === "Requested" ? "bg-orange-100 text-orange-800" :
-                      order.refund_status === "Approved" ? "bg-green-100 text-green-800" :
-                      order.shipping_status === "cancel" ? "bg-gray-100 text-gray-800" :
-                      order.shipping_status === "preparing" && order.payment_method !== "COD" ? 
+                      order.refund_status === "requested" || order.refund_status === "Requested" ? 
+                      "bg-orange-100 text-orange-800" :
+                      order.refund_status === "approved" || order.refund_status === "Approved" ? 
+                      "bg-green-100 text-green-800" :
+                      order.shipping_status === "cancel" || order.shipping_status === "Cancel" ? 
+                      "bg-gray-100 text-gray-800" :
+                      (order.shipping_status === "preparing" || order.shipping_status === "To repare") 
+                      && order.payment_method !== "COD" ? 
                         "bg-purple-100 text-purple-800" :
-                      order.shipping_status === "to ship" ? "bg-yellow-100 text-yellow-800" :
-                      order.shipping_status === "to deliver" ? "bg-blue-100 text-blue-800" :
-                      (order.shipping_status === "delivered" || order.shipping_status === "complete") ? 
+                      order.shipping_status === "to ship" || order.shipping_status === "To ship" ?
+                       "bg-yellow-100 text-yellow-800" :
+                      order.shipping_status === "to deliver" || order.shipping_status === "To deliver" ?
+                       "bg-blue-100 text-blue-800" :
+                      order.shipping_status === "delivered" || order.shipping_status === "Delivered" ? 
+                        "bg-yellow-100 text-yellow-800" :
+                      order.shipping_status === "complete" || order.shipping_status === "Complete" ? 
                         "bg-green-100 text-green-800" :
                       "bg-gray-100 text-gray-800"
                     }`}>
@@ -348,6 +406,24 @@ const Orders = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 15v-1a4 4 0 00-4-4H8m4 0l3 3m0 0l3-3m-3 3v-6" />
                             </svg>
                             Request Refund
+                          </button>
+                        )}
+
+                        {/* Add this before the Review Button */}
+                        {(order.shipping_status === "delivered" || order.shipping_status === "Delivered") && (
+                          <button 
+                            className="text-gray-600 hover:text-green-600 px-4 py-2 rounded-md border border-gray-300 
+                              hover:border-green-200 transition-all duration-300 text-sm font-medium bg-white 
+                              hover:bg-green-50 flex items-center gap-2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleMarkAsComplete(order.id);
+                            }}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Mark as Complete
                           </button>
                         )}
 
@@ -801,10 +877,14 @@ const ReviewModal = ({ isOpen, onClose, order, showToast }) => {
 
       if (reviewError) throw reviewError;
 
-      // Mark order as reviewed
+      // Mark order as reviewed AND set shipping status to complete
       const { error: orderError } = await supabase
         .from('orders')
-        .update({ is_reviewed: true })
+        .update({ 
+          is_reviewed: true,
+          shipping_status: 'complete',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', order.id);
 
       if (orderError) throw orderError;
@@ -825,7 +905,7 @@ const ReviewModal = ({ isOpen, onClose, order, showToast }) => {
       if (updateError) throw updateError;
 
       onClose();
-      showToast('Review submitted successfully');
+      showToast('Review submitted and order marked as completed');
       setTimeout(() => window.location.reload(), 2000);
     } catch (error) {
       console.error('Error submitting review:', error);
