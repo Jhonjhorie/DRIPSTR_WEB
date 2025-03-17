@@ -20,6 +20,7 @@ import ArtistCommision from '../View/Artist/ArtistCommision';
 import AddItem  from '../View/AddItem';
 import Account from '../View/Account';
 import ArtistWallet from '../View/Artist/ArtistWallet';
+import ReportedMerchant from '../View/Reports';
 
 
 const ShopProfileController = () => {
@@ -37,6 +38,7 @@ const ShopProfileController = () => {
       <Route path="/MerchantVouchers" element={<MerchantVouchers />} />
       <Route path="/MerchantWallet" element={<MerchantWallet />} />
       <Route path="/CommissionPage" element={<CommissionPage />} />
+      <Route path="/ReportedMerchant" element={<ReportedMerchant />} />
       <Route path="/AddItem" element={<AddItem />} />
       <Route path="/Artist/ArtistDashboard" element={<ArtistDashboard />} />
       <Route path="/Artist/ArtistAddArts" element={<ArtistAddArts />} />

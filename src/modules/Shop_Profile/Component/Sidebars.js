@@ -4,7 +4,18 @@ import logo from "../../../assets/shop/shoplogo.jpg";
 import successEmote from "../../../assets/emote/success.png";
 import { supabase } from "../../../constants/supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBell, faBookBookmark, faBoxesPacking, faBoxesStacked, faEye, faBolt, faMessage, faPeopleGroup, faUserEdit, faWallet } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBell,
+  faBookBookmark,
+  faBoxesPacking,
+  faBoxesStacked,
+  faEye,
+  faBolt,
+  faMessage,
+  faPeopleGroup,
+  faUserEdit,
+  faWallet,
+} from "@fortawesome/free-solid-svg-icons";
 
 function SideBar() {
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
@@ -43,9 +54,9 @@ function SideBar() {
 
         // Fetch shop image URL where user is the shop owner
         const { data, error } = await supabase
-          .from("shop") 
+          .from("shop")
           .select("shop_image, shop_name")
-          .eq("owner_Id", user.id) 
+          .eq("owner_Id", user.id)
           .single();
 
         if (error) {
@@ -106,13 +117,10 @@ function SideBar() {
           <div className="h-24 w-full rounded-md bg-slate-900">
             <div className="bg-slate-100 absolute top-24 md:top-32 mx-[22%]  w-1/2  rounded-full border-[3px]  border-slate-800 ">
               <img
-                src={shopImageUrl || successEmote} 
+                src={shopImageUrl || successEmote}
                 alt="Shop Logo"
                 className="drop-shadow-custom object-cover rounded-full h-[135px] w-full"
               />
-            </div>
-            <div  onClick={() => navigate("/shop/Account")} data-tip="Edit Merchant Account" className=" text-white  p-2 tooltip tooltip-left duration-200 cursor-pointer">
-            <FontAwesomeIcon icon={faUserEdit} /> 
             </div>
           </div>
 
@@ -134,7 +142,7 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer -pr-1">
               Dashboard
             </a>
-            <FontAwesomeIcon icon={faBolt} /> 
+            <FontAwesomeIcon icon={faBolt} />
           </li>
 
           <li
@@ -144,7 +152,7 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Products
             </a>
-            <FontAwesomeIcon icon={faBoxesPacking} /> 
+            <FontAwesomeIcon icon={faBoxesPacking} />
           </li>
 
           <li
@@ -154,7 +162,7 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Orders
             </a>
-            <FontAwesomeIcon icon={faBoxesStacked} /> 
+            <FontAwesomeIcon icon={faBoxesStacked} />
           </li>
 
           <li
@@ -164,7 +172,7 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Messages
             </a>
-            <FontAwesomeIcon icon={faMessage} /> 
+            <FontAwesomeIcon icon={faMessage} />
           </li>
 
           <li
@@ -174,7 +182,7 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Notifications
             </a>
-            <FontAwesomeIcon icon={faBell} /> 
+            <FontAwesomeIcon icon={faBell} />
           </li>
 
           <li
@@ -184,7 +192,7 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Followers
             </a>
-            <FontAwesomeIcon icon={faPeopleGroup} /> 
+            <FontAwesomeIcon icon={faPeopleGroup} />
           </li>
 
           {/* <li
@@ -203,7 +211,7 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Merchant Wallet
             </a>
-            <FontAwesomeIcon icon={faWallet} /> 
+            <FontAwesomeIcon icon={faWallet} />
           </li>
           <li
             onClick={() => navigate("/shop/CommissionPage")}
@@ -212,7 +220,16 @@ function SideBar() {
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Commissions
             </a>
-            <FontAwesomeIcon icon={faBookBookmark} /> 
+            <FontAwesomeIcon icon={faBookBookmark} />
+          </li>
+          <li
+            onClick={() => navigate("/shop/Account")}
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+          >
+            <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
+              Account
+            </a>
+            <FontAwesomeIcon icon={faUserEdit} />
           </li>
         </ul>
       </div>
