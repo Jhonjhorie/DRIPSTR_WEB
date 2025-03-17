@@ -373,7 +373,9 @@ const Orders = () => {
                         {order.shipping_status !== "delivered" && 
                           order.shipping_status !== "complete" && 
                           order.shipping_status !== "To deliver" && 
-                          order.shipping_status !== "cancel" && (
+                          order.shipping_status !== "cancel" &&
+                          order.shipping_status !== 'To receive' &&
+                          (
                           <button 
                             className="text-gray-600 hover:text-red-600 px-4 py-2 rounded-md border border-gray-300 
                             hover:border-red-200 transition-all duration-300 text-sm font-medium bg-white 
