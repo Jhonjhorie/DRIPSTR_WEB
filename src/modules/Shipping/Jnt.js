@@ -22,6 +22,8 @@ import {
   faChevronUp,
   faTag,
 } from "@fortawesome/free-solid-svg-icons";
+// Alternative fix
+import { useNotification } from '../../utils/NotificationContext';
 
 const Jnt = () => {
   const [groupedOrders, setGroupedOrders] = useState({});
@@ -30,6 +32,7 @@ const Jnt = () => {
   const [activeTable, setActiveTable] = useState("orders");
   const [tabCounts, setTabCounts] = useState({});
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const { addNotification } = useNotification();
 
   // Fetch counts for each status
   const fetchTabCounts = async () => {
@@ -125,6 +128,56 @@ const Jnt = () => {
     }
   };
 
+  const sendOrderNotification = async (userId, status, orderId) => {
+    let notificationData;
+    
+    switch (status.toLowerCase()) {
+      case "to ship":
+        notificationData = {
+          type: 'info',
+          title: 'Order Picked Up',
+          message: `Your order #${orderId} has been picked up and is ready for shipping.`
+        };
+        break;
+      case "to receive":
+        notificationData = {
+          type: 'info',
+          title: 'Order Out for Delivery',
+          message: `Your order #${orderId} is out for delivery.`
+        };
+        break;
+      case "delivered":
+        notificationData = {
+          type: 'success',
+          title: 'Order Delivered',
+          message: `Your order #${orderId} has been delivered successfully.`
+        };
+        break;
+      case "returning":
+        notificationData = {
+          type: 'warning',
+          title: 'Order Returning',
+          message: `Your order #${orderId} is being returned.`
+        };
+        break;
+      case "returned":
+        notificationData = {
+          type: 'info',
+          title: 'Order Returned',
+          message: `Your order #${orderId} has been returned.`
+        };
+        break;
+      default:
+        notificationData = {
+          type: 'info',
+          title: 'Order Status Updated',
+          message: `Your order #${orderId} status has been updated to ${status}.`
+        };
+    }
+
+    await addNotification(notificationData);
+  };
+
   const updateShippingStatus = async (transactionId, newStatus) => {
     try {
       const table = activeTable === "orders" ? "orders" : "merchant_Commission";
@@ -141,10 +194,28 @@ const Jnt = () => {
 
       if (error) throw error;
 
+      // Get the order details to get user ID
+      if (activeTable === "orders") {
+        const { data: orderData } = await supabase
+          .from("orders")
+          .select("acc_num")
+          .eq("shop_transaction_id", transactionId)
+          .single();
+
+        if (orderData?.acc_num) {
+          await sendOrderNotification(orderData.acc_num, newStatus, transactionId);
+        }
+      }
+
       await fetchOrders(activeTab);
       await fetchTabCounts();
     } catch (error) {
       console.error("Error updating shipping status:", error.message);
+      addNotification({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to update order status. Please try again.'
+      });
     }
   };
 
