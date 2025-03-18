@@ -235,7 +235,7 @@ function PrintSales() {
                   ) : (
                     <>
                       <div className="flex gap-2 items-center">
-                        <div className="h-3 w-3 bg-green-500"></div>
+                        <div className="h-3 w-3 bg-teal-500 "></div>
                         <div className="p-1 text-slate-950 text-sm font-semibold">
                           Monthly Orders:{" "}
                           <span className="font-normal">

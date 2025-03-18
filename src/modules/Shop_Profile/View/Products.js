@@ -143,6 +143,9 @@ function Products() {
           console.log("Updated Ads with URLs:", updatedAds); // Log the updated ads
           setShopAds(updatedAds); // Set the updated ads
 
+          // get the total sold items
+       
+
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
             .select(
@@ -227,6 +230,8 @@ function Products() {
   useEffect(() => {
     fetchUserProfileAndShop();
   }, []);
+  //count sold items
+  const [soldItems, setSoldItems] = useState(0);
 
   const [productReviews, setProductReviews] = useState([]);
   const [selectedImage2, setSelectedImage2] = useState(null);
@@ -572,8 +577,38 @@ function Products() {
     console.log("Viewing item:", item);
     if (item.id) {
       await fetchProductReviews(item.id);
+      await fetchSoldItems(item.id);
     }
   };
+  const fetchSoldItems = async (productId) => {
+    try {
+      const { data: completedOrders, error } = await supabase
+        .from("orders")
+        .select("quantity")
+        .eq("prod_num", productId)
+        .eq("shop_id", selectedShopId) // Ensure it's for the current shop
+        .eq("shipping_status", "Completed");
+
+      if (error) {
+        console.error("Error fetching sold items:", error.message);
+        setSoldItems(0); // Default to 0 if an error occurs
+        return;
+      }
+
+      // Calculate total sold quantity
+      const totalSold =
+        completedOrders?.reduce(
+          (total, order) => total + (order.quantity || 0),
+          0
+        ) || 0;
+
+      setSoldItems(totalSold); // Update the UI
+    } catch (error) {
+      console.error("Unexpected error fetching sold items:", error);
+      setSoldItems(0);
+    }
+  };
+
   const handleAddSize = (variantIndex) => {
     const updatedVariants = [...selectedItem.item_Variant];
     updatedVariants[variantIndex].sizes = [
@@ -1339,7 +1374,7 @@ function Products() {
               </div>
             </div>
 
-            <div className="h-full bg-white w-full relative overflow-hidden overflow-y-scroll p-2 md:flex gap-2">
+            <div className="h-full bg-white w-full relative  p-2 md:flex gap-2">
               <div className="w-full md:w-4/12 h-auto md:h-full relative">
                 <div className=" w-[200px] md:w-full place-self-center h-[200px] rounded-sm bg-slate-100 p-2 shadow-inner shadow-custom-purple mb-2">
                   <img
@@ -1457,15 +1492,9 @@ function Products() {
                           </label>
                         </div>
                       </div>
-                      <div className="justify-center  right-5 place-items-center gap-2 top-20 absolute">
-                        <div
-                          className={
-                            selectedItem.qty < 11
-                              ? "text-red-500 text-2xl font-bold text-center"
-                              : "text-primary-color text-2xl font-bold text-center"
-                          }
-                        >
-                          {selectedItem.item_Orders}
+                      <div className="justify-center right-5 place-items-center gap-2 top-20 absolute">
+                        <div className="text-primary-color text-2xl font-bold text-center">
+                          {soldItems}
                         </div>
                         <label className="text-sm text-slate-800 font-semibold">
                           Sold
