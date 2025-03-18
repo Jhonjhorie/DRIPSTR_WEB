@@ -79,14 +79,16 @@ function TopItems() {
                 />
               )}
               <div>
-              <h3 className="text-lg font-semibold text-white line-clamp-2 min-h-[3rem]">
-                {product.item_Name}
-              </h3>
-              <h3 className="text-lg font-semibold text-white line-clamp-2 min-h-[3rem]">
-                {product.item_Category}
-              </h3>
+                <h3 className="text-lg font-semibold text-white line-clamp-2 min-h-[3rem]">
+                  {product.item_Name}
+                </h3>
+                {product.item_Category && (
+                  <span className="inline-block text-xs bg-violet-600 text-white rounded-md px-2 py-1 mt-1">
+                    {product.item_Category === 'Tshirt' ? 'Shirt' : product.item_Category}
+                  </span>
+                )}
               </div>
-              <div className="">
+              <div className="mt-3 space-y-2">
                 <p className="text-sm text-gray-300">
                   <span className="font-medium">Orders:</span> {product.item_Orders}
                 </p>
