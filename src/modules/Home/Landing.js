@@ -23,6 +23,8 @@ function LandingPage() {
     } 
     else if (action === "shop") {
       navigate(`/guest`);
+    } else if (action === "download") {
+      navigate(`/download_studio`);
     } else if (action === "customer") {
       setShowAbout(true);
       setShowArt(false);
@@ -118,13 +120,16 @@ function LandingPage() {
           </button>
         </div>
         <div className="flex justify-center text-center flex-col gap-2">
-          <p className="text-lg">Scroll Down to Know more</p>
-          <span
-            onClick={() => handleShow("about")}
-            className="text-secondary-color text-3xl hover:translate-y-4 duration-300 transition-all"
+        <p className="text-lg">Go to the DripStr Studio?</p>
+          <div class="divider my-0">
+            <FontAwesomeIcon icon={faAngleDown} />
+          </div>
+          <button
+            onClick={() => handleShow("download")}
+            className="   text-primary-color hover:text-2xl hover:bg-primary-color hover:text-white rounded-lg hover:p-1 hover:glass hover:scale-125 duration-300 transition-all drop-shadow-lg font-[iceland] text-2xl w-56"
           >
-            <FontAwesomeIcon icon={faAnglesDown} />
-          </span>
+            See the Studio
+          </button>
         </div>
       </div>
       <div className="w-full pt-20 px-8 bg-slate-50 flex flex-col gap-4 pb-12">

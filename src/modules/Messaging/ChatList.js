@@ -46,6 +46,28 @@ const ChatList = ({ profile, onSelectChat }) => {
     }
   };
 
+  // Function to mark a message as read
+  const markMessageAsRead = async (messageId) => {
+    try {
+      const { data, error } = await supabase
+        .from("messages")
+        .update({ is_read: true })
+        .eq("id", messageId)
+        .select();
+
+      if (error) throw error;
+
+      // Update the local state to reflect the change
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === messageId ? { ...msg, is_read: true } : msg
+        )
+      );
+    } catch (error) {
+      console.error("Error marking message as read:", error.message);
+    }
+  };
+
   useEffect(() => {
     fetchMessages();
   }, []);
@@ -86,7 +108,7 @@ const ChatList = ({ profile, onSelectChat }) => {
         </div>
       </div>
       
-      <div className={`overflow-y-auto scrollbar-thin scrollbar-thumb-purple-200 scrollbar-track-gray-50 ${
+      <div className={`overflow-y-auto scrollbar-thin custom-scrollbar scrollbar-thumb-purple-200 scrollbar-track-gray-50 ${
         isMobile ? "max-h-[calc(100vh-8rem)]" : "max-h-96"
       }`}>
         {isLoading ? (
@@ -100,8 +122,13 @@ const ChatList = ({ profile, onSelectChat }) => {
               className={`flex items-start p-4 border-b border-gray-50 hover:bg-purple-50 transition-colors duration-150 cursor-pointer ${
                 !message.is_read ? "bg-blue-50" : ""
               }`}
-              onClick={() => {
+              onClick={async () => {
+      
+                await markMessageAsRead(message.id);
+                
+              
                 onSelectChat(message);
+                
                 if (isMobile) {
                   navigate(`/chat`, { state: { selectedMessageId: message.id } });
                 }

@@ -79,7 +79,6 @@ const ChatBox = ({ profile, chat, onClose, onMinimize }) => {
       send_file: imageUrl,
       sender_id: profile.id,
       timestamp: new Date().toISOString(),
-      is_read: true, // Mark the new message as read
     };
 
     const updatedContent = [...messages, newMessageObj];
@@ -87,7 +86,7 @@ const ChatBox = ({ profile, chat, onClose, onMinimize }) => {
     try {
       const { data, error } = await supabase
         .from("messages")
-        .update({ content: updatedContent, last_message: imageUrl ? "Client send an image file." : newMessage })
+        .update({ content: updatedContent, last_message: imageUrl ? "Client send an image file." : newMessage, is_read: true, is_readM: false})
         .eq("id", chat.id)
         .select("*, merch:merchant_Id(*)")
         .single();

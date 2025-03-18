@@ -34,6 +34,7 @@ import ResetPassword from './shared/login/ResetPassword';
 
 import AccountSetup from './modules/Login/View/AccountSetup';
 import Chat from "./modules/Messaging/Chat";
+import DownloadStudioP from "./modules/Home/dlStudio";
 
 function AppContent() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -70,6 +71,7 @@ function AppContent() {
           <main className={`flex-1 ${isLoggedIn && !hideHeaderAndSidebar ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-auto`}>
             <Routes>
               <Route path="/" element={<HomeController />} />
+              <Route path="/download_studio" element={<DownloadStudioP />} />
               <Route path="/about" element={<AboutUs />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/jnt/*" element={<JntController />} />
