@@ -7,6 +7,18 @@ const DownloadStudioP = () => {
     navigate("/")
   };
 
+  const downloadZip = async () => {
+  const zipFileUrl = "https://pbghpzmbfeahlhmopapy.supabase.co/storage/v1/object/public/download//CAP102-FINAL-DOCU-V2%20-%20Copy.zip"; 
+
+ 
+  const link = document.createElement("a");
+  link.href = zipFileUrl;
+  link.download = "dripstr.zip"; 
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
   return (
     <div className="w-full h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
       {/* Background gradient effect - more subtle */}
@@ -47,7 +59,7 @@ const DownloadStudioP = () => {
           </div>
           
           {/* Right side: Logo */}
-          <div className="w-full absolute right-10 top-10 md:w-1/3 hidden md:flex z-0 flex justify-center md:justify-end mt-6 md:mt-0">
+          <div className="w-full absolute right-20 top-10 md:w-1/3 hidden md:flex z-0  justify-center md:justify-end mt-6 md:mt-0">
             <div className="relative  flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-br from-[#17171746] to-transparent p-4 rounded-full "></div>
               <img 
@@ -93,17 +105,31 @@ const DownloadStudioP = () => {
           </div>
         </div>
 
-        {/* Download button - more minimal */}
-        <button className="group relative px-8 py-4 overflow-hidden rounded-md bg-gray-800 text-white font-medium transition-all duration-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black border border-purple-500/30">
-          <span className="relative z-10 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-purple-400">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            DOWNLOAD NOW
-          </span>
-        </button>
+
+         <button
+    onClick={downloadZip}
+    className="group relative px-8 py-4 overflow-hidden rounded-md bg-gray-800 text-white font-medium transition-all duration-300 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black border border-purple-500/30"
+  >
+    <span className="relative z-10 flex items-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="mr-2 text-purple-400"
+      >
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+      DOWNLOAD NOW
+    </span>
+  </button>
 
         {/* System requirements toggle */}
         <div className="mt-8 text-center">

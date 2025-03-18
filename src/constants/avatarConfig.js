@@ -40,7 +40,7 @@ const longsleevesURLs = {
     Slim: `/3d/avatar/MEN/Body/Slim/LongSleeve.glb`,
     Average: `/3d/avatar/MEN/Body/Average/LongSleeve.glb`,
     Broad: `/3d/avatar/MEN/Body/Broad/LongSleeve.glb`,
-    PlusSize: `/3d/avatar/MEN/Body/Plus/LongSleeve.glb`,
+    PlusSize: `/3d/avatar/MEN/Body/Plus/LongSleeves.glb`,
   },
   Girl: {
     Petite: `/3d/avatar/WOMEN/Body/Petite/LongSleeve.glb`,
