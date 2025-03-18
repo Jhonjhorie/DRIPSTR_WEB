@@ -29,7 +29,7 @@ function Artists() {
       try {
         const { data, error } = await supabase
           .from('artist_registration')
-          .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash, decline_reason, sample_art')
+          .select('id, created_at, acc_id, sample_art2, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash, decline_reason, sample_art')
           .is('is_approved', null);
         if (error) throw error;
         setRegister(data || []);
@@ -71,7 +71,7 @@ function Artists() {
       console.log("Fetching artist registration data...");
       const { data: artistData, error: fetchError } = await supabase
         .from('artist_registration')
-        .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash, sample_art')
+        .select('id, created_at, acc_id, full_name, address, mobile_number, artist_name, description, art_type, valid_id, selfie, is_approved, artist_profilePic, gcash, sample_art, sample_art2')
         .eq('id', id)
         .single();
       if (fetchError) throw fetchError;
@@ -103,7 +103,8 @@ function Artists() {
           followers_Detail: null,
           is_Premium: null,
           gcash: artistData.gcash,
-          sample_art: artistData.sample_art
+          sample_art1: artistData.sample_art,
+          sample_art2: artistData.sample_art2
         }])
         .select()
         .single(); // Get the newly inserted artist data
@@ -333,7 +334,7 @@ function Artists() {
                   <p className="text-black font-medium mb-2">Sample Arts</p>
                   <div className="flex flex-row gap-2 items-center">
                     <img
-                      src={selectedArtist.sample_art1 || selectedArtist.sample_art || 'https://via.placeholder.com/150'}
+                      src={selectedArtist.sample_art || selectedArtist.sample_art || 'https://via.placeholder.com/150'}
                       alt={`${selectedArtist.artist_name || selectedArtist.artist_Name || 'Artist'} Sample Art 1`}
                       className="w-24 h-24 object-contain rounded-md cursor-pointer"
                       onClick={() => handleImageClick(selectedArtist.sample_art1)}
