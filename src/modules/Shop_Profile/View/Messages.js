@@ -76,7 +76,7 @@ function Messages() {
     const { data, error } = await supabase
       .from("messages")
       .select(
-        `id, sender_id, content, created_at, is_read, profiles:sender_id (id, full_name, profile_picture)`
+        `id, receiver_id, content, created_at, is_read, profiles:receiver_id (id, full_name, profile_picture)`
       )
       .eq("merchant_Id", merchantId)
       .order("created_at", { ascending: false });
@@ -284,7 +284,7 @@ function Messages() {
     }
 
     const newMessage = {
-      merchant_Id: selectedUser.artist_Id,
+      merchant_Id: selectedUser.merchant_Id,
       text: messageContent,
       send_file: imageUrl,
       timestamp: new Date().toISOString(),
@@ -457,7 +457,7 @@ function Messages() {
                             console.log("Rendering Message:", message);
 
                             const isSenderMessage =
-                              message.sender_Id !== undefined;
+                              message.sender_id !== undefined;
                             const isMerchantMessage =
                               message.merchant_Id !== undefined;
 

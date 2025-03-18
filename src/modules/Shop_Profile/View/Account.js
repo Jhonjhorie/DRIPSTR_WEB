@@ -6,6 +6,7 @@ import successEmote from "../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../src/assets/emote/question.png";
 import hmmmEmote from "../../../../src/assets/emote/hmmm.png";
 import MerchantWallet from "../Component/MerchantWallet"
+import Reports from "../Component/Reports";
 import {
   blockInvalidChar,
   validateMinLength2,
@@ -308,6 +309,9 @@ function Account() {
             </div>
           </div>
         </div>
+        <div>
+          <Reports></Reports>
+        </div>
         {/* ALLERTS ADD Item SUCCESS */}
         {showAlertEdit && (
           <div className="fixed inset-0 z-30 bg-gray-800 bg-opacity-50 p-2 flex justify-center items-center">
@@ -489,7 +493,7 @@ function Account() {
           </div>
         )}
         {showAlertEditNochanges && (
-          <div className="md:bottom-5  w-auto px-10 bottom-10 z-20 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="md:bottom-5  w-auto px-10 bottom-10 z-40 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
             <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
               <div className="mt-10 ">
                 <img

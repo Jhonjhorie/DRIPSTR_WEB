@@ -33,6 +33,7 @@ function Products() {
   const [showAlertAd, setShowAlertAD] = React.useState(false); // Alert
   const [showAlertUnpost, setShowAlertUnpost] = React.useState(false); // Alert Unpost
   const [showAlertdelAD, setShowAlertDelad] = React.useState(false); // Alert Unpost
+  const [showAlertdelInfo, setShowAlertDelInfo] = React.useState(false); // Alert Unpost
   const [showAlertDelConAd, setShowAlertDelConad] = React.useState(false); // Alert Unpost
   const [showAlertDel, setShowAlertDel] = React.useState(false); // Alert Delete Item
   const [showAlert2, setShowAlert2] = React.useState(false); // Alert Confirm Post
@@ -142,6 +143,9 @@ function Products() {
           console.log("Updated Ads with URLs:", updatedAds); // Log the updated ads
           setShopAds(updatedAds); // Set the updated ads
 
+          // get the total sold items
+       
+
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
             .select(
@@ -226,6 +230,8 @@ function Products() {
   useEffect(() => {
     fetchUserProfileAndShop();
   }, []);
+  //count sold items
+  const [soldItems, setSoldItems] = useState(0);
 
   const [productReviews, setProductReviews] = useState([]);
   const [selectedImage2, setSelectedImage2] = useState(null);
@@ -348,6 +354,23 @@ function Products() {
     } catch (error) {
       console.error("Error updating the variant:", error);
     }
+  };
+  const handleDeleteSize = (variantIndex, sizeIndex) => {
+    setSelectedItem((prevItem) => {
+      const updatedVariants = [...prevItem.item_Variant];
+
+      // Remove the size at the specified index
+      updatedVariants[variantIndex].sizes = updatedVariants[
+        variantIndex
+      ].sizes.filter((_, index) => index !== sizeIndex);
+
+      return {
+        ...prevItem,
+        item_Variant: updatedVariants,
+      };
+    });
+    setShowAlertDelInfo(true);
+    setTimeout(() => setShowAlertDelInfo(false), 3000);
   };
 
   const PostNotify = async () => {
@@ -554,8 +577,38 @@ function Products() {
     console.log("Viewing item:", item);
     if (item.id) {
       await fetchProductReviews(item.id);
+      await fetchSoldItems(item.id);
     }
   };
+  const fetchSoldItems = async (productId) => {
+    try {
+      const { data: completedOrders, error } = await supabase
+        .from("orders")
+        .select("quantity")
+        .eq("prod_num", productId)
+        .eq("shop_id", selectedShopId) // Ensure it's for the current shop
+        .eq("shipping_status", "Completed");
+
+      if (error) {
+        console.error("Error fetching sold items:", error.message);
+        setSoldItems(0); // Default to 0 if an error occurs
+        return;
+      }
+
+      // Calculate total sold quantity
+      const totalSold =
+        completedOrders?.reduce(
+          (total, order) => total + (order.quantity || 0),
+          0
+        ) || 0;
+
+      setSoldItems(totalSold); // Update the UI
+    } catch (error) {
+      console.error("Unexpected error fetching sold items:", error);
+      setSoldItems(0);
+    }
+  };
+
   const handleAddSize = (variantIndex) => {
     const updatedVariants = [...selectedItem.item_Variant];
     updatedVariants[variantIndex].sizes = [
@@ -732,7 +785,7 @@ function Products() {
   const [isAlertUpdateCustomize, setShowIsCustomize] = useState(false);
   const [isCustomizable, setIsCustomizable] = useState(false);
   useEffect(() => {
-    if (!selectedItem || !selectedItem.id) return; 
+    if (!selectedItem || !selectedItem.id) return;
 
     const fetchCustomizationStatus = async () => {
       const { data, error } = await supabase
@@ -744,15 +797,15 @@ function Products() {
       if (error) {
         console.error("Error fetching isCustomizable:", error.message);
       } else {
-        setIsCustomizable(data?.isCustomizable || false); 
+        setIsCustomizable(data?.isCustomizable || false);
       }
     };
 
     fetchCustomizationStatus();
-  }, [selectedItem]); 
+  }, [selectedItem]);
 
   const handleToggle = async (event) => {
-    if (!selectedItem || !selectedItem.id) return; 
+    if (!selectedItem || !selectedItem.id) return;
 
     const newValue = event.target.checked;
 
@@ -769,7 +822,6 @@ function Products() {
       setTimeout(() => setShowIsCustomize(false), 3000);
     }
   };
-
 
   return (
     <div className="h-full w-full  bg-slate-300 px-2 md:px-10 lg:px-20 ">
@@ -1322,7 +1374,7 @@ function Products() {
               </div>
             </div>
 
-            <div className="h-full bg-white w-full relative overflow-hidden overflow-y-scroll p-2 md:flex gap-2">
+            <div className="h-full bg-white w-full relative  p-2 md:flex gap-2">
               <div className="w-full md:w-4/12 h-auto md:h-full relative">
                 <div className=" w-[200px] md:w-full place-self-center h-[200px] rounded-sm bg-slate-100 p-2 shadow-inner shadow-custom-purple mb-2">
                   <img
@@ -1367,7 +1419,8 @@ function Products() {
                         className="toggle"
                         checked={isCustomizable}
                         onChange={handleToggle}
-                      />{" "}yes
+                      />{" "}
+                      yes
                     </div>
                   </div>
                 </div>
@@ -1439,15 +1492,9 @@ function Products() {
                           </label>
                         </div>
                       </div>
-                      <div className="justify-center  right-5 place-items-center gap-2 top-20 absolute">
-                        <div
-                          className={
-                            selectedItem.qty < 11
-                              ? "text-red-500 text-2xl font-bold text-center"
-                              : "text-primary-color text-2xl font-bold text-center"
-                          }
-                        >
-                          {selectedItem.item_Orders}
+                      <div className="justify-center right-5 place-items-center gap-2 top-20 absolute">
+                        <div className="text-primary-color text-2xl font-bold text-center">
+                          {soldItems}
                         </div>
                         <label className="text-sm text-slate-800 font-semibold">
                           Sold
@@ -1586,16 +1633,18 @@ function Products() {
                                   readOnly={!editableVariants[variantIndex]}
                                 />
                               </div>
-                              {/*<div>
+                              <div>
                                 {editableVariants[variantIndex] && (
                                   <button
-                                    onClick={handleDeleteVarInfo}
+                                    onClick={() =>
+                                      handleDeleteSize(variantIndex, sizeIndex)
+                                    }
                                     className="text-red-600"
                                   >
                                     <i className="fa-solid fa-trash-can"></i>
                                   </button>
                                 )}
-                              </div>*/}
+                              </div>
                             </div>
                           </div>
                         ))
@@ -2040,6 +2089,38 @@ function Products() {
               />
             </svg>
             <span>Advertisement is Successfully Deleted.</span>
+          </div>
+        </div>
+      )}
+      {showAlertdelInfo && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-40 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-red-600 text-slate-50 font-semibold rounded-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 shrink-0 stroke-current mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span>Item variant information deleted</span>
           </div>
         </div>
       )}

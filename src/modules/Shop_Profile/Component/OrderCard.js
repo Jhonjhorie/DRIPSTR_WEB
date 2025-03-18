@@ -251,7 +251,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             Quantity: <span className="font-medium">{order.quantity}</span>
           </p>
           <p className="text-sm text-slate-700">
-            Price: <span className="font-medium">₱{order.total_price}</span>
+            Price: <span className="font-medium">₱ {order.total_price}</span>
           </p>
           <p className="text-sm text-slate-700">
             Shipping Fee:{" "}
@@ -262,8 +262,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             <span className="font-medium">{order.shipping_method}</span>
           </p>
           <p className="text-xl font-semibold md:absolute bottom-0 right-0 text-yellow-600">
-            Total: ₱
-            {order.final_price || order.total_price + order.shipping_fee}
+            Total: ₱{order.total_price}   
           </p>
         </div>
       </div>
