@@ -2,21 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { useNotification } from '../../utils/NotificationContext';
 import NotificationItem from './components/NotificationItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faTrash, faBell, faSync } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faBell, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/constants/supabase';
 
 const Notification = () => {
-  const { notifications, setNotifications, unreadCount, fetchUnreadCount } = useNotification();
+  const { notifications, setNotifications, fetchUnreadCount } = useNotification();
   const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const navigate = useNavigate();
 
-  // Mark all notifications as read
+  // Add markAllAsRead function outside useEffect
   const markAllAsRead = async () => {
     try {
       setLoading(true);
       const unreadNotifications = notifications.filter(n => !n.read);
       
-      if (unreadNotifications.length === 0) return;
+      if (unreadNotifications.length === 0) {
+        setLoading(false);
+        return;
+      }
 
       const { error } = await supabase
         .from('notifications')
@@ -25,14 +29,49 @@ const Notification = () => {
 
       if (error) throw error;
 
+      // Update local state
       setNotifications(notifications.map(n => ({ ...n, read: true })));
-      await fetchUnreadCount(); // Refresh the global unread count
+      // Update global unread count
+      await fetchUnreadCount();
+
+      // Refresh the page
+      window.location.reload();
     } catch (error) {
       console.error('Error marking notifications as read:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Update the useEffect to run only once when component mounts
+  useEffect(() => {
+    const markAllAsRead = async () => {
+      try {
+        const unreadNotifications = notifications.filter(n => !n.read);
+        
+        if (unreadNotifications.length === 0) return;
+
+        const { error } = await supabase
+          .from('notifications')
+          .update({ read: true })
+          .in('id', unreadNotifications.map(n => n.id));
+
+        if (error) throw error;
+
+        // Update local state
+        setNotifications(notifications.map(n => ({ ...n, read: true })));
+        // Update global unread count
+        await fetchUnreadCount();
+      } catch (error) {
+        console.error('Error marking notifications as read:', error);
+      }
+    };
+
+    // Run immediately when component mounts
+    if (notifications.length > 0) {
+      markAllAsRead();
+    }
+  }, []); // Empty dependency array to run only once
 
   // Delete all notifications
   const deleteAllNotifications = async () => {
@@ -47,7 +86,7 @@ const Notification = () => {
       if (error) throw error;
 
       setNotifications([]);
-      await fetchUnreadCount(); // Refresh the unread count
+      await fetchUnreadCount();
     } catch (error) {
       console.error('Error deleting notifications:', error);
     } finally {
@@ -55,67 +94,32 @@ const Notification = () => {
     }
   };
 
-  // Refresh notifications
-  const refreshNotifications = async () => {
-    try {
-      setRefreshing(true);
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('deleted', false)
-        .order('timestamp', { ascending: false });
-
-      if (error) throw error;
-      
-      setNotifications(data);
-      await fetchUnreadCount(); // Refresh the global unread count
-    } catch (error) {
-      console.error('Error refreshing notifications:', error);
-    } finally {
-      setRefreshing(false);
-    }
-  };
+// Handle notification click
+const handleNotificationClick = (notification) => {
+  if (notification.message && notification.message.includes('Order')) {
+    navigate('/account/orders');
+  }
+};
 
   return (
     <div className="p-4 max-w-screen-xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold text-gray-800">Notifications</h2>
-          {unreadCount > 0 && (
-            <span className="bg-red-500 text-white px-2 py-1 rounded-full text-xs animate-pulse">
-              {unreadCount} new
-            </span>
-          )}
         </div>
         
         <div className="flex gap-2">
           <button
-            onClick={refreshNotifications}
-            disabled={refreshing}
-            className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2
-              ${refreshing 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-green-50 text-green-600 hover:bg-green-100'}`}
-          >
-            <FontAwesomeIcon 
-              icon={faSync} 
-              className={`${refreshing ? 'animate-spin' : ''}`}
-            />
-            Refresh
-          </button>
-
-          <button
             onClick={markAllAsRead}
-            disabled={loading || unreadCount === 0}
+            disabled={loading || notifications.every(n => n.read)}
             className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2
-              ${loading || unreadCount === 0 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+              ${loading || notifications.every(n => n.read)
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 : 'bg-blue-50 text-blue-600 hover:bg-blue-100'}`}
           >
             <FontAwesomeIcon icon={faCheck} />
             Mark all as read
           </button>
-          
           <button
             onClick={deleteAllNotifications}
             disabled={loading || notifications.length === 0}
@@ -141,6 +145,7 @@ const Notification = () => {
             <NotificationItem
               key={notification.id}
               notification={notification}
+              onClick={() => handleNotificationClick(notification)}
               onUpdate={(updatedNotification) => {
                 setNotifications(notifications.map(n => 
                   n.id === updatedNotification.id ? updatedNotification : n

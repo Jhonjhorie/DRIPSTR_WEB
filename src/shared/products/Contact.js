@@ -40,7 +40,7 @@ const Contact = ({ onClose }) => {
           <div className="mt-4  ">
             <h1 className="text-lg font-semibold ">Social</h1>
             <div className="mt-4 flex gap-6 items-center flex-col">
-            <a href="https://www.facebook.com/profile.php?id=100077049286014" className="cursor-pointer hover:scale-125 duration-300 transition-al">
+            <a href="https://www.facebook.com/" className="cursor-pointer hover:scale-125 duration-300 transition-al">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"

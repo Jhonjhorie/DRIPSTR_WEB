@@ -28,6 +28,7 @@ import ShopVoucherStream from "./components/subcomponents/ShopVoucher.js";
 import ReviewStream from "./components/subcomponents/reviewsStream.js";
 import { supabase } from "../../constants/supabase.js";
 import useReviews from "./hooks/useShopReview.js";
+import ChatBox from "../Messaging/ChatBox.js";
 
 function ShopPage() {
   const location = useLocation();
@@ -41,6 +42,9 @@ function ShopPage() {
   const [filCat, setFilCat] = useState(categories[0]?.label || "");
   const { products, loading, error } = useProducts(profile);
   const {reviews, loadingRev, shopRating, fetchReviews} = useReviews(shop.id);
+  const [openChat, setOpenChat] = useState(false);
+const [selectedChat, setSelectedChat] = useState(null);
+const [minimizedChats, setMinimizedChats] = useState([]);
 
   const [stats, setStats] = useState({
     totalProducts: 0,
@@ -116,6 +120,50 @@ function ShopPage() {
       }
     }
   };
+
+  const handleMessage = async () => {
+    if (!profile?.id || !shop?.id) return;
+  
+    try {
+      const { data: existingMessages, error: fetchError } = await supabase
+        .from("messages")
+        .select("*, merch:merchant_Id(*)") // Include merchant data
+        .eq("sender_id", shop.owner_Id)
+        .eq("receiver_id", profile.id)
+        .eq("merchant_Id", shop.id);
+  
+      if (fetchError) throw fetchError;
+  
+      if (existingMessages.length > 0) {
+        setSelectedChat(existingMessages[0]);
+      } else {
+        // Create a new conversation
+        const { data, error } = await supabase
+          .from("messages")
+          .insert([
+            {
+              sender_id: shop.owner_Id,
+              receiver_id: profile.id,
+              merchant_Id: shop.id,
+              content: [],
+              last_message: "",
+            },
+          ])
+          .select("*, merch:merchant_Id(*)")
+          .single();
+  
+        if (error) throw error;
+  
+        // Open the new chat
+        setSelectedChat(data);
+      }
+  
+      // Open the chat modal
+      setOpenChat(true);
+    } catch (error) {
+      console.error("Error handling message:", error.message);
+    }
+  };
   
   const updateFollowersCount = async (change) => {
     setStats((prevStats) => ({
@@ -163,6 +211,20 @@ function ShopPage() {
   const imagePreview = shop.shop_image != null ? shop.shop_image : null;
   const isPremium = shop.isPremiumShop;
 
+  const handleSelectChat = (chat) => {
+  setSelectedChat(chat);
+  setOpenChat(false);
+};
+
+const handleCloseChat = (chat) => {
+  setSelectedChat(null);
+};
+
+const handleMinimizeChat = (chat) => {
+  setMinimizedChats((prev) => [...prev, chat]);
+  setSelectedChat(null);
+};
+
   if (!shop || Object.keys(shop).length === 0) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-white">
@@ -179,6 +241,33 @@ function ShopPage() {
         isPremium ? "" : ""
       } bg-gradient-to-b from-gray-50 to-gray-100`}
     >
+       
+       {selectedChat && (
+      <ChatBox
+        profile={profile}
+        chat={selectedChat}
+        onClose={() => handleCloseChat(selectedChat)}
+        onMinimize={() => handleMinimizeChat(selectedChat)}
+      />
+    )}
+
+<div className="fixed bottom-60 right-4 flex flex-col gap-2">
+      {minimizedChats.map((chat, index) => (
+        <div
+          key={index}
+          className="hover:scale-105 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-md shadow-slate-100 opacity-80 hover:opacity-100 cursor-pointer"
+          onClick={() => setSelectedChat(chat)}
+        >
+          <img
+            src={chat?.merch?.shop_image}
+            alt="Avatar"
+            className="rounded-full"
+          />
+        </div>
+      ))}
+    </div>
+
+    
       {/* Report Dialog */}
       <dialog
         id="my_modal_reportS"
@@ -264,6 +353,7 @@ function ShopPage() {
                     ? "text-yellow-400 hover:bg-yellow-400 hover:text-black border-yellow-400"
                     : ""
                 }`}
+                onClick={handleMessage}
               >
                 Message Us
               </button>

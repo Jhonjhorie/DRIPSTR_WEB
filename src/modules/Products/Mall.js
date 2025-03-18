@@ -10,7 +10,7 @@ import { categories } from "@/constants/categories.ts";
 
 import { toBeInTheDocument } from "@testing-library/jest-dom/matchers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAnglesLeft } from "@fortawesome/free-solid-svg-icons";
+import { faAnglesLeft, faStore } from "@fortawesome/free-solid-svg-icons";
 
 function Mall({ title2 }) {
     const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -19,9 +19,9 @@ function Mall({ title2 }) {
   const location = useLocation();
   const [activeCategory, setActiveCategory] = useState(categories[0].label);
   
-  const title = location.state?.title || title2 || "Dripstr";
+  const title = location.state?.title || title2 || "Dripstr Mall";
   const filter = location.state?.filterM || 0;
-  const icon = location.state?.icon || "faShoppingCart";
+  const icon = location.state?.icon || {faStore};
   const shopFil = location.state?.shopFil || 0;
   const { products, loading, error } = useProducts(isLoggedIn ? profile : null);
   return (

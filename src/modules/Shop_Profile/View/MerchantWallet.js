@@ -610,7 +610,7 @@ function MerchantWallet() {
               {isPremium && (
                 <div className="absolute z-10 -left-2 -top-2 flex justify-end">
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-black text-yellow-400 rounded-full text-sm font-medium">
-                    <FontAwesomeIcon icon={faCrown} /> Premium Artist
+                    <FontAwesomeIcon icon={faCrown} /> Premium Merchant
                   </span>
                 </div>
               )}

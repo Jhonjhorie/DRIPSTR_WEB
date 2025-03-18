@@ -33,13 +33,15 @@ import { Toaster } from 'react-hot-toast';
 import ResetPassword from './shared/login/ResetPassword';
 
 import AccountSetup from './modules/Login/View/AccountSetup';
+import Chat from "./modules/Messaging/Chat";
+import DownloadStudioP from "./modules/Home/dlStudio";
 
 function AppContent() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
   const location = useLocation();
 
   // Add account-setup to the routes that shouldn't show header/sidebar
-  const isJnt = location.pathname === "/jnt" || location.pathname === "/jnt/track" || location.pathname === "/jnt/detailed";
+  const isJnt = location.pathname === "/jnt" || location.pathname === "/jnt/track" || location.pathname === "/download_studio" || location.pathname === "/jnt/detailed";
   const isAccountSetup = location.pathname === "/account-setup";
   const hideHeaderAndSidebar = isJnt || isAccountSetup;
 
@@ -69,7 +71,9 @@ function AppContent() {
           <main className={`flex-1 ${isLoggedIn && !hideHeaderAndSidebar ? 'sm:ml-8 sm:pl-2' : ''} overflow-y-auto`}>
             <Routes>
               <Route path="/" element={<HomeController />} />
+              <Route path="/download_studio" element={<DownloadStudioP />} />
               <Route path="/about" element={<AboutUs />} />
+              <Route path="/chat" element={<Chat />} />
               <Route path="/jnt/*" element={<JntController />} />
               <Route path="/guest" element={<GuestHome />} />
               <Route path="/arts/*" element={<ArtistController />} />

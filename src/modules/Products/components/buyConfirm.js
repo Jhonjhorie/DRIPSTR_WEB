@@ -18,6 +18,7 @@ import ReportDialog from "./reportModal.js";
 import WishlistButton from "./subcomponents/WishlistButton.js";
 import Product3DViewer from "./Product3DViewer";
 import ClosetButton from "./subcomponents/ClosetButton";
+import { supabase } from '../../../constants/supabase';
 
 const BuyConfirm = ({ item, onClose }) => {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -37,6 +38,7 @@ const BuyConfirm = ({ item, onClose }) => {
     item?.item_Variant[0]?.sizes[0] || ""
   );
   const [show3DView, setShow3DView] = useState(false);
+  const [avatarData, setAvatarData] = useState(null);
 
   const handleIncrement = () => {
     setQuantity((prev) => prev + 1);
@@ -145,6 +147,99 @@ const BuyConfirm = ({ item, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    const fetchAvatarData = async () => {
+      const { data: session } = await supabase.auth.getSession();
+      
+      if (!session?.session?.user?.id) return;
+
+      const { data, error } = await supabase
+        .from('avatars')
+        .select('bodytype')
+        .eq('account_id', session.session.user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching avatar:', error);
+        return;
+      }
+
+      setAvatarData(data);
+    };
+
+    fetchAvatarData();
+  }, []);
+
+  const getSuggestedSize = (bodyType) => {
+    const sizeMap = {
+      'Petite': 'S',
+      'Slim': 'S',
+      'Average': 'M',
+      'Broad': 'L',
+      'PlusSize': 'XL'
+    };
+    return sizeMap[bodyType] || 'M';
+  };
+
+  const ItemOptionsWithSuggestion = ({ item, selectedColor, selectedSize, onSelectedValuesChange }) => {
+    const suggestedSize = avatarData ? getSuggestedSize(avatarData.bodytype) : null;
+
+    return (
+      <div className="flex flex-col gap-2">
+        {/* Colors */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-slate-600">Colors:</label>
+          <div className="flex flex-wrap gap-2">
+            {item?.item_Variant?.map((variant, index) => (
+              <button
+                key={index}
+                onClick={() => onSelectedValuesChange(variant, selectedSize)}
+                className={`px-3 py-1 rounded-md text-sm ${
+                  selectedColor.variant_Name === variant.variant_Name
+                    ? 'bg-secondary-color text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {variant.variant_Name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Sizes */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-slate-600">
+            Sizes:
+            {suggestedSize && (
+              <span className="ml-2 text-primary-color text-xs">
+                (Suggested: {suggestedSize})
+              </span>
+            )}
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {selectedColor?.sizes?.map((size, index) => (
+              <button
+                key={index}
+                onClick={() => onSelectedValuesChange(selectedColor, size)}
+                disabled={size.qty === 0}
+                className={`px-3 py-1 rounded-md text-sm ${
+                  selectedSize.size === size.size
+                    ? 'bg-secondary-color text-white'
+                    : size.size === suggestedSize
+                    ? 'bg-primary-color/10 border-2 border-primary-color text-primary-color'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                } ${size.qty === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {size.size}
+                {size.qty === 0 && ' (Out of stock)'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (loadingP) {
     return (
       <div className="w-full md:w-[60.40rem] rounded-lg relative pb-16 items-center justify-center bg-slate-100 flex flex-col px-2 lg:px-8 h-[27rem] ">
@@ -178,6 +273,10 @@ const BuyConfirm = ({ item, onClose }) => {
              {item.isOwner && (
           <span className="absolute left-2 top-2 text-xs bg-white bg-opacity-20 border border-secondary-color px-1 py-0.5 text-secondary-color rounded-md font-medium z-10">
             My Shop
+          </span>
+        )}{item.isCustomizable && (
+          <span className="absolute left-2 bottom-2 text-xs bg-white bg-opacity-20 border border-secondary-color px-1 py-0.5 text-secondary-color rounded-md font-medium z-10">
+           Available for Custom Order
           </span>
         )}
             {/* Image Section */}
@@ -322,7 +421,7 @@ const BuyConfirm = ({ item, onClose }) => {
 
                   <div className="flex flex-row justify-between py-2 border-b border-slate-400">
                     <div className="flex flex-col gap-2">
-                      <ItemOptions
+                      <ItemOptionsWithSuggestion
                         item={item}
                         selectedColor={selectedColor}
                         selectedSize={selectedSize}

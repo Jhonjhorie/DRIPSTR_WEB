@@ -10,7 +10,7 @@ import {
   } from '@fortawesome/free-solid-svg-icons';
 import { useNotification } from '../../../utils/NotificationContext';
 
-const NotificationItem = ({ notification }) => {
+const NotificationItem = ({ notification, onClick, onUpdate }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
     const { id, type, message, title, timestamp, read } = notification;
@@ -48,8 +48,19 @@ const NotificationItem = ({ notification }) => {
     }
   };
 
+  // Add handler for notification click
+  const handleNotificationClick = (e) => {
+    // Only handle click if not clicking the dropdown
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      onClick(notification);
+    }
+  };
+
   return (
-    <div className={`flex items-center p-4 mb-4 rounded-lg shadow-md transition-colors duration-200
+    <div 
+      onClick={handleNotificationClick}
+      className={`flex items-center p-4 mb-4 rounded-lg shadow-md transition-colors duration-200 cursor-pointer
+        hover:bg-gray-50
         ${read 
             ? 'bg-gray-50 border border-gray-100' 
             : 'bg-white border-l-4 border-primary-color shadow-lg'
@@ -78,7 +89,10 @@ const NotificationItem = ({ notification }) => {
       {/* Dropdown Menu */}
       <div className="relative" ref={dropdownRef}>
         <button
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent notification click
+            setIsDropdownOpen(!isDropdownOpen);
+          }}
           className="ml-4 text-gray-400 hover:text-gray-500"
         >
           <FontAwesomeIcon icon={faEllipsisVertical} />
@@ -89,7 +103,10 @@ const NotificationItem = ({ notification }) => {
             <div className="py-1">
               {!read && (
                 <button
-                  onClick={handleMarkAsRead}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent notification click
+                    handleMarkAsRead();
+                  }}
                   className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   <FontAwesomeIcon icon={faCheck} className="mr-2" />
@@ -97,7 +114,10 @@ const NotificationItem = ({ notification }) => {
                 </button>
               )}
               <button
-                onClick={handleDelete}
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent notification click
+                  handleDelete();
+                }}
                 className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
               >
                 <FontAwesomeIcon icon={faTrash} className="mr-2" />

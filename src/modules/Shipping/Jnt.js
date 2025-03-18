@@ -228,10 +228,10 @@ const Jnt = () => {
     { label: "To Prepare", value: "To prepare", icon: faBoxOpen },
     { label: "To Ship", value: "To ship", icon: faBox },
     { label: "To Receive", value: "To receive", icon: faTruck },
-    { label: "Delivered", value: "delivered", icon: faStore },
-    { label: "Completed", value: "completed", icon: faCheckCircle },
-    { label: "Returning", value: "returning", icon: faTriangleExclamation },
-    { label: "Returned", value: "returned", icon: faBoxOpen },
+    { label: "Delivered", value: "Delivered", icon: faStore },
+    { label: "Completed", value: "Completed", icon: faCheckCircle },
+    { label: "Returning", value: "Returning", icon: faTriangleExclamation },
+    { label: "Returned", value: "Returned", icon: faBoxOpen },
   ];
 
   const getNextStatus = (currentStatus) => {
@@ -242,11 +242,11 @@ const Jnt = () => {
         return { nextStatus: "To receive", buttonLabel: "To Deliver" };
       case "To receive":
         return [
-          { nextStatus: "delivered", buttonLabel: "Delivered" },
+          { nextStatus: "Delivered", buttonLabel: "Delivered" },
           { nextStatus: "To ship", buttonLabel: "Failed" },
         ];
-      case "returning":
-        return { nextStatus: "returned", buttonLabel: "Returned" };
+      case "Returning":
+        return { nextStatus: "Returned", buttonLabel: "Returned" };
       default:
         return null;
     }

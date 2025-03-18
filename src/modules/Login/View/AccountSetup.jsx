@@ -312,11 +312,11 @@ const AccountSetup = () => {
                 {/* Postcode Field */}
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text text-gray-700 font-medium">Postcode</span>
+                    <span className="label-text text-gray-700 font-medium">Zip code</span>
                   </label>
                   <input
                     type="text"
-                    placeholder="Enter Postcode"
+                    placeholder="Enter Zip code"
                     className="input input-primary w-full"
                     value={addressData.postcode}
                     onChange={(e) => setAddressData({ ...addressData, postcode: e.target.value })}

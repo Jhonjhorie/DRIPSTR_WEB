@@ -10,6 +10,7 @@ import {
   faMoneyBill,
   faShoppingBag,
   faReceipt,
+  faPen,
 } from "@fortawesome/free-solid-svg-icons";
 import { supabase } from "@/constants/supabase";
 import AlertDialog from "./components/alertDialog2.js";
@@ -31,6 +32,7 @@ function PlaceOrder() {
   const [selectedAddress, setSelectedAddress] = useState([]);
   const [shops, setShops] = useState(null);
   const [selectedPostcode, setSelectedPostcode] = useState("");
+  const [customNote, setCustomNote] = useState("");
   const [shippingFee, setShippingFee] = useState(50);
   const [selectedVouchers, setSelectedVouchers] = useState([]);
   const [selectedShopVouchers, setSelectedShopVouchers] = useState([]);
@@ -127,21 +129,20 @@ function PlaceOrder() {
 
   const groupItemsByShop = (items) => {
     const grouped = {};
-  
+
     items.forEach((item) => {
       const shopName = item.prod.shop.shop_name;
       const shopLvm = item.prod.shop?.lvm;
       const profileLvm = selectedAddress?.lvm;
       console.log("shop object:", item.prod.shop);
-      console.log("shop: "+ shopName)
-      console.log("shop: "+ shopLvm)
-      console.log("prof: "+ profileLvm)
-  
+      console.log("shop: " + shopName);
+      console.log("shop: " + shopLvm);
+      console.log("prof: " + profileLvm);
 
       let shippingFee = 100;
       let daysToAddStart = 7;
       let daysToAddEnd = 12;
-  
+
       if (profileLvm === shopLvm) {
         shippingFee = 50;
         daysToAddStart = 4;
@@ -163,52 +164,54 @@ function PlaceOrder() {
         daysToAddStart = 7;
         daysToAddEnd = 12;
       }
-  
+
       const today = new Date();
       const startDate = addDays(today, daysToAddStart);
       const endDate = addDays(today, daysToAddEnd);
       const endDateF = format(endDate, "yyyy-MM-dd");
-     
-      const estDeliveryDays = `${format(startDate, "MMM dd")}-${format(endDate, "dd, yyyy")}`;
-     
+
+      const estDeliveryDays = `${format(startDate, "MMM dd")}-${format(
+        endDate,
+        "dd, yyyy"
+      )}`;
+
       if (!grouped[shopName]) {
         grouped[shopName] = {
           items: [],
           shippingFee: shippingFee,
-          estDeliveryDays: estDeliveryDays, 
+          estDeliveryDays: estDeliveryDays,
           endDate: endDateF,
           shop: item.prod.shop,
         };
       }
-  
+
       grouped[shopName].items.push(item);
     });
-  
+
     return grouped;
   };
 
   useEffect(() => {
     const groupedItems = groupItemsByShop(selectedItems);
     const firstShopKey = Object.keys(groupedItems)[0];
-  const endDate = groupedItems[firstShopKey]?.endDate;
+    const endDate = groupedItems[firstShopKey]?.endDate;
 
     let totalPrice = 0;
     let totalDiscountPrice = 0;
     let totalShippingFee = 0;
     let holder = 0;
-  
+
     const productVouchers = selectedVouchers.filter(
       (v) => v.voucher_type === "Product"
     );
-  
+
     let isFirstShop = true;
     const newShopTotals = {};
-  
-    
+
     for (const shopName in groupedItems) {
       const { items: shopItems, shippingFee: shopShippingFee } =
         groupedItems[shopName];
-  
+
       let shopTotal = shopItems.reduce(
         (sum, item) =>
           sum +
@@ -218,47 +221,50 @@ function PlaceOrder() {
             item.qty,
         0
       );
-  
+
       const shopVoucher = selectedShopVouchers.find(
         (v) => v.shopId === shopItems[0].prod.shop.id
       );
       if (shopVoucher && shopItems[0].size.price >= shopVoucher.condition) {
         shopTotal = Math.max(0, shopTotal - shopVoucher.discount);
       }
-  
+
       totalPrice += shopTotal;
-  
+
       if (isFirstShop && productVouchers.length > 0) {
         shopTotal = Math.max(0, shopTotal - productVouchers[0].discount);
         isFirstShop = false;
       }
-  
+
       newShopTotals[shopName] = shopTotal;
       console.log(shopName + ": " + newShopTotals[shopName]);
       holder += shopTotal;
     }
-  
+
     // Calculate total shipping fee
     let isFirstShop2 = true;
     for (const shopName in groupedItems) {
       const { shippingFee: shopShippingFee } = groupedItems[shopName];
-  
+
       const shippingVoucher = selectedVouchers.find(
         (v) => v.voucher_type === "Shipping"
       );
-  
+
       if (isFirstShop2 && shippingVoucher) {
-        totalShippingFee += Math.max(0, shopShippingFee - shippingVoucher.discount);
+        totalShippingFee += Math.max(
+          0,
+          shopShippingFee - shippingVoucher.discount
+        );
         isFirstShop2 = false;
       } else {
         totalShippingFee += shopShippingFee;
       }
     }
-  
+
     totalDiscountPrice = holder;
-  
+
     const grandTotal = totalDiscountPrice + totalShippingFee;
-  
+
     setTotalPrice(totalPrice);
     setTotalDiscountPrice(totalDiscountPrice);
     setTotalShippingFee(totalShippingFee);
@@ -267,7 +273,6 @@ function PlaceOrder() {
   }, [selectedItems, selectedVouchers, selectedShopVouchers, selectedAddress]);
 
   const sendOrder = async (image) => {
-
     try {
       const groupedItems = groupItemsByShop(selectedItems);
       const transactionId = Date.now();
@@ -287,8 +292,11 @@ function PlaceOrder() {
           : 0;
 
       for (const shopName in groupedItems) {
-        const { items: shopItems, shippingFee: shopShippingFee, endDate } =
-          groupedItems[shopName];
+        const {
+          items: shopItems,
+          shippingFee: shopShippingFee,
+          endDate,
+        } = groupedItems[shopName];
         let isFirstItemInShop = true;
 
         let finalShippingFee = shopShippingFee;
@@ -347,6 +355,7 @@ function PlaceOrder() {
               isFirstShop && isFirstItemInShop ? selectedVouchers : null,
             estimated_delivery: endDate,
             shop_id: item.prod.shop.id,
+            customizable_note: customNote || "",
           });
 
           isFirstItemInShop = false;
@@ -452,10 +461,10 @@ function PlaceOrder() {
 
       {showAlert && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
-         <AlertDialog
-                    emote={require("@/assets/emote/success.png")}
-                    text={"Your purchase has been confirmed!"}
-                  />
+          <AlertDialog
+            emote={require("@/assets/emote/success.png")}
+            text={"Your purchase has been confirmed!"}
+          />
         </div>
       )}
 
@@ -692,29 +701,23 @@ function PlaceOrder() {
                     ))}
 
                     <div className="flex flex-wrap justify-between gap-3 items-center mt-1 text-sm">
-                    <div className="flex-wrap flex gap-2">
-                            <span className="flex items-center gap-1 text-sm text-gray-600">
-                              <img
-                                src={require("@/assets/jnt.png")}
-                                alt="Jnt"
-                                className="h-8 w-12 object-contain"
-                              />
-                              Shipping Fee:
-                              <span className="font-medium">
-                           {shippingFee}
-                              </span>
-                              /
-                            </span>
-                            <span className="flex items-center gap-1 text-sm text-gray-600">
-                              Estimated Delivery:
-                              <span className="font-medium">
-                             {estDeliveryDays}
-                              </span>
-                            </span>
-                          </div>
+                      <div className="flex-wrap flex gap-2">
+                        <span className="flex items-center gap-1 text-sm text-gray-600">
+                          <img
+                            src={require("@/assets/jnt.png")}
+                            alt="Jnt"
+                            className="h-8 w-12 object-contain"
+                          />
+                          Shipping Fee:
+                          <span className="font-medium">{shippingFee}</span>/
+                        </span>
+                        <span className="flex items-center gap-1 text-sm text-gray-600">
+                          Estimated Delivery:
+                          <span className="font-medium">{estDeliveryDays}</span>
+                        </span>
+                      </div>
                       {index === 0 && (
                         <>
-                          
                           {selectedVouchers.find(
                             (v) => v.voucher_type === "Shipping"
                           ) && (
@@ -816,56 +819,6 @@ function PlaceOrder() {
             </div>
           </section>
 
-          {/* Shipping Details */}
-          <section className="bg-white rounded-lg shadow-sm overflow-hidden">
-            <div className="p-4 border-b">
-              <h2 className="font-medium flex items-center gap-2 text-gray-800">
-                <FontAwesomeIcon
-                  icon={faTruckFast}
-                  className="text-primary-color"
-                />
-                Shipping Details
-              </h2>
-            </div>
-
-            <div className="p-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Shipping Method
-                  </label>
-                  <select
-                    className="select select-bordered w-full h-10"
-                    value={shippingMethod}
-                    onChange={(e) => setShippingMethod(e.target.value)}
-                  >
-                    <option value="Standard">Standard</option>
-                    <option value="Express">Express</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Fee (₱)
-                  </label>
-                  <input
-                    type="text"
-                    value={shippingFee}
-                    className="input input-bordered w-full h-10 bg-gray-50"
-                    disabled
-                  />
-                </div>
-              </div>
-
-              <div className="mt-3 text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span>Estimated Delivery:</span>
-                  <span className="font-medium">{estimatedDelivery}</span>
-                </div>
-              </div>
-            </div>
-          </section>
-
           {/* Vouchers */}
           <section className="bg-white rounded-lg shadow-sm overflow-hidden">
             <div className="p-4 border-b flex justify-between items-center">
@@ -912,6 +865,41 @@ function PlaceOrder() {
                   No vouchers applied
                 </div>
               )}
+            </div>
+          </section>
+       
+          <section className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="p-4 border-b">
+              <h2 className="font-medium flex items-center gap-2 text-gray-800">
+                <FontAwesomeIcon icon={faPen} className="text-primary-color" />
+                Custom Request
+              </h2>
+            </div>
+
+            <div className="p-4">
+            {selectedItems[0]?.prod?.isCustomizable && selectedItems.length === 1 ? 
+              <div className="">
+
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                Customization Notes (Auto-applied at checkout)
+
+                </label>
+                <textarea
+                  className="textarea textarea-bordered w-full h-24 bg-gray-50"
+                  placeholder="Enter any specific customization requests here..."
+                  value={customNote}
+                  onChange={(e) => setCustomNote(e.target.value)}
+                ></textarea>
+              </div>
+              : <div className="flex items-center justify-center flex-col mt-4">
+
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Not Available for Customization
+              </label>
+              <label className="block text-sm font-medium text-gray-500 mb-1">
+{selectedItems.length !== 1 ? "Custom requests are only available for single item purchases." : "Item is not available for customization."}
+              </label>
+            </div>}
             </div>
           </section>
         </div>

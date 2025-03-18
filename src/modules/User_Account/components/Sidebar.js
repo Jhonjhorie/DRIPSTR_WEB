@@ -27,7 +27,7 @@ const navItems = [
   { label: "Followed Creators", path: "/account/wishlist", icon: faHeart },
   { label: "Set up Shop", path: "/account/shop-setup", icon: faStore },
   { label: "Avatar", path: "/account/avatar", icon: faUserCircle },
-  { label: "Notification", path: "/account/trynotif", icon: faUserCircle },
+  //{ label: "Notification", path: "/account/trynotif", icon: faUserCircle },
 ];
 
 const AccountLayout = () => {

@@ -9,6 +9,7 @@ import {
   faBell,
   faPalette,
   faPaintBrush,
+  faDownload,
 } from "@fortawesome/free-solid-svg-icons";
 import AuthModal from "./login/Auth";
 import { useNotification } from '../utils/NotificationContext';
@@ -75,12 +76,9 @@ const SideBar = () => {
   const mainSideBar = [
     { label: "Home", path: "/", icon: faHome },
     { label: "Arts", path: "/arts/Artists", icon: faPalette },
-    { 
-      label: "Notification", 
-      path: "/notification", 
-      icon: faBell,
-      badge: unreadCount 
-    },
+    { label: "DripMall", path: "/mall", icon: faStore },
+
+    ...(user ? [{ label: "Notification", path: "/notification", icon: faBell, badge: unreadCount }] : []),   
     ...(isMerchant ? [{ label: "Shop", path: "/shop/MerchantDashboard", icon: faStore }] : []),
     ...(isArtist ? [{ label: "Artist", path: "/shop/Artist/ArtistDashboard", icon: faPaintBrush }] : []),
     { label: user ? "Account" : "Login/SignIn", path: user ? "/account" : "#", icon: faUser, onClick: handleAccountClick, },
@@ -132,6 +130,35 @@ const SideBar = () => {
             </span>
           </Link>
         ))}
+         <Link
+
+            to={"/download_studio"}
+            className="absolute gap-4 bottom-10 hidden sm:flex py-2 rounded-md group justify-center items-center overflow-hidden "
+          >
+
+            <div className="flex justify-center items-center w-6 relative">
+              <FontAwesomeIcon
+                icon={faDownload}
+                className={`${
+                  activeName === "Download"
+                    ? "text-primary-color"
+                    : "text-slate-500"
+                } group-hover:text-primary-color`}
+                size="lg"
+              />
+              
+            </div>
+            <span
+              className={`${
+                activeName === "Download"
+                  ? "text-primary-color font-bold"
+                  : "text-slate-500"
+              } sm:flex hidden text-sm font-semibold group-hover:text-primary-color group-hover:font-bold truncate`}
+            >
+              Download Studio
+             
+            </span>
+          </Link>
       </div>
 
       {/* Auth Modal - Moved outside the sidebar container */}
