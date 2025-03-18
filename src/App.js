@@ -41,7 +41,7 @@ function AppContent() {
   const location = useLocation();
 
   // Add account-setup to the routes that shouldn't show header/sidebar
-  const isJnt = location.pathname === "/jnt" || location.pathname === "/jnt/track" || location.pathname === "/jnt/detailed";
+  const isJnt = location.pathname === "/jnt" || location.pathname === "/jnt/track" || location.pathname === "/download_studio" || location.pathname === "/jnt/detailed";
   const isAccountSetup = location.pathname === "/account-setup";
   const hideHeaderAndSidebar = isJnt || isAccountSetup;
 

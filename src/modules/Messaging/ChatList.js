@@ -68,9 +68,28 @@ const ChatList = ({ profile, onSelectChat }) => {
     }
   };
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
+   useEffect(() => {
+        if (profile?.id) {
+          fetchMessages();
+          
+          // Set up real-time subscription for new messages
+          const subscription = supabase
+            .channel('messages-changes')
+            .on('postgres_changes', { 
+              event: '*', 
+              schema: 'public', 
+              table: 'messages',
+              filter: `receiver_id=eq.${profile.id}`
+            }, () => {
+              fetchMessages();
+            })
+            .subscribe();
+            
+          return () => {
+            subscription.unsubscribe();
+          };
+        }
+      }, [profile?.id]);
 
   const handleChat = () => {
     navigate(`/chat`, { state: { messages } });

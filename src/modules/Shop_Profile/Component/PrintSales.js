@@ -170,10 +170,10 @@ function PrintSales() {
       </div>
 
       {/* MODAL PRINT SALES STATISTICS */}
-      <dialog id="print" className="modal h-f">
+      <dialog id="print" className="modal h-full ">
         <div className="modal-box rounded-md bg-slate-950  glass h-[100%]">
           {/* Main Content */}
-          <div className="h-[91%] w-full overflow-hidden bg-slate-100 rounded-sm">
+          <div className="h-[91%] w-full overflow-hidden overflow-y-scroll bg-slate-100 rounded-sm">
             <div ref={contentRef} className="p-2 h-full w-full">
               {/* Header Section */}
               <div className="flex justify-between items-center h-20 w-full p-2">

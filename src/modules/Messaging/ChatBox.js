@@ -86,7 +86,7 @@ const ChatBox = ({ profile, chat, onClose, onMinimize }) => {
     try {
       const { data, error } = await supabase
         .from("messages")
-        .update({ content: updatedContent, last_message: imageUrl ? "Client send an image file." : newMessage, is_read: true, is_readM: false})
+        .update({ content: updatedContent, last_message: imageUrl ? "Client send an image file." : newMessage, is_read: true, is_readM: true})
         .eq("id", chat.id)
         .select("*, merch:merchant_Id(*)")
         .single();
@@ -134,17 +134,34 @@ const ChatBox = ({ profile, chat, onClose, onMinimize }) => {
     return format(messageDate, "MM/dd/yyyy hh:mm a");
   };
 
-  // Fetch messages on component mount
   useEffect(() => {
-    fetchMessages();
-  }, [chat]);
+      if (profile?.id) {
+        fetchMessages();
+        
+        // Set up real-time subscription for new messages
+        const subscription = supabase
+          .channel('messages-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'messages',
+            filter: `receiver_id=eq.${profile.id}`
+          }, () => {
+            fetchMessages();
+          })
+          .subscribe();
+          
+        return () => {
+          subscription.unsubscribe();
+        };
+      }
+    }, [profile?.id]);
 
-  // Scroll to bottom when new messages are added
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages]); 
 
   return (
     <div className="fixed bottom-11 sm:bottom-0 right-0 sm:right-4 z-[999] md:right-20 w-full sm:w-80 bg-purple-50 rounded-t-lg shadow-lg overflow-hidden transition-all  flex flex-col border border-purple-100 max-w-full">
