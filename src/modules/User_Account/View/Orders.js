@@ -51,7 +51,9 @@ const Orders = () => {
         ((order.shipping_status === "delivered" || 
         order.shipping_status === "Delivered" || 
         order.shipping_status === "complete" || 
-        order.shipping_status === "Complete") && 
+        order.shipping_status === "Complete"|| 
+        order.shipping_status === "Completed"
+      ) && 
         order.refund_status !== "Approved" && 
         order.refund_status !== "Requested")
       ).length,
@@ -101,7 +103,8 @@ const Orders = () => {
           ((order.shipping_status === "delivered" || 
             order.shipping_status === "Delivered"|| 
             order.shipping_status === "complete"|| 
-            order.shipping_status === "Complete") && 
+            order.shipping_status === "Complete" ||
+            order.shipping_status === "Completed") && 
           order.refund_status !== "Approved" && 
           order.refund_status !== "Requested")
         );
@@ -173,7 +176,7 @@ const Orders = () => {
       case "delivered":
       case "Delivered":
         return "Delivered";
-      case "complete":
+      case "Completed":
         return "Completed";
       default:
         return order.shipping_status;
@@ -214,7 +217,7 @@ const Orders = () => {
       const { error } = await supabase
         .from('orders')
         .update({ 
-          shipping_status: 'complete',
+          shipping_status: 'Completed',
           updated_at: new Date().toISOString()
         })
         .eq('id', orderId);
