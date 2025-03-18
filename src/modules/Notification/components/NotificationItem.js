@@ -49,13 +49,27 @@ const NotificationItem = ({ notification }) => {
   };
 
   return (
-    <div className={`flex items-center p-4 mb-4 rounded-lg shadow-md ${read ? 'bg-gray-50' : 'bg-white'}`}>
+    <div className={`flex items-center p-4 mb-4 rounded-lg shadow-md transition-colors duration-200
+        ${read 
+            ? 'bg-gray-50 border border-gray-100' 
+            : 'bg-white border-l-4 border-primary-color shadow-lg'
+        }`}>
       <div className="flex-shrink-0">{getIcon()}</div>
       <div className="ml-3 flex-1">
-        <h4 className={`text-sm font-medium ${read ? 'text-gray-600' : 'text-gray-900'}`}>
+        <h4 className={`text-sm font-medium ${
+            read 
+                ? 'text-gray-600' 
+                : 'text-gray-900 font-semibold'
+        }`}>
           {title}
         </h4>
-        <p className="text-sm text-gray-500">{message}</p>
+        <p className={`text-sm ${
+            read 
+                ? 'text-gray-500' 
+                : 'text-gray-700'
+        }`}>
+          {message}
+        </p>
         <span className="text-xs text-gray-400">
           {new Date(timestamp).toLocaleTimeString()}
         </span>

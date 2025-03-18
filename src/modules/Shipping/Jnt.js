@@ -136,42 +136,42 @@ const Jnt = () => {
         notificationData = {
           type: 'info',
           title: 'Order Picked Up',
-          message: `Your order #${orderId} has been picked up and is ready for shipping.`
+          message: `Order #${orderId} has been picked up and is ready for shipping.`
         };
         break;
       case "to receive":
         notificationData = {
           type: 'info',
           title: 'Order Out for Delivery',
-          message: `Your order #${orderId} is out for delivery.`
+          message: `Order #${orderId} is out for delivery.`
         };
         break;
       case "delivered":
         notificationData = {
           type: 'success',
           title: 'Order Delivered',
-          message: `Your order #${orderId} has been delivered successfully.`
+          message: `Order #${orderId} has been delivered successfully.`
         };
         break;
       case "returning":
         notificationData = {
           type: 'warning',
           title: 'Order Returning',
-          message: `Your order #${orderId} is being returned.`
+          message: `Order #${orderId} is being returned.`
         };
         break;
       case "returned":
         notificationData = {
           type: 'info',
           title: 'Order Returned',
-          message: `Your order #${orderId} has been returned.`
+          message: `Order #${orderId} has been returned.`
         };
         break;
       default:
         notificationData = {
           type: 'info',
           title: 'Order Status Updated',
-          message: `Your order #${orderId} status has been updated to ${status}.`
+          message: `Order #${orderId} status has been updated to ${status}.`
         };
     }
 

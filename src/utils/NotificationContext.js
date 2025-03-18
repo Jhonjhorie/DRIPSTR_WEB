@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
 import { supabase } from '../constants/supabase';
 import toast from 'react-hot-toast';
 
@@ -52,6 +52,7 @@ const notificationReducer = (state, action) => {
 
 export const NotificationProvider = ({ children }) => {
     const [notifications, dispatch] = useReducer(notificationReducer, []);
+    const [unreadCount, setUnreadCount] = useState(0);
 
   // Fetch notifications on mount
   useEffect(() => {
@@ -173,13 +174,50 @@ export const NotificationProvider = ({ children }) => {
     showToast('success', 'Notification deleted');
   };
 
+  const fetchUnreadCount = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('id')
+        .eq('deleted', false)
+        .eq('read', false);
+
+      if (error) throw error;
+      setUnreadCount(data?.length || 0);
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+    }
+  };
+
+  // Set up real-time subscription
+  useEffect(() => {
+    fetchUnreadCount();
+
+    const subscription = supabase
+      .channel('notification-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'notifications'
+      }, () => {
+        fetchUnreadCount();
+      })
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const value = {
     notifications,
     dispatch,
     addNotification,
     removeNotification,
     markAsRead,
-    fetchNotifications
+    fetchNotifications,
+    unreadCount,
+    fetchUnreadCount
   };
 
   return (

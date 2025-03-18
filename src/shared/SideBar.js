@@ -11,6 +11,7 @@ import {
   faPaintBrush,
 } from "@fortawesome/free-solid-svg-icons";
 import AuthModal from "./login/Auth";
+import { useNotification } from '../utils/NotificationContext';
 
 const SideBar = () => {
   const [activeName, setActiveName] = useState("Home");
@@ -20,6 +21,10 @@ const SideBar = () => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { notifications } = useNotification();
+  
+  // Calculate unread notifications
+  const unreadCount = notifications?.filter(n => !n.read).length || 0;
 
   useEffect(() => {
     // Fetch the current user profile and check if they are a merchant or artist
@@ -70,7 +75,12 @@ const SideBar = () => {
   const mainSideBar = [
     { label: "Home", path: "/", icon: faHome },
     { label: "Arts", path: "/arts/Artists", icon: faPalette },
-    //{ label: "Notification", path: "/notification", icon: faBell },
+    { 
+      label: "Notification", 
+      path: "/notification", 
+      icon: faBell,
+      badge: unreadCount 
+    },
     ...(isMerchant ? [{ label: "Shop", path: "/shop/MerchantDashboard", icon: faStore }] : []),
     ...(isArtist ? [{ label: "Artist", path: "/shop/Artist/ArtistDashboard", icon: faPaintBrush }] : []),
     { label: user ? "Account" : "Login/SignIn", path: user ? "/account" : "#", icon: faUser, onClick: handleAccountClick, },
@@ -87,14 +97,10 @@ const SideBar = () => {
               setActiveName(item.label); // Set the active label
             }}
             to={item.path}
-            className="flex gap-4 py-2 rounded-md group justify-center items-center"
+            className="flex gap-4 py-2 rounded-md group justify-center items-center relative"
           >
-            <div
-              className={`${
-                activeName === item.label ? "bg-primary-color" : "hidden"
-              } absolute bottom-0 sm:bottom-auto sm:left-0 w-10 h-1 sm:w-1 sm:h-10 z-40 rounded-t-lg sm:rounded-r-lg`}
-            />
-            <div className="flex justify-center items-center w-6">
+
+            <div className="flex justify-center items-center w-6 relative">
               <FontAwesomeIcon
                 icon={item.icon}
                 className={`${
@@ -104,6 +110,11 @@ const SideBar = () => {
                 } group-hover:text-primary-color`}
                 size="lg"
               />
+              {item.badge > 0 && (
+                <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                  {item.badge > 99 ? '99+' : item.badge}
+                </div>
+              )}
             </div>
             <span
               className={`${
@@ -113,6 +124,11 @@ const SideBar = () => {
               } sm:flex hidden text-sm font-semibold group-hover:text-primary-color group-hover:font-bold`}
             >
               {item.label}
+              {item.badge > 0 && (
+                <span className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                  {item.badge > 99 ? '99+' : item.badge}
+                </span>
+              )}
             </span>
           </Link>
         ))}
