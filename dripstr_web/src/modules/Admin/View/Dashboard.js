@@ -145,19 +145,8 @@ const Dashboard = () => {
 
         {/* Sales Statistics */}
         <div className="bg-slate-900 w-full mt-6 p-4 rounded-3xl shadow-md">
-          <div className="flex justify-between items-center">
-            <p className="text-white text-2xl font-bold">Sales Statistics</p>
-            <select className="bg-slate-900 rounded-xl text-violet-600 text-lg font-bold cursor-pointer">
-              <option value="" disabled hidden>
-                Time Period
-              </option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
-          </div>
-          <div className="mt-4">
+
+          <div className="">
             <SalesStatistics />
           </div>
         </div>
