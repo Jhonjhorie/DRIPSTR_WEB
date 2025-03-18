@@ -29,81 +29,82 @@ function PrintSales() {
     const fetchOrdersByMonth = async () => {
       try {
         setLoading(true);
-
-        const { data: userData, error: authError } =
-          await supabase.auth.getUser();
+  
+        const { data: userData, error: authError } = await supabase.auth.getUser();
         if (authError) {
           console.error("Auth Error:", authError.message);
           setLoading(false);
           return;
         }
-
+  
         const user = userData?.user;
         if (!user) {
           console.error("No user is signed in.");
           setLoading(false);
           return;
         }
-
+  
         const { data: shop, error: shopError } = await supabase
           .from("shop")
           .select("id, shop_name, shop_Rating")
           .eq("owner_Id", user.id)
           .single();
-
+  
         if (shopError) {
           console.error("Error fetching shop:", shopError.message);
           setLoading(false);
           return;
         }
-
+  
         if (!shop) {
           console.warn("No shop found for this user.");
           setLoading(false);
           return;
         }
-
+  
         setShopName(shop.shop_name || "Unknown Shop");
         setShopRating(shop.shop_Rating || 0);
         const shopId = shop.id;
-
+  
+        // Fetch orders excluding those with shipping_status = "Cancel"
         const { data: orders, error: orderError } = await supabase
           .from("orders")
           .select("id, quantity, total_price, shipping_status, date_of_order")
           .eq("shop_id", shopId)
+          .neq("shipping_status", "Cancel") // Exclude cancelled orders
           .order("date_of_order", { ascending: true });
-
+  
         if (orderError) {
           console.error("Error fetching orders:", orderError.message);
           setLoading(false);
           return;
         }
-
+  
         if (!orders || orders.length === 0) {
           console.warn("No orders found for this shop.");
           setMonthlyOrders([]);
           setLoading(false);
           return;
         }
-
+  
         console.log("Fetched Orders:", orders);
-
+  
         let totalIncome = 0;
         let totalOrders = 0;
         let totalCompletedOrders = 0;
         let totalReturnItems = 0;
         const dataByMonth = {};
-
+  
         orders.forEach((order) => {
           if (!order.date_of_order) return;
-
+  
           const orderDate = new Date(order.date_of_order);
           if (isNaN(orderDate)) return;
-
+  
           const monthYearKey = `${orderDate.getFullYear()}-${String(
             orderDate.getMonth() + 1
           ).padStart(2, "0")}`;
-
+  
           if (!dataByMonth[monthYearKey]) {
             dataByMonth[monthYearKey] = {
               totalOrders: 0,
@@ -111,37 +112,37 @@ function PrintSales() {
               totalReturns: 0,
             };
           }
-
+  
           dataByMonth[monthYearKey].totalOrders += order.quantity || 0;
-
+  
           // Count only completed orders
           if (order.shipping_status === "Completed") {
             totalCompletedOrders += order.quantity || 0;
-
+  
             // Subtract 3% from the final price for completed orders
             const discountedPrice = (order.total_price || 0) * 0.97; // Deduct 3%
             dataByMonth[monthYearKey].totalSales += discountedPrice;
             totalIncome += discountedPrice;
           }
-
+  
           if (order.shipping_status === "Returned") {
             dataByMonth[monthYearKey].totalReturns += order.quantity || 0;
             totalReturnItems += order.quantity || 0;
           }
-
+  
           totalOrders += order.quantity || 0;
         });
-
+  
         const formattedData = Object.keys(dataByMonth).map((month) => ({
           month,
           ...dataByMonth[month],
         }));
-
+  
         console.log("Formatted Monthly Data:", formattedData);
         setMonthlyOrders(formattedData);
         setTotalIncome(totalIncome);
         setTotalOrders(totalOrders);
-        setTotalCompletedOrders(totalCompletedOrders); //Set total completed orders
+        setTotalCompletedOrders(totalCompletedOrders); // Set total completed orders
         setTotalReturnItems(totalReturnItems);
       } catch (error) {
         console.error("Error in fetchOrdersByMonth:", error.message);
@@ -149,10 +150,101 @@ function PrintSales() {
         setLoading(false);
       }
     };
-
+  
     fetchOrdersByMonth();
   }, []);
 
+  useEffect(() => {
+    const fetchOrdersAndRatings = async () => {
+      try {
+        setLoading(true);
+  
+        const { data: userData, error: authError } = await supabase.auth.getUser();
+        if (authError) {
+          console.error("Auth Error:", authError.message);
+          setLoading(false);
+          return;
+        }
+  
+        const user = userData?.user;
+        if (!user) {
+          console.error("No user is signed in.");
+          setLoading(false);
+          return;
+        }
+  
+        const { data: shop, error: shopError } = await supabase
+          .from("shop")
+          .select("id, shop_name")
+          .eq("owner_Id", user.id)
+          .single();
+  
+        if (shopError) {
+          console.error("Error fetching shop:", shopError.message);
+          setLoading(false);
+          return;
+        }
+  
+        if (!shop) {
+          console.warn("No shop found for this user.");
+          setLoading(false);
+          return;
+        }
+  
+        setShopName(shop.shop_name || "Unknown Shop");
+        const shopId = shop.id;
+  
+        // Fetch products for the shop
+        const { data: products, error: productError } = await supabase
+          .from("shop_Product")
+          .select("id")
+          .eq("shop_Id", shopId);
+  
+        if (productError) {
+          console.error("Error fetching products:", productError.message);
+          setLoading(false);
+          return;
+        }
+  
+        if (!products || products.length === 0) {
+          console.warn("No products found for this shop.");
+          setShopRating(0);
+          return;
+        }
+  
+        const productIds = products.map((product) => product.id);
+  
+        // Fetch reviews for the products
+        const { data: reviews, error: reviewError } = await supabase
+          .from("reviews")
+          .select("rating")
+          .in("product_id", productIds);
+  
+        if (reviewError) {
+          console.error("Error fetching reviews:", reviewError.message);
+          return;
+        }
+  
+        if (!reviews || reviews.length === 0) {
+          console.warn("No reviews found for the products.");
+          setShopRating(0);
+          return;
+        }
+  
+        // Calculate the average rating
+        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+        const averageRating = totalRating / reviews.length;
+  
+        setShopRating(averageRating.toFixed(1)); // Set the average rating with 1 decimal place
+      } catch (error) {
+        console.error("Error in fetchOrdersAndRatings:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchOrdersAndRatings();
+  }, []);
   // Process Data for the Bar Chart
   const monthlyOrderLabels = monthlyOrders.map((entry) => entry.month); // Month names
   const pData = monthlyOrders.map((entry) => entry.totalOrders); // Orders per month
@@ -272,11 +364,11 @@ function PrintSales() {
                         </span>
                       </div>
                       <div className="p-1 text-slate-950 text-sm font-semibold">
-                        Total Income:{" "}
+                        Total Income: ₱
                         <span className="font-normal">{totalIncome ?? 0}</span>
                       </div>
 
-                      <div className="p-1 text-slate-950 text-sm font-semibold">
+                      {/* <div className="p-1 text-slate-950 text-sm font-semibold">
                         Most Positive Feedback: <br />
                         <span className="font-normal">
                           {PossitiveFB || "No feedback yet"}
@@ -287,7 +379,7 @@ function PrintSales() {
                         <span className="font-normal">
                           {NegativeFB || "No feedback yet"}
                         </span>
-                      </div>
+                      </div> */}
                       <div className="p-1 text-slate-950 text-sm font-semibold">
                         <DateTime />
                       </div>

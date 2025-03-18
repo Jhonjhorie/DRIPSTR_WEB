@@ -41,6 +41,15 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
     fetchShop();
   }, []);
 
+  useEffect(() => {
+    // Add this console log to debug
+    console.log("Order data:", {
+      isCustomizable: order.shop_Product?.isCustomizable,
+      customizable_note: order.customizable_note,
+      shop_Product: order.shop_Product
+    });
+  }, [order]);
+
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       setLoading(true);
@@ -106,13 +115,12 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
   return (
     <div
-      className={`border relative rounded-lg p-4 shadow-md mb-4  ${
-        order.shipping_status === "Cancel"
+      className={`border relative rounded-lg p-4 shadow-md mb-4  ${order.shipping_status === "Cancel"
           ? "bg-slate-300"
           : order.shipping_status === "Completed"
-          ? "bg-slate-300"
-          : "bg-white"
-      }`}
+            ? "bg-slate-300"
+            : "bg-white"
+        }`}
     >
       {/* <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md "></div> */}
       <h2 className="text-lg font-bold text-slate-900">Order #{order.id}</h2>
@@ -134,7 +142,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               </p>
               <p className="text-sm text-slate-700">
                 Transaction ID:{" "}
-                <span className="font-medium">{order.transaction_id}</span>
+                <span className="font-medium">{order.shop_transaction_id}</span>
               </p>
               <p className="text-sm text-slate-700">
                 Buyer:{" "}
@@ -162,17 +170,28 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   </p>
                 </div>
               )}
+    
+ 
+{order.shop_Product?.isCustomizable && (
+  <div>
+    <p className="text-sm text-slate-700">
+      Customization Note:{" "}
+      <span className="font-medium">
+        {order.customizable_note || "No customization note provided"}
+      </span>
+    </p>
+  </div>
+)}
 
               {order.shipping_status === "To prepare" && (
                 <div>
                   <p className="text-sm text-slate-700">
                     Cancelation reason:{" "}
                     <span
-                      className={`font-medium ${
-                        order.cancellation_requested_at
+                      className={`font-medium ${order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                      }`}
+                        }`}
                     >
                       {order.cancellation_reason || "none"}
                     </span>
@@ -180,20 +199,19 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <p className="text-sm text-slate-700">
                     Cancelation date:{" "}
                     <span
-                      className={`font-medium ${
-                        order.cancellation_requested_at
+                      className={`font-medium ${order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                      }`}
+                        }`}
                     >
                       {order.cancellation_requested_at
                         ? new Date(
-                            order.cancellation_requested_at
-                          ).toLocaleString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })
+                          order.cancellation_requested_at
+                        ).toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
                         : "none"}
                     </span>
                   </p>
@@ -204,11 +222,10 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <p className="text-sm text-slate-700">
                     Cancelation reason:{" "}
                     <span
-                      className={`font-medium ${
-                        order.cancellation_requested_at
+                      className={`font-medium ${order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                      }`}
+                        }`}
                     >
                       {order.cancellation_reason || "none"}
                     </span>
@@ -216,20 +233,19 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <p className="text-sm text-slate-700">
                     Cancelation date:{" "}
                     <span
-                      className={`font-medium ${
-                        order.cancellation_requested_at
+                      className={`font-medium ${order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                      }`}
+                        }`}
                     >
                       {order.cancellation_requested_at
                         ? new Date(
-                            order.cancellation_requested_at
-                          ).toLocaleString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })
+                          order.cancellation_requested_at
+                        ).toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
                         : "none"}
                     </span>
                   </p>
@@ -262,7 +278,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             <span className="font-medium">{order.shipping_method}</span>
           </p>
           <p className="text-xl font-semibold md:absolute bottom-0 right-0 text-yellow-600">
-            Total: ₱{order.total_price}   
+            Total: ₱{order.total_price}
           </p>
         </div>
       </div>
@@ -310,7 +326,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             </button>
           </div>
         )} */}
-        {order.shipping_status === "To receive" &&(
+        {order.shipping_status === "To receive" && (
           <button
             className="bg-blue-500 text-sm text-white justify-end px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
             onClick={handleOpenDeliveryInfo}
@@ -343,7 +359,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 </div>
                 <p className="text-sm text-gray-600">
                   Transaction ID:{" "}
-                  <span className="font-medium">{order.transaction_id}</span>
+                  <span className="font-medium">{order.shop_transaction_id}</span>
                 </p>
               </div>
 
