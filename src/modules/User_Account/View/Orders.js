@@ -420,10 +420,12 @@ const Orders = () => {
                       <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                         {/* Cancel Button */}
                         {order.shipping_status !== "delivered" && 
+                          order.shipping_status !== "Delivered" && 
                           order.shipping_status !== "complete" && 
                           order.shipping_status !== "Completed" && 
                           order.shipping_status !== "To deliver" && 
                           order.shipping_status !== "cancel" &&
+                          order.shipping_status !== "Cancel" &&
                           order.shipping_status !== 'To receive' &&
                           (
                           <button 
