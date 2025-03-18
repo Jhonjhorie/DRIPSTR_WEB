@@ -170,7 +170,7 @@ function Messages() {
     try {
       const { data, error } = await supabase
         .from("messages")
-        .update({ is_readM: true })
+        .update({ is_readM: false })
         .eq("id", message.id);
 
       if (error) {
@@ -297,7 +297,7 @@ function Messages() {
     try {
       const { data, error } = await supabase
         .from("messages")
-        .update({ content: updatedContent, is_read: false })
+        .update({ content: updatedContent, is_read: false, is_readM: false, last_message: messageContent })
         .match({ id: selectedUser.id });
 
       if (error) {

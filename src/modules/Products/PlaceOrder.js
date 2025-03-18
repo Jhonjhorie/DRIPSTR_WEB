@@ -280,10 +280,10 @@ function PlaceOrder() {
       const orders = [];
       let isFirstShop = true;
       const shippingVoucher = selectedVouchers.find(
-        (v) => v.voucher_type === "Shipping"
+        (v) => v.voucher_type === 'Shipping'
       );
       const productVouchers = selectedVouchers.filter(
-        (v) => v.voucher_type !== "Shipping"
+        (v) => v.voucher_type !== 'Shipping'
       );
 
       const productDiscount =
@@ -340,8 +340,8 @@ function PlaceOrder() {
             order_variation: item.variant,
             order_size: item.size,
             shipping_addr:
-              selectedAddress.full_address || "No address provided",
-            shipping_postcode: selectedPostcode || "No postcode provided",
+              selectedAddress.full_address || 'No address provided',
+            shipping_postcode: selectedPostcode || 'No postcode provided',
             shipping_method: shippingMethod,
             shipping_fee: itemShippingFee || 0,
             discount: item.prod.discount || 0,
@@ -358,6 +358,15 @@ function PlaceOrder() {
             customizable_note: customNote || "",
           });
 
+          // Add notification for the merchant
+          await addProductNotification({
+            userId: profile.id,
+            merchantId: item.prod.shop_Id,
+            type: 'ORDER_PLACED',
+            title: 'New Order Received',
+            message: `A new order has been placed for your product: ${item.prod.item_Name}.`,
+          });
+
           isFirstItemInShop = false;
         }
 
@@ -365,24 +374,24 @@ function PlaceOrder() {
       }
 
       const { data, error } = await supabase
-        .from("orders")
+        .from('orders')
         .insert(orders)
         .select();
 
       if (error) {
-        console.error("Error placing order:", error);
-        alert("Failed to place order. Please try again.");
+        console.error('Error placing order:', error);
+        alert('Failed to place order. Please try again.');
       } else {
-        console.log("Orders placed successfully:", data);
+        console.log('Orders placed successfully:', data);
         setShowAlert(true);
 
         // Mark used vouchers as used
         for (const voucher of selectedVouchers) {
           await supabase
-            .from("customer_vouchers")
+            .from('customer_vouchers')
             .update({ isUsed: true })
-            .eq("voucher_id", voucher.id)
-            .eq("acc_id", profile.id);
+            .eq('voucher_id', voucher.id)
+            .eq('acc_id', profile.id);
         }
 
         for (const item of selectedItems) {
@@ -395,8 +404,8 @@ function PlaceOrder() {
         }, 3000);
       }
     } catch (error) {
-      console.error("Error placing order:", error);
-      alert("Failed to place order. Please try again.");
+      console.error('Error placing order:', error);
+      alert('Failed to place order. Please try again.');
     }
   };
 
@@ -437,6 +446,55 @@ function PlaceOrder() {
     const modal = document.getElementById("my_modal_ShopVoucher");
     if (modal) {
       modal.close();
+    }
+  };
+  const addProductNotification = async ({ userId, merchantId, type, title, message }) => {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .insert([
+          {
+            user_id: userId,
+            merchantId: merchantId,
+            type: type,
+            title: title,
+            message: message,
+            timestamp: new Date().toISOString(),
+            read: false,
+            deleted: false,
+          },
+        ])
+        .select()
+        .single();
+  
+      if (error) {
+        console.error('Error inserting notification:', error.message);
+        return { success: false, error: error.message };
+      }
+  
+      console.log('Notification added successfully:', data);
+      return { success: true, data };
+    } catch (err) {
+      console.error('Unexpected error inserting notification:', err.message);
+      return { success: false, error: err.message };
+    }
+  };
+
+  const handleOrderNotification = async (product, userId) => {
+    const notification = {
+      userId: userId,
+      merchantId: product.shop_Id, // Assuming `shop_Id` is the merchant ID
+      type: 'ORDER_PLACED',
+      title: 'New Order Received',
+      message: `A new order has been placed for your product: ${product.item_Name}.`,
+    };
+  
+    const result = await addProductNotification(notification);
+  
+    if (result.success) {
+      console.log('Order notification sent successfully.');
+    } else {
+      console.error('Failed to send order notification:', result.error);
     }
   };
 

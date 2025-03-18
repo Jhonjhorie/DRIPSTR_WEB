@@ -257,6 +257,300 @@ function MerchantDashboard() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchShopRatings = async () => {
+      try {
+        const { data: userData, error: authError } = await supabase.auth.getUser();
+        if (authError) {
+          console.error("Authentication error:", authError.message);
+          return;
+        }
+
+        const user = userData?.user;
+        if (!user) {
+          console.error("No user is signed in.");
+          return;
+        }
+
+        // Fetch shop data
+        const { data: shops, error: shopError } = await supabase
+          .from("shop")
+          .select("id")
+          .eq("owner_Id", user.id);
+
+        if (shopError) {
+          console.error("Error fetching shops:", shopError.message);
+          return;
+        }
+
+        if (!shops || shops.length === 0) {
+          console.warn("No shops found for this user.");
+          return;
+        }
+
+        const shopIds = shops.map((shop) => shop.id);
+
+        // Fetch products for the shop
+        const { data: products, error: productError } = await supabase
+          .from("shop_Product")
+          .select("id")
+          .in("shop_Id", shopIds);
+
+        if (productError) {
+          console.error("Error fetching products:", productError.message);
+          return;
+        }
+
+        if (!products || products.length === 0) {
+          console.warn("No products found for this shop.");
+          setShopRating(0);
+          return;
+        }
+
+        const productIds = products.map((product) => product.id);
+
+        // Fetch reviews for the products
+        const { data: reviews, error: reviewError } = await supabase
+          .from("reviews")
+          .select("rating")
+          .in("product_id", productIds);
+
+        if (reviewError) {
+          console.error("Error fetching reviews:", reviewError.message);
+          return;
+        }
+
+        if (!reviews || reviews.length === 0) {
+          console.warn("No reviews found for the products.");
+          setShopRating(0);
+          return;
+        }
+
+        // Calculate the average rating
+        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+        const averageRating = totalRating / reviews.length;
+
+        setShopRating(averageRating.toFixed(1)); // Set the average rating with 2 decimal places
+      } catch (error) {
+        console.error("Error fetching shop ratings:", error.message);
+      }
+    };
+
+    fetchShopRatings();
+  }, []);
+
+  useEffect(() => {
+    const fetchTopSellingItems = async () => {
+      try {
+        setLoading(true);
+
+        const { data: userData, error: authError } = await supabase.auth.getUser();
+        if (authError) {
+          console.error("Auth Error:", authError.message);
+          setLoading(false);
+          return;
+        }
+
+        const user = userData?.user;
+        if (!user) {
+          console.error("No user is signed in.");
+          setLoading(false);
+          return;
+        }
+
+        // Fetch shop data
+        const { data: shop, error: shopError } = await supabase
+          .from("shop")
+          .select("id")
+          .eq("owner_Id", user.id)
+          .single();
+
+        if (shopError) {
+          console.error("Error fetching shop:", shopError.message);
+          setLoading(false);
+          return;
+        }
+
+        if (!shop) {
+          console.warn("No shop found for this user.");
+          setLoading(false);
+          return;
+        }
+
+        const shopId = shop.id;
+
+        // Fetch products for the shop
+        const { data: products, error: productError } = await supabase
+          .from("shop_Product")
+          .select("id, item_Name, item_Variant")
+          .eq("shop_Id", shopId);
+
+        if (productError) {
+          console.error("Error fetching products:", productError.message);
+          setLoading(false);
+          return;
+        }
+
+        if (!products || products.length === 0) {
+          console.warn("No products found for this shop.");
+          setChartData([]);
+          return;
+        }
+
+        const productIds = products.map((product) => product.id);
+
+        // Fetch orders with shipping_status = "Completed"
+        const { data: orders, error: orderError } = await supabase
+          .from("orders")
+          .select("prod_num, quantity")
+          .in("prod_num", productIds)
+          .eq("shipping_status", "Completed");
+
+        if (orderError) {
+          console.error("Error fetching orders:", orderError.message);
+          setLoading(false);
+          return;
+        }
+
+        if (!orders || orders.length === 0) {
+          console.warn("No completed orders found for this shop.");
+          setChartData([]);
+          return;
+        }
+
+        // Calculate the total quantity sold for each product
+        const productSales = {};
+        orders.forEach((order) => {
+          if (!productSales[order.prod_num]) {
+            productSales[order.prod_num] = 0;
+          }
+          productSales[order.prod_num] += order.quantity;
+        });
+
+        // Map product sales to product details
+        const topSellingItems = products
+          .map((product) => {
+            let imagePath = null;
+
+            // Parse the item_Variant JSON to extract the imagePath
+            try {
+              const variants = product.item_Variant;
+
+              if (typeof variants === "string") {
+                try {
+                  variants = JSON.parse(variants);
+                } catch (err) {
+                  console.error("Error parsing item_Variant JSON:", err.message);
+                }
+              }
+              
+              if (Array.isArray(variants) && variants.length > 0) {
+                imagePath = variants[0]?.imagePath || null; // Use the first variant's imagePath
+              }
+            } catch (err) {
+              console.error("Error parsing item_Variant JSON:", err.message);
+            }
+
+            return {
+              id: product.id,
+              label: product.item_Name,
+              image: imagePath,
+              value: productSales[product.id] || 0,
+            };
+          })
+          .filter((item) => item.value > 0) // Only include products with sales
+          .sort((a, b) => b.value - a.value); // Sort by quantity sold
+
+        setChartData(topSellingItems);
+      } catch (error) {
+        console.error("Error fetching top-selling items:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopSellingItems();
+  }, []);
+
+  useEffect(() => {
+    const fetchProductVariants = async () => {
+      try {
+        // Fetch the current user
+        const { data: userData, error: authError } = await supabase.auth.getUser();
+        if (authError) {
+          console.error("Authentication error:", authError.message);
+          return;
+        }
+
+        const user = userData?.user;
+        if (!user) {
+          console.error("No user is signed in.");
+          return;
+        }
+
+        // Fetch shop data
+        const { data: shop, error: shopError } = await supabase
+          .from("shop")
+          .select("id")
+          .eq("owner_Id", user.id)
+          .single();
+
+        if (shopError) {
+          console.error("Error fetching shop:", shopError.message);
+          return;
+        }
+
+        if (!shop) {
+          console.warn("No shop found for this user.");
+          return;
+        }
+
+        const shopId = shop.id; // Define shopId here
+
+        // Fetch products for the shop
+        const { data: products, error } = await supabase
+          .from("shop_Product")
+          .select("id, item_Name, item_Variant")
+          .eq("shop_Id", shopId); // Use shopId here
+
+        if (error) {
+          console.error("Error fetching products:", error.message);
+          return;
+        }
+
+        if (!products || products.length === 0) {
+          console.warn("No products found for this shop.");
+          return;
+        }
+
+        const parsedProducts = products.map((product) => {
+          let variants = product.item_Variant;
+
+          if (typeof variants === "string") {
+            try {
+              variants = JSON.parse(variants);
+            } catch (err) {
+              console.error("Error parsing item_Variant JSON:", err.message);
+              variants = [];
+            }
+          }
+          
+          return {
+            id: product.id,
+            name: product.item_Name,
+            variants: variants, // Parsed variants
+          };
+        });
+
+        console.log("Parsed Products with Variants:", parsedProducts);
+      } catch (error) {
+        console.error("Error fetching product variants:", error.message);
+      }
+    };
+
+    fetchProductVariants();
+  }, []);
+
   const formatRevenue = (revenue) => {
     const amount = parseFloat(revenue) || 0;
 
@@ -407,7 +701,7 @@ function MerchantDashboard() {
           <div className="bg-slate-100 h-full w-auto rounded-md">
             <div className="text-slate-900 font-semibold text-2xl md:text-5xl pt-[25%]  text-center">
               {" "}
-              {shopRating}{" "}
+              {shopRating || 0}{" "}
               <box-icon
                 type="solid"
                 size="30px"

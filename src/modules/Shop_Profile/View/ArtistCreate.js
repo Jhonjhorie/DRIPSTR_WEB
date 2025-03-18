@@ -439,7 +439,7 @@ function ArtistCreate() {
       console.error("Error updating terms:", error);
       alert("Failed to accept terms. Please try again.");
     } else {
-      alert("Terms accepted successfully!");
+      // alert("Terms accepted successfully!");
       handleCloseTandC();
     }
   };

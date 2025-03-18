@@ -134,13 +134,12 @@ function Orders({ shopOwnerId }) {
 
       const productIds = products.map((p) => p.id);
 
-      // Fetch orders with buyer details
+      // Update the orders query to explicitly join with shop_Product
       const { data: ordersData, error: orderError } = await supabase
         .from("orders")
-        .select(
-          `
+        .select(`
           id, 
-          transaction_id, 
+          shop_transaction_id, 
           prod_num, 
           quantity, 
           total_price, 
@@ -159,9 +158,20 @@ function Orders({ shopOwnerId }) {
           estimated_delivery,
           payment_method,
           payment_status,
-          profiles:acc_num (full_name, mobile, profile_picture, address)
-          `
-        )
+          
+          customizable_note,
+          shop_Product!inner (
+            id,
+            item_Name,
+            isCustomizable
+          ),
+          profiles:acc_num (
+            full_name,
+            mobile,
+            profile_picture,
+            address
+          )
+        `)
         .in("prod_num", productIds)
         .order("id", { ascending: true });
 
@@ -178,6 +188,7 @@ function Orders({ shopOwnerId }) {
         refunded: [],
       };
 
+      // Update the enrichedOrder creation in the forEach loop
       ordersData.forEach((order) => {
         const variant =
           typeof order.order_variation === "string"
@@ -189,7 +200,7 @@ function Orders({ shopOwnerId }) {
             ? JSON.parse(order.order_size)
             : order.order_size;
 
-        const product = products.find((p) => p.id === order.prod_num);
+        const product = order.shop_Product; // Now directly accessing the joined shop_Product
 
         const enrichedOrder = {
           ...order,
@@ -198,17 +209,15 @@ function Orders({ shopOwnerId }) {
           size: sizeDetails?.size || "N/A",
           price: sizeDetails?.price || null,
           buyerPhone: order.profiles?.mobile,
-          productName: product ? product.item_Name : "Unknown Product",
+          productName: product?.item_Name || "Unknown Product",
           buyerName: order.profiles?.full_name || "Unknown Buyer",
-          buyerProfilePic:
-            order.profiles?.profile_picture || "default_avatar.jpg",
+          buyerProfilePic: order.profiles?.profile_picture || "default_avatar.jpg",
           buyerAddress: order.profiles?.address || "Address not set",
+          isCustomizable: product?.isCustomizable || false, // Get isCustomizable from shop_Product
+          customizable_note: order.customizable_note || null,
         };
 
-        // if (order.order_status === "To pay") {
-        //   categorizedOrders.newOrders.push(enrichedOrder);
-        // } else
-
+        // Add to appropriate category based on shipping_status
         if (order.shipping_status === "To prepare") {
           categorizedOrders.preparing.push(enrichedOrder);
         } else if (order.shipping_status === "To ship") {
@@ -224,7 +233,6 @@ function Orders({ shopOwnerId }) {
         } else if (order.shipping_status === "Returned") {
           categorizedOrders.refunded.push(enrichedOrder);
         }
-        
       });
 
       setOrders(categorizedOrders);

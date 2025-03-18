@@ -144,7 +144,7 @@ function Products() {
           setShopAds(updatedAds); // Set the updated ads
 
           // get the total sold items
-       
+
 
           const { data: products, error: productError } = await supabase
             .from("shop_Product")
@@ -182,9 +182,9 @@ function Products() {
 
                 const updatedFirstVariant = firstVariant
                   ? {
-                      ...firstVariant,
-                      imagePath: firstVariantUrlData?.publicUrl || null,
-                    }
+                    ...firstVariant,
+                    imagePath: firstVariantUrlData?.publicUrl || null,
+                  }
                   : null;
 
                 // Fetch image paths for all variants
@@ -540,25 +540,31 @@ function Products() {
   };
   const handleConfirmedUpdate = async () => {
     if (currentVariantIndex !== null) {
-      const success = await handleUpdate(currentVariantIndex);
-      if (success) {
-        toggleEdit(currentVariantIndex);
-      }
-      handleUpdateItem();
-      setShowAlertCOnfirmUpdate(false);
-    }
-    const updatedVariants = [...selectedItem.item_Variant];
-    if (currentVariantIndex !== null) {
-      updatedVariants[currentVariantIndex].sizes = updatedVariants[
-        currentVariantIndex
-      ].sizes.filter(
-        (size) => size.size.trim() !== "" || size.qty > 0 || size.price > 0
+      const updatedVariants = [...selectedItem.item_Variant];
+      const currentVariant = updatedVariants[currentVariantIndex];
+
+      // Validate sizes
+      const hasInvalidFields = currentVariant.sizes.some(
+        (size) => !size.size.trim() || size.qty <= 0 || size.price <= 0
       );
+
+      if (hasInvalidFields) {
+        setconfirmField(true);
+        setTimeout(() => setconfirmField(false), 3000);
+        return;
+      }
+
+      // Proceed with the update if validation passes
+      try {
+        const success = await handleUpdate(currentVariantIndex);
+        if (success) {
+          toggleEdit(currentVariantIndex);
+        }
+        setShowAlertCOnfirmUpdate(false);
+      } catch (error) {
+        console.error("Error during update:", error);
+      }
     }
-    setSelectedItem({
-      ...selectedItem,
-      item_Variant: updatedVariants,
-    });
   };
   const handleUnPostItem = () => {
     setShowAlertUnP(true);
@@ -661,7 +667,7 @@ function Products() {
       alert("An unexpected error occurred.");
     }
   };
-
+  const [showMaxalert, setShowAlertDeladMax] = React.useState(false);
   //Shops ads images
   const handleAddAd = async () => {
     if (!imageSrcAd || !adName) {
@@ -673,7 +679,7 @@ function Products() {
     setLoading(true);
 
     try {
-      // Fetch existing ads
+      // Fetch existing ads for the current shop
       const { data: shopData, error: fetchError } = await supabase
         .from("shop")
         .select("shop_Ads")
@@ -683,6 +689,15 @@ function Products() {
       if (fetchError) {
         console.error("Error fetching shop ads:", fetchError);
         setError(fetchError.message);
+        return;
+      }
+
+      const existingAds = shopData?.shop_Ads || [];
+
+      // Check if the number of ads exceeds the limit
+      if (existingAds.length >= 5) {
+        setShowAlertDeladMax(true);
+        setTimeout(() => setShowAlertDeladMax(false), 3000);
         return;
       }
 
@@ -716,8 +731,6 @@ function Products() {
         return;
       }
 
-      const existingAds = shopData?.shop_Ads || [];
-
       const newAd = {
         id: Date.now(),
         ad_Name: adName,
@@ -726,6 +739,7 @@ function Products() {
 
       const updatedAds = [...existingAds, newAd];
 
+      // Update the shop_Ads field in the database
       const { error: updateError } = await supabase
         .from("shop")
         .update({ shop_Ads: updatedAds })
@@ -753,7 +767,6 @@ function Products() {
       setLoading(false);
     }
   };
-
   const handleAddAds = () => {
     //ADS
     setIsModalOpenAds(true);
@@ -822,7 +835,7 @@ function Products() {
       setTimeout(() => setShowIsCustomize(false), 3000);
     }
   };
-
+  const [confirmField, setconfirmField] = React.useState(false);
   return (
     <div className="h-full w-full  bg-slate-300 px-2 md:px-10 lg:px-20 ">
       <div className="absolute mx-3 right-0 z-10">
@@ -1023,8 +1036,8 @@ function Products() {
                   <li className="list-none pr-4">Action</li>
                 </div>
                 {shopData.length > 0 &&
-                shopData[0].shop_Ads &&
-                shopData[0].shop_Ads.length > 0 ? (
+                  shopData[0].shop_Ads &&
+                  shopData[0].shop_Ads.length > 0 ? (
                   shopData[0].shop_Ads.map((ad, index) => {
                     return (
                       <div
@@ -1086,7 +1099,7 @@ function Products() {
       </div>
       {/* Add Advertisement Modal */}
       {isModalOpenAds && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900 bg-opacity-75 ">
           <div className="bg-white relative rounded-md p-5 h-auto w-full md:w-3/4 pt-2 lg:w-1/2 m-2 md:m-0 auto">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
@@ -1336,6 +1349,28 @@ function Products() {
           </div>
         </div>
       )}
+      {showMaxalert && (
+        <div className="md:bottom-5   w-auto px-10 bottom-10 z-50 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-white font-semibold rounded-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-6 w-6 shrink-0 stroke-current">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Advertisement limit reach, 5 ad images only.</span>
+          </div>
+        </div>
+      )}
       {/* EDIT, VIEW, POST, REMOVE ITEM */}
       {selectedItem && (
         <div
@@ -1344,7 +1379,7 @@ function Products() {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-lg  md:w-2/3 h-3/4 -mt-14 md:mt-0 md:h-2/3 w-full "
+            className="bg-white rounded-lg  md:w-2/3 h-3/4 -mt-14 md:-mt-10 md:h-2/2 w-full "
           >
             <div className=" bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 w-full rounded-t-md  " />
             <div className=" flex justify-between items-center pr-2 ">
@@ -1546,11 +1581,10 @@ function Products() {
                                 toggleEdit(variantIndex);
                               }
                             }}
-                            className={`${
-                              editableVariants[variantIndex]
-                                ? "bg-green-500"
-                                : "bg-blue-500"
-                            } text-white text-sm px-3 py-1 rounded-md`}
+                            className={`${editableVariants[variantIndex]
+                              ? "bg-green-500"
+                              : "bg-blue-500"
+                              } text-white text-sm px-3 py-1 rounded-md`}
                           >
                             {editableVariants[variantIndex] ? "Save" : "Edit"}
                           </button>
@@ -1567,12 +1601,12 @@ function Products() {
                                   Size:
                                 </label>
                                 <input
-                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                    editableVariants[variantIndex]
-                                      ? "bg-slate-300"
-                                      : "bg-slate-100"
-                                  }`}
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${editableVariants[variantIndex]
+                                    ? "bg-slate-300"
+                                    : "bg-slate-100"
+                                    }`}
                                   type="text"
+                                  required
                                   value={size.size}
                                   onChange={(e) =>
                                     handleSizeChange(
@@ -1591,13 +1625,13 @@ function Products() {
                                 </label>
                                 <input
                                   onKeyDown={blockInvalidChar}
-                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                    editableVariants[variantIndex]
-                                      ? "bg-slate-300"
-                                      : "bg-slate-100"
-                                  }`}
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${editableVariants[variantIndex]
+                                    ? "bg-slate-300"
+                                    : "bg-slate-100"
+                                    }`}
                                   type="number"
                                   value={size.qty}
+                                  required
                                   onChange={(e) =>
                                     handleSizeChange(
                                       variantIndex,
@@ -1615,13 +1649,13 @@ function Products() {
                                 </label>
                                 <input
                                   onKeyDown={blockInvalidChar}
-                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${
-                                    editableVariants[variantIndex]
-                                      ? "bg-slate-300"
-                                      : "bg-slate-100"
-                                  }`}
+                                  className={`bg-slate-100 text-sm text-slate-700 font-medium p-1 rounded-sm w-20 ml-2 ${editableVariants[variantIndex]
+                                    ? "bg-slate-300"
+                                    : "bg-slate-100"
+                                    }`}
                                   type="number"
                                   value={size.price}
+                                  required
                                   onChange={(e) =>
                                     handleSizeChange(
                                       variantIndex,
@@ -1925,6 +1959,7 @@ function Products() {
               </div>
             </div>
           )}
+
           {/* Alert Update Variant Confirmation */}
           {showAlertEditDone && (
             <div
@@ -2121,6 +2156,28 @@ function Products() {
               />
             </svg>
             <span>Item variant information deleted</span>
+          </div>
+        </div>
+      )}
+      {confirmField && (
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-40 right-0 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+          <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
+            <div className="mt-10 ">
+              <img
+                src={questionEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+          </div>
+          <div
+            role="alert"
+            className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-slate-50 font-semibold rounded-md"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="h-6 w-6 shrink-0 stroke-current">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span>Sizes for variant is required.</span>
           </div>
         </div>
       )}
