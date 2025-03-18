@@ -6,6 +6,7 @@ import DateTime from "../Hooks/DateTime";
 import successEmote from "../../../../src/assets/emote/success.png";
 import { supabase } from "../../../constants/supabase";
 import hmmmEmote from "../../../../src/assets/emote/hmmm.png";
+import sadEmote from "../../../../src/assets/emote/error.png";
 
 function FormCommision() {
   const [records, setRecords] = useState([]);
@@ -142,15 +143,40 @@ function FormCommision() {
     }
   };
   
+  const closeBtn = () => { 
+    setShowModalComplete(false);
+    setIsModalOpenAlreadyTaken(false);
+    setIsModalOpentaken(false);
+    fetchMerchantCommissions(sData.owner_Id, sData.id);
+  }
   
   
-
+  const [showAlertAlreadyTaken, setIsModalOpenAlreadyTaken] = useState(false); 
+  const [showAlertTaken, setIsModalOpentaken] = useState(false); 
   const handleAccept = async () => {
     if (!selectedRecordId) return;
   
+    const { data: existingRecord, error: fetchError } = await supabase
+      .from("merchant_Commission")
+      .select("merchantId")
+      .eq("id", selectedRecordId)
+      .single();
+  
+    if (fetchError) {
+      console.error("Error fetching record:", fetchError);
+      return;
+    }
+  
+    // check if there's a id of merchant
+    if (existingRecord?.merchantId) {
+      setIsModalOpenAlreadyTaken(true)
+      return;
+    }
+  
+    // Proceed with updating the status
     const { error } = await supabase
       .from("merchant_Commission")
-      .update({ status: "To prepare" })
+      .update({ status: "To prepare", merchantId: shopId })
       .eq("id", selectedRecordId);
   
     if (error) {
@@ -159,7 +185,7 @@ function FormCommision() {
     }
   
     setShowModalComplete(false);
-  
+    setIsModalOpentaken(true);
     if (!ownerId || !shopId) {
       console.error("Error: Missing ownerId or shopId in handleAccept.");
       return;
@@ -168,6 +194,7 @@ function FormCommision() {
     fetchMerchantCommissions(ownerId, shopId);
   };
   
+
 
 
   return (
@@ -247,6 +274,63 @@ function FormCommision() {
         </table>
       </div>
 
+
+      {showAlertAlreadyTaken && (
+        <div className="fixed  inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white relative p-6 rounded-lg shadow-lg w-1/3">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
+              {" "}
+            </div>
+            <div className="mt-2 justify-center flex ">
+              <img
+                src={sadEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+            <h3 className="text-lg text-center font-semibold text-slate-900 mb-4">
+              Order commission already taken
+            </h3>
+
+            <div className="flex justify-center gap-4">
+              <button
+               onClick={closeBtn}
+                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+       {showAlertTaken && (
+        <div className="fixed  inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white relative p-6 rounded-lg shadow-lg w-1/3">
+            <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
+              {" "}
+            </div>
+            <div className="mt-2 justify-center flex ">
+              <img
+                src={successEmote}
+                alt="Success Emote"
+                className="object-contain rounded-lg p-1 drop-shadow-customViolet"
+              />
+            </div>
+            <h3 className="text-lg text-center font-semibold text-slate-900 mb-4">
+              Order commission taken
+            </h3>
+
+            <div className="flex justify-center gap-4">
+              <button
+               onClick={closeBtn}
+                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Image to view  */}
       {selectedImage && (
         <div className="fixed top-0 left-0 z-30 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">

@@ -12,6 +12,9 @@ import sample3 from "@/assets/images/samples/5.png";
 import sample2 from "@/assets/images/samples/10.png";
 import hmmmEmote from "@/assets/emote/success.png";
 import { supabase } from "@/constants/supabase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMessage, faCircleXmark } from "@fortawesome/free-solid-svg-icons";
+
 
 const { useState, useEffect, useRef } = React;
 
@@ -328,11 +331,7 @@ function AristOrders() {
           <div className="w-full md:w-2/5 bg-gradient-to-br relative from-violet-500 to-fuchsia-500 p-1 h-auto shadow-black">
             <div className="text-2xl font-semibold p-2 py-5 text-white flex items-center justify-between">
               <label>Messages</label>
-              <box-icon
-                type="solid"
-                color="#4D077C"
-                name="message-square-dots"
-              />
+              <FontAwesomeIcon icon={faMessage} /> 
             </div>
             <div className="h-[500px] overflow-hidden overflow-y-scroll rounded-md bg-slate-100 bg-opacity-40 glass shadow-black w-full shadow-inner pt-2 pl-2">
               {messages.map((message, index) => (
@@ -428,9 +427,9 @@ function AristOrders() {
                     </div>
                     <div
                       onClick={handleCloseChat}
-                      className="hover:scale-95 duration-300 cursor-pointer rounded-md p-1 justify-center flex"
+                      className="hover:scale-105 text-xl duration-300  cursor-pointer text-slate-800 rounded-md p-1 justify-center flex"
                     >
-                      <box-icon name="message-square-x" color="#000"></box-icon>
+                       <FontAwesomeIcon icon={faCircleXmark} />
                     </div>
                   </div>
 

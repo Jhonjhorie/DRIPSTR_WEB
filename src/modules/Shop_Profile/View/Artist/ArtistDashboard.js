@@ -13,6 +13,11 @@ import questionEmote from "../../../../../src/assets/emote/question.png";
 import { supabase } from "../../../../constants/supabase";
 import hmmmEmote from "../../../../../src/assets/emote/hmmm.png";
 import successEmote from "@/assets/emote/success.png";
+
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBookBookmark, faHeart, faPenToSquare, faShield, faSquare, faUserGroup} from "@fortawesome/free-solid-svg-icons";
+
+
 const { useState, useEffect } = React;
 
 function MerchantDashboard() {
@@ -599,11 +604,10 @@ function MerchantDashboard() {
             <div className="flex justify-center gap-1 mt-1 bg-custom-purple p-1 shadow-inner shadow-slate-800 rounded-md md:mt-0 md:gap-5">
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
-                  <div className="flex align-middle gap-2  justify-center ">
+                  <div className="flex align-middle items-center gap-2  justify-center ">
                     <div className="text-xl md:text-2xl text-slate-100 "> {totLikes}</div>
-                    <div className="pt-1">
-                      {" "}
-                      <box-icon color="white" size="100%" type='solid' name='like'></box-icon>
+                    <div className=" text-slate-100 text-sm md:text-xl">
+                      <FontAwesomeIcon icon={faHeart} /> 
                     </div>
                   </div>
 
@@ -612,16 +616,10 @@ function MerchantDashboard() {
               </div>
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
-                  <div className="flex align-middle gap-2  justify-center ">
+                  <div className="flex align-middle gap-2 items-center justify-center ">
                     <div className="text-xl md:text-2xl text-slate-100"> {totalFollowers}</div>
-                    <div className="pt-1">
-                      {" "}
-                      <box-icon
-                        color="white"
-                        size="100%"
-                        name="group"
-                        type="solid"
-                      ></box-icon>
+                    <div className="text-slate-100 text-sm md:text-xl">
+                      <FontAwesomeIcon icon={faUserGroup} /> 
                     </div>
                   </div>
 
@@ -630,17 +628,12 @@ function MerchantDashboard() {
               </div>
               <div className="h-full w-20 ">
                 <div className="h-full w-20 justify-items-center ">
-                  <div className="flex align-middle gap-2  justify-center ">
+                  <div className="flex align-middle gap-2 items-center justify-center ">
                     <div className="text-xl md:text-2xl text-slate-100">
                       {totalArtsCount}
                     </div>
-                    <div className="pt-1">
-                      {" "}
-                      <box-icon
-                        color="white"
-                        type="solid"
-                        name="book-heart"
-                      ></box-icon>
+                    <div className="text-slate-100 text-sm md:text-xl">
+                    <FontAwesomeIcon icon={faBookBookmark} /> 
                     </div>
                   </div>
 
@@ -653,14 +646,10 @@ function MerchantDashboard() {
                 className="h-full w-20 duration-300 hover:scale-95 cursor-pointer"
               >
                 <div className="h-full w-20 justify-items-center bg-slate-50 bg-opacity-25 shadow-md rounded-md ">
-                  <div className="flex align-middle gap-2  justify-center ">
-                    <div className="pt-1">
+                  <div className="flex align-middle gap-2 items-center justify-center ">
+                    <div className="text-slate-100 text-sm md:text-xl">
                       {" "}
-                      <box-icon
-                        color="white"
-                        type="solid"
-                        name="edit"
-                      ></box-icon>
+                      <FontAwesomeIcon icon={faPenToSquare} /> 
                     </div>
                   </div>
 
@@ -711,22 +700,14 @@ function MerchantDashboard() {
                           onClick={() => handleLike(art.id, art.likes)}
                         >
                           {art.likes?.length || 0}
-                          <box-icon
-                            name="heart"
-                            type="solid"
-                            color={art.likes?.includes(userId) ? "red" : "gray"}
-                          ></box-icon>
+                            <FontAwesomeIcon icon={faHeart} color={art.likes?.includes(userId) ? "red" : "gray"}/> 
                         </div>
-                        <div
+                        {/* <div
                           className="tooltip tooltip-left text-sm flex items-center gap-1 cursor-pointer hover:scale-105 duration-200 text-yellow-500"
                           data-tip="See complaints"
                         >
-                          <box-icon
-                            name="shield-x"
-                            type="solid"
-                            color="gold"
-                          ></box-icon>
-                        </div>
+                          <FontAwesomeIcon icon={faShield} /> 
+                        </div> */}
                       </div>
                     </div>
                   ))}

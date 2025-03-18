@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import successEmote from "../../../../src/assets/emote/success.png";
 import questionEmote from "../../../../src/assets/emote/hmmm.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faInfoCircle, faLeftLong } from "@fortawesome/free-solid-svg-icons";
 
 const AddItem = () => {
   const navigate = useNavigate();
@@ -369,7 +371,7 @@ const AddItem = () => {
     setVariantToDeleteName(name);
   };
   return (
-    <div className="h-full w-full bg-slate-300  ">
+    <div className="h-full w-full bg-slate-300 overflow-hidden  ">
       <div className="absolute mx-3 right-0 z-10">
         <SideBar></SideBar>
       </div>
@@ -384,7 +386,7 @@ const AddItem = () => {
                     className="hover:scale-90 duration-300"
                   >
                     {" "}
-                    <box-icon name="share" type="solid" size="40px"></box-icon>
+                    <FontAwesomeIcon icon={faLeftLong} /> 
                   </button>
                 </div>
                 <span className="ml-3 ">Add Item</span>
@@ -434,14 +436,18 @@ const AddItem = () => {
                   >
                     {[
                       "Jersey",
-                      "Shorts",
                       "Tshirt",
                       "Longsleeves",
+                      "Shorts",
+                      "Skirt",
                       "Pants",
                       "Tumbler",
                       "Mug",
                       "Shoes",
+                      "Boots",
                       "Totebag",
+                      "Skirt",
+                      "Boots",
                       "Others",
                     ].map((category) => (
                       <li key={category}>
@@ -488,7 +494,7 @@ const AddItem = () => {
                     className="tooltip tooltip-left md:tooltip-bottom p-1 cursor-help "
                     data-tip="Type three tags here such as 'Shirt', 'Polo', 'Appliances', etc... that suits to your Item."
                   >
-                    <box-icon name="info-circle"></box-icon>
+                     <FontAwesomeIcon icon={faInfoCircle} /> 
                   </div>
                 </div>
                 <div className=" w-full ">

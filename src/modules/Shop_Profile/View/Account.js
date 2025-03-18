@@ -310,7 +310,7 @@ function Account() {
         </div>
         {/* ALLERTS ADD Item SUCCESS */}
         {showAlertEdit && (
-          <div className="fixed inset-0 z-50 bg-gray-800 bg-opacity-50 p-2 flex justify-center items-center">
+          <div className="fixed inset-0 z-30 bg-gray-800 bg-opacity-50 p-2 flex justify-center items-center">
             <div className="bg-white  md:h-auto mt-5 md:mt-8 w-full md:w-[50%]  justify-items-center rounded-md shadow-md relative">
               <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
                 {" "}
@@ -429,7 +429,7 @@ function Account() {
         )}
         {/* ALLERTS ARTIST PAGE SUCCESSFULLY */}
         {showAlertSuccessEdit && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="fixed inset-0 z-40 bg-gray-600 bg-opacity-50 flex justify-center items-center">
             <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
               <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
                 {" "}
@@ -455,7 +455,7 @@ function Account() {
           </div>
         )}
         {showAlertSuccessEditCon && (
-          <div className="fixed z-20 inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="fixed inset-0 z-40 bg-gray-600 bg-opacity-50 flex justify-center items-center">
             <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
               <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
                 {" "}

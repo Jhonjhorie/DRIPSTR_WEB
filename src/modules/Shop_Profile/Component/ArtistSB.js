@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import avatar from "../../../assets/car.jpg";
 import { supabase } from "../../../constants/supabase";
-
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPaintBrush, faMessage, faCompassDrafting, faUser, faWallet, faBolt } from "@fortawesome/free-solid-svg-icons";
 
 function ArtistSB() {
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
@@ -112,65 +113,61 @@ function ArtistSB() {
           </div>
           <li
             onClick={() => navigate("/shop/Artist/ArtistDashboard")}
-            className="flex justify-between p-1 hover:bg-slate-300 mt-4 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 mt-4 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
-            <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
+            <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer -pr-1">
               Dashboard
             </a>
-            <box-icon type="solid" name="dashboard" color="#4D077C"></box-icon>
+            <FontAwesomeIcon icon={faBolt} /> 
           </li>
 
           <li
             onClick={() => navigate("/shop/Artist/ArtistAddArts")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between p-1 items-center hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Manage Arts
             </a>
-            <box-icon type="solid" name="component" color="#4D077C"></box-icon>
+            <FontAwesomeIcon icon={faPaintBrush} />
           </li>
 
           <li
             onClick={() => navigate("/shop/Artist/ArtistOrders")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between items-center p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Messages
             </a>
-            <box-icon
-              type="solid"
-              name="message-dots"
-              color="#4D077C"
-            ></box-icon>
+            <FontAwesomeIcon icon={faMessage} />
           </li>
 
           <li
             onClick={() => navigate("/shop/Artist/ArtistCommision")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between  items-center p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Commissions
             </a>
-            <box-icon name="basket" type="solid" color="#4D077C"></box-icon>
+            <FontAwesomeIcon icon={faCompassDrafting} />
           </li>
 
           <li
             onClick={() => navigate("/shop/Artist/ArtistAccount")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between items-center p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Account
             </a>
-            <box-icon type='solid' name='user-account' color="#4D077C"></box-icon>
+            <FontAwesomeIcon icon={faUser} />
           </li>
           <li
             onClick={() => navigate("/shop/Artist/ArtistWallet")}
-            className="flex justify-between p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
+            className="flex justify-between items-center p-1 hover:bg-slate-300 rounded-sm hover:duration-200 hover:text-violet-900 cursor-pointer "
           >
             <a className="block  text-base text-slate-900 w-full hover:text-primary-color cursor-pointer ">
               Merchant Wallet
             </a>
-            <box-icon type='solid' color="#4D077C" name='wallet'></box-icon>
+            <FontAwesomeIcon icon={faWallet} />
           </li>
         </ul>
     

@@ -171,17 +171,7 @@ const UserProfile = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-gray-600">Email Address</label>
-                    {isEditing ? (
-                      <input
-                        type="email"
-                        name="email"
-                        value={profile.email}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                      />
-                    ) : (
                       <p className="text-gray-800 bg-gray-50 px-4 py-2 rounded-lg">{profile.email}</p>
-                    )}
                   </div>
 
                   <div className="space-y-2">

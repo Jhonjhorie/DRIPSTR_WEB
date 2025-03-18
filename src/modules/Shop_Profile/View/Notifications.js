@@ -2,6 +2,9 @@ import React from 'react';
 import SideBar from '../Component/Sidebars'
 import girl from '../../../assets/shop/erica.jpg';
 import boy from '../../../assets/shop/sample2.jpg'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
+
 const { useState } = React;
 
 function Notifications() { 
@@ -44,7 +47,7 @@ function Notifications() {
                   <option value="option5">Oldest</option>
                 </select>
                  
-                  <box-icon type='solid' name='bell' color='#F09319' size="lg"></box-icon>
+                <FontAwesomeIcon icon={faBell}  className='text-xl'/> 
               </div> 
             </div>
             <div className='bg-slate-200 h-[550px] rounded-md w-full custom-scrollbar overflow-y-scroll p-2 '>

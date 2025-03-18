@@ -53,7 +53,7 @@ const CommissionHistory = ({ artistId }) => {
         data-tip="See Commission History"
         bgColor="bg-transparent"
         textColor="text-secondary-color"
-        className="flex-none flex fixed bottom-16 md:bottom-4 cursor-pointer right-5 items-center justify-center w-10 h-10 bg-secondary-color opacity-70 hover:opacity-100 rounded-md hover:text-black text-slate-400 hover:text-primary-color hover:bg-slate-50 duration-300 transition-all border border-slate-400 hover:border-primary-color"
+        className="flex-none flex fixed bottom-16 md:bottom-4 cursor-pointer right-5 items-center justify-center w-10 h-10 bg-white text-slate-800 opacity-70 hover:opacity-100 rounded-full hover:text-white  hover:text-primary-color hover:bg-slate-900 duration-300 transition-all border border-slate-100 hover:border-white"
         onClick={() => setIsOpen(!isOpen)}
       >
         <FontAwesomeIcon icon={faHistory} />

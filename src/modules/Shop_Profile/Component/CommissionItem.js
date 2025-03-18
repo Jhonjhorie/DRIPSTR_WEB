@@ -95,7 +95,6 @@ function CommissionItem() {
           `id, client_Id, fullName, image, description, pricing, status, merchantId, filePath, receipt, notes,
         profiles:client_Id(id, mobile)`
         )
-        .eq("status", "To prepare")
         .eq("merchantId", shopId);
 
       if (error) {
@@ -135,7 +134,7 @@ function CommissionItem() {
   return (
     <div>
       <div className="overflow-x-auto rounded-md border border-base-content/5 bg-slate-200">
-        <table className="table">
+        <table className="table h-auto w-full bg-slate-200">
           {/* head */}
           <thead className="w-full bg-custom-purple glass">
             <tr className="text-sm text-center ">
@@ -149,7 +148,7 @@ function CommissionItem() {
             </tr>
           </thead>
           {isLoading ? (
-            <tbody>
+            <tbody className="">
               <tr>
                 <td colSpan="7" className="text-center py-10">
                   <span className="loading loading-dots loading-lg"></span>
@@ -181,6 +180,7 @@ function CommissionItem() {
                   <td>{record.status || "Accept"}</td>
                   <td>
                     <div className="gap-2 flex justify-center">
+                    {record.status === "To prepare" ? (
                       <button
                         onClick={() => {
                           setIsModalOpen(true);
@@ -192,6 +192,10 @@ function CommissionItem() {
                       >
                         Print
                       </button>
+                      ) : (
+                        <span className="text-gray-800 font-semibold">Shipping</span>
+                      
+                      )}
                       {/* <button
                         onClick={() => {
                           setShowModalComplete(true);
@@ -299,7 +303,7 @@ function CommissionItem() {
                 <p className="text-sm text-slate-800">
                   <strong>Shipping Address: </strong>
                   {clientAddress
-                    ? `${clientAddress.full_address}, ${clientAddress.postcode}, Philippines`
+                    ? `${clientAddress.full_address}, ${clientAddress.postcode}`
                     : "No address found"}
                 </p>
 

@@ -109,12 +109,12 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
       className={`border relative rounded-lg p-4 shadow-md mb-4  ${
         order.shipping_status === "Cancel"
           ? "bg-slate-300"
-          : order.shipping_status === "Delivered"
+          : order.shipping_status === "Completed"
           ? "bg-slate-300"
           : "bg-white"
       }`}
     >
-      <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md "></div>
+      {/* <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md "></div> */}
       <h2 className="text-lg font-bold text-slate-900">Order #{order.id}</h2>
       <div className="w-full md:flex gap-2">
         {/* Product Details */}
@@ -311,21 +311,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             </button>
           </div>
         )} */}
-        {order.shipping_status === "To deliver" && (
+        {order.shipping_status === "To receive" &&(
           <button
             className="bg-blue-500 text-sm text-white justify-end px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
             onClick={handleOpenDeliveryInfo}
             disabled={loading}
           >
             {loading ? "Updating..." : "Status"}
-          </button>
-        )}
-        {order.shipping_status === "Completed" && (
-          <button
-            className="bg-green-500 text-sm text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 ml-2"
-            disabled={loading}
-          >
-            {loading ? "Updating..." : "Okay"}
           </button>
         )}
       </div>
@@ -358,14 +350,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
               {/* Product Section */}
               <div className="flex gap-4 mt-4">
-                <div className="p-1 rounded-md shadow-md h-36 w-36 bg-slate-800">
-                  <img
-                    src={order.variantImg || "placeholder.jpg"}
-                    alt={order.variantName || "Product Image"}
-                    className="h-full w-full object-cover rounded-md"
-                  />
-                </div>
-
                 <div className="flex-1">
                   <p className="text-sm text-slate-800">
                     <strong>Product:</strong> {order.productName || "N/A"}
@@ -390,6 +374,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                     <strong>Address:</strong> {shopData?.address || "N/A"}
                   </p>
                 </div>
+                {/* <div className="p-1 rounded-md shadow-md h-36 w-36 bg-slate-800">
+                  <img
+                    src={order.variantImg || "placeholder.jpg"}
+                    alt={order.variantName || "Product Image"}
+                    className="h-full w-full object-cover rounded-md"
+                  />
+                </div> */}
               </div>
 
               {/* Shipping Details */}
@@ -401,7 +392,9 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <strong>Receiver:</strong> {order.buyerName || "N/A"}
                 </p>
                 <p className="text-sm text-slate-800">
-                  <strong>Address:</strong> {order.shipping_addr || "N/A"}
+                  <strong>Address:</strong>{" "}
+                  {order.shipping_addr + ", " + order.shipping_postcode ||
+                    "N/A"}
                 </p>
                 <p className="text-sm text-slate-800">
                   <strong>Mobile number:</strong> {order.buyerPhone || "N/A"}

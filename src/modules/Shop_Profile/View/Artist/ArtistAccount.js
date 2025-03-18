@@ -8,6 +8,9 @@ import {
   blockInvalidChar,
   validateMinLength2,
 } from "../../Hooks/ValidNumberInput";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
+
 const { useState, useEffect } = React;
 function ArtistAccount() {
   const [loading, setLoading] = useState(false);
@@ -231,7 +234,7 @@ function ArtistAccount() {
               className="cursor-pointer hover:scale-95 duration-200"
             >
               {" "}
-              <box-icon color="black" type="solid" name="edit"></box-icon>
+              <FontAwesomeIcon icon={faPenToSquare} />
             </div>
           </div>
           <div className="w-full md:flex gap-5">
@@ -278,7 +281,7 @@ function ArtistAccount() {
       </div>
       {/* ALLERTS ADD Item SUCCESS */}
       {showAlertEdit && (
-        <div className="fixed inset-0 z-50 bg-gray-600 p-2 bg-opacity-50  flex justify-center items-center">
+        <div className="fixed inset-0 z-30 bg-gray-600 p-2 bg-opacity-50  flex justify-center items-center">
           <div className="bg-white md:h-auto mt-8 w-full md:w-[50%]  justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 h-1.5 rounded-t-md">
               {" "}
@@ -320,7 +323,7 @@ function ArtistAccount() {
                       value={formData.artist_Name}
                       onChange={handleInputChange}
                       placeholder={artistData.artist_Name}
-                      className="p-1 bg-slate-300 w-full font-medium text-custom-purple rounded-sm"
+                      className="p-1 bg-slate-300 w-full text-sm text-slate-800  rounded-sm"
                     ></input>{" "}
                     <br />
                     <div className="label">
@@ -336,7 +339,7 @@ function ArtistAccount() {
                       onKeyDown={blockInvalidChar}
                       onInput={phonedigit}
                       placeholder={artistData.contact_number}
-                      className="p-1 bg-slate-300 w-full font-medium text-custom-purple rounded-sm"
+                      className="p-1 bg-slate-300 w-full text-sm text-slate-800 rounded-sm"
                     ></input>{" "}
                     <br />
                     <div className="label">
@@ -350,7 +353,7 @@ function ArtistAccount() {
                       value={formData.art_Type}
                       onChange={handleInputChange}
                       placeholder={artistData.art_Type}
-                      className="p-1 bg-slate-300 w-full font-medium text-custom-purple rounded-sm"
+                      className="p-1 bg-slate-300 w-full text-slate-800 text-sm rounded-sm"
                     ></input>
                   </div>
                 </div>
@@ -358,7 +361,7 @@ function ArtistAccount() {
                   <input
                     type="file"
                     accept="image/*"
-                    className="p-1 bg-slate-300 w-full font-medium text-slate-800 rounded-sm"
+                    className="p-1 bg-slate-300 w-full text-sm text-slate-800 rounded-sm"
                     onChange={handleImageChange}
                   ></input>{" "}
                   <br />
@@ -372,7 +375,7 @@ function ArtistAccount() {
                     value={formData.artist_Bio}
                     onChange={handleInputChange}
                     placeholder={artistData.artist_Bio}
-                    className="p-2 h-[80%] bg-slate-200 resize-none shadow-md shadow-slate-400 w-full text-custom-purple font-medium"
+                    className="p-2 h-[80%] bg-slate-200 text-sm resize-none text-slate-800 shadow-md shadow-slate-400 w-full "
                   ></textarea>
                 </div>
               </div>
@@ -423,7 +426,7 @@ function ArtistAccount() {
         </div>
       )}
       {showAlertSuccessEditCon && (
-        <div className="fixed z-20 inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div className="fixed z-30 inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white w-96 p-5   justify-items-center rounded-md shadow-md relative">
             <div className=" w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md">
               {" "}
@@ -442,22 +445,22 @@ function ArtistAccount() {
             <div className="w-full flex justify-between">
               <div
                 onClick={closeConfirmEditCon}
-                className="bg-red-500 hover:bg-red-300 m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                className="mt-4 p-2 px-4 bg-gray-500 cursor-pointer hover:bg-gray-700 duration-300 text-sm text-white py-2 rounded"
               >
                 Cancel
               </div>
               <div
                 onClick={handleEdit}
-                className="bg-primary-color m-2 p-1 px-2 hover:scale-95 duration-300 rounded-sm text-white font-semibold cursor-pointer"
+                className="mt-4 p-2 px-4 hover:bg-blue-700 cursor-pointer text-sm duration-300 bg-blue-500 text-white rounded"
               >
-                Okay!
+                Confirm
               </div>
             </div>
           </div>
         </div>
       )}
       {showAlertEditNochanges && (
-        <div className="md:bottom-5  w-auto px-10 bottom-10 z-20 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:bottom-5  w-auto px-10 bottom-10 z-30 right-0  h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-16 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img

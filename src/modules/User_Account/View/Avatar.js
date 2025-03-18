@@ -5,7 +5,11 @@ import { SkeletonUtils } from "three-stdlib";
 import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
 import Sidebar from "../components/Sidebar";
 import { supabase } from "../../../constants/supabase";
-import { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs } from "../../../constants/avatarConfig";
+import { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs,  jerseyURLs, 
+  longsleevesURLs,
+  pantsURLs,
+  footwearsURLs,
+  skirtURLs } from "../../../constants/avatarConfig";
 import { gsap } from "gsap";
 import * as THREE from 'three';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -13,10 +17,23 @@ import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
 import Toast from '../../../shared/alerts';
 import { Link } from 'react-router-dom';
+import useCarts from '../../../modules/Products/hooks/useCart';
+import useUserProfile from '../../../shared/mulletCheck';
 
 // Add to top of Avatar.js
 useGLTF.preload(Object.values(bodyTypeURLs.Boy).flat());
 useGLTF.preload(Object.values(bodyTypeURLs.Girl).flat());
+
+// Add this helper function near the top
+const getClothingCategory = (category) => {
+  const categories = {
+    tops: ['Tshirt', 'Jersey', 'Longsleeves'],
+    bottoms: ['Pants', 'Shorts', 'Skirt'],
+    footwear: ['Shoes', 'Boots']
+  };
+  return Object.entries(categories).find(([_, items]) => 
+    items.includes(category))?.[0] || 'other';
+};
 
 // Add this component near the top of your file
 const BodyTypeInfoModal = ({ isOpen, onClose }) => {
@@ -34,26 +51,53 @@ const BodyTypeInfoModal = ({ isOpen, onClose }) => {
             <i className="fas fa-times"></i>
           </button>
         </div>
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-semibold text-purple-600">XS (Petite)</h4>
-            <p className="text-gray-600">Small frame, shorter height, narrow shoulders, slim waist and hips.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-purple-600">S (Slim/Athletic)</h4>
-            <p className="text-gray-600">Lean build with slightly more muscle definition, narrow to medium shoulders, and a balanced waist-to-hip ratio.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-purple-600">M (Average/Regular)</h4>
-            <p className="text-gray-600">Well-proportioned frame, moderate muscle definition, and slightly broader shoulders compared to waist and hips.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-purple-600">L (Curvy/Broad)</h4>
-            <p className="text-gray-600">Fuller figure with broader shoulders, a more defined waist, and wider hips or chest.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold text-purple-600">XL (Fuller/Plus)</h4>
-            <p className="text-gray-600">Larger frame with a more generous proportion across the chest, waist, and hips, offering more room for comfort and movement.</p>
+
+        {/* Measurements Table */}
+        <div className="mt-6">
+          <h4 className="font-semibold  mb-3">Size Measurements</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white border border-gray-200">
+              <thead className="bg-purple-50">
+                <tr>
+                  <th className="px-4 py-2 border-b text-left text-purple-600">Size</th>
+                  <th className="px-4 py-2 border-b text-left text-purple-600">Bust</th>
+                  <th className="px-4 py-2 border-b text-left text-purple-600">Waist</th>
+                  <th className="px-4 py-2 border-b text-left text-purple-600">Hips</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">XS (Petite)</td>
+                  <td className="px-4 py-2 border-b">30-32"</td>
+                  <td className="px-4 py-2 border-b">22-24"</td>
+                  <td className="px-4 py-2 border-b">32-34"</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">S (Slim/Athletic)</td>
+                  <td className="px-4 py-2 border-b">32-34"</td>
+                  <td className="px-4 py-2 border-b">24-26"</td>
+                  <td className="px-4 py-2 border-b">34-36"</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">M (Average/Regular)</td>
+                  <td className="px-4 py-2 border-b">34-36"</td>
+                  <td className="px-4 py-2 border-b">27-29"</td>
+                  <td className="px-4 py-2 border-b">37-39"</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">L (Curvy/Broad)</td>
+                  <td className="px-4 py-2 border-b">37-40"</td>
+                  <td className="px-4 py-2 border-b">30-33"</td>
+                  <td className="px-4 py-2 border-b">40-43"</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-2 border-b">XL (Fuller/Plus)</td>
+                  <td className="px-4 py-2 border-b">41-44"</td>
+                  <td className="px-4 py-2 border-b">34-38"</td>
+                  <td className="px-4 py-2 border-b">44-48"</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -336,7 +380,6 @@ const CharacterCustomization = () => {
   const [cameraView, setCameraView] = useState('full');
   const [closetItems, setClosetItems] = useState([]);
   const [loadingCloset, setLoadingCloset] = useState(true);
-  const [selectedTexture, setSelectedTexture] = useState(null);
   const [alertConfig, setAlertConfig] = useState({
     isOpen: false,
     message: '',
@@ -347,6 +390,72 @@ const CharacterCustomization = () => {
   const [isBodyTypeInfoOpen, setIsBodyTypeInfoOpen] = useState(false);
   const [showLeftPanel, setShowLeftPanel] = useState(false);
   const [showRightPanel, setShowRightPanel] = useState(false);
+  const [selectedItems, setSelectedItems] = useState({
+    tops: null,
+    bottoms: null,
+    footwear: null
+  });
+  const [expandedCategories, setExpandedCategories] = useState({
+    tops: true,
+    bottoms: true,
+    footwear: true
+  });
+  const [addingToCart, setAddingToCart] = useState(false);
+
+  // Add cart integration hooks
+  const { addToCart } = useCarts();
+  const { profile } = useUserProfile();
+
+  const handleAddSelectedToCart = async () => {
+    if (!profile) {
+      setToast({
+        show: true,
+        message: "Please log in to add items to cart",
+        type: 'warning'
+      });
+      return;
+    }
+
+    setAddingToCart(true);
+    try {
+      // Filter out null values and create array of selected items
+      const itemsToAdd = Object.values(selectedItems).filter(item => item);
+      
+      // Add each item to cart
+      for (const item of itemsToAdd) {
+        const variantInfo = item.variant;
+        const sizeInfo = variantInfo?.sizes?.[0]; // Get first size or implement size selection
+
+        if (!sizeInfo) {
+          console.error('No size information available for item:', item);
+          continue;
+        }
+
+        await addToCart(
+          item.product.id,
+          1, // Default quantity
+          variantInfo,
+          sizeInfo
+        );
+      }
+
+      setToast({
+        show: true,
+        message: `${itemsToAdd.length} item(s) added to cart successfully!`,
+        type: 'success'
+      });
+
+    } catch (error) {
+      console.error('Error adding items to cart:', error);
+      setToast({
+        show: true,
+        message: 'Failed to add items to cart',
+        type: 'error'
+      });
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAvatar = async () => {
@@ -451,11 +560,13 @@ const CharacterCustomization = () => {
   }, []);
 
   const getTShirtURL = () => {
-    return tshirURLs[gender][selectedBodyType] || null;
+    console.log('Getting TShirt URL for:', { gender, selectedBodyType });
+    return tshirURLs[gender][selectedBodyType];
   };
 
   const getShortsURL = () => {
-    return shortsURLs[gender][selectedBodyType] || null;
+    console.log('Getting Shorts URL for:', { gender, selectedBodyType });
+    return shortsURLs[gender][selectedBodyType];
   };
 
   const handleUpdate = async (e) => {
@@ -548,7 +659,11 @@ const CharacterCustomization = () => {
   };
 
   const handleTextureSelect = (item) => {
-    setSelectedTexture(item.product.texture_3D);
+    const category = getClothingCategory(item.product?.item_Category);
+    setSelectedItems(prev => ({
+      ...prev,
+      [category]: item
+    }));
   };
 
   const handleRemoveFromCloset = async (itemId) => {
@@ -627,6 +742,64 @@ const CharacterCustomization = () => {
       });
     }
   };
+
+  const toggleCategory = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  // Update the useEffect for gender/bodyType changes
+  useEffect(() => {
+    // Only run if gender or bodyType changes
+    if (!gender || !selectedBodyType) return;
+  
+    // Get URLs for default clothing
+    const defaultTop = getTShirtURL();
+    const defaultBottom = getShortsURL();
+    console.log('Default clothing URLs:', { defaultTop, defaultBottom });
+  
+    // Update selected items while preserving existing selections
+    setSelectedItems(prev => ({
+      // Handle tops
+      tops: prev.tops ? {
+        ...prev.tops,
+        product: {
+          ...prev.tops.product,
+          // Update the URL based on new gender/bodyType
+          type3D: getModelURLForCategory(
+            prev.tops.product.item_Category,
+            gender,
+            selectedBodyType
+          )
+        },
+        key: `${gender}-${selectedBodyType}-${Date.now()}`
+      } : null,
+  
+      // Handle bottoms
+      bottoms: prev.bottoms ? {
+        ...prev.bottoms,
+        product: {
+          ...prev.bottoms.product,
+          // Update the URL based on new gender/bodyType
+          type3D: getModelURLForCategory(
+            prev.bottoms.product.item_Category,
+            gender,
+            selectedBodyType
+          )
+        },
+        key: `${gender}-${selectedBodyType}-${Date.now()}`
+      } : null,
+  
+      // Handle footwear
+      footwear: prev.footwear ? {
+        ...prev.footwear,
+        key: `${gender}-${selectedBodyType}-${Date.now()}`
+      } : null
+    }));
+  
+  }, [gender, selectedBodyType]);
 
   return (
     <>
@@ -860,6 +1033,33 @@ const CharacterCustomization = () => {
         </button>
       </div>
 
+      {/* Add after the camera control buttons */}
+      <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-10 flex gap-2">
+        <button
+          onClick={handleAddSelectedToCart}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all
+            ${Object.values(selectedItems).some(item => item) 
+              ? 'bg-purple-600 text-white hover:bg-purple-700' 
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+          disabled={!Object.values(selectedItems).some(item => item) || addingToCart}
+          title={!Object.values(selectedItems).some(item => item) ? "Select items to add to cart" : ""}
+        >
+          {addingToCart ? (
+            <>
+              <i className="fas fa-spinner fa-spin"></i>
+              Adding to Cart...
+            </>
+          ) : (
+            <>
+              <i className="fas fa-shopping-cart"></i>
+              {Object.values(selectedItems).some(item => item) 
+                ? `Add ${Object.values(selectedItems).filter(item => item).length} Item${Object.values(selectedItems).filter(item => item).length > 1 ? 's' : ''} to Cart`
+                : 'No Items Selected'}
+            </>
+          )}
+        </button>
+      </div>
+
       <Suspense fallback={
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
@@ -902,6 +1102,13 @@ const CharacterCustomization = () => {
             {/* Wrap the models in the RotatingGroup */}
             <RotatingGroup>
               <Platform />
+              {/* Avatar and Hair are always visible */}
+              <Part 
+                key={`body-${gender}-${selectedBodyType}`} 
+                url={bodyTypeURLs[gender][selectedBodyType]} 
+                position={[0, 0, 0]} 
+                color={skincolor} 
+              />
               {selectedHair && hairURLs[selectedHair] && (
                 <Part 
                   key={`hair-${selectedHair}-${haircolor}`} 
@@ -910,26 +1117,38 @@ const CharacterCustomization = () => {
                   color={haircolor} 
                 />
               )}
+
+              {/* Top Wear with combined key */}
               <Part 
-                key={`body-${gender}-${selectedBodyType}`} 
-                url={bodyTypeURLs[gender][selectedBodyType]} 
-                position={[0, 0, 0]} 
-                color={skincolor} 
+                key={`top-${gender}-${selectedBodyType}-${selectedItems.tops?.key || 'default'}-${Date.now()}`}
+                url={selectedItems.tops 
+                  ? getModelURLForCategory(selectedItems.tops.product.item_Category, gender, selectedBodyType)
+                  : getTShirtURL()
+                }
+                position={[0, 0, 0]}
+                texture={selectedItems.tops?.product.texture_3D}
+                color={!selectedItems.tops ? "#FFFFFF" : undefined}
               />
-              {getTShirtURL() && (
+
+              {/* Bottom Wear with combined key */}
+              <Part 
+                key={`bottom-${gender}-${selectedBodyType}-${selectedItems.bottoms?.key || 'default'}-${Date.now()}`}
+                url={selectedItems.bottoms
+                  ? getModelURLForCategory(selectedItems.bottoms.product.item_Category, gender, selectedBodyType)
+                  : getShortsURL()
+                }
+                position={[0, 0, 0]}
+                texture={selectedItems.bottoms?.product.texture_3D}
+                color={!selectedItems.bottoms ? "#000000" : undefined}
+              />
+
+              {/* Footwear if selected */}
+              {selectedItems.footwear && (
                 <Part 
-                  key={`tshirt-${gender}-${selectedBodyType}`} 
-                  url={getTShirtURL()} 
+                  key={`footwear-${gender}-${selectedBodyType}-${selectedItems.footwear?.key || 'default'}-${Date.now()}`}
+                  url={getModelURLForCategory(selectedItems.footwear.product.item_Category, gender, selectedBodyType)}
                   position={[0, 0, 0]}
-                  texture={selectedTexture} // Pass selected texture
-                />
-              )}
-              {getShortsURL() && (
-                <Part 
-                  key={`shorts-${gender}-${selectedBodyType}`} 
-                  url={getShortsURL()} 
-                  position={[0, 0, 0]}
-                  color="#000000"
+                  texture={selectedItems.footwear.product.texture_3D}
                 />
               )}
             </RotatingGroup>
@@ -956,17 +1175,17 @@ const CharacterCustomization = () => {
 
 
           {/* Action Buttons */}
-          <div className="flex justify-center space-x-2 p-4">
+          <div className="flex justify-center space-x-2 p-4 z-50">
             {isEditing ? (
               <>
                 <button
-                  className="p-2 w-40 bg-gray-500 text-white rounded hover:bg-gray-600 transition-all"
+                  className="p-2 w-40 bg-gray-500 text-white rounded hover:bg-gray-600 transition-all z-50"
                   onClick={handleCancel}
                 >
                   Cancel
                 </button>
                 <button
-                  className="p-2 w-40 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
+                  className="p-2 w-40 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all z-50"
                   onClick={handleUpdate}
                 >
                   Save Changes
@@ -1006,56 +1225,99 @@ const CharacterCustomization = () => {
       `}
     >
       <div className="flex-1 bg-white rounded-lg shadow-lg p-4 overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-3">My Closet</h2>
-            {loadingCloset ? (
-              <div className="flex items-center justify-center h-full">
-                <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-gray-400" />
+  <h2 className="text-lg font-semibold mb-3">My Closet</h2>
+  {loadingCloset ? (
+    <div className="flex items-center justify-center h-full">
+      <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-gray-400" />
+    </div>
+  ) : closetItems.length === 0 ? (
+    <div className="text-center text-gray-500">No items in closet</div>
+  ) : (
+    <div className="space-y-4">
+      {['tops', 'bottoms', 'footwear'].map((category) => {
+        const categoryItems = closetItems.filter(
+          item => getClothingCategory(item.product?.item_Category) === category
+        );
+
+        if (categoryItems.length === 0) return null;
+
+        return (
+          <div key={category} className="border rounded-lg overflow-hidden">
+            <button
+              onClick={() => toggleCategory(category)}
+              className="w-full flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <span className="font-semibold capitalize">{category}</span>
+                <span className="text-xs text-gray-500">({categoryItems.length})</span>
               </div>
-            ) : closetItems.length === 0 ? (
-              <div className="text-center text-gray-500">No items in closet</div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {closetItems.map((item) => (
-                  <div key={`${item.product_id}-${item.variant?.variant?.variant_Name}`}
-                    className={`relative group p-2 rounded-lg border-2 transition-all ${
-                      selectedTexture === item.product.texture_3D
-                        ? 'border-purple-600 bg-purple-50'
-                        : 'border-gray-200 hover:border-purple-300'
-                    }`}
-                  >
-                    <button
-                      onClick={() => handleTextureSelect(item)}
-                      className="w-full text-left"
+              <i className={`fas fa-chevron-${expandedCategories[category] ? 'down' : 'right'} 
+                text-gray-400 transition-transform duration-200`}
+              />
+            </button>
+
+            <div className={`transition-all duration-300 ${
+              expandedCategories[category] 
+                ? 'max-h-[1000px] opacity-100' 
+                : 'max-h-0 opacity-0 overflow-hidden'
+            }`}>
+              <div className="grid grid-cols-2 gap-3 p-3">
+                {categoryItems.map((item) => {
+                  const isSelected = selectedItems[category]?.product?.texture_3D === item.product.texture_3D;
+                  
+                  return (
+                    <div
+                      key={`${item.product_id}-${item.variant?.variant?.variant_Name}`}
+                      className={`relative group p-2 rounded-lg border-2 transition-all ${
+                        isSelected
+                          ? 'border-purple-600 bg-purple-50'
+                          : 'border-gray-200 hover:border-purple-300'
+                      }`}
                     >
-                      <img 
-                        src={item.variant?.imagePath || '/placeholder.png'} 
-                        alt={item.product?.item_Name}
-                        className="w-full h-24 object-contain mb-2"
-                      />
-                      <p className="text-xs font-medium truncate">
-                        {item.product?.item_Name}
-                      </p>
-                    </button>
-                    
-                    <div className="mt-2 flex flex-col gap-1">
                       <button
-                        onClick={() => handleViewProduct(item)}
-                        className="w-full px-2 py-1 text-xs text-center bg-purple-100 text-purple-600 rounded hover:bg-purple-200 transition-colors"
+                        onClick={() => handleTextureSelect(item)}
+                        className="w-full text-left"
                       >
-                        View Product
+                        <img 
+                          src={item.variant?.imagePath || '/placeholder.png'} 
+                          alt={item.product?.item_Name}
+                          className="w-full h-24 object-contain mb-2"
+                        />
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium truncate">
+                            {item.product?.item_Name}
+                          </p>
+                          <span className="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                            {item.product?.item_Category}
+                          </span>
+                        </div>
                       </button>
-                      <button
-                        onClick={() => handleRemoveFromCloset(item.id)}
-                        className="w-full px-2 py-1 text-xs text-center bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-                      >
-                        Remove
-                      </button>
+                      
+                      <div className="mt-2 flex flex-col gap-1">
+                        <button
+                          onClick={() => handleViewProduct(item)}
+                          className="w-full px-2 py-1 text-xs text-center bg-purple-100 text-purple-600 rounded hover:bg-purple-200 transition-colors"
+                        >
+                          View Product
+                        </button>
+                        <button
+                          onClick={() => handleRemoveFromCloset(item.id)}
+                          className="w-full px-2 py-1 text-xs text-center bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-            )}
-        </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
     </div>
   </div>
 </div>
@@ -1066,3 +1328,23 @@ const CharacterCustomization = () => {
 };
 
 export default CharacterCustomization;
+
+const getModelURLForCategory = (category, gender, bodyType) => {
+  console.log('Getting model for:', { category, gender, bodyType });
+  
+  const urlMaps = {
+    'Tshirt': tshirURLs,
+    'Jersey': jerseyURLs,
+    'Longsleeves': longsleevesURLs,
+    'Shorts': shortsURLs,
+    'Pants': pantsURLs,
+    'Skirt': skirtURLs,
+    'Shoes': footwearsURLs?.[gender]?.Shoes,
+    'Boots': footwearsURLs?.[gender]?.Boots1,
+  };
+
+  // Get the appropriate model URL based on category, gender and body type
+  const modelURL = urlMaps[category]?.[gender]?.[bodyType];
+  console.log('Selected model URL:', modelURL);
+  return modelURL;
+};
