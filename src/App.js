@@ -33,6 +33,7 @@ import { Toaster } from 'react-hot-toast';
 import ResetPassword from './shared/login/ResetPassword';
 
 import AccountSetup from './modules/Login/View/AccountSetup';
+import Chat from "./modules/Messaging/Chat";
 
 function AppContent() {
   const { profile, loadingP, errorP, isLoggedIn } = useUserProfile();
@@ -70,6 +71,7 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<HomeController />} />
               <Route path="/about" element={<AboutUs />} />
+              <Route path="/chat" element={<Chat />} />
               <Route path="/jnt/*" element={<JntController />} />
               <Route path="/guest" element={<GuestHome />} />
               <Route path="/arts/*" element={<ArtistController />} />
