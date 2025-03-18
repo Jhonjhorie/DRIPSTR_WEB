@@ -283,10 +283,10 @@ const Address = () => {
           </div>
 
           <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700">Postcode</label>
+            <label className="text-sm font-medium text-gray-700">Zip Code</label>
             <input
               type="text"
-              placeholder="Enter Postcode"
+              placeholder="Enter Zip Code"
               className="mt-1 input input-bordered bg-gray-100 w-full"
               value={isEdit ? editAddressData.postcode : newAddressData.postcode}
               onChange={(e) => {
@@ -361,7 +361,7 @@ const Address = () => {
                         <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Full Address</th>
                         <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Region</th>
                         <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">City</th>
-                        <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Postcode</th>
+                        <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Zip Code</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -396,7 +396,7 @@ const Address = () => {
                       <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Full Address</th>
                       <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Region</th>
                       <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">City</th>
-                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Postcode</th>
+                      <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-left">Zip Code</th>
                       <th className="px-6 py-3 text-xs font-semibold text-gray-600 text-center">Actions</th>
                     </tr>
                   </thead>
