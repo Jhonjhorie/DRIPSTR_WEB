@@ -5,6 +5,7 @@ import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarSolid } from "@fortawesome/free-solid-svg-icons";
 import { faStar as faStarRegular } from "@fortawesome/free-regular-svg-icons";
 import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { faSync } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../../constants/supabase";
 import useUserProfile from "@/shared/mulletCheck.js";
@@ -22,6 +23,7 @@ const Orders = () => {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const tabs = ["All", "Verifying", "To Ship", "To Receive", "To Review", "Returns & Cancellations"];
 
@@ -236,6 +238,33 @@ const Orders = () => {
     }
   };
 
+  const refreshOrders = async () => {
+    try {
+      setRefreshing(true);
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_variation,
+          order_size,
+          shop_Product:prod_num (
+            item_Name
+          )
+        `)
+        .eq('acc_num', profile.id)
+        .order('date_of_order', { ascending: false });
+  
+      if (error) throw error;
+      setOrders(data);
+      showToast('Orders refreshed successfully');
+    } catch (error) {
+      console.error('Error refreshing orders:', error);
+      showToast('Failed to refresh orders', 'error');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -249,10 +278,27 @@ const Orders = () => {
       <div className="flex-1 p-4 px-9">
         {/* Fixed Header Section */}
         <div className="flex-none">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-          <i className="fas fa-shopping-bag mr-3 text-primary-color"></i>
-          My Orders
-        </h1>          
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+              <i className="fas fa-shopping-bag mr-3 text-primary-color"></i>
+              My Orders
+            </h1>
+            <button
+              onClick={refreshOrders}
+              disabled={refreshing}
+              className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2
+                ${refreshing 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-purple-50 text-purple-600 hover:bg-purple-100'
+                }`}
+            >
+              <FontAwesomeIcon 
+                icon={faSync} 
+                className={`${refreshing ? 'animate-spin' : ''}`}
+              />
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
           {/* Navigation Tabs */}
           <div className="tabs mb-1 border-b border-gray-300 flex flex-row justify-around">
             {tabs.map((tab) => (
@@ -375,6 +421,7 @@ const Orders = () => {
                         {/* Cancel Button */}
                         {order.shipping_status !== "delivered" && 
                           order.shipping_status !== "complete" && 
+                          order.shipping_status !== "Completed" && 
                           order.shipping_status !== "To deliver" && 
                           order.shipping_status !== "cancel" &&
                           order.shipping_status !== 'To receive' &&
@@ -415,7 +462,7 @@ const Orders = () => {
                         )}
 
                         {/* Add this before the Review Button */}
-                        {(order.shipping_status === "delivered" || order.shipping_status === "Delivered") && (
+                        {(order.shipping_status === "delivered" || order.shipping_status === "Delivered" ) && (
                           <button 
                             className="text-gray-600 hover:text-green-600 px-4 py-2 rounded-md border border-gray-300 
                               hover:border-green-200 transition-all duration-300 text-sm font-medium bg-white 
@@ -433,7 +480,7 @@ const Orders = () => {
                         )}
 
                         {/* Review Button */}
-                        {(order.shipping_status === "delivered" || order.shipping_status === "Delivered" || order.shipping_status === "complete") && (
+                        {(order.shipping_status === "delivered" || order.shipping_status === "Delivered" || order.shipping_status === "complete" || order.shipping_status === "Completed") && (
                           order.is_reviewed ? (
                             <div className="flex items-center text-green-600">
                               <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
