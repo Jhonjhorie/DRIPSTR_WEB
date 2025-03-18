@@ -4,6 +4,7 @@ import logo from "../../../assets/logoBlack.png";
 import logoName from "../../../assets/logoName.png";
 import DateTime from "../Hooks/DateTime";
 import { supabase } from "../../../constants/supabase";
+import { BarChart } from "@mui/x-charts/BarChart";
 
 function PrintSales() {
   const contentRef = useRef(null);
@@ -28,78 +29,81 @@ function PrintSales() {
     const fetchOrdersByMonth = async () => {
       try {
         setLoading(true);
-  
-        const { data: userData, error: authError } = await supabase.auth.getUser();
+
+        const { data: userData, error: authError } =
+          await supabase.auth.getUser();
         if (authError) {
           console.error("Auth Error:", authError.message);
           setLoading(false);
           return;
         }
-  
+
         const user = userData?.user;
         if (!user) {
           console.error("No user is signed in.");
           setLoading(false);
           return;
         }
-  
+
         const { data: shop, error: shopError } = await supabase
           .from("shop")
           .select("id, shop_name, shop_Rating")
           .eq("owner_Id", user.id)
           .single();
-  
+
         if (shopError) {
           console.error("Error fetching shop:", shopError.message);
           setLoading(false);
           return;
         }
-  
+
         if (!shop) {
           console.warn("No shop found for this user.");
           setLoading(false);
           return;
         }
-  
+
         setShopName(shop.shop_name || "Unknown Shop");
         setShopRating(shop.shop_Rating || 0);
         const shopId = shop.id;
-  
+
         const { data: orders, error: orderError } = await supabase
           .from("orders")
           .select("id, quantity, total_price, shipping_status, date_of_order")
           .eq("shop_id", shopId)
           .order("date_of_order", { ascending: true });
-  
+
         if (orderError) {
           console.error("Error fetching orders:", orderError.message);
           setLoading(false);
           return;
         }
-  
+
         if (!orders || orders.length === 0) {
           console.warn("No orders found for this shop.");
           setMonthlyOrders([]);
           setLoading(false);
           return;
         }
-  
+
         console.log("Fetched Orders:", orders);
-  
+
         let totalIncome = 0;
         let totalOrders = 0;
         let totalCompletedOrders = 0;
         let totalReturnItems = 0;
         const dataByMonth = {};
-  
+
         orders.forEach((order) => {
           if (!order.date_of_order) return;
-  
+
           const orderDate = new Date(order.date_of_order);
           if (isNaN(orderDate)) return;
-  
-          const monthYearKey = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, "0")}`;
-  
+
+          const monthYearKey = `${orderDate.getFullYear()}-${String(
+            orderDate.getMonth() + 1
+          ).padStart(2, "0")}`;
+
           if (!dataByMonth[monthYearKey]) {
             dataByMonth[monthYearKey] = {
               totalOrders: 0,
@@ -107,32 +111,32 @@ function PrintSales() {
               totalReturns: 0,
             };
           }
-  
+
           dataByMonth[monthYearKey].totalOrders += order.quantity || 0;
-  
+
           // Count only completed orders
           if (order.shipping_status === "Completed") {
             totalCompletedOrders += order.quantity || 0;
-  
+
             // Subtract 3% from the final price for completed orders
             const discountedPrice = (order.total_price || 0) * 0.97; // Deduct 3%
             dataByMonth[monthYearKey].totalSales += discountedPrice;
             totalIncome += discountedPrice;
           }
-  
+
           if (order.shipping_status === "Returned") {
             dataByMonth[monthYearKey].totalReturns += order.quantity || 0;
             totalReturnItems += order.quantity || 0;
           }
-  
+
           totalOrders += order.quantity || 0;
         });
-  
+
         const formattedData = Object.keys(dataByMonth).map((month) => ({
           month,
           ...dataByMonth[month],
         }));
-  
+
         console.log("Formatted Monthly Data:", formattedData);
         setMonthlyOrders(formattedData);
         setTotalIncome(totalIncome);
@@ -145,12 +149,16 @@ function PrintSales() {
         setLoading(false);
       }
     };
-  
+
     fetchOrdersByMonth();
   }, []);
-  
-  
-  
+
+  // Process Data for the Bar Chart
+  const monthlyOrderLabels = monthlyOrders.map((entry) => entry.month); // Month names
+  const pData = monthlyOrders.map((entry) => entry.totalOrders); // Orders per month
+  const uData = monthlyOrders.map((entry) => entry.totalSales); // Income per month
+  const rData = monthlyOrders.map((entry) => entry.totalReturns); // Returns per month
+
   return (
     <div>
       {/* Onclick show print modal */}
@@ -163,9 +171,9 @@ function PrintSales() {
 
       {/* MODAL PRINT SALES STATISTICS */}
       <dialog id="print" className="modal h-f">
-        <div className="modal-box rounded-md bg-slate-950 glass h-[100%]">
+        <div className="modal-box rounded-md bg-slate-950  glass h-[100%]">
           {/* Main Content */}
-          <div className="h-[91%] w-full bg-slate-100 rounded-sm">
+          <div className="h-[91%] w-full overflow-hidden bg-slate-100 rounded-sm">
             <div ref={contentRef} className="p-2 h-full w-full">
               {/* Header Section */}
               <div className="flex justify-between items-center h-20 w-full p-2">
@@ -188,20 +196,77 @@ function PrintSales() {
 
               {/* Divider */}
               <div className="w-full h-0.5 rounded-full bg-custom-purple"></div>
-
+              <div className="text-xl text-center text-t">
+                {new Date().toLocaleString("en-US", { month: "long" })} report for <span className="text-custom-purple">{shopName || "N/A"}</span>
+              </div>
+              <div className="h-44">
+                <BarChart
+                  className="text-sm"
+                  series={[
+                    {
+                      data: pData,
+                      label: "Orders",
+                      id: "pvId",
+                      yAxisId: "leftAxisId",
+                    },
+                    {
+                      data: uData,
+                      label: "Income",
+                      id: "uvId",
+                      yAxisId: "rightAxisId",
+                    },
+                    {
+                      data: rData,
+                      label: "Return Items",
+                      id: "ruvId",
+                      yAxisId: "leftAxisId",
+                    },
+                  ]}
+                  xAxis={[{ scaleType: "band", data: monthlyOrderLabels }]}
+                  yAxis={[{ id: "leftAxisId" }, { id: "rightAxisId" }]}
+                  rightAxis="rightAxisId"
+                />
+              </div>
               {/* Shop Details */}
-              <div className="w-full h-72 p-5 mb-5">
+              <div className="w-full h-72 p-5 -mt-10 mb-5">
                 <div className="text-black text-sm">
                   {loading ? (
                     <p className="text-center text-lg font-bold">Loading...</p>
                   ) : (
                     <>
+                      <div className="flex gap-2 items-center">
+                        <div className="h-3 w-3 bg-green-500"></div>
+                        <div className="p-1 text-slate-950 text-sm font-semibold">
+                          Monthly Orders:{" "}
+                          <span className="font-normal">
+                            {totalOrders ?? 0}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <div className="h-3 w-3 bg-blue-500"></div>
+                        <div className="p-1 text-slate-950 text-sm font-semibold">
+                          Total Orders Completed:{" "}
+                          <span className="font-normal">
+                            {totalCompletedOrders ?? 0}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <div className="h-3 w-3 bg-violet-500"></div>
+                        <div className="p-1 text-slate-950 text-sm font-semibold ">
+                          No. of Return Items:{" "}
+                          <span className="font-normal">
+                            {totalReturnItems ?? 0}
+                          </span>
+                        </div>
+                      </div>
                       <div className="p-1 text-slate-950 text-sm font-semibold">
                         Shop Name:{" "}
                         <span className="font-normal">{shopName || "N/A"}</span>
                       </div>
                       <div className="p-1 text-slate-950 text-sm font-semibold">
-                        Ratings:{" "}
+                        Shop rating:{" "}
                         <span className="font-normal">
                           {shopRating ?? "N/A"}
                         </span>
@@ -210,16 +275,7 @@ function PrintSales() {
                         Total Income:{" "}
                         <span className="font-normal">{totalIncome ?? 0}</span>
                       </div>
-                      <div className="p-1 text-slate-950 text-sm font-semibold">
-                        Total Orders:{" "}
-                        <span className="font-normal">{totalCompletedOrders ?? 0}</span>
-                      </div>
-                      <div className="p-1 text-slate-950 text-sm font-semibold mb-3">
-                        No. of Return Items:{" "}
-                        <span className="font-normal">
-                          {totalReturnItems ?? 0}
-                        </span>
-                      </div>
+
                       <div className="p-1 text-slate-950 text-sm font-semibold">
                         Most Positive Feedback: <br />
                         <span className="font-normal">

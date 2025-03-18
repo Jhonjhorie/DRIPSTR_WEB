@@ -234,14 +234,14 @@ function MerchantDashboard() {
 
   
 
-  const [walletrevenue, setWalletData] = useState(0);
   const formatRevenue = (revenue) => {
     const amount = parseFloat(revenue) || 0;
-
+  
     return amount >= 1000
-      ? (amount / 1000).toFixed(1).replace(".0", "") + "k"
-      : amount.toLocaleString("en-PH", { minimumFractionDigits: "" });
+      ? Math.floor(amount / 1000) + "k" // Ensures 1088 becomes "1k"
+      : amount.toLocaleString("en-PH");
   };
+  
 
   const [pData, setPData] = useState([0]); // Orders data
   const [uData, setUData] = useState([0]); // Income data
@@ -253,31 +253,34 @@ function MerchantDashboard() {
   useEffect(() => {
     const fetchWalletRevenue = async () => {
       try {
-        const { data: userData, error: authError } = await supabase.auth.getUser();
-        if (authError) {
-          console.error("Authentication error:", authError.message);
-          return;
-        }
+        const userRes = await supabase.auth.getUser();
+        const user = userRes.data.user;
   
-        const user = userData.user;
         if (!user) {
           console.log("No user is signed in");
           return;
         }
   
-        // Fetch revenue from wallet_merchant
-        const { data: wallet, error: walletError } = await supabase
-          .from("merchant_Wallet")
-          .select("revenue")
+        const { data, error } = await supabase
+          .from("shop")
+          .select("wallet, merchant_Wallet(id, revenue)")
           .eq("owner_Id", user.id)
           .single();
   
-        if (walletError) {
-          console.error("Error fetching wallet revenue:", walletError.message);
+        if (error) {
+          console.error("Error fetching wallet details:", error.message);
           return;
         }
   
-        setWalletRevenue(wallet?.revenue || "0.00");
+        const walletId = data?.wallet;
+        const merchantWalletId = data?.merchant_Wallet?.id;
+        const revenue = data?.merchant_Wallet?.revenue || "0.00";
+  
+        console.log("Wallet ID:", walletId);
+        console.log("Merchant Wallet ID:", merchantWalletId);
+        console.log("Total Revenue:", revenue);
+  
+        setWalletRevenue(revenue);
       } catch (err) {
         console.error("Unexpected error:", err.message);
       }
@@ -285,6 +288,8 @@ function MerchantDashboard() {
   
     fetchWalletRevenue();
   }, []);
+  
+  
   
   
   const [topProduct, setTopProduct] = useState(null);
@@ -374,7 +379,7 @@ function MerchantDashboard() {
               >
                 {" "}
                 <span className="text-3xl">₱</span>
-                {formatRevenue(walletRevenue?.revenue || "0.00")}
+                {formatRevenue(parseFloat(walletRevenue) || 0)}
               </div>
               <div className="absolute bottom-0 md:text-[60px] text-[40px]  text-white right-3 blur-[2px] -z-10">
               <FontAwesomeIcon icon={faCoins} /> 
@@ -520,7 +525,7 @@ function MerchantDashboard() {
             </div>
           </div>
         </div>
-        <div className="bg-custom-purple rounded-md duration-300 shadow-md h-full w-full lg:w-[35%] hover:scale-95 cursor-pointer p-2 place-items-center flex justify-center ">
+        <div className="bg-custom-purple rounded-md duration-300 shadow-md h-full w-full lg:w-[35%] hover:scale-95  p-2 place-items-center flex justify-center ">
           <div className="iceland-regular text-slate-200">
             Create Design with
           </div>
