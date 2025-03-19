@@ -5,6 +5,7 @@ import { supabase } from "../../../constants/supabase";
 
 const GcashDialog = ({ onClose, order, total }) => {
   const [mascotR, setMascotR] = useState(false);
+  const [alert, setAlert] = useState(false);
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false); 
 
@@ -44,7 +45,7 @@ const GcashDialog = ({ onClose, order, total }) => {
 
   const onConfirm = async () => {
     if (!image) {
-      alert("Please provide proof of payment.");
+      setAlert(true)
       return;
     }
 
@@ -69,6 +70,7 @@ const GcashDialog = ({ onClose, order, total }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <AlertDialog emote={require("@/assets/emote/hmmm.png")} text={"please provide proof of payment"}/>
       <div className="sm:w-full max-w-[60.40rem] h-[35rem] font-[iceland]  md:mr-0 mr-8 pr-2 bg-slate-50 rounded-lg shadow-lg mx-4">
         {mascotR ? (
           <div className="flex flex-col items-center justify-center h-full w-full p-6">
