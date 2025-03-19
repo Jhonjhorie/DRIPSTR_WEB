@@ -92,7 +92,7 @@ const GcashDialog = ({ onClose, order, total }) => {
             <div className="flex-col w-full md:w-80 relative items-center flex justify-center">
               <p className="font-semibold text-2xl">Scan QR Code</p>
               <img
-                src={require("@/assets/images/gcashQR.jpg")}
+                src={require("@/assets/qr.png")}
                 alt={"Proof of Payment"}
                 className="w-full object-contain"
               />
