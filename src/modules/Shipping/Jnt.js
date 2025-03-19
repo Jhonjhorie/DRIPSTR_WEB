@@ -80,13 +80,16 @@ const Jnt = () => {
       let query;
       if (activeTable === "orders") {
         query = supabase
-          .from("orders")
-          .select(
-            `*,
-            user:acc_num (username, full_name, mobile),
-            product:prod_num (item_Name, shop:shop_Id (id, shop_name))`
-          )
-          .eq("shipping_status", status);
+        .from("orders")
+        .select(
+          `*,
+          user:acc_num (username, full_name, mobile),
+          product:prod_num (item_Name, shop:shop_Id (id, shop_name))`
+        )
+        .eq("shipping_status", status)
+        .or(
+          `payment_method.neq.Gcash, and(payment_method.eq.Gcash, payment_status.eq.Paid)`
+        );
       } else {
         query = supabase
           .from("merchant_Commission")
