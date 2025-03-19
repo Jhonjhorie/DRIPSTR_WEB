@@ -2,6 +2,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import React, { useState } from "react";
 import { supabase } from "../../../constants/supabase";
+import AlertDialog from "./alertDialog2";
 
 const GcashDialog = ({ onClose, order, total }) => {
   const [mascotR, setMascotR] = useState(false);
@@ -45,7 +46,10 @@ const GcashDialog = ({ onClose, order, total }) => {
 
   const onConfirm = async () => {
     if (!image) {
-      setAlert(true)
+       setAlert(true);
+      setTimeout(() => {
+        setAlert(false);
+      }, 3000);
       return;
     }
 
