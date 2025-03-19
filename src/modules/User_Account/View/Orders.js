@@ -106,13 +106,15 @@ const Orders = () => {
             order.shipping_status === "Delivered"|| 
             order.shipping_status === "complete"|| 
             order.shipping_status === "Complete" ||
-            order.shipping_status === "Completed") && 
-          order.refund_status !== "Approved" && 
-          order.refund_status !== "Requested")
+            order.shipping_status === "Completed" ||
+            order.cancellation_status === 'Rejected') && 
+            order.refund_status !== "Approved" && 
+            order.refund_status !== "Cancelled" && 
+            order.refund_status !== "Requested")
         );
       case "Returns & Cancellations":
         return filtered.filter(order => 
-          (order.shipping_status === "cancel" || 
+          (order.shipping_status === "cancel" || order.shipping_status === "Cancelled" || 
           order.refund_status !== "Not Requested") 
         );
       default:

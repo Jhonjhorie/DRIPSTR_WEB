@@ -83,30 +83,7 @@ function CancellationTab() {
                     .eq('id', orderId)
             ];
 
-            // 3. If payment method is Gcash, handle wallet deduction
-            if (orderData.payment_method === 'Gcash') {
-                // Get wallet data
-                const walletData = orderData.shop_id?.wallet;
-                if (!walletData || !walletData.id) {
-                    throw new Error('Wallet not found for this shop');
-                }
 
-                // Calculate 97% of total_price
-                const refundAmount = Number(orderData.total_price) * 0.97;
-
-                // Calculate new revenue
-                const newRevenue = Number(walletData.revenue) - refundAmount;
-
-                // Add wallet update to the transaction
-                updates.push(
-                    supabase
-                        .from('merchant_Wallet')
-                        .update({
-                            revenue: newRevenue,
-                        })
-                        .eq('id', walletData.id)
-                );
-            }
 
             // 4. Execute all updates atomically
             await Promise.all(updates);

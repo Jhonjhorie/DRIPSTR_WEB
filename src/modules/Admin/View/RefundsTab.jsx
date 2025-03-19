@@ -56,9 +56,8 @@ function RefundsTab() {
           total_price,
           shop_id (
             wallet (
-              id,
-              revenue
-            )
+              id
+             )
           )
         `)
         .eq('id', orderId)
@@ -71,13 +70,8 @@ function RefundsTab() {
       if (!walletData || !walletData.id) {
         throw new Error('Wallet not found for this shop');
       }
-  
-      // 3. Calculate 97% of total_price
-      const refundAmount = Number(orderData.total_price) * 0.97;
-  
-      // 4. Calculate new revenue
-      const newRevenue = Number(walletData.revenue) - refundAmount;
-  
+   
+   
       // 5. Start a transaction to update both tables atomically
       await Promise.all([
         // Update order refund status
@@ -86,18 +80,10 @@ function RefundsTab() {
           .update({ 
             refund_status: 'Approved', 
             refund_processed_at: phtTime,
-            payment_status: 'Refunded',
-            shipping_status: 'Refunded'
+            payment_status: 'Refund'
           })
           .eq('id', orderId),
-  
-        // Update shop wallet revenue
-        supabase
-          .from('merchant_Wallet')
-          .update({ 
-            revenue: newRevenue,
-          })
-          .eq('id', walletData.id)
+   
       ]);
   
       await fetchRefunds(); // Refetch data after update
