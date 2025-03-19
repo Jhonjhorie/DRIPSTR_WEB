@@ -38,22 +38,13 @@ function Orders() {
             }`}
           >
             Refunds
-          </button>
-          <button
-            onClick={() => setActiveTab('Cancellation')}
-            className={`px-4 py-2 rounded ${
-              activeTab === 'Cancellation' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'
-            }`}
-          >
-            Cancellations
-          </button>
+          </button> 
         </div>
         {/* Tab Content */}
         <div className="flex-1 flex flex-col">
           {activeTab === 'Orders' && <OrdersTab />}
           {activeTab === 'Completed' && <CompletedTab />}
           {activeTab === 'Refunds' && <RefundsTab />}
-          {activeTab === 'Cancellation' && <CancellationTab />}
         </div>
       </div>
     </div>
