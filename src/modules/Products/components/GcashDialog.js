@@ -70,7 +70,11 @@ const GcashDialog = ({ onClose, order, total }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <AlertDialog emote={require("@/assets/emote/hmmm.png")} text={"please provide proof of payment"}/>
+      {alert && (
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
+              <AlertDialog emote={require("@/assets/emote/hmmm.png")} text={"please provide proof of payment"}/>
+              </div>
+            )}
       <div className="sm:w-full max-w-[60.40rem] h-[35rem] font-[iceland]  md:mr-0 mr-8 pr-2 bg-slate-50 rounded-lg shadow-lg mx-4">
         {mascotR ? (
           <div className="flex flex-col items-center justify-center h-full w-full p-6">
