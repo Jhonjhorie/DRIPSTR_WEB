@@ -447,8 +447,8 @@ const Orders = () => {
                         )}
 
                         {/* Refund Button */}
-                        {(order.payment_status === "Paid" && 
-                          (order.shipping_status === "delivered" || order.shipping_status === "Delivered")) && order.refund_status === "Not Requested" && (
+                        {
+                          (order.shipping_status === "delivered" || order.shipping_status === "Delivered") && order.refund_status === "Not Requested" && (
                           <button 
                             className="text-gray-600 hover:text-orange-600 px-4 py-2 rounded-md border border-gray-300 
                             hover:border-orange-200 transition-all duration-300 text-sm font-medium bg-white 
