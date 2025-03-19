@@ -95,10 +95,9 @@ const Notification = () => {
   };
 
 // Handle notification click
-const handleNotificationClick = (notification) => {
-  if (notification.message && notification.message.includes('Order')) {
+const handleNotificationClick = () => {
     navigate('/account/orders');
-  }
+  
 };
 
   return (
@@ -145,7 +144,7 @@ const handleNotificationClick = (notification) => {
             <NotificationItem
               key={notification.id}
               notification={notification}
-              onClick={() => handleNotificationClick(notification)}
+              onClick={() => handleNotificationClick()}
               onUpdate={(updatedNotification) => {
                 setNotifications(notifications.map(n => 
                   n.id === updatedNotification.id ? updatedNotification : n
