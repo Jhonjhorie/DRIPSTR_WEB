@@ -66,6 +66,15 @@ const BuyConfirm = ({ item, onClose }) => {
   const handleSelectedValues = (color, size) => {
     setSelectedColor(color);
     setSelectedSize(size);
+    
+    // Update 3D preview if available
+    if (show3DView && item.is3D) {
+      // Force 3D viewer refresh
+      setShow3DView(false);
+      setTimeout(() => setShow3DView(true), 100);
+    }
+    
+    // Update image preview
     setImagePreview(color.imagePath);
   };
 
@@ -173,17 +182,17 @@ const BuyConfirm = ({ item, onClose }) => {
   const getSuggestedSize = (bodyType) => {
     const sizeMap = {
       'Petite': 'S',
-      'Slim': 'S',
+      'Slim': 'S', 
       'Average': 'M',
       'Broad': 'L',
       'PlusSize': 'XL'
     };
-    return sizeMap[bodyType] || 'M';
+    return sizeMap[bodyType] || 'M'; // Default to M if no matching body type
   };
 
   const ItemOptionsWithSuggestion = ({ item, selectedColor, selectedSize, onSelectedValuesChange }) => {
     const suggestedSize = avatarData ? getSuggestedSize(avatarData.bodytype) : null;
-
+  
     return (
       <div className="flex flex-col gap-2">
         {/* Colors */}
@@ -198,24 +207,31 @@ const BuyConfirm = ({ item, onClose }) => {
                   selectedColor.variant_Name === variant.variant_Name
                     ? 'bg-secondary-color text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                } transition-all duration-200`}
               >
-                {variant.variant_Name}
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-4 h-4 rounded-full border border-gray-300"
+                    style={{ backgroundColor: variant.variant_Name.toLowerCase() }}
+                  />
+                  {variant.variant_Name}
+                </div>
               </button>
             ))}
           </div>
         </div>
-
+  
         {/* Sizes */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm text-slate-600">
-            Sizes:
-            {suggestedSize && (
-              <span className="ml-2 text-primary-color text-xs">
-                (Suggested: {suggestedSize})
-              </span>
-            )}
-          </label>
+        <label className="text-sm text-slate-600 flex items-center">
+          Sizes:
+          {suggestedSize && (
+            <span className="ml-2 text-primary-color text-xs">
+              (Recommended: {suggestedSize})
+            </span>
+          )}
+          <SizeGuide />
+        </label>
           <div className="flex flex-wrap gap-2">
             {selectedColor?.sizes?.map((size, index) => (
               <button
@@ -228,12 +244,51 @@ const BuyConfirm = ({ item, onClose }) => {
                     : size.size === suggestedSize
                     ? 'bg-primary-color/10 border-2 border-primary-color text-primary-color'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } ${size.qty === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                } ${size.qty === 0 ? 'opacity-50 cursor-not-allowed' : ''} transition-all duration-200`}
               >
-                {size.size}
-                {size.qty === 0 && ' (Out of stock)'}
+                <div className="flex flex-col items-center">
+                  <span>{size.size}</span>
+                  <span className="text-xs opacity-75">
+                    {size.qty > 0 ? `${size.qty} left` : 'Out of stock'}
+                  </span>
+                </div>
               </button>
             ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  const SizeGuide = () => {
+    return (
+      <div className="dropdown dropdown-hover">
+        <label tabIndex={0} className="text-xs text-primary-color cursor-help ml-2">
+          Size Guide
+        </label>
+        <div tabIndex={0} className="dropdown-content z-[1] card card-compact w-64 p-2 shadow bg-white text-slate-700">
+          <div className="card-body">
+            <h3 className="font-bold text-sm">Size Recommendations</h3>
+            <table className="text-xs">
+              <tbody>
+                <tr>
+                  <td className="pr-4">Petite/Slim</td>
+                  <td>Size S</td>
+                </tr>
+                <tr>
+                  <td className="pr-4">Average</td>
+                  <td>Size M</td>
+                </tr>
+                <tr>
+                  <td className="pr-4">Broad</td>
+                  <td>Size L</td>
+                </tr>
+                <tr>
+                  <td className="pr-4">Plus Size</td>
+                  <td>Size XL</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -427,7 +482,7 @@ const BuyConfirm = ({ item, onClose }) => {
                         selectedSize={selectedSize}
                         onSelectedValuesChange={handleSelectedValues}
                       />
-                    </div>
+                     </div>
                   </div>
                 </div>
 
