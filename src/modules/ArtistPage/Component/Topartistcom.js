@@ -10,13 +10,14 @@ const Topartistcom = () => {
   const [artists, setArtists] = useState([]);
   const [filter, setFilter] = useState("All");
   const [search, setSearch] = useState("");
-  const [showAllTopArtists, setShowAllTopArtists] = useState(false);
+  const [loading, setLoading] = useState(true); // Loader state
 
   useEffect(() => {
     fetchArtistsWithLikes();
   }, []);
 
   const fetchArtistsWithLikes = async () => {
+    setLoading(true); // Start loading
     try {
       const { data: artistData, error: artistError } = await supabase
         .from("artist")
@@ -56,124 +57,138 @@ const Topartistcom = () => {
       setArtists(sortedArtists);
     } catch (err) {
       console.error("Unexpected error:", err);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
   // Search and filter
-  const filteredArtists = artists
-    .filter((artist) => {
-      const matchesFilter = filter === "All" || artist.art_Type === filter;
-      const name = artist.artist_Name ? artist.artist_Name.toLowerCase() : "";
-      const fullName = artist.full_Name ? artist.full_Name.toLowerCase() : "";
-      const matchesSearch =
-        name.includes(search.toLowerCase()) ||
-        fullName.includes(search.toLowerCase());
+  const filteredArtists = artists.filter((artist) => {
+    const matchesFilter = filter === "All" || artist.art_Type === filter;
+    const name = artist.artist_Name ? artist.artist_Name.toLowerCase() : "";
+    const fullName = artist.full_Name ? artist.full_Name.toLowerCase() : "";
+    const matchesSearch =
+      name.includes(search.toLowerCase()) ||
+      fullName.includes(search.toLowerCase());
 
-      return matchesFilter && matchesSearch;
-    })
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <div>
-      <div className="flex gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Search artists..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-1 text-slate-900 border text-sm rounded-md bg-white shadow-md cursor-pointer"
-        />
+      {/* Loader */}
+      {loading ? (
+        <div className="flex justify-center items-center h-40">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500"></div>
+        </div>
+      ) : (
+        <>
+          {/* Search and Filter */}
+          <div className="flex gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Search artists..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="px-4 py-1 text-slate-900 border text-sm rounded-md bg-white shadow-md cursor-pointer"
+            />
 
-        <select
-        className="px-4 py-1 text-slate-900 border text-sm rounded-md bg-white shadow-md cursor-pointer"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        >
-          {[
-            "All",
-            ...new Set(
-              artists.map((artist) => artist.art_Type).filter(Boolean)
-            ),
-          ].map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
+            <select
+              className="px-4 py-1 text-slate-900 border text-sm rounded-md bg-white shadow-md cursor-pointer"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              {[
+                "All",
+                ...new Set(
+                  artists.map((artist) => artist.art_Type).filter(Boolean)
+                ),
+              ].map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
 
-       
-      </div>
-
-      <div className="overflow-x-auto rounded-box md:p-5 border-base-content/5 shadow-inner shadow-slate-600 bg-base-300 border-2 border-white text-slate-900">
-        <table className="table">
-          <thead>
-            <tr className="text-black text-center text-[15px]">
-              <th>Placement</th>
-              <th>Name</th>
-              <th>Art Type</th>
-              <th>Artist Information</th>
-              <th>Likes</th>
-              <th>Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredArtists.map((artist, index) => (
-              <tr key={artist.id} className="h-10">
-                <td className="text-4xl text-slate-900 text-center font-thin opacity-75">
-                  {String(index + 1).padStart(2, "0")}
-                </td>
-                <td>
-                  <div className="flex items-center gap-3">
-                    <div className="avatar">
-                      <div className="mask mask-squircle bg-slate-100 h-12 w-12">
-                        <img
-                          src={artist.artist_Image || successEmote}
-                          alt={artist.artist_Name}
-                        />
+          {/* Artist Table */}
+          <div className="overflow-x-auto rounded-box md:p-5 border-base-content/5 shadow-inner shadow-slate-600 bg-base-300 border-2 border-white text-slate-900">
+            <table className="table">
+              <thead>
+                <tr className="text-black text-center text-[15px]">
+                  <th>Placement</th>
+                  <th>Name</th>
+                  <th>Art Type</th>
+                  <th>Artist Information</th>
+                  <th>Likes</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredArtists.map((artist, index) => (
+                  <tr key={artist.id} className="h-10">
+                    <td className="text-4xl text-slate-900 text-center font-thin opacity-75">
+                      {String(index + 1).padStart(2, "0")}
+                    </td>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="avatar">
+                          <div className="mask mask-squircle bg-slate-100 h-12 w-12">
+                            <img
+                              src={artist.artist_Image || successEmote}
+                              alt={artist.artist_Name}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-bold">{artist.artist_Name}</div>
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      <div className="font-bold">{artist.artist_Name}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="text-center w-3/4">
-                  {artist.art_Type || "N/A"}
-                  <br />
-                  <span
-                    className={`badge  ${
-                      artist.is_Premium
-                        ? "bg-yellow-500 text-sm text-black glass"
-                        : "bg-custom-purple text-sm text-white glass"
-                    }`}
-                  >
-                    {artist.is_Premium ? "Premium Artist" : "Standard Artist"}
-                  </span>
-                </td>
-                <td className="w-2/4 h-16 overflow-hidden text-ellipsis p-2 whitespace-nowrap">
-                  {artist.artist_Bio
-                    ? artist.artist_Bio.length > 50
-                      ? artist.artist_Bio.substring(0, 50) + "..."
-                      : artist.artist_Bio
-                    : "No Bio Available"}
-                </td>
-                <td className="text-center font-bold">{artist.likes}</td>
-                <td className="">
-                  <button
-                   onClick={() => {
-                    sessionStorage.setItem("previousPage", window.location.pathname); 
-                    navigate(`/arts/ArtistPage/${artist.id}`);
-                  }}
-                    className="btn btn-ghost z-20 btn-xs rounded-sm"
-                  >
-                    Details
-                  </button>
-                </td>
-              
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                    </td>
+                    <td className="text-center w-3/4">
+                      {artist.art_Type || "N/A"}
+                      <br />
+                      <span
+                        className={`badge  ${
+                          artist.is_Premium
+                            ? "bg-yellow-500 text-sm text-black glass"
+                            : "bg-custom-purple text-sm text-white glass"
+                        }`}
+                      >
+                        {artist.is_Premium
+                          ? "Premium Artist"
+                          : "Standard Artist"}
+                      </span>
+                    </td>
+                    <td className="w-2/4 h-16 overflow-hidden text-ellipsis p-2 whitespace-nowrap">
+                      {artist.artist_Bio
+                        ? artist.artist_Bio.length > 50
+                          ? artist.artist_Bio.substring(0, 50) + "..."
+                          : artist.artist_Bio
+                        : "No Bio Available"}
+                    </td>
+                    <td className="text-center font-bold">{artist.likes}</td>
+                    <td className="">
+                      <button
+                        onClick={() => {
+                          sessionStorage.setItem(
+                            "previousPage",
+                            window.location.pathname
+                          );
+                          navigate(`/arts/ArtistPage/${artist.id}`);
+                        }}
+                        className="btn btn-ghost z-20 btn-xs rounded-sm"
+                      >
+                        Details
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 };

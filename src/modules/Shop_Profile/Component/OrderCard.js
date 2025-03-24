@@ -304,13 +304,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               >
                 {loading ? "Updating..." : "Print"}
               </button>
-              {/* <button
+               <button
                 className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                 onClick={() => setIsModalOpenToPrepare(true)}
                 disabled={loading}
               >
                 {loading ? "Updating..." : "Mark as to ship"}
-              </button> */}
+              </button> 
             </div>
           </div>
         )}
@@ -325,7 +325,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               {loading ? "Updating..." : "Set to deliver"}
             </button>
           </div>
-        )} */}
+        )}  */}
         {order.shipping_status === "To receive" && (
           <button
             className="bg-blue-500 text-sm text-white justify-end px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
