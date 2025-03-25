@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/constants/supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -24,6 +24,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 // Alternative fix
 import { useNotification } from '../../utils/NotificationContext';
+import Navbar from "./Shared/Navbar";
 
 const Jnt = () => {
   const [groupedOrders, setGroupedOrders] = useState({});
@@ -34,7 +35,6 @@ const Jnt = () => {
   const [expandedOrder, setExpandedOrder] = useState(null);
   const { addNotification } = useNotification();
 
-  // Fetch counts for each status
   const fetchTabCounts = async () => {
     try {
       const counts = {};
@@ -286,41 +286,8 @@ const Jnt = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Navbar */}
-      <nav className="bg-red-600 shadow-md p-3 sticky top-0 z-10">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-bold text-white">
-            J&T Express
-          </h1>
-          <ul className="flex space-x-4">
-            <li>
-              <Link
-                to="/jnt"
-                className="text-white hover:text-red-100 font-medium text-sm"
-              >
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/jnt/track"
-                className="text-white hover:text-red-100 font-medium text-sm"
-              >
-                Track
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/jnt/detailed"
-                className="text-white hover:text-red-100 font-medium text-sm"
-              >
-                Details
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </nav>
-
+   
+<Navbar />
       {/* Table Selection Tabs */}
       <div className="container mx-auto px-2 py-3">
         <div className="flex rounded-lg overflow-hidden shadow-sm mb-4">
