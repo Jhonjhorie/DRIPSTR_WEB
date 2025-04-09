@@ -14,8 +14,8 @@ const JntController = () => {
 
       <Route element={<PrivateRoute />}>
         <Route path="/dashboard/*" element={<Jnt />} />
-        <Route path="/detailed/*" element={<JntDetailed />} />
-        <Route path="/track/*" element={<JntTrack />} />
+        {/* <Route path="/detailed/*" element={<JntDetailed />} />
+        <Route path="/track/*" element={<JntTrack />} /> */}
       </Route>
     </Routes>
   );

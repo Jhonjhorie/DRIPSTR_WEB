@@ -42,7 +42,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/express"
-                className="text-white hover:text-red-100 font-medium text-sm"
+                className="text-white hover:text-purple-100 font-medium text-sm"
               >
                 Home
               </Link>
@@ -50,7 +50,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/express/track"
-                className="text-white hover:text-red-100 font-medium text-sm"
+                className="text-white hover:text-purple-100 font-medium text-sm"
               >
                 Track
               </Link>
@@ -58,7 +58,7 @@ const Navbar = () => {
             <li>
               <Link
                 to="/express/detailed"
-                className="text-white hover:text-red-100 font-medium text-sm"
+                className="text-white hover:text-purple-100 font-medium text-sm"
               >
                 Details
               </Link>
@@ -81,7 +81,7 @@ const Navbar = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-red-600 px-4 py-2 shadow-lg">
+          <div className="md:hidden absolute top-16 left-0 right-0 bg-purple-600 px-4 py-2 shadow-lg">
             <ul className="flex flex-col space-y-3">
               <li>
                 <Link
@@ -112,7 +112,7 @@ const Navbar = () => {
               </li>
             </ul>
 
-            <div className="flex flex-col mt-4 pt-4 border-t border-red-500">
+            <div className="flex flex-col mt-4 pt-4 border-t border-purple-500">
               <span className="text-white font-medium text-sm flex gap-2 items-center py-2">
                 <FontAwesomeIcon icon={faUser} size={"sm"} /> {username}
               </span>

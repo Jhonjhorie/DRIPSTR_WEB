@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/constants/supabase";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -21,19 +21,46 @@ import {
   faChevronDown,
   faChevronUp,
   faTag,
+  faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
-// Alternative fix
-import { useNotification } from '../../utils/NotificationContext';
+import { useNotification } from "../../utils/NotificationContext";
 import Navbar from "./Shared/Navbar";
 
-const Jnt = () => {
+const ExpressDashboard = () => {
   const [groupedOrders, setGroupedOrders] = useState({});
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("To prepare");
+  const [activeTab, setActiveTab] = useState("");
   const [activeTable, setActiveTable] = useState("orders");
   const [tabCounts, setTabCounts] = useState({});
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [userRole, setUserRole] = useState("");
+  const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
   const { addNotification } = useNotification();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Check authentication and role
+    const adminToken = localStorage.getItem("adminToken");
+    const role = localStorage.getItem("role");
+    const id = localStorage.getItem("id");
+    const username = localStorage.getItem("username");
+
+    if (!adminToken) {
+      navigate("/express");
+      return;
+    }
+    setUserId(id)
+    setUserRole(role);
+    setUsername(username);
+
+    // Set default active tab based on role
+    if (role === "driver") {
+      setActiveTab("To ship");
+    } else {
+      setActiveTab("To prepare");
+    }
+  }, [navigate]);
 
   const fetchTabCounts = async () => {
     try {
@@ -47,7 +74,7 @@ const Jnt = () => {
         "returning",
         "returned",
       ];
-
+  
       for (const status of statuses) {
         let query;
         if (activeTable === "orders") {
@@ -55,41 +82,52 @@ const Jnt = () => {
             .from("orders")
             .select("*", { count: "exact", head: true })
             .eq("shipping_status", status);
+  
+          // For Driver role, filter by delivery_driver for statuses other than "To prepare" and "To ship"
+          if (userRole === "Driver" && status !== "To prepare" && status !== "To ship") {
+            query = query.eq("delivery_driver", userId);
+          }
         } else {
           query = supabase
             .from("merchant_Commission")
             .select("*", { count: "exact", head: true })
             .eq("status", status);
         }
-
+  
         const { count, error } = await query;
-
+  
         if (error) throw error;
         counts[status] = count || 0;
       }
-
+  
       setTabCounts(counts);
     } catch (error) {
       console.error("Error fetching tab counts:", error.message);
     }
   };
 
-  // Fetch orders with user and product details from Supabase
   const fetchOrders = async (status) => {
     try {
       let query;
       if (activeTable === "orders") {
         query = supabase
-        .from("orders")
-        .select(
-          `*,
+          .from("orders")
+          .select(
+            `*,
           user:acc_num (username, full_name, mobile),
-          product:prod_num (item_Name, shop:shop_Id (id, shop_name))`
-        )
-        .eq("shipping_status", status)
-        .or(
-          `payment_method.neq.Gcash, and(payment_method.eq.Gcash, payment_status.eq.Paid)`
-        );
+          product:prod_num (item_Name, shop:shop_Id (id, shop_name)),
+          driver:delivery_driver (username)
+          `
+          )
+          .eq("shipping_status", status)
+          .or(
+            `payment_method.neq.Gcash, and(payment_method.eq.Gcash, payment_status.eq.Paid)`
+          );
+  
+        // For Driver role, filter by delivery_driver for statuses other than "To prepare" and "To ship"
+        if (userRole === "Driver" && status !== "To prepare" && status !== "To ship") {
+          query = query.eq("delivery_driver", userId);
+        }
       } else {
         query = supabase
           .from("merchant_Commission")
@@ -100,14 +138,14 @@ const Jnt = () => {
           )
           .eq("status", status);
       }
-
+  
       const { data: ordersData, error: ordersError } = await query.order(
         "created_at",
         { ascending: false }
       );
-
+  
       if (ordersError) throw ordersError;
-
+  
       const grouped = ordersData.reduce((acc, order) => {
         const transactionId = order.shop_transaction_id || order.transaction_id;
         if (!acc[transactionId]) {
@@ -122,7 +160,7 @@ const Jnt = () => {
         }
         return acc;
       }, {});
-
+  
       setGroupedOrders(grouped);
     } catch (error) {
       console.error("Error fetching orders:", error.message);
@@ -133,48 +171,48 @@ const Jnt = () => {
 
   const sendOrderNotification = async (userId, status, orderId) => {
     let notificationData;
-    
+
     switch (status.toLowerCase()) {
       case "to ship":
         notificationData = {
-          type: 'info',
-          title: 'Order Picked Up',
-          message: `Order #${orderId} has been picked up and is ready for shipping.`
+          type: "info",
+          title: "Order Picked Up",
+          message: `Order #${orderId} has been picked up and is ready for shipping.`,
         };
         break;
       case "to receive":
         notificationData = {
-          type: 'info',
-          title: 'Order Out for Delivery',
-          message: `Order #${orderId} is out for delivery.`
+          type: "info",
+          title: "Order Out for Delivery",
+          message: `Order #${orderId} is out for delivery.`,
         };
         break;
       case "delivered":
         notificationData = {
-          type: 'success',
-          title: 'Order Delivered',
-          message: `Order #${orderId} has been delivered successfully.`
+          type: "success",
+          title: "Order Delivered",
+          message: `Order #${orderId} has been delivered successfully.`,
         };
         break;
       case "returning":
         notificationData = {
-          type: 'warning',
-          title: 'Order Returning',
-          message: `Order #${orderId} is being returned.`
+          type: "warning",
+          title: "Order Returning",
+          message: `Order #${orderId} is being returned.`,
         };
         break;
       case "returned":
         notificationData = {
-          type: 'info',
-          title: 'Order Returned',
-          message: `Order #${orderId} has been returned.`
+          type: "info",
+          title: "Order Returned",
+          message: `Order #${orderId} has been returned.`,
         };
         break;
       default:
         notificationData = {
-          type: 'info',
-          title: 'Order Status Updated',
-          message: `Order #${orderId} status has been updated to ${status}.`
+          type: "info",
+          title: "Order Status Updated",
+          message: `Order #${orderId} status has been updated to ${status}.`,
         };
     }
 
@@ -187,9 +225,17 @@ const Jnt = () => {
       const statusField =
         activeTable === "orders" ? "shipping_status" : "status";
 
+      // Prepare the update object
+      const updateData = { [statusField]: newStatus };
+      
+      // Add delivery_driver if conditions are met
+      if (activeTable === "orders" && userRole === "Driver" && newStatus === "To receive") {
+        updateData.delivery_driver = userId;
+      }
+
       const { error } = await supabase
         .from(table)
-        .update({ [statusField]: newStatus })
+        .update(updateData)
         .eq(
           activeTable === "orders" ? "shop_transaction_id" : "transaction_id",
           transactionId
@@ -197,7 +243,6 @@ const Jnt = () => {
 
       if (error) throw error;
 
-      // Get the order details to get user ID
       if (activeTable === "orders") {
         const { data: orderData } = await supabase
           .from("orders")
@@ -206,7 +251,11 @@ const Jnt = () => {
           .single();
 
         if (orderData?.acc_num) {
-          await sendOrderNotification(orderData.acc_num, newStatus, transactionId);
+          await sendOrderNotification(
+            orderData.acc_num,
+            newStatus,
+            transactionId
+          );
         }
       }
 
@@ -215,44 +264,80 @@ const Jnt = () => {
     } catch (error) {
       console.error("Error updating shipping status:", error.message);
       addNotification({
-        type: 'error',
-        title: 'Update Failed',
-        message: 'Failed to update order status. Please try again.'
+        type: "error",
+        title: "Update Failed",
+        message: "Failed to update order status. Please try again.",
       });
     }
   };
 
   useEffect(() => {
-    fetchOrders(activeTab);
-    fetchTabCounts();
+    if (activeTab) {
+      fetchOrders(activeTab);
+      fetchTabCounts();
+    }
   }, [activeTab, activeTable]);
 
-  const tabs = [
-    { label: "To Prepare", value: "To prepare", icon: faBoxOpen },
-    { label: "To Ship", value: "To ship", icon: faBox },
-    { label: "To Receive", value: "To receive", icon: faTruck },
-    { label: "Delivered", value: "Delivered", icon: faStore },
-    { label: "Completed", value: "Completed", icon: faCheckCircle },
-    { label: "Returning", value: "Returning", icon: faTriangleExclamation },
-    { label: "Returned", value: "Returned", icon: faBoxOpen },
-  ];
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("id");
+    localStorage.removeItem("role");
+    navigate("/express");
+  };
+
+  const getRoleTabs = () => {
+    const allTabs = [
+      { label: "To Prepare", value: "To prepare", icon: faBoxOpen },
+      { label: "To Ship", value: "To ship", icon: faBox },
+      { label: "To Receive", value: "To receive", icon: faTruck },
+      { label: "Delivered", value: "Delivered", icon: faStore },
+      { label: "Completed", value: "Completed", icon: faCheckCircle },
+      { label: "Returning", value: "Returning", icon: faTriangleExclamation },
+      { label: "Returned", value: "Returned", icon: faBoxOpen },
+    ];
+
+    if (userRole === "Driver") {
+      return allTabs.filter((tab) =>
+        [
+          "To ship",
+          "To receive",
+          "Delivered",
+          "Returning",
+          "Returned",
+        ].includes(tab.value)
+      );
+    }
+    return allTabs;
+  };
 
   const getNextStatus = (currentStatus) => {
-    switch (currentStatus) {
-      case "To prepare":
+    // For managers, only allow updating from "To prepare"
+    if (userRole === "Main Manager" || userRole === "Branch Manager") {
+      if (currentStatus === "To prepare") {
         return { nextStatus: "To ship", buttonLabel: "Picked up" };
-      case "To ship":
-        return { nextStatus: "To receive", buttonLabel: "To Deliver" };
-      case "To receive":
-        return [
-          { nextStatus: "Delivered", buttonLabel: "Delivered" },
-          { nextStatus: "To ship", buttonLabel: "Failed" },
-        ];
-      case "Returning":
-        return { nextStatus: "Returned", buttonLabel: "Returned" };
-      default:
-        return null;
+      }
+      return null;
     }
+
+    // For drivers
+    if (userRole === "Driver") {
+      switch (currentStatus) {
+        case "To ship":
+          return { nextStatus: "To receive", buttonLabel: "To Deliver" };
+        case "To receive":
+          return [
+            { nextStatus: "Delivered", buttonLabel: "Delivered" },
+            { nextStatus: "To ship", buttonLabel: "Failed" },
+          ];
+        case "Returning":
+          return { nextStatus: "Returned", buttonLabel: "Returned" };
+        default:
+          return null;
+      }
+    }
+
+    return null;
   };
 
   const toggleOrderExpansion = (transactionId) => {
@@ -272,12 +357,16 @@ const Jnt = () => {
       case "To receive":
         return "bg-amber-100 text-amber-800";
       case "delivered":
+      case "Delivered":
         return "bg-green-100 text-green-800";
       case "completed":
+      case "Completed":
         return "bg-green-100 text-green-800";
       case "returning":
+      case "Returning":
         return "bg-orange-100 text-orange-800";
       case "returned":
+      case "Returned":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -286,8 +375,34 @@ const Jnt = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-   
-<Navbar />
+      <div className="bg-purple-600 text-white shadow-md">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center">
+            <h1 className=" text-md sm:text-xl font-bold">Dripstr Express</h1>
+            {userRole && (
+              <span className="ml-1 sm:ml-3 px-1 sm:px-2 py-1 text-xs bg-purple-800 rounded-full">
+                {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <span className="text-xs sm:text-sm  text-white flex gap-2 items-center">
+              {" "}
+              <FontAwesomeIcon icon={faUser} className="" />{" "}
+              <span className=" font-bold "> {username}</span>{" "}
+              <div className="bg-white h-5 rounded w-1"></div>
+            </span>
+            <button
+              onClick={handleLogout}
+              className="flex items-center text-sm bg-purple-700 hover:bg-purple-800 px-3 py-1 rounded"
+            >
+              <FontAwesomeIcon icon={faSignOutAlt} className="mr-1" />
+              <span className="hidden sm:inline-block">Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Table Selection Tabs */}
       <div className="container mx-auto px-2 py-3">
         <div className="flex rounded-lg overflow-hidden shadow-sm mb-4">
@@ -296,7 +411,7 @@ const Jnt = () => {
             className={`flex-1 py-2 text-center text-sm font-medium transition-colors 
               ${
                 activeTable === "orders"
-                  ? "bg-red-600 text-white"
+                  ? "bg-purple-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
           >
@@ -307,7 +422,7 @@ const Jnt = () => {
             className={`flex-1 py-2 text-center text-sm font-medium transition-colors
               ${
                 activeTable === "merchant_Commission"
-                  ? "bg-red-600 text-white"
+                  ? "bg-purple-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-100"
               }`}
           >
@@ -319,14 +434,14 @@ const Jnt = () => {
       {/* Status Tabs - Horizontal Scrolling */}
       <div className="container mx-auto px-2">
         <div className="overflow-x-auto flex space-x-2 pb-2 scrollbar-hide">
-          {tabs.map((tab) => (
+          {getRoleTabs().map((tab) => (
             <button
               key={tab.value}
               onClick={() => setActiveTab(tab.value)}
               className={`px-3 py-2 whitespace-nowrap rounded-md text-xs font-medium flex items-center transition-colors
                 ${
                   activeTab === tab.value
-                    ? "bg-red-600 text-white shadow-md"
+                    ? "bg-purple-600 text-white shadow-md"
                     : "bg-white text-gray-700 hover:bg-gray-100"
                 }`}
             >
@@ -336,8 +451,8 @@ const Jnt = () => {
                 <span
                   className={`ml-1 px-1.5 py-0.5 text-xs rounded-full ${
                     activeTab === tab.value
-                      ? "bg-white text-red-600"
-                      : "bg-red-100 text-red-600"
+                      ? "bg-white text-purple-600"
+                      : "bg-purple-100 text-purple-600"
                   }`}
                 >
                   {tabCounts[tab.value]}
@@ -353,7 +468,7 @@ const Jnt = () => {
             <div className="flex justify-center items-center h-40">
               <FontAwesomeIcon
                 icon={faSpinner}
-                className="fa-spin text-2xl text-red-600"
+                className="fa-spin text-2xl text-purple-600"
               />
             </div>
           ) : Object.values(groupedOrders).length > 0 ? (
@@ -387,9 +502,7 @@ const Jnt = () => {
                                 ? "Order"
                                 : "Commission"}
                             </span>
-                            <span className="font-bold">
-                              {transactionId}
-                            </span>
+                            <span className="font-bold">{transactionId}</span>
                           </div>
                           <div className="flex items-center mt-1">
                             <span
@@ -399,6 +512,12 @@ const Jnt = () => {
                             </span>
                           </div>
                         </div>
+                        {group.driver?.username && (
+  <div className="flex items-center">
+    <span   className={`text-sm px-2 py-0.5 rounded-full bg-purple-300`}>Driver: <span className="font-bold">{group.driver.username}</span></span>
+  </div>
+)}
+                       
                         <div className="flex items-center">
                           <span className="text-sm mr-2">
                             {new Date(group.created_at).toLocaleDateString(
@@ -432,53 +551,62 @@ const Jnt = () => {
 
                       {!isExpanded && (
                         <div className="mt-1 flex justify-between items-center text-sm">
-                        <div className="flex items-center">
-                          <FontAwesomeIcon icon={faBox} className="text-gray-400 mr-2" />
-                          <span>{group.items.length} item(s)</span>
+                          <div className="flex items-center">
+                            <FontAwesomeIcon
+                              icon={faBox}
+                              className="text-gray-400 mr-2"
+                            />
+                            <span>{group.items.length} item(s)</span>
+                          </div>
+                          <div className="font-bold">
+                            {activeTable === "orders"
+                              ? `₱${group.total_price.toFixed(2)}`
+                              : `₱${group.items
+                                  .reduce(
+                                    (total, item) =>
+                                      total + (item.pricing || 0),
+                                    0
+                                  )
+                                  .toFixed(2)}`}
+                          </div>
                         </div>
-                        <div className="font-bold">
-                          {activeTable === "orders"
-                            ? `₱${group.total_price.toFixed(2)}`
-                            : `₱${group.items.reduce((total, item) => total + (item.pricing || 0), 0).toFixed(2)}`}
-                        </div>
-                     
-                          {nextStatus && (
-                            <div className="mt-3 flex justify-end space-x-2">
-                              {Array.isArray(nextStatus) ? (
-                                nextStatus.map((status) => (
-                                  <button
-                                    key={status.nextStatus}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      updateShippingStatus(
-                                        transactionId,
-                                        status.nextStatus
-                                      );
-                                    }}
-                                    className={`px-3 py-1.5 rounded-md text-xs font-medium ${
-                                      status.buttonLabel === "Failed"
-                                        ? "bg-gray-200 text-gray-700"
-                                        : "bg-red-600 text-white"
-                                    }`}
-                                  >
-                                    {status.buttonLabel}
-                                  </button>
-                                ))
-                              ) : (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    updateShippingStatus(
-                                      transactionId,
-                                      nextStatus.nextStatus
-                                    );
-                                  }}
-                                  className="px-3 py-1.5 rounded-md text-xs font-medium bg-red-600 text-white"
-                                >
-                                  {nextStatus.buttonLabel}
-                                </button>
-                              )}
-                            </div>
+                      )}
+
+                      {!isExpanded && nextStatus && (
+                        <div className="mt-3 flex justify-end space-x-2">
+                          {Array.isArray(nextStatus) ? (
+                            nextStatus.map((status) => (
+                              <button
+                                key={status.nextStatus}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  updateShippingStatus(
+                                    transactionId,
+                                    status.nextStatus
+                                  );
+                                }}
+                                className={`px-3 py-1.5 rounded-md text-xs font-medium ${
+                                  status.buttonLabel === "Failed"
+                                    ? "bg-gray-200 text-gray-700"
+                                    : "bg-purple-600 text-white"
+                                }`}
+                              >
+                                {status.buttonLabel}
+                              </button>
+                            ))
+                          ) : (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateShippingStatus(
+                                  transactionId,
+                                  nextStatus.nextStatus
+                                );
+                              }}
+                              className="px-3 py-1.5 rounded-md text-xs font-medium bg-purple-600 text-white"
+                            >
+                              {nextStatus.buttonLabel}
+                            </button>
                           )}
                         </div>
                       )}
@@ -647,7 +775,7 @@ const Jnt = () => {
                                   className={`px-3 py-1.5 rounded-md text-xs font-medium ${
                                     status.buttonLabel === "Failed"
                                       ? "bg-gray-200 text-gray-700"
-                                      : "bg-red-600 text-white"
+                                      : "bg-purple-600 text-white"
                                   }`}
                                 >
                                   {status.buttonLabel}
@@ -662,7 +790,7 @@ const Jnt = () => {
                                     nextStatus.nextStatus
                                   );
                                 }}
-                                className="px-3 py-1.5 rounded-md text-xs font-medium bg-red-600 text-white"
+                                className="px-3 py-1.5 rounded-md text-xs font-medium bg-purple-600 text-white"
                               >
                                 {nextStatus.buttonLabel}
                               </button>
@@ -692,7 +820,8 @@ const Jnt = () => {
       <footer className="bg-gray-100 py-4 border-t border-gray-200 mt-6">
         <div className="container mx-auto px-4 text-center text-sm text-gray-600">
           <p>
-            &copy; {new Date().getFullYear()} J&T Express. All rights reserved.
+            &copy; {new Date().getFullYear()} Dripstr Express. All rights
+            reserved.
           </p>
         </div>
       </footer>
@@ -700,4 +829,4 @@ const Jnt = () => {
   );
 };
 
-export default Jnt;
+export default ExpressDashboard;
