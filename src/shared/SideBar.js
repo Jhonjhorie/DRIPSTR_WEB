@@ -10,6 +10,7 @@ import {
   faPalette,
   faPaintBrush,
   faDownload,
+  faShop,
 } from "@fortawesome/free-solid-svg-icons";
 import AuthModal from "./login/Auth";
 import { useNotification } from '../utils/NotificationContext';
@@ -79,7 +80,7 @@ const SideBar = () => {
     { label: "DripMall", path: "/mall", icon: faStore },
 
     ...(user ? [{ label: "Notification", path: "/notification", icon: faBell, badge: unreadCount }] : []),   
-    ...(isMerchant ? [{ label: "Shop", path: "/shop/MerchantDashboard", icon: faStore }] : []),
+    ...(isMerchant ? [{ label: "Shop", path: "/shop/MerchantDashboard", icon: faShop }] : []),
     ...(isArtist ? [{ label: "Artist", path: "/shop/Artist/ArtistDashboard", icon: faPaintBrush }] : []),
     { label: user ? "Account" : "Login/SignIn", path: user ? "/account" : "#", icon: faUser, onClick: handleAccountClick, },
   ];

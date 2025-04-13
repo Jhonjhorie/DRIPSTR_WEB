@@ -12,7 +12,7 @@ import { useParams } from "react-router-dom";
 import FormCommision from "../Component/FormCommission";
 import History from "../Component/History";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCrown, faMessage, faUserPlus, faLeftLong, faShieldHalved, faHeart, faFileImage, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faCrown, faMessage, faUserPlus, faLeftLong, faShieldHalved, faHeart, faFileImage, faPaperPlane, faFileDownload, faDownload } from "@fortawesome/free-solid-svg-icons";
 
 const { useState, useEffect } = React;
 
@@ -786,6 +786,26 @@ function ArtistPage() {
     fetchMessages();
   }, [currentUser?.id, artist?.id]);
   countArtists();
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [imageToSave, setImageToSave] = useState(null);
+  
+  const handleSaveImageAsFile = (imageUrl) => {
+    // Create an anchor element
+    const link = document.createElement("a");
+    link.href = imageUrl;
+  
+    // Set the download attribute with a default filename
+    const fileName = `drpimage_${Date.now()}.png`; // Customize the extension based on the image type
+    link.download = fileName;
+  
+    // Append the anchor to the document body and trigger a click
+    document.body.appendChild(link);
+    link.click();
+  
+    // Remove the anchor from the document
+    document.body.removeChild(link);
+  };
+
 
   if (!artist)
     return (
@@ -1512,13 +1532,26 @@ function ArtistPage() {
                     >
                       {message.text}
                       {message.send_file && (
-                        <div className="mt-2">
+                        <div className="mt-2 relative">
+                          {/* Image */}
                           <img
                             src={message.send_file}
                             alt="Attached"
                             className="min-w-[5rem] min-h-[5rem] object-cover rounded"
                             onClick={() => setSelectedImage(message.send_file)}
                           />
+                          {/* Download Icon */}
+                          <a
+                            onClick={() => {
+                              setImageToSave(message.send_file);
+                              setShowSaveModal(true);
+                            }}
+                            download="drpimage"
+                            className="absolute top-2 right-2 text-white px-2 p-1 rounded hover:bg-violet-500 transition"
+                            title="Download Image"
+                          >
+                            <FontAwesomeIcon icon={faDownload} />
+                          </a>
                         </div>
                       )}
                     </div>
@@ -1659,6 +1692,31 @@ function ArtistPage() {
           </div>
         </div>
       )}
+      {showSaveModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+    <div className="bg-white p-5 rounded-md shadow-md">
+      <h2 className="text-lg font-bold mb-4">Save Image</h2>
+      <p>Do you want to save this image to your computer?</p>
+      <div className="flex justify-end mt-4 gap-2">
+        <button
+          onClick={() => setShowSaveModal(false)}
+          className="px-4 text-sm py-2 bg-gray-300 rounded hover:bg-gray-400"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => {
+            handleSaveImageAsFile(imageToSave);
+            setShowSaveModal(false);
+          }}
+          className="px-4 text-sm py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
