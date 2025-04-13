@@ -285,7 +285,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
       {/* Buttons */}
       <div className=" mt-4">
-        {order.shipping_status === "To prepare" && (
+        {order.shipping_status === "Preparing" && (
           <div className="flex gap-2 w-full justify-between">
             <div>
               <button
@@ -309,7 +309,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 onClick={() => setIsModalOpenToPrepare(true)}
                 disabled={loading}
               >
-                {loading ? "Updating..." : "Mark as to ship"}
+                {loading ? "Updating..." : "Mark as Ready to Deliver"}
               </button> 
             </div>
           </div>
