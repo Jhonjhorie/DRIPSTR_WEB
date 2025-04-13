@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/constants/supabase";
+import Navbar from "./Shared/Navbar";
 
 const JntDetailed = () => {
   const [shipments, setShipments] = useState([]);
@@ -92,27 +93,7 @@ const JntDetailed = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen text-gray-900">
-      {/* Navbar */}
-      <nav className="bg-red-600 shadow-md p-4 flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-white">J&T Express</h1>
-        <ul className="flex space-x-6">
-          <li>
-            <Link to="/jnt" className="text-white font-semibold hover:underline">
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link to="/jnt/track" className="text-white font-semibold hover:underline">
-              Track a Shipment
-            </Link>
-          </li>
-          <li>
-            <Link to="/jnt/detailed" className="text-white font-semibold hover:underline">
-              Detailed List
-            </Link>
-          </li>
-        </ul>
-      </nav>
+    <Navbar />
 
       {/* Table Selection Tabs */}
       <div className="container mx-auto px-2 py-4">
