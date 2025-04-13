@@ -7,26 +7,22 @@ function SalesStatistics() {
   const [dates, setDates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [timePeriod, setTimePeriod] = useState("daily"); // Default to daily
+  const [timePeriod, setTimePeriod] = useState("daily");
 
   useEffect(() => {
     const fetchSalesData = async () => {
       try {
         setLoading(true);
-
-        // Fetch orders data
         const { data: ordersData, error: ordersError } = await supabase
           .from("orders")
           .select("total_price, date_of_order")
           .order("date_of_order", { ascending: true });
 
-        // Fetch artist subscription data
         const { data: artistData, error: artistError } = await supabase
           .from("artist_Subscription")
           .select("amount, created_at")
           .order("created_at", { ascending: true });
 
-        // Fetch merchant subscription data (no amount, just status and created_at)
         const { data: merchantData, error: merchantError } = await supabase
           .from("merchant_Subscription")
           .select("created_at, status")
@@ -36,39 +32,30 @@ function SalesStatistics() {
         if (artistError) throw artistError;
         if (merchantError) throw merchantError;
 
-        // Process data based on selected time period
         const aggregatedSales = {};
-
-        // Process orders (3% of total_price)
         ordersData.forEach((order) => {
           const date = new Date(order.date_of_order);
           const key = getDateKey(date, timePeriod);
-          const adjustedPrice = order.total_price * 0.03; // 3% of total_price
-
+          const adjustedPrice = order.total_price * 0.03;
           if (!aggregatedSales[key]) aggregatedSales[key] = 0;
           aggregatedSales[key] += adjustedPrice;
         });
 
-        // Process artist subscriptions (amount as is)
         artistData.forEach((subscription) => {
           const date = new Date(subscription.created_at);
           const key = getDateKey(date, timePeriod);
-
           if (!aggregatedSales[key]) aggregatedSales[key] = 0;
           aggregatedSales[key] += subscription.amount;
         });
 
-        // Process merchant subscriptions (500 if status = "Completed", 0 otherwise)
         merchantData.forEach((subscription) => {
           const date = new Date(subscription.created_at);
           const key = getDateKey(date, timePeriod);
           const valueToAdd = subscription.status === "Completed" ? 500 : 0;
-
           if (!aggregatedSales[key]) aggregatedSales[key] = 0;
           aggregatedSales[key] += valueToAdd;
         });
 
-        // Sort dates chronologically
         const sortedDates = Object.keys(aggregatedSales).sort((a, b) => new Date(a) - new Date(b));
         const sortedSales = sortedDates.map((date) => aggregatedSales[date]);
 
@@ -82,9 +69,8 @@ function SalesStatistics() {
     };
 
     fetchSalesData();
-  }, [timePeriod]); // Re-fetch when timePeriod changes
+  }, [timePeriod]);
 
-  // Helper function to format date keys based on time period
   const getDateKey = (date, period) => {
     switch (period) {
       case "daily":
@@ -102,8 +88,17 @@ function SalesStatistics() {
     }
   };
 
-  // Custom formatter for currency with ₱ and .0
   const formatCurrency = (value) => `₱${value.toFixed(1)}`;
+
+  // Custom tooltip formatter for monthly view
+  const customValueFormatter = (value, context) => {
+    const totalSales = value;
+    if (timePeriod === "monthly") {
+      const profitAfterTax = totalSales * 0.8; // Total sales - 20%
+      return `Total Sales: ${formatCurrency(totalSales)}\nProfit After Tax: ${formatCurrency(profitAfterTax)}`;
+    }
+    return `Total Sales: ${formatCurrency(totalSales)}`;
+  };
 
   const handleTimePeriodChange = (event) => {
     setTimePeriod(event.target.value);
@@ -148,7 +143,7 @@ function SalesStatistics() {
               label: "Total Sales",
               id: "salesId",
               yAxisId: "salesAxisId",
-              valueFormatter: formatCurrency, // Format tooltips
+              valueFormatter: customValueFormatter, // Use custom formatter
             },
           ]}
           xAxis={[
@@ -160,11 +155,12 @@ function SalesStatistics() {
           yAxis={[
             {
               id: "salesAxisId",
-              valueFormatter: formatCurrency, // Format y-axis labels
+              valueFormatter: formatCurrency,
             },
           ]}
           height={300}
           margin={{ top: 20, right: 20, bottom: 40, left: 60 }}
+          tooltip={{ trigger: "item" }} // Ensure tooltip is triggered per bar
         />
       </div>
     </div>
