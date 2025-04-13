@@ -3,7 +3,7 @@ import { supabase } from "@/constants/supabase";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../../../../assets/logoName.png";
 import { ArrowDownCircleIcon } from "@heroicons/react/16/solid";
-import { faDashboard, faMoneyBill, faShoppingBag, faImages, faTag, faShop, faUserTie, faPalette, faCircleUser, faExclamationCircle, faHamburger, faBars, faGear, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import { faDashboard, faMoneyBill, faShoppingBag, faImages, faTag, faShop, faUserTie, faPalette, faCircleUser, faExclamationCircle, faHamburger, faBars, faGear, faRightFromBracket, faTruckFast } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function Sidebar() {
@@ -62,7 +62,7 @@ function Sidebar() {
   );
 
   return (
-    <div className="flex gap-0 w-max">
+    <div className="flex gap-0  w-max">
       <button
         onClick={toggleSidebar}
         className="flex mt-10 h-9 lg:hidden duration-500 p-2 m-2 text-white rounded-md focus:outline-none hover:bg-gray-800"
@@ -75,7 +75,7 @@ function Sidebar() {
         className={`${isSidebarOpen ? "block" : "hidden"}
           lg:block flex flex-col h-screen w-full max-w-[13rem] transition-all duration-500 text-lg p-4 text-white`}
       >
-        <nav className="flex flex-col gap-5 p-2 text-white">
+        <nav className="flex flex-col gap-3 p-2 text-white">
           <SidebarItem
             icon={
               <FontAwesomeIcon icon={faDashboard} className="w-5 h-5" />
@@ -166,17 +166,17 @@ function Sidebar() {
             </div>
 
             {isUsersDropdownOpen && (
-              <div className="ml-6 mt-2 flex flex-col gap-2">
+              <div className="ml-6 mt-2 flex flex-col gap-1">
                 <SidebarItem
                   icon={
-                    <FontAwesomeIcon icon={faShop} className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faShop} className="w-4 h-4" />
                   }
                   label="Merchants"
                   to="/admin/merchants"
                 />
                 <SidebarItem
                   icon={
-                    <FontAwesomeIcon icon={faPalette} className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faPalette} className="w-4 h-4" />
                   }
                   label="Artists"
                   to="/admin/artists"
@@ -184,10 +184,19 @@ function Sidebar() {
                 {isChief && (
                   <SidebarItem
                     icon={
-                      <FontAwesomeIcon icon={faUserTie} className="w-5 h-5" />
+                      <FontAwesomeIcon icon={faUserTie} className="w-4 h-4" />
                     }
                     label="Admins"
                     to="/admin/admins"
+                  />
+                )}   
+                {isChief && (
+                  <SidebarItem
+                    icon={
+                      <FontAwesomeIcon icon={faTruckFast} className="w-4 h-4" />
+                    }
+                    label="Express"
+                    to="/admin/express"
                   />
                 )}
               </div>

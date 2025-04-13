@@ -14,6 +14,7 @@ import {
   faMapMarker,
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
+import Navbar from "./Shared/Navbar";
 
 const JntTrack = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,27 +88,7 @@ const JntTrack = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      {/* Navbar */}
-      <nav className="bg-red-600 shadow-md p-4 flex justify-between items-center">
-        <h1 className="text-xl md:text-2xl font-bold text-white">J&T Express</h1>
-        <ul className="flex space-x-4">
-          <li>
-            <Link to="/jnt" className="text-white hover:text-red-100 font-medium text-sm">
-              Home
-            </Link>
-          </li>
-          <li>
-            <Link to="/jnt/track" className="text-white hover:text-red-100 font-medium text-sm">
-              Track
-            </Link>
-          </li>
-          <li>
-            <Link to="/jnt/detailed" className="text-white hover:text-red-100 font-medium text-sm">
-              Details
-            </Link>
-          </li>
-        </ul>
-      </nav>
+   <Navbar />
 
       {/* Search Section */}
       <div className="container mx-auto px-4 py-6">

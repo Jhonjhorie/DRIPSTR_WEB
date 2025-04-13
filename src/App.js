@@ -13,7 +13,7 @@ import ArtistController from "./modules/ArtistPage/Controller/Artists_Controller
 import Search from "./modules/Products/Search";
 import GuestHome from "./modules/Home/GuestHome";
 import Mall from "./modules/Products/Mall";
-import JntController from "./modules/Shipping/Jnt_Controller";
+import JntController from "./modules/Shipping/Controller/Express_Controller";
 
 // Data
 import useUserProfile from "@/shared/mulletCheck";
@@ -41,7 +41,7 @@ function AppContent() {
   const location = useLocation();
 
   // Add account-setup to the routes that shouldn't show header/sidebar
-  const isJnt = location.pathname === "/jnt" || location.pathname === "/jnt/track" || location.pathname === "/download_studio" || location.pathname === "/jnt/detailed";
+  const isJnt = location.pathname === "/express" || location.pathname === "/express/dashboard" || location.pathname === "/express/track" || location.pathname === "/download_studio" || location.pathname === "/express/detailed";
   const isAccountSetup = location.pathname === "/account-setup";
   const hideHeaderAndSidebar = isJnt || isAccountSetup;
 
@@ -74,7 +74,7 @@ function AppContent() {
               <Route path="/download_studio" element={<DownloadStudioP />} />
               <Route path="/about" element={<AboutUs />} />
               <Route path="/chat" element={<Chat />} />
-              <Route path="/jnt/*" element={<JntController />} />
+              <Route path="/express/*" element={<JntController />} />
               <Route path="/guest" element={<GuestHome />} />
               <Route path="/arts/*" element={<ArtistController />} />
               <Route path="/product/*" element={<ProductController />} />
