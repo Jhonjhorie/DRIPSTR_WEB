@@ -2,16 +2,19 @@ import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/constants/supabase";
 import { useReactToPrint } from "react-to-print";
 import Logo from "../../../assets/logoName.png";
+
 const OrderCard = ({ order, refreshOrders, setOrders }) => {
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); //Print order report
+  const [isModalOpen, setIsModalOpen] = useState(false); // Print order report
   const [shopData, setShopData] = useState([]);
   const [isModalOpenToDeliver, setIsModalOpenToDeliver] = useState(false);
-  const [isModalOpenToProcess, setIsModalOpenToProcess] = useState(false);
   const [isModalOpenToPrepare, setIsModalOpenToPrepare] = useState(false);
   const [isModalOpenToCancel, setIsModalOpenToCancel] = useState(false);
   const [openDeliveryInfo, setOpenDeliveryInfo] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [subBranches, setSubBranches] = useState([]);
+  const [selectedSubBranch, setSelectedSubBranch] = useState("");
+  const [shopLVM, setShopLVM] = useState("");
 
   useEffect(() => {
     const fetchShop = async () => {
@@ -42,7 +45,49 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
   }, []);
 
   useEffect(() => {
-    // Add this console log to debug
+    const fetchSubBranchesAndLVM = async () => {
+      try {
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) {
+          console.error("Error fetching user:", userError);
+          return;
+        }
+
+        const { data: shopData, error: shopError } = await supabase
+          .from("shop")
+          .select("lvm")
+          .eq("owner_Id", userData.user.id)
+          .single();
+
+        if (shopError) {
+          console.error("Error fetching shop LVM:", shopError.message);
+          return;
+        }
+
+        setShopLVM(shopData.lvm);
+
+        // Fetch sub-branches where role is "Main Manager"
+        const { data: branches, error: branchError } = await supabase
+          .from("express_admins")
+          .select("sub_branch")
+          .eq("lvm", shopData.lvm)
+          .eq("role", "Branch Manager");
+
+        if (branchError) {
+          console.error("Error fetching sub-branches:", branchError.message);
+          return;
+        }
+
+        setSubBranches(branches.map((branch) => branch.sub_branch));
+      } catch (err) {
+        console.error("Unexpected error:", err.message);
+      }
+    };
+
+    fetchSubBranchesAndLVM();
+  }, []);
+
+  useEffect(() => {
     console.log("Order data:", {
       isCustomizable: order.shop_Product?.isCustomizable,
       customizable_note: order.customizable_note,
@@ -78,23 +123,29 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
     }
   };
 
-  //print the div content serves as a handout copy
   const contentRef = useRef(null);
   const handlePrint = useReactToPrint({ contentRef });
 
-  //modal for confirmation
-  // const handleProcess = () => {
-  //   updateOrderStatus(order.id, "To prepare");
-  //   setIsModalOpenToProcess(false);
-  // };
-  const handlePrepare = () => {
-    updateOrderStatus(order.id, "To ship");
-    setIsModalOpenToPrepare(false);
+  const handlePrepare = async () => {
+    if (!selectedSubBranch) {
+      alert("Please select a sub-branch.");
+      return;
+    }
+
+    try {
+      await updateOrderStatus(order.id, "To prepare");
+      console.log(`Order assigned to sub-branch: ${selectedSubBranch}`);
+      setIsModalOpenToPrepare(false);
+    } catch (err) {
+      console.error("Error preparing order:", err.message);
+    }
   };
+
   const handleConfirm = () => {
     updateOrderStatus(order.id, "To ship");
     setIsModalOpenToDeliver(false);
   };
+
   const handleCancel = () => {
     updateOrderStatus(order.id, "Cancel");
     setIsModalOpenToCancel(false);
@@ -122,10 +173,8 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
             : "bg-white"
         }`}
     >
-      {/* <div className="w-full bg-gradient-to-r top-0 absolute left-0 from-violet-500 to-fuchsia-500 h-1 rounded-t-md "></div> */}
       <h2 className="text-lg font-bold text-slate-900">Order #{order.id}</h2>
       <div className="w-full md:flex gap-2">
-        {/* Product Details */}
         <div className="w-full h-auto">
           <div className="md:flex gap-4 mt-3">
             <div className="p-1 rounded-md place-self-center shadow-md h-36 w-40 bg-slate-800">
@@ -170,19 +219,16 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   </p>
                 </div>
               )}
-    
- 
-{order.shop_Product?.isCustomizable && (
-  <div>
-    <p className="text-sm text-slate-700">
-      Customization Note:{" "}
-      <span className="font-medium">
-        {order.customizable_note || "No customization note provided"}
-      </span>
-    </p>
-  </div>
-)}
-
+              {order.shop_Product?.isCustomizable && (
+                <div>
+                  <p className="text-sm text-slate-700">
+                    Customization Note:{" "}
+                    <span className="font-medium">
+                      {order.customizable_note || "No customization note provided"}
+                    </span>
+                  </p>
+                </div>
+              )}
               {order.shipping_status === "To prepare" && (
                 <div>
                   <p className="text-sm text-slate-700">
@@ -283,9 +329,8 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         </div>
       </div>
 
-      {/* Buttons */}
       <div className=" mt-4">
-        {order.shipping_status === "To prepare" && (
+        {order.shipping_status === "Preparing" && (
           <div className="flex gap-2 w-full justify-between">
             <div>
               <button
@@ -304,28 +349,16 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               >
                 {loading ? "Updating..." : "Print"}
               </button>
-              {/* <button
+              <button
                 className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
                 onClick={() => setIsModalOpenToPrepare(true)}
                 disabled={loading}
               >
-                {loading ? "Updating..." : "Mark as to ship"}
-              </button> */}
+                {loading ? "Updating..." : "Mark as Ready to Deliver"}
+              </button>
             </div>
           </div>
         )}
-        {/* {order.shipping_status === "To ship" && (
-          <div className="flex gap-2">
-      
-            <button
-              className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-              onClick={() => setIsModalOpenToDeliver(true)}
-              disabled={loading}
-            >
-              {loading ? "Updating..." : "Set to deliver"}
-            </button>
-          </div>
-        )} */}
         {order.shipping_status === "To receive" && (
           <button
             className="bg-blue-500 text-sm text-white justify-end px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
@@ -337,7 +370,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         )}
       </div>
 
-      {/* Modal Print Report */}
       {isModalOpen && (
         <dialog
           id="print"
@@ -348,7 +380,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
               ref={contentRef}
               className="max-w-md mx-auto bg-white shadow-lg border border-gray-300 px-5 py-4 rounded-lg"
             >
-              {/* Header */}
               <div className="text-center border-b pb-4">
                 <div className=" h-7 justify-items-center ">
                   <img
@@ -363,7 +394,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 </p>
               </div>
 
-              {/* Product Section */}
               <div className="flex gap-4 mt-4">
                 <div className="flex-1">
                   <p className="text-sm text-slate-800">
@@ -389,16 +419,8 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                     <strong>Address:</strong> {shopData?.address || "N/A"}
                   </p>
                 </div>
-                {/* <div className="p-1 rounded-md shadow-md h-36 w-36 bg-slate-800">
-                  <img
-                    src={order.variantImg || "placeholder.jpg"}
-                    alt={order.variantName || "Product Image"}
-                    className="h-full w-full object-cover rounded-md"
-                  />
-                </div> */}
               </div>
 
-              {/* Shipping Details */}
               <div className="mt-4 border-t pt-4">
                 <h3 className="text-md font-semibold text-slate-900">
                   Shipping Details
@@ -416,7 +438,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 </p>
               </div>
 
-              {/* Pricing Summary */}
               <div className="mt-4 border-t pt-4">
                 <h3 className="text-md font-semibold text-slate-900">
                   Order Summary
@@ -439,7 +460,6 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 </div>
               </div>
 
-              {/* Footer */}
               <div className="text-center text-xs text-gray-500 mt-4 border-t pt-2">
                 <p>Thank you for shopping with Dripstr!</p>
               </div>
@@ -493,55 +513,46 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           </div>
         </div>
       )}
-      {/* {isModalOpenToProcess && (
-        <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg text-slate-900 font-semibold">
-              Confirm to prepare
-            </p>
-            <p className="text-sm text-gray-800">
-              Are you sure you want to set this order to "To prepare"?
-            </p>
 
-            <div className="mt-4 flex justify-between space-x-2">
-              <button
-                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
-                onClick={() => setIsModalOpenToProcess(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
-                onClick={handleProcess}
-              >
-                Confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
       {isModalOpenToPrepare && (
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
-              Confirm to ship{" "}
-              <span className="text-custom-purple">
-                {order.productName || "N/A"}
-              </span>
+              Assign Branch for Order{" "}
+              <span className="text-custom-purple">{order.productName || "N/A"}</span>
             </p>
             <p className="text-sm text-gray-800">
-              Are you sure you want to set this order to "To ship"?
+              Select a branch to assign this order for delivery.
             </p>
+
+            <div className="mt-4">
+              <label htmlFor="sub-branch" className="block text-sm font-medium text-gray-700">
+                Select a Dripstr express branches near you 
+              </label>
+              <select
+                id="sub-branch"
+                className="mt-1 block w-full bg-white p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                value={selectedSubBranch}
+                onChange={(e) => setSelectedSubBranch(e.target.value)}
+              >
+                <option value="">Select a sub-branch</option>
+                {subBranches.map((branch, index) => (
+                  <option key={index} value={branch}>
+                    {branch}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="mt-4 flex justify-between space-x-2">
               <button
-                className="bg-gray-300 px-4 py-2  text-sm text-slate-900 rounded hover:bg-gray-400"
+                className="bg-gray-300 px-4 py-2 text-sm text-slate-900 rounded hover:bg-gray-400"
                 onClick={() => setIsModalOpenToPrepare(false)}
               >
                 Cancel
               </button>
               <button
-                className="bg-blue-500  text-sm text-slate-900 px-4 py-2 rounded hover:bg-blue-700"
+                className="bg-blue-500 text-sm text-white px-4 py-2 rounded hover:bg-blue-700"
                 onClick={handlePrepare}
               >
                 Confirm
@@ -550,6 +561,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           </div>
         </div>
       )}
+
       {isModalOpenToCancel && (
         <div className="fixed inset-0 z-10 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-4 rounded-lg shadow-lg">
@@ -580,6 +592,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           </div>
         </div>
       )}
+
       {openDeliveryInfo && selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50  px-4">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md transform transition-all scale-100">

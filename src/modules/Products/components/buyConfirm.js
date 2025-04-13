@@ -347,7 +347,10 @@ const BuyConfirm = ({ item, onClose }) => {
                       onClose={() => setShow3DView(false)}
                       className="w-full h-full"
                       selectedColor={selectedColor}
-                      productData={item}
+                      productData={{
+                        ...item,
+                        selectedSize: selectedSize // Pass the selected size
+                      }}
                     />
                     <div className="absolute top-4 right-4 flex items-center gap-2">
                       {item.is3D && (

@@ -15,6 +15,7 @@ import {
   faCheckCircle,
   faBoxOpen,
   faBan,
+  faStore,
 } from "@fortawesome/free-solid-svg-icons";
 
 function Orders({ shopOwnerId }) {
@@ -84,6 +85,7 @@ function Orders({ shopOwnerId }) {
   //setting order status
   const [orders, setOrders] = useState({
     preparing: [],
+    toprepare: [],
     ship: [],
     receive: [],
     shipped: [],
@@ -180,6 +182,7 @@ function Orders({ shopOwnerId }) {
       // Process orders and categorize them by status
       const categorizedOrders = {
         preparing: [],
+        toprepare: [],
         ship: [],
         receive: [],
         shipped: [],
@@ -218,8 +221,10 @@ function Orders({ shopOwnerId }) {
         };
 
         // Add to appropriate category based on shipping_status
-        if (order.shipping_status === "To prepare") {
+        if (order.shipping_status === "Preparing") {
           categorizedOrders.preparing.push(enrichedOrder);
+        } else if (order.shipping_status === "To prepare") {
+          categorizedOrders.toprepare.push(enrichedOrder);
         } else if (order.shipping_status === "To ship") {
           categorizedOrders.ship.push(enrichedOrder);
         } else if (order.shipping_status === "Delivered") {
@@ -274,11 +279,17 @@ function Orders({ shopOwnerId }) {
                   <span className="text-sm md:text-lg">  <FontAwesomeIcon icon={faBoxOpen} />{" "}Preparing</span>
                 </li>
                 <li
+                  className={activeTab === "toprepare" ? "active-tab" : ""}
+                  onClick={() => {setActiveTab("toprepare"); fetchOrdersForMerchant(); }}
+                > 
+                  <span className="text-sm md:text-lg"> <FontAwesomeIcon icon={faStore} />{" "}In shipment</span>
+                </li>
+                {/* <li
                   className={activeTab === "ship" ? "active-tab" : ""}
                   onClick={() => {setActiveTab("ship"); fetchOrdersForMerchant(); }}
                 > 
                   <span className="text-sm md:text-lg"> <FontAwesomeIcon icon={faBox} />{" "}To ship</span>
-                </li>
+                </li> */}
                 <li
                   className={activeTab === "receive" ? "active-tab" : ""}
                   onClick={() => {setActiveTab("receive"); fetchOrdersForMerchant();}}
@@ -357,6 +368,27 @@ function Orders({ shopOwnerId }) {
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+              {activeTab === "toprepare" && (
+                <div className="pb-5">
+                  <h2 className="text-xl text-custom-purple font-bold mb-4">
+                    To ship Orders
+                  </h2>
+                  {orders.ship.length > 0 ? (
+                    orders.ship.map((order) => (
+                      <OrderCard
+                        key={order.id}
+                        order={order}
+                        refreshOrders={refreshOrders}
+                      />
+                    ))
+                  ) : (
+                    <div className="justify-items-center mt-28">
+                      <img src={hmmmEmote} className="h-20 " />
+                      <div className="text-slate-800">No to prepare orders.</div>
+                    </div>
+                  )}
                 </div>
               )}
               {activeTab === "ship" && (
