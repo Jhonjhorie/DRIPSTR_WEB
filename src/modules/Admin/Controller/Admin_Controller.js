@@ -19,9 +19,10 @@ import Commisions from "../View/Commisions";
 import Arts from "../View/Arts";
 import Management from "../View/Management";
 import Subscriptions from "../View/Subscriptions";
+import ExpressAdmins from "../View/ExpressAdmins";
 const AdminController = () => {
   return (
-    <main className="bg-slate-800 p-4">
+    <main className="bg-slate-800  p-4">
       <Routes>
         {/* Public Route (Login) */}
         <Route path="/" element={<AdminLogin />} />
@@ -35,6 +36,7 @@ const AdminController = () => {
           <Route path="/merchants" element={<Merchants />} />
           <Route path="/reports/:reportNo" element={<ReportDetail />} />
           <Route path="/admins" element={<Admins />} />
+          <Route path="/express" element={<ExpressAdmins />} />
           <Route path="/artists" element={<Artists />} />
           <Route path="/cashout" element={<Cashout />} />
           <Route path="/commisions" element={<Commisions />} />

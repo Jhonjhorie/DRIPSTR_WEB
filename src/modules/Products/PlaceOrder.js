@@ -350,7 +350,7 @@ function PlaceOrder() {
               paymentMethod === "COD" ? "To pay" : "Pending to Admin",
             proof_of_payment: image,
             shop_transaction_id: transactionId,
-            shipping_status: "To prepare",
+            shipping_status: "Prepairing",
             voucher_used:
               isFirstShop && isFirstItemInShop ? selectedVouchers : null,
             estimated_delivery: endDate,
