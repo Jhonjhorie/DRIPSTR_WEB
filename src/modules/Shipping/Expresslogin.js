@@ -18,7 +18,7 @@ const ExpressLogin = () => {
       // Query the "admins" table to check if the username exists
       const { data, error: queryError } = await supabase
         .from("express_admins")
-        .select("id, username, password, role") // Select id, username & password
+        .select("id, username, password, role, branch, sub_branch") // Select id, username & password
         .eq("username", username)
         .single();
     
@@ -41,6 +41,9 @@ const ExpressLogin = () => {
       localStorage.setItem("username", data.username);
       localStorage.setItem("id", data.id);
       localStorage.setItem("role", data.role);
+      localStorage.setItem("branch", data.branch);
+      localStorage.setItem("sub_branch", data.sub_branch);
+
     
       navigate("/express/dashboard");
     } catch (err) {

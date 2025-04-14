@@ -17,6 +17,7 @@ function ExpressAdmins() {
   const [adminRole, setAdminRole] = useState("");
   const [adminBranch, setAdminBranch] = useState("");
   const [adminLvm, setAdminLvm] = useState("");
+  const [number, setNumber] = useState("");
   const [branches, setBranches] = useState([]);
   const [adminSubBranch, setAdminSubBranch] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
@@ -32,7 +33,7 @@ function ExpressAdmins() {
     setLoading(true);
     const { data, error } = await supabase
       .from("express_admins")
-      .select("id, username, password, gcash, branch, role, lvm, sub_branch");
+      .select("id, username, password, gcash, number, branch, role, lvm, sub_branch");
 
     if (error) {
       console.error("❌ Error fetching express_admins:", error.message);
@@ -51,6 +52,7 @@ function ExpressAdmins() {
     setAdminUsername("");
     setAdminPassword("");
     setAdminRole("");
+    setNumber("");
     setAdminBranch("");
     setAdminSubBranch("");
     setAdminLvm("");
@@ -65,6 +67,7 @@ function ExpressAdmins() {
     setAdminUsername(admin.username);
     setAdminPassword(admin.password);
     setAdminRole(admin.role);
+    setNumber(admin.number);
     setAdminBranch(admin.branch);
     setAdminSubBranch(admin.sub_branch);
     setAdminLvm(admin.lvm);
@@ -111,6 +114,7 @@ function ExpressAdmins() {
           username: adminUsername,
           password: adminPassword,
           gcash: adminGcash,
+          number: number,
           lvm: adminLvm,
           role: adminRole,
           branch: adminBranch,
@@ -130,10 +134,11 @@ function ExpressAdmins() {
           username: adminUsername,
           password: adminPassword,
           gcash: adminGcash,
+          number: number,
           lvm: adminLvm,
           role: adminRole,
           branch: adminBranch,
-          sub_branch: adminSubBranch,
+          sub_branch: adminSubBranch || adminBranch,
         },
       ]);
 
@@ -222,6 +227,7 @@ function ExpressAdmins() {
                 <th className="p-2 border border-gray-500">Branch</th>
                 <th className="p-2 border border-gray-500">Sub Branch</th>
                 <th className="p-2 border border-gray-500">Gcash</th>
+                <th className="p-2 border border-gray-500">Contact</th>
                 <th className="p-2 border border-gray-500">Actions</th>
               </tr>
             </thead>
@@ -258,6 +264,9 @@ function ExpressAdmins() {
                         Image
                       </p>
                     </td>
+                    <td className="p-2 border border-gray-500 text-center align-middle">
+                      {admin.number}
+                    </td>
                     <td className="p-2 border border-gray-500">
                       <div className="flex justify-center items-center gap-4">
                         <button
@@ -292,14 +301,14 @@ function ExpressAdmins() {
         {/* Add/Edit Admin Modal */}
         {showModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-            <div className="bg-slate-800 p-6 rounded-lg shadow-lg w-96">
-              <h2 className="text-xl font-bold mb-4 text-white">
+            <div className="bg-slate-800 py-1 px-6 rounded-lg shadow-lg w-96">
+              <h2 className="text-xl font-bold mb-1 text-white">
                 {isEditMode ? "Edit User" : "Add User"}
               </h2>
 
               {error && <p className="text-red-500">{error}</p>}
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <div>
                   <h1 className="text-white text-md font-bold mb-1">
                     Username
@@ -309,7 +318,7 @@ function ExpressAdmins() {
                     placeholder="Username"
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
-                    className="w-full p-2 border rounded mb-2"
+                    className="w-full p-2 border rounded mb-1"
                   />
                 </div>
                 <div>
@@ -321,7 +330,7 @@ function ExpressAdmins() {
                     placeholder="Password"
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
-                    className="w-full p-2 border rounded mb-2"
+                    className="w-full p-2 border rounded mb-1"
                   />
                 </div>
                 <div>
@@ -329,7 +338,7 @@ function ExpressAdmins() {
                   <select
                     value={adminRole}
                     onChange={(e) => setAdminRole(e.target.value)}
-                    className="select select-bordered w-full p-2 mb-2"
+                    className="select select-bordered w-full p-2 mb-1"
                   >
                     <option value="" disabled>
                       Select a role
@@ -348,7 +357,7 @@ function ExpressAdmins() {
                     value={adminLvm}
                     onChange={(e) => setAdminLvm(e.target.value)}
                     disabled={!adminRole}
-                    className="select select-bordered w-full p-2 mb-2"
+                    className="select select-bordered w-full p-2 mb-1"
                   >
                     <option value="" disabled>
                       Select an Island
@@ -368,7 +377,7 @@ function ExpressAdmins() {
                          value={adminBranch}
                          disabled
                          onChange={(e) => setAdminBranch(e.target.value)}
-                         className="w-full p-2 border rounded mb-2"
+                         className="w-full p-2 border rounded mb-1 text-black bg-white"
                        />
                      </div>
                 )}
@@ -380,7 +389,7 @@ function ExpressAdmins() {
                     <select
                       value={adminBranch}
                       onChange={(e) => setAdminBranch(e.target.value)}
-                      className="select select-bordered w-full p-2 mb-2"
+                      className="select select-bordered w-full p-2 mb-1"
                     >
                       <option value="" disabled>
                         Select a Branch
@@ -407,7 +416,7 @@ function ExpressAdmins() {
                       placeholder="Branch"
                       value={adminBranch}
                       onChange={(e) => setAdminBranch(e.target.value)}
-                      className="w-full p-2 border rounded mb-2"
+                      className="w-full p-2 border rounded mb-1 text-black bg-white"
                     />
                   </div>
                 )}
@@ -421,16 +430,28 @@ function ExpressAdmins() {
                       placeholder="Enter Sub-Branch"
                       value={adminSubBranch}
                       onChange={(e) => setAdminSubBranch(e.target.value)}
-                      className="w-full p-2 border rounded mb-2"
+                      className="w-full p-2 border rounded mb-1 text-black bg-white"
                     />
                   </div>
                 )}
+                   <div>
+                  <h1 className="text-white text-md font-bold mb-1">
+                    Contact Number
+                  </h1>
+                  <input
+                    type="text"
+                    placeholder="Contact Number"
+                    value={number}
+                    onChange={(e) => setNumber(e.target.value)}
+                    className="w-full p-2 border rounded mb-1 text-black bg-white"
+                  />
+                </div>
                 <div>
                   <h1 className="text-white text-md font-bold mb-1">GCash</h1>
                   <div className="flex flex-col items-center">
                     <img
                       src={adminGcash || "https://via.placeholder.com/112"}
-                      className="h-[7rem] w-[7rem] object-cover rounded cursor-pointer mb-2"
+                      className="h-[7rem] w-[7rem] object-cover rounded cursor-pointer mb-1"
                       alt="GCash QR Code"
                       onClick={() =>
                         document.getElementById("gcashInput").click()
@@ -460,9 +481,10 @@ function ExpressAdmins() {
                     </button>
                   </div>
                 </div>
+             
               </div>
 
-              <div className="flex justify-end space-x-2 mt-4">
+              <div className="flex justify-end space-x-2 mt-2">
                 <button
                   onClick={() => setShowModal(false)}
                   className="bg-gray-400 hover:bg-gray-600 text-white py-2 px-4 rounded"

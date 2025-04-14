@@ -36,6 +36,9 @@ const ExpressDashboard = () => {
   const [userRole, setUserRole] = useState("");
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
+  const [userBranch, setUserBranch] = useState("");
+  const [userSubBranch, setUserSubBranch] = useState("");
+
   const { addNotification } = useNotification();
   const navigate = useNavigate();
 
@@ -45,6 +48,9 @@ const ExpressDashboard = () => {
     const role = localStorage.getItem("role");
     const id = localStorage.getItem("id");
     const username = localStorage.getItem("username");
+    const branch = localStorage.getItem("branch");
+    const sub_branch = localStorage.getItem("sub_branch");
+
 
     if (!adminToken) {
       navigate("/express");
@@ -53,8 +59,10 @@ const ExpressDashboard = () => {
     setUserId(id)
     setUserRole(role);
     setUsername(username);
+    setUserBranch(branch);
+    setUserSubBranch(sub_branch);
 
-    // Set default active tab based on role
+
     if (role === "driver") {
       setActiveTab("To ship");
     } else {
@@ -76,28 +84,55 @@ const ExpressDashboard = () => {
       ];
   
       for (const status of statuses) {
-        let query;
+        let data = [];
         if (activeTable === "orders") {
-          query = supabase
+          // Get all relevant orders for this status
+          let query = supabase
             .from("orders")
-            .select("*", { count: "exact", head: true })
+            .select(
+              `id,
+              delivery_driver,
+              shipping_status,
+              shipBranch:shipping_branch (branch, sub_branch)`
+            )
             .eq("shipping_status", status);
   
-          // For Driver role, filter by delivery_driver for statuses other than "To prepare" and "To ship"
+          // For Driver role, filter by delivery_driver directly in query
           if (userRole === "Driver" && status !== "To prepare" && status !== "To ship") {
             query = query.eq("delivery_driver", userId);
           }
+  
+          const { data: ordersData, error } = await query;
+          if (error) throw error;
+  
+          // Apply client-side filters for nested fields
+          if (userRole === "Main Manager") {
+            data = ordersData.filter(
+              (order) => order.shipBranch?.branch === userBranch
+            );
+          } else if (userRole === "Branch Manager") {
+            data = ordersData.filter(
+              (order) => order.shipBranch?.sub_branch === userSubBranch
+            );
+          } else if (userRole === "Driver") {
+            data = ordersData.filter(
+              (order) => order.shipBranch?.branch === userBranch
+            );
+          } else {
+            data = ordersData;
+          }
+  
+          counts[status] = data.length;
         } else {
-          query = supabase
+         
+          const { count, error } = await supabase
             .from("merchant_Commission")
             .select("*", { count: "exact", head: true })
             .eq("status", status);
+  
+          if (error) throw error;
+          counts[status] = count || 0;
         }
-  
-        const { count, error } = await query;
-  
-        if (error) throw error;
-        counts[status] = count || 0;
       }
   
       setTabCounts(counts);
@@ -107,61 +142,80 @@ const ExpressDashboard = () => {
   };
 
   const fetchOrders = async (status) => {
-    try {
-      let query;
-      if (activeTable === "orders") {
-        query = supabase
-          .from("orders")
-          .select(
-            `*,
-          user:acc_num (username, full_name, mobile),
-          product:prod_num (item_Name, shop:shop_Id (id, shop_name)),
-          driver:delivery_driver (username)
-          `
-          )
-          .eq("shipping_status", status)
-          .or(
-            `payment_method.neq.Gcash, and(payment_method.eq.Gcash, payment_status.eq.Paid)`
-          );
-  
-        // For Driver role, filter by delivery_driver for statuses other than "To prepare" and "To ship"
-        if (userRole === "Driver" && status !== "To prepare" && status !== "To ship") {
-          query = query.eq("delivery_driver", userId);
-        }
-      } else {
-        query = supabase
-          .from("merchant_Commission")
-          .select(
-            `*,
-            client:client_Id (username, full_name, mobile),
-            merchant:merchantId (shop_name, contact_number, address)`
-          )
-          .eq("status", status);
+      try {
+        let query;
+        if (activeTable === "orders") {
+          query = supabase
+            .from("orders")
+            .select(
+              `*,
+              user:acc_num (username, full_name, mobile),
+              product:prod_num (item_Name, shop:shop_Id (id, shop_name)),
+              driver:delivery_driver (username),
+              shipBranch:shipping_branch (branch, sub_branch)`
+            )
+            .eq("shipping_status", status)
+            .or(
+              `payment_method.neq.Gcash, and(payment_method.eq.Gcash, payment_status.eq.Paid)`
+            );
+            if (userRole === "Driver" && status === "To prepare") {
+              query = query.neq("shipping_status", "To prepare");
+            }
+      if (userRole === "Driver" && status !== "To prepare" && status !== "To ship") {
+        query = query.eq("delivery_driver", userId);
       }
-  
-      const { data: ordersData, error: ordersError } = await query.order(
-        "created_at",
-        { ascending: false }
-      );
-  
-      if (ordersError) throw ordersError;
-  
-      const grouped = ordersData.reduce((acc, order) => {
-        const transactionId = order.shop_transaction_id || order.transaction_id;
-        if (!acc[transactionId]) {
-          acc[transactionId] = {
-            ...order,
-            items: [order],
-            total_price: order.final_price || order.pricing,
-          };
+
         } else {
-          acc[transactionId].items.push(order);
-          acc[transactionId].total_price += order.final_price || order.pricing;
+          query = supabase
+            .from("merchant_Commission")
+            .select(
+              `*,
+              client:client_Id (username, full_name, mobile),
+              merchant:merchantId (shop_name, contact_number, address)`
+            )
+            .eq("status", status);
         }
-        return acc;
-      }, {});
   
-      setGroupedOrders(grouped);
+      const { data: ordersData, error: ordersError } = await query.order("created_at", {
+      ascending: false,
+    });
+
+    if (ordersError) throw ordersError;
+
+    let filteredData = ordersData;
+
+    if (activeTable === "orders") {
+      if (userRole === "Main Manager") {
+        filteredData = filteredData.filter(
+          (order) => order.shipBranch?.branch === userBranch
+        );
+      } else if (userRole === "Branch Manager") {
+        filteredData = filteredData.filter(
+          (order) => order.shipBranch?.sub_branch === userSubBranch
+        );
+      } else if (userRole === "Driver") {
+        filteredData = filteredData.filter(
+          (order) => order.shipBranch?.branch === userBranch
+        );
+      }
+    }
+
+    const grouped = filteredData.reduce((acc, order) => {
+      const transactionId = order.shop_transaction_id || order.transaction_id;
+      if (!acc[transactionId]) {
+        acc[transactionId] = {
+          ...order,
+          items: [order],
+          total_price: order.final_price || order.pricing,
+        };
+      } else {
+        acc[transactionId].items.push(order);
+        acc[transactionId].total_price += order.final_price || order.pricing;
+      }
+      return acc;
+    }, {});
+
+    setGroupedOrders(grouped);
     } catch (error) {
       console.error("Error fetching orders:", error.message);
     } finally {
