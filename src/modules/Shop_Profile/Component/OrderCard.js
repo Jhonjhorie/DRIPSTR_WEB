@@ -131,11 +131,40 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
       alert("Please select a sub-branch.");
       return;
     }
-
+  
     try {
-      await updateOrderStatus(order.id, "To prepare");
-      console.log(`Order assigned to sub-branch: ${selectedSubBranch}`);
+      // Fetch the ID of the selected sub-branch
+      const { data: branchData, error: branchError } = await supabase
+        .from("express_admins")
+        .select("id")
+        .eq("sub_branch", selectedSubBranch)
+        .single();
+  
+      if (branchError) {
+        console.error("Error fetching sub-branch ID:", branchError.message);
+        return;
+      }
+  
+      const subBranchId = branchData.id;
+  
+      // Update the order with the sub-branch ID in the shipping_branch column
+      const { error: updateError } = await supabase
+        .from("orders")
+        .update({ shipping_status: "To prepare", shipping_branch: subBranchId })
+        .eq("id", order.id);
+  
+      if (updateError) {
+        console.error("Error updating order:", updateError.message);
+        return;
+      }
+  
+      console.log(`Order assigned to sub-branch ID: ${subBranchId}`);
       setIsModalOpenToPrepare(false);
+  
+      // Optionally refresh orders
+      if (refreshOrders) {
+        refreshOrders();
+      }
     } catch (err) {
       console.error("Error preparing order:", err.message);
     }
@@ -530,18 +559,21 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 Select a Dripstr express branches near you 
               </label>
               <select
-                id="sub-branch"
-                className="mt-1 block w-full bg-white p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                value={selectedSubBranch}
-                onChange={(e) => setSelectedSubBranch(e.target.value)}
-              >
-                <option value="">Select a sub-branch</option>
-                {subBranches.map((branch, index) => (
-                  <option key={index} value={branch}>
-                    {branch}
-                  </option>
-                ))}
-              </select>
+  id="sub-branch"
+  className="mt-1 block w-full bg-white p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+  value={selectedSubBranch}
+  onChange={(e) => {
+    console.log("Selected Sub-Branch:", e.target.value); // Debugging log
+    setSelectedSubBranch(e.target.value);
+  }}
+>
+  <option value="">Select a sub-branch</option>
+  {subBranches.map((branch, index) => (
+    <option key={index} value={branch}>
+      {branch}
+    </option>
+  ))}
+</select>
             </div>
 
             <div className="mt-4 flex justify-between space-x-2">
