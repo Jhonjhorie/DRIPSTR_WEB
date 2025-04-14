@@ -263,7 +263,7 @@ function PlaceOrder() {
 
     totalDiscountPrice = holder;
 
-    const grandTotal = totalDiscountPrice + totalShippingFee;
+    const grandTotal = ((totalDiscountPrice*1.12) + totalShippingFee);
 
     setTotalPrice(totalPrice);
     setTotalDiscountPrice(totalDiscountPrice);
@@ -313,9 +313,9 @@ function PlaceOrder() {
 
         for (const item of shopItems) {
           let itemPrice =
-            (item.prod.discount
-              ? item.size.price * (1 - item.prod.discount / 100)
-              : item.size.price) * item.qty;
+            ((item.prod.discount
+              ? (item.size.price) * (1 - item.prod.discount / 100)
+              : item.size.price) * item.qty)*1.12;
 
           if (isFirstItemInShop) {
             if (
@@ -1022,7 +1022,11 @@ function PlaceOrder() {
                         {grandTotal.toFixed(2)}
                       </span>
                     </span>
+                    
                   </div>
+                  <div className="text-xs text-gray-500 flex text-right justify-end">
+                  The total amount includes 12% VAT in accordance with Philippine tax regulations.
+  </div>
                 </div>
               </div>
 
