@@ -7,21 +7,10 @@ import * as THREE from 'three';
 import { TextureLoader, RepeatWrapping, NearestFilter } from 'three';
 import { SkeletonUtils } from 'three-stdlib';
 import { supabase } from '../../../constants/supabase';
-import { bodyTypeURLs, hairURLs } from '../../../constants/avatarConfig';
+import { bodyTypeURLs, hairURLs, tshirURLs, jerseyURLs, longsleevesURLs, shortsURLs, pantsURLs, footwearsURLs, skirtURLs, tshirtSizes } from '../../../constants/avatarConfig';
 import { useRef } from 'react';
 import { gsap } from 'gsap';
 import { useNavigate } from "react-router-dom";
-
-// First, import all necessary URL configurations
-import { 
-  tshirURLs, 
-  jerseyURLs, 
-  longsleevesURLs,
-  shortsURLs,
-  pantsURLs,
-  footwearsURLs,
-  skirtURLs
-} from '../../../constants/avatarConfig';
 
 // Add these imports at the top
 import AuthModal from '../../../shared/login/Auth';
@@ -30,8 +19,17 @@ const Model = ({ avatarData, productData, color }) => {
   const [error, setError] = useState(null);
 
   // Get correct model paths based on category
-  const getModelURL = (category, gender, bodyType) => {
-    console.log('Getting model for:', { category, gender, bodyType });
+  const getModelURL = (category, gender, bodyType, size) => {
+    console.log('Getting model for:', { category, gender, bodyType, size });
+
+    // Special handling for t-shirts with sizes
+    if (category === 'Tshirt' && size) {
+      const sizeModelURL = tshirtSizes[gender]?.[bodyType]?.[size];
+      if (sizeModelURL) {
+        console.log('Using sized t-shirt model:', sizeModelURL);
+        return sizeModelURL;
+      }
+    }
 
     const urlMaps = {
       'Tshirt': tshirURLs,
@@ -87,7 +85,8 @@ const Model = ({ avatarData, productData, color }) => {
     return getModelURL(
       productData.item_Category,
       avatarData.gender,
-      avatarData.bodytype
+      avatarData.bodytype,
+      productData.selectedSize?.size // Pass the selected size from props
     );
   }, [avatarData, productData]);
 

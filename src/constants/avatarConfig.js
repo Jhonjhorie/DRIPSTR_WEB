@@ -145,4 +145,82 @@ const hairURLs = {
   Burst: `/3d/avatar/WOMEN/Hair/Hair3.glb`,
 };
 
-export { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs, pantsURLs, skirtURLs, longsleevesURLs, jerseyURLs, footwearsURLs, tshirtTextureURLs };
+ 
+const tshirtSizes = {
+  Boy: {
+    Petite: {
+      XS: "/3d/avatar/MEN/Body/Petite/Shirt.glb",
+      S: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Petite_Tshirt_S.glb",
+      M: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Petite_Tshirt_M.glb",
+      L: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Petite_Tshirt_L.glb",
+      XL: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Petite_Tshirt_XL.glb"
+    },
+    Slim: {
+    //  XS: "/3d/avatar/MEN/Body/Slim/Sizes/Tshirt/Petite_Tshirt_XS.glb",
+      S: "/3d/avatar/MEN/Body/Slim/Shirt.glb",
+      M: "/3d/avatar/MEN/Body/Slim/Sizes/Tshirt/Tshirt_M.glb",
+      L: "/3d/avatar/MEN/Body/Slim/Sizes/Tshirt/Tshirt_L.glb",
+      XL: "/3d/avatar/MEN/Body/Slim/Sizes/Tshirt/Tshirt_XL.glb"
+    },
+    Average: {
+      XS: "/3d/avatar/MEN/Body/Average/Sizes/Tshirt/Tshirt_XS.glb",
+      S: "/3d/avatar/MEN/Body/Average/Sizes/Tshirt/Tshirt_S.glb",
+      M: "/3d/avatar/MEN/Body/Average/Shirt.glb",
+      L: "/3d/avatar/MEN/Body/Average/Sizes/Tshirt/Tshirt_L.glb",
+      XL: "/3d/avatar/MEN/Body/Average/Sizes/Tshirt/Tshirt_XL.glb"
+    },
+    Broad: {
+     // XS: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Tshirt_XS.glb",
+    //  S: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Tshirt_S.glb",
+      //M: "/3d/avatar/MEN/Body/Petite/Shirt.glb",
+      L: "/3d/avatar/MEN/Body/Broad/Shirt.glb",
+      XL: "/3d/avatar/MEN/Body/Broad/Sizes/Broad_Tshirt_XL.glb"
+    },
+    PlusSize: {
+     // XS: "/3d/avatar/MEN/Body/Plus/Sizes/Tshirt/Tshirt_XS.glb",
+     // S: "/3d/avatar/MEN/Body/Plus/Sizes/Tshirt/Tshirt_S.glb",
+     // M: "/3d/avatar/MEN/Body/Plus/Shirt.glb",
+     // L: "/3d/avatar/MEN/Body/Plus/Sizes/Tshirt/Tshirt_L.glb",
+      XL: "/3d/avatar/MEN/Body/Plus/Shirt.glb"
+    }
+  },
+  Girl: {   
+    Petite: {
+      XS: "/3d/avatar/MEN/Body/Petite/Shirt.glb",
+      S: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Petite_Tshirt_S.glb",
+      M: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Petite_Tshirt_M.glb",
+      L: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Petite_Tshirt_L.glb",
+      XL: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Petite_Tshirt_XL.glb"
+    },
+    Slim: {
+    //  XS: "/3d/avatar/MEN/Body/Slim/Sizes/Tshirt/Petite_Tshirt_XS.glb",
+      S: "/3d/avatar/MEN/Body/Slim/Shirt.glb",
+      M: "/3d/avatar/MEN/Body/Slim/Sizes/Tshirt/Tshirt_M.glb",
+      L: "/3d/avatar/MEN/Body/Slim/Sizes/Tshirt/Tshirt_L.glb",
+      XL: "/3d/avatar/MEN/Body/Slim/Sizes/Tshirt/Tshirt_XL.glb"
+    },
+    Average: {
+      XS: "/3d/avatar/MEN/Body/Average/Sizes/Tshirt/Tshirt_XS.glb",
+      S: "/3d/avatar/MEN/Body/Average/Sizes/Tshirt/Tshirt_S.glb",
+      M: "/3d/avatar/MEN/Body/Average/Shirt.glb",
+      L: "/3d/avatar/MEN/Body/Average/Sizes/Tshirt/Tshirt_L.glb",
+      XL: "/3d/avatar/MEN/Body/Average/Sizes/Tshirt/Tshirt_XL.glb"
+    },
+    Broad: {
+     // XS: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Tshirt_XS.glb",
+    //  S: "/3d/avatar/MEN/Body/Petite/Sizes/Tshirt/Tshirt_S.glb",
+      //M: "/3d/avatar/MEN/Body/Petite/Shirt.glb",
+      L: "/3d/avatar/MEN/Body/Broad/Shirt.glb",
+      XL: "/3d/avatar/MEN/Body/Broad/Sizes/Broad_Tshirt_XL.glb"
+    },
+    PlusSize: {
+     // XS: "/3d/avatar/MEN/Body/Plus/Sizes/Tshirt/Tshirt_XS.glb",
+     // S: "/3d/avatar/MEN/Body/Plus/Sizes/Tshirt/Tshirt_S.glb",
+     // M: "/3d/avatar/MEN/Body/Plus/Shirt.glb",
+     // L: "/3d/avatar/MEN/Body/Plus/Sizes/Tshirt/Tshirt_L.glb",
+      XL: "/3d/avatar/MEN/Body/Plus/Shirt.glb"
+    }
+  }
+};
+ 
+export { bodyTypeURLs, hairURLs, tshirURLs, shortsURLs, pantsURLs, skirtURLs, longsleevesURLs, jerseyURLs, footwearsURLs, tshirtTextureURLs, tshirtSizes };
