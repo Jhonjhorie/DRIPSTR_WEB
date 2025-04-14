@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/constants/supabase";
 import { useReactToPrint } from "react-to-print";
 import Logo from "../../../assets/logoName.png";
-
+import successEmote from "../../../../src/assets/emote/success.png";
 const OrderCard = ({ order, refreshOrders, setOrders }) => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // Print order report
@@ -47,7 +47,8 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
   useEffect(() => {
     const fetchSubBranchesAndLVM = async () => {
       try {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
+        const { data: userData, error: userError } =
+          await supabase.auth.getUser();
         if (userError || !userData.user) {
           console.error("Error fetching user:", userError);
           return;
@@ -91,7 +92,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
     console.log("Order data:", {
       isCustomizable: order.shop_Product?.isCustomizable,
       customizable_note: order.customizable_note,
-      shop_Product: order.shop_Product
+      shop_Product: order.shop_Product,
     });
   }, [order]);
 
@@ -125,13 +126,14 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
   const contentRef = useRef(null);
   const handlePrint = useReactToPrint({ contentRef });
-
+  const [showAlertBranch, setShowBranch] = useState(false); // Alert Select a branch
   const handlePrepare = async () => {
     if (!selectedSubBranch) {
-      alert("Please select a sub-branch.");
+      setShowBranch(true);
+      setTimeout(() => setShowBranch(false), 3000);
       return;
     }
-  
+
     try {
       // Fetch the ID of the selected sub-branch
       const { data: branchData, error: branchError } = await supabase
@@ -139,28 +141,28 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
         .select("id")
         .eq("sub_branch", selectedSubBranch)
         .single();
-  
+
       if (branchError) {
         console.error("Error fetching sub-branch ID:", branchError.message);
         return;
       }
-  
+
       const subBranchId = branchData.id;
-  
+
       // Update the order with the sub-branch ID in the shipping_branch column
       const { error: updateError } = await supabase
         .from("orders")
         .update({ shipping_status: "To prepare", shipping_branch: subBranchId })
         .eq("id", order.id);
-  
+
       if (updateError) {
         console.error("Error updating order:", updateError.message);
         return;
       }
-  
+
       console.log(`Order assigned to sub-branch ID: ${subBranchId}`);
       setIsModalOpenToPrepare(false);
-  
+
       // Optionally refresh orders
       if (refreshOrders) {
         refreshOrders();
@@ -195,12 +197,13 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
 
   return (
     <div
-      className={`border relative rounded-lg p-4 shadow-md mb-4  ${order.shipping_status === "Cancel"
+      className={`border relative rounded-lg p-4 shadow-md mb-4  ${
+        order.shipping_status === "Cancel"
           ? "bg-slate-300"
           : order.shipping_status === "Completed"
-            ? "bg-slate-300"
-            : "bg-white"
-        }`}
+          ? "bg-slate-300"
+          : "bg-white"
+      }`}
     >
       <h2 className="text-lg font-bold text-slate-900">Order #{order.id}</h2>
       <div className="w-full md:flex gap-2">
@@ -253,20 +256,22 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <p className="text-sm text-slate-700">
                     Customization Note:{" "}
                     <span className="font-medium">
-                      {order.customizable_note || "No customization note provided"}
+                      {order.customizable_note ||
+                        "No customization note provided"}
                     </span>
                   </p>
                 </div>
               )}
-              {order.shipping_status === "To prepare" && (
+              {order.shipping_status === "Preparing" && (
                 <div>
                   <p className="text-sm text-slate-700">
                     Cancelation reason:{" "}
                     <span
-                      className={`font-medium ${order.cancellation_requested_at
+                      className={`font-medium ${
+                        order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                        }`}
+                      }`}
                     >
                       {order.cancellation_reason || "none"}
                     </span>
@@ -274,33 +279,36 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <p className="text-sm text-slate-700">
                     Cancelation date:{" "}
                     <span
-                      className={`font-medium ${order.cancellation_requested_at
+                      className={`font-medium ${
+                        order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                        }`}
+                      }`}
                     >
                       {order.cancellation_requested_at
                         ? new Date(
-                          order.cancellation_requested_at
-                        ).toLocaleString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
+                            order.cancellation_requested_at
+                          ).toLocaleString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
                         : "none"}
                     </span>
                   </p>
                 </div>
               )}
+              
               {order.shipping_status === "Cancel" && (
                 <div>
                   <p className="text-sm text-slate-700">
                     Cancelation reason:{" "}
                     <span
-                      className={`font-medium ${order.cancellation_requested_at
+                      className={`font-medium ${
+                        order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                        }`}
+                      }`}
                     >
                       {order.cancellation_reason || "none"}
                     </span>
@@ -308,19 +316,20 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                   <p className="text-sm text-slate-700">
                     Cancelation date:{" "}
                     <span
-                      className={`font-medium ${order.cancellation_requested_at
+                      className={`font-medium ${
+                        order.cancellation_requested_at
                           ? "text-red-500"
                           : "text-slate-700"
-                        }`}
+                      }`}
                     >
                       {order.cancellation_requested_at
                         ? new Date(
-                          order.cancellation_requested_at
-                        ).toLocaleString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
+                            order.cancellation_requested_at
+                          ).toLocaleString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
                         : "none"}
                     </span>
                   </p>
@@ -419,7 +428,9 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
                 </div>
                 <p className="text-sm text-gray-600">
                   Transaction ID:{" "}
-                  <span className="font-medium">{order.shop_transaction_id}</span>
+                  <span className="font-medium">
+                    {order.shop_transaction_id}
+                  </span>
                 </p>
               </div>
 
@@ -548,32 +559,37 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <p className="text-lg text-slate-900 font-semibold">
               Assign Branch for Order{" "}
-              <span className="text-custom-purple">{order.productName || "N/A"}</span>
+              <span className="text-custom-purple">
+                {order.productName || "N/A"}
+              </span>
             </p>
             <p className="text-sm text-gray-800">
               Select a branch to assign this order for delivery.
             </p>
 
             <div className="mt-4">
-              <label htmlFor="sub-branch" className="block text-sm font-medium text-gray-700">
-                Select a Dripstr express branches near you 
+              <label
+                htmlFor="sub-branch"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Select a Dripstr express branches near you
               </label>
               <select
-  id="sub-branch"
-  className="mt-1 block w-full bg-white p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-  value={selectedSubBranch}
-  onChange={(e) => {
-    console.log("Selected Sub-Branch:", e.target.value); // Debugging log
-    setSelectedSubBranch(e.target.value);
-  }}
->
-  <option value="">Select a sub-branch</option>
-  {subBranches.map((branch, index) => (
-    <option key={index} value={branch}>
-      {branch}
-    </option>
-  ))}
-</select>
+                id="sub-branch"
+                className="mt-1 block w-full bg-white p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                value={selectedSubBranch}
+                onChange={(e) => {
+                  console.log("Selected Sub-Branch:", e.target.value); // Debugging log
+                  setSelectedSubBranch(e.target.value);
+                }}
+              >
+                <option value="">Select a branch</option>
+                {subBranches.map((branch, index) => (
+                  <option key={index} value={branch}>
+                    {branch}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="mt-4 flex justify-between space-x-2">
@@ -662,6 +678,25 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           </div>
         </div>
       )}
+    {showAlertBranch && (
+  <div className="fixed bottom-5 right-5 z-40 h-auto transition-opacity duration-1000 ease-in-out opacity-100">
+    <div className="relative flex items-center">
+      <div className="mt-10 absolute -top-44 left-28 -z-10 justify-items-center content-center">
+        <img
+          src={successEmote}
+          alt="Success Emote"
+          className="object-contain h-40 w-40 rounded-lg p-1 drop-shadow-customViolet"
+        />
+      </div>
+      <div
+        role="alert"
+        className="alert alert-success shadow-md flex items-center p-4 bg-custom-purple text-slate-50 font-semibold rounded-md"
+      >
+        <span>Select a branch to Drop off this Item.</span>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
