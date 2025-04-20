@@ -1221,7 +1221,7 @@ function Products() {
         </div>
       )}
       {showAlertMI && (
-        <div className="md:bottom-5 lg:bottom-10 z-10 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
+        <div className="md:bottom-5 lg:bottom-10 z-50 justify-end md:right-5 lg:right-10 h-auto absolute transition-opacity duration-1000 ease-in-out opacity-100">
           <div className="absolute -top-48 right-10 -z-10 justify-items-center content-center">
             <div className="mt-10 ">
               <img

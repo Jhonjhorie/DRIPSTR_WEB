@@ -373,10 +373,10 @@ function Orders({ shopOwnerId }) {
               {activeTab === "toprepare" && (
                 <div className="pb-5">
                   <h2 className="text-xl text-custom-purple font-bold mb-4">
-                    To ship Orders
+                    In shipment Orders
                   </h2>
-                  {orders.ship.length > 0 ? (
-                    orders.ship.map((order) => (
+                  {orders.toprepare.length > 0 ? (
+                    orders.toprepare.map((order) => (
                       <OrderCard
                         key={order.id}
                         order={order}
