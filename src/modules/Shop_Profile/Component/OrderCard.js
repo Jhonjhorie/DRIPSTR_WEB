@@ -407,7 +407,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           </button>
         )}
       </div>
-
+      
       {isModalOpen && (
         <dialog
           id="print"
@@ -416,7 +416,7 @@ const OrderCard = ({ order, refreshOrders, setOrders }) => {
           <div className="bg-slate-200 p-4 ext-slate-800 rounded shadow-lg w-auto">
             <div
               ref={contentRef}
-              className="max-w-md mx-auto bg-white shadow-lg border border-gray-300 px-5 py-4 rounded-lg"
+              className="max-w-md mx-auto bg-white  px-5 py-4 rounded-lg"
             >
               <div className="text-center border-b pb-4">
                 <div className=" h-7 justify-items-center ">
