@@ -36,8 +36,11 @@ const Orders = () => {
     const counts = {
       "To Ship": orders.filter(order =>         
         (order.shipping_status === "To ship" || 
-        order.shipping_status === "preparing" ||
-        order.shipping_status === "To prepare") &&
+          order.shipping_status === "prepairing" ||
+          order.shipping_status === "Prepairing" ||
+          order.shipping_status === "preparing" ||
+          order.shipping_status === "Preparing" ||
+          order.shipping_status === "To prepare") &&
         order.payment_status !== 'Pending to Admin'
       ).length,
       "To Receive": orders.filter(order => 
@@ -82,7 +85,8 @@ const Orders = () => {
       case "To Ship":
         return filtered.filter(order => 
           (order.shipping_status === "To ship" || 
-            order.shipping_status === "preparing" ||
+            order.shipping_status === "prepairing" ||
+            order.shipping_status === "Prepairing" ||
             order.shipping_status === "To prepare") &&
             order.payment_status !== 'Pending to Admin'
 
